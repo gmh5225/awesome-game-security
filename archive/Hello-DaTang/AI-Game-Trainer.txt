@@ -1,0 +1,1845 @@
+Project Path: arc_Hello-DaTang_AI-Game-Trainer_o2vmddmf
+
+Source Tree:
+
+```txt
+arc_Hello-DaTang_AI-Game-Trainer_o2vmddmf
+├── AGENTS.md
+├── LICENSE-THIRD-PARTY.txt
+├── README.md
+├── docs
+│   └── ROADMAP.md
+├── launcher.py
+├── packaging
+│   ├── README-PORTABLE.md
+│   ├── RELEASE_NOTES.md
+│   └── VERSION
+├── pyproject.toml
+├── requirements-windows.txt
+├── scripts
+│   └── bootstrap.ps1
+├── tests
+│   ├── __init__.py
+│   ├── fixtures
+│   │   └── demo_target.c
+│   ├── test_bridge.py
+│   ├── test_diagnostics.py
+│   ├── test_service.py
+│   ├── test_store.py
+│   ├── test_ui_contract.py
+│   └── test_web.py
+└── trainer
+    ├── __init__.py
+    ├── __main__.py
+    ├── bridge.py
+    ├── diagnostics.py
+    ├── service.py
+    ├── static
+    │   ├── app.js
+    │   ├── index.html
+    │   └── style.css
+    ├── store.py
+    └── web.py
+
+```
+
+`AGENTS.md`:
+
+```md
+# Developer guide for AI Game Trainer
+
+Goal: a user-approved, reusable, local-first trainer. The first milestone is a Windows Python UI and CE Bridge integration; native Tauri/React is deferred until the CE feedback loop works on real machines.
+
+## Local test
+- python -m unittest discover -s tests -v
+- python -m compileall -q trainer
+- On Windows, py -m pip install -r requirements-windows.txt and py -m trainer
+
+## Contract with CE
+- Dependency: miscusi-peek/cheatengine-mcp-bridge pinned at 6bd7ce90479250a9b4b75e7944df9c105ecb2572.
+- Named pipe: \\.\pipe\CE_MCP_Bridge_v99; request/response: little-endian uint32 length then UTF-8 JSON-RPC.
+- IMPORTANT: Lua v12 accepts filename for load_table/save_table, and process_id_or_name for open_process. Docs use other names in places.
+- IMPORTANT: set_memory_record_value in Lua v12 ignores freeze. For active/inactive use a vetted evaluate_lua snippet with a numeric record ID already returned by CE.
+- The repository does not vendor/redistribute upstream code. bootstrap.ps1 checks out upstream under ignored vendor/.
+
+## Safety and robustness
+- Do not enable kernel, DBVM, anti-cheat evasion, or online multiplayer modifications.
+- Never accept arbitrary Lua, shell commands, or bridge method names from the HTTP client.
+- Bind HTTP to loopback and verify Host/Origin.
+- A saved feature must be associated with one exact game executable; refuse ambiguous multiple matching processes.
+- Never assume a runtime memory address persists across restarts. Preserve CE .CT structures, verify target and record before mutation; if invalid, fail closed.
+- Do not leak secrets, save games or generated CT tables into Git.
+- Tests must run without Cheat Engine; use a fake CE bridge.
+- Favor Windows D: drive for checkout and dev tools when documenting local installation.
+
+```
+
+`LICENSE-THIRD-PARTY.txt`:
+
+```txt
+AI Game Trainer v0.1.1 Windows portable distribution
+
+Included CE Lua Bridge:
+  https://github.com/miscusi-peek/cheatengine-mcp-bridge
+Pinned commit: 6bd7ce90479250a9b4b75e7944df9c105ecb2572
+License: MIT (Copyright 2025 miscusi-peek).
+See CE-Bridge/LICENSE.txt bundled in the ZIP for full terms.
+
+The Cheat Engine application itself is NOT bundled.
+Runtime components from Python, pywin32 and PyInstaller are packaged
+under their respective applicable licenses.
+
+```
+
+`README.md`:
+
+```md
+# AI Game Trainer
+
+## 免安装下载（Windows x64）
+
+**优先推荐 [GitHub Releases](https://github.com/Hello-DaTang/AI-Game-Trainer/releases)**：下载 AI-Game-Trainer-Windows-x64.zip → 完整解压 → 双击 AI-Game-Trainer.exe，即可打开本地控制台，无须在电脑上安装 Python、Git、Node.js、Rust 或 pip。
+
+ZIP 包内包含 CE-Bridge/ce_mcp_bridge.lua，仍需单独安装 Cheat Engine 并手动加载 Lua Bridge。详见 ZIP 内的《使用说明.md》。本版本仍是修改记录持久化 MVP，**没有内嵌 Codex 对话 Agent**。
+
+在 Cheat Engine + AI 的探索阶段制作修改功能，验证满意后保存为游戏专属按钮。下次进入单机游戏，直接点击按钮即可调用已经保存的 CE 修改记录。
+
+> **当前版本：0.1.3，开发验证版。** 已实现游戏库、CE Bridge 探活、从 CE 捕获地址列表记录、将整张 CE 表保存为 .CT、重新载入后开启/关闭指定记录、SQLite 持久化、本地网页控制台。**尚未集成内置自然语言聊天或 Codex SDK，已提供 Windows 免 Python 便携包，但仍未提供 Tauri 安装包。** Agent 可以在外部 Codex + CE MCP 中探索，再把结果导入本软件。不能保证任何游戏中的修改成功或跨版本稳定。
+
+## 不用学习 CE 的一键实测（v0.1.3）
+
+启动 CE 并加载 Lua Bridge 后，打开本程序页面，点击 **「开始一键实测」**。软件会自动运行随包测试进程、由 CE 读取数值 123、改写为 777、再次读取确认、恢复成 123 后退出。不会操作你添加的真实游戏，也不需要手动做内存扫描。
+
+通过说明基础内存读写通路正常，**不能代表 AI 自动探索或 CT 复用已验证**。
+
+## 架构
+
+- Windows Cheat Engine 7.x，加载上游 Lua Bridge（版本 12.0.0 / wire v99）。
+- Python 3.10+ 标准库 HTTP 服务与 SQLite：不用 Node/Rust 就能运行第一阶段 UI。
+- 本地管理页面：127.0.0.1:8765；数据库位于 %LOCALAPPDATA%\AI-Game-Trainer\trainer.sqlite3；CE 表位于其 tables 目录。
+- 默认 Windows Named Pipe；可切换到仅监听 127.0.0.1 的 TCP Relay。
+- 上游 CE Bridge **不在此仓库中复制**，通过脚本固定版本下载到 vendor/。
+
+## Windows 从零开始（建议装在 D: 盘）
+
+先确保安装 **Git、Python 3.10 或更新版本，以及 Cheat Engine**。使用 PowerShell：
+
+~~~powershell
+Set-Location D:\
+git clone https://github.com/Hello-DaTang/AI-Game-Trainer.git
+Set-Location .\AI-Game-Trainer
+powershell -ExecutionPolicy Bypass -File .\scripts\bootstrap.ps1
+py -m pip install -r requirements-windows.txt
+~~~
+
+然后按顺序：
+
+1. 启动 Cheat Engine（本阶段**不要启动 DBVM/内核工具**）。
+2. CE 顶部菜单选择 File → Execute Script，加载 vendor\cheatengine-mcp-bridge\MCP_Server\ce_mcp_bridge.lua。正确加载后 Lua 日志包含 CE_MCP_Bridge_v99。若该菜单不存在，可在 CE Table → Show Cheat Table Lua Script 中执行 dofile 的完整绝对路径（使用双中括号 Lua 字符串）。
+3. 启动你的离线单机游戏，在 CE 中通过进程列表**附加到这个游戏的 EXE**。
+4. 在 PowerShell 执行：
+
+~~~powershell
+py -m trainer
+~~~
+
+浏览器会自动打开 http://127.0.0.1:8765 。若没有自动打开，手动访问该地址。
+
+### 第一次保存一个按钮
+
+1. 在浏览器添加游戏，填入游戏进程文件名，例如 mygame.exe。
+2. 在 CE 中完成扫描/分析；验证成功后在 CE 地址列表创建一个唯一描述的记录（例如 Player Stamina）。对于开关功能，建议使用带 [ENABLE]/[DISABLE] 的 Auto Assembler 记录。
+3. 回到浏览器：读取 CE 记录 → 选择记录 → 给按钮命名 → 保存。
+4. 此时软件把 CE 当前表全部保存为 CT 文件，并在 SQLite 中登记按钮。需要保存第二个按钮时请先加载**原来的 CT**，在原表中增加记录后再保存；软件会拒绝删除已登记记录的覆盖操作。
+5. 关闭游戏并重启。再启动游戏、CE 与 Bridge 后，在网页点击按钮；软件检查目标进程，重载 CT，并切换对应 CE MemoryRecord 的 Active 状态。
+
+**重要区别：** 按钮的关闭表示取消 CE 记录的激活/冻结。它**不保证**已更改的金币、存档或游戏机制完全复原；具体取决于 CT 脚本的 Disable 实现。保存了错误的绝对地址不会自动变成稳定指针，必须在 CE 中采用可靠指针链、AOB 或其他经验证的定位技术。
+
+### 与 Codex Agent 配合
+
+可以在原生 Windows Codex CLI 中另外配置 CE MCP（对应 bootstrap 下载的同一份脚本）：
+
+~~~toml
+[mcp_servers.cheatengine]
+command = "python"
+args = ['D:\AI-Game-Trainer\vendor\cheatengine-mcp-bridge\MCP_Server\mcp_cheatengine.py']
+~~~
+
+上面的盘符路径仅是示例，需要替换为实际绝对路径。安装该 MCP 的依赖：
+
+~~~powershell
+py -m pip install -r .\vendor\cheatengine-mcp-bridge\MCP_Server\requirements.txt
+~~~
+
+你可让 Codex 在允许的本地测试进程上探索，并把经验证的逻辑保存成 CE 地址列表记录。**目前对话仍在 Codex 外部进行**；这不是嵌入式 AI 聊天。若 Codex 在 WSL 中运行，请按照上游 README 的 TCP Relay 方案；Windows 命名管道不能直接跨 WSL 访问。
+
+### 可选 TCP Relay
+
+用上游的 ce_tcp_relay.py（Windows）监听 loopback：
+
+~~~powershell
+py .\vendor\cheatengine-mcp-bridge\MCP_Server\ce_tcp_relay.py --host 127.0.0.1 --port 9876
+$env:TRAINER_CE_TRANSPORT = "tcp"
+py -m trainer
+~~~
+
+不要将 TCP Relay 绑定到公网或不可信网络接口，它能控制 Cheat Engine。
+
+## 当前限制及风险
+
+- 仅用于你有权限修改的**本地离线单机程序**。不提供反作弊绕过、联机游戏服务器数值修改或内核隐藏能力。
+- 页面按钮需要 CE 和 Lua Bridge 处于运行状态。无 CE 时仍能打开页面及查看已保存的按钮。
+- 只能在发现唯一匹配 EXE 的进程时运行，且首次切换会加载整张保存的 CT，可能覆盖 CE 当前未保存的表。
+- 同一张表内的记录描述必须唯一；不要将运行时绝对内存地址当成永久有效的标识。
+- 此版本不会自动识别游戏更新或修复失效的指针/AOB。跨重启持久化的是 CT 和功能定义，**不是成功修改的承诺**。
+- 上游 CE Bridge v12 的底层脚本具有 Lua 执行能力，所以仅加载可信任的 CT 与 Lua 文件；定期备份游戏存档。
+- 默认服务仅在 127.0.0.1 上监听；不会将任何训练数据/游戏内存发往云端。
+
+## 开发测试
+
+~~~powershell
+py -m unittest discover -s tests -v
+py -m compileall -q trainer
+~~~
+
+测试使用模拟 CE Bridge，不会触碰真实游戏。真实 Windows + CE 联调需在本机完成。具体阶段规划见 docs/ROADMAP.md。
+
+```
+
+`docs/ROADMAP.md`:
+
+```md
+# MVP 与后续路线
+
+## v0.1 — 已编写，等待 Windows 实机验证
+
+- Python 3.10+ stdlib localhost web UI
+- SQLite 游戏与功能定义
+- 直接对接 CE Bridge v12 的 JSON-RPC 命名管道
+- 导出/导入 CT，按唯一 MemoryRecord.Description 创建按钮
+- 目标 EXE 校验与记录状态校验
+- Fake Bridge 模拟测试 + GitHub Actions
+
+## v0.2 — 完成真实联调后
+
+- 把运行时开关状态和异常恢复做得更严密
+- 新建/删除游戏及功能、手动修复 CT、游戏版本 fingerprint
+- 指针/AOB、脚本启停回滚校验、失败时事务式恢复
+- 真实 Windows CE Bridge 适配测试记录
+- 自动化安装、自检以及错误日志
+
+## v0.3 — Agent 探索与人工验证
+
+- Codex app-server 或 SDK 接入，隔离审批与实际执行
+- 内存扫描与写入的操作计划、审计、用户确认
+- 将探索中的临时数据自动导出到已验证 CT，明确用户验收
+- 日常修改调用执行器而不是每次消耗 AI token
+
+## v0.4 — 桌面产品
+
+- Tauri + React 打包 Windows 应用
+- 更完整的游戏库、快捷键与运行时状态检测
+- 一键启动/关闭、备份/恢复、可选数据迁移
+
+## 跨阶段准则
+
+安全默认拒绝：无目标进程、多个同名进程、CE 未连接、CT 缺记录、开关失败，均不应该对未知地址进行写入。联网对战、反作弊绕过、驱动与 DBVM 均不在范围内。
+
+```
+
+`launcher.py`:
+
+```py
+"""PyInstaller entry point: preserve Python package imports."""
+from trainer.__main__ import main
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`packaging/README-PORTABLE.md`:
+
+```md
+# AI Game Trainer v0.1.3 — Windows 便携版
+
+这一版不需要在本机安装 Python、Node.js、Rust、Git 或 pip。
+
+## 使用步骤
+1. 解压整个 ZIP，例如到 D:\Tools\AI-Game-Trainer。
+2. 双击 AI-Game-Trainer.exe。不能单独移动这个 exe；同目录的 _internal 运行库是必需的。
+3. 控制台窗口会保持打开，并自动弹出浏览器 http://127.0.0.1:8765 。关闭控制台会退出程序。
+4. 修改器保存的配置、SQLite 和 CE 表位于 %LOCALAPPDATA%\AI-Game-Trainer，升级时不会随着程序文件夹清理。
+
+## 零学习一键测试（修复版）
+
+完成 CE Bridge 加载后，回到浏览器首页，点击「开始一键实测」。软件会自动启动内置 AITrainerDemo.exe，并通过 CE 完成 123 → 777 → 123 的内存读写校验，结束后关闭测试进程。你不必手动扫描地址，也不需要打开真实游戏。
+
+## Cheat Engine 的准备
+这版仍然需要自行安装 Cheat Engine 主程序，不随 ZIP 附带。
+
+1. 运行 Cheat Engine。在 File → Execute Script 加载 CE-Bridge\ce_mcp_bridge.lua。
+2. 如果找不到该菜单，进入 Table → Show Cheat Table Lua Script，执行：
+   dofile([[D:\Tools\AI-Game-Trainer\CE-Bridge\ce_mcp_bridge.lua]])
+   （请改成实际路径）
+3. 在 CE 中手动选择并附加到正在运行的离线单机游戏 EXE。
+4. 回到网页左下方检查 CE Bridge 连接状态。
+5. 在 CE 中扫描/分析并验证一条修改记录，回到网页保存为按钮。下次可从 CT 重新加载。
+
+## 注意
+- 此版提供持久化及一键开启/关闭，尚未集成 Codex 自然语言 AI Agent。
+- 游戏重启后可能重新定位，游戏更新或地址失效时不保证修改成功。
+- 修改行为应仅用于有权限修改的本地离线单机程序；不提供反作弊绕过或内核隐藏。
+- 本程序没有代码签名，请仅从官方 Releases 下载并核对随包提供的 SHA256 文件。若杀毒软件报警，请先验证来源，不要贸然关闭防护。
+- 如果端口 8765 已被占用，请关闭上一个进程，或从命令行运行 AI-Game-Trainer.exe --port 8766。
+- 本程序启动的是本地网页控制台，不是独立原生 GUI。
+- 如需故障排查，保留黑色控制台中的错误信息反馈给开发者。
+
+项目与源码：https://github.com/Hello-DaTang/AI-Game-Trainer
+
+```
+
+`packaging/RELEASE_NOTES.md`:
+
+```md
+## v0.1.3 — 修复一键实测按钮缺失与表单反复刷新
+
+- 修复 v0.1.2 中 HTML 未包含测试按钮，导致前端 JavaScript 中断的问题。
+- 首页与工作台现可见「开始一键实测」，点击后会通过 CE 自动测试数值 123 → 777 → 123。
+- 修复诊断错误未能规范返回 JSON 的问题。
+- 防止网页脚本异常时游戏表单意外采用 GET 请求，将名称和 EXE 显示在地址栏。
+- 增加自动化前端 DOM ID 契约测试，防止同类回归。
+- 仍是 Windows ZIP 便携版；保留 SQLite 游戏库；Cheat Engine 7.7 和 CE Lua Bridge 仍需保持运行。
+
+本版本的 CI 不具有真实 CE 实例，Windows 现场内存读写需要用户电脑完成验证。
+
+```
+
+`packaging/VERSION`:
+
+```
+v0.1.3
+
+```
+
+`pyproject.toml`:
+
+```toml
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-game-trainer"
+version = "0.1.0"
+description = "Local-first reusable Cheat Engine trainer presets"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["trainer"]
+
+[tool.setuptools.package-data]
+trainer = ["static/*.html", "static/*.css", "static/*.js"]
+
+```
+
+`requirements-windows.txt`:
+
+```txt
+# Required only for Windows named-pipe communication with the CE Lua bridge.
+pywin32>=306
+
+```
+
+`scripts/bootstrap.ps1`:
+
+```ps1
+# Windows installation of the pinned upstream CE bridge.
+# Run from repo root: powershell -ExecutionPolicy Bypass -File .\scripts\bootstrap.ps1
+$ErrorActionPreference = "Stop"
+$root = Split-Path -Parent $PSScriptRoot
+Set-Location $root
+$checkout = Join-Path $root "vendor\cheatengine-mcp-bridge"
+$revision = "6bd7ce90479250a9b4b75e7944df9c105ecb2572"
+if (-not (Test-Path (Join-Path $checkout ".git"))) {
+    New-Item -ItemType Directory -Force -Path (Split-Path $checkout -Parent) | Out-Null
+    git clone https://github.com/miscusi-peek/cheatengine-mcp-bridge.git $checkout
+    if ($LASTEXITCODE -ne 0) { throw "git clone failed" }
+}
+Push-Location $checkout
+try {
+    git fetch origin $revision
+    if ($LASTEXITCODE -ne 0) { throw "git fetch failed" }
+    git checkout --detach $revision
+    if ($LASTEXITCODE -ne 0) { throw "git checkout failed" }
+} finally {
+    Pop-Location
+}
+Write-Host "Upstream CE bridge pinned at $revision"
+Write-Host "CE Lua script: $checkout\MCP_Server\ce_mcp_bridge.lua"
+Write-Host "Next: py -m pip install -r requirements-windows.txt"
+Write-Host "Then open Cheat Engine and execute the Lua script above."
+Write-Host "Finally run: py -m trainer"
+
+```
+
+`tests/__init__.py`:
+
+```py
+"""Fake bridge integration tests."""
+
+```
+
+`tests/fixtures/demo_target.c`:
+
+```c
+/* Harmless local fixture for the AI Game Trainer CE read/write smoke test.
+ * No injection, drivers, persistence, networking or external game interaction.
+ * Built into Tools/AITrainerDemo.exe with MSVC /MT for a standalone runtime.
+ */
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <wchar.h>
+
+static volatile LONG g_demo_number = 123;
+
+int wmain(int argc, wchar_t **argv)
+{
+    FILE *out = NULL;
+    if (argc != 3 || wcscmp(argv[1], L"--ready-file") != 0) {
+        return 2;
+    }
+    if (_wfopen_s(&out, argv[2], L"wb") != 0 || out == NULL) {
+        return 3;
+    }
+    fprintf(out, "{\"pid\":%lu,\"address\":\"0x%llX\"}",
+            (unsigned long)GetCurrentProcessId(),
+            (unsigned long long)(uintptr_t)&g_demo_number);
+    fclose(out);
+
+    /* Refer to the volatile number so the compiler retains the symbol. */
+    while (1) {
+        if (g_demo_number == -1) {
+            return 0;
+        }
+        Sleep(100);
+    }
+}
+
+```
+
+`tests/test_bridge.py`:
+
+```py
+import json
+import socket
+import struct
+import threading
+import unittest
+
+from trainer.bridge import CEBridge, BridgeError
+
+
+class BridgeTests(unittest.TestCase):
+    def _exchange(self, response):
+        listener = socket.socket()
+        listener.bind(("127.0.0.1", 0))
+        listener.listen(1)
+        port = listener.getsockname()[1]
+        captured = []
+
+        def server():
+            try:
+                conn, _ = listener.accept()
+                with conn:
+                    def exact(n):
+                        chunks = []
+                        while n:
+                            piece = conn.recv(n)
+                            if not piece:
+                                raise EOFError()
+                            chunks.append(piece)
+                            n -= len(piece)
+                        return b"".join(chunks)
+                    length = struct.unpack("<I", exact(4))[0]
+                    captured.append(json.loads(exact(length)))
+                    payload = json.dumps(response).encode()
+                    conn.sendall(struct.pack("<I", len(payload)) + payload)
+            finally:
+                listener.close()
+
+        worker = threading.Thread(target=server, daemon=True)
+        worker.start()
+        try:
+            return CEBridge(transport="tcp", port=port).call("ping"), captured
+        finally:
+            worker.join(timeout=3)
+
+    def test_tcp_json_rpc_framing(self):
+        reply, calls = self._exchange({"jsonrpc": "2.0", "result": {"success": True, "version": "12.0.0"}, "id": 1})
+        self.assertEqual(reply["version"], "12.0.0")
+        self.assertEqual(calls[0]["method"], "ping")
+
+    def test_bridge_error_is_not_reported_successfully(self):
+        with self.assertRaises(BridgeError):
+            self._exchange({"jsonrpc": "2.0", "result": {"success": False, "error": "Not attached"}, "id": 1})
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_diagnostics.py`:
+
+```py
+import unittest
+
+from trainer.diagnostics import DiagnosticError, verify_memory_roundtrip
+
+
+class FakeMemoryBridge:
+    def __init__(self, initial=123):
+        self.pid = None
+        self.value = initial
+        self.calls = []
+
+    def call(self, method, params=None):
+        params = params or {}
+        self.calls.append((method, params))
+        if method == "open_process":
+            self.pid = int(params["process_id_or_name"])
+            return {"success": True}
+        if method == "get_opened_process_id":
+            return {"success": True, "process_id": self.pid}
+        if method == "read_integer":
+            return {"success": True, "value": self.value}
+        if method == "write_integer":
+            self.value = params["value"]
+            return {"success": True}
+        raise AssertionError(method)
+
+
+class DiagnosticsTests(unittest.TestCase):
+    def test_read_write_restore(self):
+        bridge = FakeMemoryBridge()
+        out = verify_memory_roundtrip(bridge, 991, "0x1234")
+        self.assertEqual(out, {"initial": 123, "changed": 777, "restored": 123})
+        self.assertEqual(bridge.value, 123)
+        self.assertEqual(bridge.calls[0], ("open_process", {"process_id_or_name": 991}))
+        self.assertEqual(sum(x[0] == "write_integer" for x in bridge.calls), 2)
+        self.assertTrue(all(
+            params.get("address", "0x1234") == "0x1234"
+            for method, params in bridge.calls if method in ("write_integer", "read_integer")
+        ))
+
+    def test_bad_initial_value_fails_without_writing(self):
+        bridge = FakeMemoryBridge(initial=999)
+        with self.assertRaises(DiagnosticError):
+            verify_memory_roundtrip(bridge, 991, "0x1234")
+        self.assertEqual(bridge.value, 999)
+        self.assertFalse(any(method == "write_integer" for method, _ in bridge.calls))
+
+    def test_write_that_does_not_change_memory_fails_safely(self):
+        class NoOpWrites(FakeMemoryBridge):
+            def call(self, method, params=None):
+                if method == "write_integer":
+                    self.calls.append((method, params))
+                    return {"success": True}
+                return super().call(method, params)
+
+        bridge = NoOpWrites()
+        with self.assertRaises(DiagnosticError):
+            verify_memory_roundtrip(bridge, 991, "0x1234")
+        self.assertEqual(bridge.value, 123)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_service.py`:
+
+```py
+import tempfile
+import unittest
+from pathlib import Path
+
+from trainer.service import TrainerService
+from trainer.store import StoreError
+
+
+class FakeCEBridge:
+    def __init__(self):
+        self.pid = 731
+        self.list = [{"pid": 731, "name": "Demo.exe"}]
+        self.records = [
+            {"id": 42, "description": "Infinite HP", "enabled": False},
+            {"id": 43, "description": "Infinite Ammo", "enabled": False},
+        ]
+        self.calls = []
+
+    def call(self, method, params=None):
+        params = params or {}
+        self.calls.append((method, params))
+        if method == "ping":
+            return {"success": True, "version": "12.0.0"}
+        if method == "get_process_list":
+            return {"processes": self.list}
+        if method == "get_opened_process_id":
+            return {"process_id": self.pid}
+        if method == "get_address_list":
+            return {"records": self.records, "total": len(self.records)}
+        if method == "save_table":
+            Path(params["filename"]).write_text("<CheatTable />", encoding="utf-8")
+            return {"success": True}
+        if method == "load_table":
+            if not Path(params["filename"]).is_file():
+                raise RuntimeError("CT not found")
+            for record in self.records:
+                record["enabled"] = False
+            return {"success": True}
+        if method == "open_process":
+            self.pid = params["process_id_or_name"]
+            return {"success": True}
+        if method == "evaluate_lua":
+            code = params["code"]
+            if "getMemoryRecordByID(42)" in code:
+                self.records[0]["enabled"] = "r.Active=true" in code
+            elif "getMemoryRecordByID(43)" in code:
+                self.records[1]["enabled"] = "r.Active=true" in code
+            return {"success": True}
+        if method == "get_memory_record":
+            record = next(r for r in self.records if r["id"] == params["id"])
+            return {"success": True, "record": record}
+        raise AssertionError("Unexpected CE call: " + method)
+
+
+class ServiceTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.bridge = FakeCEBridge()
+        self.app = TrainerService(Path(self.tmp.name), self.bridge)
+        self.game = self.app.store.add_game("Demo", "demo.exe")
+
+    def test_capture_and_replay_after_restart(self):
+        feature = self.app.capture(self.game["id"], "Unlimited HP", "Infinite HP")
+        self.assertTrue(self.app.table_path(self.game["id"]).is_file())
+        self.assertEqual(self.app.snapshot()["games"][0]["features"][0]["id"], feature["id"])
+        restarted_bridge = FakeCEBridge()
+        app2 = TrainerService(Path(self.tmp.name), restarted_bridge)
+        result = app2.toggle(feature["id"], True)
+        self.assertTrue(result["enabled"])
+        self.assertTrue(restarted_bridge.records[0]["enabled"])
+        self.assertIn(("load_table", {"filename": str(app2.table_path(self.game["id"])), "merge": False}), restarted_bridge.calls)
+        app2.toggle(feature["id"], False)
+        self.assertFalse(restarted_bridge.records[0]["enabled"])
+        self.assertEqual(sum(m == "load_table" for m, _ in restarted_bridge.calls), 1)
+
+    def test_capture_must_be_attached_to_exact_target(self):
+        self.bridge.pid = 999
+        with self.assertRaises(StoreError):
+            self.app.capture(self.game["id"], "HP", "Infinite HP")
+        self.assertFalse(self.app.table_path(self.game["id"]).exists())
+
+    def test_capture_blocks_duplicate_description_and_missing_existing_record(self):
+        self.app.capture(self.game["id"], "HP", "Infinite HP")
+        with self.assertRaises(StoreError):
+            self.app.capture(self.game["id"], "HP2", "Infinite HP")
+        self.bridge.records = [{"id": 43, "description": "Infinite Ammo", "enabled": False}]
+        with self.assertRaises(StoreError):
+            self.app.capture(self.game["id"], "Ammo", "Infinite Ammo")
+
+    def test_no_process_and_multiple_processes_fail_closed(self):
+        self.app.capture(self.game["id"], "HP", "Infinite HP")
+        feature_id = self.app.snapshot()["games"][0]["features"][0]["id"]
+        self.bridge.list = []
+        with self.assertRaises(StoreError):
+            self.app.toggle(feature_id, True)
+        self.bridge.list = [{"pid": 731, "name": "demo.exe"}, {"pid": 732, "name": "demo.exe"}]
+        with self.assertRaises(StoreError):
+            self.app.toggle(feature_id, True)
+
+    def test_untrusted_input_does_not_become_lua(self):
+        with self.assertRaises(StoreError):
+            self.app.capture(self.game["id"], "Bad", "nonexistent'; os.execute('bad')")
+        self.app.capture(self.game["id"], "HP", "Infinite HP")
+        feature_id = self.app.snapshot()["games"][0]["features"][0]["id"]
+        with self.assertRaises(StoreError):
+            self.app.toggle(feature_id, "true")
+        self.app.toggle(feature_id, True)
+        code = [data["code"] for method, data in self.bridge.calls if method == "evaluate_lua"][0]
+        self.assertNotIn("Infinite HP", code)
+        self.assertIn("getMemoryRecordByID(42)", code)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_store.py`:
+
+```py
+import tempfile
+import unittest
+from pathlib import Path
+
+from trainer.store import Store, StoreError
+
+
+class StoreTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.db_path = Path(self.tmp.name) / "nested" / "trainer.sqlite3"
+        self.store = Store(self.db_path)
+
+    def test_persists_game_and_feature_across_instances(self):
+        game = self.store.add_game("Demo", "demo.exe")
+        feature = self.store.add_feature(game["id"], "Health", "Player Health")
+        restarted = Store(self.db_path)
+        self.assertEqual(restarted.games()[0]["exe"], "demo.exe")
+        self.assertEqual(restarted.features(game["id"])[0]["id"], feature["id"])
+
+    def test_rejects_duplicate_process_and_record(self):
+        game = self.store.add_game("Demo", "demo.exe")
+        with self.assertRaises(StoreError):
+            self.store.add_game("Demo 2", "DEMO.EXE")
+        self.store.add_feature(game["id"], "Health", "Player Health")
+        with self.assertRaises(StoreError):
+            self.store.add_feature(game["id"], "Health again", "Player Health")
+
+    def test_rejects_executable_paths_and_empty_fields(self):
+        for name in ("", " "):
+            with self.assertRaises(StoreError):
+                self.store.add_game(name, "demo.exe")
+        for exe in ("C:\\Games\\game.exe", "../game.exe", "game", ""):
+            with self.assertRaises(StoreError):
+                self.store.add_game("Game", exe)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_ui_contract.py`:
+
+```py
+"""Verify every hard-coded UI element lookup exists in the shipped HTML."""
+import re
+import unittest
+from html.parser import HTMLParser
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1] / "trainer" / "static"
+
+
+class ElementParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.ids = []
+        self.forms = []
+
+    def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
+        if "id" in attributes:
+            self.ids.append(attributes["id"])
+        if tag == "form":
+            self.forms.append(attributes)
+
+
+class UIContractTests(unittest.TestCase):
+    def test_every_js_element_lookup_exists_in_html(self):
+        html = (ROOT / "index.html").read_text("utf-8")
+        js = (ROOT / "app.js").read_text("utf-8")
+        parser = ElementParser()
+        parser.feed(html)
+        looked_up = set(re.findall(r'\bel\(["\']([\w-]+)["\']\)', js))
+        missing = looked_up - set(parser.ids)
+        self.assertFalse(missing, f"JavaScript references missing DOM IDs: {sorted(missing)}")
+        self.assertEqual(len(parser.ids), len(set(parser.ids)), "Duplicate HTML IDs")
+        self.assertIn("self-test", looked_up)
+        self.assertIn("self-test-result", looked_up)
+
+    def test_game_form_cannot_fallback_to_get_query(self):
+        parser = ElementParser()
+        parser.feed((ROOT / "index.html").read_text("utf-8"))
+        form = next(x for x in parser.forms if x.get("id") == "game-form")
+        self.assertEqual(form.get("method"), "post")
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_web.py`:
+
+```py
+import http.client
+import json
+import tempfile
+import threading
+import unittest
+from pathlib import Path
+
+from trainer.service import TrainerService
+from trainer.diagnostics import DiagnosticError
+from trainer.web import serve
+from tests.test_service import FakeCEBridge
+
+
+class WebTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.service = TrainerService(Path(self.tmp.name), FakeCEBridge())
+        self.server = serve(self.service, port=0)
+        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread.start()
+        self.addCleanup(self.thread.join, 2)
+        self.addCleanup(self.server.server_close)
+        self.addCleanup(self.server.shutdown)
+
+    def test_health_and_static_page(self):
+        connection = http.client.HTTPConnection("127.0.0.1", self.server.server_port)
+        connection.request("GET", "/api/health")
+        res = connection.getresponse()
+        self.assertEqual(res.status, 200)
+        self.assertEqual(json.loads(res.read())["ok"], True)
+        connection.request("GET", "/")
+        res = connection.getresponse()
+        self.assertEqual(res.status, 200)
+        page = res.read().decode("utf-8")
+        self.assertIn("AI Game Trainer", page)
+        self.assertIn('id="self-test"', page)
+        self.assertIn('id="self-test-result"', page)
+        connection.close()
+
+    def test_self_test_errors_are_returned_as_json(self):
+        def failed():
+            raise DiagnosticError("fixture unavailable")
+        self.service.selftest = failed
+        connection = http.client.HTTPConnection("127.0.0.1", self.server.server_port)
+        connection.request(
+            "POST", "/api/diagnostics/self-test", body="{}",
+            headers={"Content-Type": "application/json"},
+        )
+        response = connection.getresponse()
+        self.assertEqual(response.status, 400)
+        self.assertEqual(json.loads(response.read())["error"], "fixture unavailable")
+        connection.close()
+
+    def test_unauthorized_origin_rejected(self):
+        connection = http.client.HTTPConnection("127.0.0.1", self.server.server_port)
+        connection.request(
+            "POST", "/api/games", body='{"name":"Bad","exe":"bad.exe"}',
+            headers={"Content-Type": "application/json", "Origin": "https://malicious.example"},
+        )
+        res = connection.getresponse()
+        self.assertEqual(res.status, 403)
+        res.read()
+        connection.close()
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`trainer/__init__.py`:
+
+```py
+"""AI Game Trainer: local, offline-first Cheat Engine preset manager."""
+
+__version__ = "0.1.3"
+
+```
+
+`trainer/__main__.py`:
+
+```py
+"""Start the no-build local desktop dashboard: py -m trainer."""
+import argparse
+import threading
+import webbrowser
+
+from .service import TrainerService
+from .web import serve
+
+
+def main():
+    parser = argparse.ArgumentParser(description="AI Game Trainer (local MVP)")
+    parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--no-browser", action="store_true")
+    args = parser.parse_args()
+    server = serve(TrainerService(), args.port)
+    if not args.no_browser:
+        threading.Timer(
+            0.5, lambda: webbrowser.open("http://127.0.0.1:" + str(server.server_port))
+        ).start()
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopping AI Game Trainer...")
+    finally:
+        server.server_close()
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`trainer/bridge.py`:
+
+```py
+"""Small direct client for miscusi-peek/cheatengine-mcp-bridge v12.
+
+Wire format: little-endian uint32 payload length + JSON-RPC 2.0 bytes.
+No arbitrary command endpoint is exposed to HTTP clients.
+"""
+from __future__ import annotations
+
+import json
+import os
+import socket
+import struct
+
+PIPE_NAME = r"\\.\pipe\CE_MCP_Bridge_v99"
+MAX_REPLY = 8 * 1024 * 1024
+
+
+class BridgeError(RuntimeError):
+    """The CE bridge is unavailable or returned an error."""
+
+
+def _read_socket(sock: socket.socket, count: int) -> bytes:
+    pieces = []
+    while count:
+        data = sock.recv(count)
+        if not data:
+            raise BridgeError("CE bridge closed the connection")
+        pieces.append(data)
+        count -= len(data)
+    return b"".join(pieces)
+
+
+class CEBridge:
+    """One connection per request; avoids sharing a named-pipe handle across threads."""
+
+    def __init__(self, transport: str | None = None, port: int | None = None):
+        self.transport = transport or os.environ.get(
+            "TRAINER_CE_TRANSPORT", "pipe" if os.name == "nt" else "tcp"
+        )
+        self.port = int(port or os.environ.get("TRAINER_CE_PORT", "9876"))
+        if self.transport not in ("pipe", "tcp"):
+            raise ValueError("TRAINER_CE_TRANSPORT must be pipe or tcp")
+        if not 1 <= self.port <= 65535:
+            raise ValueError("Invalid CE relay port")
+        if self.transport == "pipe" and os.name != "nt":
+            raise ValueError("Named pipes require Windows")
+
+    def call(self, method: str, params: dict | None = None) -> dict:
+        payload = json.dumps(
+            {"jsonrpc": "2.0", "method": method, "params": params or {}, "id": 1},
+            ensure_ascii=False,
+        ).encode("utf-8")
+        request = struct.pack("<I", len(payload)) + payload
+        try:
+            if self.transport == "tcp":
+                with socket.create_connection(("127.0.0.1", self.port), timeout=5) as sock:
+                    sock.settimeout(8)
+                    sock.sendall(request)
+                    length = struct.unpack("<I", _read_socket(sock, 4))[0]
+                    if length > MAX_REPLY:
+                        raise BridgeError("CE bridge response exceeds size limit")
+                    raw = _read_socket(sock, length)
+            else:
+                raw = self._pipe_exchange(request)
+            result = json.loads(raw)
+        except BridgeError:
+            raise
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            raise BridgeError("Cannot communicate with CE Bridge: " + str(exc)) from exc
+        if not isinstance(result, dict):
+            raise BridgeError("Invalid CE bridge response")
+        if "error" in result:
+            raise BridgeError(str(result["error"]))
+        value = result.get("result", result)
+        if not isinstance(value, dict):
+            raise BridgeError("Invalid CE bridge result")
+        if value.get("success") is False:
+            raise BridgeError(str(value.get("error", "CE command failed")))
+        return value
+
+    @staticmethod
+    def _pipe_exchange(request: bytes) -> bytes:
+        try:
+            import win32file
+        except ImportError as exc:
+            raise BridgeError("Install Windows dependencies: py -m pip install -r requirements-windows.txt") from exc
+        handle = None
+        try:
+            handle = win32file.CreateFile(
+                PIPE_NAME,
+                win32file.GENERIC_READ | win32file.GENERIC_WRITE,
+                0, None, win32file.OPEN_EXISTING, 0, None,
+            )
+            # Keep the two writes used by upstream v12 (header, then JSON body).
+            win32file.WriteFile(handle, request[:4])
+            win32file.WriteFile(handle, request[4:])
+            length_bytes = CEBridge._read_pipe(handle, 4, win32file)
+            length = struct.unpack("<I", length_bytes)[0]
+            if length > MAX_REPLY:
+                raise BridgeError("CE bridge response exceeds size limit")
+            return CEBridge._read_pipe(handle, length, win32file)
+        finally:
+            if handle is not None:
+                win32file.CloseHandle(handle)
+
+    @staticmethod
+    def _read_pipe(handle, length: int, win32file) -> bytes:
+        output = bytearray()
+        while len(output) < length:
+            _, part = win32file.ReadFile(handle, length - len(output))
+            if not part:
+                raise BridgeError("CE pipe disconnected")
+            output.extend(part)
+        return bytes(output)
+
+```
+
+`trainer/diagnostics.py`:
+
+```py
+"""A one-click read/write smoke test against an owned, harmless Windows process.
+
+Never writes to the user's game or an arbitrary executable. The demo process
+is started by us and terminated after the test. CE's previous attachment is
+restored when possible. This is not a game cheat or an AI discovery agent.
+"""
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+
+from .bridge import BridgeError
+
+
+class DiagnosticError(RuntimeError):
+    """Local demo target or CE test failed."""
+
+
+def demo_exe_path() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent / "Tools" / "AITrainerDemo.exe"
+    return Path(__file__).resolve().parents[1] / "bin" / "AITrainerDemo.exe"
+
+
+def verify_memory_roundtrip(bridge, pid: int, address: str) -> dict:
+    """Attach to our freshly spawned process; test and restore a DWORD."""
+    bridge.call("open_process", {"process_id_or_name": pid})
+    info = bridge.call("get_opened_process_id")
+    if int(info.get("process_id", 0)) != pid:
+        raise DiagnosticError("Cheat Engine 未能附加到自动测试进程")
+
+    args = {"address": address, "type": "dword"}
+    original = bridge.call("read_integer", args).get("value")
+    if original != 123:
+        raise DiagnosticError(f"测试初始值不正确：期望 123，得到 {original!r}")
+
+    changed_value = 777
+    try:
+        bridge.call("write_integer", {**args, "value": changed_value})
+        actual = bridge.call("read_integer", args).get("value")
+        if actual != changed_value:
+            raise DiagnosticError(
+                f"内存写入校验未通过：期望 {changed_value}，得到 {actual!r}"
+            )
+    finally:
+        # The only target is the throwaway process created by this diagnostic.
+        bridge.call("write_integer", {**args, "value": original})
+
+    restored = bridge.call("read_integer", args).get("value")
+    if restored != original:
+        raise DiagnosticError("内存原值恢复失败")
+    return {"initial": original, "changed": changed_value, "restored": restored}
+
+
+def run_selftest(bridge, target: Path | None = None) -> dict:
+    """Use the bundled demo process. No game/CT database is modified."""
+    if os.name != "nt":
+        raise DiagnosticError("一键 CE 实测仅支持 Windows")
+    binary = Path(target) if target is not None else demo_exe_path()
+    if not binary.is_file():
+        raise DiagnosticError("缺少内置测试进程 AITrainerDemo.exe，请安装 v0.1.2 或更新版本的完整 ZIP")
+
+    # Verify the CE bridge first, before touching any process.
+    ping = bridge.call("ping")
+    previous_pid = None
+    try:
+        info = bridge.call("get_opened_process_id")
+        previous_pid = int(info.get("process_id") or 0) or None
+    except BridgeError:
+        # Fresh CE session with no process attached is expected.
+        pass
+
+    result = {}
+    warnings = []
+    with tempfile.TemporaryDirectory(prefix="ai-trainer-demo-") as folder:
+        ready_file = Path(folder) / "ready.json"
+        flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        process = subprocess.Popen(
+            [str(binary), "--ready-file", str(ready_file)],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=flags,
+        )
+        try:
+            deadline = time.monotonic() + 8.0
+            while not ready_file.is_file():
+                if process.poll() is not None:
+                    raise DiagnosticError("测试进程启动失败，退出码：" + str(process.returncode))
+                if time.monotonic() >= deadline:
+                    raise DiagnosticError("等待自动测试进程启动超时")
+                time.sleep(0.1)
+            try:
+                ready = json.loads(ready_file.read_text("utf-8"))
+                pid = int(ready["pid"])
+                address = ready["address"]
+                if pid != process.pid or not isinstance(address, str) or not address.startswith("0x"):
+                    raise ValueError("Fixture PID/address mismatch")
+            except (ValueError, KeyError, json.JSONDecodeError) as exc:
+                raise DiagnosticError("测试进程返回了无效的内存信息") from exc
+            result = verify_memory_roundtrip(bridge, pid, address)
+        finally:
+            # Avoid leaving the fixture process running if anything fails.
+            if process.poll() is None:
+                process.terminate()
+                try:
+                    process.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=3)
+            if previous_pid is not None:
+                try:
+                    bridge.call("open_process", {"process_id_or_name": previous_pid})
+                except BridgeError:
+                    warnings.append("原来的 CE 进程附加状态未能恢复，请手动重新附加")
+
+    return {
+        "success": True,
+        "bridge_version": ping.get("version", "unknown"),
+        "initial": result["initial"],
+        "changed": result["changed"],
+        "restored": result["restored"],
+        "steps": [
+            "Cheat Engine 通信正常",
+            "自动启动专用测试进程",
+            "读取目标进程 DWORD：123",
+            "写入并重新读取：777",
+            "恢复原值：123",
+            "自动关闭测试进程",
+        ],
+        "warnings": warnings,
+        "note": "已验证 CE 内存读写链路；尚未测试 CT 跨重启或 AI 自动探索功能。",
+    }
+
+```
+
+`trainer/service.py`:
+
+```py
+"""Business operations: capture a CE table and replay verified, named records.
+
+The upstream v12 Lua code expects filename (not path) for load_table/save_table,
+and its set_memory_record_value ignores the documented freeze parameter.
+For switching record.Active we therefore use a fixed Lua snippet with a numeric
+record ID obtained from CE, never user-submitted Lua.
+"""
+from __future__ import annotations
+
+import os
+import threading
+from pathlib import Path
+
+from .bridge import BridgeError, CEBridge
+from .diagnostics import run_selftest
+from .store import Store, StoreError
+
+
+def default_data_dir() -> Path:
+    base = os.environ.get("TRAINER_DATA_DIR")
+    if base:
+        return Path(base).expanduser()
+    if os.name == "nt":
+        return Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "AI-Game-Trainer"
+    return Path.home() / ".local" / "share" / "ai-game-trainer"
+
+
+class TrainerService:
+    def __init__(self, data_dir: Path | None = None, bridge=None):
+        self.data_dir = Path(data_dir) if data_dir else default_data_dir()
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        (self.data_dir / "tables").mkdir(parents=True, exist_ok=True)
+        self.store = Store(self.data_dir / "trainer.sqlite3")
+        self.bridge = bridge or CEBridge()
+        self._lock = threading.RLock()
+        self._loaded = None
+        self._states = {}
+
+    def table_path(self, game_id: str) -> Path:
+        self.store.game(game_id)
+        return (self.data_dir / "tables" / (game_id + ".CT")).resolve()
+
+    def snapshot(self) -> dict:
+        games = self.store.games()
+        return {
+            "games": [
+                {**game, "features": [
+                    {**feature, "enabled": bool(self._states.get(feature["id"], False))}
+                    for feature in self.store.features(game["id"])
+                ],
+                 "has_table": self.table_path(game["id"]).is_file()}
+                for game in games
+            ],
+            "data_dir": str(self.data_dir),
+        }
+
+    def selftest(self) -> dict:
+        with self._lock:
+            return run_selftest(self.bridge)
+
+    def status(self) -> dict:
+        try:
+            reply = self.bridge.call("ping")
+            return {"connected": True, "version": reply.get("version"), "message": reply.get("message")}
+        except BridgeError as exc:
+            return {"connected": False, "message": str(exc)}
+
+    def _target_pid(self, game: dict) -> int:
+        result = self.bridge.call("get_process_list")
+        matches = [
+            p for p in result.get("processes", [])
+            if str(p.get("name", "")).casefold().rsplit("\\", 1)[-1].casefold()
+            == game["exe"].casefold()
+        ]
+        if not matches:
+            raise StoreError("未检测到 " + game["exe"] + "，请先启动对应的单机游戏")
+        if len(matches) != 1:
+            raise StoreError("发现同名进程多于一个；当前版本禁止自动选择进程")
+        return int(matches[0]["pid"])
+
+    def _attached_to(self, pid: int):
+        result = self.bridge.call("get_opened_process_id")
+        if int(result.get("process_id", 0)) != pid:
+            raise StoreError("Cheat Engine 当前连接的不是该游戏，请在 CE 中先选择正确进程")
+
+    def _records(self):
+        result = self.bridge.call("get_address_list", {"offset": 0, "limit": 1000})
+        if int(result.get("total", len(result.get("records", [])))) > 1000:
+            raise StoreError("CE 表超过 1000 条记录；当前版本不支持自动匹配")
+        return result.get("records", [])
+
+    def records(self, game_id: str):
+        with self._lock:
+            game = self.store.game(game_id)
+            self._attached_to(self._target_pid(game))
+            return [
+                {"id": r.get("id"), "description": r.get("description"),
+                 "enabled": bool(r.get("enabled"))}
+                for r in self._records() if r.get("description")
+            ]
+
+    def capture(self, game_id: str, title: str, description: str) -> dict:
+        """Save the entire current CE table after validating all referenced records."""
+        with self._lock:
+            game = self.store.game(game_id)
+            self._attached_to(self._target_pid(game))
+            records = self._records()
+            descriptions = [r.get("description") for r in records]
+            if descriptions.count(description) != 1:
+                raise StoreError("CE 表中必须有且仅有一条同名记录：" + description)
+            for saved in self.store.features(game_id):
+                if descriptions.count(saved["record_description"]) != 1:
+                    raise StoreError("CE 当前表缺少已保存功能：" + saved["record_description"] + "；请先加载旧表再追加")
+            if any(f["record_description"] == description for f in self.store.features(game_id)):
+                raise StoreError("这条 CE 记录已经保存过")
+            if not title.strip() or len(title.strip()) > 128:
+                raise StoreError("功能名称需要 1–128 个字符")
+            target = self.table_path(game_id)
+            staging = target.with_name(target.stem + ".pending.CT")
+            try:
+                self.bridge.call("save_table", {"filename": str(staging)})
+                if not staging.is_file() or staging.stat().st_size == 0:
+                    raise StoreError("CE 没有生成有效 CT 文件")
+                staging.replace(target)
+                new_feature = self.store.add_feature(game_id, title, description)
+            finally:
+                staging.unlink(missing_ok=True)
+            self._loaded = None
+            self._states.clear()
+            return new_feature
+
+    def toggle(self, feature_id: str, enabled: bool):
+        if type(enabled) is not bool:
+            raise StoreError("enabled 必须为 true 或 false")
+        with self._lock:
+            feature = self.store.feature(feature_id)
+            game = self.store.game(feature["game_id"])
+            path = self.table_path(game["id"])
+            if not path.is_file():
+                raise StoreError("此游戏尚未保存 CT 文件")
+            pid = self._target_pid(game)
+            table_key = (game["id"], pid, path.stat().st_mtime_ns)
+            if self._loaded != table_key:
+                self._states.clear()
+                self.bridge.call("open_process", {"process_id_or_name": pid})
+                self._attached_to(pid)
+                self.bridge.call("load_table", {"filename": str(path), "merge": False})
+                self._loaded = table_key
+            else:
+                self._attached_to(pid)
+            matches = [r for r in self._records() if r.get("description") == feature["record_description"]]
+            if len(matches) != 1:
+                raise StoreError("CT 中找不到唯一对应的记录，请检查游戏更新及 CT 文件")
+            record_id = int(matches[0]["id"])
+            if record_id < 0 or record_id > 2**31 - 1:
+                raise StoreError("无效的 CE 记录 ID")
+            # Lua expression contains only a checked integer, never raw client input.
+            expression = (
+                "local r=getAddressList():getMemoryRecordByID(" + str(record_id) + "); "
+                "if not r then error('record not found') end; "
+                "r.Active=" + ("true" if enabled else "false") + "; "
+                "return tostring(r.Active)"
+            )
+            self.bridge.call("evaluate_lua", {"code": expression})
+            actual = self.bridge.call("get_memory_record", {"id": record_id}).get("record", {})
+            if bool(actual.get("enabled")) != enabled:
+                raise BridgeError("CE 未能切换记录状态；按钮状态未更新")
+            self._states[feature_id] = enabled
+            return {"feature_id": feature_id, "enabled": enabled, "process_id": pid}
+
+```
+
+`trainer/static/app.js`:
+
+```js
+"use strict";
+const el = (id) => document.getElementById(id);
+let currentGame = null;
+let snapshot = {games: []};
+let activeStates = {};
+
+async function api(path, payload) {
+  const options = payload === undefined ? {} : {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload)
+  };
+  const response = await fetch(path, options);
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || "操作失败");
+  return result;
+}
+function notice(message, ok = false) {
+  const node = el("notice");
+  node.textContent = message;
+  node.classList.remove("hidden");
+  node.classList.toggle("ok", ok);
+}
+function clearNotice() { el("notice").classList.add("hidden"); }
+async function reload() {
+  snapshot = await api("/api/state");
+  const games = snapshot.games;
+  activeStates = Object.fromEntries(games.flatMap((game) =>
+    game.features.map((feature) => [feature.id, feature.enabled])));
+  el("games").replaceChildren();
+  games.forEach((g) => {
+    const btn = document.createElement("button");
+    btn.className = "game-nav" + (g.id === currentGame ? " selected" : "");
+    btn.textContent = "◈  " + g.name;
+    btn.addEventListener("click", () => { currentGame = g.id; clearNotice(); render(); });
+    el("games").append(btn);
+  });
+  if (!currentGame && games.length) currentGame = games[0].id;
+  if (currentGame && !games.some((g) => g.id === currentGame))
+    currentGame = games.length ? games[0].id : null;
+  render();
+}
+function render() {
+  const game = snapshot.games.find((g) => g.id === currentGame);
+  const selected = !!game;
+  el("welcome").classList.toggle("hidden", selected);
+  el("workspace").classList.toggle("hidden", !selected);
+  el("page-title").textContent = selected ? "游戏修改工作台" : "管理你自己的游戏修改器";
+  el("breadcrumb").textContent = selected ? game.name : "开始";
+  el("page-intro").textContent = selected
+    ? "已保存的修改功能将保留在本地。只有在你点击时才会尝试修改游戏进程。"
+    : "把通过 Cheat Engine 验证过的功能保存为可复用按钮。游戏重启后仍能从 CT 文件中恢复。";
+  document.querySelectorAll(".game-nav").forEach((btn, i) => {
+    btn.classList.toggle("selected", snapshot.games[i].id === currentGame);
+  });
+  if (!game) return;
+  el("game-name").textContent = game.name;
+  el("game-exe").textContent = game.exe;
+  el("table-status").textContent = game.has_table ? "CT 已保存" : "未保存 CT";
+  el("table-status").classList.toggle("ready", game.has_table);
+  const host = el("features");
+  host.replaceChildren();
+  if (!game.features.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "暂无已保存的修改功能。先在 CE 中制作一条记录，再从下面导入。";
+    host.append(empty);
+  }
+  game.features.forEach((feature) => {
+    const row = document.createElement("div");
+    row.className = "feature-row";
+    const info = document.createElement("div");
+    const name = document.createElement("div");
+    name.className = "feature-name";
+    name.textContent = feature.title;
+    const sub = document.createElement("div");
+    sub.className = "feature-sub";
+    sub.textContent = "CE 记录：" + feature.record_description;
+    info.append(name, sub);
+    const toggle = document.createElement("button");
+    const enabled = !!activeStates[feature.id];
+    toggle.className = "switch" + (enabled ? " active" : "");
+    toggle.setAttribute("aria-label", enabled ? "关闭 " + feature.title : "开启 " + feature.title);
+    toggle.setAttribute("aria-pressed", String(enabled));
+    toggle.title = enabled ? "关闭" : "开启";
+    toggle.addEventListener("click", async () => {
+      toggle.disabled = true;
+      try {
+        const result = await api("/api/features/toggle", {
+          feature_id: feature.id, enabled: !activeStates[feature.id]
+        });
+        activeStates[feature.id] = result.enabled;
+        notice(feature.title + "：" + (result.enabled ? "已开启" : "已关闭"), true);
+      } catch (err) { notice(err.message); }
+      finally { toggle.disabled = false; render(); }
+    });
+    row.append(info, toggle);
+    host.append(row);
+  });
+}
+async function refreshBridge() {
+  try {
+    const status = await api("/api/bridge");
+    el("bridge-dot").classList.toggle("connected", !!status.connected);
+    el("bridge-status").textContent = status.connected ? "Cheat Engine 已连接" : "Cheat Engine 未连接";
+    el("bridge-status").title = status.message || "";
+  } catch (err) { el("bridge-status").textContent = "Bridge 检查失败"; }
+}
+el("self-test")?.addEventListener("click", async () => {
+  const button = el("self-test");
+  const output = el("self-test-result");
+  button.disabled = true;
+  button.textContent = "正在测试 CE 内存读写…";
+  output.classList.remove("hidden", "passed");
+  output.textContent = "自动测试进行中，预计只需几秒。请保持 Cheat Engine 与 Bridge 运行。";
+  try {
+    const result = await api("/api/diagnostics/self-test", {});
+    output.classList.add("passed");
+    const steps = Array.isArray(result.steps) ? result.steps.join("\n✓ ") : "";
+    const warning = (result.warnings || []).join("\n");
+    output.textContent = "✓ 实测通过\n✓ " + steps + "\n" + (result.note || "") + (warning ? "\n提示：" + warning : "");
+    await refreshBridge();
+  } catch (err) {
+    output.classList.remove("passed");
+    output.textContent = "✗ 实测失败：" + err.message;
+  } finally {
+    button.disabled = false;
+    button.textContent = "重新测试";
+  }
+});
+el("new-game").addEventListener("click", () => {
+  currentGame = null;
+  el("welcome").classList.remove("hidden");
+  el("workspace").classList.add("hidden");
+  el("page-title").textContent = "添加游戏";
+  el("breadcrumb").textContent = "添加游戏";
+  clearNotice();
+});
+el("game-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const data = Object.fromEntries(new FormData(event.currentTarget));
+  try {
+    const game = await api("/api/games", data);
+    currentGame = game.id;
+    event.currentTarget.reset();
+    await reload();
+    notice("已添加游戏，请先在 Cheat Engine 中附加此进程。", true);
+  } catch (err) { notice(err.message); }
+});
+el("read-records").addEventListener("click", async () => {
+  if (!currentGame) return;
+  try {
+    const result = await api("/api/records?game_id=" + encodeURIComponent(currentGame));
+    const select = el("record-options");
+    select.replaceChildren();
+    result.records.forEach((r) => {
+      const opt = document.createElement("option");
+      opt.value = r.description;
+      opt.textContent = r.description;
+      select.append(opt);
+    });
+    el("record-hint").textContent = "读取到 " + result.records.length + " 条记录";
+    el("capture-form").classList.toggle("hidden", !result.records.length);
+    if (!result.records.length) notice("CE 当前地址列表为空，先创建一条有效记录。");
+    else clearNotice();
+  } catch (err) { notice(err.message); }
+});
+el("capture-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const data = Object.fromEntries(new FormData(event.currentTarget));
+  try {
+    await api("/api/features/capture", {...data, game_id: currentGame});
+    el("capture-form").classList.add("hidden");
+    el("record-hint").textContent = "";
+    await reload();
+    notice("已保存完整 CT 表与修改按钮。下次启动游戏可以直接点击开关。", true);
+  } catch (err) { notice(err.message); }
+});
+el("refresh-bridge").addEventListener("click", refreshBridge);
+reload().catch((err) => notice(err.message));
+refreshBridge();
+
+```
+
+`trainer/static/index.html`:
+
+```html
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f9">
+  <title>AI Game Trainer</title>
+  <link href="/style.css" rel="stylesheet">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="logo">✳</span><span>AI Game Trainer<small>PERSONAL WORKSPACE</small></span></div>
+      <div class="nav-title">游戏库</div>
+      <nav id="games" aria-label="游戏列表"></nav>
+      <button class="side-add" id="new-game">＋ 添加游戏</button>
+      <div class="side-bottom"><span class="dot" id="bridge-dot"></span><span id="bridge-status">正在检查 CE Bridge</span><button id="refresh-bridge" title="重新检查连接">↻</button></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div>工作台 <span class="separator">/</span> <span id="breadcrumb">开始</span></div><span class="edition">LOCAL MVP · 0.1.3</span></header>
+      <div class="main-body">
+        <div class="eyebrow">YOUR GAME · YOUR RULES</div>
+        <h1 id="page-title">管理你自己的游戏修改器</h1>
+        <p class="intro" id="page-intro">把通过 Cheat Engine 验证过的功能保存为可复用按钮。游戏重启后仍能从 CT 文件中恢复。</p>
+        <div id="notice" class="notice hidden" role="status"></div>
+        <section class="panel demo-check" id="self-test-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Cheat Engine 一键实测</h2>
+              <p>无需手动扫描内存。自动启动测试进程，通过 CE 把数值 123 改成 777，再恢复 123。</p>
+            </div>
+          </div>
+          <button type="button" class="primary" id="self-test">开始一键实测</button>
+          <div id="self-test-result" class="test-result hidden" role="status" aria-live="polite"></div>
+        </section>
+        <section class="panel" id="welcome">
+          <div class="panel-head"><div><h2>添加第一个游戏</h2><p>仅支持你有权修改的本地单机游戏。</p></div></div>
+          <form id="game-form" class="fields" method="post" action="/api/games">
+            <label>游戏名称<input name="name" required maxlength="128" placeholder="例如：单机测试游戏"></label>
+            <label>游戏进程文件名<input name="exe" required maxlength="255" placeholder="game.exe"></label>
+            <button class="primary" type="submit">添加到游戏库</button>
+          </form>
+        </section>
+        <div id="workspace" class="hidden">
+          <section class="hero">
+            <div class="hero-icon">◈</div>
+            <div><div class="hero-label">CURRENT GAME</div><h2 id="game-name"></h2><div class="process" id="game-exe"></div></div>
+            <span class="pill" id="table-status">未保存 CT</span>
+          </section>
+          <div class="section-title"><div><h2>已保存功能</h2><p>点击即向 Cheat Engine 发送指令；首次操作将自动加载此游戏的 CT 文件。</p></div></div>
+          <section class="panel features" id="features"></section>
+          <section class="panel capture">
+            <div class="panel-head"><div><h2>保存新的修改功能</h2><p>先在 Cheat Engine 或 Codex + MCP 中完成探索，并将结果添加成 CE 地址列表记录。</p></div></div>
+            <div class="guide"><span class="guide-step">01</span> 在 CE 中打开正确游戏进程 → 创建并验证一条记录。<br><span class="guide-step">02</span> 点击“读取 CE 记录”，选中想保存为按钮的功能。<br><span class="guide-step">03</span> 保存当前整张 CT 表，下次可直接启用。</div>
+            <div class="capture-actions"><button class="secondary" id="read-records">读取 CE 记录</button><span id="record-hint"></span></div>
+            <form id="capture-form" class="fields hidden">
+              <label>CE 地址列表中的记录<select name="record_description" id="record-options" required></select></label>
+              <label>按钮显示名称<input name="title" placeholder="例如：无限体力" maxlength="128" required></label>
+              <button class="primary" type="submit">保存成一键按钮</button>
+            </form>
+          </section>
+          <div class="footnote">提示：保存的是当前 CE 表的完整快照。若游戏更新导致指针或 AOB 失效，需重新定位并验证，不保证跨版本自动可用。</div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
+
+```
+
+`trainer/static/style.css`:
+
+```css
+:root{font-family:Inter,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;color:#1e2732;background:#f6f7f9;font-synthesis:none}*{box-sizing:border-box}body{margin:0}.shell{display:flex;min-height:100vh}.sidebar{width:254px;background:#fff;border-right:1px solid #e9ebef;display:flex;flex-direction:column;padding:30px 18px 20px;flex-shrink:0}.brand{display:flex;gap:12px;align-items:center;font-weight:800;letter-spacing:-.4px;font-size:16px;margin-bottom:52px}.brand small{display:block;font-size:9px;letter-spacing:2px;font-weight:600;color:#99a1ae;margin-top:5px}.logo{height:38px;width:38px;display:grid;place-items:center;background:#262c37;border-radius:12px;color:white;font-size:26px}.nav-title{color:#9aa4b2;letter-spacing:1.6px;font-size:10px;font-weight:800;margin:0 12px 14px}.game-nav{display:block;text-align:left;border:0;background:transparent;width:100%;padding:14px 12px;color:#6a7483;border-radius:10px;font-weight:600;cursor:pointer;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.game-nav.selected{background:#f0f2f5;color:#252b34}.game-nav:hover,.side-add:hover{background:#f2f4f7}.side-add{border:1px dashed #d6dce4;border-radius:10px;background:transparent;color:#747e8d;padding:12px;margin-top:12px;cursor:pointer;text-align:left}.side-bottom{margin-top:auto;padding:20px 7px 0;border-top:1px solid #e9ecf0;color:#8995a0;font-size:12px;display:flex;align-items:center;gap:8px}.dot{height:8px;width:8px;display:inline-block;border-radius:50%;background:#e4a24c}.dot.connected{background:#27a978}#refresh-bridge{margin-left:auto;border:0;background:transparent;color:#9aa4b2;font-size:20px;cursor:pointer}.main{flex:1;min-width:0}.topbar{height:78px;border-bottom:1px solid #ebedf0;display:flex;align-items:center;justify-content:space-between;padding:0 62px;background:#fbfcfd;font-size:13px;font-weight:600;color:#778291}.separator{padding:0 12px;color:#b7bec7}.edition{font-size:10px;letter-spacing:1.4px;color:#a3acb7}.main-body{max-width:1030px;margin:auto;padding:61px 62px 80px}.eyebrow{color:#a1aaba;font-size:11px;letter-spacing:2.1px;font-weight:800}h1{font-size:34px;letter-spacing:-1px;margin:16px 0 13px;font-weight:730}.intro{color:#8190a0;line-height:1.7;font-size:14px;margin:0 0 38px;max-width:760px}.panel{background:#fff;border:1px solid #e6eaf0;border-radius:17px;padding:27px 29px;box-shadow:0 8px 25px rgba(30,40,60,.025);margin-bottom:24px}.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.panel h2,.section-title h2{font-size:17px;margin:0 0 8px;letter-spacing:-.25px}.panel p,.section-title p{font-size:13px;color:#97a1af;margin:0;line-height:1.5}.fields{display:grid;gap:16px}.fields label{font-size:12px;font-weight:650;color:#616d7a;display:grid;gap:8px}input,select{height:43px;border:1px solid #e1e5ed;padding:0 14px;background:#fcfdfe;border-radius:9px;font:inherit;color:#2b3442;outline:none}input:focus,select:focus{border-color:#6a80a4;box-shadow:0 0 0 3px #edf2f9}button{font-family:inherit;font-weight:650}.primary{background:#303847;color:white;border:0;padding:12px 18px;cursor:pointer;border-radius:9px;justify-self:start}.primary:hover{background:#495565}.secondary{border:1px solid #dfe4ea;color:#4f5e6c;background:white;border-radius:9px;padding:11px 17px;cursor:pointer}.secondary:hover{background:#f6f8fa}button:disabled{cursor:not-allowed;opacity:.55}.hidden{display:none!important}.notice{border:1px solid #f2d4b6;background:#fff9ef;border-radius:10px;color:#8a561c;padding:14px 16px;font-size:13px;margin:0 0 22px;white-space:pre-wrap}.notice.ok{background:#eaf8f0;color:#247148;border-color:#c5e8d4}.hero{background:#fff;border:1px solid #e8ebf0;border-radius:17px;padding:24px 28px;display:flex;align-items:center;gap:20px;margin-bottom:36px}.hero-icon{display:grid;place-items:center;width:62px;height:62px;background:#f0f2f6;color:#667995;font-size:29px;border-radius:16px}.hero-label{font-size:10px;letter-spacing:1.7px;color:#a4aebb;font-weight:800}.hero h2{font-size:21px;margin:7px 0 5px}.process{color:#98a2b0;font-size:12px}.pill{margin-left:auto;border-radius:20px;color:#788598;background:#f2f5f8;font-size:11px;padding:8px 12px;white-space:nowrap}.pill.ready{background:#e8f5ed;color:#25815d}.section-title{margin-bottom:19px}.features{padding:8px 27px}.feature-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:19px 3px;border-bottom:1px solid #eff1f4}.feature-row:last-child{border-bottom:0}.feature-name{font-size:14px;font-weight:720}.feature-sub{font-size:11px;color:#98a3b0;margin-top:6px}.switch{width:48px;height:27px;border-radius:20px;border:0;background:#d8dde5;position:relative;cursor:pointer;transition:background .15s;flex-shrink:0}.switch:before{content:"";width:19px;height:19px;background:white;position:absolute;left:4px;top:4px;border-radius:50%;box-shadow:0 1px 3px #9fa7af;transition:transform .15s}.switch.active{background:#46ab86}.switch.active:before{transform:translateX(21px)}.empty{padding:30px 12px;text-align:center;color:#9ca7b4;font-size:13px}.capture{margin-top:38px}.guide{line-height:2.6;font-size:12px;color:#748191;border-radius:10px;background:#f8f9fb;padding:14px 18px}.guide-step{color:#9aa7b9;font-weight:800;letter-spacing:1px;margin-right:9px}.capture-actions{display:flex;align-items:center;gap:14px;margin:21px 0 0}.capture-actions span{color:#98a3af;font-size:12px}.capture .fields{margin-top:21px}.footnote{font-size:12px;color:#9ba5b2;line-height:1.8}.demo-check{border-color:#dce6e2}.demo-check .panel-head{margin-bottom:16px}.test-result{margin-top:16px;padding:16px;border-radius:9px;background:#fff7ed;color:#925a2e;white-space:pre-line;font-size:12px;line-height:1.8}.test-result.passed{background:#edf8f2;color:#24734c}@media(max-width:800px){.shell{display:block}.sidebar{width:100%;min-height:0;padding:17px;display:block;border-right:0;border-bottom:1px solid #e8ebf0}.brand{margin-bottom:17px}.nav-title,.side-bottom{display:none}.sidebar nav{display:flex;gap:6px;overflow-x:auto}.game-nav{width:auto;min-width:100px;flex:0 0 auto;margin:0}.side-add{margin-top:10px}.topbar{height:53px;padding:0 20px}.main-body{padding:40px 20px 60px}h1{font-size:27px}.panel{padding:21px}.hero{padding:18px;gap:12px}.hero-icon{width:43px;height:43px}.hero h2{font-size:17px}}
+```
+
+`trainer/store.py`:
+
+```py
+"""Durable game and trainer feature metadata, separated from runtime state."""
+from __future__ import annotations
+
+import sqlite3
+from contextlib import contextmanager
+import uuid
+from pathlib import Path
+
+
+class StoreError(ValueError):
+    pass
+
+
+def _as_dict(row):
+    return dict(row) if row is not None else None
+
+
+class Store:
+    def __init__(self, path: Path):
+        self.path = Path(path)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with self._connect() as db:
+            db.executescript("""
+                CREATE TABLE IF NOT EXISTS games (
+                    id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    exe TEXT NOT NULL COLLATE NOCASE UNIQUE,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE IF NOT EXISTS features (
+                    id TEXT PRIMARY KEY,
+                    game_id TEXT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+                    title TEXT NOT NULL,
+                    record_description TEXT NOT NULL,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(game_id, record_description)
+                );
+            """)
+
+    @contextmanager
+    def _connect(self):
+        db = sqlite3.connect(self.path, timeout=10)
+        try:
+            db.row_factory = sqlite3.Row
+            db.execute("PRAGMA foreign_keys = ON")
+            db.execute("PRAGMA busy_timeout = 10000")
+            with db:
+                yield db
+        finally:
+            db.close()
+
+    def add_game(self, name: str, exe: str):
+        name, exe = name.strip(), exe.strip()
+        if not name or len(name) > 128:
+            raise StoreError("游戏名称需要 1–128 个字符")
+        if not exe or len(exe) > 255 or "/" in exe or "\\" in exe or not exe.lower().endswith(".exe"):
+            raise StoreError("请输入游戏进程文件名，例如 game.exe（不能是完整路径）")
+        item_id = uuid.uuid4().hex
+        try:
+            with self._connect() as db:
+                db.execute("INSERT INTO games(id, name, exe) VALUES(?, ?, ?)", (item_id, name, exe))
+        except sqlite3.IntegrityError as exc:
+            raise StoreError("此 EXE 已经添加到游戏库") from exc
+        return self.game(item_id)
+
+    def game(self, game_id: str):
+        with self._connect() as db:
+            row = db.execute("SELECT * FROM games WHERE id = ?", (game_id,)).fetchone()
+        if not row:
+            raise StoreError("未找到游戏")
+        return _as_dict(row)
+
+    def games(self):
+        with self._connect() as db:
+            rows = db.execute("SELECT * FROM games ORDER BY created_at, rowid").fetchall()
+        return list(map(_as_dict, rows))
+
+    def add_feature(self, game_id: str, title: str, record_description: str):
+        title, record_description = title.strip(), record_description.strip()
+        self.game(game_id)
+        if not title or len(title) > 128 or not record_description or len(record_description) > 255:
+            raise StoreError("请提供功能名称与准确的 CE 记录描述")
+        item_id = uuid.uuid4().hex
+        try:
+            with self._connect() as db:
+                db.execute(
+                    "INSERT INTO features(id, game_id, title, record_description) VALUES(?, ?, ?, ?)",
+                    (item_id, game_id, title, record_description),
+                )
+        except sqlite3.IntegrityError as exc:
+            raise StoreError("该 CE 记录已经保存为按钮") from exc
+        return self.feature(item_id)
+
+    def feature(self, feature_id: str):
+        with self._connect() as db:
+            row = db.execute("SELECT * FROM features WHERE id = ?", (feature_id,)).fetchone()
+        if not row:
+            raise StoreError("未找到修改功能")
+        return _as_dict(row)
+
+    def features(self, game_id: str):
+        with self._connect() as db:
+            rows = db.execute(
+                "SELECT * FROM features WHERE game_id = ? ORDER BY created_at, rowid",
+                (game_id,),
+            ).fetchall()
+        return list(map(_as_dict, rows))
+
+```
+
+`trainer/web.py`:
+
+```py
+"""Localhost-only HTTP UI. The browser never supplies raw CE commands or Lua."""
+from __future__ import annotations
+
+import json
+import mimetypes
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
+
+from .bridge import BridgeError
+from .diagnostics import DiagnosticError
+from .service import TrainerService
+from .store import StoreError
+
+STATIC = Path(__file__).with_name("static")
+MAX_BODY = 64 * 1024
+
+
+def make_handler(service: TrainerService):
+    class Handler(BaseHTTPRequestHandler):
+        server_version = "AITrainer/0.1"
+
+        def _headers(self, status: int, content_type: str):
+            self.send_response(status)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("X-Frame-Options", "DENY")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header(
+                "Content-Security-Policy",
+                "default-src 'none'; script-src 'self'; style-src 'self'; "
+                "connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'self'",
+            )
+
+        def _json(self, status, payload):
+            body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+            self._headers(status, "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def _same_origin(self):
+            allowed = {"127.0.0.1:" + str(self.server.server_port),
+                       "localhost:" + str(self.server.server_port)}
+            if self.headers.get("Host", "") not in allowed:
+                return False
+            origin = self.headers.get("Origin")
+            return origin is None or origin in {"http://" + x for x in allowed}
+
+        def _route(self, path, payload):
+            if path == "/api/games":
+                return service.store.add_game(payload["name"], payload["exe"])
+            if path == "/api/features/capture":
+                return service.capture(
+                    payload["game_id"], payload["title"], payload["record_description"]
+                )
+            if path == "/api/diagnostics/self-test":
+                return service.selftest()
+            if path == "/api/features/toggle":
+                return service.toggle(payload["feature_id"], payload["enabled"])
+            raise StoreError("未知操作")
+
+        def do_GET(self):
+            if not self._same_origin():
+                return self._json(403, {"error": "Invalid host or origin"})
+            parsed = urlsplit(self.path)
+            try:
+                if parsed.path == "/api/state":
+                    return self._json(200, service.snapshot())
+                if parsed.path == "/api/bridge":
+                    return self._json(200, service.status())
+                if parsed.path == "/api/records":
+                    game_id = parse_qs(parsed.query).get("game_id", [""])[0]
+                    return self._json(200, {"records": service.records(game_id)})
+                if parsed.path == "/api/health":
+                    return self._json(200, {"ok": True})
+                assets = {"/": "index.html", "/app.js": "app.js", "/style.css": "style.css"}
+                filename = assets.get(parsed.path)
+                if filename:
+                    data = (STATIC / filename).read_bytes()
+                    mime = {"index.html": "text/html", "app.js": "application/javascript",
+                            "style.css": "text/css"}[filename]
+                    self._headers(200, mime + "; charset=utf-8")
+                    self.send_header("Content-Length", str(len(data)))
+                    self.end_headers()
+                    self.wfile.write(data)
+                    return
+                return self._json(404, {"error": "Not found"})
+            except (StoreError, DiagnosticError, ValueError, KeyError, TypeError) as exc:
+                return self._json(400, {"error": str(exc)})
+            except BridgeError as exc:
+                return self._json(502, {"error": str(exc)})
+
+        def do_POST(self):
+            if not self._same_origin():
+                return self._json(403, {"error": "Invalid host or origin"})
+            if self.headers.get("Content-Type", "").split(";")[0].strip() != "application/json":
+                return self._json(415, {"error": "Expected application/json"})
+            try:
+                size = int(self.headers.get("Content-Length", "-1"))
+                if size < 0 or size > MAX_BODY:
+                    return self._json(413, {"error": "Invalid request size"})
+                payload = json.loads(self.rfile.read(size))
+                if not isinstance(payload, dict):
+                    raise ValueError("JSON body must be an object")
+                result = self._route(urlsplit(self.path).path, payload)
+                return self._json(200, result)
+            except (StoreError, DiagnosticError, ValueError, KeyError, TypeError) as exc:
+                return self._json(400, {"error": str(exc)})
+            except BridgeError as exc:
+                return self._json(502, {"error": str(exc)})
+
+    return Handler
+
+
+def serve(service: TrainerService, port: int = 8765):
+    server = ThreadingHTTPServer(("127.0.0.1", port), make_handler(service))
+    print("AI Game Trainer ready: http://127.0.0.1:" + str(server.server_port))
+    return server
+
+```

@@ -1,0 +1,869 @@
+Project Path: arc_essensha_cs2-anti-cheat-ml-research_3rcf65gu
+
+Source Tree:
+
+```txt
+arc_essensha_cs2-anti-cheat-ml-research_3rcf65gu
+├── Adversarial_Adaptation_and_Concept_Drift.ipynb
+├── Anti_Cheating_(Exisiting_vs_New_Model).ipynb
+├── Anti_Cheating_Skill_Parsing_and_Productionalization.ipynb
+├── Counter_Strike_2_Cheat_Detection_Dataset.ipynb
+├── Graph_Based_Coordinated_Cheating_(Nodes_and_Edges).ipynb
+├── Individual_and_Coordinated_Cheating_Simulation.ipynb
+├── README.md
+├── Real_Time_Production_Detection.ipynb
+├── docs
+│   ├── ARCHITECTURE.md
+│   └── EVALUATION_AND_LIMITATIONS.md
+├── generate_synthetic_data.py
+├── requirements.txt
+├── run_baseline.py
+└── test_baseline.py
+
+```
+
+`Adversarial_Adaptation_and_Concept_Drift.ipynb`:
+
+```ipynb
+Jupyter Notebook Summary:
+Total cells: 19 (7 code, 12 markdown, 0 raw)
+
+Code Cell #1:
+```python
+import pandas as pd
+
+file_path = "/srv/synthetic_anticheat_telemetry.csv"
+
+# Reload and overwrite the old DataFrame
+df = pd.read_csv(file_path, skiprows=1, index_col=False)
+
+print("Shape:", df.shape)
+print("Columns:", df.columns.tolist())
+display(df.head(5))
+```
+
+Code Cell #2:
+```python
+import numpy as np
+import pandas as pd
+
+rng = np.random.default_rng(42)
+
+# Legitimate players remain relatively stable
+legit_before = rng.normal(250, 35, 1000)
+legit_after = rng.normal(250, 35, 1000)
+
+# Cheaters adapt to resemble legitimate players
+cheat_before = rng.normal(120, 25, 200)
+cheat_after = rng.normal(215, 30, 200)
+
+df = pd.DataFrame({
+    "period": ["before"] * 1200 + ["after"] * 1200,
+    "reaction_ms": np.concatenate([
+        legit_before, cheat_before,
+        legit_after, cheat_after
+    ]),
+    "is_cheater": [0] * 1000 + [1] * 200 +
+                  [0] * 1000 + [1] * 200
+})
+
+print(
+    df.groupby(["period", "is_cheater"])["reaction_ms"]
+      .mean()
+      .round(1)
+)
+```
+
+Code Cell #3:
+```python
+from sklearn.metrics import roc_auc_score
+
+for period in ["before", "after"]:
+    subset = df[df["period"] == period]
+
+    # Lower reaction time = higher cheating risk
+    risk_score = -subset["reaction_ms"]
+
+    auc = roc_auc_score(
+        subset["is_cheater"],
+        risk_score
+    )
+
+    print(f"{period}: ROC-AUC = {auc:.3f}")
+```
+
+... [4 more code cells omitted]
+
+```
+
+`Anti_Cheating_(Exisiting_vs_New_Model).ipynb`:
+
+```ipynb
+Jupyter Notebook Summary:
+Total cells: 36 (16 code, 20 markdown, 0 raw)
+
+Code Cell #1:
+```python
+import pandas as pd
+
+file_path = "/srv/synthetic_anticheat_telemetry.csv"
+
+# Reload and overwrite the old DataFrame
+df = pd.read_csv(file_path, skiprows=1, index_col=False)
+
+print("Shape:", df.shape)
+print("Columns:", df.columns.tolist())
+display(df.head(5))
+```
+
+Code Cell #2:
+```python
+
+import numpy as np
+import pandas as pd
+
+rng = np.random.default_rng(42)
+
+n_players = 100_000
+
+players = pd.DataFrame({
+    "player_id": np.arange(n_players),
+    "skill_proxy": rng.uniform(0, 1, n_players),
+    "tenure_days": rng.integers(1, 1500, n_players),
+    "region": rng.choice(
+        ["NA", "EU", "KR", "BR"],
+        size=n_players
+    )
+})
+
+# Hidden synthetic ground truth
+players["true_cheating"] = rng.binomial(
+    1, 0.025, n_players
+)
+
+# Existing detector is more likely to flag
+# cheating players, but misses some.
+flag_probability = np.where(
+    players["true_cheating"] == 1,
+    0.70,
+    0.035
+)
+
+players["old_model_flag"] = (
+    rng.random(n_players) < flag_probability
+).astype(int)
+
+# Only flagged players receive investigation labels
+players["reviewed"] = players["old_model_flag"]
+
+players["observed_label"] = np.where(
+    players["reviewed"] == 1,
+    players["true_cheating"],
+    np.nan
+)
+
+print("Total players:", len(players))
+print("True cheating prevalence:",
+      round(players["true_cheating"].mean(), 4))
+print("Flagged players:",
+      players["old_model_flag"].sum())
+print("Reviewed players:",
+      players["reviewed"].sum())
+print("Unlabeled players:",
+      players["observed_label"].isna().sum())
+
+print("\nObserved label counts:")
+print(players["observed_label"].value_counts(dropna=False))
+```
+
+Code Cell #3:
+```python
+
+population_prevalence = players["true_cheating"].mean()
+
+reviewed_players = players[players["reviewed"] == 1]
+
+reviewed_prevalence = reviewed_players["observed_label"].mean()
+
+print("Population prevalence:",
+      round(population_prevalence * 100, 2), "%")
+
+print("Reviewed prevalence:",
+      round(reviewed_prevalence * 100, 2), "%")
+
+print("Prevalence ratio:",
+      round(reviewed_prevalence / population_prevalence, 2))
+```
+
+... [13 more code cells omitted]
+
+```
+
+`Anti_Cheating_Skill_Parsing_and_Productionalization.ipynb`:
+
+```ipynb
+Jupyter Notebook Summary:
+Total cells: 92 (42 code, 50 markdown, 0 raw)
+
+Code Cell #1:
+```python
+
+import pandas as pd
+
+df = pd.read_csv("/srv/synthetic_anticheat_telemetry.csv")
+
+print("Dataset shape:", df.shape)
+display(df.head(10))
+```
+
+Code Cell #2:
+```python
+#Here where seeing shape and rows, columns, type of data, Missing value (which is 0), with nearly 12000 of duplicated rows, and random state to select certain probabilitywe see the shape and rows, columns, type of data, Missing value (which is 0), with nearly 12000 of duplicated rows, and random state to select certain probabilityHere, seeing shape and rows, columns, type of data, Missing value (which is 0), with nearly 12000 of duplicated rows, and random state to select certain probabilitywe see the shape and rows, columns, type of data, Missing value (which is 0), with nearly 12000 of duplicated rows, and random state to select certain probability#abilitywe see the shape and rows, columns, type of data, Missing value (which is 0), with nearly 12000 of duplicated rows, and random state to select certain probabilityHere, seeing shape and rows, columns, type of data, Missing value (which is 0), with nearly 12000 of duplicated rows, and random state to select certain probabilitywe see the shape and rows, columns, type of data, Missing value (which is 0), with nearly 12000 of duplicated rows, and random state to select certain probability
+#a reaction-time column could contain negative values, a player could appear in multiple matches, and a suspicious-behavior label might accidentally leak into the training features. Each creates a different modeling risk
+import pandas as pd
+
+# Basic dataset structure
+print("Shape:", df.shape)
+
+print("\nColumn names:")
+print(df.columns.tolist())
+
+print("\nData types:")
+print(df.dtypes)
+
+print("\nMissing values:")
+display(df.isna().sum().to_frame("missing_count"))
+
+print("\nDuplicate rows:")
+print(df.duplicated().sum())
+
+print("\nSample observations:")
+display(df.sample(min(10, len(df)), random_state=42))
+```
+
+Code Cell #3:
+```python
+
+file_path = "/srv/synthetic_anticheat_telemetry.csv"
+
+with open(file_path, "r", encoding="utf-8-sig") as f:
+    for _ in range(3):
+        print(repr(f.readline()))
+```
+
+... [39 more code cells omitted]
+
+```
+
+`Counter_Strike_2_Cheat_Detection_Dataset.ipynb`:
+
+```ipynb
+Jupyter Notebook Summary:
+Total cells: 51 (30 code, 21 markdown, 0 raw)
+
+Code Cell #1:
+```python
+import pandas as pd
+
+# Load your CSV from the srv folder
+events = pd.read_csv("/srv/Counter Strike cheating.csv")
+
+# Confirm it loaded
+print("Dataset shape:", events.shape)
+print("\nColumns:")
+print(events.columns.tolist())
+
+# Preview the first five rows
+display(events.head())
+```
+
+Code Cell #2:
+```python
+import pandas as pd
+
+# Skip the extra title row added by Numbers
+df = pd.read_csv(
+    "/srv/Counter Strike cheating.csv",
+    skiprows=2
+)
+
+print("Dataset shape:", df.shape)
+print("Columns:", df.columns.tolist()[:10])
+
+display(df.head())
+```
+
+Code Cell #3:
+```python
+import pandas as pd
+
+# Inspect the raw CSV structure
+preview = pd.read_csv(
+    "/srv/Counter Strike cheating.csv",
+    header=None,
+    nrows=6
+)
+
+display(preview.iloc[:, :10])
+```
+
+... [27 more code cells omitted]
+
+```
+
+`Graph_Based_Coordinated_Cheating_(Nodes_and_Edges).ipynb`:
+
+```ipynb
+Jupyter Notebook Summary:
+Total cells: 16 (10 code, 6 markdown, 0 raw)
+
+Code Cell #1:
+```python
+import pandas as pd
+
+file_path = "/srv/synthetic_anticheat_telemetry.csv"
+
+# Reload and overwrite the old DataFrame
+df = pd.read_csv(file_path, skiprows=1, index_col=False)
+
+print("Shape:", df.shape)
+print("Columns:", df.columns.tolist())
+display(df.head(5))
+```
+
+Code Cell #2:
+```python
+
+import pandas as pd
+import networkx as nx
+
+# Synthetic player relationships
+edges = pd.DataFrame({
+    "player_a": ["A", "A", "B", "D", "E", "F"],
+    "player_b": ["B", "C", "C", "E", "F", "G"],
+    "games_together": [42, 38, 45, 12, 8, 5]
+})
+
+G = nx.from_pandas_edgelist(
+    edges,
+    source="player_a",
+    target="player_b",
+    edge_attr="games_together"
+)
+
+print("Players:", G.number_of_nodes())
+print("Connections:", G.number_of_edges())
+
+for player in G.nodes:
+    print(
+        player,
+        "degree:",
+        G.degree(player)
+    )
+```
+
+Code Cell #3:
+```python
+for player in G.nodes:
+    print(
+        player,
+        G.degree(player, weight="games_together")
+    )
+```
+
+... [7 more code cells omitted]
+
+```
+
+`Individual_and_Coordinated_Cheating_Simulation.ipynb`:
+
+```ipynb
+Jupyter Notebook Summary:
+Total cells: 6 (4 code, 2 markdown, 0 raw)
+
+Code Cell #1:
+```python
+import pandas as pd
+
+file_path = "/srv/synthetic_anticheat_telemetry.csv"
+
+# Reload and overwrite the old DataFrame
+df = pd.read_csv(file_path, skiprows=1, index_col=False)
+
+print("Shape:", df.shape)
+print("Columns:", df.columns.tolist())
+display(df.head(5))
+```
+
+Code Cell #2:
+```python
+import pandas as pd
+
+events = pd.DataFrame({
+    "player_id": ["A", "A", "A", "B", "B", "B"],
+    "reaction_time_ms": [110, 112, 108, 180, 250, 320]
+})
+
+features = events.groupby("player_id")["reaction_time_ms"].agg(
+    ["mean", "std"]
+)
+
+print(features)
+```
+
+Code Cell #3:
+```python
+features["reaction_consistency"] = 1 / (features["std"] + 1)
+
+print(features)
+```
+
+... [1 more code cells omitted]
+
+```
+
+`README.md`:
+
+```md
+# Counter-Strike 2 Anti-Cheat ML Research
+
+**Independent applied machine learning research | Synthetic and illustrative data | Not a deployed anti-cheat system**
+
+This repository explores how to design, evaluate, and operate anti-cheat detection in a multiplayer game setting. It examines individual and coordinated behavior, label-selection bias, concept drift, skill-segment fairness, human-review capacity, and failure handling. Counter-Strike 2 provides the *gameplay framing*; this is **not Valve telemetry, VAC integration, or a production service**.
+
+## The player problem
+
+An anti-cheat detector must surface suspicious behavior without treating exceptional legitimate skill as cheating. False positives can damage player trust, and a high offline AUC does not automatically produce a safe enforcement system. The proposed decision process therefore separates **risk scoring**, **investigative review**, and **any enforcement action**. Model scores are investigative signals, not proof.
+
+## What is implemented vs. proposed
+
+| Component | Status | Evidence |
+| --- | --- | --- |
+| Synthetic gameplay-feature exploration and temporal holdout | Notebook experiments | [Skill parsing and productionalization](Anti_Cheating_Skill_Parsing_and_Productionalization.ipynb) |
+| Logistic regression and Isolation Forest comparison | Notebook experiments | [Skill parsing and productionalization](Anti_Cheating_Skill_Parsing_and_Productionalization.ipynb) |
+| Probability calibration, threshold and review-budget analysis | Notebook experiments | [Existing vs. new model](Anti_Cheating_(Exisiting_vs_New_Model).ipynb) |
+| Concept drift and simulated model-health decisions | Notebook experiments | [Adversarial adaptation](Adversarial_Adaptation_and_Concept_Drift.ipynb) |
+| Player-interaction graphs and graph-informed scoring | Small synthetic examples | [Graph-based coordinated cheating](Graph_Based_Coordinated_Cheating_(Nodes_and_Edges).ipynb) |
+| Event throughput, queue backlogs, windowing and review capacity | Arithmetic / illustrative simulations | [Real-time production detection](Real_Time_Production_Detection.ipynb) |
+| Real-time deployed scoring API, streaming infrastructure, anti-cheat enforcement | **Not implemented or verified** | [Architecture proposal](docs/ARCHITECTURE.md) |
+
+## Notebook guide
+
+1. [Counter-Strike 2 Cheat Detection Dataset](Counter_Strike_2_Cheat_Detection_Dataset.ipynb) — exploratory event-level features and a small labeled-player example. Some cells reference local files not included here.
+2. [Anti-Cheating: Existing vs. New Model](Anti_Cheating_(Exisiting_vs_New_Model).ipynb) — synthetic populations, reaction-time baseline, multifeature classifiers, investigation-label bias and calibration.
+3. [Anti-Cheating: Skill Parsing and Productionalization](Anti_Cheating_Skill_Parsing_and_Productionalization.ipynb) — 12,000-row synthetic dataset, temporal validation, logistic regression, Isolation Forest, thresholds, skill segments, scoring fallbacks and simulated latency.
+4. [Adversarial Adaptation and Concept Drift](Adversarial_Adaptation_and_Concept_Drift.ipynb) — before/after drift scenario, changing precision/recall, selective review labels and health gates.
+5. [Graph-Based Coordinated Cheating](Graph_Based_Coordinated_Cheating_(Nodes_and_Edges).ipynb) — NetworkX graph construction, clustering, recency weighting and illustrative graph-enhanced scoring.
+6. [Individual and Coordinated Cheating Simulation](Individual_and_Coordinated_Cheating_Simulation.ipynb) — small reaction-consistency examples and segment-level false-positive calculations.
+7. [Real-Time Production Detection](Real_Time_Production_Detection.ipynb) — **simulation of production considerations**, not a running production service; throughput, backlog, windows and review metrics.
+
+The repository currently contains **seven** Jupyter notebooks. Some notebook names use “production” to describe a *design exercise*, not a deployed application.
+
+## Selected results and how to interpret them
+
+The following are **saved notebook outputs** from synthetic or illustrative exercises, not measurements of a live game system. They have **not been independently rerun as part of this documentation update**.
+
+| Exercise | Saved output | Interpretation |
+| --- | --- | --- |
+| Skill-parsing notebook: scoring latency | Mean **2.608 ms**, P95 **6.1 ms**, P99 **10.059 ms** | Local simulation/benchmark; not an end-to-end service latency SLO or load test |
+| Skill-parsing notebook: request status | **94.4% success**, **3.3% insufficient telemetry**, **2.3% model unavailable** | Simulated outcomes over 1,000 requests, not real uptime |
+| Existing vs. new model: reviewed-only training | ROC-AUC **0.9852**, Brier **0.0328** | Synthetic label-selection experiment |
+| Existing vs. new model: representative training | ROC-AUC **0.9849**, Brier **0.0097** | Synthetic experiment suggests better probability calibration with representative labels |
+| Concept drift: before / after | ROC-AUC **0.998 → 0.742**; recall **0.985 → 0.120** | Constructed drift scenario showing a fixed detector degrading |
+| Graph example: Precision@100 | **65% vs. 82%** | **Illustrative hard-coded comparison**, not a measured improvement from a trained graph model |
+| Real-time detection example | Precision **75%**, recall **60%**, FPR **0.62%** | Calculated from assumed confusion-matrix counts, not live detection results |
+
+**Why these metrics matter:** ROC-AUC/PR-AUC assess ranking under class imbalance; precision and recall at an investigation threshold reflect review cost; Brier score and calibration reveal whether scores can support decisions; false-positive rates by player-skill segment help identify disparate player impact. AUC alone is insufficient.
+
+For further verification, see [evaluation and limitations](docs/EVALUATION_AND_LIMITATIONS.md).
+
+## Proposed system architecture
+
+See the [architecture diagram and operational decision path](docs/ARCHITECTURE.md).
+
+At a high level: game-event telemetry → validated feature windows → candidate detectors → calibrated risk scoring → review queue → human adjudication and delayed labels → monitoring and controlled retraining. Missing telemetry or model failure should **abstain or fall back safely**, not trigger automatic punishment.
+
+## Reproducing the research
+
+The notebooks are exploratory and **not yet a fully reproducible one-command pipeline**. Several read files from absolute paths such as `/srv/synthetic_anticheat_telemetry.csv` or `/srv/Counter Strike cheating.csv`; those source files are not included in this repository. Other cells generate their own synthetic examples. Open a notebook in Jupyter or Colab, inspect its dependencies and required inputs, and run applicable cells in order. Do not assume every notebook will run from a clean checkout.
+
+Typical Python packages used across the notebooks include `pandas`, `numpy`, `scikit-learn`, `matplotlib`, and `networkx`. No pinned environment or CI verification is currently provided.
+
+## Responsible use and limitations
+
+- All modeled labels and gameplay scenarios are synthetic, illustrative, or locally supplied; none should be interpreted as verified player cheating.
+- Synthetic data can encode unrealistic separability, label bias, and temporal or match-identifier inconsistencies; high model scores may not transfer to real gameplay.
+- Some analyses use assumed counts or hand-entered outcomes to illustrate trade-offs. These are identified above.
+- A prototype score must **not** automatically ban players. Review capacity, appeal processes, evidence quality, segment fairness and privacy controls are central to any real deployment.
+- Proposed streaming, serving, latency SLOs, canary rollout, rollback and production monitoring are architectural considerations, not validated deployments.
+
+**Author:** [Essence Lynn Wilson, PhD](https://github.com/essensha) · Independent research portfolio.
+
+## Clean-checkout reproducible baseline (new)
+
+A standalone, **fully synthetic** experiment is now included alongside the original exploratory notebooks. It generates its own data, applies a chronological train/test split, fits logistic regression and Isolation Forest, and exports metrics plus skill-segment false-positive rates. The generator deliberately uses **new synthetic data**, so its metrics **will not match** the historical notebook outputs above.
+
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\\Scripts\\activate
+pip install -r requirements.txt
+python generate_synthetic_data.py
+python run_baseline.py
+python -m unittest test_baseline.py
+```
+
+Outputs are written to `outputs/metrics.json` and `outputs/predictions.csv`; generated data is written to `data/synthetic_anticheat_telemetry.csv`. Both directories are ignored by Git. Use `--rows` and `--seed` on the generator and `--threshold` on the baseline to explore trade-offs.
+
+**Scope:** this is an offline research baseline, not a streaming system or enforcement model. The original notebooks remain unchanged and may still require local files. The commands were executed successfully in a separate Python environment with NumPy 2.3.5, pandas 2.2.3, and scikit-learn 1.8.0; both unit tests passed. This verifies the standalone baseline on that environment, not compatibility with every dependency version or operating system.
+
+### Verified standalone run (seed 42, 12,000 rows)
+
+A separate execution generated **9,667 training rows** and **2,333 temporal test rows** (cutoff day 48). Saved console metrics from that execution:
+
+| Metric | Result |
+| --- | ---: |
+| Logistic regression ROC-AUC | 0.999994 |
+| Logistic regression average precision | 0.999900 |
+| Logistic regression Brier score | 0.000647 |
+| Logistic regression precision at threshold 0.70 | 1.0000 |
+| Logistic regression recall at threshold 0.70 | 0.9787 |
+| Isolation Forest ROC-AUC | 0.990523 |
+| Isolation Forest average precision | 0.894990 |
+| Automated tests | 2 passed |
+
+**Interpretation:** The generated label patterns are deliberately strong and highly separable. Near-perfect metrics, and the observed zero false positives across skill groups in this run, **do not establish real-world detection performance or fairness**. This baseline validates code execution and evaluation wiring, not deployment readiness.
+
+```
+
+`Real_Time_Production_Detection.ipynb`:
+
+```ipynb
+Jupyter Notebook Summary:
+Total cells: 25 (10 code, 15 markdown, 0 raw)
+
+Code Cell #1:
+```python
+import pandas as pd
+
+file_path = "/srv/synthetic_anticheat_telemetry.csv"
+
+# Reload and overwrite the old DataFrame
+df = pd.read_csv(file_path, skiprows=1, index_col=False)
+
+print("Shape:", df.shape)
+print("Columns:", df.columns.tolist())
+display(df.head(5))
+```
+
+Code Cell #2:
+```python
+daily_events = 12_000_000
+seconds_per_day = 24 * 60 * 60
+
+average_eps = daily_events / seconds_per_day
+peak_eps = average_eps * 5
+
+print(f"Peak events/sec: {peak_eps:.1f}")
+```
+
+Code Cell #3:
+```python
+import math
+
+peak_eps = 694.4
+worker_capacity = 100
+buffer = 1.30
+
+required_workers = math.ceil(
+    peak_eps * buffer / worker_capacity
+)
+
+print("Required workers:", required_workers)
+```
+
+... [7 more code cells omitted]
+
+```
+
+`docs/ARCHITECTURE.md`:
+
+```md
+# Proposed Anti-Cheat ML Architecture
+
+> **Design proposal, not a deployed system.** The notebooks simulate selected modeling and operational decisions; they do not implement the full diagram.
+
+```mermaid
+flowchart TD
+    A[Gameplay events / match telemetry] --> B[Schema validation and privacy controls]
+    B --> C[Event windows and feature engineering]
+    C --> D[Behavioral classifier]
+    C --> E[Anomaly detector]
+    C --> F[Player-interaction graph features]
+    D --> G[Score calibration and policy guardrails]
+    E --> G
+    F --> G
+    G --> H{Sufficient telemetry and healthy models?}
+    H -->|Yes| I[Rank investigative candidates]
+    H -->|No| J[Abstain / safe fallback and log reason]
+    I --> K[Capacity-limited human review]
+    K --> L[Adjudication and delayed labels]
+    L --> M[Offline evaluation, drift and fairness monitoring]
+    J --> M
+    M --> N[Retraining and controlled rollout proposal]
+    N -.-> D
+```
+
+## Proposed data and inference path
+
+1. **Ingest and validate:** match and player event streams require event-time ordering, schema checks, privacy minimization, deduplication, and late-event handling. These are design requirements, not features proven by this repository.
+2. **Build features:** compute rolling reaction-time distributions, timing regularity, target accuracy and repeated-action signals; partition by match/time and avoid using post-decision information. Graph features may summarize co-play links, recency and clustering.
+3. **Score:** use a supervised baseline alongside anomaly signals. Compare models using time-based holdouts, PR-AUC, calibration, and review-budget precision. A combined score requires independent validation before adoption.
+4. **Decision policy:** prioritize cases for review under a capacity budget; use reason codes and evidence provenance. Do not equate a risk score with guilt.
+5. **Fail safely:** on missing required features, return `insufficient_telemetry`; on unavailable models, return `model_unavailable` and use a validated fallback or abstain. Normal gameplay continues.
+6. **Monitor:** check input drift, label delay/selection bias, calibration, false positives by skill segment, review backlog, inference errors, and patch-related shifts. Investigate before retraining.
+7. **Roll out cautiously:** proposed offline backtesting → shadow scoring → limited canary → A/B or staged evaluation, with rollback triggers and documented ownership. None of these release stages are demonstrated as deployed here.
+
+## Latency and throughput caveats
+
+The skill-parsing notebook reports **simulated/local scoring measurements** (P99 10.059 ms), not network, serialization, feature-store, queue, or end-to-end production latency. The real-time notebook performs **illustrative throughput and backlog calculations** using assumed traffic and worker capacity; it does not load-test a deployed streaming service. Real deployment would need representative hardware, concurrent traffic, feature freshness measurements, P95/P99 service SLOs, load shedding, and disaster recovery tests.
+
+## Threats to validity and player trust
+
+High-skill legitimate players may resemble scripted behavior; cheats adapt after detection; review labels are missing not at random; graph connections can reflect innocent teammates; patch changes may shift features. A safe system requires careful segment evaluation, independent labels, human adjudication, privacy and appeals, not just higher detection rates.
+
+```
+
+`docs/EVALUATION_AND_LIMITATIONS.md`:
+
+```md
+# Evaluation Notes and Limitations
+
+This document separates **saved notebook outputs**, **illustrative inputs**, and **unverified production claims**. Values below were inspected from committed notebook outputs; they were not independently rerun for this documentation update.
+
+## Experiment groups
+
+| Notebook | Evaluation evidence | Caveat |
+| --- | --- | --- |
+| Skill Parsing and Productionalization | 12,000-row synthetic dataset; chronological split; logistic regression and Isolation Forest; precision/recall, ROC-AUC/PR-AUC, calibration, skill segments, latency and fallback simulations | Local data file is not committed; temporal split may include synthetic match-ID inconsistencies; latency is not end-to-end service latency |
+| Existing vs. New Model | Synthetic 100,000-player population; reviewed-only vs. representative-label training; ROC-AUC 0.9852 vs. 0.9849; Brier 0.0328 vs. 0.0097; review capacity 200 | Illustrates label-selection bias; synthetic labels and assumptions limit external validity |
+| Adversarial Adaptation | Constructed before/after scenario: ROC-AUC 0.998 to 0.742; fixed-threshold recall 0.985 to 0.120 | Scenario-based drift demonstration, not observed live adversarial adaptation |
+| Graph-Based Coordinated Cheating | Small NetworkX graph, clustering, time-decay examples | Precision@100 65% vs. 82% is entered as assumed counts; **not** a validated graph-model lift |
+| Real-Time Production Detection | Arithmetic throughput/backlog scenarios and confusion-matrix calculations | No deployed service, real-time ingestion system, load test or production enforcement |
+| Counter-Strike 2 Cheat Detection Dataset | Event-level exploration and small labeled-player example | Some inputs are absent and cells may not run cleanly from checkout |
+
+## Responsible evaluation checklist
+
+- [x] Demonstrate temporal validation in a synthetic experiment
+- [x] Compare supervised and anomaly approaches
+- [x] Explore class imbalance, thresholds and review capacity
+- [x] Examine calibration and selective investigation labels
+- [x] Explore skill-segment false-positive risks
+- [x] Demonstrate missing-feature and model-unavailable statuses
+- [ ] Provide versioned, redistributable data generation and clean-run instructions
+- [ ] Independently rerun and snapshot all reported metrics in CI
+- [ ] Establish validated end-to-end latency SLOs under load
+- [ ] Evaluate graph lift on independent, non-hard-coded labels
+- [ ] Deploy a monitored scoring service with rollback and audit trail
+- [ ] Validate fairness and enforcement safeguards with real, consented, governed data
+
+## Interpretation
+
+**Discrimination is not calibration.** Similar ROC-AUC can coexist with materially different probability reliability. **Precision at a review budget is not enforcement precision.** A flagged case is not a confirmed cheater. **Simulated P99 is not a production SLA.** Local scoring omits ingestion, network, feature freshness, serialization, and concurrency. **Skill fairness matters.** Review segment-level false positives before selecting thresholds.
+
+No results here establish a production-ready CS2 anti-cheat system.
+
+```
+
+`generate_synthetic_data.py`:
+
+```py
+"""Generate reproducible, fully synthetic CS2-inspired player telemetry.
+
+Not Valve data. Labels encode planted patterns, not confirmed cheating.
+"""
+import argparse
+from pathlib import Path
+import numpy as np
+import pandas as pd
+
+COLUMNS = ["player_id", "match_id", "match_day", "skill_proxy", "actions_per_min",
+           "median_reaction_ms", "timing_regularities", "target_accuracy",
+           "repeated_action_ratio", "synthetic_pattern", "is_suspicious_simulated"]
+
+def generate(n=12000, seed=42, days=60):
+    if n < 100 or days < 10:
+        raise ValueError("n must be >= 100 and days >= 10")
+    rng = np.random.default_rng(seed)
+    day = rng.integers(0, days, n)
+    skill = rng.uniform(0, 1, n)
+    suspicious = rng.binomial(1, 0.065, n)
+    style = np.where(suspicious == 0, "none",
+                     np.where(rng.random(n) < 0.5, "fast_reaction", "precision_pattern"))
+    reaction = 290 - 72 * skill - 65 * (style == "fast_reaction") - 18 * (style == "precision_pattern") + rng.normal(0, 22, n)
+    accuracy = np.clip(0.27 + 0.36 * skill + 0.23 * (style == "precision_pattern") + 0.12 * (style == "fast_reaction") + rng.normal(0, 0.07, n), 0, 1)
+    regularity = np.clip(0.23 + 0.17 * skill + 0.38 * suspicious + rng.normal(0, 0.11, n), 0, 1)
+    repeated = np.clip(0.13 + 0.09 * skill + 0.31 * suspicious + rng.normal(0, 0.09, n), 0, 1)
+    apm = np.maximum(1, 90 + 90 * skill + 40 * suspicious + rng.normal(0, 25, n))
+    return pd.DataFrame({
+        "player_id": np.arange(100000, 100000 + n),
+        "match_id": np.arange(200000, 200000 + n),
+        "match_day": day,
+        "skill_proxy": skill.round(5),
+        "actions_per_min": apm.round(3),
+        "median_reaction_ms": reaction.clip(50, 600).round(3),
+        "timing_regularities": regularity.round(5),
+        "target_accuracy": accuracy.round(5),
+        "repeated_action_ratio": repeated.round(5),
+        "synthetic_pattern": style,
+        "is_suspicious_simulated": suspicious
+    })[COLUMNS]
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--rows", type=int, default=12000)
+    p.add_argument("--seed", type=int, default=42)
+    p.add_argument("--output", default="data/synthetic_anticheat_telemetry.csv")
+    a = p.parse_args()
+    out = Path(a.output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    df = generate(a.rows, a.seed)
+    df.to_csv(out, index=False)
+    print(f"Generated {len(df)} synthetic rows to {out}; suspicious rate={df.is_suspicious_simulated.mean():.3f}")
+
+```
+
+`requirements.txt`:
+
+```txt
+numpy>=1.24,<3
+pandas>=2.0,<3
+scikit-learn>=1.3,<2
+
+```
+
+`run_baseline.py`:
+
+```py
+"""Reproducible synthetic baseline: temporal split, models, fairness and calibration.
+
+No network, external data, production deployment or enforcement.
+"""
+import argparse
+import json
+from pathlib import Path
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import IsolationForest
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import average_precision_score, brier_score_loss, precision_score, recall_score, roc_auc_score
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+FEATURES = ["skill_proxy", "actions_per_min", "median_reaction_ms",
+            "timing_regularities", "target_accuracy", "repeated_action_ratio"]
+LABEL = "is_suspicious_simulated"
+
+def run(data_path, output_dir, threshold=0.7):
+    df = pd.read_csv(data_path)
+    needed = set(FEATURES + [LABEL, "match_day", "player_id", "match_id"])
+    missing = needed - set(df.columns)
+    if missing:
+        raise ValueError(f"Missing columns: {sorted(missing)}")
+    if df[list(needed)].isna().any().any():
+        raise ValueError("Missing values in required fields")
+    days = np.sort(df.match_day.unique())
+    if len(days) < 5:
+        raise ValueError("Need at least five unique days")
+    cutoff = days[int(len(days) * 0.8)]
+    train, test = df[df.match_day < cutoff].copy(), df[df.match_day >= cutoff].copy()
+    if train.empty or test.empty or train[LABEL].nunique() < 2 or test[LABEL].nunique() < 2:
+        raise ValueError("Temporal train/test split must have both classes")
+    if set(train.match_id) & set(test.match_id):
+        raise ValueError("Match identifiers leak across time split")
+    if set(train.player_id) & set(test.player_id):
+        raise ValueError("Player identifiers overlap across time split; review evaluation design")
+    xtrain, xtest, ytrain, ytest = train[FEATURES], test[FEATURES], train[LABEL], test[LABEL]
+    lr = make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000, random_state=42))
+    lr.fit(xtrain, ytrain)
+    prob = lr.predict_proba(xtest)[:, 1]
+    iso = make_pipeline(StandardScaler(), IsolationForest(n_estimators=200, contamination=0.07, random_state=42))
+    iso.fit(xtrain)
+    anomaly = -iso.decision_function(xtest)
+    prediction = (prob >= threshold).astype(int)
+    metrics = {
+        "dataset": "synthetic_generated", "train_rows": int(len(train)), "test_rows": int(len(test)),
+        "cutoff_day": int(cutoff), "test_prevalence": float(ytest.mean()), "threshold": threshold,
+        "logistic_regression": {
+            "roc_auc": float(roc_auc_score(ytest, prob)),
+            "average_precision": float(average_precision_score(ytest, prob)),
+            "brier": float(brier_score_loss(ytest, prob)),
+            "precision": float(precision_score(ytest, prediction, zero_division=0)),
+            "recall": float(recall_score(ytest, prediction, zero_division=0))
+        },
+        "isolation_forest": {
+            "roc_auc": float(roc_auc_score(ytest, anomaly)),
+            "average_precision": float(average_precision_score(ytest, anomaly))
+        }
+    }
+    out = Path(output_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    evaluation = test[["player_id", "match_day", "skill_proxy", LABEL]].copy()
+    evaluation["predicted_probability"] = prob
+    evaluation["predicted_label"] = prediction
+    evaluation["skill_group"] = pd.qcut(evaluation.skill_proxy, q=5, labels=["Very Low", "Low", "Medium", "High", "Very High"])
+    groups = []
+    for group, subset in evaluation.groupby("skill_group", observed=True):
+        normal = subset[subset[LABEL] == 0]
+        fp = int(normal.predicted_label.sum())
+        groups.append({"skill_group": str(group), "observations": int(len(subset)),
+                       "normal_observations": int(len(normal)), "false_positives": fp,
+                       "false_positive_rate": float(fp / len(normal)) if len(normal) else None})
+    metrics["skill_segments"] = groups
+    evaluation.to_csv(out / "predictions.csv", index=False)
+    with (out / "metrics.json").open("w") as f:
+        json.dump(metrics, f, indent=2)
+    print(json.dumps(metrics, indent=2))
+    return metrics
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--data", default="data/synthetic_anticheat_telemetry.csv")
+    p.add_argument("--output-dir", default="outputs")
+    p.add_argument("--threshold", type=float, default=0.7)
+    args = p.parse_args()
+    if not 0 <= args.threshold <= 1:
+        p.error("threshold must be between 0 and 1")
+    run(args.data, args.output_dir, args.threshold)
+
+```
+
+`test_baseline.py`:
+
+```py
+import tempfile
+import unittest
+from pathlib import Path
+from generate_synthetic_data import generate
+from run_baseline import run
+
+class BaselineTests(unittest.TestCase):
+    def test_deterministic_generation(self):
+        a = generate(1200, 42)
+        b = generate(1200, 42)
+        self.assertTrue(a.equals(b))
+        self.assertEqual(a.shape, (1200, 11))
+        self.assertFalse(a.isna().any().any())
+
+    def test_end_to_end(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "data.csv"
+            generate(3000, 42).to_csv(path, index=False)
+            result = run(path, Path(tmp) / "out")
+            self.assertGreater(result["logistic_regression"]["roc_auc"], 0.5)
+            self.assertEqual(len(result["skill_segments"]), 5)
+            self.assertTrue((Path(tmp) / "out" / "metrics.json").exists())
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
