@@ -1,3 +1,5 @@
+- **2026-11-14** — ingest `description:lm060719/io.mo.glassmic` (projection `wiki/sources/descriptions/lm060719__io.mo.glassmic.md`): entity [[io-mo-glassmic]] (GlassMic); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[xposed-module-kit]] and [[lsposed-universal-template]].
+
 - **2026-11-14** — ingest `description:misnopini1987/GTA-5-Trainer-Menu-Base` (projection `wiki/sources/descriptions/misnopini1987__GTA-5-Trainer-Menu-Base.md`): entity [[gta-5-trainer-menu-base]] (MenuForge); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[bigbasev2]], [[phake]], and [[yimmenu]].
 
 - **2026-11-14** — ingest `description:swheettaos/crewtools` (projection `wiki/sources/descriptions/swheettaos__crewtools.md`): entity [[crewtools]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[banmod]] and [[au-anticheat]].

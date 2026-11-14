@@ -72,6 +72,7 @@ sources:
   - wiki/sources/descriptions/LGLTeam__Android-Mod-Menu.md
   - wiki/sources/descriptions/LuckyPray__DexKit-Android.md
   - wiki/sources/descriptions/LowTension__android_kernel_xiaomi_sm8475.md
+  - wiki/sources/descriptions/lm060719__io.mo.glassmic.md
   - wiki/sources/descriptions/Danda420__kernel_xiaomi_sm8250.md
   - wiki/sources/descriptions/RooTurkk__ROOTURK-Kernel.md
   - wiki/sources/descriptions/lj94093__IDAAndroidBreakpoint.md
@@ -678,6 +679,8 @@ Root paths: `/proc/<pid>/mem` pread/pwrite, GameGuardian-style editors, ceserver
 ## In-app purchase (IAP) & billing
 
 Client-side Play Billing hooks such as [[freedom]] intercept the billing service interface and return fake purchase confirmations—useful for studying IAP verification weaknesses on Android games that trust local billing callbacks without robust server-side receipt checks. (source: wiki/sources/descriptions/gmh5225__freedom.md) Multi-store billing hook module [[com-fuck-iab]] (FKIAB; LSPosed/Xposed; intercepts Google Play, Bazaar, and Myket billing service binders; embeds Frida Gum for compiled TypeScript per-package scripts; restore purchases / bypass local checks; Cheat / Xposed) extends that lane for regional storefronts and scriptable per-title IAP analysis. (source: wiki/sources/descriptions/Xposed-Modules-Repo__com.fuck.iab.md)
+
+Virtual microphone and audio-capture routing module [[io-mo-glassmic]] (lm060719; LSPosed on rooted devices; Kotlin Compose + Java/C++ shadowhook; hooks AudioRecord/AAudio/OpenSL ES so targets read imported PCM, TTS, or experimental playback-loop samples; optional root AudioPolicy inject; floating diagnostics; Cheat / Xposed / audio-pipeline testing) supports controlled microphone-routing and capture-compatibility experiments beside voice-biometrics and anti-spoof research—not production AC bypass. (source: wiki/sources/descriptions/lm060719__io.mo.glassmic.md)
 
 ## Mobile anti-cheat
 
