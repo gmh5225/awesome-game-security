@@ -1849,6 +1849,7 @@ sources:
   - wiki/sources/descriptions/Steesha__CodeCleaner.md
   - wiki/sources/descriptions/SternI__FortniteMCP.md
   - wiki/sources/descriptions/Ston3dd__ReaperPy.md
+  - wiki/sources/descriptions/NetVar1337__SlopStation.md
   - wiki/sources/descriptions/SteamDatabase__Protobufs.md
   - wiki/sources/descriptions/VenTaz__Themidie.md
   - wiki/sources/descriptions/VollRagm__ghostdebug.md
@@ -3197,7 +3198,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Native PS5 homebrew library shell via [[niak-ps5]] (niakw; full-screen DualSense UI; local title scan; loopback-only `127.0.0.1` launch broker; 3D PS4/PS5 case art + on-select LaunchBox CDN fetch; GPL native C/C++ + OpenGL CI + Python packaging/tests; self-contained shell—not a Sony system-UI replacement; PlayStation / homebrew dashboard) (source: wiki/sources/descriptions/niakw__NiakPS5.md) (source: wiki/sources/README-categories.md)
 - Native PS5 homebrew GBA/GB player via [[gbar5]] (thereal47Ronin; mGBA libretro static core; Vulkan/RADV UI; optional FSR framegen; library/cheats/save states; RetroAchievements/rcheevos; SMB/NFS ROM sync; Lapy sandbox elevation for etaHEN user paths; self-update; C/C++ + Python/shell build; PS5 native payload / retro homebrew—not online AC) (source: wiki/sources/descriptions/thereal47Ronin__GBAR5.md)
 - Python PS5 live-debug toolkit via [[reaperpy]] (Ston3dd; desktop client over ps5debug-NG—memory scan/patch, pointer scan, hardware watchpoints, Keystone x86-64 code caves, Capstone disasm, undo journal; UE/Unity IL2CPP live object menus; GoldHEN/etaHEN cheat export/import; own-hardware offline SP research scope; PlayStation / console RE) (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/Ston3dd__ReaperPy.md)
-- Windows Tauri PS4 RE workbench NetVar1337/SlopStation (ps4debug-NG live memory/debugger/scanner, Hyperion decompiler, Unicorn x86-64 emulation, Lua scripting, built-in MCP; authorized console RE—not online AC; PlayStation) (source: wiki/sources/README-categories.md)
+- Windows Tauri PS4 RE workbench via [[slopstation]] (NetVar1337; ps4debug-NG live memory/debugger/CE-style scanner; C++ analysis engine; Hyperion decompiler; Unicorn x86-64 devirt/slicing; static ELF/PE; Lua 5.4; built-in MCP; host packet capture + HTTP payload host; optional ps5debug-NG; authorized console RE—not online AC; PlayStation) (source: wiki/sources/descriptions/NetVar1337__SlopStation.md) (source: wiki/sources/README-categories.md)
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; static RE for jailbroken PS4 modules) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)
 - PS4 Orbis Ghidra extension via [[ghidra-orbis]] (loaders, analyzers, scripts, syscall/NID mapping; symbol recovery; Java/Gradle; Orbis OS file formats) sits in the same `PlayStation` / Cheat Ghidra Plugins lane beside [[ida-ps4-helper]]. (source: wiki/sources/descriptions/astrelsky__GhidraOrbis.md)
 - PS5 ELF loader/analysis in IDA via [[ida-ps5-elf-plugin]] (PS5-specific ELF extensions, segment types, dynamic linking; game/system binaries; console security RE) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__ida_ps5_elf_plugin.md)
