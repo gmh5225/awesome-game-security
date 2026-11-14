@@ -2332,6 +2332,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/wasm-ceserver [Analyzing WebAssembly]
 - https://github.com/Eruditi/CE-MCP-Plugin [MCP for Cheat Engine]
 - https://github.com/TindalosKorone/dsh-cheatengine [DSH agent plugin bridging DeepSeek Harness to Cheat Engine via ce_* tools for memory scan, breakpoints, pointer analysis, and Lua/AA scripting]
+- https://github.com/Hello-DaTang/AI-Game-Trainer [Windows CE 7.x bridge with local HTTP/SQLite console to capture, persist, and toggle Cheat Engine table entries per game library]
 
 > Injection:Windows
 - https://github.com/itaymigdal/awesome-injection [awesome injection]
@@ -3575,6 +3576,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Game:Warcraft III
 - https://github.com/stijnherfst/HiveWE [editor]
 - https://github.com/devoltzz/devos-map-doctor [Toolkit to diagnose, unprotect, fix, and port Warcraft III maps (1.24–Reforged) for World Editor and Reforged without modifying originals]
+- https://github.com/37f/warcraft-iii-legacy-cheat [Multi-version Warcraft III Legacy trainer (1.20e–1.29.2) with path/SHA binding, hotkey memory edits, and Chinese voice feedback]
 
 > Game:Half-Life 2
 - https://github.com/codereversing/hl2aimbot
@@ -4943,6 +4945,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ShaniTheDeveloper/Adaptive_Anti-Cheat_Stream_Processor [C++/Qt desktop pipeline that ingests simulated gameplay telemetry and flags suspicious patterns with Bloom filters, count-min sketches, and sliding windows]
 - https://github.com/ConWan30/qortime-ai [Muse explain/red-team and SAM visualization layer on deterministic console match-integrity receipts; AI advisories cannot upgrade referee verdicts]
 - https://github.com/oykuoner/YAACS-AntiCheat [CS2 anti-cheat research pipeline that parses HLTV demos with demoparser2, extracts spatiotemporal aim telemetry, and benchmarks heuristic plus ML aimbot classifiers]
+- https://github.com/essensha/cs2-anti-cheat-ml-research [CS2-framed ML research notebooks on synthetic telemetry: classifiers, calibration, concept drift, graph-based coordination, and production-style review-capacity simulations]
 - https://github.com/magicnothief/cs2-overwatch [Offline CS2 demo review pipeline with aim/behavior models, ray-cast visibility checks, calibrated suspicion scoring, and optional local LLM evidence summaries]
 - https://github.com/gjones01/NullCS [Offline CS2 demo (.dem) pipeline that extracts tick-level aim/visibility features and ranks players with evidence tables for human review—not automated bans]
 - https://github.com/AODOJUST/gomoku-anti-cheat-detector [Browser extension (Baishen) that replays gomoku.com and papergames.io games locally with Rapfi WASM to score AI-assistance suspicion via multi-engine move analysis and feature fingerprinting]
