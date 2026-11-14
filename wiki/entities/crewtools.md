@@ -18,7 +18,7 @@ In-game tabbed admin window for kicks, bans, and housekeeping (periodic cleanup,
 
 ## Posture
 
-Runs on the **host client** only (not a dedicated headless server). Complements other Unity IL2CPP host-moderation stacks such as [[banmod]], [[au-anticheat]], and [[among-us-anti-cheat]]; distinct from kernel products such as [[easy-anti-cheat]].
+Runs on the **host client** only (not a dedicated headless server). Complements other Unity IL2CPP host-moderation stacks such as [[banmod]], [[au-anticheat]], [[among-us-anti-cheat]], and [[among-us-3d-vr-anticheat]]; distinct from kernel products such as [[easy-anti-cheat]].
 
 ## Links
 
