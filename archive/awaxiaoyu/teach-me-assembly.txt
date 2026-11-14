@@ -1,0 +1,640 @@
+Project Path: arc_awaxiaoyu_teach-me-assembly_uamixcfx
+
+Source Tree:
+
+```txt
+arc_awaxiaoyu_teach-me-assembly_uamixcfx
+├── LICENSE
+├── README.md
+├── zh_semantic.py
+└── zh_semantic_rules.json
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 awaxiaoyu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Teach Me Assembly
+
+Teach Me Assembly 是一个适用于 IDA Pro 9.5 的纯本地 IDAPython 插件。它根据单条汇编指令和操作数添加中文语义注释，不使用 AI、网络服务，也不依赖相邻指令或函数上下文。
+
+## 安装
+
+将 `zh_semantic.py` 和 `zh_semantic_rules.json` 复制到 IDA 的 `plugins` 目录，然后重启 IDA。
+
+在反汇编视图中将光标放到目标函数，使用 **Edit > Plugins > Teach Me Assembly**，或按 **Ctrl+Alt+Shift+S**。插件会为光标所在函数中的指令添加或更新 `【语义】` 注释，并保留其他现有注释。
+
+## 功能
+
+- 根据 IDA 解码结果说明寄存器、立即数、内存和代码地址操作数。
+- 解释常见 x86 条件跳转、`cmovcc`、`setcc`、循环、栈操作、调用和算术标志位。
+- 提供 ARM、MIPS、RISC-V 常见数据传送、算术、移位和分支指令的本地规则。
+- 根据处理器和操作数顺序说明数据传送方向。
+- 通过本地 JSON 文件覆盖或添加助记符说明。
+
+每条指令独立解释；插件不会推断跨指令的数据流或函数意图。未覆盖的助记符会显示通用说明。
+
+## 自定义规则
+
+编辑 `zh_semantic_rules.json` 中的 `mnemonics` 映射。键使用小写助记符，描述可使用 `{mnemonic}` 和 `{operands}` 占位符。自定义规则优先于内置规则，每次运行时重新读取。
+
+```json
+{
+  "mnemonics": {
+    "my_custom_opcode": "项目自定义语义：{operands}"
+  }
+}
+```
+
+## 开发与许可
+
+插件使用 IDA 自带的 IDAPython API，不需要额外 Python 依赖。项目使用 MIT License，详见 [LICENSE](LICENSE)。
+
+```
+
+`zh_semantic.py`:
+
+```py
+"""Annotate each instruction in the current function with local Chinese rules."""
+
+import json
+import os
+
+import ida_auto
+import ida_bytes
+import ida_funcs
+import ida_ida
+import ida_idaapi
+import ida_kernwin
+import ida_lines
+import ida_ua
+
+
+PLUGIN_NAME = "Teach Me Assembly"
+COMMENT_MARKER = "【语义】"
+LEGACY_COMMENT_MARKER = "【AI语义】"
+RULES_FILE = os.path.join(os.path.dirname(__file__), "zh_semantic_rules.json")
+
+CONDITIONAL_JUMPS = {
+    "ja", "jae", "jb", "jbe", "jc", "jcxz", "jecxz", "jrcxz",
+    "je", "jg", "jge", "jl", "jle", "jna", "jnae", "jnb", "jnbe",
+    "jnc", "jne", "jng", "jnge", "jnl", "jnle", "jno", "jnp", "jns",
+    "jnz", "jo", "jp", "jpe", "jpo", "js", "jz",
+}
+LOAD_MNEMONICS = {
+    "lb", "lbu", "lh", "lhu", "lw", "lwu", "ld", "lwc1", "ldc1",
+    "lwl", "lwr", "ll", "flw", "fld",
+}
+STORE_MNEMONICS = {
+    "sw", "sh", "sb", "sd", "swc1", "sdc1", "swl", "swr", "sc",
+    "fsw", "fsd",
+}
+ARM_FLAG_WRITERS = {
+    "adcs", "adds", "ands", "asrs", "bics", "eors", "lsls", "lsrs",
+    "movs", "muls", "negs", "orrs", "rors", "rsbs", "sbcs", "subs",
+}
+X86_FLAG_CONDITIONS = {
+    "je": "ZF=1", "jz": "ZF=1", "jne": "ZF=0", "jnz": "ZF=0",
+    "ja": "CF=0 且 ZF=0", "jnbe": "CF=0 且 ZF=0",
+    "jae": "CF=0", "jnb": "CF=0", "jnc": "CF=0",
+    "jb": "CF=1", "jnae": "CF=1", "jc": "CF=1",
+    "jbe": "CF=1 或 ZF=1", "jna": "CF=1 或 ZF=1",
+    "jg": "ZF=0 且 SF=OF", "jnle": "ZF=0 且 SF=OF",
+    "jge": "SF=OF", "jnl": "SF=OF",
+    "jl": "SF!=OF", "jnge": "SF!=OF",
+    "jle": "ZF=1 或 SF!=OF", "jng": "ZF=1 或 SF!=OF",
+    "jo": "OF=1", "jno": "OF=0", "js": "SF=1", "jns": "SF=0",
+    "jp": "PF=1", "jpe": "PF=1", "jnp": "PF=0", "jpo": "PF=0",
+}
+X86_CC_SUFFIXES = {
+    "o": "OF=1", "no": "OF=0", "b": "CF=1", "c": "CF=1", "nae": "CF=1",
+    "ae": "CF=0", "nb": "CF=0", "nc": "CF=0", "e": "ZF=1", "z": "ZF=1",
+    "ne": "ZF=0", "nz": "ZF=0", "be": "CF=1 或 ZF=1", "na": "CF=1 或 ZF=1",
+    "a": "CF=0 且 ZF=0", "nbe": "CF=0 且 ZF=0", "s": "SF=1", "ns": "SF=0",
+    "p": "PF=1", "pe": "PF=1", "np": "PF=0", "po": "PF=0", "l": "SF!=OF",
+    "nge": "SF!=OF", "ge": "SF=OF", "nl": "SF=OF", "le": "ZF=1 或 SF!=OF",
+    "ng": "ZF=1 或 SF!=OF", "g": "ZF=0 且 SF=OF", "nle": "ZF=0 且 SF=OF",
+}
+ARM_FLAG_CONDITIONS = {
+    "eq": "Z=1", "ne": "Z=0", "cs": "C=1", "hs": "C=1",
+    "cc": "C=0", "lo": "C=0", "mi": "N=1", "pl": "N=0",
+    "vs": "V=1", "vc": "V=0", "hi": "C=1 且 Z=0",
+    "ls": "C=0 或 Z=1", "ge": "N=V", "lt": "N!=V",
+    "gt": "Z=0 且 N=V", "le": "Z=1 或 N!=V",
+}
+ARM_CONDITIONABLE_MNEMONICS = {
+    "adc", "adcs", "add", "adds", "and", "ands", "asr", "asrs", "bic", "bics",
+    "bl", "blx", "bx", "cmp", "cmn", "eor", "eors", "ldr", "ldrb", "ldrh",
+    "ldm", "lsl", "lsls", "lsr", "lsrs", "mov", "movs", "mvn", "mul", "muls",
+    "orr", "orrs", "pop", "push", "rsb", "rsbs", "sbc", "sbcs", "str", "strb",
+    "strh", "stm", "sub", "subs", "teq", "tst",
+}
+COMPARE_BRANCHES = {
+    "beq": "两操作数相等", "bne": "两操作数不相等",
+    "blt": "有符号小于", "bge": "有符号大于或等于",
+    "bltu": "无符号小于", "bgeu": "无符号大于或等于",
+    "beqz": "操作数等于零", "bnez": "操作数不等于零",
+    "bgtz": "操作数大于零", "blez": "操作数小于或等于零",
+    "bltz": "操作数小于零", "bgez": "操作数大于或等于零",
+}
+
+
+def operand_text(operand):
+    if isinstance(operand, dict):
+        return operand.get("text", "")
+    return str(operand)
+
+
+def describe_operand(operand):
+    if not isinstance(operand, dict):
+        return str(operand)
+
+    labels = {
+        "register": "寄存器",
+        "immediate": "立即数",
+        "direct_memory": "直接内存地址",
+        "indirect_memory": "间接内存引用",
+        "code_address": "代码地址",
+        "other": "操作数",
+    }
+    text = operand.get("text", "")
+    kind = operand.get("kind", "other")
+    result = "{} {}".format(labels.get(kind, "操作数"), text).strip()
+    size = operand.get("size", 0)
+    if isinstance(size, int) and size > 0 and kind != "code_address":
+        result += "（{} 字节）".format(size)
+    return result
+
+
+def branch_condition(mnemonic, procname):
+    mnemonic = mnemonic.lower()
+    if mnemonic in X86_FLAG_CONDITIONS:
+        return X86_FLAG_CONDITIONS[mnemonic]
+
+    if procname.lower().startswith(("arm", "aarch64")):
+        if mnemonic.startswith("b."):
+            return ARM_FLAG_CONDITIONS.get(mnemonic.split(".", 1)[1])
+        if mnemonic.startswith("b"):
+            return ARM_FLAG_CONDITIONS.get(mnemonic[1:])
+    return None
+
+
+def arm_instruction_condition(mnemonic, procname):
+    if not procname.lower().startswith("arm"):
+        return None
+    mnemonic = mnemonic.lower()
+    if "." in mnemonic:
+        stem, suffix = mnemonic.split(".", 1)
+        if stem in ARM_CONDITIONABLE_MNEMONICS and suffix in ARM_FLAG_CONDITIONS:
+            return stem, ARM_FLAG_CONDITIONS[suffix]
+    for suffix in sorted(ARM_FLAG_CONDITIONS, key=len, reverse=True):
+        stem = mnemonic[:-len(suffix)]
+        if mnemonic.endswith(suffix) and stem in ARM_CONDITIONABLE_MNEMONICS:
+            return stem, ARM_FLAG_CONDITIONS[suffix]
+    return None
+
+
+def x86_cc_condition(mnemonic):
+    for prefix in ("cmov", "set"):
+        if mnemonic.startswith(prefix):
+            return X86_CC_SUFFIXES.get(mnemonic[len(prefix):])
+    return None
+
+
+def load_custom_rules():
+    """Load user overrides from a small local JSON file."""
+    try:
+        with open(RULES_FILE, "r", encoding="utf-8") as rules_file:
+            data = json.load(rules_file)
+    except FileNotFoundError:
+        return {}, None
+    except Exception as error:
+        return {}, "读取 {} 失败：{}".format(os.path.basename(RULES_FILE), error)
+
+    mnemonics = data.get("mnemonics") if isinstance(data, dict) else None
+    if not isinstance(mnemonics, dict):
+        return {}, "{} 中必须包含 mnemonics 对象。".format(os.path.basename(RULES_FILE))
+    rules = {}
+    for mnemonic, description in mnemonics.items():
+        if isinstance(mnemonic, str) and isinstance(description, str):
+            rules[mnemonic.strip().lower()] = description
+    return rules, None
+
+
+def ordered_transfer_operands(operands, procname):
+    if len(operands) < 2:
+        return None
+    procname = procname.lower()
+    if procname.startswith("metapc"):
+        att_syntax = any(operand_text(op).lstrip().startswith(("%", "$")) for op in operands)
+        return (operands[0], operands[1]) if att_syntax else (operands[1], operands[0])
+    if procname.startswith(("arm", "mips", "riscv")):
+        return operands[1], operands[0]
+    return None
+
+
+def format_transfer(operands, procname, mode="copy"):
+    ordered = ordered_transfer_operands(operands, procname)
+    if ordered is None:
+        return "按指令规定方向执行数据传送"
+    source, destination = ordered
+    source_text = describe_operand(source)
+    destination_text = describe_operand(destination)
+    source_kind = source.get("kind") if isinstance(source, dict) else None
+    destination_kind = destination.get("kind") if isinstance(destination, dict) else None
+
+    if mode == "address":
+        return "计算 {} 表示的有效地址并写入 {}".format(source_text, destination_text)
+    if source_kind in {"direct_memory", "indirect_memory"}:
+        return "从 {} 读取数据到 {}".format(source_text, destination_text)
+    if destination_kind in {"direct_memory", "indirect_memory"}:
+        return "将 {} 的值写入 {}".format(source_text, destination_text)
+    return "将 {} 的值传送到 {}".format(source_text, destination_text)
+
+
+def implicit_effect(mnemonic, base, procname):
+    procname = procname.lower()
+    if procname.startswith("metapc"):
+        if base in {"push", "pushq", "pushf", "pushfd", "pushfq"}:
+            return "同时递减栈指针并写入栈顶"
+        if base in {"pop", "popq", "popf", "popfd", "popfq"}:
+            return "同时读取栈顶并递增栈指针"
+        if base.startswith("cmp"):
+            return "更新 CF、PF、AF、ZF、SF、OF 标志位"
+        if base in {"test", "tst"}:
+            return "更新 SF、ZF、PF，清除 CF/OF；AF 未定义"
+        if base.startswith(("inc", "dec")):
+            return "更新算术标志位，但保留 CF"
+        if base.startswith(("add", "adc", "sub", "sbb", "neg")):
+            return "更新算术标志位"
+        if base.startswith(("and", "or", "xor")):
+            return "更新 SF、ZF、PF 并清除 CF/OF"
+        if base.startswith(("shl", "sal", "shr", "sar", "rol", "ror")):
+            return "更新移位相关标志位"
+    elif procname.startswith("arm"):
+        if base in {"cmp", "cmn", "tst", "teq"} or base in ARM_FLAG_WRITERS:
+            return "更新 NZCV 条件标志位"
+        if base in {"push", "pop"}:
+            return "同时调整 SP 并访问栈内存"
+    return ""
+
+
+def call_description(base, procname, operands):
+    procname = procname.lower()
+    if procname.startswith("metapc"):
+        return "将返回地址压入栈并跳转到调用目标"
+    if procname.startswith("arm"):
+        return "将返回地址写入 LR 并跳转到调用目标"
+    if procname.startswith("mips"):
+        if base == "jalr" and len(operands) >= 2 and operand_text(operands[0]).lower() in {"$zero", "$0", "zero", "r0"}:
+            return "不保存返回地址，直接跳转到目标"
+        return "将返回地址写入 $ra 并跳转到调用目标"
+    if procname.startswith("riscv"):
+        if base in {"jal", "jalr"} and len(operands) >= 2 and operand_text(operands[0]).lower() in {"zero", "x0"}:
+            return "不保存返回地址，直接跳转到目标"
+        return "将返回地址写入链接寄存器并跳转到调用目标"
+    return "调用目标并保存返回位置"
+
+
+def describe_instruction(mnemonic, operands, procname="", custom_rules=None):
+    """Describe one instruction without using surrounding code or external services."""
+    mnemonic = (mnemonic or "").strip().lower()
+    base = mnemonic.split(".", 1)[0]
+    args = "，".join(describe_operand(operand) for operand in operands) if operands else "无显式操作数"
+    condition = branch_condition(mnemonic, procname)
+    arm_condition = arm_instruction_condition(mnemonic, procname)
+    if arm_condition:
+        base = arm_condition[0]
+
+    if custom_rules:
+        template = custom_rules.get(mnemonic) or custom_rules.get(base)
+        if template:
+            return template.replace("{mnemonic}", mnemonic.upper()).replace("{operands}", args)
+
+    cmov_condition = x86_cc_condition(mnemonic) if mnemonic.startswith("cmov") else None
+    set_condition = x86_cc_condition(mnemonic) if mnemonic.startswith("set") else None
+    if cmov_condition and len(operands) >= 2:
+        ordered = ordered_transfer_operands(operands, procname)
+        if ordered is None:
+            action = "条件 {} 成立时执行条件传送".format(cmov_condition)
+        else:
+            source, destination = ordered
+            action = "条件 {} 成立时将 {} 传送到 {}；否则目标保持不变".format(
+                cmov_condition, describe_operand(source), describe_operand(destination)
+            )
+    elif set_condition and operands:
+        action = "条件 {} 成立时将目标操作数置为 1，否则置为 0".format(set_condition)
+    elif base.startswith("movzx"):
+        action = format_transfer(operands, procname) + "，高位补零"
+    elif base.startswith(("movsx", "movsxd")):
+        action = format_transfer(operands, procname) + "，高位按符号位扩展"
+    elif base.startswith("lea"):
+        action = format_transfer(operands, procname, "address")
+    elif base in {"movn", "movz"}:
+        condition_text = "非零" if base == "movn" else "为零"
+        action = "仅当条件寄存器{}时传送数据".format(condition_text)
+    elif base == "ldp" and len(operands) >= 3:
+        action = "从 {} 连续读取两个数据到 {} 和 {}".format(
+            describe_operand(operands[2]),
+            describe_operand(operands[0]),
+            describe_operand(operands[1]),
+        )
+    elif base == "stp" and len(operands) >= 3:
+        action = "将 {} 和 {} 连续写入 {}".format(
+            describe_operand(operands[0]),
+            describe_operand(operands[1]),
+            describe_operand(operands[2]),
+        )
+    elif base in {"ldm", "stm"} and len(operands) >= 2:
+        if base == "ldm":
+            action = "从 {} 指定的内存区域加载多个寄存器".format(describe_operand(operands[0]))
+        else:
+            action = "将多个寄存器的值写入 {} 指定的内存区域".format(describe_operand(operands[0]))
+    elif base.startswith(("mov", "ldr")) or base in {"ldur", "li", "la"} | LOAD_MNEMONICS:
+        action = format_transfer(operands, procname)
+    elif base.startswith(("str", "stp", "stm", "stur")) or base in STORE_MNEMONICS:
+        if len(operands) >= 2:
+            action = "将 {} 的值写入 {}".format(
+                describe_operand(operands[0]), describe_operand(operands[1])
+            )
+        else:
+            action = "将操作数的值写入内存"
+    elif base in {"push", "pushq", "pushf", "pushfd", "pushfq"}:
+        action = "将操作数压入栈"
+    elif base in {"pop", "popq", "popf", "popfd", "popfq"}:
+        action = "从栈顶取出数据并写入操作数"
+    elif base in {"xchg", "swap"}:
+        action = "交换操作数的值"
+    elif base.startswith("cmp") or base in {"cmn", "teq"}:
+        action = "比较操作数，不保存运算结果"
+    elif base in {"test", "tst"}:
+        action = "对操作数执行按位与测试，不保存结果"
+    elif base in {"slt", "sltu", "slti", "sltiu", "seqz", "snez", "sltz", "sgtz", "cset", "csetm"}:
+        action = "比较操作数，并将布尔结果写入目标操作数"
+    elif base in {"csel", "csinc", "csinv", "csneg"}:
+        action = "按条件从候选操作数中选择一个值写入目标寄存器"
+    elif base.startswith("amo"):
+        action = "原子地读取内存、执行读改写运算并写回结果"
+    elif base.startswith(("add", "adc", "addu", "addiu", "dadd")) or base in {"fadd"}:
+        action = "执行加法运算"
+    elif base.startswith(("sub", "sbb", "sbc", "subu", "dsub")) or base in {"fsub", "rsb", "rsc"}:
+        action = "执行减法运算"
+    elif base.startswith(("mul", "imul", "muls", "umull", "smull", "mla", "madd", "mult")):
+        action = "执行乘法运算"
+    elif base.startswith(("div", "idiv", "udiv", "sdiv")) or base in {"fdiv", "ddiv"}:
+        action = "执行除法运算"
+    elif base.startswith("inc"):
+        action = "递增操作数"
+    elif base.startswith("dec"):
+        action = "递减操作数"
+    elif base.startswith(("and", "or", "xor", "eor", "bic", "nor")):
+        action = "执行按位逻辑运算"
+    elif base.startswith(("not", "mvn")):
+        action = "按位取反"
+    elif base.startswith(("neg", "negs")):
+        action = "对操作数取负"
+    elif base.startswith(("shl", "sal", "shr", "sar", "lsl", "lsr", "asr", "sll", "srl", "sra", "slli", "srli", "srai")):
+        action = "执行移位运算"
+    elif base.startswith(("rol", "ror", "rcl", "rcr", "rrx")):
+        action = "执行循环移位运算"
+    elif condition:
+        action = "条件 {} 成立时跳转".format(condition)
+    elif base in {"cbz", "cbnz", "tbz", "tbnz"}:
+        action = {
+            "cbz": "寄存器值为零时跳转",
+            "cbnz": "寄存器值非零时跳转",
+            "tbz": "指定 bit 为零时跳转",
+            "tbnz": "指定 bit 非零时跳转",
+        }[base]
+    elif procname.lower().startswith(("mips", "riscv")) and base in COMPARE_BRANCHES:
+        action = "{}时跳转".format(COMPARE_BRANCHES[base])
+    elif base in {"jcxz", "jecxz", "jrcxz"}:
+        action = "计数寄存器为零时跳转"
+    elif base in {"loope", "loopz"}:
+        action = "计数器递减后非零且 ZF=1 时循环跳转"
+    elif base in {"loopne", "loopnz"}:
+        action = "计数器递减后非零且 ZF=0 时循环跳转"
+    elif base == "loop":
+        action = "计数器递减后非零时循环跳转"
+    elif base in CONDITIONAL_JUMPS:
+        action = "条件满足时跳转"
+    elif base in {"call", "callq", "callf", "bl", "blx", "jal", "jalr", "jsr", "bsr"}:
+        action = call_description(base, procname, operands)
+    elif base in {"ret", "retn", "retf", "eret", "rfe", "rfi"}:
+        if procname.lower().startswith("metapc"):
+            action = "从栈顶读取返回地址并跳转，同时递增栈指针"
+        elif procname.lower().startswith("arm"):
+            action = "通过 LR 中保存的返回地址返回"
+        elif procname.lower().startswith("riscv"):
+            action = "通过 ra 链接寄存器返回"
+        elif procname.lower().startswith("mips"):
+            action = "通过 $ra 链接寄存器返回"
+        else:
+            action = "从当前函数或异常处理过程返回"
+    elif base in {"jmp", "ljmp", "b", "bra", "br", "j", "jr", "bx"}:
+        if base in {"jr", "br", "bx"} and operands:
+            target = operand_text(operands[0]).strip().lower()
+            if target in {"ra", "$ra", "$31", "r31", "lr", "r14", "x1", "x30"}:
+                action = "通过链接寄存器返回调用者"
+            else:
+                action = "无条件跳转"
+        else:
+            action = "无条件跳转"
+    elif base.startswith("cmov"):
+        action = "执行条件传送；具体条件后缀未收录"
+    elif base.startswith("set"):
+        action = "根据条件设置目标操作数；具体条件后缀未收录"
+    elif base in {"mfhi", "mflo"}:
+        action = "读取 MIPS 高位/低位乘除结果寄存器并写入目标操作数"
+    elif base.startswith("cvt") or base.startswith("conv") or base in {"itof", "ftoi"}:
+        action = "转换操作数的数据类型或表示格式"
+    elif base in {"int", "int3", "syscall", "sysenter", "svc", "ecall", "hvc", "smc"}:
+        action = "触发软件中断、系统调用或异常入口"
+    elif base in {"nop", "nopw", "nopl", "yield", "pause"}:
+        action = "空操作或处理器提示指令，不直接修改通用数据"
+    elif base == "leave":
+        action = "销毁当前栈帧并恢复调用者的栈帧指针"
+    elif base == "enter":
+        action = "建立当前函数的栈帧"
+    elif base == "cld":
+        action = "清除方向标志，使字符串操作按地址递增方向处理"
+    elif base == "std":
+        action = "设置方向标志，使字符串操作按地址递减方向处理"
+    elif base in {"cli", "sti"}:
+        action = "修改处理器中断使能状态"
+    elif base in {"hlt", "wfi", "wait"}:
+        action = "使处理器暂停或等待事件"
+    elif base.startswith("endbr"):
+        action = "标记间接分支跟踪的合法入口位置"
+    elif base in {"lui", "auipc", "adr", "adrp"}:
+        action = "根据立即数构造或计算地址值并写入目标寄存器"
+    elif base in {"mrs", "msr", "mfc0", "mfc1", "mtc0", "mtc1"}:
+        action = "在通用寄存器与处理器状态/协处理器寄存器之间传送数据"
+    elif base in {"fence", "fence.i", "sync"}:
+        action = "约束内存或指令访问的先后顺序"
+    elif base.startswith("csr"):
+        action = "读取或修改 RISC-V 控制状态寄存器"
+    elif base:
+        action = "执行目标架构定义的 {} 操作".format(mnemonic.upper())
+    else:
+        action = "执行未识别的指令"
+
+    effect = implicit_effect(mnemonic, base, procname)
+    if effect:
+        action += "；" + effect
+    if arm_condition and not condition:
+        action += "；仅当 NZCV 条件 {} 成立时执行".format(arm_condition[1])
+    return "{}（操作数：{}）。".format(action, args)
+
+
+def collect_instructions(func):
+    instructions = []
+    ea = func.start_ea
+    while ea != ida_idaapi.BADADDR and ea < func.end_ea:
+        if ida_bytes.is_code(ida_bytes.get_full_flags(ea)):
+            mnemonic = ida_ua.print_insn_mnem(ea) or ""
+            operands = []
+            insn = ida_ua.insn_t()
+            if ida_ua.decode_insn(insn, ea):
+                for index in range(ida_ida.UA_MAXOP):
+                    operand = insn.ops[index]
+                    if operand.type == ida_ua.o_void:
+                        break
+                    text = ida_lines.tag_remove(ida_ua.print_operand(ea, index) or "").strip()
+                    if operand.type == ida_ua.o_reg:
+                        kind = "register"
+                    elif operand.type == ida_ua.o_imm:
+                        kind = "immediate"
+                    elif operand.type == ida_ua.o_mem:
+                        kind = "direct_memory"
+                    elif operand.type in {ida_ua.o_phrase, ida_ua.o_displ}:
+                        kind = "indirect_memory"
+                    elif operand.type in {ida_ua.o_near, ida_ua.o_far}:
+                        kind = "code_address"
+                    else:
+                        kind = "other"
+                    size = ida_ua.get_dtype_size(operand.dtype)
+                    operands.append({"text": text, "kind": kind, "size": size})
+            else:
+                for index in range(ida_ida.UA_MAXOP):
+                    text = ida_ua.print_operand(ea, index)
+                    if not text:
+                        break
+                    operands.append(ida_lines.tag_remove(text).strip())
+            if not mnemonic:
+                line = ida_lines.tag_remove(ida_lines.generate_disasm_line(ea, 0) or "")
+                mnemonic = line.split(None, 1)[0] if line.strip() else ""
+            if mnemonic:
+                instructions.append((ea, mnemonic, operands))
+
+        next_ea = ida_bytes.next_head(ea, func.end_ea)
+        if next_ea == ida_idaapi.BADADDR or next_ea <= ea:
+            break
+        ea = next_ea
+    return instructions
+
+
+def merge_comment(existing, semantic):
+    existing = existing or ""
+    for marker in (COMMENT_MARKER, LEGACY_COMMENT_MARKER):
+        if marker in existing:
+            prefix = existing.partition(marker)[0].rstrip()
+            if prefix.endswith("|"):
+                prefix = prefix[:-1].rstrip()
+            return (prefix + " | " if prefix else "") + COMMENT_MARKER + semantic
+    return (existing.rstrip() + " | " if existing.strip() else "") + COMMENT_MARKER + semantic
+
+
+def apply_comments(instructions, procname="", custom_rules=None):
+    updated = 0
+    for ea, mnemonic, operands in instructions:
+        semantic = describe_instruction(mnemonic, operands, procname, custom_rules)
+        existing = ida_bytes.get_cmt(ea, False)
+        if ida_bytes.set_cmt(ea, merge_comment(existing, semantic), False):
+            updated += 1
+    return updated
+
+
+class ChineseSemanticPlugin(ida_idaapi.plugin_t):
+    flags = ida_idaapi.PLUGIN_FIX
+    comment = "Annotate instructions with local Chinese semantic rules"
+    help = "Add an independent Chinese instruction description to every line in the current function"
+    wanted_name = PLUGIN_NAME
+    wanted_hotkey = "Ctrl-Alt-Shift-S"
+
+    def __init__(self):
+        super().__init__()
+
+    def init(self):
+        return ida_idaapi.PLUGIN_KEEP
+
+    def run(self, arg):
+        if not ida_auto.auto_is_ok():
+            ida_kernwin.warning("IDA 自动分析尚未完成，请稍后再运行插件。")
+            return
+
+        func = ida_funcs.get_func(ida_kernwin.get_screen_ea())
+        if func is None:
+            ida_kernwin.warning("请先将光标放在一个函数的反汇编行中。")
+            return
+
+        instructions = collect_instructions(func)
+        if not instructions:
+            ida_kernwin.warning("当前函数中没有可注释的反汇编指令。")
+            return
+
+        custom_rules, rules_error = load_custom_rules()
+        if rules_error:
+            ida_kernwin.warning(rules_error + " 将继续使用内置规则。")
+        updated = apply_comments(
+            instructions, ida_ida.inf_get_procname() or "", custom_rules
+        )
+        ida_kernwin.msg(
+            "[{}] 完成：为 {} 条指令添加了逐行语义注释。\n".format(
+                PLUGIN_NAME, updated
+            )
+        )
+
+
+def PLUGIN_ENTRY():
+    return ChineseSemanticPlugin()
+
+```
+
+`zh_semantic_rules.json`:
+
+```json
+{
+  "mnemonics": {
+    "my_custom_opcode": "项目自定义语义：{operands}"
+  }
+}
+
+```
