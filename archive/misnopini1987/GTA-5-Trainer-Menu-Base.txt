@@ -1,0 +1,182 @@
+Project Path: arc_misnopini1987_GTA-5-Trainer-Menu-Base_m0kmqe6w
+
+Source Tree:
+
+```txt
+arc_misnopini1987_GTA-5-Trainer-Menu-Base_m0kmqe6w
+├── LICENSE
+├── README.md
+└── docs
+    └── download-button.svg
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 MenuForge contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# GTA 5 Trainer Menu Base
+**The modular trainer menu base for GTA V on Windows that turns weeks of overlay boilerplate into an afternoon of building.**
+
+[download-url]: https://github.com/misnopini1987/GTA-5-Trainer-Menu-Base/releases
+
+![License](https://img.shields.io/badge/license-MIT-blue) ![C++](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus&logoColor=white) ![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?logo=windows&logoColor=white) ![Framework](https://img.shields.io/badge/framework-ImGui-E34F26) ![Render](https://img.shields.io/badge/render-DirectX%2011-2F7FD6) ![Status](https://img.shields.io/badge/status-active-success) ![Release](https://img.shields.io/badge/release-2026-blueviolet)
+
+[![Download](docs/download-button.svg)][download-url]
+
+MenuForge is a foundational scaffold for building an in-game trainer-style overlay menu for Grand Theft Auto V. Instead of shipping a finished menu, it hands you the skeleton: a menu registry, a deterministic navigation state machine, a thin render pipeline, a theme engine, and a localization layer — you bring the features.
+
+## Why
+You want a custom in-game menu for your GTA V tooling — submenus, toggles, sliders, notifications, localized labels — but every route starts with the same wall of raw DirectX and ImGui boilerplate. MenuForge removes that wall: the rendering pipeline, the input router, and the design system are wired, tested, and ready. You register your content and ship your menu, and the plumbing never gets in your way.
+
+## Without / With
+| Without | With |
+| --- | --- |
+| Weeks of overlay boilerplate before your first working menu | A compiling sample overlay on day one |
+| Navigation bugs that lose track of nested submenus | A deterministic state machine with breadcrumb depth |
+| Hard-coded pixel positions that drift off-screen on ultrawide displays | A relative layout engine that re-centers on any resolution |
+| Copy-pasted styles scattered across the codebase | Semantic theme tokens that restyle everything in one swap |
+| Strings glued to code and a rewrite for every new language | JSON string tables — a new language is a file drop |
+| A crash mid-write leaving a corrupt configuration file | Atomic config writes that always leave a valid file |
+
+## Quick Start
+1. Open the release page via [Download][download-url] and save the MenuForge source archive (MenuForge-src.zip) to your PC.
+2. Unblock the downloaded archive before extracting: right-click it, choose Properties, then click Unblock.
+3. Extract the archive into its working folder.
+   `powershell Expand-Archive -Path .\MenuForge-src.zip -DestinationPath C:\MenuForge -Force`
+4. Install CMake, the build configurator for the project.
+   `powershell winget install -e --id Kitware.CMake`
+5. Install the Microsoft C++ build tools — launch PowerShell as administrator (UAC) first.
+   `powershell winget install -e --id Microsoft.VisualStudio.2022.BuildTools --override "--quiet --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"`
+6. Configure the build for a 64-bit Windows target.
+   `powershell cmake -S C:\MenuForge -B C:\MenuForge\build -A x64`
+7. Compile the menu base and the sample overlay.
+   `powershell cmake --build C:\MenuForge\build --config Release`
+8. Run the sample overlay to see the menu system live.
+   `powershell Start-Process -FilePath C:\MenuForge\build\Release\menuforge-sample.exe`
+
+## Features
+- Register menus, submenus, toggles, sliders, and action buttons through a compact, chainable API.
+- Navigate nested submenus deterministically with a state machine that always knows your depth.
+- Restyle the whole overlay in one swap with semantic theme tokens and hot-swappable themes.
+- Localize every visible string through JSON tables with graceful fallback and RTL readiness.
+- Persist key bindings, themes, languages, and per-item values with crash-safe atomic writes.
+- Rebind overlay and navigation keys at runtime with automatic conflict detection.
+- Surface feedback through stacked, category-aware notification toasts with configurable lifetimes.
+
+## How it works
+MenuForge separates the overlay into four cooperating subsystems: the State Layer (open menu, navigation stack, highlight index, and modal captures), the Render Layer (a thin, read-only renderer over DirectX 11 and ImGui), the Input Layer (raw keyboard, mouse, and gamepad events mapped to semantic actions such as NavigateDown and Select), and the Content Layer (your registered menus and items). Because the layers never leak into each other, you can replace the renderer or remap the input without touching your features — and unit-test the entire menu logic without a graphics context.
+
+## Usage
+Register a vehicle menu with a toggle and a slider wired to your feature code:
+```cpp
+auto* vehicles = MenuForge::RegisterMenu("vehicles", "menu.vehicles.title");
+vehicles->AddToggle("invincible", "menu.vehicles.invincible", &g_Invincible);
+vehicles->AddSlider("boost", "menu.vehicles.boost", 0, 100, &g_BoostPct);
+```
+
+Fire a localized success toast from an action button:
+```cpp
+vehicles->AddAction("repair", "menu.vehicles.repair", [] {
+    g_Vehicle.Repair();
+    MenuForge::Notify(NotifyCategory::Success, "notify.repair.done");
+});
+```
+
+Switch theme and language at runtime, then persist the result:
+```cpp
+MenuForge::ApplyTheme("carbon");
+MenuForge::SetLanguage("de");
+MenuForge::SaveConfig(); // atomic write to menuforge.cfg
+```
+
+## Configuration
+| Setting | Default | Description |
+| --- | --- | --- |
+| Overlay toggle key | `F7` | Opens and closes the overlay. |
+| Navigate Up / Down | `Arrow Up` / `Arrow Down` | Move the highlight through items. |
+| Navigate Left / Right | `Arrow Left` / `Arrow Right` | Adjust sliders, enter and exit submenus. |
+| Select | `Enter` | Activate the highlighted item. |
+| Back | `Backspace` | Return to the parent menu. |
+| Theme | `midnight` | Hot-swappable theme identifier. |
+| Language | `en` | Active string table for all visible text. |
+| Notification lifetime | `3.0 s` | Default toast lifetime; per-category overrides supported. |
+| Config file | `menuforge.cfg` | Human-readable persistence file with atomic writes. |
+
+## Troubleshooting / FAQ
+**Is MenuForge a finished overlay?** No. It is a menu base — a scaffold you extend into the overlay you want.
+
+**The overlay does not appear.** The render backend targets DirectX 11; make sure your session runs with a DX11 device and that the overlay key was not rebound in the Key Bindings menu.
+
+**Keys do not respond.** Another tool may hold the same bindings. Rebind at runtime — MenuForge detects conflicts the moment they appear.
+
+**Some labels look untranslated.** A missing key falls back to the default table instead of rendering blank space; add the key to your string table to override it.
+
+**My configuration survived a crash — how?** Writes go to a temporary file first and are then swapped in atomically, so a crash mid-write cannot corrupt `menuforge.cfg`.
+
+**Is gamepad navigation supported?** Controller support is in beta on the 2026 roadmap and maps gamepad events onto the same semantic actions as the keyboard.
+
+**Can I use MenuForge commercially?** Yes, subject to the terms of the MIT license in the LICENSE file.
+
+## Contributing
+Fork the repository, create a feature branch, and keep new code docs-first: every public symbol carries a comment explaining intent, not just mechanics. Your features belong in the Content Layer — the State, Render, and Input layers are stable by design, so changes there deserve an issue first. Open a pull request with a short description of what changed and why, and check the FAQ before filing a new one. If MenuForge saved you a week of overlay work, give the repository a star — it helps other builders find it.
+
+## Keywords
+gta5 · gta5 mod · gta5 trainer · trainer menu · menu base · trainer base · mod menu framework · overlay framework · in-game overlay · game overlay · imgui · imgui menu · directx 11 · c++17 · cplusplus · windows 10 · windows 11 · pc modding · modding tools · game tooling · gaming toolkit · developer tools · starter kit · educational scaffold · blueprint · menu sdk · menu registration api · declarative menu · submenu navigation · state machine · theme engine · semantic tokens · hot-swappable themes · responsive layout · adaptive ui · ui framework · rendering pipeline · localization · string table · multilingual ui · rtl ready · config persistence · atomic writes · notification toasts · toast notifications · input rebinding · key bindings · runtime remap · controller support · open source · mit license · sourcebase · sourcebase alternative · sourceforge-gtastyle · menuforge · gta v tools
+
+## License
+Released under the [MIT](./LICENSE) license.
+
+```
+
+`docs/download-button.svg`:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40" role="img" aria-label="Download">
+  <defs>
+    <linearGradient id="mfBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6D8CFF"/>
+      <stop offset="0.45" stop-color="#3A5BE0"/>
+      <stop offset="1" stop-color="#23348F"/>
+    </linearGradient>
+    <linearGradient id="mfSheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect x="0.5" y="0.5" width="119" height="39" rx="9" fill="url(#mfBody)"/>
+  <path d="M0.5 9.5 Q0.5 0.5 9.5 0.5 H110.5 Q119.5 0.5 119.5 9.5 V13 H0.5 Z" fill="url(#mfSheen)"/>
+  <g stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M17 12 V25"/>
+    <path d="M11.5 20 L17 25.5 L22.5 20"/>
+  </g>
+  <text x="28" y="24.5" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" letter-spacing="1.4" fill="#FFFFFF">DOWNLOAD</text>
+</svg>
+
+```
