@@ -1326,6 +1326,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eac-analysis](entities/eac-analysis.md) — 19h Linux EAC userland (`eac.elf`) VM reconstruction; dlopen/trace harness, dispatch/VMTAIL probes, bytecode→IR/CFG, handler ISA, static path replay, MBA reducers; GDB dynamic tracing (Anti Cheat / Linux ELF)
 - [eac-bypass](entities/eac-bypass.md) — offensive EAC bypass research (C++; kernel driver + shader work)
 - [eac-bypass-1](entities/eac-bypass-1.md) — EAC bypass via `NtMapVisualRelativePoints` KM↔UM channel (C++; driver communication; gmh5225)
+- [EAC Compliance](entities/eac-compliance.md) — MarceloAlm Arch Linux EAC Linux v2 guide + `check-eac-compliance.sh` sysfs/procfs auditor (Secure Boot, TPM, lockdown, DKMS signing, IOMMU, LSM BPF; Shim/MOK; NVIDIA/VirtualBox; Guide)
 - [eac-cr3-bypass](entities/eac-cr3-bypass.md) — UM+KM EAC CR3 bypass teaching sample (C/C++; driver dev)
 - [eac-cr3-shuffle](entities/eac-cr3-shuffle.md) — compact EAC CR3 shuffle research sample; paging walk + VA→PA checks (SamuelTulach; Bypassing CR3 protection)
 - [eac-dbp](entities/eac-dbp.md) — EAC debug/bypass PoC; kernel driver + UM module; callback/minifilter/control-path interference + API interception; Visual Studio/WDK; controlled RE/security testing (Debug; Schnocker)
