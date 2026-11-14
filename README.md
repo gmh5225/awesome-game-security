@@ -1125,6 +1125,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/zpp1103/smo-harmony [HLE host port of Super Mario Odyssey (Switch 1.4.1) to HarmonyOS/OpenHarmony with nn::* service shims and NVN-to-Vulkan translation; BYO dump, source-only snapshot]
 - https://github.com/luvabyss/b3-express [Bayonetta 3 (Switch 1.2.0) native Windows port via ScarletNX static recompilation with NVN-on-Vulkan renderer and launcher; BYO dump, documented status and mod pipeline]
 - https://github.com/raulzrrs/letsgo-recomp [Native Windows port of Pokémon: Let's Go, Eevee!/Pikachu! (Switch 1.0.0) via static recompilation on LAS Recomp; BYO game dump, no assets in repo]
+- https://github.com/finalpantasy/new-pokemon-snap-recomp [Static recompilation of New Pokémon Snap (Switch 2.0.1) to native Windows (AArch64→C) with NVN-on-Vulkan runtime and input remapping; BYO dump, no game assets in repo]
 - https://github.com/valentderah/totk-pc-recomp [Static recompilation of The Legend of Zelda: Tears of the Kingdom to native Windows x86-64 with a Vulkan renderer (BYO game assets)]
 - https://github.com/Lucas-blip-png/dkb-pc-recomp [Static recompilation of Donkey Kong Bananza (Switch 2) to native Windows with a Vulkan renderer; BYO assets, documented NVN/SPIR-V RE pipeline (early, tutorial-level progress)]
 - https://github.com/STS78721/MKW-THWOMP [Static recompilation of Mario Kart World (Switch 2, 1.8.0) to native Windows with NVN-on-Vulkan runtime, codegen, and build tooling; BYO dump]
