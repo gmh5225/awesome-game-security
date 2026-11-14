@@ -755,6 +755,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Overlay
 - https://github.com/SeanPesce/Direct3D9-Overlay
 - https://github.com/dantebuilds/swapchain-bottleneck [Architecture analysis of DXGI swapchain/MPO overlay injection, Present-hook collisions, TDR cascades, and anti-cheat whitelist friction]
+- https://github.com/TheBlackSide243/perfoverlay-supreme [Single-exe Windows 10/11 in-game performance overlay (FPS, frame time, 1% low, CPU/GPU/RAM/VRAM) via ETW Present events—no DLL injection; D3D11 overlay window with RTSS-style layout editor]
 
 ## OpenGL
 > Guide
@@ -5136,6 +5137,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Detection:Obfuscation
 - https://github.com/mrphrazer/obfuscation_detection
 - https://github.com/cognis-digital/packpeek [Static C CLI packer/loader fingerprinter for UPX, ASPack, Themida, VMProtect, and others; entropy scoring with YARA and SARIF output]
+- https://github.com/cxlines/unicode_based_source_code_obsfucation_study_2026 [Reproducible ICRAS 2026 study comparing static Unicode diagnostics (D1–D3+, Ruff) for detecting Unicode-based Python source obfuscation on controlled and upstream corpora]
 
 > Detection:Android root
 - https://github.com/rushiranpise/detection [Collection of Various Root Detection Apps for Android]
