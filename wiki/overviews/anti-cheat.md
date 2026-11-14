@@ -28,6 +28,7 @@ sources:
   - wiki/sources/descriptions/DoomSalat__PEAK-mode-AntiCheat-Sentinel.md
   - wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md
   - wiki/sources/descriptions/gjones01__NullCS.md
+  - wiki/sources/descriptions/essensha__cs2-anti-cheat-ml-research.md
   - wiki/sources/descriptions/ImNotVirgola__VirgolaAntiCheat.md
   - wiki/sources/descriptions/InsideExploit__phoenix-ac.md
   - wiki/sources/descriptions/flameteamdev__LavaGuardAC.md
@@ -1521,6 +1522,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Console match-integrity AI layer:** [[qortime-ai]] (ConWan30; Python + JS verification panels; Muse Spark plain-English rulings/score cross-checks, Muse Wonder red-team receipt tampering, SAM 3.1 Evidence Lens scorebug + Challenge Echo pause-menu checks, Show Your Hands input-to-pixel alignment, Ed25519 advisory sidecars on receipt hashes; **lower-only** rules—AI may downgrade `VERIFIED`→`PARTIAL` but never upgrade referee verdicts on signed console match-integrity receipts from the [[qortroller]] line; useful for studying LLM narration boundaries beside [[detector-operations]] shadow-mode pipelines) (source: wiki/sources/descriptions/ConWan30__qortime-ai.md)
 
 **Offline CS2 demo evidence tables:** [[nullcs]] (gjones01; demoparser2/awpy `.dem` → per-engagement windows; CNN on aim/mouse/visibility/timing sequences + XGBoost over ~450 player features for lobby rankings; Next.js + FastAPI-style upload/desktop workflows; tabular evidence for human review—no automated bans; Anti Cheat / Analysis Framework) beside [[cs2-overwatch]] and [[yaacs-anticheat]] demo-telemetry lanes. (source: wiki/sources/descriptions/gjones01__NullCS.md)
+
+**CS2 synthetic telemetry ML bench:** [[cs2-anti-cheat-ml-research]] (essensha; Jupyter + Python on fully synthetic player/match telemetry—individual and coordinated cheat scenarios; temporal validation; logistic regression and Isolation Forest baselines; probability calibration and threshold trade-offs; NetworkX co-play graphs; concept drift, label bias, and skill-segment fairness studies; review-throughput/backlog simulations and safe model-unavailable fallbacks; reproducible dataset generators + fairness-by-skill offline evaluation; research-only—not production AC or auto-ban; Anti Cheat / Machine Learning) beside demo parsers such as [[cs2-overwatch]]/[[nullcs]] and match-stat classifiers such as [[ban-hammer]]. (source: wiki/sources/descriptions/essensha__cs2-anti-cheat-ml-research.md)
 
 **Educational AC curriculum:** [[anticheat-lab]] (Ogonx; six-month self-study track on deliberately vulnerable own-game builds—x64 ASM/C++ memory layout, RE tooling, server authority, statistical/client checks; Compiler Explorer + VS stack tracing; devlog; VM-only scope; Anti Cheat) complements guide-style labs such as [[minecraft-anticheat-docs]] and telemetry research stacks such as [[apex-anticheat-lab]]. (source: wiki/sources/descriptions/Ogonx__anticheat-lab.md) (source: wiki/sources/README-categories.md)
 
