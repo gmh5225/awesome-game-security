@@ -1481,6 +1481,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/smithluke874/Android-VirtualCam-Manager [Magisk/Zygisk virtual camera module with ArtHook-based Camera1 surface and NV21 frame injection (no LSPosed)]
 
 > Xposed
+- https://github.com/lm060719/io.mo.glassmic [LSPosed module that routes imported or TTS audio into target apps via AudioRecord/AAudio hooks for rooted Android audio-pipeline testing]
 - https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
 - https://github.com/xposed-modules-repo/com.fuck.iab [LSPosed/Xposed module that hooks Google Play, Bazaar, and Myket in-app billing to bypass purchases, with per-package Frida script support]
 - https://github.com/mabbcoll13/xposed-module-kit [Xposed/LSPosed module scaffold with hook templates and root-detection bypass example]
@@ -2650,6 +2651,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/adamhlt/ImGui-Standalone
 - https://github.com/ocornut/imgui_club [Official Dear ImGui extensions including a hex memory editor widget]
 - https://github.com/XeTrinityz/Oracle [MIT-licensed in-game cheat/tweak menu for Batman: Arkham Knight (BmSDK-AK), Trinity Edition with modular hooks and settings.toml]
+- https://github.com/misnopini1987/GTA-5-Trainer-Menu-Base [MIT C++17 DirectX 11 / ImGui scaffold (MenuForge) for building modular in-game trainer overlay menus for GTA V on Windows]
 
 > Vulnerable Driver 
 - https://www.loldrivers.io/drivers [Living Off The Land Drivers]
@@ -4861,6 +4863,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/hckerelauk-git/amongusanticheat [Among Us client-side BepInEx 6 / IL2CPP anti-cheat (ACE) with rule-based detections, in-game settings UI, AI review, and RPC flood protection]
 - https://github.com/xav0dev/AU-Anticheat [Among Us BepInEx IL2CPP host-side anti-cheat and lobby moderation with evidence-based RPC checks and configurable host tools]
 - https://github.com/DoomSalat/PEAK-mode-AntiCheat-Sentinel [BepInEx host-side anti-cheat for PEAK that attributes suspicious item spawns to Photon senders and blocks illegal grants on the host]
+- https://github.com/swheettaos/crewtools [Host-only BepInEx 6 IL2CPP plugin for Moon Sweepers crew games: permissions, spending caps, protected bases, and cheat catching]
 - https://github.com/uamo11/y0x1Server [Piqueserver Ace of Spades dedicated server fork with persistent HWID bans and server-side speed/fly/teleport, reach, rapid-fire, and snap-aim checks]
 - https://github.com/Longno242/Encryptic-Roblox-Anti-Cheat [Server-authoritative Luau anti-cheat for Roblox with movement, remote, fly/noclip, fire-rate, and combat guards plus Studio demo]
 - https://github.com/mastershadow547/Advanced-Anticheat [Open-source Roblox server anti-cheat detecting movement exploits, unauthorized remotes, and environment tampering]
