@@ -2305,6 +2305,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/mibho/x64dbgTraceReader [Trace Reader]
 - https://github.com/Steesha/CodeCleaner [Cleaning Themida Mutation Assembly codes]
 - https://github.com/ivanpotatoes/KozDbg [Open-source x64dbg plugin that bypasses VMProtect 3.3.x–3.10.x user-mode and kernel-debugger anti-debug checks via version-specific profiles (no kernel driver)]
+- https://github.com/ivanpotatoes/KozVM [Open-source x64dbg anti-anti-VM plugin for VMProtect 3.3.1–3.5.0 CPUID checks via runtime handler patching (companion to KozDbg; no kernel driver)]
 - https://github.com/notpidgey/ManyTypes [x64dbg typeparsing plugin with Windows types]
 - https://github.com/cycraft-corp/BinaryAnalysisMCPs [Binary analysis MCPs collections]
 - https://github.com/dariushoule/x64dbg-rippy [AI reverse engineering assistant for x64dbg]
