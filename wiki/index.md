@@ -4102,6 +4102,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UnSign](entities/unsign.md) — CLI Authenticode signature removal from PE/COFF (EXE/DLL/SYS; C; 32/64-bit; re-signing / RE / malware analysis; SV-Foster)
 - [unlicense](entities/unlicense.md) — Python 3 Frida dynamic unpacker for Themida/WinLicense 2.x/3.x (OEP + IAT rebuild; native PE + .NET; Fix Themida)
 - [unthemidator](entities/unthemidator.md) — C++20 static Themida/Code Virtualizer/WinLicense v3–v4 unpacker (Unicorn/Zydis emulation; IAT + VM rebuild; no host execution; x86/x64 EXE/DLL/drivers; Fix Themida; x86rc)
+- [unicode-based-source-code-obsfucation-study-2026](entities/unicode-based-source-code-obsfucation-study-2026.md) — cxlines ICRAS 2026 reproducible Python Unicode-obfuscation static-detector benchmark (D1–D3+, Ruff; controlled + upstream corpora; Detection:Obfuscation; supply-chain/code-review read-only analysis)
 - [Unpacker](entities/unpacker.md) — modular Python PE/ELF packer detection + unpack pipeline (UPX, ASPack, Themida, VMProtect; Unicorn/Qiling emulation; Fix VMP / Unpacker)
 - [Unwinder](entities/unwinder.md) — Kudaes Rust call-stack spoofing crate (SilentMoonWalk-inspired; macros for functions + indirect syscalls; stable traces; chained spoof without linear stack growth; Rust + ASM; Cheat Spoof Stack / thread stack spoofing)
 - [unicorn-pe](entities/unicorn-pe.md) — Unicorn-based Windows PE emulation for packed binaries (per-instruction disasm; cheat / DBI)
