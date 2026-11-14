@@ -190,6 +190,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AI-Aimbot](entities/ai-aimbot.md) — RootKit-Org YOLOv5 screen-capture aimbot (Conda; Fortnite/Rust custom models; detection sensitivity + aim tuning; cheat / Machine Learning YOLOv5)
 - [AIMr](entities/aimr.md) — ai-aimbot Python YOLO screen-capture external aimbot (CustomTkinter CLI/GUI; bettercam; optional DirectML; triggerbot/recoil/silent aim; optional Arduino/KMBOX hardware input; cheat / Machine Learning YOLO)
 - [AI-FPS-b00m-h3adsh0t](entities/ai-fps-b00m-h3adsh0t.md) — AI-powered FPS aimbot (Python/C++; external screen capture + YOLO player detection + mouse aim; cheat / Neural Network; gmh5225)
+- [AI Game Trainer](entities/ai-game-trainer.md) — Hello-DaTang Windows local-first trainer console; Python HTTP + SQLite + browser UI; CE 7.x MCP Lua bridge; capture/persist `.CT` presets per game library; offline single-player; Codex + CE MCP
 - [AIMachDec](entities/aimachdec.md) — IDA LLM ARM64→C/ObjC/Swift for Mach-O (apps/kernelcache/DSC; cheat / IDA Plugins)
 - [AimStar](entities/aimstar.md) — M3351AN external CS2 cheat framework (C++; bone-based aimbot, entity tracking, ESP, triggerbot, offset management, menu config; multi-language docs; external cheat architecture + CS2 memory reading research; cheat / game:cs2 [External])
 - [aimbot-detection-prototype](entities/aimbot-detection-prototype.md) — deep-learning aimbot/triggerbot detection prototype (clips + live window; Detection:Aimbot)
