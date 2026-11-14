@@ -1,0 +1,3892 @@
+Project Path: arc_MarceloAlm_EAC-compliance__7scyjst
+
+Source Tree:
+
+```txt
+arc_MarceloAlm_EAC-compliance__7scyjst
+├── 95-systemd-boot.hook
+├── ANSIBLE-SECURITY-BLUEPRINT.md
+├── HARDENING-DEBIAN13-VM.md
+├── HARDENING-DEBIAN13-VM.pt-BR.md
+├── HARDENING.md
+├── HARDENING.pt-BR.md
+├── LICENSE
+├── README.md
+├── README.pt-BR.md
+└── check-eac-compliance.sh
+
+```
+
+`95-systemd-boot.hook`:
+
+```hook
+[Trigger]
+Type = Package
+Operation = Upgrade
+Target = systemd
+
+[Action]
+Description = Atualizando systemd-boot e sincronizando grubx64.efi para o Shim...
+When = PostTransaction
+Exec = /bin/sh -c "/usr/bin/bootctl update && /usr/bin/cp -f /boot/EFI/systemd/systemd-bootx64.efi /boot/EFI/systemd/grubx64.efi"
+
+```
+
+`ANSIBLE-SECURITY-BLUEPRINT.md`:
+
+```md
+# Blueprint de Segurança e Hardening CIS para Ansible: Debian 13 em Máquinas Virtuais
+
+[![Ansible](https://img.shields.io/badge/Ansible-Ready-EE0000?logo=ansible&logoColor=white)](https://www.ansible.com/)
+[![Debian](https://img.shields.io/badge/Debian%2013-Trixie-d70a53?logo=debian&logoColor=white)](https://www.debian.org/)
+[![CIS Benchmark](https://img.shields.io/badge/CIS%20Benchmark-Level%201%20Server-success)](https://www.cisecurity.org/cis-benchmarks/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> **Documento de Especificação Técnica e Arquitetura de Automação**  
+> Este arquivo foi estruturado para servir de especificação de engenharia direta para a criação de **Playbooks e Roles do Ansible**, automatizando o provisionamento e o endurecimento defensivo de Máquinas Virtuais Debian 13 em conformidade com o **CIS Benchmark Level 1 Server**.
+
+---
+
+## Índice
+
+- [1. Visão Geral da Arquitetura e Matriz de Roles Ansible](#1-visão-geral-da-arquitetura-e-matriz-de-roles-ansible)
+- [2. Role 1: `vm_firmware_agent` (Hypervisor & QEMU Guest Agent)](#2-role-1-vm_firmware_agent-hypervisor--qemu-guest-agent)
+- [3. Role 2: `kernel_sysctl` (Memória, ASLR, Yama e Processos)](#3-role-2-kernel_sysctl-memória-aslr-yama-e-processos)
+- [4. Role 3: `filesystem_security` (Montagens e Blacklist de Drivers)](#4-role-3-filesystem_security-montagens-e-blacklist-de-drivers)
+- [5. Role 4: `network_hardening` (Stack TCP/IP e Anti-Spoofing)](#5-role-4-network_hardening-stack-tcpip-e-anti-spoofing)
+- [6. Role 5: `nftables_firewall` (Filtragem Nativa de Pacotes)](#6-role-5-nftables_firewall-filtragem-nativa-de-pacotes)
+- [7. Role 6: `openssh_server` (Acesso Remoto Seguro e Criptografia)](#7-role-6-openssh_server-acesso-remoto-seguro-e-criptografia)
+- [8. Role 7: `access_privilege` (Sudo Seguro, PAM e Core Dumps)](#8-role-7-access_privilege-sudo-seguro-pam-e-core-dumps)
+- [9. Role 8: `apparmor_enforce` (Mandatory Access Control)](#9-role-8-apparmor_enforce-mandatory-access-control)
+- [10. Role 9: `auditd_logging` (Auditoria Contínua Imutável)](#10-role-9-auditd_logging-auditoria-contínua-imutável)
+- [11. Role 10: `auto_updates_integrity` (Unattended Upgrades & Debsums)](#11-role-10-auto_updates_integrity-unattended-upgrades--debsums)
+- [12. Playbook Integrador e Tarefas de Validação (`verify.yml`)](#12-playbook-integrador-e-tarefas-de-validação-verifyyml)
+
+---
+
+## 1. Visão Geral da Arquitetura e Matriz de Roles Ansible
+
+A automação deve ser dividida em roles independentes, idempotentes e orientadas a handlers.
+
+```
+site.yml
+├── roles/
+│   ├── vm_firmware_agent/       # Restrições de QEMU Guest Agent
+│   ├── kernel_sysctl/           # Sysctl de memória, ASLR, Yama, eBPF
+│   ├── filesystem_security/     # Montagens fstab, tmpfs, blacklist fs
+│   ├── network_hardening/       # Sysctl de rede, rp_filter, ICMP
+│   ├── nftables_firewall/       # Firewall padrão drop, rate limiting
+│   ├── openssh_server/          # sshd_config.d, chaves públicas, ciphers
+│   ├── access_privilege/        # Sudo use_pty, limits coredump
+│   ├── apparmor_enforce/        # Perfis do AppArmor em enforce
+│   ├── auditd_logging/          # Regras CIS auditd imutáveis
+│   └── auto_updates_integrity/  # Unattended-upgrades e debsums
+```
+
+---
+
+## 2. Role 1: `vm_firmware_agent` (Hypervisor & QEMU Guest Agent)
+
+### Objetivo
+Garantir o isolamento entre convidado e hypervisor, desabilitando o vetor de injeção de comandos arbitrários no agente de virtualização.
+
+### Variáveis (`defaults/main.yml`)
+```yaml
+vm_agent_package: "qemu-guest-agent"
+vm_agent_blacklist_commands:
+  - "guest-exec"
+  - "guest-exec-status"
+```
+
+### Tarefas (`tasks/main.yml`)
+```yaml
+- name: Instalar o pacote do agente do hypervisor
+  ansible.builtin.apt:
+    name: "{{ vm_agent_package }}"
+    state: present
+    update_cache: yes
+
+- name: Restringir execuções remotas arbitrárias via QEMU Guest Agent
+  ansible.builtin.lineinfile:
+    path: /etc/default/qemu-guest-agent
+    regexp: '^DAEMON_ARGS='
+    line: 'DAEMON_ARGS="--blacklist={{ vm_agent_blacklist_commands | join(",") }}"'
+    create: yes
+    mode: '0644'
+  notify: Reiniciar QEMU Guest Agent
+```
+
+### Handlers (`handlers/main.yml`)
+```yaml
+- name: Reiniciar QEMU Guest Agent
+  ansible.builtin.systemd:
+    name: qemu-guest-agent
+    state: restarted
+```
+
+---
+
+## 3. Role 2: `kernel_sysctl` (Memória, ASLR, Yama e Processos)
+
+### Objetivo
+Aplicar parâmetros de memória em tempo de execução para mitigar ataques de corrupção de memória e exploração de ponteiros (CIS 1.5).
+
+### Variáveis (`defaults/main.yml`)
+```yaml
+kernel_sysctl_settings:
+  kernel.randomize_va_space: 2
+  kernel.dmesg_restrict: 1
+  kernel.kptr_restrict: 2
+  kernel.yama.ptrace_scope: 2
+  kernel.unprivileged_bpf_disabled: 1
+  net.core.bpf_jit_harden: 2
+  fs.protected_symlinks: 1
+  fs.protected_hardlinks: 1
+  fs.protected_fifos: 2
+  fs.protected_regular: 2
+  fs.suid_dumpable: 0
+  kernel.sysrq: 176
+  vm.swappiness: 10
+```
+
+### Tarefas (`tasks/main.yml`)
+```yaml
+- name: Implantar configuração de sysctl de hardening
+  ansible.builtin.template:
+    src: 50-security-hardening.conf.j2
+    dest: /etc/sysctl.d/50-security-hardening.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Aplicar Sysctl
+```
+
+### Template (`templates/50-security-hardening.conf.j2`)
+```ini
+# Gerado via Ansible - CIS Benchmark Level 1
+{% for key, value in kernel_sysctl_settings.items() %}
+{{ key }} = {{ value }}
+{% endfor %}
+```
+
+### Handlers (`handlers/main.yml`)
+```yaml
+- name: Aplicar Sysctl
+  ansible.builtin.command:
+    cmd: sysctl --system
+  changed_when: true
+```
+
+---
+
+## 4. Role 3: `filesystem_security` (Montagens e Blacklist de Drivers)
+
+### Objetivo
+Impedir a execução de binários não autorizados em áreas públicas e desabilitar drivers de sistemas de arquivos legados (CIS 1.1).
+
+### Tarefas (`tasks/main.yml`)
+```yaml
+- name: Desabilitar drivers de sistemas de arquivos legados e obsoletos
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/blacklist-filesystems.conf
+    content: |
+      # CIS Benchmark 1.1.1
+      install cramfs /bin/true
+      install freevxfs /bin/true
+      install jffs2 /bin/true
+      install hfs /bin/true
+      install hfsplus /bin/true
+      install squashfs /bin/true
+      install udf /bin/true
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Garantir opções seguras de montagem para /dev/shm no fstab
+  ansible.posix.mount:
+    path: /dev/shm
+    src: tmpfs
+    fstype: tmpfs
+    opts: "defaults,nosuid,nodev,noexec"
+    state: present
+
+- name: Habilitar unidade tmp.mount do systemd para o /tmp seguro
+  ansible.builtin.systemd:
+    name: tmp.mount
+    enabled: yes
+    state: started
+```
+
+---
+
+## 5. Role 4: `network_hardening` (Stack TCP/IP e Anti-Spoofing)
+
+### Objetivo
+Descartar pacotes forjados, bloquear ICMP redirects e proteger a VM contra DoS e spoofing em redes virtuais (CIS 3.1 & 3.2).
+
+### Variáveis (`defaults/main.yml`)
+```yaml
+network_sysctl_settings:
+  net.ipv4.ip_forward: 0
+  net.ipv6.conf.all.forwarding: 0
+  net.ipv4.conf.all.rp_filter: 1
+  net.ipv4.conf.default.rp_filter: 1
+  net.ipv4.conf.all.accept_redirects: 0
+  net.ipv4.conf.default.accept_redirects: 0
+  net.ipv4.conf.all.secure_redirects: 0
+  net.ipv4.conf.default.secure_redirects: 0
+  net.ipv4.conf.all.send_redirects: 0
+  net.ipv4.conf.default.send_redirects: 0
+  net.ipv6.conf.all.accept_redirects: 0
+  net.ipv6.conf.default.accept_redirects: 0
+  net.ipv4.conf.all.accept_source_route: 0
+  net.ipv4.conf.default.accept_source_route: 0
+  net.ipv6.conf.all.accept_source_route: 0
+  net.ipv6.conf.default.accept_source_route: 0
+  net.ipv4.tcp_syncookies: 1
+  net.ipv4.tcp_rfc1337: 1
+  net.ipv4.icmp_echo_ignore_broadcasts: 1
+  net.ipv4.icmp_ignore_bogus_error_responses: 1
+  net.ipv4.conf.all.log_martians: 1
+  net.ipv4.conf.default.log_martians: 1
+  net.ipv6.conf.all.accept_ra: 0
+  net.ipv6.conf.default.accept_ra: 0
+```
+
+### Tarefas (`tasks/main.yml`)
+```yaml
+- name: Implantar sysctl de hardening de rede TCP/IP
+  ansible.builtin.template:
+    src: 60-network-hardening.conf.j2
+    dest: /etc/sysctl.d/60-network-hardening.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Aplicar Sysctl
+
+- name: Desabilitar protocolos de rede obsoletos
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/blacklist-protocols.conf
+    content: |
+      # CIS Benchmark 3.4
+      install dccp /bin/true
+      install sctp /bin/true
+      install rds /bin/true
+      install tipc /bin/true
+    owner: root
+    group: root
+    mode: '0644'
+```
+
+---
+
+## 6. Role 5: `nftables_firewall` (Filtragem Nativa de Pacotes)
+
+### Objetivo
+Impor uma política restritiva de descarte (*default drop*) em nível de kernel utilizando o framework nativo do Debian.
+
+### Variáveis (`defaults/main.yml`)
+```yaml
+firewall_allowed_tcp_ports:
+  - 22
+firewall_rate_limit_ssh: "10/minute"
+firewall_rate_limit_icmp: "5/second"
+```
+
+### Template (`templates/nftables.conf.j2`)
+```text
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+table inet filter {
+    chain input {
+        type filter hook input priority filter; policy drop;
+
+        iif "lo" accept
+        ct state established,related accept
+        ct state invalid drop
+
+        ip protocol icmp icmp type echo-request limit rate {{ firewall_rate_limit_icmp }} accept
+        ip6 nexthdr icmpv6 icmpv6 type echo-request limit rate {{ firewall_rate_limit_icmp }} accept
+
+        {% for port in firewall_allowed_tcp_ports %}
+        tcp dport {{ port }} ct state new limit rate {{ firewall_rate_limit_ssh }} accept
+        {% endfor %}
+    }
+
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+    }
+
+    chain output {
+        type filter hook output priority filter; policy accept;
+    }
+}
+```
+
+### Tarefas (`tasks/main.yml`)
+```yaml
+- name: Instalar nftables
+  ansible.builtin.apt:
+    name: nftables
+    state: present
+
+- name: Implantar configuração de firewall nftables
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: /etc/nftables.conf
+    owner: root
+    group: root
+    mode: '0755'
+  notify: Recarregar Nftables
+
+- name: Habilitar e iniciar serviço nftables
+  ansible.builtin.systemd:
+    name: nftables
+    enabled: yes
+    state: started
+```
+
+### Handlers (`handlers/main.yml`)
+```yaml
+- name: Recarregar Nftables
+  ansible.builtin.systemd:
+    name: nftables
+    state: reloaded
+```
+
+---
+
+## 7. Role 6: `openssh_server` (Acesso Remoto Seguro e Criptografia)
+
+### Objetivo
+Desativar senhas em texto puro, proibir login de root e limitar tentativas de conexão remota (CIS 5.2).
+
+### Variáveis (`defaults/main.yml`)
+```yaml
+sshd_permit_root_login: "no"
+sshd_password_authentication: "no"
+sshd_pubkey_authentication: "yes"
+sshd_max_auth_tries: 3
+sshd_client_alive_interval: 300
+sshd_client_alive_count_max: 2
+sshd_ciphers: "chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com"
+sshd_kex_algorithms: "curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512"
+sshd_macs: "hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com"
+```
+
+### Tarefas (`tasks/main.yml`)
+```yaml
+- name: Configurar arquivo modular de hardening do OpenSSH
+  ansible.builtin.template:
+    src: 01-hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/01-hardening.conf
+    owner: root
+    group: root
+    mode: '0600'
+    validate: '/usr/sbin/sshd -t -f %s'
+  notify: Recarregar SSH
+```
+
+### Template (`templates/01-hardening.conf.j2`)
+```ini
+# CIS Benchmark 5.2 - Gerado via Ansible
+PermitRootLogin {{ sshd_permit_root_login }}
+PasswordAuthentication {{ sshd_password_authentication }}
+PermitEmptyPasswords no
+KbdInteractiveAuthentication no
+PubkeyAuthentication {{ sshd_pubkey_authentication }}
+MaxAuthTries {{ sshd_max_auth_tries }}
+X11Forwarding no
+AllowTcpForwarding no
+AllowAgentForwarding no
+ClientAliveInterval {{ sshd_client_alive_interval }}
+ClientAliveCountMax {{ sshd_client_alive_count_max }}
+LogLevel VERBOSE
+Ciphers {{ sshd_ciphers }}
+KexAlgorithms {{ sshd_kex_algorithms }}
+MACs {{ sshd_macs }}
+```
+
+### Handlers (`handlers/main.yml`)
+```yaml
+- name: Recarregar SSH
+  ansible.builtin.systemd:
+    name: ssh
+    state: reloaded
+```
+
+---
+
+## 8. Role 7: `access_privilege` (Sudo Seguro, PAM e Core Dumps)
+
+### Objetivo
+Isolar o terminal do `sudo`, registrar execuções administrativas e impedir despejo de memória sensível (CIS 5.3 & 1.5).
+
+### Tarefas (`tasks/main.yml`)
+```yaml
+- name: Configurar regras restritivas do Sudo
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/01-security-hardening
+    content: |
+      # CIS Benchmark 5.3
+      Defaults use_pty
+      Defaults logfile="/var/log/sudo.log"
+      Defaults timestamp_timeout=5
+      Defaults passwd_tries=3
+    owner: root
+    group: root
+    mode: '0440'
+    validate: '/usr/sbin/visudo -cf %s'
+
+- name: Desabilitar core dumps em limits.conf
+  ansible.builtin.copy:
+    dest: /etc/security/limits.d/10-coredump.conf
+    content: |
+      # CIS Benchmark 1.5.1
+      * hard core 0
+      * soft core 0
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Desabilitar armazenamento de core dumps no systemd
+  ansible.builtin.ini_file:
+    path: /etc/systemd/coredump.conf
+    section: Coredump
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    mode: '0644'
+  loop:
+    - { option: 'Storage', value: 'none' }
+    - { option: 'ProcessSizeMax', value: '0' }
+```
+
+---
+
+## 9. Role 8: `apparmor_enforce` (Mandatory Access Control)
+
+### Objetivo
+Garantir que o LSM padrão do Debian 13 esteja operacional com todos os perfis em modo estrito de imposição (*enforcing*).
+
+### Tarefas (`tasks/main.yml`)
+```yaml
+- name: Instalar pacotes de perfis e utilitários do AppArmor
+  ansible.builtin.apt:
+    name:
+      - apparmor
+      - apparmor-profiles
+      - apparmor-utils
+    state: present
+
+- name: Garantir que o serviço do AppArmor esteja habilitado e ativo
+  ansible.builtin.systemd:
+    name: apparmor
+    enabled: yes
+    state: started
+
+- name: Impor modo enforce em todos os perfis carregados
+  ansible.builtin.command:
+    cmd: aa-enforce /etc/apparmor.d/*
+  changed_when: false
+```
+
+---
+
+## 10. Role 9: `auditd_logging` (Auditoria Contínua Imutável)
+
+### Objetivo
+Rastrear chamadas de sistema, escalonamento de privilégios e alterações de credenciais, travando as regras até o reboot (CIS 4.x).
+
+### Tarefas (`tasks/main.yml`)
+```yaml
+- name: Instalar auditd
+  ansible.builtin.apt:
+    name: auditd
+    state: present
+
+- name: Implantar regras CIS de auditoria
+  ansible.builtin.copy:
+    dest: /etc/audit/rules.d/50-security.rules
+    content: |
+      -D
+      -b 8192
+      -f 1
+
+      # Identidade e Usuários (CIS 4.1.4)
+      -w /etc/group -p wa -k identity
+      -w /etc/passwd -p wa -k identity
+      -w /etc/gshadow -p wa -k identity
+      -w /etc/shadow -p wa -k identity
+      -w /etc/security/opasswd -p wa -k identity
+
+      # Ambiente de Rede (CIS 4.1.5)
+      -a always,exit -F arch=b64 -S sethostname,setdomainname -k system_locale
+      -w /etc/issue -p wa -k system_locale
+      -w /etc/hosts -p wa -k system_locale
+
+      # Privilégios e Sudoers (CIS 4.1.10)
+      -w /etc/sudoers -p wa -k scope
+      -w /etc/sudoers.d/ -p wa -k scope
+
+      # Chamadas de Montagem (CIS 4.1.13)
+      -a always,exit -F arch=b64 -S mount,umount2 -k mounts
+
+      # Regras Imutáveis (CIS 4.1.17)
+      -e 2
+    owner: root
+    group: root
+    mode: '0640'
+  notify: Recarregar Audit Rules
+
+- name: Habilitar serviço auditd
+  ansible.builtin.systemd:
+    name: auditd
+    enabled: yes
+    state: started
+```
+
+### Handlers (`handlers/main.yml`)
+```yaml
+- name: Recarregar Audit Rules
+  ansible.builtin.command:
+    cmd: augenrules --load
+  changed_when: true
+```
+
+---
+
+## 11. Role 10: `auto_updates_integrity` (Unattended Upgrades & Debsums)
+
+### Objetivo
+Automatizar a aplicação de patches de segurança e auditar alterações em binários oficiais do sistema operacional.
+
+### Tarefas (`tasks/main.yml`)
+```yaml
+- name: Instalar unattended-upgrades e debsums
+  ansible.builtin.apt:
+    name:
+      - unattended-upgrades
+      - apt-listchanges
+      - debsums
+    state: present
+
+- name: Configurar origens de segurança automáticas no Debian
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    content: |
+      Unattended-Upgrade::Origins-Pattern {
+          "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+      };
+      Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+      Unattended-Upgrade::MinimalSteps "true";
+      Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+      Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Habilitar execução diária do unattended-upgrades
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+    owner: root
+    group: root
+    mode: '0644'
+```
+
+---
+
+## 12. Playbook Integrador e Tarefas de Validação (`verify.yml`)
+
+### Playbook Principal (`site.yml`)
+```yaml
+---
+- name: Hardening Completo Debian 13 para Máquinas Virtuais (CIS Level 1)
+  hosts: debian_vms
+  become: yes
+  roles:
+    - vm_firmware_agent
+    - kernel_sysctl
+    - filesystem_security
+    - network_hardening
+    - nftables_firewall
+    - openssh_server
+    - access_privilege
+    - apparmor_enforce
+    - auditd_logging
+    - auto_updates_integrity
+```
+
+### Tarefas de Validação e Asserção (`verify.yml`)
+Execute após o playbook para atestar que o estado desejado foi alcançado:
+
+```yaml
+---
+- name: Validar Controles de Segurança Aplicados
+  hosts: debian_vms
+  become: yes
+  tasks:
+    - name: Verificar ASLR ativo em nível 2
+      ansible.builtin.assert:
+        that: ansible_kernel_randomize_va_space == "2"
+      vars:
+        ansible_kernel_randomize_va_space: "{{ lookup('pipe', 'sysctl -n kernel.randomize_va_space') }}"
+
+    - name: Verificar política padrão de descarte do nftables
+      ansible.builtin.command:
+        cmd: nft list ruleset
+      register: nft_output
+      changed_when: false
+      failed_when: "'policy drop' not in nft_output.stdout"
+
+    - name: Verificar AppArmor em execução
+      ansible.builtin.command:
+        cmd: aa-status
+      register: apparmor_output
+      changed_when: false
+      failed_when: "'apparmor module is loaded' not in apparmor_output.stdout"
+
+    - name: Verificar bloqueio de login root no SSH
+      ansible.builtin.command:
+        cmd: sshd -T
+      register: sshd_output
+      changed_when: false
+      failed_when: "'permitrootlogin no' not in sshd_output.stdout"
+
+    - name: Relatório de Integridade de Pacotes com Debsums
+      ansible.builtin.command:
+        cmd: debsums -c
+      register: debsums_result
+      changed_when: false
+      failed_when: debsums_result.rc != 0
+```
+
+```
+
+`HARDENING-DEBIAN13-VM.md`:
+
+```md
+# Debian 13 (Trixie) Hardening Guide for Virtual Machines: CIS Benchmark & Defense-in-Depth
+
+[![Debian](https://img.shields.io/badge/Debian%2013-Trixie%20(Testing%2FStable)-d70a53?logo=debian&logoColor=white)](https://www.debian.org/)
+[![CIS Benchmark](https://img.shields.io/badge/CIS%20Benchmark-Debian%20Level%201%20Server-success)](https://www.cisecurity.org/cis-benchmarks/)
+[![Virtualization](https://img.shields.io/badge/Virtualization-KVM%20%7C%20Proxmox%20%7C%20VMware-blue)](https://wiki.debian.org/KVM)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> [!NOTE]
+> Leia este guia em português: **[Português (Brasil)](HARDENING-DEBIAN13-VM.pt-BR.md)**  
+> This guide is dedicated to virtualized servers and instances running **Debian 13 (Trixie)** across modern hypervisors (KVM/QEMU, Proxmox VE, VMware ESXi, Hyper-V, and VirtualBox). For our bare-metal Arch Linux hardening guide, see **[HARDENING.md](HARDENING.md)**.
+
+This document establishes the operational security baseline and defensive hardening standards for virtual instances running **Debian 13**. The configuration adheres strictly to the **CIS Debian Linux Benchmark** (Level 1 Server) and incorporates virtualization-specific mitigations to minimize the attack surface and enforce boundary isolation between the guest operating system and the hypervisor.
+
+---
+
+## Table of Contents
+
+- [1. Threat Model & Virtualization Principles](#1-threat-model--virtualization-principles)
+- [2. Layer 1: Virtual Hardware & Firmware (OVMF & Hypervisor)](#2-layer-1-virtual-hardware--firmware-ovmf--hypervisor)
+- [3. Layer 2: Kernel, Memory & Sysctl on Debian 13 (CIS 1.5 & 3.x)](#3-layer-2-kernel-memory--sysctl-on-debian-13-cis-15--3x)
+- [4. Layer 3: Filesystem Partitioning & Obsolete Modules (CIS 1.1)](#4-layer-3-filesystem-partitioning--obsolete-modules-cis-11)
+- [5. Layer 4: TCP/IP Network Stack Hardening & `nftables` Firewall](#5-layer-4-tcpip-network-stack-hardening--nftables-firewall)
+- [6. Layer 5: OpenSSH Server Hardening & Privilege Control (CIS 5.x)](#6-layer-5-openssh-server-hardening--privilege-control-cis-5x)
+- [7. Layer 6: Mandatory Access Control with AppArmor (Debian Default)](#7-layer-6-mandatory-access-control-with-apparmor-debian-default)
+- [8. Layer 7: Continuous Auditing with `auditd` & Unattended Upgrades](#8-layer-7-continuous-auditing-with-auditd--unattended-upgrades)
+- [9. Continuous Verification & Health Checklist](#9-continuous-verification--health-checklist)
+- [Official References](#official-references)
+
+---
+
+## 1. Threat Model & Virtualization Principles
+
+Virtual machines operate under different security dynamics than bare-metal hosts:
+1. **Shared Physical Hardware:** Microarchitectural side-channel attacks (*Spectre*, *Meltdown*, *L1TF*) require memory space layout protections.
+2. **Paravirtualized Devices:** `virtio` drivers provide high performance, but unused virtual bus emulators must be pruned.
+3. **Hypervisor Guest Agents:** Tools like `qemu-guest-agent` allow the hypervisor to execute arbitrary root commands unless explicitly restricted via blacklists.
+4. **Pruning Unused Virtual Hardware:** VMs do not require Bluetooth, audio devices, legacy serial controllers, or floppy disk drives. Removing emulated hardware reduces potential QEMU escape vulnerabilities.
+
+---
+
+## 2. Layer 1: Virtual Hardware & Firmware (OVMF & Hypervisor)
+
+Configure your VM settings on the hypervisor (Proxmox, KVM/QEMU, or VMware) prior to production deployment:
+
+### 2.1. Recommended Hypervisor Configuration (Proxmox / KVM)
+* **BIOS / Firmware:** Choose **OVMF (UEFI)** rather than legacy SeaBIOS.
+* **Secure Boot:** Enable Secure Boot (Debian officially signs its kernel and GRUB binaries with the Microsoft UEFI CA).
+* **vTPM (Virtual TPM 2.0):** Enable TPM 2.0 emulation (via `swtpm` on Proxmox/KVM or vTPM on ESXi).
+* **Remove Unnecessary Virtual Devices:**
+  * Remove emulated audio controllers (*Audio Device*).
+  * Disable unneeded serial/parallel ports.
+  * Remove floppy drive controllers.
+  * Utilize **VirtIO SCSI** or **VirtIO Block** for disks and **VirtIO Network** with multiqueue.
+
+### 2.2. Hypervisor Agent Hardening (`qemu-guest-agent`)
+
+In KVM/Proxmox environments, `qemu-guest-agent` is critical for clock synchronization, filesystem freezing during backups, and IP discovery. However, by default, the hypervisor can inject arbitrary commands into the guest via `guest-exec`.
+
+1. **Install the Agent:**
+   ```bash
+   sudo apt update
+   sudo apt install -y qemu-guest-agent
+   ```
+2. **Restrict Arbitrary Remote Command Execution:**
+   Edit `/etc/default/qemu-guest-agent` to blacklist remote execution commands (`guest-exec` and `guest-exec-status`):
+   ```ini
+   DAEMON_ARGS="--blacklist=guest-exec,guest-exec-status"
+   ```
+   Restart the service:
+   ```bash
+   sudo systemctl restart qemu-guest-agent
+   ```
+
+---
+
+## 3. Layer 2: Kernel, Memory & Sysctl on Debian 13 (CIS 1.5 & 3.x)
+
+Create `/etc/sysctl.d/50-security-hardening.conf` to enforce CIS Level 1 Server memory and kernel controls:
+
+```ini
+# ==============================================================================
+# Kernel & Memory Hardening - Debian 13 (CIS Level 1 Server)
+# ==============================================================================
+
+# 1. Full Address Space Layout Randomization (ASLR - CIS 1.5.3)
+kernel.randomize_va_space = 2
+
+# 2. Kernel Log Buffer Restrictions (dmesg - CIS 1.5.2)
+kernel.dmesg_restrict = 1
+
+# 3. Kernel Pointer Concealment (/proc/kallsyms)
+kernel.kptr_restrict = 2
+
+# 4. Process Tracing Restrictions (LSM Yama - CIS 1.5.4)
+# Allows ptrace only with CAP_SYS_PTRACE (admin/root)
+kernel.yama.ptrace_scope = 2
+
+# 5. Restrict Unprivileged eBPF & Enable JIT Hardening
+kernel.unprivileged_bpf_disabled = 1
+net.core.bpf_jit_harden = 2
+
+# 6. Filesystem Race Condition Protections (Symlinks & Hardlinks - CIS 1.5.1)
+fs.protected_symlinks = 1
+fs.protected_hardlinks = 1
+fs.protected_fifos = 2
+fs.protected_regular = 2
+
+# 7. Disable Core Dumps
+fs.suid_dumpable = 0
+
+# 8. Magic SysRq Key Hardening (Restrict to emergency sync/unmount/reboot)
+kernel.sysrq = 176
+
+# 9. Virtual Memory Swappiness Tuning
+# Avoid aggressive swap page eviction on virtualized hosts
+vm.swappiness = 10
+```
+
+Apply immediately:
+```bash
+sudo sysctl --system
+```
+
+---
+
+## 4. Layer 3: Filesystem Partitioning & Obsolete Modules (CIS 1.1)
+
+### 4.1. Secure Mount Flags in `/etc/fstab`
+
+Ensure temporary and world-writable directories are mounted with restrictive execution flags:
+
+```text
+# Secure /tmp mount in volatile memory (CIS 1.1.2 - 1.1.5)
+tmpfs   /tmp        tmpfs   defaults,nosuid,nodev,noexec,mode=1777  0   0
+
+# Secure POSIX shared memory (CIS 1.1.6 - 1.1.8)
+tmpfs   /dev/shm    tmpfs   defaults,nosuid,nodev,noexec            0   0
+```
+
+Or enable the native systemd mount unit:
+```bash
+sudo systemctl enable --now tmp.mount
+```
+
+### 4.2. Blacklist Obsolete Filesystem Drivers (CIS 1.1.1)
+
+Because virtual machines communicate over virtual network interfaces and block devices, unneeded legacy filesystems should be disabled.
+
+Create `/etc/modprobe.d/blacklist-filesystems.conf`:
+```ini
+# CIS Benchmark 1.1.1 - Disable unused filesystem drivers
+install cramfs /bin/true
+install freevxfs /bin/true
+install jffs2 /bin/true
+install hfs /bin/true
+install hfsplus /bin/true
+install squashfs /bin/true
+install udf /bin/true
+```
+
+---
+
+## 5. Layer 4: TCP/IP Network Stack Hardening & `nftables` Firewall
+
+### 5.1. Network Sysctl Hardening: `/etc/sysctl.d/60-network-hardening.conf`
+
+```ini
+# ==============================================================================
+# TCP/IP Network Hardening - Debian 13 (CIS 3.1 & 3.2)
+# ==============================================================================
+
+# 1. Disable IP Forwarding (VM is not an edge router)
+net.ipv4.ip_forward = 0
+net.ipv6.conf.all.forwarding = 0
+
+# 2. Strict Reverse Path Filtering (Mitigate IP spoofing on shared bridges - CIS 3.2.7)
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+
+# 3. Block All ICMP Redirects (CIS 3.2.2)
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.conf.all.secure_redirects = 0
+net.ipv4.conf.default.secure_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+
+# 4. Block Source-Routed Packets (CIS 3.2.1)
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv4.conf.default.accept_source_route = 0
+net.ipv6.conf.all.accept_source_route = 0
+net.ipv6.conf.default.accept_source_route = 0
+
+# 5. SYN Flood Mitigation & RFC 1337 Protection (CIS 3.2.8)
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_rfc1337 = 1
+
+# 6. Ignore Broadcast ICMP & Bogus Errors (CIS 3.2.4 & 3.2.5)
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+
+# 7. Log Martians (Impossible Route Logging - CIS 3.2.3)
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.conf.default.log_martians = 1
+
+# 8. Ignore Unsolicited IPv6 Router Advertisements
+net.ipv6.conf.all.accept_ra = 0
+net.ipv6.conf.default.accept_ra = 0
+```
+
+### 5.2. Native Firewall with `nftables` (Debian Official Standard)
+
+Debian 13 relies on **`nftables`** as the default packet filtering framework. Configure a default drop policy:
+
+1. **Install and Enable:**
+   ```bash
+   sudo apt install -y nftables
+   sudo systemctl enable --now nftables
+   ```
+2. **Define Rules in `/etc/nftables.conf`:**
+   ```text
+   #!/usr/sbin/nft -f
+
+   flush ruleset
+
+   table inet filter {
+       chain input {
+           type filter hook input priority filter; policy drop;
+
+           # Accept loopback traffic
+           iif "lo" accept
+
+           # Accept established/related connections
+           ct state established,related accept
+
+           # Drop invalid connection states
+           ct state invalid drop
+
+           # Rate-limited ICMP ping
+           ip protocol icmp icmp type echo-request limit rate 5/second accept
+           ip6 nexthdr icmpv6 icmpv6 type echo-request limit rate 5/second accept
+
+           # SSH Access with rate limiting
+           tcp dport 22 ct state new limit rate 10/minute accept
+       }
+
+       chain forward {
+           type filter hook forward priority filter; policy drop;
+       }
+
+       chain output {
+           type filter hook output priority filter; policy accept;
+       }
+   }
+   ```
+3. **Apply & Verify:**
+   ```bash
+   sudo nft -f /etc/nftables.conf
+   sudo systemctl restart nftables
+   sudo nft list ruleset
+   ```
+
+---
+
+## 6. Layer 5: OpenSSH Server Hardening & Privilege Control (CIS 5.x)
+
+### 6.1. SSH Hardening: `/etc/ssh/sshd_config.d/01-hardening.conf`
+
+```ini
+# ==============================================================================
+# OpenSSH Server Hardening - Debian 13 (CIS 5.2)
+# ==============================================================================
+
+# 1. Disable Direct Root Login (CIS 5.2.8)
+PermitRootLogin no
+
+# 2. Disable Password Authentication (Enforce Public Key Auth - CIS 5.2.9)
+PasswordAuthentication no
+PermitEmptyPasswords no
+KbdInteractiveAuthentication no
+
+# 3. Enforce Public Key Authentication
+PubkeyAuthentication yes
+
+# 4. Limit Authentication Attempts (CIS 5.2.5)
+MaxAuthTries 3
+
+# 5. Modern Cryptography Only (CIS 5.2.11)
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+
+# 6. Disable Unnecessary Port & Agent Forwarding (CIS 5.2.6)
+X11Forwarding no
+AllowTcpForwarding no
+AllowAgentForwarding no
+
+# 7. Idle Session Timeouts (CIS 5.2.13)
+ClientAliveInterval 300
+ClientAliveCountMax 2
+
+# 8. Verbose Auditing Logs (CIS 5.2.3)
+LogLevel VERBOSE
+```
+
+Test and reload SSH:
+```bash
+sudo sshd -t
+sudo systemctl reload ssh
+```
+
+### 6.2. Secure `sudo` Configuration (CIS 5.3)
+
+Create `/etc/sudoers.d/01-security-hardening`:
+
+```bash
+sudo visudo -f /etc/sudoers.d/01-security-hardening
+```
+
+Insert:
+```text
+# Enforce execution in dedicated PTY to prevent terminal hijacking (CIS 5.3.2)
+Defaults use_pty
+
+# Log administrative actions (CIS 5.3.3)
+Defaults logfile="/var/log/sudo.log"
+
+# Limit ticket timeout to 5 minutes (CIS 5.3.4)
+Defaults timestamp_timeout=5
+
+# Limit invalid password attempts
+Defaults passwd_tries=3
+```
+
+---
+
+## 7. Layer 6: Mandatory Access Control with AppArmor (Debian Default)
+
+Unlike distributions where MAC systems must be installed manually, **Debian installs and enables AppArmor by default**.
+
+1. **Verify AppArmor Status:**
+   ```bash
+   sudo aa-status
+   ```
+2. **Install Extra Profiles & Utilities:**
+   ```bash
+   sudo apt install -y apparmor-profiles apparmor-utils
+   ```
+3. **Enforce All Loaded Profiles:**
+   ```bash
+   sudo aa-enforce /etc/apparmor.d/*
+   ```
+
+---
+
+## 8. Layer 7: Continuous Auditing with `auditd` & Unattended Upgrades
+
+### 8.1. Audit Logging with `auditd` (CIS 4.x)
+
+1. **Install `auditd`:**
+   ```bash
+   sudo apt install -y auditd
+   sudo systemctl enable --now auditd
+   ```
+2. **Rules Configuration (`/etc/audit/rules.d/50-security.rules`):**
+   ```ini
+   -D
+   -b 8192
+   -f 1
+
+   # Audit account and password database modifications (CIS 4.1.4)
+   -w /etc/group -p wa -k identity
+   -w /etc/passwd -p wa -k identity
+   -w /etc/gshadow -p wa -k identity
+   -w /etc/shadow -p wa -k identity
+   -w /etc/security/opasswd -p wa -k identity
+
+   # Audit network environment changes (CIS 4.1.5)
+   -a always,exit -F arch=b64 -S sethostname,setdomainname -k system_locale
+   -w /etc/issue -p wa -k system_locale
+   -w /etc/hosts -p wa -k system_locale
+
+   # Audit sudoers configuration modifications (CIS 4.1.10)
+   -w /etc/sudoers -p wa -k scope
+   -w /etc/sudoers.d/ -p wa -k scope
+
+   # Audit filesystem mount operations (CIS 4.1.13)
+   -a always,exit -F arch=b64 -S mount,umount2 -k mounts
+
+   # Make configuration immutable until reboot (CIS 4.1.17)
+   -e 2
+   ```
+3. **Apply Rules:**
+   ```bash
+   sudo augenrules --load
+   sudo auditctl -s
+   ```
+
+### 8.2. Automated Security Patches with `unattended-upgrades`
+
+1. **Install Packages:**
+   ```bash
+   sudo apt install -y unattended-upgrades apt-listchanges
+   ```
+2. **Enable Service:**
+   ```bash
+   sudo dpkg-reconfigure -plow unattended-upgrades
+   ```
+3. **Verify Security Origins in `/etc/apt/apt.conf.d/50unattended-upgrades`:**
+   ```text
+   Unattended-Upgrade::Origins-Pattern {
+       "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+   };
+   Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+   Unattended-Upgrade::MinimalSteps "true";
+   Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+   Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+   ```
+
+### 8.3. File Integrity Verification with `debsums`
+
+Detect tampered or corrupted system binaries against Debian's official package checksums:
+
+```bash
+sudo apt install -y debsums
+sudo debsums -c
+```
+
+---
+
+## 9. Continuous Verification & Health Checklist
+
+| Control | Audit Command | Expected Output |
+| :--- | :--- | :--- |
+| **AppArmor** | `aa-status` | `apparmor module is loaded; ... profiles in enforce mode` |
+| **Firewall** | `nft list ruleset` | `chain input { type filter ... policy drop; }` |
+| **SSH Root** | `sshd -T \| grep permitrootlogin` | `permitrootlogin no` |
+| **SSH Passwords** | `sshd -T \| grep passwordauthentication` | `passwordauthentication no` |
+| **ASLR** | `sysctl kernel.randomize_va_space` | `kernel.randomize_va_space = 2` |
+| **Yama ptrace** | `sysctl kernel.yama.ptrace_scope` | `kernel.yama.ptrace_scope = 2` |
+| **Auditd** | `auditctl -s` | `enabled 2` (immutable) |
+| **Reverse Path** | `sysctl net.ipv4.conf.all.rp_filter` | `net.ipv4.conf.all.rp_filter = 1` |
+| **SYN Cookies** | `sysctl net.ipv4.tcp_syncookies` | `net.ipv4.tcp_syncookies = 1` |
+| **Integrity** | `debsums -c` | Empty output (zero tampered files) |
+
+---
+
+## Official References
+
+* [CIS Center for Internet Security: Debian Linux Benchmark](https://www.cisecurity.org/benchmark/debian_linux)
+* [Debian Wiki: Securing Debian Manual](https://www.debian.org/doc/manuals/securing-debian-manual/)
+* [Debian Wiki: AppArmor](https://wiki.debian.org/AppArmor)
+* [Debian Wiki: nftables](https://wiki.debian.org/nftables)
+* [Debian Wiki: UnattendedUpgrades](https://wiki.debian.org/UnattendedUpgrades)
+* [QEMU Documentation: Guest Agent Security Considerations](https://www.qemu.org/docs/master/interop/qemu-ga.html)
+
+```
+
+`HARDENING-DEBIAN13-VM.pt-BR.md`:
+
+```md
+# Guia de Hardening Debian 13 (Trixie) para Máquinas Virtuais: CIS Benchmark & Defesa em Profundidade
+
+[![Debian](https://img.shields.io/badge/Debian%2013-Trixie%20(Testing%2FStable)-d70a53?logo=debian&logoColor=white)](https://www.debian.org/)
+[![CIS Benchmark](https://img.shields.io/badge/CIS%20Benchmark-Debian%20Level%201%20Server-success)](https://www.cisecurity.org/cis-benchmarks/)
+[![Virtualization](https://img.shields.io/badge/Virtualization-KVM%20%7C%20Proxmox%20%7C%20VMware-blue)](https://wiki.debian.org/KVM)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> [!NOTE]
+> Read this guide in English: **[English](HARDENING-DEBIAN13-VM.md)**  
+> Este guia é dedicado a servidores e estações virtualizadas executando **Debian 13 (Trixie)** sobre hypervisors modernos (KVM/QEMU, Proxmox VE, VMware ESXi, Hyper-V e VirtualBox). Para o guia focado em bare-metal Arch Linux, consulte **[HARDENING.pt-BR.md](HARDENING.pt-BR.md)**.
+
+Este documento estabelece o padrão de segurança operacional e endurecimento defensivo (*hardening*) para instâncias virtuais rodando **Debian 13**. O modelo adota os controles estritos do **CIS Debian Linux Benchmark** (Nível 1 - Server) e introduz salvaguardas específicas para o ecossistema virtualizado, minimizando a superfície de ataque e garantindo o isolamento entre o convidado (*guest*) e o hospedeiro (*hypervisor*).
+
+---
+
+## Índice
+
+- [1. Princípios de Segurança em Ambientes Virtualizados](#1-princípios-de-segurança-em-ambientes-virtualizados)
+- [2. Camada 1: Hardware Virtual e Firmware (OVMF & Hypervisor)](#2-camada-1-hardware-virtual-e-firmware-ovmf--hypervisor)
+- [3. Camada 2: Kernel, Memória e Sysctl no Debian 13 (CIS 1.5 & 3.x)](#3-camada-2-kernel-memória-e-sysctl-no-debian-13-cis-15--3x)
+- [4. Camada 3: Particionamento e Sistema de Arquivos em VMs (CIS 1.1)](#4-camada-3-particionamento-e-sistema-de-arquivos-em-vms-cis-11)
+- [5. Camada 4: Blindagem da Pilha de Rede TCP/IP e Firewall com `nftables`](#5-camada-4-blindagem-da-pilha-de-rede-tcpip-e-firewall-com-nftables)
+- [6. Camada 5: Hardening do Servidor OpenSSH e Controle de Privilégios (CIS 5.x)](#6-camada-5-hardening-do-servidor-openssh-e-controle-de-privilégios-cis-5x)
+- [7. Camada 6: Mandatory Access Control com AppArmor (O Padrão Debian)](#7-camada-6-mandatory-access-control-com-apparmor-o-padrão-debian)
+- [8. Camada 7: Auditoria Contínua com `auditd` e Atualizações Automáticas](#8-camada-7-auditoria-contínua-com-auditd-e-atualizações-automáticas)
+- [9. Checklist de Auditoria e Conformidade para a VM](#9-checklist-de-auditoria-e-conformidade-para-a-vm)
+- [Referências Oficiais](#referências-oficiais)
+
+---
+
+## 1. Princípios de Segurança em Ambientes Virtualizados
+
+Uma Máquina Virtual (VM) possui uma dinâmica de ameaça distinta de um computador físico:
+1. **Compartilhamento de Recursos Físicos:** Ataques de canal lateral (ex.: *Spectre*, *Meltdown*, *L1TF*) podem tentar vazar dados entre VMs vizinhas ou para o hypervisor.
+2. **Interfaces Paravirtualizadas:** Dispositivos `virtio` oferecem alta performance, mas exigem que barramentos virtuais não utilizados sejam eliminados.
+3. **Agentes de Convidado (*Guest Agents*):** Ferramentas como o `qemu-guest-agent` permitem ao hypervisor executar comandos como `root` no convidado se não forem devidamente restringidas.
+4. **Ausência de Periféricos Físicos Supérfluos:** Uma VM não necessita de Bluetooth, som, interfaces Wi-Fi ou leitor de disquetes. Toda redução na emulação é uma vitória defensiva.
+
+---
+
+## 2. Camada 1: Hardware Virtual e Firmware (OVMF & Hypervisor)
+
+Antes de instalar ou configurar o Debian 13, configure as opções da máquina virtual no hypervisor:
+
+### 2.1. Configuração Recomendada no Hypervisor (Proxmox / KVM / QEMU)
+* **BIOS / Firmware:** Selecione **OVMF (UEFI)** em vez de SeaBIOS legada.
+* **Secure Boot:** Ative o suporte a Secure Boot com chaves pré-matriculadas (Debian assina nativamente seu kernel e GRUB via certificado Microsoft UEFI CA).
+* **vTPM (TPM 2.0 Virtual):** Ative a emulação de TPM 2.0 (via `swtpm` no Proxmox/KVM ou vTPM no ESXi).
+* **Remoção de Dispositivos Inúteis:**
+  * Remova controladoras de áudio (*Audio Device*).
+  * Desative portas seriais/paralelas desnecessárias.
+  * Remova controladoras de disquete (*Floppy*).
+  * Use barramento **VirtIO SCSI** ou **VirtIO Block** para discos e **VirtIO Network** com multiqueue.
+
+### 2.2. Hardening do Agente do Hypervisor (`qemu-guest-agent`)
+
+Se você usa KVM/Proxmox, o `qemu-guest-agent` é essencial para sincronização de clock, snapshots consistentes de disco e visualização de IPs. Porém, por padrão, o hypervisor pode injetar comandos arbitrários no convidado via `guest-exec`.
+
+1. **Instalação do Agente:**
+   ```bash
+   sudo apt update
+   sudo apt install -y qemu-guest-agent
+   ```
+2. **Restringir Execução de Comandos Arbitrários via Hypervisor:**
+   Edite o `/etc/default/qemu-guest-agent` para desabilitar comandos de execução externa remota (`guest-exec` e `guest-file-write`):
+   ```ini
+   DAEMON_ARGS="--blacklist=guest-exec,guest-exec-status"
+   ```
+   Reinicie o serviço:
+   ```bash
+   sudo systemctl restart qemu-guest-agent
+   ```
+
+---
+
+## 3. Camada 2: Kernel, Memória e Sysctl no Debian 13 (CIS 1.5 & 3.x)
+
+Crie o arquivo `/etc/sysctl.d/50-security-hardening.conf` para aplicar o baseline de memória do CIS Benchmark no Debian 13:
+
+```ini
+# ==============================================================================
+# Hardening de Kernel, Memória e Processos - Debian 13 (CIS Level 1 Server)
+# ==============================================================================
+
+# 1. Randomização Total do Espaço de Endereçamento (ASLR - CIS 1.5.3)
+kernel.randomize_va_space = 2
+
+# 2. Restrição do Buffer de Logs do Kernel (dmesg - CIS 1.5.2)
+kernel.dmesg_restrict = 1
+
+# 3. Ocultação de Ponteiros de Kernel (/proc/kallsyms)
+kernel.kptr_restrict = 2
+
+# 4. Restrição de Process Tracing (LSM Yama - CIS 1.5.4)
+# Permite anexar ptrace apenas com CAP_SYS_PTRACE (root)
+kernel.yama.ptrace_scope = 2
+
+# 5. Restrição de eBPF sem privilégios e JIT Hardening
+kernel.unprivileged_bpf_disabled = 1
+net.core.bpf_jit_harden = 2
+
+# 6. Proteção contra Symlinks/Hardlinks em Diretórios Públicos (CIS 1.5.1)
+fs.protected_symlinks = 1
+fs.protected_hardlinks = 1
+fs.protected_fifos = 2
+fs.protected_regular = 2
+
+# 7. Desativação de Core Dumps no Kernel
+fs.suid_dumpable = 0
+
+# 8. Desativação do Magic SysRq (ou restrito a sincronização/reboot de emergência)
+kernel.sysrq = 176
+
+# 9. Otimização de Memória e Troca para VMs (Swappiness)
+# Em VMs, evitar paginação agressiva melhora a segurança e estabilidade do host
+vm.swappiness = 10
+```
+
+Aplique as regras imediatamente:
+```bash
+sudo sysctl --system
+```
+
+---
+
+## 4. Camada 3: Particionamento e Sistema de Arquivos em VMs (CIS 1.1)
+
+O CIS Benchmark recomenda particionamento dedicado para isolar diretórios temporários e de logs, prevenindo ataques de esgotamento de disco (*DoS*) e elevação de privilégios.
+
+### 4.1. Esquema de Montagens Seguras em `/etc/fstab`
+
+Em uma VM particionada com LVM ou subvolumes dedicados, aplique as flags restritivas:
+
+```text
+# Montagem do /tmp em memória volátil com execução bloqueada (CIS 1.1.2 - 1.1.5)
+tmpfs   /tmp        tmpfs   defaults,nosuid,nodev,noexec,mode=1777  0   0
+
+# Montagem de memória compartilhada POSIX (CIS 1.1.6 - 1.1.8)
+tmpfs   /dev/shm    tmpfs   defaults,nosuid,nodev,noexec            0   0
+
+# Partições de Logs e Auditoria (se criadas separadamente)
+# /var/log          ext4    defaults,nosuid,nodev,noexec            0   2
+# /var/log/audit    ext4    defaults,nosuid,nodev,noexec            0   2
+```
+
+Se o seu Debian 13 utiliza o serviço nativo do systemd para gerenciar o `/tmp`:
+```bash
+sudo systemctl enable --now tmp.mount
+```
+
+### 4.2. Desativação de Módulos de Sistemas de Arquivos Obsoletos (CIS 1.1.1)
+
+Como a VM se comunica estritamente via rede e discos virtuais, nenhum formato de arquivo arcaico deve estar disponível para montagem.
+
+Crie `/etc/modprobe.d/blacklist-filesystems.conf`:
+```ini
+# CIS Benchmark 1.1.1 - Desativação de drivers de sistemas de arquivos não utilizados
+install cramfs /bin/true
+install freevxfs /bin/true
+install jffs2 /bin/true
+install hfs /bin/true
+install hfsplus /bin/true
+install squashfs /bin/true
+install udf /bin/true
+```
+
+---
+
+## 5. Camada 4: Blindagem da Pilha de Rede TCP/IP e Firewall com `nftables`
+
+Em ambientes virtualizados, pacotes frequentemente transitam por pontes (*bridges*) virtuais compartilhadas. O tráfego precisa ser estritamente filtrado.
+
+### 5.1. Hardening de Rede via Sysctl: `/etc/sysctl.d/60-network-hardening.conf`
+
+```ini
+# ==============================================================================
+# Hardening de Rede para VM Debian 13 (CIS 3.1 & 3.2)
+# ==============================================================================
+
+# 1. Desativação de Roteamento de Pacotes (A VM não é gateway)
+net.ipv4.ip_forward = 0
+net.ipv6.conf.all.forwarding = 0
+
+# 2. Reverse Path Filtering Estrito (Anti-Spoofing em Redes Virtuais - CIS 3.2.7)
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+
+# 3. Bloqueio Total de ICMP Redirects (CIS 3.2.2)
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.conf.all.secure_redirects = 0
+net.ipv4.conf.default.secure_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+
+# 4. Bloqueio de Source Routing (CIS 3.2.1)
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv4.conf.default.accept_source_route = 0
+net.ipv6.conf.all.accept_source_route = 0
+net.ipv6.conf.default.accept_source_route = 0
+
+# 5. Mitigação de SYN Flood (CIS 3.2.8)
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_rfc1337 = 1
+
+# 6. Ignorar Mensagens ICMP Broadcast e Erros Forjados (CIS 3.2.4 & 3.2.5)
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+
+# 7. Log de Pacotes com Roteamento Impossível (Martians - CIS 3.2.3)
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.conf.default.log_martians = 1
+
+# 8. Ignorar Router Advertisements IPv6 não solicitados
+net.ipv6.conf.all.accept_ra = 0
+net.ipv6.conf.default.accept_ra = 0
+```
+
+### 5.2. Firewall Nativo com `nftables` (Padrão Oficial do Debian)
+
+O Debian substituiu integralmente o `iptables` legado pelo **`nftables`**. Configure uma política padrão de descarte (*default drop*):
+
+1. **Instalar e Ativar o Serviço:**
+   ```bash
+   sudo apt install -y nftables
+   sudo systemctl enable --now nftables
+   ```
+2. **Definir as Regras em `/etc/nftables.conf`:**
+   ```text
+   #!/usr/sbin/nft -f
+
+   flush ruleset
+
+   table inet filter {
+       chain input {
+           type filter hook input priority filter; policy drop;
+
+           # Aceita tráfego da interface local (loopback)
+           iif "lo" accept
+
+           # Aceita conexões já estabelecidas e relacionadas
+           ct state established,related accept
+
+           # Descarta pacotes em estado inválido
+           ct state invalid drop
+
+           # Aceita ICMP (Ping) com limite de taxa (rate limiting)
+           ip protocol icmp icmp type echo-request limit rate 5/second accept
+           ip6 nexthdr icmpv6 icmpv6 type echo-request limit rate 5/second accept
+
+           # Acesso SSH Seguro (ajuste a porta se usar porta customizada)
+           tcp dport 22 ct state new limit rate 10/minute accept
+
+           # Adicione aqui portas de serviços da VM (ex.: 80, 443 para web)
+           # tcp dport { 80, 443 } ct state new accept
+       }
+
+       chain forward {
+           type filter hook forward priority filter; policy drop;
+       }
+
+       chain output {
+           type filter hook output priority filter; policy accept;
+       }
+   }
+   ```
+3. **Aplicar e Validar:**
+   ```bash
+   sudo nft -f /etc/nftables.conf
+   sudo systemctl restart nftables
+   sudo nft list ruleset
+   ```
+
+---
+
+## 6. Camada 5: Hardening do Servidor OpenSSH e Controle de Privilégios (CIS 5.x)
+
+Para uma VM gerenciada remotamente, o **OpenSSH** é a porta de entrada principal e exige proteção intransigente.
+
+### 6.1. Configuração do SSH: `/etc/ssh/sshd_config.d/01-hardening.conf`
+
+No Debian 13, utilize o diretório modular de configuração do SSH:
+
+```ini
+# ==============================================================================
+# Hardening do Servidor OpenSSH - Debian 13 (CIS Benchmark 5.2)
+# ==============================================================================
+
+# 1. Proibir Login Direto como Root (CIS 5.2.8)
+PermitRootLogin no
+
+# 2. Desabilitar Autenticação por Senha (Exigir Chaves Criptográficas - CIS 5.2.9)
+PasswordAuthentication no
+PermitEmptyPasswords no
+KbdInteractiveAuthentication no
+
+# 3. Forçar Autenticação por Chave Pública
+PubkeyAuthentication yes
+
+# 4. Limitar Tentativas de Autenticação por Conexão (CIS 5.2.5)
+MaxAuthTries 3
+
+# 5. Criptografia Moderna (Apenas Ciphers e KEX Seguros - CIS 5.2.11)
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+
+# 6. Desativar Encaminhamentos Inseguros (CIS 5.2.6)
+X11Forwarding no
+AllowTcpForwarding no
+AllowAgentForwarding no
+
+# 7. Timeouts de Sessão Inativa (CIS 5.2.13)
+# Desconecta após 10 minutos de inatividade (300s x 2)
+ClientAliveInterval 300
+ClientAliveCountMax 2
+
+# 8. Isolamento de Privilégios e Logs Detalhados (CIS 5.2.3)
+LogLevel VERBOSE
+```
+
+Valide e recarregue o SSH com segurança:
+```bash
+sudo sshd -t
+sudo systemctl reload ssh
+```
+
+---
+
+### 6.2. Configuração do `sudo` Seguro (CIS 5.3)
+
+Crie `/etc/sudoers.d/01-security-hardening`:
+
+```bash
+sudo visudo -f /etc/sudoers.d/01-security-hardening
+```
+
+Adicione as regras:
+```text
+# Exige PTY dedicado para prevenir hijacking de terminal (CIS 5.3.2)
+Defaults use_pty
+
+# Registro em log dedicado (CIS 5.3.3)
+Defaults logfile="/var/log/sudo.log"
+
+# Timeout de expiração de credenciais em 5 minutos (CIS 5.3.4)
+Defaults timestamp_timeout=5
+
+# Limite de tentativas de senha incorreta
+Defaults passwd_tries=3
+```
+
+---
+
+## 7. Camada 6: Mandatory Access Control com AppArmor (O Padrão Debian)
+
+Ao contrário de distribuições que deixam o LSM a critério do usuário, o **Debian instala e ativa o AppArmor nativamente**. O objetivo do hardening no Debian 13 é garantir que os perfis estejam em modo estrito de imposição (*enforcing*).
+
+### 1. Verificar o Status do AppArmor:
+```bash
+sudo aa-status
+```
+*Certifique-se de que o AppArmor está carregado e que os perfis padrão estão em `enforce mode`.*
+
+### 2. Instalar Perfis Adicionais e Utilitários:
+```bash
+sudo apt install -y apparmor-profiles apparmor-utils
+```
+
+### 3. Colocar Perfis em Modo Enforce:
+Se algum perfil estiver em modo reclamante (*complain*), coloque-o em imposição:
+```bash
+sudo aa-enforce /etc/apparmor.d/*
+```
+
+---
+
+## 8. Camada 7: Auditoria Contínua com `auditd` e Atualizações Automáticas
+
+### 8.1. Auditoria do Sistema com `auditd` (CIS 4.x)
+
+1. **Instalação:**
+   ```bash
+   sudo apt install -y auditd
+   sudo systemctl enable --now auditd
+   ```
+2. **Regras de Auditoria para Debian (`/etc/audit/rules.d/50-security.rules`):**
+   ```ini
+   # Remove regras anteriores
+   -D
+   -b 8192
+   -f 1
+
+   # Monitorar alterações em contas, grupos e senhas (CIS 4.1.4)
+   -w /etc/group -p wa -k identity
+   -w /etc/passwd -p wa -k identity
+   -w /etc/gshadow -p wa -k identity
+   -w /etc/shadow -p wa -k identity
+   -w /etc/security/opasswd -p wa -k identity
+
+   # Monitorar configurações de rede (CIS 4.1.5)
+   -a always,exit -F arch=b64 -S sethostname,setdomainname -k system_locale
+   -w /etc/issue -p wa -k system_locale
+   -w /etc/hosts -p wa -k system_locale
+
+   # Monitorar sudo e privilégios (CIS 4.1.10)
+   -w /etc/sudoers -p wa -k scope
+   -w /etc/sudoers.d/ -p wa -k scope
+
+   # Monitorar chamadas de montagem de arquivos (CIS 4.1.13)
+   -a always,exit -F arch=b64 -S mount,umount2 -k mounts
+
+   # Tornar as regras imutáveis até o próximo reboot (CIS 4.1.17)
+   -e 2
+   ```
+3. **Aplicar as Regras:**
+   ```bash
+   sudo augenrules --load
+   sudo auditctl -s
+   ```
+
+---
+
+### 8.2. Atualizações de Segurança Automáticas com `unattended-upgrades`
+
+Uma VM exposta precisa de correções de segurança imediatas sem depender de intervenções manuais.
+
+1. **Instalação:**
+   ```bash
+   sudo apt install -y unattended-upgrades apt-listchanges
+   ```
+2. **Ativar o Serviço:**
+   ```bash
+   sudo dpkg-reconfigure -plow unattended-upgrades
+   ```
+3. **Garantir Atualizações Estritas de Segurança em `/etc/apt/apt.conf.d/50unattended-upgrades`:**
+   Certifique-se de que a origem de segurança do Debian 13 (Trixie) está habilitada:
+   ```text
+   Unattended-Upgrade::Origins-Pattern {
+       "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+   };
+   Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+   Unattended-Upgrade::MinimalSteps "true";
+   Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+   Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+   ```
+
+---
+
+### 8.3. Verificação de Integridade de Pacotes com `debsums`
+
+O Debian possui uma ferramenta nativa excepcional para verificar se arquivos do sistema foram alterados ou corrompidos em relação aos pacotes originais dos repositórios:
+
+```bash
+sudo apt install -y debsums
+
+# Verifica apenas arquivos alterados ou corrompidos (omitindo arquivos de configuração esperados):
+sudo debsums -c
+```
+
+---
+
+## 9. Checklist de Auditoria e Conformidade para a VM
+
+Execute estes comandos rápidos na VM Debian 13 para validar o cumprimento dos controles:
+
+| Controle CIS | Comando de Auditoria | Resultado Esperado |
+| :--- | :--- | :--- |
+| **AppArmor** | `aa-status` | `apparmor module is loaded; ... profiles in enforce mode` |
+| **Firewall** | `nft list ruleset` | `chain input { type filter ... policy drop; }` |
+| **SSH Root** | `sshd -T \| grep permitrootlogin` | `permitrootlogin no` |
+| **SSH Senhas** | `sshd -T \| grep passwordauthentication` | `passwordauthentication no` |
+| **ASLR** | `sysctl kernel.randomize_va_space` | `kernel.randomize_va_space = 2` |
+| **Yama ptrace** | `sysctl kernel.yama.ptrace_scope` | `kernel.yama.ptrace_scope = 2` |
+| **Auditd** | `auditctl -s` | `enabled 2` (imutável) |
+| **Reverse Path** | `sysctl net.ipv4.conf.all.rp_filter` | `net.ipv4.conf.all.rp_filter = 1` |
+| **SYN Cookies** | `sysctl net.ipv4.tcp_syncookies` | `net.ipv4.tcp_syncookies = 1` |
+| **Integridade** | `debsums -c` | Sem saídas (zero arquivos corrompidos/adulterados) |
+
+---
+
+## Referências Oficiais
+
+* [CIS Center for Internet Security: Debian Linux Benchmark](https://www.cisecurity.org/benchmark/debian_linux)
+* [Debian Wiki: Securing Debian Manual](https://www.debian.org/doc/manuals/securing-debian-manual/)
+* [Debian Wiki: AppArmor](https://wiki.debian.org/AppArmor)
+* [Debian Wiki: nftables](https://wiki.debian.org/nftables)
+* [Debian Wiki: UnattendedUpgrades](https://wiki.debian.org/UnattendedUpgrades)
+* [QEMU Documentation: Guest Agent Security Considerations](https://www.qemu.org/docs/master/interop/qemu-ga.html)
+
+```
+
+`HARDENING.md`:
+
+```md
+# Arch Linux Hardening Guide: CIS Benchmark Alignment & Defense-in-Depth
+
+[![Arch Linux](https://img.shields.io/badge/Arch%20Linux-Hardened-1793d1?logo=arch-linux&logoColor=white)](https://archlinux.org/)
+[![CIS Benchmark](https://img.shields.io/badge/CIS%20Benchmark-Level%201%20%26%202-success)](https://www.cisecurity.org/cis-benchmarks/)
+[![Secure Boot](https://img.shields.io/badge/UEFI-Secure%20Boot%20Enabled-blue?logo=linux&logoColor=white)](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> [!NOTE]
+> Leia este guia em português: **[Português (Brasil)](HARDENING.pt-BR.md)**  
+> This guide is the companion security hardening reference for the repository, building directly on the boot and kernel foundation established in the **[EAC Linux v2 Guide](README.md)**.
+
+This document consolidates production-grade technical hardening procedures to transform an **Arch Linux** installation into a high-security operational environment. Recommendations strictly follow the **CIS Linux Benchmark** (*Center for Internet Security*), spanning from firmware integrity to user space, without disrupting daily workstation productivity, browser security, or GPU gaming performance.
+
+---
+
+## Table of Contents
+
+- [1. Defense-in-Depth Principles & CIS Levels](#1-defense-in-depth-principles--cis-levels)
+- [2. Layer 1: Firmware, Boot & Ring-0 Integrity (The Base Foundation)](#2-layer-1-firmware-boot--ring-0-integrity-the-base-foundation)
+- [3. Layer 2: Kernel & Memory Hardening via Sysctl (CIS 1.5 & 3.x)](#3-layer-2-kernel--memory-hardening-via-sysctl-cis-15--3x)
+- [4. Layer 3: Filesystem Protections & Legacy Module Blacklisting (CIS 1.1)](#4-layer-3-filesystem-protections--legacy-module-blacklisting-cis-11)
+- [5. Layer 4: TCP/IP Network Stack Hardening (CIS 3.1 & 3.2)](#5-layer-4-tcpip-network-stack-hardening-cis-31--32)
+- [6. Layer 5: Privilege Control, PAM & Secure Sudo (CIS 5.x)](#6-layer-5-privilege-control-pam--secure-sudo-cis-5x)
+- [7. Layer 6: System Event Auditing with `auditd` (CIS 4.x)](#7-layer-6-system-event-auditing-with-auditd-cis-4x)
+- [8. Continuous Verification & Health Checklist](#8-continuous-verification--health-checklist)
+- [Official References](#official-references)
+
+---
+
+## 1. Defense-in-Depth Principles & CIS Levels
+
+The **Defense-in-Depth** model assumes that no single security measure is impenetrable. The system is fortified through concentric protective rings:
+
+```
+[ User / Applications ]
+        │
+        ▼ (Secure Sudo, PAM, umask 027, Core Dumps Disabled)
+[ Operating System ]
+        │
+        ▼ (Filesystem protections, noexec/nosuid mounts, obsolete fs blacklisting)
+[ Network & Transport ]
+        │
+        ▼ (SYN Cookies, strict rp_filter, ICMP redirects disabled)
+[ Kernel & Memory ]
+        │
+        ▼ (Sysctl Hardening, ASLR 2, Yama ptrace_scope 2, BPF JIT harden)
+[ Firmware & Hardware ]
+          (UEFI Secure Boot, TPM 2.0 PCRs, IOMMU DMA pt, Kernel Lockdown)
+```
+
+### CIS Benchmark Profiles:
+* **Level 1 (Workstation / Baseline):** Practical configurations that provide strong defense posture without breaking desktop applications, web browsers, development toolchains, or gaming engines.
+* **Level 2 (High Security / Hardened):** Stricter posture with restricted debuggers, strict syscall auditing, and rigorous memory boundaries.
+
+---
+
+## 2. Layer 1: Firmware, Boot & Ring-0 Integrity (The Base Foundation)
+
+The foundational integrity layers leverage the architecture configured in the primary guide:
+
+1. **UEFI Secure Boot in User Mode (`SetupMode = 0`):**
+   * Enforces cryptographic verification on all boot binaries via the UEFI `db` and MOK keyring.
+   * Automated signing of kernels and UKIs via `sbctl`.
+2. **TPM 2.0 & Measured Boot:**
+   * Strict measurement across PCRs (0 through 11), auditing firmware, bootloader stages, and initramfs transitions.
+3. **`kexec` Disabled:**
+   * Prevents loading unverified kernels in RAM (`kernel.kexec_load_disabled = 1`).
+4. **IOMMU Bus Isolation (`intel_iommu=on iommu=pt`):**
+   * Active DMAR memory table protection preventing malicious physical DMA attacks from PCIe, Thunderbolt, or USB4 devices.
+5. **Kernel Lockdown (`lockdown=integrity`):**
+   * Ring-0 barrier disabling `/dev/mem`, CPU MSR write access, and unsigned module execution.
+
+---
+
+## 3. Layer 2: Kernel & Memory Hardening via Sysctl (CIS 1.5 & 3.x)
+
+The following parameters protect against memory corruption, pointer leaks, and unprivileged kernel tampering at runtime.
+
+### Configuration: `/etc/sysctl.d/50-security-hardening.conf`
+
+Create the configuration file with the following documented directives:
+
+```ini
+# ==============================================================================
+# Kernel & Memory Hardening (CIS Benchmark Level 1 & 2)
+# ==============================================================================
+
+# 1. Full Address Space Layout Randomization (ASLR)
+# 2 = Fully randomize stack, heap, and shared library locations (CIS 1.5.3)
+kernel.randomize_va_space = 2
+
+# 2. Kernel Log Buffer Restrictions (dmesg)
+# Prevents unprivileged users from reading kernel addresses and pointers via dmesg (CIS 1.5.2)
+kernel.dmesg_restrict = 1
+
+# 3. Kernel Pointer Concealment (/proc/kallsyms)
+# 2 = Hides kernel pointers from all users (including root unless CAP_SYSLOG is active)
+kernel.kptr_restrict = 2
+
+# 4. Process Tracing Scope (LSM Yama)
+# 1 = Only direct parent processes can attach ptrace
+# 2 = Only processes with CAP_SYS_PTRACE (admin) can trace (prevents unauthorized process injection)
+kernel.yama.ptrace_scope = 2
+
+# 5. eBPF JIT Compiler Hardening
+# 1 = Disables unprivileged eBPF usage
+# 2 = Applies constant blinding against speculative execution (Spectre) on JIT code
+kernel.unprivileged_bpf_disabled = 1
+net.core.bpf_jit_harden = 2
+
+# 6. Filesystem Race Condition Protections (Symlinks & Hardlinks)
+# Prevents symlink/hardlink spoofing attacks in world-writable directories like /tmp (CIS 1.5.1)
+fs.protected_symlinks = 1
+fs.protected_hardlinks = 1
+fs.protected_fifos = 2
+fs.protected_regular = 2
+
+# 7. Magic SysRq Key Hardening
+# Restricts Magic SysRq to emergency sync/unmount/reboot (176) or disables entirely (0)
+kernel.sysrq = 176
+
+# 8. Disable Core Dumps for SUID Programs
+# Prevents sensitive process memory (passwords, tokens) from being written to disk on crashes
+fs.suid_dumpable = 0
+```
+
+Apply immediately with:
+```bash
+sudo sysctl --system
+```
+
+---
+
+## 4. Layer 3: Filesystem Protections & Legacy Module Blacklisting (CIS 1.1)
+
+### 4.1. Restrictive Mount Options for Temporary Filesystems
+
+Directories with world-writable permissions (`/tmp`, `/dev/shm`, `/var/tmp`) should have binary execution and privilege escalation disabled.
+
+#### 1. Secure `/tmp` Mount (via systemd `tmp.mount`):
+Arch Linux mounts `/tmp` as `tmpfs` automatically. Enable and enforce secure mount flags:
+
+```bash
+sudo cp /usr/share/systemd/tmp.mount /etc/systemd/system/tmp.mount
+sudo vim /etc/systemd/system/tmp.mount
+```
+Ensure the `Options` line contains:
+```ini
+Options=mode=1777,strictatime,nosuid,nodev,noexec
+```
+Reload and start:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now tmp.mount
+```
+
+#### 2. Secure `/dev/shm` Mount:
+Append to `/etc/fstab` to lock POSIX shared memory:
+```text
+tmpfs   /dev/shm    tmpfs   defaults,nosuid,nodev,noexec    0   0
+```
+
+---
+
+### 4.2. Blacklist Obsolete Filesystems (CIS 1.1.1)
+
+Unused, legacy filesystem formats pose unnecessary kernel attack surface when inserting untrusted USB drives.
+
+Create `/etc/modprobe.d/blacklist-filesystems.conf`:
+```ini
+# Disable unused, legacy, or vulnerable filesystem drivers
+install cramfs /bin/true
+install freevxfs /bin/true
+install jffs2 /bin/true
+install hfs /bin/true
+install hfsplus /bin/true
+install squashfs /bin/true
+install udf /bin/true
+```
+
+---
+
+## 5. Layer 4: TCP/IP Network Stack Hardening (CIS 3.1 & 3.2)
+
+For endpoints and workstations, the network stack should discard malformed packets, enforce strict path filtering, and disable routing capabilities.
+
+### Configuration: `/etc/sysctl.d/60-network-hardening.conf`
+
+```ini
+# ==============================================================================
+# TCP/IP Network Stack Hardening (CIS Benchmark 3.1, 3.2 & 3.3)
+# ==============================================================================
+
+# 1. Disable Packet Forwarding (Endpoint is not a router)
+net.ipv4.ip_forward = 0
+net.ipv6.conf.all.forwarding = 0
+
+# 2. Strict Reverse Path Filtering (Mitigates IP Spoofing - CIS 3.2.7)
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+
+# 3. Block ICMP Redirects (Prevents Man-in-the-Middle routing attacks - CIS 3.2.2)
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.conf.all.secure_redirects = 0
+net.ipv4.conf.default.secure_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+
+# 4. Block Source-Routed Packets (CIS 3.2.1)
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv4.conf.default.accept_source_route = 0
+net.ipv6.conf.all.accept_source_route = 0
+net.ipv6.conf.default.accept_source_route = 0
+
+# 5. TCP SYN Cookies & RFC 1337 Protection (Mitigates SYN Flood attacks - CIS 3.2.8)
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_rfc1337 = 1
+
+# 6. Ignore Broadcast ICMP & Bogus Errors (CIS 3.2.4 & 3.2.5)
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+
+# 7. Log Packets with Impossible Addresses (Martians - CIS 3.2.3)
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.conf.default.log_martians = 1
+
+# 8. Ignore Unsolicited IPv6 Router Advertisements
+net.ipv6.conf.all.accept_ra = 0
+net.ipv6.conf.default.accept_ra = 0
+```
+
+### 5.2. Blacklist Uncommon Network Protocols (CIS 3.4)
+
+Create `/etc/modprobe.d/blacklist-protocols.conf`:
+```ini
+install dccp /bin/true
+install sctp /bin/true
+install rds /bin/true
+install tipc /bin/true
+```
+
+---
+
+## 6. Layer 5: Privilege Control, PAM & Secure Sudo (CIS 5.x)
+
+### 6.1. Secure `sudo` Configuration (CIS 5.3)
+
+Ensure `sudo` executes inside its own dedicated pseudoterminal (PTY) and logs all administrative executions.
+
+Create `/etc/sudoers.d/01-security-hardening` with syntax validation:
+
+```bash
+sudo visudo -f /etc/sudoers.d/01-security-hardening
+```
+
+Insert the following rules:
+```text
+# Run sudo in a dedicated pseudo-terminal to prevent terminal hijacking (CIS 5.3.2)
+Defaults use_pty
+
+# Log administrative command executions to a dedicated log file (CIS 5.3.3)
+Defaults logfile="/var/log/sudo.log"
+
+# Limit password timeout to 5 minutes (CIS 5.3.4)
+Defaults timestamp_timeout=5
+
+# Limit incorrect password attempts before exiting
+Defaults passwd_tries=3
+```
+
+### 6.2. Disable User-Space Core Dumps (CIS 1.5.1)
+
+Core dumps can leak sensitive operational memory (tokens, passwords, encryption keys).
+
+1. In `/etc/security/limits.d/10-coredump.conf`:
+   ```text
+   * hard core 0
+   * soft core 0
+   ```
+2. In `/etc/systemd/coredump.conf`:
+   ```ini
+   [Coredump]
+   Storage=none
+   ProcessSizeMax=0
+   ```
+
+---
+
+## 7. Layer 6: System Event Auditing with `auditd` (CIS 4.x)
+
+The Linux Audit Daemon (`auditd`) provides tamper-evident logging for critical syscalls, privilege escalation, and credential modifications.
+
+### 1. Install & Enable `auditd`:
+```bash
+sudo pacman -S audit
+sudo systemctl enable --now auditd
+```
+
+### 2. Essential Audit Rules (`/etc/audit/rules.d/50-security.rules`):
+
+```ini
+# Reset existing rules
+-D
+
+# Buffer size
+-b 8192
+
+# Failure mode: 1 = silent log failure (avoids kernel panic on buffer overflow)
+-f 1
+
+# Audit system time modifications (CIS 4.1.3)
+-a always,exit -F arch=b64 -S adjtimex,settimeofday,clock_settime -k time_change
+
+# Audit identity and authentication changes (CIS 4.1.4)
+-w /etc/group -p wa -k identity
+-w /etc/passwd -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/security/opasswd -p wa -k identity
+
+# Audit network environment changes (CIS 4.1.5)
+-a always,exit -F arch=b64 -S sethostname,setdomainname -k system_locale
+-w /etc/issue -p wa -k system_locale
+-w /etc/hosts -p wa -k system_locale
+
+# Audit sudoers configuration modifications (CIS 4.1.10)
+-w /etc/sudoers -p wa -k scope
+-w /etc/sudoers.d/ -p wa -k scope
+
+# Lock audit configuration immutable until reboot (CIS 4.1.17)
+-e 2
+```
+
+Reload audit rules:
+```bash
+sudo augenrules --load
+```
+
+---
+
+## 8. Continuous Verification & Health Checklist
+
+Run these quick inspection commands to verify active defenses:
+
+| Component | Audit Command | Expected Output |
+| :--- | :--- | :--- |
+| **Secure Boot** | `sbctl status` | `Secure Boot: ✓ Enabled` |
+| **ASLR** | `sysctl kernel.randomize_va_space` | `kernel.randomize_va_space = 2` |
+| **Yama ptrace** | `sysctl kernel.yama.ptrace_scope` | `kernel.yama.ptrace_scope = 2` |
+| **Reverse Path** | `sysctl net.ipv4.conf.all.rp_filter` | `net.ipv4.conf.all.rp_filter = 1` |
+| **SYN Cookies** | `sysctl net.ipv4.tcp_syncookies` | `net.ipv4.tcp_syncookies = 1` |
+| **Auditd** | `auditctl -s` | `enabled 2, pid ...` |
+| **Core Dumps** | `ulimit -c` | `0` |
+
+---
+
+## Official References
+
+* [CIS Center for Internet Security: Distribution-Independent Linux Benchmark](https://www.cisecurity.org/benchmark/distribution_independent_linux)
+* [ArchWiki: Security Hardening](https://wiki.archlinux.org/title/Security)
+* [ArchWiki: Sysctl Hardening](https://wiki.archlinux.org/title/Sysctl#Security)
+* [Kernel.org: Admin Guide - Linux Security Hardening](https://docs.kernel.org/admin-guide/index.html)
+* [Kernel.org: Yama LSM Documentation](https://docs.kernel.org/admin-guide/LSM/Yama.html)
+
+```
+
+`HARDENING.pt-BR.md`:
+
+```md
+# Guia de Hardening Arch Linux: Alinhamento CIS Benchmark e Defesa em Profundidade
+
+[![Arch Linux](https://img.shields.io/badge/Arch%20Linux-Hardened-1793d1?logo=arch-linux&logoColor=white)](https://archlinux.org/)
+[![CIS Benchmark](https://img.shields.io/badge/CIS%20Benchmark-Level%201%20%26%202-success)](https://www.cisecurity.org/cis-benchmarks/)
+[![Secure Boot](https://img.shields.io/badge/UEFI-Secure%20Boot%20Ativo-blue?logo=linux&logoColor=white)](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> [!NOTE]
+> Read this guide in English: **[English](HARDENING.md)**  
+> Este guia é o complemento de segurança e hardening do repositório, aproveitando as fundações de boot e kernel do **[Guia EAC Linux v2](README.pt-BR.md)**.
+
+Este documento consolida as diretrizes técnicas para transformar uma instalação do **Arch Linux** em um ambiente de alta segurança operacional. O alinhamento segue as melhores práticas do **CIS Linux Benchmark** (*Center for Internet Security*), cobrindo desde a integridade do firmware até o espaço do usuário, sem comprometer a estabilidade do sistema nem o desempenho gráfico para trabalho ou jogos.
+
+---
+
+## Índice
+
+- [1. Princípios de Defesa em Profundidade e Níveis CIS](#1-princípios-de-defesa-em-profundidade-e-níveis-cis)
+- [2. Camada 1: Firmware, Boot e Integridade de Ring-0 (A Base Consolidada)](#2-camada-1-firmware-boot-e-integridade-de-ring-0-a-base-consolidada)
+- [3. Camada 2: Hardening de Kernel e Memória via Sysctl (CIS 1.5 & 3.x)](#3-camada-2-hardening-de-kernel-e-memória-via-sysctl-cis-15--3x)
+- [4. Camada 3: Proteção do Sistema de Arquivos e Módulos Obsoletos (CIS 1.1)](#4-camada-3-proteção-do-sistema-de-arquivos-e-módulos-obsoletos-cis-11)
+- [5. Camada 4: Blindagem da Pilha de Rede TCP/IP (CIS 3.1 & 3.2)](#5-camada-4-blindagem-da-pilha-de-rede-tcpip-cis-31--32)
+- [6. Camada 5: Controle de Privilégios, PAM e Sudo Seguro (CIS 5.x)](#6-camada-5-controle-de-privilégios-pam-e-sudo-seguro-cis-5x)
+- [7. Camada 6: Auditoria de Eventos e Rastreamento com `auditd` (CIS 4.x)](#7-camada-6-auditoria-de-eventos-e-rastreamento-com-auditd-cis-4x)
+- [8. Checklist de Verificação e Manutenção Contínua](#8-checklist-de-verificação-e-manutenção-contínua)
+- [Referências Oficiais](#referências-oficiais)
+
+---
+
+## 1. Princípios de Defesa em Profundidade e Níveis CIS
+
+A metodologia de **Defesa em Profundidade** pressupõe que nenhuma camada de segurança é infalível de forma isolada. O sistema é estruturado em barreiras concêntricas:
+
+```
+[ Usuário / Aplicação ]
+        │
+        ▼ (Sudo Seguro, PAM, umask 027, Core Dumps desativados)
+[ Sistema Operacional ]
+        │
+        ▼ (Proteção de fs, montagens noexec/nosuid, desativação de fs legados)
+[ Rede & Transporte ]
+        │
+        ▼ (SYN Cookies, rp_filter estrito, ICMP redirects desativados)
+[ Kernel & Memória ]
+        │
+        ▼ (Sysctl Hardening, ASLR 2, Yama ptrace_scope 2, BPF JIT harden)
+[ Firmware & Hardware ]
+          (UEFI Secure Boot, TPM 2.0 PCRs, IOMMU DMA pt, Kernel Lockdown)
+```
+
+### Perfis do CIS Benchmark:
+* **Nível 1 (Workstation / Produtividade):** Conjunto prático de configurações que oferece uma postura defensiva rígida sem interromper a usabilidade de estações de trabalho, navegadores, jogos ou ferramentas de desenvolvimento.
+* **Nível 2 (Ambientes Críticos / Hardened):** Postura estrita com restrição de depuradores, auditoria integral de chamadas de sistema e isolamento absoluto de memória.
+
+---
+
+## 2. Camada 1: Firmware, Boot e Integridade de Ring-0 (A Base Consolidada)
+
+A fundação de integridade do sistema reaproveita a estrutura construída no guia principal:
+
+1. **UEFI Secure Boot em Modo Usuário (`SetupMode = 0`):**
+   * Garante que apenas binários validados no banco `db` ou via chaveiro MOK possam ser executados.
+   * Assinatura automática de kernels e UKIs via `sbctl`.
+2. **TPM 2.0 & Measured Boot:**
+   * Medição estrita de PCRs (0 a 11) registrando cada transição de firmware, bootloader e initramfs.
+3. **Bloqueio de `kexec`:**
+   * Impede a sobreposição de kernels na memória RAM (`kernel.kexec_load_disabled = 1`).
+4. **Isolamento de Barramento IOMMU (`intel_iommu=on iommu=pt`):**
+   * Proteção ativa das tabelas DMAR contra ataques de hardware via DMA (Direct Memory Access) em portas PCIe ou Thunderbolt/USB4.
+5. **Kernel Lockdown (`lockdown=integrity`):**
+   * Isolamento inviolável do Ring-0, bloqueando `/dev/mem`, escrita em MSRs e qualquer módulo sem assinatura.
+
+---
+
+## 3. Camada 2: Hardening de Kernel e Memória via Sysctl (CIS 1.5 & 3.x)
+
+Os parâmetros abaixo configuram proteções em tempo de execução para dificultar a exploração de vulnerabilidades de corrupção de memória e vazamento de ponteiros.
+
+### Configuração: `/etc/sysctl.d/50-security-hardening.conf`
+
+Crie o arquivo com as seguintes diretivas comentadas:
+
+```ini
+# ==============================================================================
+# Hardening de Kernel e Subsistema de Memória (CIS Benchmark Level 1 & 2)
+# ==============================================================================
+
+# 1. Randomização Total do Espaço de Endereçamento (ASLR)
+# 2 = Randomização completa de posições de pilha, heap e bibliotecas compartilhadas (CIS 1.5.3)
+kernel.randomize_va_space = 2
+
+# 2. Restrição do Buffer de Logs do Kernel (dmesg)
+# Impede usuários sem privilégios de inspecionar dmesg e coletar endereços de ponteiros (CIS 1.5.2)
+kernel.dmesg_restrict = 1
+
+# 3. Ocultação de Ponteiros de Kernel (/proc/kallsyms)
+# 2 = Oculta todos os ponteiros do kernel de todos os usuários (inclusive root), exceto com CAP_SYSLOG
+kernel.kptr_restrict = 2
+
+# 4. Escopo do Mecanismo ptrace (LSM Yama)
+# 1 = Apenas processos ancestrais imediatos podem anexar (evita injeção de processos alheios)
+# 2 = Apenas processos com CAP_SYS_PTRACE (administrador) podem rastrear processos
+kernel.yama.ptrace_scope = 2
+
+# 5. Restrição do Compilador JIT do eBPF
+# 1 = Desabilita o uso de eBPF por usuários sem privilégios
+# 2 = Aplica blindagem contra ataques de Spectre no código compilado JIT
+kernel.unprivileged_bpf_disabled = 1
+net.core.bpf_jit_harden = 2
+
+# 6. Proteção contra Race Conditions no Sistema de Arquivos (Symlinks e Hardlinks)
+# Impede a criação de links maliciosos em diretórios públicos como /tmp (CIS 1.5.1)
+fs.protected_symlinks = 1
+fs.protected_hardlinks = 1
+fs.protected_fifos = 2
+fs.protected_regular = 2
+
+# 7. Desativação do Magic SysRq para Segurança Local
+# Permite apenas o controle mínimo de emergência ou desativa completamente (0 = desativado, 176 = sync/unmount/reboot)
+kernel.sysrq = 176
+
+# 8. Desativação de Core Dumps via Kernel
+# Evita gravação de senhas ou chaves na memória em caso de falha de processos
+fs.suid_dumpable = 0
+```
+
+Aplique imediatamente com:
+```bash
+sudo sysctl --system
+```
+
+---
+
+## 4. Camada 3: Proteção do Sistema de Arquivos e Módulos Obsoletos (CIS 1.1)
+
+### 4.1. Opções de Montagem Restritivas em Partições Temporárias
+
+Diretórios onde qualquer usuário tem permissão de escrita (`/tmp`, `/dev/shm`, `/var/tmp`) devem ter execução de binários e elevação de privilégios revogadas.
+
+#### 1. Montagem Segura do `/tmp` (via systemd `tmp.mount`):
+O Arch Linux monta o `/tmp` como `tmpfs` automaticamente. Habilite o serviço nativo com flags restritas:
+
+```bash
+sudo cp /usr/share/systemd/tmp.mount /etc/systemd/system/tmp.mount
+sudo vim /etc/systemd/system/tmp.mount
+```
+Certifique-se de que a linha `Options` contenha:
+```ini
+Options=mode=1777,strictatime,nosuid,nodev,noexec
+```
+Recarregue e ative:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now tmp.mount
+```
+
+#### 2. Montagem Segura de `/dev/shm`:
+Adicione ao `/etc/fstab` para restringir a memória compartilhada POSIX:
+```text
+tmpfs   /dev/shm    tmpfs   defaults,nosuid,nodev,noexec    0   0
+```
+
+---
+
+### 4.2. Desativação de Módulos de Sistemas de Arquivos Obsoletos (CIS 1.1.1)
+
+Formatos legados ou exóticos não auditados representam superfície de ataque para injeção via pendrives maliciosos.
+
+Crie `/etc/modprobe.d/blacklist-filesystems.conf`:
+```ini
+# Desativação de sistemas de arquivos legados ou vulneráveis
+install cramfs /bin/true
+install freevxfs /bin/true
+install jffs2 /bin/true
+install hfs /bin/true
+install hfsplus /bin/true
+install squashfs /bin/true
+install udf /bin/true
+```
+
+---
+
+## 5. Camada 4: Blindagem da Pilha de Rede TCP/IP (CIS 3.1 & 3.2)
+
+Em estações de trabalho e servidores, o tráfego de rede deve ser estritamente defensivo, descartando pacotes malformados e impedindo técnicas de spoofing e personificação de rota.
+
+### Configuração: `/etc/sysctl.d/60-network-hardening.conf`
+
+```ini
+# ==============================================================================
+# Hardening da Pilha de Rede TCP/IP (CIS Benchmark 3.1, 3.2 & 3.3)
+# ==============================================================================
+
+# 1. Desativação de Roteamento de Pacotes (A estação não atua como roteador)
+net.ipv4.ip_forward = 0
+net.ipv6.conf.all.forwarding = 0
+
+# 2. Proteção contra IP Spoofing (Reverse Path Filtering Estrito - CIS 3.2.7)
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+
+# 3. Bloqueio de ICMP Redirects (Impede ataques Man-in-the-Middle de rota - CIS 3.2.2)
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.conf.all.secure_redirects = 0
+net.ipv4.conf.default.secure_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+
+# 4. Bloqueio de Source Routing (Impede o emissor de ditar a rota dos pacotes - CIS 3.2.1)
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv4.conf.default.accept_source_route = 0
+net.ipv6.conf.all.accept_source_route = 0
+net.ipv6.conf.default.accept_source_route = 0
+
+# 5. Mitigação contra Ataques de Negação de Serviço (DoS / SYN Flood - CIS 3.2.8)
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_rfc1337 = 1
+
+# 6. Proteção contra Smurf Attacks e Broadcasts Falsos (CIS 3.2.4 & 3.2.5)
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+
+# 7. Log de Pacotes Suspeitos com Endereços Impossíveis (Martians - CIS 3.2.3)
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.conf.default.log_martians = 1
+
+# 8. Desativação de Router Advertisements IPv6 não solicitados
+net.ipv6.conf.all.accept_ra = 0
+net.ipv6.conf.default.accept_ra = 0
+```
+
+### 5.2. Desativação de Protocolos de Rede Pouco Comuns (CIS 3.4)
+
+Crie `/etc/modprobe.d/blacklist-protocols.conf`:
+```ini
+install dccp /bin/true
+install sctp /bin/true
+install rds /bin/true
+install tipc /bin/true
+```
+
+---
+
+## 6. Camada 5: Controle de Privilégios, PAM e Sudo Seguro (CIS 5.x)
+
+### 6.1. Configuração do `sudo` Seguro (CIS 5.3)
+
+O `sudo` deve operar isolado em seu próprio terminal virtual e registrar todas as execuções.
+
+Crie o arquivo `/etc/sudoers.d/01-security-hardening` com validação de sintaxe:
+
+```bash
+sudo visudo -f /etc/sudoers.d/01-security-hardening
+```
+
+Insira as seguintes regras:
+```text
+# Exige que o sudo rode dentro de um PTY dedicado, prevenindo ataques de hijacking de terminal (CIS 5.3.2)
+Defaults use_pty
+
+# Registra todas as execuções em arquivo de log dedicado (CIS 5.3.3)
+Defaults logfile="/var/log/sudo.log"
+
+# Define timeout de autenticação em 5 minutos (CIS 5.3.4)
+Defaults timestamp_timeout=5
+
+# Limita o número de tentativas de senha incorreta
+Defaults passwd_tries=3
+```
+
+### 6.2. Desativação de Core Dumps no Espaço do Usuário (CIS 1.5.1)
+
+Core dumps podem conter dados sensíveis (tokens, senhas e fragmentos de chaves privadas em memória).
+
+1. No `/etc/security/limits.d/10-coredump.conf`:
+   ```text
+   * hard core 0
+   * soft core 0
+   ```
+2. No `/etc/systemd/coredump.conf`:
+   ```ini
+   [Coredump]
+   Storage=none
+   ProcessSizeMax=0
+   ```
+
+---
+
+## 7. Camada 6: Auditoria de Eventos e Rastreamento com `auditd` (CIS 4.x)
+
+O daemon de auditoria do Linux (`auditd`) monitora e gera registros à prova de adulteração sobre chamadas de sistema, execução de privilégios e alterações de autorização.
+
+### 1. Instalação e Habilitação do Serviço:
+```bash
+sudo pacman -S audit
+sudo systemctl enable --now auditd
+```
+
+### 2. Regras Essenciais de Auditoria (`/etc/audit/rules.d/50-security.rules`):
+
+```ini
+# Remove regras anteriores
+-D
+
+# Define o tamanho do buffer de eventos
+-b 8192
+
+# Falha silenciosa em caso de sobrecarga (evita travar o boot)
+-f 1
+
+# Monitorar alterações no relógio do sistema (CIS 4.1.3)
+-a always,exit -F arch=b64 -S adjtimex,settimeofday,clock_settime -k time_change
+
+# Monitorar modificações em usuários e grupos (CIS 4.1.4)
+-w /etc/group -p wa -k identity
+-w /etc/passwd -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/security/opasswd -p wa -k identity
+
+# Monitorar alterações de configuração de rede (CIS 4.1.5)
+-a always,exit -F arch=b64 -S sethostname,setdomainname -k system_locale
+-w /etc/issue -p wa -k system_locale
+-w /etc/hosts -p wa -k system_locale
+
+# Monitorar regras do Sudoers (CIS 4.1.10)
+-w /etc/sudoers -p wa -k scope
+-w /etc/sudoers.d/ -p wa -k scope
+
+# Tornar as regras imutáveis até o próximo reboot (CIS 4.1.17)
+-e 2
+```
+
+Recarregue as regras:
+```bash
+sudo augenrules --load
+```
+
+---
+
+## 8. Checklist de Verificação e Manutenção Contínua
+
+Execute estes comandos rápidos para auditar o status das defesas aplicadas:
+
+| Componente | Comando de Verificação | Saída Esperada |
+| :--- | :--- | :--- |
+| **Secure Boot** | `sbctl status` | `Secure Boot: ✓ Enabled` |
+| **ASLR** | `sysctl kernel.randomize_va_space` | `kernel.randomize_va_space = 2` |
+| **Yama ptrace** | `sysctl kernel.yama.ptrace_scope` | `kernel.yama.ptrace_scope = 2` |
+| **Reverse Path** | `sysctl net.ipv4.conf.all.rp_filter` | `net.ipv4.conf.all.rp_filter = 1` |
+| **SYN Cookies** | `sysctl net.ipv4.tcp_syncookies` | `net.ipv4.tcp_syncookies = 1` |
+| **Auditd** | `auditctl -s` | `enabled 2, pid ...` |
+| **Core Dumps** | `ulimit -c` | `0` |
+
+---
+
+## Referências Oficiais
+
+* [CIS Center for Internet Security: Distribution-Independent Linux Benchmark](https://www.cisecurity.org/benchmark/distribution_independent_linux)
+* [ArchWiki: Security Hardening](https://wiki.archlinux.org/title/Security)
+* [ArchWiki: Sysctl Hardening](https://wiki.archlinux.org/title/Sysctl#Security)
+* [Kernel.org: Admin Guide - Linux Security Hardening](https://docs.kernel.org/admin-guide/index.html)
+* [Kernel.org: Yama LSM Documentation](https://docs.kernel.org/admin-guide/LSM/Yama.html)
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Marcelo
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Arch Linux Guide: Secure Boot, TPM 2.0, and Kernel Lockdown Meeting EAC Linux v2 Requirements
+
+[![Arch Linux](https://img.shields.io/badge/Arch%20Linux-Kernel%206.x%2F7.x-1793d1?logo=arch-linux&logoColor=white)](https://archlinux.org/)
+[![Secure Boot](https://img.shields.io/badge/UEFI-Secure%20Boot%20Enabled-success?logo=linux&logoColor=white)](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot)
+[![Lockdown](https://img.shields.io/badge/Kernel%20Lockdown-integrity-blue)](https://docs.kernel.org/admin-guide/module-signing.html)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> [!NOTE]
+> Read this document in other languages: **[Português (Brasil)](README.pt-BR.md)**  
+> Also check out our companion security guide: **[CIS Hardening Guide](HARDENING.md)**
+
+A comprehensive, production-grade guide and standalone verification tool to configure **Arch Linux** in full compliance with the strict security requirements of **Easy Anti-Cheat (EAC) Linux v2** (announced by Epic Games), while preserving full support for **NVIDIA GPU drivers** and any out-of-tree [DKMS](https://wiki.archlinux.org/title/Dynamic_Kernel_Module_Support#Secure_Boot) modules (e.g., VirtualBox, v4l2loopback, Razer drivers, custom Wi-Fi/NICs).
+
+> [!IMPORTANT]
+> **Technical Scope: Epic Games' "Well-Known Key List" vs. Local MOK Keys:**
+> According to official details published by Epic Games:
+> 1. **System & Kernel Parameters (100% Compliant):** All operating system requirements covered in this guide (UEFI Secure Boot, TPM 2.0 & Measured Boot, Kernel Lockdown in `[integrity]` mode, `kexec` disabled, IOMMU isolation, and LSM BPF) strictly satisfy all EAC Linux v2 criteria **without restrictions**.
+> 2. **The "Well-Known" Key List:** To prevent cheat developers from signing rogue kernel drivers with self-generated private keys, Epic Games enforces a curated **"Well-Known Key List"**. The initial list exclusively trusts centralized distribution signing authorities (Ubuntu/Canonical, Fedora, Debian, openSUSE, Universal Blue/Bazzite, and Microsoft UEFI CA).
+> 3. **The Role of Arch Linux Maintainers:** Epic Games **does not trust self-generated user MOK keys** for anti-cheat verification. Epic explicitly invited distribution maintainers (including Arch Linux) to coordinate directly with Epic Games to align configurations and submit their official distribution CA keys for inclusion into the trusted list. This guide ensures your system architecture is fully prepared and compliant as official Arch signing matures.
+
+---
+
+## Table of Contents
+
+- [1. Official EAC Linux v2 Requirements](#1-official-eac-linux-v2-requirements)
+  - [1.1 Defense Vector Matrix & Practical Restrictions](#11-defense-vector-matrix--practical-system-restrictions)
+- [2. The Dual-Keyring Architecture (Problem & Solution)](#2-the-dual-keyring-architecture-problem--solution)
+- [3. Step-by-Step Implementation](#3-step-by-step-implementation)
+  - [Phase 1: Base Secure Boot with `sbctl`](#phase-1-base-secure-boot-with-sbctl)
+  - [Phase 2: Sysctl & Kernel Modular Command Line](#phase-2-sysctl--kernel-modular-command-line)
+  - [Phase 3: Shim Boot Chain & MOK Infrastructure](#phase-3-shim-boot-chain--mok-infrastructure)
+  - [Phase 4: Install & Validate DKMS Modules (NVIDIA & Gaming Drivers)](#phase-4-install--validate-dkms-modules-nvidia--gaming-drivers)
+  - [Phase 5: Enabling Kernel Lockdown](#phase-5-enabling-kernel-lockdown)
+  - [Alternative Option: Dual-Boot UKI Profiles (Desktop/Hibernation vs. Gaming/Lockdown)](#alternative-option-dual-boot-uki-profiles-desktophibernation-vs-gaminglockdown)
+- [4. Automated Direct Kernel Auditor (`check-eac-compliance.sh`)](#4-automated-direct-kernel-auditor-check-eac-compliancesh)
+- [5. Post-Boot Verification Checklist](#5-post-boot-verification-checklist)
+- [6. Maintenance: How to Re-sign and Rebuild DKMS Modules](#6-maintenance-how-to-re-sign-and-rebuild-dkms-modules)
+- [7. Official References](#7-official-references)
+- [License](#license)
+
+---
+
+## 1. Official EAC Linux v2 Requirements
+
+Unlike Windows ring-0 anti-cheat drivers, EAC Linux v2 leverages an on-demand **`systemd`** daemon coupled with **`eBPF`** programs. To prevent cheating, memory tampering, and unauthorized kernel alterations, EAC mandates a strict chain of trust:
+
+1. **UEFI [Secure Boot](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot) Enabled** in User Mode (`SetupMode = 0`) with recognized keys.
+2. **TPM 2.0 & Measured Boot** active, logging PCR measurements through systemd and firmware.
+3. **Signed Kernel and Modules** (`CONFIG_MODULE_SIG=y`).
+4. **Kernel Lockdown in `integrity` Mode** (`/sys/kernel/security/lockdown` set to `[integrity]`), locking ring-0 against modification even by the `root` user.
+5. **`kexec` Permanently Disabled** (`kernel.kexec_load_disabled = 1`), preventing in-memory execution of unverified kernels.
+6. **IOMMU Enabled** (`intel_iommu=on iommu=pt` or AMD-Vi equivalent), blocking physical DMA attacks from PCIe/Thunderbolt peripherals.
+7. **LSM BPF Enabled** (`CONFIG_BPF_LSM=y`), allowing the anti-cheat security module to audit eBPF hooks.
+
+### 1.1. Defense Vector Matrix & Practical System Restrictions
+
+Each requirement closes a specific attack vector, imposing concrete operational restrictions for administrators and end-users:
+
+| # | Technical Requirement | EAC Defense Vector | Practical System Consequence |
+| :--- | :--- | :--- | :--- |
+| **1** | **UEFI Secure Boot** (`SetupMode = 0`) | Blocks tampering with bootloaders, kernels, or EFI binaries before the OS launches. | **Unsigned binaries fail to boot.** Generic recovery LiveUSBs or unverified kernels trigger `Security Violation`. |
+| **2** | **TPM 2.0 & Measured Boot** (PCRs 0–11) | Audits firmware, BIOS, kernel, and `cmdline` alterations through cryptographic PCR logs. | **TPM-bound LUKS is sensitive:** Firmware updates or `cmdline` edits change PCRs, requiring manual recovery passphrase. Requires discrete or firmware TPM 2.0. |
+| **3** | **Module Signing** (`CONFIG_MODULE_SIG=y`) | Prevents injection of rootkits and malicious drivers into privileged Ring-0. | **Unsigned modules fail to load (`insmod`).** All out-of-tree DKMS drivers (NVIDIA, VirtualBox, v4l2loopback) mandate key enrollment and build-time signing. |
+| **4** | **Kernel Lockdown** (`[integrity]`) | Strictly isolates kernel memory and internal structures from user space (even from `root`/`sudo`). | **Hibernation disabled** (`LOCKDOWN_HIBERNATION`); `/dev/mem` disabled; MSR writes blocked (**breaks software undervolt/overclock** like `throttled`/`ryzenadj`); `debugfs` restricted. |
+| **5** | **Disable `kexec`** (`kexec_load_disabled = 1`) | Prevents in-RAM hot-jumping between kernels, bypassing firmware and PCR measurements. | **Fast software reboots (`systemctl kexec`) are disabled.** Cold hardware reboot cycle through UEFI is mandatory. |
+| **6** | **IOMMU Isolation** (`intel_iommu=on iommu=pt`) | Blocks hardware DMA attacks via PCIe devices (e.g., *PCILeech*) or external Thunderbolt/USB4 ports. | All bus traffic is mediated by DMAR page tables. High-speed external hotplug devices have direct RAM access blocked. |
+| **7** | **LSM BPF Enabled** (`CONFIG_BPF_LSM=y`) | Empowers EAC to audit and veto suspicious syscalls in real time using verified eBPF probes. | **EAC holds syscall veto authority.** Memory debuggers and reverse-engineering tools (GDB, Cheat Engine via Proton) are intercepted when inspecting game memory. |
+
+> [!WARNING]
+> **Daily Productivity Impact Checklist:**  
+> Before applying these configurations, review the affected operational features:
+> * ⚠️ **Hibernation (`Suspend-to-Disk`):** Permanently disabled under `lockdown=integrity`. If your daily workflow depends on hibernation, use the optional [UKI Dual-Boot Profile](#alternative-option-uki-dual-boot-profile-desktop-hibernation-vs-gaming-lockdown) to switch between a desktop profile with hibernation and a hardened profile for gaming.
+> * ⚠️ **CPU Tuning (Undervolting/Overclocking):** Utilities that write to MSRs (`/dev/cpu/*/msr`) will fail under lockdown (tuning must be set directly in the BIOS).
+> * ⚠️ **Third-Party DKMS Drivers:** Require the dedicated MOK infrastructure documented in Phase 3 to function properly.
+> * ⚠️ **Disk Encryption:** If using TPM-based auto-unlocking, ensure you have your LUKS recovery passphrase safely backed up before updating firmware or kernels.
+
+---
+
+## 2. The Dual-Keyring Architecture (Problem & Solution)
+
+### The Upstream Kernel Keyring Isolation Issue
+When configuring [Secure Boot](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot) on Arch Linux using [sbctl](https://wiki.archlinux.org/title/Sbctl), your root key (`Database Key`) is enrolled directly into the motherboard NVRAM UEFI `db`.
+
+During Linux boot:
+* The kernel reads the UEFI `db` and populates the **`.platform`** keyring.
+* **Upstream Security Restriction:** The upstream Linux kernel **strictly forbids** the `.platform` keyring from validating kernel modules (`.ko`). This prevents arbitrary third-party code signed with Microsoft OEM vendor keys from executing in kernel space.
+* **Consequence under Lockdown:** When `lockdown=integrity` is active, the kernel ignores your `Database Key` in `.platform`, treats NVIDIA and any other DKMS modules as **unsigned**, and blocks loading with `Operation not permitted`.
+
+### The Solution: Shim + MOK + `sbctl` Chain
+To bypass this limitation without compromising security, we establish a dual-keyring architecture:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                          Firmware UEFI (NVRAM)                         │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                         Executes shimx64.efi (MS / sbctl signed)
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                              Shim Bootloader                           │
+│  - Reads MOK list (MokList) from NVRAM                                 │
+│  - Creates runtime EFI variable 'MokListRT'                            │
+│  - Executes 'grubx64.efi' (sbctl-signed copy of systemd-boot)          │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                 systemd-bootx64.efi -> arch-linux.efi (UKI)            │
+│  - Boots the Linux Kernel with unified parameters                      │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                             Linux Kernel                               │
+│                                                                        │
+│  [Keyring .platform] (via UEFI db)   │ [Keyring .machine] (via MokList)│
+│  - Validates bootloaders & UKIs      │ - Validates Kernel Modules      │
+│  - Key: Database Key (sbctl)         │ - Key: Machine Owner Key (MOK)  │
+│                                      │   (NVIDIA + Any DKMS OK!)       │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 3. Step-by-Step Implementation
+
+### Phase 1: Base Secure Boot with `sbctl`
+
+Follow the official [ArchWiki sbctl guide](https://wiki.archlinux.org/title/Sbctl) to prepare the platform:
+
+1. **Enter UEFI Firmware & Activate Setup Mode (Key Installation Mode):**
+   Before Linux can enroll cryptographic keys into the motherboard's NVRAM, the firmware must be placed in **Setup Mode** (where write permissions to PK, KEK, and db are open). The exact terminology and menu layout vary significantly across motherboard manufacturers and BIOS vendors:
+   * **Lenovo (Insyde / ThinkPad):** Go to `Security` -> `Secure Boot` -> Select `Reset to Setup Mode` or `Clear All Secure Boot Keys`.
+   * **ASUS:** Navigate to `Boot` -> `Secure Boot` -> `Key Management` -> Select `Clear Secure Boot Keys` (firmware automatically shifts into Setup Mode).
+   * **MSI:** Go to `Settings` -> `Security` -> `Secure Boot` -> Change mode from `Standard` to `Custom` -> Select `Delete all Secure Boot variables`.
+   * **Gigabyte / AORUS:** Navigate to `BIOS` -> `Secure Boot` -> Toggle to `Custom` -> Select `Delete PK` / `Clear Keys`.
+   * **Dell:** Go to `Secure Boot` -> `Expert Key Management` -> Select `Enable Custom Mode` -> `Delete All Keys`.
+   * **HP:** Go to `Security` -> `Secure Boot Configuration` -> Select `Clear Secure Boot keys`.
+
+   Save changes and reboot into Arch Linux. Check with `sudo sbctl status` (it should display `Setup Mode: ✓ Enabled` and `Secure Boot: ✗ Disabled`).
+
+2. **Install `sbctl` and Generate Keys:**
+   ```bash
+   sudo pacman -S sbctl
+   sudo sbctl create-keys
+   ```
+
+3. **Enroll Keys with Microsoft Vendor Support:**
+   > [!IMPORTANT]
+   > As documented in [ArchWiki: Secure Boot - Microsoft keys](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot#Microsoft_keys), the `-m` (`--microsoft`) flag is **mandatory** for systems with dedicated NVIDIA GPUs to prevent black screens caused by GPU Option ROMs during POST.
+   ```bash
+   sudo sbctl enroll-keys -m
+   ```
+
+4. **Sign Boot Binaries and UKI:**
+   ```bash
+   sudo sbctl sign -s /boot/EFI/BOOT/BOOTX64.EFI
+   sudo sbctl sign -s /boot/EFI/systemd/systemd-bootx64.efi
+   sudo sbctl sign -s /boot/EFI/Linux/arch-linux.efi
+   ```
+
+---
+
+### Phase 2: Sysctl & Kernel Modular Command Line
+
+1. **Disable `kexec` via Sysctl:**
+   ```bash
+   cat << 'EOF' | sudo tee /etc/sysctl.d/99-eac-security.conf
+   kernel.kexec_load_disabled = 1
+   EOF
+   ```
+   Apply immediately:
+   ```bash
+   sudo sysctl -p /etc/sysctl.d/99-eac-security.conf
+   ```
+
+2. **Modularize Kernel Cmdline (`/etc/cmdline.d/`):**
+   Modern `mkinitcpio` generators parse `/etc/cmdline.d/*.conf` in alphanumerical order to assemble the [Unified Kernel Image (UKI)](https://wiki.archlinux.org/title/Unified_kernel_image).
+
+   #### Step 2.1: Identify your Root Drive PARTUUID
+   Before configuring boot parameters, retrieve the GPT partition identifier for your root partition:
+   ```bash
+   lsblk -o NAME,FSTYPE,LABEL,PARTUUID,MOUNTPOINTS
+   ```
+   * **`PARTUUID` (Partition UUID):** Defined at the GPT partition table level. It persists even if the filesystem is reformatted, making it the most resilient choice for `root=PARTUUID=...` (locate the row mounted at `/`).
+
+   > [!NOTE]
+   > **Note on Hibernation (Suspend-to-Disk):**
+   > Under Linux Kernel Lockdown (`[integrity]`), traditional suspend-to-disk (hibernation) is strictly disabled by upstream design to prevent memory tampering via swap. Standard Suspend-to-RAM (`suspend`) remains fully functional. Therefore, no swap `resume=` parameters are configured.
+
+   #### Step 2.2: Backup Existing Cmdline and Create Drop-ins
+   Instead of deleting your legacy configuration, safely back it up and use it as the base:
+
+   ```bash
+   # 1. Create the modular drop-in directory:
+   sudo mkdir -p /etc/cmdline.d
+
+   # 2. Copy existing cmdline to 10-root.conf as a starting point:
+   sudo cp /etc/kernel/cmdline /etc/cmdline.d/10-root.conf
+
+   # 3. Safely move the original monolithic file to a backup:
+   sudo mv /etc/kernel/cmdline /etc/kernel/cmdline.backup
+   ```
+
+   * **Inspect and Clean Root Parameters (`/etc/cmdline.d/10-root.conf`):**
+     Print your copied configuration:
+     ```bash
+     cat /etc/cmdline.d/10-root.conf
+     ```
+     Now open it with **Vim** (`sudo vim /etc/cmdline.d/10-root.conf`) and refine the parameters according to these rules:
+     * **What to KEEP:**
+       * Root partition reference: Ensure `root=PARTUUID=<YOUR-ROOT-PARTUUID>` matches your discovered partition. If the original used `root=/dev/...` or `root=UUID=...`, switch to `PARTUUID` for maximum boot resilience.
+       * Filesystem type and write mode: `rootfstype=ext4` (or `btrfs`), `rw`.
+       * Base boot flags: `quiet`, `splash`, `zswap.enabled=...`, or distribution-specific parameters.
+     * **What to REMOVE from this file:**
+       * **Hibernation arguments:** Delete any `resume=UUID=...` and `resume_offset=...` options (since hibernation is restricted under Lockdown).
+       * **Security and IOMMU arguments:** Remove any `intel_iommu=...`, `iommu=...`, or `lockdown=...` (these belong exclusively in `90-security.conf`).
+
+   * **Security parameters (`/etc/cmdline.d/90-security.conf`):**
+     Positioned at `90` to evaluate after base root parameters:
+     ```bash
+     cat << 'EOF' | sudo tee /etc/cmdline.d/90-security.conf
+     intel_iommu=on iommu=pt
+     EOF
+     ```
+     *(Use `amd_iommu=on` on AMD systems. Note: `lockdown=integrity` will be added in Phase 5 once the MOK boot chain is active).*
+
+#### Step 2.3: Pre-Reboot Safety Checklist & Base Secure Boot Validation
+
+Before rebooting to validate your base Secure Boot setup, observe these critical safety precautions:
+
+> [!CAUTION]
+> **Essential Pre-Reboot Precautions:**
+> 1. **Verify ESP Signatures:** Run `sudo sbctl verify`. Every boot binary (`/boot/EFI/BOOT/BOOTX64.EFI`, `/boot/EFI/systemd/systemd-bootx64.efi`, and your UKI `/boot/EFI/Linux/arch-linux.efi`) **must** show a green tick `✓ is signed`. If an unsigned UKI boots with Secure Boot enforced, the UEFI will halt with an *Access Denied / Security Violation* error.
+> 2. **Double-Check Root PARTUUID:** Inspect `/etc/cmdline.d/10-root.conf` against your `lsblk -o NAME,PARTUUID,MOUNTPOINTS` output. A typo in the PARTUUID will cause the initramfs to drop into an emergency rescue shell.
+> 3. **Confirm Microsoft Vendor Keys (`-m`):** Ensure you executed `sudo sbctl enroll-keys -m`. Omitting `-m` blocks dedicated GPU Option ROMs from initializing video output during POST.
+> 4. **Keep an Arch Live USB Handy:** Keep a bootable Arch Linux USB drive accessible. In the unlikely event of a boot misconfiguration, you can boot from the USB (temporarily disabling Secure Boot in UEFI if necessary) and run `arch-chroot` to fix settings.
+
+**Compile and Reboot to Test Base Secure Boot:**
+```bash
+# 1. Assemble the UKI incorporating the new modular cmdline:
+sudo mkinitcpio -P
+
+# 2. Confirm the generated UKI was automatically signed by sbctl's hook:
+sudo sbctl verify
+
+# 3. Reboot the machine:
+sudo reboot
+```
+
+**Post-Reboot Validation:**
+Once booted back into Arch, run:
+```bash
+bootctl status | grep "Secure Boot:"
+```
+*Expected output: `Secure Boot: enabled (user)`.*
+With your base Secure Boot and modular UKI validated, proceed to Phase 3 to configure the Shim and MOK infrastructure.
+
+---
+
+### Phase 3: Shim Boot Chain & MOK Infrastructure
+
+Before installing GPU drivers, set up the cryptographic MOK keys and configure the Shim preloader boot chain.
+
+1. **Generate Dedicated MOK Keypair and Secure Permissions:**
+   ```bash
+   sudo openssl req -new -x509 -newkey rsa:2048 -nodes -days 3650 \
+     -subj "/CN=Arch Linux Kernel Modules MOK/" \
+     -keyout /etc/dkms/mok.key \
+     -outform DER -out /etc/dkms/mok.der
+
+   sudo openssl x509 -in /etc/dkms/mok.der -inform DER -out /etc/dkms/mok.pem
+
+   # Restrict private key permissions strictly to root (600)
+   sudo chmod 600 /etc/dkms/mok.key
+   ```
+
+2. **Configure DKMS Signing Framework:**
+   Setting up [DKMS Secure Boot](https://wiki.archlinux.org/title/Dynamic_Kernel_Module_Support#Secure_Boot) signing in advance ensures that pacman hooks automatically sign all compiled modules upon install:
+   ```bash
+   sudo mkdir -p /etc/dkms/framework.conf.d
+   cat << 'EOF' | sudo tee /etc/dkms/framework.conf.d/signing.conf
+   sign_file="/usr/lib/modules/$kernelver/build/scripts/sign-file"
+   mok_signing_key="/etc/dkms/mok.key"
+   mok_certificate="/etc/dkms/mok.pem"
+   EOF
+   ```
+
+3. **Install `mokutil` and Queue MOK Import:**
+   Install `mokutil` from the official Arch repositories:
+   ```bash
+   sudo pacman -S mokutil
+   sudo mokutil --import /etc/dkms/mok.der
+   ```
+   *Enter a temporary password when prompted (remember it for the upcoming reboot).*
+
+4. **Install `shim-signed` via `makepkg`:**
+   The bootloader preloader `shimx64.efi` must be obtained from the [AUR package: `shim-signed`](https://aur.archlinux.org/packages/shim-signed).
+
+   > [!WARNING]
+   > **Arch User Repository (AUR) Security Notice & Best Practices:**
+   > PKGBUILD scripts submitted to the AUR are maintained by the community and are **not vetted or audited** by the Arch Linux security team. Malicious or poorly maintained scripts can compromise your system. Always adhere to these safety practices:
+   > 1. **Audit the PKGBUILD:** Always inspect the `PKGBUILD` and any `.install` scripts before compilation. Verify the upstream download URLs (`source=`) and ensure the cryptographic hashes (`sha256sums=`) match. For `shim-signed`, confirm that the binary originates directly from trusted Fedora/Red Hat official RPM repositories signed by the Microsoft UEFI CA.
+   > 2. **Never build as root:** `makepkg` should strictly run under a standard unprivileged user.
+   > 3. **Avoid Blind Automation:** Do not rely on automated AUR parsers/helpers; manually inspect and build using Arch's native `makepkg`.
+   >
+   > **Official Native Installation via `makepkg`:**
+   > ```bash
+   > git clone https://aur.archlinux.org/shim-signed.git
+   > cd shim-signed
+   > vim PKGBUILD   # Thoroughly inspect sources, RPM URLs, and checksums
+   > makepkg -si
+   > cd .. && rm -rf shim-signed
+   > ```
+
+5. **Install Shim on ESP and Sign `mmx64.efi`:**
+   ```bash
+   sudo cp /usr/share/shim-signed/shimx64.efi /boot/EFI/systemd/
+   sudo cp /usr/share/shim-signed/mmx64.efi /boot/EFI/systemd/
+   sudo sbctl sign -s /boot/EFI/systemd/mmx64.efi
+   ```
+
+6. **Create and Register `grubx64.efi` Payload in `sbctl`:**
+   Shim strictly looks for a secondary bootloader named `grubx64.efi` in the same directory. Copy the raw binary directly from `/usr/lib/systemd/boot/efi/systemd-bootx64.efi` to ensure it starts without prior signatures, allowing `sbctl sign -s` to sign it and register it into the signing database (`/var/lib/sbctl/files.json`):
+   ```bash
+   sudo cp /usr/lib/systemd/boot/efi/systemd-bootx64.efi /boot/EFI/systemd/grubx64.efi
+   sudo sbctl sign -s /boot/EFI/systemd/grubx64.efi
+   ```
+   *(Confirm registration in the database with `sudo sbctl list-files`)*.
+
+7. **Create Pacman Hook for Automated `systemd-boot` Synchronization:**
+   Because `bootctl update` only updates default UEFI paths and is unaware of `grubx64.efi`, configure a post-transaction pacman hook to keep `grubx64.efi` in sync on every `systemd` package upgrade:
+   ```bash
+   sudo mkdir -p /etc/pacman.d/hooks
+   cat << 'EOF' | sudo tee /etc/pacman.d/hooks/95-systemd-boot.hook
+   [Trigger]
+   Type = Package
+   Operation = Upgrade
+   Target = systemd
+
+   [Action]
+   Description = Atualizando systemd-boot e sincronizando grubx64.efi para o Shim...
+   When = PostTransaction
+   Exec = /bin/sh -c "/usr/bin/bootctl update && /usr/bin/cp -f /boot/EFI/systemd/systemd-bootx64.efi /boot/EFI/systemd/grubx64.efi"
+   EOF
+   ```
+
+   > [!TIP]
+   > **How automated signature verification operates:**  
+   > 1. During a `systemd` package upgrade, `95-systemd-boot.hook` runs `bootctl update` and clones the updated binary to `grubx64.efi`.  
+   > 2. At the end of the pacman transaction, the native system hook `/usr/share/libalpm/hooks/zz-sbctl.hook` executes `sbctl sign-all -g`.  
+   > 3. Because both `grubx64.efi` and `systemd-bootx64.efi` are tracked in `files.json`, `sbctl` automatically re-signs both binaries before reboot, preventing any *Security Policy Violation* failures.
+
+8. **Create NVRAM Boot Entry:**
+   ```bash
+   sudo efibootmgr --create --disk /dev/nvme0n1 --part 1 \
+     --label "Arch Linux (Shim MOK)" \
+     --loader '\EFI\systemd\shimx64.efi'
+   ```
+
+9. **Enroll MOK via MokManager on Reboot:**
+   Reboot the system (`sudo reboot`). When the blue **MokManager** screen appears:
+   * Press any key -> **Enroll MOK** -> **Continue** -> **Yes** -> Type your temporary password -> **Reboot**.
+
+---
+
+### Phase 4: Install & Validate DKMS Modules (NVIDIA & Gaming Drivers)
+
+Now that Shim is booting the system and the `.machine` keyring contains your MOK key, install your graphics drivers and DKMS modules:
+
+1. **Install NVIDIA Drivers (and Any Other DKMS Modules):**
+   With `signing.conf` already in place, pacman hooks automatically compile and sign the modules:
+   ```bash
+   # Primary gaming GPU driver:
+   sudo pacman -S nvidia-open-dkms
+
+   # Any other required DKMS modules (e.g., VirtualBox, v4l2loopback, Wi-Fi):
+   # sudo pacman -S virtualbox-host-dkms v4l2loopback-dkms
+   ```
+
+2. **Verify Module Signatures:**
+   ```bash
+   modinfo nvidia | grep signer
+   # Or for any other DKMS module:
+   # modinfo vboxdrv | grep signer
+   ```
+   *Expected: `signer: Arch Linux Kernel Modules MOK`.*
+
+3. **Verify GPU Acceleration:**
+   ```bash
+   nvidia-smi
+   ```
+
+---
+
+### Phase 5: Enabling Kernel Lockdown
+
+With all out-of-tree modules signed and validated by the `.machine` keyring, activate kernel lockdown to satisfy the EAC v2 integrity requirements:
+
+1. **Add `lockdown=integrity` to `/etc/cmdline.d/90-security.conf`:**
+   ```bash
+   cat << 'EOF' | sudo tee /etc/cmdline.d/90-security.conf
+   intel_iommu=on iommu=pt lockdown=integrity
+   EOF
+   ```
+
+2. **Regenerate UKI and Reboot:**
+   Regenerate your [Unified Kernel Image (UKI)](https://wiki.archlinux.org/title/Unified_kernel_image) to bake `lockdown=integrity` into the cryptographically signed `.cmdline`:
+   ```bash
+   sudo mkinitcpio -P
+   sudo reboot
+   ```
+
+---
+
+### Alternative Option: Dual-Boot UKI Profiles (Desktop/Hibernation vs. Gaming/Lockdown)
+
+Because Linux Kernel Lockdown in `[integrity]` mode strictly blocks resume from hibernation (`LOCKDOWN_HIBERNATION`), users who rely on daily **hibernation** can configure `systemd-boot` with **two independent UKI entries**:
+* **Default Entry (`arch-linux.efi`):** Everyday desktop productivity with active swap/hibernation support (no `lockdown=integrity`).
+* **Gaming Entry (`arch-linux-lockdown.efi`):** Fully hardened environment for anti-cheat games with `lockdown=integrity`, `intel_iommu=on iommu=pt`, and `efi=disable_early_pci_dma`.
+
+> [!NOTE]
+> The `kexec` block (`kernel.kexec_load_disabled = 1`) remains enforced globally via `/etc/sysctl.d/99-security.conf` (Phase 2). It is not passed on the kernel `cmdline` because upstream Linux parses and enforces this setting strictly via `sysctl`.
+
+#### 1. Structure `/etc/cmdline.d/` with an Isolated Subdirectory
+
+`mkinitcpio` evaluates `*.conf` files inside `/etc/cmdline.d/` non-recursively. You can isolate gaming parameters inside a `lockdown/` subfolder:
+
+1. **Base system and hibernation parameters in root `/etc/cmdline.d/` (Default Entry):**
+   ```bash
+   # System base
+   cat << 'EOF' | sudo tee /etc/cmdline.d/10-root.conf
+   root=PARTUUID=<YOUR-ROOT-PARTUUID> rw rootfstype=ext4 zswap.enabled=0 quiet splash
+   EOF
+
+   # Hibernation / Swapfile
+   cat << 'EOF' | sudo tee /etc/cmdline.d/20-resume.conf
+   resume=UUID=<YOUR-SWAP-UUID> resume_offset=<YOUR-SWAPFILE-OFFSET>
+   EOF
+
+   # Base IOMMU
+   cat << 'EOF' | sudo tee /etc/cmdline.d/30-security.conf
+   intel_iommu=on iommu=pt
+   EOF
+   ```
+
+2. **Create the `lockdown/` subfolder with root symlink and security parameters:**
+   ```bash
+   sudo mkdir -p /etc/cmdline.d/lockdown
+
+   # Symlink to reuse root parameters without duplication
+   sudo ln -sf /etc/cmdline.d/10-root.conf /etc/cmdline.d/lockdown/10-root.conf
+
+   # Hardened parameters & Kernel Lockdown
+   cat << 'EOF' | sudo tee /etc/cmdline.d/lockdown/30-security.conf
+   lockdown=integrity intel_iommu=on iommu=pt efi=disable_early_pci_dma
+   EOF
+   ```
+
+#### 2. Configure Presets in `/etc/mkinitcpio.d/linux.preset`
+
+Edit `/etc/mkinitcpio.d/linux.preset` (`sudo vim /etc/mkinitcpio.d/linux.preset`):
+
+```ini
+ALL_kver="/boot/vmlinuz-linux"
+
+PRESETS=('default' 'lockdown')
+
+# --- Entry 1: Desktop / Hibernation (Default) ---
+default_uki="/boot/EFI/Linux/arch-linux.efi"
+default_options="--splash /boot/loader/background.bmp"
+
+# --- Entry 2: Gaming / EAC Anti-Cheat (Lockdown) ---
+lockdown_uki="/boot/EFI/Linux/arch-linux-lockdown.efi"
+lockdown_options="--splash /boot/loader/background.bmp --cmdline /etc/cmdline.d/lockdown"
+```
+
+#### 3. Build, Sign, and Set Default Boot
+
+```bash
+# 1. Compile both UKI images
+sudo mkinitcpio -P
+
+# 2. Register lockdown UKI in sbctl database (if not auto-signed by post-hook)
+sudo sbctl sign -s /boot/EFI/Linux/arch-linux-lockdown.efi
+
+# 3. Ensure default boot points to the hibernation image
+sudo bootctl set-default arch-linux.efi
+
+# 4. Verify detected boot entries
+bootctl list
+```
+
+When powering on your computer, the system boots into your desktop environment with working hibernation. When launching games requiring EAC v2, press the **Spacebar** during boot and select `Arch Linux (...~lockdown)`.
+
+---
+
+## 4. Automated Direct Kernel Auditor (`check-eac-compliance.sh`)
+
+Immediately after rebooting, verify your system's compliance using the standalone auditor script included in this repository ([`check-eac-compliance.sh`](check-eac-compliance.sh)). It audits kernel security interfaces directly without relying on high-level tools:
+
+```bash
+chmod +x check-eac-compliance.sh
+sudo ./check-eac-compliance.sh
+```
+
+### Audited Sysfs/Procfs Interfaces:
+
+| Target | Direct Kernel Path | Compliance Criterion |
+|---|---|---|
+| **Secure Boot** | `/sys/firmware/efi/efivars/SecureBoot-*` | 5th byte == `0x01` |
+| **Setup Mode** | `/sys/firmware/efi/efivars/SetupMode-*` | 5th byte == `0x00` (User Mode enforcement) |
+| **TPM 2.0** | `/sys/class/tpm/tpm0/tpm_version_major` | Reports `2` |
+| **Measured Boot** | `/sys/kernel/security/tpm0/binary_bios_measurements` | Event log > 0 bytes |
+| **Kernel Lockdown** | `/sys/kernel/security/lockdown` | Contains `[integrity]` |
+| **kexec Lock** | `/proc/sys/kernel/kexec_load_disabled` | Equal to `1` |
+| **IOMMU Groups** | `/sys/kernel/iommu_groups` | Group count > 0 |
+| **LSM BPF** | `/sys/kernel/security/lsm` | Contains `bpf` |
+| **Shim MokListRT**| `/sys/firmware/efi/efivars/MokListRT-*` | Exported runtime table present |
+| **MOK Keyring** | `/proc/keys` | Certificate exists in kernel keyring table |
+| **Kernel Taint** | `/proc/sys/kernel/tainted` | Bitwise: Bit 13 (`8192` - Unsigned) is `0`; Bit 12 (`4096` - OOT DKMS) allowed |
+| **Active Cmdline** | `/proc/cmdline` | Contains `lockdown=integrity` & `intel_iommu=on` |
+
+---
+
+## 5. Post-Boot Verification Checklist
+
+You can also run quick manual checks against core security interfaces:
+
+| Metric | Direct Check Command | Expected Output |
+|---|---|---|
+| **Lockdown Status** | `cat /sys/kernel/security/lockdown` | `none [integrity] confidentiality` |
+| **kexec Disabled** | `cat /proc/sys/kernel/kexec_load_disabled` | `1` |
+| **MOK Keyring** | `keyctl show %:.machine` or `cat /proc/keys` | Contains `Arch Linux Kernel Modules MOK` |
+| **Kernel Taint** | `cat /proc/sys/kernel/tainted` | `4096` (OOT DKMS) or `0` (clean) |
+| **Host Security ID** | `fwupdmgr security` | HSI-1 valid, Intel BootGuard enabled |
+| **NVIDIA 3D Driver**| `nvidia-smi` | GPU operational with Wayland/X11 |
+
+---
+
+## 6. Maintenance: How to Re-sign and Rebuild DKMS Modules
+
+Whenever a kernel update occurs or you install new out-of-tree hardware drivers in the future, use these standard procedures:
+
+### A. Automatic Rebuild & Signing (Recommended)
+Because `/etc/dkms/framework.conf.d/signing.conf` is persistent, `pacman` hooks automatically rebuild and re-sign all DKMS modules on every kernel update. To manually trigger this:
+```bash
+sudo dkms autoinstall
+```
+
+### B. Force Rebuilding a Specific Module
+To completely purge and recompile a specific module (replace with your module name and version):
+```bash
+# Check installed DKMS modules:
+dkms status
+
+# Cleanly rebuild and re-sign:
+sudo dkms remove <module>/<version> --all
+sudo dkms install <module>/<version>
+```
+*Example for NVIDIA:*
+```bash
+sudo dkms remove nvidia/615.78.08 --all && sudo dkms install nvidia/615.78.08
+```
+
+### C. Manual Direct Module Signing with `sign-file`
+If you compile an independent `.ko` outside of the DKMS tree, sign it manually using the kernel's built-in tool:
+```bash
+sudo /usr/lib/modules/$(uname -r)/build/scripts/sign-file sha256 \
+  /etc/dkms/mok.key \
+  /etc/dkms/mok.pem \
+  /path/to/module.ko
+```
+
+---
+
+## 7. Official References
+
+* [Introducing Easy Anti-Cheat Linux v2 - Epic Online Services](https://onlineservices.epicgames.com/news/introducing-easy-anti-cheat-linux-v2)
+* [ArchWiki: Unified Extensible Firmware Interface/Secure Boot](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot)
+* [ArchWiki: sbctl](https://wiki.archlinux.org/title/Sbctl)
+* [ArchWiki: Unified Kernel Image (UKI)](https://wiki.archlinux.org/title/Unified_kernel_image)
+* [ArchWiki: systemd-boot](https://wiki.archlinux.org/title/Systemd-boot)
+* [ArchWiki: DKMS Secure Boot](https://wiki.archlinux.org/title/Dynamic_Kernel_Module_Support#Secure_Boot)
+* [Linux Kernel Module Signing Documentation](https://docs.kernel.org/admin-guide/module-signing.html)
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE).
+
+```
+
+`README.pt-BR.md`:
+
+```md
+# Guia Arch Linux: Secure Boot, TPM 2.0 e Kernel Lockdown atendendo requisitos EAC Linux v2
+
+[![Arch Linux](https://img.shields.io/badge/Arch%20Linux-Kernel%206.x%2F7.x-1793d1?logo=arch-linux&logoColor=white)](https://archlinux.org/)
+[![Secure Boot](https://img.shields.io/badge/UEFI-Secure%20Boot%20Ativo-success?logo=linux&logoColor=white)](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot)
+[![Lockdown](https://img.shields.io/badge/Kernel%20Lockdown-integrity-blue)](https://docs.kernel.org/admin-guide/module-signing.html)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> [!NOTE]
+> Leia este documento em inglês: **[English](README.md)**  
+> Consulte também o guia complementar de segurança: **[Guia de Hardening e CIS Benchmark](HARDENING.pt-BR.md)**
+
+Este documento registra todas as configurações, referências oficiais, descobertas arquiteturais e o passo a passo integral para implantar e manter um sistema **Arch Linux** em total conformidade com os requisitos estritos do **Easy Anti-Cheat (EAC) Linux v2** (anunciado pela Epic Games em outubro de 2026), garantindo a integridade do sistema operacional com suporte completo a **placas de vídeo NVIDIA** e a qualquer módulo [DKMS](https://wiki.archlinux.org/title/Dynamic_Kernel_Module_Support#Secure_Boot) de terceiros (VirtualBox, v4l2loopback, drivers Wi-Fi/NICs proprietários, etc.).
+
+> [!IMPORTANT]
+> **Esclarecimento Técnico: A "Well-Known Key List" da Epic Games vs. Chaves MOK Locais:**
+> Conforme detalhado no anúncio oficial da Epic Games:
+> 1. **Parâmetros de Sistema (100% Conformes):** Todas as configurações deste guia (UEFI Secure Boot, TPM 2.0 & Measured Boot, Kernel Lockdown `[integrity]`, bloqueio de `kexec`, isolamento IOMMU e LSM BPF) cumprem rigorosamente e sem restrições todas as exigências do EAC Linux v2.
+> 2. **A "Well-Known List" de Chaves:** Para prevenir que desenvolvedores de trapaças assinem módulos maliciosos com suas próprias chaves privadas, a Epic Games mantém uma **lista fechada de chaves públicas reconhecidas** (*Well-Known Key List*), que inicialmente contempla apenas distribuições com infraestrutura corporativa de assinatura centralizada (Ubuntu/Canonical, Fedora, Debian, openSUSE, Universal Blue/Bazzite).
+> 3. **O Papel dos Mantenedores do Arch Linux:** A Epic Games **não aceita chaves MOK geradas localmente pelo próprio usuário** para fins de liberação no anti-cheat. A Epic declarou oficialmente que distribuições comunitárias dependem de uma coordenação direta de seus **mantenedores oficiais** para estabelecer uma autoridade certificadora (CA) oficial da distribuição que possa ser auditada e incluída na lista confiável do EAC. Este guia deixa o sistema pronto em nível de arquitetura para quando esse canal for consolidado.
+
+---
+
+## Índice
+
+- [1. Requisitos Técnicos do Easy Anti-Cheat Linux v2](#1-requisitos-técnicos-do-easy-anti-cheat-linux-v2)
+  - [1.1 Matriz de Vetores de Defesa e Restrições Práticas](#11-matriz-de-vetores-de-defesa-e-restrições-práticas-no-sistema)
+- [2. A Arquitetura de Confiança de Duplo Chaveiro (O Problema e a Solução)](#2-a-arquitetura-de-confiança-de-duplo-chaveiro-o-problema-e-a-solução)
+- [3. Passo a Passo de Implementação Completa](#3-passo-a-passo-de-implementação-completa)
+  - [Fase 1: Secure Boot Base com `sbctl`](#fase-1-secure-boot-base-com-sbctl)
+  - [Fase 2: Sysctl e Linha de Comando Modular do Kernel (`/etc/cmdline.d/`)](#fase-2-sysctl-e-linha-de-comando-modular-do-kernel-etccmdlined)
+  - [Fase 3: Cadeia de Boot do Shim e Infraestrutura MOK](#fase-3-cadeia-de-boot-do-shim-e-infraestrutura-mok)
+  - [Fase 4: Instalação e Validação dos Módulos DKMS (NVIDIA e Jogos)](#fase-4-instalação-e-validação-dos-módulos-dkms-nvidia-e-jogos)
+  - [Fase 5: Ativação Definitiva do Kernel Lockdown](#fase-5-ativação-definitiva-do-kernel-lockdown)
+  - [Opção Alternativa: Perfil de Duplo Boot UKI (Desktop/Hibernação vs. Gaming/Lockdown)](#opção-alternativa-perfil-de-duplo-boot-uki-desktophibernação-vs-gaminglockdown)
+- [4. Auditor Automatizado de Kernel Direto (`check-eac-compliance.sh`)](#4-auditor-automatizado-de-kernel-direto-check-eac-compliancesh)
+- [5. Guia de Verificação Pós-Boot](#5-guia-de-verificação-pós-boot)
+- [6. Manutenção: Como Reassinar e Reconstruir Módulos DKMS](#6-manutenção-como-reassinar-e-reconstruir-módulos-dkms)
+- [7. Referências Oficiais](#7-referências-oficiais)
+- [Licença](#licença)
+
+---
+
+## 1. Requisitos Técnicos do Easy Anti-Cheat Linux v2
+
+O EAC Linux v2 abandona drivers de ring-0 invasivos (estilo Windows) em favor de um serviço sob demanda do **`systemd`** acoplado a programas **`eBPF`**, exigindo uma cadeia estrita de confiança no sistema operacional:
+
+1. **UEFI [Secure Boot](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot) Ativo** em modo usuário (`SetupMode = 0`) com chaves reconhecidas.
+2. **TPM 2.0 & Measured Boot** operacional e medindo PCRs no boot.
+3. **Kernel e Módulos Assinados** criptograficamente (`CONFIG_MODULE_SIG=y`).
+4. **Kernel Lockdown em Modo `integrity`** (`/sys/kernel/security/lockdown` definido como `[integrity]`), bloqueando modificações no espaço de kernel mesmo pelo usuário `root`.
+5. **`kexec` Desabilitado** (`kernel.kexec_load_disabled = 1`), impedindo injeção de kernels não verificados via memória RAM.
+6. **IOMMU Habilitado** (Intel VT-d ou AMD-Vi com `iommu=pt`), impedindo ataques DMA de periféricos físicos.
+7. **LSM BPF Habilitado** (`CONFIG_BPF_LSM=y`), permitindo auditoria das sondas de integridade do anti-cheat via Security Module.
+
+### 1.1. Matriz de Vetores de Defesa e Restrições Práticas no Sistema
+
+Cada requisito fecha um vetor de ataque específico, impondo restrições reais de operação ao administrador e usuário do sistema:
+
+| # | Requisito Técnico | Vetor de Defesa EAC | Consequência Prática no Sistema |
+| :--- | :--- | :--- | :--- |
+| **1** | **UEFI Secure Boot** (`SetupMode = 0`) | Impede carregamento de bootloaders, kernels ou binários EFI adulterados antes do SO. | **Binários não assinados não inicializam.** Pendrives de recuperação ou LiveUSBs genéricos sofrem `Security Violation`. |
+| **2** | **TPM 2.0 & Measured Boot** (PCRs 0–11) | Audita alterações em firmware, BIOS, kernel e `cmdline` através de medições criptográficas. | **LUKS via TPM fica sensível:** Qualquer update de BIOS ou edição de `cmdline` altera PCRs e exige senha mestra. Exige chip TPM 2.0 / fTPM. |
+| **3** | **Assinatura de Módulos** (`CONFIG_MODULE_SIG=y`) | Bloqueia injeção de drivers maliciosos ou rootkits no anel mais privilegiado (Ring-0). | **Módulos caseiros sem assinatura falham (`insmod`).** Todo driver DKMS (NVIDIA, VirtualBox, v4l2loopback) exige chave privada e assinatura no build. |
+| **4** | **Kernel Lockdown** (`[integrity]`) | Isola completamente a memória do kernel contra o espaço do usuário (mesmo com `root`/`sudo`). | **Hibernação bloqueada** (`LOCKDOWN_HIBERNATION`); `/dev/mem` desativado; escrita em MSRs bloqueada (**impede undervolt/overclock** como `throttled`/`ryzenadj`); `debugfs` restrito. |
+| **5** | **Bloqueio de `kexec`** (`kexec_load_disabled = 1`) | Impede salto direto entre kernels na RAM sem passar pela validação da BIOS/UEFI. | **Reboots rápidos via software (`systemctl kexec`) deixam de funcionar.** O computador é obrigado a passar pelo ciclo completo de boot frio pelo hardware. |
+| **6** | **Isolamento IOMMU** (`intel_iommu=on iommu=pt`) | Mitiga ataques DMA via hardware PCIe (ex.: *PCILeech*) ou portas Thunderbolt/USB4. | Tráfego de barramento passa por filtragem DMAR. Hotplug de periféricos externos de alta velocidade tem acesso direto à RAM bloqueado. |
+| **7** | **LSM BPF Habilitado** (`CONFIG_BPF_LSM=y`) | Permite ao EAC inspecionar e vetar chamadas de sistema em tempo real com programas eBPF. | **O EAC tem poder de veto em syscalls.** Depuradores de memória e ferramentas de engenharia reversa (GDB, Cheat Engine via Proton) são bloqueados ao inspecionar o jogo. |
+
+> [!WARNING]
+> **Checklist de Impacto no Uso Diário:**  
+> Antes de aplicar as configurações, atente-se aos recursos afetados no dia a dia:
+> * ⚠️ **Hibernação (`Suspend-to-Disk`):** Totalmente desativada pelo `lockdown=integrity`. Caso dependa da hibernação para trabalho, adote o perfil opcional de [Duplo Boot UKI](#opção-alternativa-perfil-de-duplo-boot-uki-desktophibernação-vs-gaminglockdown) para alternar entre uma entrada com hibernação e outra blindada para jogos.
+> * ⚠️ **Ajustes de CPU (Undervolt/Overclock):** Utilitários que gravam em MSRs (`/dev/cpu/*/msr`) deixam de funcionar no modo lockdown (ajustes finos devem ser feitos diretamente na BIOS).
+> * ⚠️ **Drivers DKMS de Terceiros:** Exigem a infraestrutura de chaveiro MOK descrita na Fase 3 para que a NVIDIA e máquinas virtuais funcionem.
+> * ⚠️ **Criptografia de Disco:** Em discos com auto-desbloqueio via TPM, mantenha sua *passphrase* de recuperação anotada de forma segura antes de realizar atualizações de firmware ou de kernel.
+
+---
+
+## 2. A Arquitetura de Confiança de Duplo Chaveiro (O Problema e a Solução)
+
+### O Problema do Kernel Upstream com o `sbctl` e o Lockdown
+No Arch Linux ao utilizar o [sbctl](https://wiki.archlinux.org/title/Sbctl), a chave mestre (`Database Key`) é gravada diretamente na memória NVRAM do firmware UEFI no banco `db`.
+
+Quando o Linux inicializa:
+* O kernel lê o banco `db` da UEFI e o adiciona ao chaveiro **`.platform`**.
+* **Trava de Segurança Upstream:** O kernel Linux proíbe que o chaveiro `.platform` valide módulos de kernel (`.ko`), pois quase todas as placas-mãe possuem certificados da Microsoft no `db`. Se o `.platform` validasse módulos, qualquer binário assinado com certificado Microsoft ou OEM poderia rodar no ring-0.
+* **Consequência sob Lockdown:** Ao ativar `lockdown=integrity`, o kernel do Arch ignora a `Database Key` no `.platform`, trata o driver NVIDIA e qualquer outro módulo DKMS como **não assinados** e bloqueia o carregamento com `Operation not permitted`.
+
+### A Solução: Arquitetura Shim + MOK + `sbctl`
+Para contornar esse isolamento mantendo a máxima segurança, adotamos uma arquitetura de papéis separados:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                          Firmware UEFI (NVRAM)                         │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                         Chama shimx64.efi (Assinado MS / sbctl)
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                              Shim Bootloader                           │
+│  - Lê a lista MOK (MokList) na NVRAM                                   │
+│  - Cria a variável de runtime EFI 'MokListRT'                          │
+│  - Executa 'grubx64.efi' (cópia assinada do systemd-boot)              │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                 systemd-bootx64.efi -> arch-linux.efi (UKI)            │
+│  - Executa o Kernel Linux com parâmetros de boot                       │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                             Kernel Linux                               │
+│                                                                        │
+│  [Keyring .platform] (via db UEFI)   │ [Keyring .machine] (via MokList)│
+│  - Valida binários de boot e UKI     │ - Valida Módulos de Kernel      │
+│  - Chave: Database Key (sbctl)       │ - Chave: Arch Linux Kernel MOK  │
+│                                      │   (NVIDIA + Qualquer DKMS OK!)  │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 3. Passo a Passo de Implementação Completa
+
+### Fase 1: Secure Boot Base com `sbctl`
+
+Consulte o guia oficial do [ArchWiki sbctl](https://wiki.archlinux.org/title/Sbctl) para o provisionamento base:
+
+1. **Acessar o Firmware UEFI e Ativar o Modo de Instalação (Setup Mode):**
+   Antes de permitir que o Linux matricule as chaves no chip NVRAM da placa-mãe, o firmware precisa ser colocado em **Setup Mode** (modo de configuração aberta onde as variáveis PK, KEK e db aceitam gravação). O caminho e o nome dessa opção variam dependendo da marca da placa-mãe ou do laptop:
+   * **Lenovo (Insyde / ThinkPad / Legion):** Vá em `Security` -> `Secure Boot` -> selecione `Reset to Setup Mode` ou `Clear All Secure Boot Keys`.
+   * **ASUS:** Acesse `Boot` -> `Secure Boot` -> `Key Management` -> selecione `Clear Secure Boot Keys` (o firmware entra em Setup Mode automaticamente).
+   * **MSI:** Vá em `Settings` -> `Security` -> `Secure Boot` -> altere o modo de `Standard` para `Custom` -> selecione `Delete all Secure Boot variables`.
+   * **Gigabyte / AORUS:** Navegue até `BIOS` -> `Secure Boot` -> mude para `Custom` -> selecione `Delete PK` ou `Clear Keys`.
+   * **Dell:** Vá em `Secure Boot` -> `Expert Key Management` -> selecione `Enable Custom Mode` -> `Delete All Keys`.
+   * **HP:** Acesse `Security` -> `Secure Boot Configuration` -> marque `Clear Secure Boot keys`.
+
+   Salve as alterações e reinicie no Arch Linux. Confirme executando `sudo sbctl status` (deve constar `Setup Mode: ✓ Enabled` e `Secure Boot: ✗ Disabled`).
+
+2. **Instalar o `sbctl` e Gerar as Chaves do Sistema:**
+   ```bash
+   sudo pacman -S sbctl
+   sudo sbctl create-keys
+   ```
+
+3. **Matricular as Chaves com Suporte a Vendor Keys (Microsoft):**
+   > [!IMPORTANT]
+   > Conforme documentado no [ArchWiki: Secure Boot - Microsoft keys](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot#Microsoft_keys), a flag `-m` (`--microsoft`) é **obrigatória** em máquinas com GPU dedicada NVIDIA. Ela inclui as chaves Microsoft UEFI CA necessárias para carregar os Option ROMs de firmware de vídeo durante a inicialização, evitando telas pretas na BIOS/POST.
+   ```bash
+   sudo sbctl enroll-keys -m
+   ```
+
+4. **Assinar os Binários de Boot e a UKI:**
+   ```bash
+   sudo sbctl sign -s /boot/EFI/BOOT/BOOTX64.EFI
+   sudo sbctl sign -s /boot/EFI/systemd/systemd-bootx64.efi
+   sudo sbctl sign -s /boot/EFI/Linux/arch-linux.efi
+   ```
+
+---
+
+### Fase 2: Sysctl e Linha de Comando Modular do Kernel (`/etc/cmdline.d/`)
+
+1. **Desabilitar o `kexec` via Sysctl:**
+   ```bash
+   cat << 'EOF' | sudo tee /etc/sysctl.d/99-eac-security.conf
+   kernel.kexec_load_disabled = 1
+   EOF
+   ```
+   Aplique em tempo de execução:
+   ```bash
+   sudo sysctl -p /etc/sysctl.d/99-eac-security.conf
+   ```
+
+2. **Modularizar a Linha de Comando do Kernel:**
+   O `mkinitcpio` moderno monta a [Imagem Unificada de Kernel (UKI)](https://wiki.archlinux.org/title/Unified_kernel_image) lendo drop-ins em `/etc/cmdline.d/*.conf` em ordem alfanumérica:
+
+   #### 2.1. Identificar o PARTUUID da Partição Raiz
+   Antes de criar ou editar as configurações de boot, consulte o identificador GPT da sua partição raiz:
+   ```bash
+   lsblk -o NAME,FSTYPE,LABEL,PARTUUID,MOUNTPOINTS
+   ```
+   * **`PARTUUID` (UUID da Partição):** Gravado no cabeçalho GPT da partição (localize a linha montada em `/`). Permanece idêntico mesmo se o sistema de arquivos for formatado, sendo o identificador ideal para `root=PARTUUID=...`.
+
+   > [!NOTE]
+   > **Nota sobre Hibernação (Suspend-to-Disk):**
+   > Sob o Kernel Lockdown (`[integrity]`), a hibernação tradicional em disco é estritamente bloqueada por design do kernel upstream para prevenir adulteração de memória através do swap. A suspensão na memória RAM (`suspend`) permanece 100% operacional. Desta forma, não configuramos parâmetros de `resume=`.
+
+   #### 2.2. Fazer Backup e Criar os Arquivos Modulares
+   Em vez de apagar sua configuração anterior, faça uma cópia de segurança e use-a como base para os arquivos modulares:
+
+   ```bash
+   # 1. Criar o diretório de drop-ins:
+   sudo mkdir -p /etc/cmdline.d
+
+   # 2. Copiar a linha atual para 10-root.conf como base:
+   sudo cp /etc/kernel/cmdline /etc/cmdline.d/10-root.conf
+
+   # 3. Mover o arquivo monolítico original para backup:
+   sudo mv /etc/kernel/cmdline /etc/kernel/cmdline.backup
+   ```
+
+   * **Inspecionar e Limpar os Parâmetros da Raiz (`/etc/cmdline.d/10-root.conf`):**
+     Exiba o conteúdo herdado:
+     ```bash
+     cat /etc/cmdline.d/10-root.conf
+     ```
+     Abra o arquivo com o **Vim** (`sudo vim /etc/cmdline.d/10-root.conf`) e ajuste as opções seguindo estas diretrizes:
+     * **O que MANTER:**
+       * Referência da partição raiz: Certifique-se de que `root=PARTUUID=<SEU-ROOT-PARTUUID>` reflete a partição correta. Caso o original usasse `root=/dev/...` ou `root=UUID=...`, prefira o `PARTUUID` para imunidade contra alterações de formatação.
+       * Tipo de sistema de arquivos e modo de escrita: `rootfstype=ext4` (ou `btrfs`), `rw`.
+       * Parâmetros do sistema: `quiet`, `splash`, `zswap.enabled=...`, flags de processador, etc.
+     * **O que REMOVER deste arquivo:**
+       * **Parâmetros de hibernação:** Remova quaisquer opções de `resume=UUID=...` e `resume_offset=...` (visto que a hibernação é bloqueada sob Lockdown).
+       * **Parâmetros de segurança e IOMMU:** Remova opções como `intel_iommu=...`, `iommu=...` ou `lockdown=...` (essas opções agora pertencem exclusivamente ao `90-security.conf`).
+
+   * **Parâmetros de segurança (`/etc/cmdline.d/90-security.conf`):**
+     Posicionado com índice `90` para ter menor precedência e ser avaliado após a raiz:
+     ```bash
+     cat << 'EOF' | sudo tee /etc/cmdline.d/90-security.conf
+     intel_iommu=on iommu=pt
+     EOF
+     ```
+     *(Em processadores AMD, utilize `amd_iommu=on`. Observação: o parâmetro `lockdown=integrity` será adicionado na Fase 5, após a infraestrutura MOK e o driver de vídeo estarem instalados e testados).*
+
+#### 2.3. Cuidados Prévios e Validação do Secure Boot Base (Reboot Intermediário)
+
+Antes de reiniciar para validar o Secure Boot base e os arquivos modulares do kernel, adote impreterivelmente os seguintes cuidados preventivos:
+
+> [!CAUTION]
+> **Checklist Essencial de Segurança Pré-Reboot:**
+> 1. **Assinaturas da Partição ESP (`sbctl verify`):** Execute `sudo sbctl verify`. Todos os executáveis de boot (`/boot/EFI/BOOT/BOOTX64.EFI`, `/boot/EFI/systemd/systemd-bootx64.efi` e a imagem UKI `/boot/EFI/Linux/arch-linux.efi`) **devem** estar com a marcação verde `✓ is signed`. Se a imagem UKI não estiver assinada e o Secure Boot for exigido pelo firmware, o computador bloqueará o boot com mensagem de *Access Denied / Security Violation*.
+> 2. **Conferir o `PARTUUID` no `10-root.conf`:** Verifique se o `PARTUUID` preenchido corresponde exatamente à partição raiz informada pelo `lsblk -o NAME,PARTUUID,MOUNTPOINTS`. Qualquer caractere incorreto impedirá a montagem da raiz, caindo no shell de resgate do initramfs.
+> 3. **Garantir as Chaves Microsoft (`sbctl enroll-keys -m`):** Certifique-se de que a flag `-m` foi utilizada. Em placas de vídeo dedicadas NVIDIA ou telas de laptops, a ausência das chaves da Microsoft no banco `db` impede a inicialização do vídeo durante o POST/bootloader.
+> 4. **Mídia de Instalação (Live USB do Arch) em mãos:** Tenha um pendrive de instalação do Arch Linux preparado. Caso ocorra qualquer erro de configuração de boot, você pode inicializar pelo pendrive (desativando temporariamente o Secure Boot na BIOS se necessário) e utilizar o `arch-chroot` para corrigir os arquivos.
+
+**Gerar a UKI e Reiniciar para Validação Base:**
+```bash
+# 1. Compilar a UKI integrando a nova linha de comando modular:
+sudo mkinitcpio -P
+
+# 2. Confirmar que a nova UKI foi automaticamente assinada pelo hook do sbctl:
+sudo sbctl verify
+
+# 3. Reiniciar o sistema:
+sudo reboot
+```
+
+**Validação Pós-Reboot:**
+Ao retornar ao sistema, confirme que o Secure Boot base está ativo:
+```bash
+bootctl status | grep "Secure Boot:"
+```
+*Saída esperada: `Secure Boot: enabled (user)`.*
+Com a base validada com sucesso, passe com total segurança para a Fase 3 para configurar o Shim e a infraestrutura MOK.
+
+---
+
+### Fase 3: Cadeia de Boot do Shim e Infraestrutura MOK
+
+Antes de instalar os drivers de vídeo proprietários, configuramos os certificados MOK e a cadeia de inicialização com o preloader Shim.
+
+1. **Gerar o Par de Chaves MOK Dedicado e Proteger Permissões:**
+   ```bash
+   sudo openssl req -new -x509 -newkey rsa:2048 -nodes -days 3650 \
+     -subj "/CN=Arch Linux Kernel Modules MOK/" \
+     -keyout /etc/dkms/mok.key \
+     -outform DER -out /etc/dkms/mok.der
+
+   sudo openssl x509 -in /etc/dkms/mok.der -inform DER -out /etc/dkms/mok.pem
+
+   # Restringe a permissão da chave privada estritamente ao root (600)
+   sudo chmod 600 /etc/dkms/mok.key
+   ```
+
+2. **Configurar o Framework de Assinatura do DKMS:**
+   Configurar o [DKMS Secure Boot](https://wiki.archlinux.org/title/Dynamic_Kernel_Module_Support#Secure_Boot) antecipadamente garante que qualquer módulo compilado seja automaticamente assinado pelos hooks do pacman:
+   ```bash
+   sudo mkdir -p /etc/dkms/framework.conf.d
+   cat << 'EOF' | sudo tee /etc/dkms/framework.conf.d/signing.conf
+   sign_file="/usr/lib/modules/$kernelver/build/scripts/sign-file"
+   mok_signing_key="/etc/dkms/mok.key"
+   mok_certificate="/etc/dkms/mok.pem"
+   EOF
+   ```
+
+3. **Instalar o `mokutil` e Enfileirar a Chave MOK:**
+   O `mokutil` está disponível nos repositórios oficiais do Arch:
+   ```bash
+   sudo pacman -S mokutil
+   sudo mokutil --import /etc/dkms/mok.der
+   ```
+   *O sistema solicitará uma senha temporária (memorize-a para a confirmação na tela azul).*
+   *Confirme o enfileiramento com `sudo mokutil --list-new`.*
+
+4. **Obter e Instalar o `shim-signed` via `makepkg`:**
+   O preloader `shimx64.efi` oficial assinado pela Microsoft UEFI CA deve ser obtido através do pacote do AUR: [`shim-signed`](https://aur.archlinux.org/packages/shim-signed).
+
+   > [!WARNING]
+   > **Aviso de Segurança e Cuidados Essenciais com o AUR (Arch User Repository):**
+   > O AUR é um repositório comunitário cujos scripts de compilação (`PKGBUILD`) **não passam por auditoria prévia da equipe oficial de segurança do Arch Linux**. Qualquer usuário pode enviar ou atualizar pacotes. Para manter seu sistema seguro, adote impreterivelmente os seguintes cuidados:
+   > 1. **Inspecione o PKGBUILD:** Nunca instale um pacote do AUR às cegas. Abra o `PKGBUILD` com o **Vim** e confira os endereços das fontes (`source=`) e os hashes de integridade (`sha256sums=`). No caso do `shim-signed`, certifique-se de que o arquivo baixa o binário oficial empacotado pelo Fedora/Red Hat contendo a assinatura digital da Microsoft Corporation.
+   > 2. **Nunca compile como root:** O utilitário `makepkg` deve sempre ser executado por um usuário comum sem privilégios administrativos.
+   > 3. **Evite automação cega:** Não dependa de parsers ou helpers automáticos de terceiros; realize o processo nativo e auditável via `makepkg`.
+   >
+   > **Procedimento Oficial Nativo via `makepkg`:**
+   > ```bash
+   > git clone https://aur.archlinux.org/shim-signed.git
+   > cd shim-signed
+   > vim PKGBUILD   # Inspecione minuciosamente a procedência dos binários e checksums
+   > makepkg -si
+   > cd .. && rm -rf shim-signed
+   > ```
+
+5. **Copiar os Binários do Shim para a Partição ESP (`/boot/EFI/systemd/`):**
+   ```bash
+   sudo cp /usr/share/shim-signed/shimx64.efi /boot/EFI/systemd/
+   sudo cp /usr/share/shim-signed/mmx64.efi /boot/EFI/systemd/
+   sudo sbctl sign -s /boot/EFI/systemd/mmx64.efi
+   ```
+
+6. **Criar e Cadastrar o Executável `grubx64.efi` no `sbctl`:**
+   O `shim` procura estritamente por um binário chamado `grubx64.efi` no mesmo diretório. Copie o binário a partir de `/usr/lib/systemd/boot/efi/systemd-bootx64.efi` para garantir que o arquivo seja originado sem assinaturas prévias, permitindo que o `sbctl sign -s` realize a assinatura digital e o registre obrigatoriamente no banco de dados (`/var/lib/sbctl/files.json`):
+   ```bash
+   sudo cp /usr/lib/systemd/boot/efi/systemd-bootx64.efi /boot/EFI/systemd/grubx64.efi
+   sudo sbctl sign -s /boot/EFI/systemd/grubx64.efi
+   ```
+   *(Confirme que ele foi registrado no banco executando `sudo sbctl list-files`)*.
+
+7. **Criar o Hook do Pacman para Atualização Automática do `systemd-boot`:**
+   Como o utilitário `bootctl update` só atualiza os caminhos padrão da UEFI e desconhece o `grubx64.efi`, configure um hook pós-transação do pacman para sincronizar o arquivo a cada upgrade do pacote `systemd`:
+   ```bash
+   sudo mkdir -p /etc/pacman.d/hooks
+   cat << 'EOF' | sudo tee /etc/pacman.d/hooks/95-systemd-boot.hook
+   [Trigger]
+   Type = Package
+   Operation = Upgrade
+   Target = systemd
+
+   [Action]
+   Description = Atualizando systemd-boot e sincronizando grubx64.efi para o Shim...
+   When = PostTransaction
+   Exec = /bin/sh -c "/usr/bin/bootctl update && /usr/bin/cp -f /boot/EFI/systemd/systemd-bootx64.efi /boot/EFI/systemd/grubx64.efi"
+   EOF
+   ```
+
+   > [!TIP]
+   > **Como a automação da assinatura opera:**  
+   > 1. Durante um upgrade do `systemd`, o hook `95-systemd-boot.hook` roda o `bootctl update` e clona a versão atualizada para `grubx64.efi`.  
+   > 2. No final da mesma transação do pacman, o hook nativo do sistema `/usr/share/libalpm/hooks/zz-sbctl.hook` executa `sbctl sign-all -g`.  
+   > 3. Como o `grubx64.efi` e o `systemd-bootx64.efi` estão ambos cadastrados no `files.json`, o `sbctl` assina ambos os binários de forma 100% transparente antes do reboot, prevenindo qualquer falha de *Security Policy Violation*.
+
+8. **Adicionar a Entrada do Shim na NVRAM com `efibootmgr`:**
+   ```bash
+   sudo efibootmgr --create --disk /dev/nvme0n1 --part 1 \
+     --label "Arch Linux (Shim MOK)" \
+     --loader '\EFI\systemd\shimx64.efi'
+   ```
+
+9. **Matrícula na Tela Azul do MokManager (No Reboot):**
+   Reinicie o computador: `sudo reboot`. O Shim detectará a chave pendente e abrirá a tela azul do **MokManager**:
+   * Pressione qualquer tecla para interromper a contagem regressiva.
+   * Selecione **Enroll MOK** -> **Continue** (ou *View key 0* para conferir `Arch Linux Kernel Modules MOK`).
+   * Selecione **Yes** e digite a senha temporária definida no `mokutil` -> **Reboot**.
+
+---
+
+### Fase 4: Instalação e Validação dos Módulos DKMS (NVIDIA e Jogos)
+
+Com o sistema inicializado através do Shim e a chave MOK ativa no chaveiro `%:.machine`, proceda com a instalação dos módulos gráficos:
+
+1. **Instalar o Driver NVIDIA (e Qualquer Outro Módulo DKMS):**
+   Com o `signing.conf` ativo, a própria transação do pacman compilará e assinará os módulos na hora:
+   ```bash
+   # Driver principal para jogos (NVIDIA Open Kernel Modules):
+   sudo pacman -S nvidia-open-dkms
+
+   # Qualquer outro módulo DKMS necessário no seu ecossistema (ex.: VirtualBox, v4l2loopback, Wi-Fi):
+   # sudo pacman -S virtualbox-host-dkms v4l2loopback-dkms
+   ```
+
+2. **Verificar a Assinatura Criptográfica dos Módulos:**
+   ```bash
+   modinfo nvidia | grep signer
+   # Ou para qualquer outro módulo DKMS instalado:
+   # modinfo vboxdrv | grep signer
+   ```
+   *Esperado: `signer: Arch Linux Kernel Modules MOK`.*
+
+3. **Verificar o Reconhecimento da Placa de Vídeo:**
+   ```bash
+   nvidia-smi
+   ```
+
+---
+
+### Fase 5: Ativação Definitiva do Kernel Lockdown
+
+Com todos os módulos de terceiros devidamente assinados e validados pelo chaveiro `.machine`, ative a trava de integridade exigida pelo EAC v2:
+
+1. **Adicionar `lockdown=integrity` ao `/etc/cmdline.d/90-security.conf`:**
+   ```bash
+   cat << 'EOF' | sudo tee /etc/cmdline.d/90-security.conf
+   intel_iommu=on iommu=pt lockdown=integrity
+   EOF
+   ```
+
+2. **Regenerar a UKI e Reiniciar:**
+   Regenere a sua [UKI](https://wiki.archlinux.org/title/Unified_kernel_image) com o `lockdown=integrity` na linha de comando assinada e reinicie:
+   ```bash
+   sudo mkinitcpio -P
+   sudo reboot
+   ```
+
+---
+
+### Opção Alternativa: Perfil de Duplo Boot UKI (Desktop/Hibernação vs. Gaming/Lockdown)
+
+Como o Kernel Lockdown em modo `[integrity]` bloqueia a restauração de imagem em disco (`LOCKDOWN_HIBERNATION`), usuários que dependem da **hibernação** no dia a dia podem configurar o `systemd-boot` com **duas entradas UKI independentes**:
+* **Entrada Padrão (`arch-linux.efi`):** Uso diário para trabalho e produtividade com hibernação/swap ativo (sem `lockdown=integrity`).
+* **Entrada Gaming (`arch-linux-lockdown.efi`):** Ambiente blindado para jogos com `lockdown=integrity`, `intel_iommu=on iommu=pt` e `efi=disable_early_pci_dma`.
+
+> [!NOTE]
+> O bloqueio de `kexec` (`kernel.kexec_load_disabled = 1`) permanece ativo no `/etc/sysctl.d/99-security.conf` (Fase 2) para todo o sistema. Ele não é passado no `cmdline` porque o kernel Linux upstream gerencia essa trava de segurança exclusivamente via `sysctl`.
+
+#### 1. Estruturar `/etc/cmdline.d/` com Subdiretório Isolado
+
+O `mkinitcpio` avalia de forma não-recursiva os arquivos `*.conf` dentro de `/etc/cmdline.d/`. Podemos isolar a entrada de jogos em uma subpasta `lockdown/`:
+
+1. **Parâmetros base e de hibernação na raiz de `/etc/cmdline.d/` (Entrada Padrão):**
+   ```bash
+   # Base do sistema
+   cat << 'EOF' | sudo tee /etc/cmdline.d/10-root.conf
+   root=PARTUUID=<SEU-ROOT-PARTUUID> rw rootfstype=ext4 zswap.enabled=0 quiet splash
+   EOF
+
+   # Hibernação / Swapfile
+   cat << 'EOF' | sudo tee /etc/cmdline.d/20-resume.conf
+   resume=UUID=<SEU-SWAP-UUID> resume_offset=<SEU-OFFSET-SWAPFILE>
+   EOF
+
+   # IOMMU base
+   cat << 'EOF' | sudo tee /etc/cmdline.d/30-security.conf
+   intel_iommu=on iommu=pt
+   EOF
+   ```
+
+2. **Criar a subpasta `lockdown/` com symlink da raiz e parâmetros de segurança:**
+   ```bash
+   sudo mkdir -p /etc/cmdline.d/lockdown
+
+   # Link simbólico para reaproveitar os parâmetros da raiz sem duplicação
+   sudo ln -sf /etc/cmdline.d/10-root.conf /etc/cmdline.d/lockdown/10-root.conf
+
+   # Parâmetros de segurança e Kernel Lockdown
+   cat << 'EOF' | sudo tee /etc/cmdline.d/lockdown/30-security.conf
+   lockdown=integrity intel_iommu=on iommu=pt efi=disable_early_pci_dma
+   EOF
+   ```
+
+#### 2. Configurar os Presets no `/etc/mkinitcpio.d/linux.preset`
+
+Edite o arquivo `/etc/mkinitcpio.d/linux.preset` (`sudo vim /etc/mkinitcpio.d/linux.preset`):
+
+```ini
+ALL_kver="/boot/vmlinuz-linux"
+
+PRESETS=('default' 'lockdown')
+
+# --- Entrada 1: Desktop / Hibernação (Padrão) ---
+default_uki="/boot/EFI/Linux/arch-linux.efi"
+default_options="--splash /boot/loader/background.bmp"
+
+# --- Entrada 2: Gaming / EAC Anti-Cheat (Lockdown) ---
+lockdown_uki="/boot/EFI/Linux/arch-linux-lockdown.efi"
+lockdown_options="--splash /boot/loader/background.bmp --cmdline /etc/cmdline.d/lockdown"
+```
+
+#### 3. Compilar, Assinar e Definir o Padrão
+
+```bash
+# 1. Compilar ambas as imagens UKI
+sudo mkinitcpio -P
+
+# 2. Registrar a imagem de lockdown no sbctl (se ainda não assinado automaticamente)
+sudo sbctl sign -s /boot/EFI/Linux/arch-linux-lockdown.efi
+
+# 3. Definir a entrada com hibernação como inicialização padrão no systemd-boot
+sudo bootctl set-default arch-linux.efi
+
+# 4. Verificar as entradas detectadas
+bootctl list
+```
+
+Ao ligar o computador, o sistema entra automaticamente na entrada com hibernação. Quando desejar jogar títulos protegidos por anti-cheat, pressione a tecla **Espaço** durante o boot e selecione a entrada `Arch Linux (...~lockdown)`.
+
+---
+
+## 4. Auditor Automatizado de Kernel Direto (`check-eac-compliance.sh`)
+
+Imediatamente após reiniciar o sistema, execute o script auditor independente fornecido neste repositório ([`check-eac-compliance.sh`](check-eac-compliance.sh)) para verificar diretamente as interfaces do kernel sem depender de comandos de alto nível do sistema:
+
+```bash
+chmod +x check-eac-compliance.sh
+sudo ./check-eac-compliance.sh
+```
+
+### Interfaces do Kernel (`sysfs` / `procfs`) Auditadas:
+
+| Alvo | Caminho Direto no Kernel | Critério de Sucesso |
+|---|---|---|
+| **Secure Boot** | `/sys/firmware/efi/efivars/SecureBoot-*` | 5º byte == `0x01` |
+| **Setup Mode** | `/sys/firmware/efi/efivars/SetupMode-*` | 5º byte == `0x00` (Modo Usuário ativo) |
+| **TPM 2.0** | `/sys/class/tpm/tpm0/tpm_version_major` | Reporta versão `2` |
+| **Measured Boot** | `/sys/kernel/security/tpm0/binary_bios_measurements` | Log de eventos > 0 bytes |
+| **Kernel Lockdown** | `/sys/kernel/security/lockdown` | Contém `[integrity]` |
+| **kexec Bloqueado** | `/proc/sys/kernel/kexec_load_disabled` | Igual a `1` |
+| **Grupos IOMMU** | `/sys/kernel/iommu_groups` | Contagem de grupos > 0 |
+| **LSM BPF** | `/sys/kernel/security/lsm` | Contém `bpf` |
+| **MokListRT (Shim)**| `/sys/firmware/efi/efivars/MokListRT-*` | Tabela exportada em runtime presente |
+| **Chaveiro MOK** | `/proc/keys` | Certificado presente na tabela de chaves |
+| **Taint do Kernel** | `/proc/sys/kernel/tainted` | Bit 13 (`8192` - Não assinado) em `0`; Bit 12 (`4096` - OOT DKMS) permitido |
+| **Cmdline Ativo** | `/proc/cmdline` | Contém `lockdown=integrity` e `intel_iommu=on` |
+
+---
+
+## 5. Guia de Verificação Pós-Boot
+
+Você também pode realizar checagens pontuais nas interfaces de integridade:
+
+| Métrica | Comando de Auditoria Direta | Saída Esperada |
+|---|---|---|
+| **Status do Lockdown** | `cat /sys/kernel/security/lockdown` | `none [integrity] confidentiality` |
+| **kexec Desativado** | `cat /proc/sys/kernel/kexec_load_disabled` | `1` |
+| **Chave MOK no Kernel** | `keyctl show %:.machine` ou `cat /proc/keys` | Contém `Arch Linux Kernel Modules MOK` |
+| **Taint do Kernel** | `cat /proc/sys/kernel/tainted` | `4096` (OOT DKMS) ou `0` (limpo) |
+| **Host Security ID** | `fwupdmgr security` | HSI-1 válido, Intel BootGuard habilitado |
+| **Driver 3D NVIDIA** | `nvidia-smi` | GPU funcional em Wayland/X11 |
+
+---
+
+## 6. Manutenção: Como Reassinar e Reconstruir Módulos DKMS
+
+Sempre que houver atualizações do kernel Linux ou caso você instale novos dispositivos com drivers de terceiros, utilize estes procedimentos padrão:
+
+### A. Reconstrução e Assinatura Automática (Padrão)
+Como o `/etc/dkms/framework.conf.d/signing.conf` é permanente, os hooks do `pacman` reconstroem e assinam todos os módulos DKMS automaticamente a cada atualização de kernel. Para acionar manualmente:
+```bash
+sudo dkms autoinstall
+```
+
+### B. Forçar a Reconstrução de um Módulo Específico
+Para limpar completamente e forçar a recompilação e assinatura de qualquer módulo (substitua pelo nome e versão do seu driver):
+```bash
+# Verificar status dos módulos instalados:
+dkms status
+
+# Reconstruir e reassinar do zero:
+sudo dkms remove <modulo>/<versao> --all
+sudo dkms install <modulo>/<versao>
+```
+*Exemplo prático para o driver NVIDIA:*
+```bash
+sudo dkms remove nvidia/615.78.08 --all && sudo dkms install nvidia/615.78.08
+```
+
+### C. Assinatura Manual Direta com `sign-file`
+Se você compilar manualmente um arquivo de módulo `.ko` fora da árvore do DKMS, pode assiná-lo diretamente com o utilitário oficial do kernel:
+```bash
+sudo /usr/lib/modules/$(uname -r)/build/scripts/sign-file sha256 \
+  /etc/dkms/mok.key \
+  /etc/dkms/mok.pem \
+  /caminho/para/o/modulo.ko
+```
+
+---
+
+## 7. Referências Oficiais
+
+* [Introducing Easy Anti-Cheat Linux v2 - Epic Online Services](https://onlineservices.epicgames.com/news/introducing-easy-anti-cheat-linux-v2)
+* [ArchWiki: Unified Extensible Firmware Interface/Secure Boot](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot)
+* [ArchWiki: sbctl](https://wiki.archlinux.org/title/Sbctl)
+* [ArchWiki: Unified Kernel Image (UKI)](https://wiki.archlinux.org/title/Unified_kernel_image)
+* [ArchWiki: systemd-boot](https://wiki.archlinux.org/title/Systemd-boot)
+* [ArchWiki: DKMS Secure Boot](https://wiki.archlinux.org/title/Dynamic_Kernel_Module_Support#Secure_Boot)
+* [Linux Kernel Module Signing Documentation](https://docs.kernel.org/admin-guide/module-signing.html)
+
+---
+
+## Licença
+
+Distribuído sob a [Licença MIT](LICENSE).
+
+```
+
+`check-eac-compliance.sh`:
+
+```sh
+#!/usr/bin/env bash
+# ==============================================================================
+# Verificador de Integridade Direta via Kernel (/sys, /proc, /dev, /run)
+# Compatibilidade com Easy Anti-Cheat (EAC) Linux v2
+# ==============================================================================
+
+set -u
+
+# Cores ANSI
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+PASS_COUNT=0
+FAIL_COUNT=0
+WARN_COUNT=0
+
+print_header() {
+    echo -e "\n${BOLD}${CYAN}=== $1 ===${NC}"
+}
+
+report_pass() {
+    echo -e " [ ${GREEN}PASS${NC} ] $1"
+    ((PASS_COUNT++))
+}
+
+report_fail() {
+    echo -e " [ ${RED}FAIL${NC} ] $1"
+    ((FAIL_COUNT++))
+}
+
+report_warn() {
+    echo -e " [ ${YELLOW}WARN${NC} ] $1"
+    ((WARN_COUNT++))
+}
+
+report_info() {
+    echo -e " [ ${BLUE}INFO${NC} ] $1"
+}
+
+# Função auxiliar para extrair o byte de valor de uma variável EFI no /sys/firmware/efi/efivars
+# As variáveis efivars possuem um cabeçalho de 4 bytes de atributos EFI seguidos pelo payload de dados.
+read_efivar_byte() {
+    local var_path="$1"
+    if [[ -r "$var_path" ]]; then
+        # Extrai o 5º byte (1 byte a partir do offset 4) em valor decimal
+        od -An -j4 -N1 -tu1 "$var_path" 2>/dev/null | tr -d ' '
+    else
+        echo ""
+    fi
+}
+
+# ------------------------------------------------------------------------------
+# 1. UEFI Secure Boot e Setup Mode (/sys/firmware/efi/efivars/)
+# ------------------------------------------------------------------------------
+print_header "1. UEFI Secure Boot e Modo de Operação (/sys/firmware/efi/efivars/)"
+
+# SecureBoot: GUID padrão global da UEFI 8be4df61-93ca-11d2-aa0d-00e098032b8c
+SECURE_BOOT_FILE=$(compgen -G "/sys/firmware/efi/efivars/SecureBoot-*" | head -n 1 || true)
+SETUP_MODE_FILE=$(compgen -G "/sys/firmware/efi/efivars/SetupMode-*" | head -n 1 || true)
+
+if [[ -n "$SECURE_BOOT_FILE" && -f "$SECURE_BOOT_FILE" ]]; then
+    SB_VAL=$(read_efivar_byte "$SECURE_BOOT_FILE")
+    if [[ "$SB_VAL" == "1" ]]; then
+        report_pass "SecureBoot ativo no firmware (efivar: 0x01): $(basename "$SECURE_BOOT_FILE")"
+    else
+        report_fail "SecureBoot desativado no firmware (efivar: $SB_VAL)"
+    fi
+else
+    report_fail "Variável de firmware SecureBoot não encontrada em /sys/firmware/efi/efivars"
+fi
+
+if [[ -n "$SETUP_MODE_FILE" && -f "$SETUP_MODE_FILE" ]]; then
+    SM_VAL=$(read_efivar_byte "$SETUP_MODE_FILE")
+    if [[ "$SM_VAL" == "0" ]]; then
+        report_pass "SetupMode desabilitado / Modo Usuário ativo (efivar: 0x00 - chaves em imposição)"
+    else
+        report_warn "SetupMode está ativo (efivar: $SM_VAL) - firmware aberto para gravação"
+    fi
+fi
+
+# ------------------------------------------------------------------------------
+# 2. TPM 2.0 & Measured Boot (/sys/class/tpm/, /dev/tpm*, /sys/kernel/security/tpm*)
+# ------------------------------------------------------------------------------
+print_header "2. TPM 2.0 & Measured Boot (/sys/class/tpm/, /dev/tpmrm0)"
+
+if [[ -d /sys/class/tpm/tpm0 ]]; then
+    report_pass "Interface de hardware TPM encontrada em /sys/class/tpm/tpm0"
+
+    # Checa versão principal do TPM
+    if [[ -f /sys/class/tpm/tpm0/tpm_version_major ]]; then
+        TPM_VER=$(cat /sys/class/tpm/tpm0/tpm_version_major)
+        if [[ "$TPM_VER" == "2" ]]; then
+            report_pass "Versão do TPM confirmada pelo kernel: TPM 2.0"
+        else
+            report_warn "Versão do TPM reportada pelo kernel: TPM $TPM_VER"
+        fi
+    fi
+else
+    report_fail "Nenhuma interface TPM registrada em /sys/class/tpm/"
+fi
+
+# Checa se o Resource Manager do TPM está presente (necessário para multiplexação)
+if [[ -c /dev/tpmrm0 ]]; then
+    report_pass "Dispositivo de caracteres de kernel /dev/tpmrm0 operacional"
+else
+    report_fail "Dispositivo /dev/tpmrm0 ausente"
+fi
+
+# Checa medições do BIOS/Bootloader exportadas via securityfs
+if [[ -f /sys/kernel/security/tpm0/binary_bios_measurements ]]; then
+    MEASURE_SIZE=$(wc -c < /sys/kernel/security/tpm0/binary_bios_measurements)
+    if [[ $MEASURE_SIZE -gt 0 ]]; then
+        report_pass "Measured Boot ativo: $MEASURE_SIZE bytes de eventos medidos em /sys/kernel/security/tpm0/binary_bios_measurements"
+    else
+        report_warn "Log de medições /sys/kernel/security/tpm0/binary_bios_measurements está vazio"
+    fi
+else
+    report_info "Registro /sys/kernel/security/tpm0/binary_bios_measurements não exposto"
+fi
+
+# ------------------------------------------------------------------------------
+# 3. Kernel Lockdown (/sys/kernel/security/lockdown)
+# ------------------------------------------------------------------------------
+print_header "3. Kernel Lockdown (/sys/kernel/security/lockdown)"
+if [[ -f /sys/kernel/security/lockdown ]]; then
+    LOCKDOWN_RAW=$(cat /sys/kernel/security/lockdown)
+    if echo "$LOCKDOWN_RAW" | grep -q "\[integrity\]"; then
+        report_pass "Modo ativo: [integrity] (Ring-0 trancado contra adulteração)"
+    elif echo "$LOCKDOWN_RAW" | grep -q "\[confidentiality\]"; then
+        report_pass "Modo ativo: [confidentiality]"
+    else
+        report_fail "Lockdown desabilitado ou incorreto: $LOCKDOWN_RAW"
+    fi
+else
+    report_fail "securityfs: /sys/kernel/security/lockdown inexistente"
+fi
+
+# ------------------------------------------------------------------------------
+# 4. Bloqueio de kexec (/proc/sys/kernel/kexec_load_disabled)
+# ------------------------------------------------------------------------------
+print_header "4. Bloqueio de kexec (/proc/sys/kernel/kexec_load_disabled)"
+if [[ -f /proc/sys/kernel/kexec_load_disabled ]]; then
+    KEXEC_VAL=$(cat /proc/sys/kernel/kexec_load_disabled)
+    if [[ "$KEXEC_VAL" == "1" ]]; then
+        report_pass "/proc/sys/kernel/kexec_load_disabled = 1 (Injeção de novo kernel bloqueada)"
+    else
+        report_fail "/proc/sys/kernel/kexec_load_disabled = $KEXEC_VAL (Esperado: 1)"
+    fi
+else
+    report_fail "/proc/sys/kernel/kexec_load_disabled inexistente"
+fi
+
+# ------------------------------------------------------------------------------
+# 5. Isolamento IOMMU (/sys/kernel/iommu_groups, /sys/class/iommu)
+# ------------------------------------------------------------------------------
+print_header "5. Isolamento IOMMU (/sys/kernel/iommu_groups, /sys/class/iommu)"
+if [[ -d /sys/kernel/iommu_groups ]]; then
+    GROUP_COUNT=$(find /sys/kernel/iommu_groups -mindepth 1 -maxdepth 1 -type d | wc -l)
+    if [[ $GROUP_COUNT -gt 0 ]]; then
+        report_pass "$GROUP_COUNT grupos de isolamento IOMMU populados em /sys/kernel/iommu_groups/"
+    else
+        report_fail "/sys/kernel/iommu_groups está vazio (IOMMU desativado)"
+    fi
+else
+    report_fail "/sys/kernel/iommu_groups inexistente (Suporte IOMMU ausente)"
+fi
+
+if [[ -d /sys/class/iommu ]]; then
+    IOMMU_DEVS=$(ls /sys/class/iommu 2>/dev/null | tr '\n' ' ' || true)
+    report_info "Controladores IOMMU registrados no sysfs: $IOMMU_DEVS"
+fi
+
+# ------------------------------------------------------------------------------
+# 6. LSM BPF (/sys/kernel/security/lsm)
+# ------------------------------------------------------------------------------
+print_header "6. Módulos de Segurança LSM (/sys/kernel/security/lsm)"
+if [[ -f /sys/kernel/security/lsm ]]; then
+    LSM_LIST=$(cat /sys/kernel/security/lsm)
+    if echo "$LSM_LIST" | grep -q "bpf"; then
+        report_pass "LSM BPF carregado no securityfs: $LSM_LIST"
+    else
+        report_fail "LSM BPF não presente: $LSM_LIST"
+    fi
+else
+    report_fail "/sys/kernel/security/lsm inacessível"
+fi
+
+# ------------------------------------------------------------------------------
+# 7. Cadeia Shim e MOK em Runtime (/sys/firmware/efi/efivars/MokListRT*, /proc/keys)
+# ------------------------------------------------------------------------------
+print_header "7. Cadeia de Runtime do Shim & MOK (/sys/firmware/efi/efivars/, /proc/keys)"
+
+# O Shim cria variáveis efivars de runtime terminadas em 'RT' legíveis pelo kernel Linux
+MOKLIST_RT_FILE=$(compgen -G "/sys/firmware/efi/efivars/MokListRT-*" | head -n 1 || true)
+if [[ -n "$MOKLIST_RT_FILE" && -f "$MOKLIST_RT_FILE" ]]; then
+    MOK_SIZE=$(wc -c < "$MOKLIST_RT_FILE")
+    report_pass "Shim operacional: Variável de runtime MokListRT ativa ($MOK_SIZE bytes exportados para o kernel)"
+else
+    report_fail "Variável MokListRT não encontrada em /sys/firmware/efi/efivars/ (Shim não inicializado ou sem chaves)"
+fi
+
+# Consulta nativa da tabela de chaves e certificados em /proc/keys (dispensa o comando keyctl)
+if [[ -f /proc/keys ]]; then
+    # Procura pelo certificado MOK (Arch Linux Kernel Modules MOK ou nome personalizado)
+    if grep -q -E "Kernel Modules MOK" /proc/keys; then
+        report_pass "Chave MOK localizada na tabela do kernel (/proc/keys):"
+        grep -i -E "Kernel Modules MOK" /proc/keys | sed 's/^/    /'
+    else
+        report_fail "Certificado MOK ('Kernel Modules MOK') não encontrado em /proc/keys"
+    fi
+
+    # Procura pelo keyring .machine
+    if grep -q "keyring: \.machine" /proc/keys || grep -q "\.machine" /proc/keys; then
+        report_pass "Keyring '.machine' registrado e populado no subsistema de segurança do kernel"
+    else
+        report_warn "Keyring '.machine' não identificado explicitamente em /proc/keys"
+    fi
+else
+    report_fail "/proc/keys inacessível (CONFIG_KEYS desabilitado no kernel)"
+fi
+
+# ------------------------------------------------------------------------------
+# 8. Análise de Taint do Kernel (/proc/sys/kernel/tainted)
+# ------------------------------------------------------------------------------
+print_header "8. Análise de Taint do Kernel (/proc/sys/kernel/tainted)"
+if [[ -f /proc/sys/kernel/tainted ]]; then
+    TAINT=$(cat /proc/sys/kernel/tainted)
+    report_info "Valor bruto em /proc/sys/kernel/tainted: $TAINT"
+
+    # Bit 13: 8192 (TAINT_UNSIGNED_MODULE)
+    IS_UNSIGNED=$(( (TAINT & 8192) != 0 ))
+    # Bit 0: 1 (TAINT_PROPRIETARY_MODULE)
+    IS_PROPRIETARY=$(( (TAINT & 1) != 0 ))
+    # Bit 12: 4096 (TAINT_OOT_MODULE) -> DKMS Out-of-tree
+    IS_OOT=$(( (TAINT & 4096) != 0 ))
+
+    if [[ $IS_UNSIGNED -eq 1 ]]; then
+        report_fail "Bit 13 ATIVO (8192): Módulo NÃO assinado no espaço do kernel!"
+    else
+        report_pass "Bit 13 DESATIVADO: Zero módulos não assinados no kernel"
+    fi
+
+    if [[ $IS_PROPRIETARY -eq 1 ]]; then
+        report_warn "Bit 0 ATIVO (1): Módulo de código fechado presente"
+    else
+        report_pass "Bit 0 DESATIVADO: Livre de módulos fechados que violam GPL"
+    fi
+
+    if [[ $IS_OOT -eq 1 ]]; then
+        report_info "Bit 12 ATIVO (4096): Módulos DKMS compilados fora da árvore (comportamento padrão e esperado)"
+    fi
+
+    if [[ $TAINT -eq 0 ]]; then
+        report_pass "Kernel 100% puro (tainted = 0)"
+    elif [[ $TAINT -eq 4096 ]]; then
+        report_pass "Kernel maculado unicamente pelo DKMS aberto out-of-tree (tainted = 4096). Válido para o EAC!"
+    fi
+fi
+
+# ------------------------------------------------------------------------------
+# 9. Linha de Comando do Kernel em Execução (/proc/cmdline)
+# ------------------------------------------------------------------------------
+print_header "9. Parâmetros Ativos de Boot (/proc/cmdline)"
+if [[ -f /proc/cmdline ]]; then
+    CMDLINE_ACTUAL=$(cat /proc/cmdline)
+    echo -e " [ ${BLUE}CMDLINE${NC} ] $CMDLINE_ACTUAL"
+
+    if echo "$CMDLINE_ACTUAL" | grep -q "lockdown=integrity"; then
+        report_pass "Parâmetro 'lockdown=integrity' presente na linha de comando ativa"
+    fi
+
+    if echo "$CMDLINE_ACTUAL" | grep -q "intel_iommu=on"; then
+        report_pass "Parâmetro 'intel_iommu=on' presente na linha de comando ativa"
+    fi
+fi
+
+# ------------------------------------------------------------------------------
+# 10. Resumo Final
+# ------------------------------------------------------------------------------
+print_header "Resumo da Avaliação EAC Linux v2"
+echo -e "Sucessos: ${GREEN}${PASS_COUNT}${NC} | Falhas: ${RED}${FAIL_COUNT}${NC} | Avisos: ${YELLOW}${WARN_COUNT}${NC}"
+
+if [[ $FAIL_COUNT -eq 0 ]]; then
+    echo -e "\n${GREEN}${BOLD}✔ SISTEMA 100% CONFORME COM EAC LINUX V2 (Auditado diretamente via /sys e /proc)!${NC}\n"
+    exit 0
+else
+    echo -e "\n${RED}${BOLD}✘ Falhas detectadas na auditoria direta do kernel.${NC}\n"
+    exit 1
+fi
+
+```
