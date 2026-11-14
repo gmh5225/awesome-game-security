@@ -1876,6 +1876,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [grand-theft-auto-modding-source](entities/grand-theft-auto-modding-source.md) — GTA modding source collection (re3/reVC; GTA III/Vice City RE; platform ports; DirectX/OpenGL; mod infrastructure; gmh5225)
 - [GrandTheftAutoV-Cheat](entities/grandtheftautov-cheat.md) — GTA V PC mod-menu cheat (money / vehicle spawn / teleport / player mods; scripting + memory manipulation; gmh5225)
 - [gta-5-sigs-1.59](entities/gta-5-sigs-1.59.md) — GTA V v1.59 byte-pattern signatures (World/ReplayInterface/Viewport/Ammo/Clip; gmh5225; cheat / game:gta5 [Offset])
+- [gta-5-trainer-menu-base](entities/gta-5-trainer-menu-base.md) — GTA V MenuForge MIT C++17 D3D11/ImGui trainer overlay scaffold (registry content API, navigation FSM, JSON i18n, atomic config, key rebinding; misnopini1987; Cheat / ImGui)
 - [gta5cheat](entities/gta5cheat.md) — GTA V Python cheat (memory analysis; cheat / game:gta5; gmh5225)
 - [gta5cheat-qt](entities/gta5cheat-qt.md) — GTA V Qt cheat (C/C++; memory analysis; cheat / game:gta5)
 - [GTA5-DMA-CHEAT](entities/gta5-dma-cheat.md) — GTA V DMA cheat (MemProcFS/VMMDLL + ImGui/DX11; god mode / teleport / vehicle edits; Legacy + Enhanced; CE offset tables incl. BattlEye patches; cheat / game:gta5 [DMA]; fmc999)

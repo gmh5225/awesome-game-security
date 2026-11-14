@@ -100,6 +100,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__valorant-gui-imgui-remake.md
   - wiki/sources/descriptions/gmh5225__gd-internal.md
   - wiki/sources/descriptions/gmh5225__GTAIII-DE-GoldHook.md
+  - wiki/sources/descriptions/misnopini1987__GTA-5-Trainer-Menu-Base.md
   - wiki/sources/descriptions/gmh5225__BigBaseV2.md
   - wiki/sources/descriptions/gmh5225__Fortnite-External-Cheat-Source-Code.md
   - wiki/sources/descriptions/gmh5225__Fortnite-Esp-Aimbot-Exploits-Hwid-Spoofer-Cleaner-Hack-Cheat.md
@@ -388,7 +389,7 @@ sources:
   - wiki/sources/descriptions/husnaintariq577__kx-vision.md
   - wiki/sources/descriptions/effcol__wiz3D.md
   - wiki/sources/descriptions/ocornut__imgui_test_engine.md
-updated: 2026-11-11
+updated: 2026-11-14
 confidence: high
 ---
 
@@ -495,6 +496,7 @@ Windows documents `SwapBuffers` through GDI; do not assume a similarly named wra
 - Title-specific Geometry Dash internal ImGui menu samples such as [[gd-internal]] (gmh5225; Comfortaa font loaded from `menu.cpp`; cheat / game:geometry dash) sit in the same in-process ImGui cheat-menu lane on rhythm titles. (source: wiki/sources/descriptions/gmh5225__gd-internal.md)
 - Title-specific GTA III: The Definitive Edition internal samples such as [[gtaiii-de-goldhook]] (gmh5225; ImGui overlay via DirectX Present hook; gameplay modifications and visual enhancements; cheat / game:gta3) sit in the same in-process ImGui cheat-menu lane on remastered classic titles. (source: wiki/sources/descriptions/gmh5225__GTAIII-DE-GoldHook.md)
 - Title-specific GTA V C++/Lua hook-and-render bases such as [[bigbasev2]] (gmh5225; rendering / modding / hooking scaffold; cheat / game:gta5) sit in the same in-process mod-menu / Present-hook lane beside [[phake]] and [[gtav-dragresize]]. (source: wiki/sources/descriptions/gmh5225__BigBaseV2.md)
+- GTA V **MenuForge** overlay scaffolds such as [[gta-5-trainer-menu-base]] (misnopini1987; MIT C++17; DXGI11 + Dear ImGui trainer-menu layers—navigation state machine, theme tokens, localization; menu injection research; cheat / ImGui) sit in that DX11 ImGui scaffold lane without shipping gameplay features. (source: wiki/sources/descriptions/misnopini1987__GTA-5-Trainer-Menu-Base.md)
 - Title-specific Fortnite internal DX11 ImGui samples such as [[fortnite-internal-cheat-fixed-and-updated]] (gmh5225; box/skeleton/distance/snapline/FOV/chest/ammo ESP + memory/silent aimbot; DirectX 11 ImGui overlay; cheat / game:fortnite) sit in the same in-process ImGui cheat-menu lane on EAC-protected UE clients. (source: wiki/sources/descriptions/gmh5225__Fortnite-Internal-Cheat-Fixed-and-Updated.md)
 - Title-specific Fortnite internal DX9 ImGui samples such as [[fortnite-hack-esp-exploits-with-menu]] (YMY1666527646; box/line ESP + menu-driven aim/exploit toggles; DirectX 9 ImGui overlay; cheat / game:fortnite [Internal]) sit in that same in-process ImGui cheat-menu lane beside DX11 internals. (source: wiki/sources/descriptions/YMY1666527646__Fortnite-Hack-Esp-Exploits-With-Menu.md)
 - Title-specific Fortnite external DX9 ImGui samples such as [[fortnite-external-cheat-leak]] (Waihbe; leaked external source; DirectX 9 ImGui overlay + in-game feature menu; ESP/aim visualization over driver-assisted out-of-process reads; cheat / game:fortnite [External]) sit in the external layered-window / DX9 ImGui overlay lane beside [[fortnite-external-cheat-source-code]] and [[nigusfn]]. (source: wiki/sources/descriptions/Waihbe__Fortnite-External-Cheat-Leak.md)
