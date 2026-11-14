@@ -3883,6 +3883,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [taskbarhero-bot](entities/taskbarhero-bot.md) — TaskbarHero Unity IL2CPP external trainer/bot (C#/.NET 10; ACTk bypass, batch-read automations, WPF panel; matheusbranhann)
 - [TaxiDriver](entities/taxi-driver.md) — ALittlePatate; Linux LKM + user-mode pair; device-interface RPM/WPM, base-address lookup, example clients; low-level game memory tooling + Linux security research (cheat / W/RPM Driver and usermode for Linux)
 - [tastsong-game-programmer-study-notes](entities/tastsong-game-programmer-study-notes.md) — TastSong Unity C# study notes + sample projects (design patterns, rendering, networking, AI, engine architecture; Game Development notes / guide)
+- [teach-me-assembly](entities/teach-me-assembly.md) — offline IDAPython IDA Pro plugin: Chinese semantic disasm comments via JSON mnemonic rules (x86/ARM/MIPS/RISC-V; no AI/network; awaxiaoyu; Cheat / IDA Plugins)
 - [TaskScheduler](entities/task-scheduler.md) — cross-platform fiber-based C++ task scheduler (multi-threaded jobs, task grouping, work-stealing; Windows/POSIX; tests/examples; Game Engine / Task Scheduler)
 - [TeeForge-CD](entities/tee-forge-cd.md) — mcxiaochenn; Rust Magisk/KernelSU/APatch module + Vue WebUI/CLI; boot refresh of Tricky Store/TEESimulator/OHKM targets, resetprop hide helper, optional bootloader masking, Keybox from public pool or Qualcomm RKP (Play Integrity; Cheat / Magisk)
 - [TDE](entities/tde.md) — Themida IDA plugin / Fix Themida (devirtualization engine; sodareverse)
