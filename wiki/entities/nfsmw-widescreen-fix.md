@@ -18,4 +18,4 @@ Lightweight **C++ ASI plugin** (typically via **dinput8.dll**) that modernizes *
 
 ## Related
 
-[[gtaiv-eflc-fusionfix]] · [[kotr-modern-patch]] · [[nfsu2recomp]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]]
+[[nfsmw-controllersupport]] · [[gtaiv-eflc-fusionfix]] · [[kotr-modern-patch]] · [[nfsu2recomp]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]]
