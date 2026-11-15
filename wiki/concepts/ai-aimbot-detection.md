@@ -48,6 +48,7 @@ sources:
   - wiki/sources/descriptions/voilecx__eigen.md
   - wiki/sources/descriptions/katze225__PowerAC.md
   - wiki/sources/descriptions/wepposs__WepAC.md
+  - wiki/sources/descriptions/korpys667__MKAC.md
   - wiki/sources/descriptions/aethelreborn__minecraft-anticheat-docs.md
   - wiki/sources/descriptions/AODOJUST__gomoku-anti-cheat-detector.md
   - wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md
@@ -144,6 +145,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[eigen-anticheat]] — voilecx Paper/Folia Scala 3 plugin; PacketEvents per-tick aim/movement feature rows with lag-compensated client-view reconstruction; combat vs baseline windows streamed to authenticated WebSocket ML backend for labelled datasets and inference (GrimAC/Shard-inspired transaction lag compensation) (source: wiki/sources/descriptions/voilecx__eigen.md)
 - [[powerac]] — katze225 Paper/Folia Java plugin; embedded CNN over fixed-window rotation telemetry from packet listeners; in-game labeled-sample collection with asynchronous on-server retraining; staff logs, Discord webhooks, and plugin API/events—no remote inference or license server (source: wiki/sources/descriptions/katze225__PowerAC.md)
 - [[wepac]] — wepposs Paper/Spigot **1.21+** Java plugin; hybrid rule-based movement/combat/block/inventory checks plus embedded **MLP** cheat scoring with per-player adaptive thresholds; inline Netty packet inspection and movement physics simulation; online learning from punishments, staff labels, and filtered legit PvP; persisted weights across restarts (source: wiki/sources/descriptions/wepposs__WepAC.md)
+- [[mkac]] — korpys667 Paper/Folia Kotlin/Java 21 open-source combat AC; packet checks plus **hosted MKAC API** ML scoring for killaura and aim-assist from input patterns; violation logging, YAML punishments, optional SQLite/MySQL/Redis cross-server alerts; in-game monitoring, suspicion review, and data-collection commands (source: wiki/sources/descriptions/korpys667__MKAC.md)
 - [[minecraft-anticheat-docs]] — aethelreborn structured Markdown primer on Minecraft server-side combat/reach analysis, heuristic and ML detection models, and latency compensation for Java Edition plugins (GrimAC/Vulcan/Matrix context; documentation-only Guide lane) (source: wiki/sources/descriptions/aethelreborn__minecraft-anticheat-docs.md)
 - [[mlanticheat]] — Minecraft Paper 1.21.4+ combat AC; per-server ensemble neural + logistic models + anomaly detection over combat rotations; operator labeling, Shadow Mode review, optional PacketEvents rotation tracking, automatic retraining (gravemaulr)
 - [[model-anti-cheat]] — DayZ server-side ML pipeline; mission-script per-second telemetry (position, view, weapon, raycast line-of-sight) + Python feature extraction + RandomForest aimbot/movement anomaly classifier (sample cheater sessions)
