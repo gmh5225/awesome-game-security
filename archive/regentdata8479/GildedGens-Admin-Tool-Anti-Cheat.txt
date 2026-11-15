@@ -1,0 +1,1165 @@
+Project Path: arc_regentdata8479_GildedGens-Admin-Tool-Anti-Cheat_qlq1u4tv
+
+Source Tree:
+
+```txt
+arc_regentdata8479_GildedGens-Admin-Tool-Anti-Cheat_qlq1u4tv
+├── LICENSE
+├── README.md
+├── TESTING.md
+├── manifest.json
+└── scripts
+    ├── config.js
+    ├── guard.js
+    ├── inventory.js
+    ├── main.js
+    ├── perms.js
+    ├── scanner.js
+    ├── store.js
+    └── ui.js
+
+```
+
+`LICENSE`:
+
+```
+GildedGens Admin Control System + GILDEDGENS GUARD
+Copyright (c) 2026 RegentData8479. All rights reserved.
+
+You may download and use this software on your own Minecraft Bedrock world or Realm.
+Without prior written permission from the copyright holder you may NOT:
+  - redistribute, republish, re-upload, sell, or sublicense this software or any part of it;
+  - distribute modified versions of it;
+  - present it as your own work.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+BUT NOT LIMITED TO MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM
+THE USE OR MISUSE OF THE SOFTWARE, INCLUDING ITEM REMOVAL, PLAYER PUNISHMENTS, FALSE
+DETECTIONS, OR DATA LOSS ON ANY WORLD OR REALM.
+
+```
+
+`README.md`:
+
+```md
+# GildedGens Admin Control System + GILDEDGENS GUARD (Behavior Pack)
+
+STATUS: written against the stable Script API (@minecraft/server 2.11.0, @minecraft/server-ui 2.3.0, min engine 1.26.50)
+but NOT yet run in-game by the author. Work through TESTING.md before trusting enforcement on your live Realm.
+
+## License, redistribution and disclaimer
+Copyright (c) 2026 RegentData8479. All rights reserved. See LICENSE.
+
+- You may NOT redistribute, re-upload, sell, or republish this add-on or any part of it, with or without changes, and you may not claim it as your own.
+- Use is at your own risk. The software is provided "as is" with no warranty.
+- The author is NOT responsible for misuse of this add-on, including use against players without a legitimate reason, wrongful item removal, false anti-cheat detections, punishments or bans, or data loss. Server owners are solely responsible for how they configure and use it and for following Minecraft's EULA and Usage Guidelines.
+- Always test in dry-run / log-only mode first.
+
+## Folder layout
+GildedGens_Admin_BP/
+  manifest.json
+  scripts/main.js       entry: joins/leaves, monitoring, panel triggers, persistence flush
+  scripts/config.js     defaults: PANEL_ITEM, OWNER_BOOTSTRAP_NAMES, guard presets, default blacklist
+  scripts/store.js      persistence (chunked world dynamic properties) + audit log
+  scripts/perms.js      roles + permission matrix (by player ID)
+  scripts/inventory.js  slot/armor/offhand read + safe removal
+  scripts/scanner.js    blacklist + inventory anti-cheat scanner (dry-run capable)
+  scripts/guard.js      GILDEDGENS GUARD checks, VL, punishments
+  scripts/ui.js         all dashboards (native forms)
+
+## Install on a Realm
+1. BEFORE installing: edit OWNER_BOOTSTRAP_NAMES in scripts/config.js with your gamertag (or use /scriptevent gg:claim later).
+2. Import GildedGens_Admin.mcpack on a Minecraft client (double-click / open with Minecraft).
+3. Realm settings -> Edit -> your world -> Add-ons -> Behavior Packs -> activate it -> save. (Realms Pro: upload via the same path.)
+   No Beta APIs experiment is needed. No external networking is used.
+4. Open the panel: rename a compass to "GG Panel" in an anvil and use it, or run /scriptevent gg:panel (needs commands enabled).
+5. First owner: gamertag in OWNER_BOOTSTRAP_NAMES, or an operator runs /scriptevent gg:claim while no OWNER exists.
+
+Ships in DRY-RUN (scan.dryRun = true) and Guard LOG-ONLY. Switch to enforcement in Security -> Scan settings after reviewing alerts.
+
+## Support matrix
+FULLY SUPPORTED: online player list/search, coords, dimension, health, session time; inventory + hotbar + armor + offhand
+inspection (id, qty, enchants, durability, name tag, lore, tags); blacklist with wildcard ids and role/ID exemptions;
+auto-removal with dry-run; manual confiscation with confirmation; roles; persistent audit log with filters.
+PARTIAL: game mode (needs getGameMode in your API version, else shown n/a); "custom item properties" (only what the API
+exposes); kick/ban (uses the kick command from script - verify it works on your Realm; otherwise failures are logged and
+staff are alerted); all Guard checks are heuristics (see below); offline players = last known data only.
+UNSUPPORTED (not faked): personal Ender Chest contents (no Script API access); contents of shulker boxes/bundles carried
+in inventory; packet-level detection; reading anything of offline players' inventories.
+Mitigation: items leaving an Ender Chest are caught on the next scan once in the inventory.
+
+## Guard honesty notes
+Realm packs only see sampled positions and hit/break/place events. Reach, KillAura and NoFall are approximate; speed/fly
+use block-geometry airborne detection (independent of the client's onGround flag). False-positive protection: buffers,
+grace after join/teleport/damage/knockback/pearl/elytra/gamemode change, effect awareness, lag pause, VL decay, exemptions,
+log-only mode, three presets. Tune on log-only first.
+
+## Operators
+Realm operators automatically get ADMIN access (OPERATOR_ROLE in config.js; 0 turns it off, 3 makes them OWNER). Stored roles still apply if higher.
+
+```
+
+`TESTING.md`:
+
+```md
+# Testing checklist (do on a test world/Realm first, 2+ accounts)
+1. Join/leave: observed count rises; offline entry shows last known coords. Check Dashboard.
+2. Permissions: non-staff uses a "GG Panel" compass -> denied, alert to staff, log "unauthorized". Promote/demote a player; rejoin; role persists.
+3. Inspect: give yourself items in every slot, armor, offhand; verify Inspector matches; enchant something, check durability.
+4. Blacklist (keep DRY-RUN on): /give a second account a command_block -> alert + "dry-run" log. Put it in offhand and as armor-slot equivalent test with a barrier in offhand.
+5. Enforcement: turn DRY-RUN off; repeat -> removed, log "removed", stats +qty. Authorized OWNER holding the same item is untouched.
+6. Manual confiscation: confirm dialog, log entry; cancel leaves item. Disconnect mid-form -> "player left", no crash.
+7. Persistence: restart the Realm; admins, blacklist, config, logs, VL profiles still present.
+8. Guard (log-only): sprint-jump/boat/elytra/ice (no flags), then use a legit-speed potion; a hacked client or /effect speed 255 should flag. Knockback/ender pearl should NOT flag. Verify lag: no flags while server is stuttering.
+9. Punish mode: with a test account raise VL via /effect speed 50; confirm warn -> setback -> restrict -> kick thresholds and that kick actually works on your Realm.
+10. Load: 10+ players; watch for lag. Increase scan/sample intervals if needed.
+
+```
+
+`manifest.json`:
+
+```json
+{
+  "format_version": 2,
+  "header": {
+    "name": "GildedGens Admin Control System",
+    "description": "Realm administration + GILDEDGENS GUARD anti-cheat (Script API)",
+    "uuid": "7c1e5a52-3d0b-4f6e-9a1c-2b8d4e6f0a11",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 26, 50]
+  },
+  "modules": [
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "b94f2d17-60aa-4c3e-8e5d-1f7a93c2d4b8",
+      "version": [1, 0, 0],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    { "module_name": "@minecraft/server", "version": "2.11.0" },
+    { "module_name": "@minecraft/server-ui", "version": "2.3.0" }
+  ]
+}
+
+```
+
+`scripts/config.js`:
+
+```js
+// GildedGens Admin Control System - defaults. Everything here is editable in-game and persisted.
+export const PANEL_ITEM = { typeId: "minecraft:compass", name: "GG Panel" }; // rename a compass to this in an anvil
+// Gamertags that become OWNER automatically on first join (case-insensitive). Put YOUR gamertag here before installing.
+// Realm operators automatically get this role level: 0 = off, 1 = MODERATOR, 2 = ADMIN, 3 = OWNER.
+export const OPERATOR_ROLE = 2;
+export const OWNER_BOOTSTRAP_NAMES = ["RegentData8479", "GlizzyOwnsU5832"];
+
+export const PRESETS = {
+  conservative: { buffer: 4, maxSpeed: 11, flyTime: 3.5, noFall: 9, reach: 6.0, cps: 25, multi: 5, angle: 100, nuker: 30, breakReach: 8, fastPlace: 14, itemSpam: 24, interact: 36, ptsMult: 0.7 },
+  balanced:     { buffer: 3, maxSpeed: 9,  flyTime: 2.5, noFall: 7, reach: 5.0, cps: 20, multi: 4, angle: 85,  nuker: 22, breakReach: 7, fastPlace: 11, itemSpam: 18, interact: 26, ptsMult: 1 },
+  aggressive:   { buffer: 2, maxSpeed: 8,  flyTime: 1.6, noFall: 5, reach: 4.4, cps: 16, multi: 3, angle: 70,  nuker: 18, breakReach: 6, fastPlace: 9,  itemSpam: 14, interact: 20, ptsMult: 1.4 },
+};
+
+export const DEFAULT_CONFIG = {
+  monitor: { intervalTicks: 100 },
+  scan: { enabled: true, intervalTicks: 200, dryRun: true, suspiciousQty: 2304 },
+  guard: {
+    enabled: true,
+    mode: "log", // "log" = detections only, "punish" = apply punishments
+    preset: "balanced",
+    sampleTicks: 5,
+    decayPerMin: 2,
+    exemptStaff: false,
+    inventoryConfiscate: true, // inventory detections may remove items (only when scan.dryRun=false AND mode=punish)
+    exempt: {},
+    banned: {},
+    restrictedEquipment: [],
+    checks: {
+      speed: true, fly: true, hover: true, waterWalk: true, noFall: true,
+      reach: true, attackSpeed: true, multiTarget: true, killAura: true,
+      nuker: true, fastPlace: true, itemSpam: true, interactSpam: true,
+      invIllegalStack: true, invBannedItem: true, invEnchant: true, invQuantity: true, invRestricted: true,
+    },
+    // VL thresholds per category group. 0 = action disabled.
+    punish: {
+      movement:  { warn: 8, setback: 15, restrict: 30, kick: 50, ban: 0 },
+      combat:    { warn: 8, setback: 0,  restrict: 30, kick: 50, ban: 0 },
+      world:     { warn: 10, setback: 0, restrict: 35, kick: 60, ban: 0 },
+      inventory: { warn: 5, setback: 0,  restrict: 0,  kick: 40, ban: 0 },
+    },
+  },
+};
+
+// minRole: NONE (only allowedIds) | ADMIN (ADMIN+OWNER exempt) | OWNER (only OWNER exempt). Wildcards (*) allowed in id.
+const E = (id, name, minRole, severity, autoRemove) => ({ id, name, minRole, allowedIds: [], severity, autoRemove, enabled: true });
+export const DEFAULT_BLACKLIST = [
+  E("minecraft:command_block", "Command Block", "OWNER", 3, true),
+  E("minecraft:repeating_command_block", "Repeating Command Block", "OWNER", 3, true),
+  E("minecraft:chain_command_block", "Chain Command Block", "OWNER", 3, true),
+  E("minecraft:command_block_minecart", "Command Block Minecart", "OWNER", 3, true),
+  E("minecraft:structure_block", "Structure Block", "OWNER", 3, true),
+  E("minecraft:structure_void", "Structure Void", "ADMIN", 2, true),
+  E("minecraft:jigsaw", "Jigsaw Block", "OWNER", 3, true),
+  E("minecraft:barrier", "Barrier", "ADMIN", 2, true),
+  E("minecraft:allow", "Allow Block", "ADMIN", 2, true),
+  E("minecraft:deny", "Deny Block", "ADMIN", 2, true),
+  E("minecraft:border_block", "Border Block", "ADMIN", 2, true),
+  E("minecraft:light_block*", "Light Block", "ADMIN", 1, true),
+  E("minecraft:*_spawn_egg", "Spawn Egg (flag only)", "ADMIN", 1, false),
+];
+
+```
+
+`scripts/guard.js`:
+
+```js
+// GILDEDGENS GUARD - behaviour heuristics built on observable Script API state.
+// NOT packet-level and NOT authoritative: a Realm behaviour pack only sees what the API exposes (positions sampled
+// every few ticks, hit/break/place events). Every check is a heuristic guarded by buffers, grace periods and decay.
+import { world, system } from "@minecraft/server";
+import { S, log, mark } from "./store.js";
+import { roleOf, notify } from "./perms.js";
+import { alive } from "./inventory.js";
+import { PRESETS } from "./config.js";
+
+export const CHECKS = {
+  speed: { group: "movement", pts: 3, label: "Speed" }, fly: { group: "movement", pts: 4, label: "Fly" },
+  hover: { group: "movement", pts: 3, label: "Hover" }, waterWalk: { group: "movement", pts: 3, label: "Water walk" },
+  noFall: { group: "movement", pts: 2, label: "NoFall (heuristic)" },
+  reach: { group: "combat", pts: 3, label: "Reach" }, attackSpeed: { group: "combat", pts: 2, label: "Attack speed / pattern" },
+  multiTarget: { group: "combat", pts: 3, label: "Multi-target" }, killAura: { group: "combat", pts: 3, label: "Attack direction" },
+  nuker: { group: "world", pts: 3, label: "Nuker" }, fastPlace: { group: "world", pts: 2, label: "FastPlace" },
+  itemSpam: { group: "world", pts: 1, label: "Item-use spam" }, interactSpam: { group: "world", pts: 1, label: "Interaction spam" },
+  invIllegalStack: { group: "inventory", pts: 4, label: "Illegal stack size" }, invBannedItem: { group: "inventory", pts: 5, label: "Banned item" },
+  invEnchant: { group: "inventory", pts: 4, label: "Illegal enchant level" }, invQuantity: { group: "inventory", pts: 2, label: "Suspicious quantity" },
+  invRestricted: { group: "inventory", pts: 3, label: "Restricted equipment" },
+};
+export const GROUPS = ["movement", "combat", "world", "inventory"];
+const ACTIONS = ["warn", "setback", "restrict", "kick", "ban"];
+const BIG = new Set(["minecraft:ender_dragon", "minecraft:ghast", "minecraft:ravager", "minecraft:warden", "minecraft:wither", "minecraft:iron_golem", "minecraft:hoglin", "minecraft:zoglin", "minecraft:elder_guardian", "minecraft:slime", "minecraft:magma_cube", "minecraft:horse", "minecraft:donkey", "minecraft:mule", "minecraft:llama", "minecraft:camel", "minecraft:sniffer", "minecraft:cow", "minecraft:polar_bear"]);
+const SOFT = /water|web|ladder|vine|scaffolding|slime|hay|honey|powder_snow|bubble|bed|berry|lava|twisting|weeping/;
+const GRACE_ITEMS = new Set(["minecraft:ender_pearl", "minecraft:wind_charge", "minecraft:trident", "minecraft:firework_rocket", "minecraft:chorus_fruit", "minecraft:mace"]);
+
+const ST = new Map();
+let lagUntil = 0;
+const T = () => PRESETS[S.cfg.guard.preset] ?? PRESETS.balanced;
+const on = (c) => S.cfg.guard.enabled && S.cfg.guard.checks[c];
+export const isLagging = () => system.currentTick < lagUntil;
+export const dropState = (id) => ST.delete(id);
+function st(p) {
+  let s = ST.get(p.id);
+  if (!s) { s = { last: null, air: 0, peak: 0, buf: {}, grace: system.currentTick + 100, lastGlide: -999, effUntil: 0, gm: null, hits: [], hitLog: [], targets: [], breaks: [], places: [], uses: [], ints: [], safe: null, pend: null, fallHurt: -999, alertAt: {}, pun: {}, lastFlag: -999 }; ST.set(p.id, s); }
+  return s;
+}
+const exempt = (p) => !!S.cfg.guard.exempt[p.id] || (S.cfg.guard.exemptStaff && roleOf(p) >= 2);
+const gmode = (p) => { try { return String(p.getGameMode()).toLowerCase(); } catch { return "unknown"; } };
+const eff = (p, id) => { try { return p.getEffect(id); } catch { return undefined; } };
+
+export const totalVL = (v) => Object.values(v.vl).reduce((a, b) => a + b, 0);
+export const groupVL = (v, g) => Object.entries(v.vl).reduce((a, [k, x]) => a + (CHECKS[k]?.group === g ? x : 0), 0);
+const hhmm = () => new Date().toISOString().slice(11, 19) + "Z";
+
+function recommend(total) {
+  if (total >= 40) return "Review live / consider kick or ban";
+  if (total >= 20) return "Spectate and inspect inventory";
+  if (total >= 8) return "Keep watching";
+  return "Likely benign - monitor";
+}
+export function flag(p, check, detail, mult = 1) {
+  const meta = CHECKS[check]; if (!meta || !on(check) || exempt(p)) return;
+  const s = st(p), now = system.currentTick;
+  const pts = Math.round(meta.pts * T().ptsMult * mult * 10) / 10;
+  const v = (S.viol[p.id] ??= { name: p.name, vl: {}, hist: [], pun: [], last: 0 });
+  v.name = p.name; v.vl[check] = (v.vl[check] || 0) + pts; v.last = Date.now(); s.lastFlag = now;
+  const total = totalVL(v);
+  v.hist.push({ t: Date.now(), check, pts, vl: Math.round(total * 10) / 10, d: String(detail).slice(0, 90) });
+  if (v.hist.length > 25) v.hist.shift();
+  mark("viol");
+  if (now - (s.alertAt[check] ?? -999) >= 100) {
+    s.alertAt[check] = now;
+    log({ sev: meta.group === "inventory" ? 2 : 1, act: "guard:" + check, player: p.name, playerId: p.id, detail: `${detail} (+${pts}, VL ${total.toFixed(1)})` });
+    notify("viewAlerts", `§c[GG GUARD] §f${p.name} §7${meta.label} §8| §f${detail} §8| §e+${pts} §7(VL §e${total.toFixed(1)}§7) §8| §7${hhmm()} §8| §a${recommend(total)}`);
+  }
+  punish(p, v, meta.group, s);
+}
+function hit(p, s, check, cond, detail, need = T().buffer) {
+  if (cond) { s.buf[check] = (s.buf[check] || 0) + 1; if (s.buf[check] >= need) { s.buf[check] = 0; flag(p, check, detail); } }
+  else s.buf[check] = Math.max(0, (s.buf[check] || 0) - 0.5);
+}
+
+// ---------- punishments ----------
+function setback(p, s) {
+  if (!s.safe) return;
+  try { p.teleport({ x: s.safe.x, y: s.safe.y, z: s.safe.z }, { dimension: world.getDimension(s.safe.dim) }); s.grace = system.currentTick + 40; s.last = null; } catch { /* ignore */ }
+}
+export function kick(p, reason) {
+  try { p.runCommand(`kick "${p.name}" ${reason}`); return true; } catch (e) {
+    notify("viewAlerts", `§c[GG GUARD] Kick of ${p.name} failed (command unsupported here?): ${e}`);
+    log({ sev: 2, act: "kick_failed", player: p.name, playerId: p.id, detail: String(e) });
+    return false;
+  }
+}
+function punish(p, v, group, s) {
+  const g = S.cfg.guard; if (g.mode !== "punish") return;
+  const th = g.punish[group]; if (!th) return;
+  const gt = groupVL(v, group), lv = s.pun[group] ?? 0;
+  for (let i = ACTIONS.length - 1; i >= 0; i--) {
+    const a = ACTIONS[i], t = th[a];
+    if (!(t > 0 && gt >= t)) continue;
+    if (a === "setback") { setback(p, s); return; }
+    if (i + 1 <= lv) return;
+    s.pun[group] = i + 1;
+    S.stats.punished++; v.pun.push({ t: Date.now(), a, g: group }); if (v.pun.length > 15) v.pun.shift(); mark("viol");
+    log({ sev: 3, act: "punish:" + a, player: p.name, playerId: p.id, detail: `${group} VL ${gt.toFixed(1)}` });
+    notify("viewAlerts", `§6[GG GUARD] §f${p.name} §7-> §e${a.toUpperCase()} §7(${group} VL ${gt.toFixed(1)})`);
+    if (a === "warn") p.sendMessage("§c[GildedGens Guard] §fSuspicious activity detected on your account. Continued violations may lead to removal.");
+    else if (a === "restrict") { try { p.addEffect("slowness", 400, { amplifier: 1, showParticles: false }); p.addEffect("weakness", 400, { amplifier: 1, showParticles: false }); } catch { /* ignore */ } }
+    else if (a === "kick") kick(p, "Removed by GildedGens Guard (suspicious activity)");
+    else if (a === "ban") { banPlayer(p.id, p.name, "Anti-cheat auto-ban", "GUARD"); kick(p, "Banned by GildedGens Guard"); }
+    return;
+  }
+}
+export function banPlayer(id, name, reason, by) {
+  S.cfg.guard.banned[id] = { name, reason, by, t: Date.now() }; mark("cfg");
+  log({ sev: 3, act: "guard_ban", player: name, playerId: id, admin: by, detail: reason });
+}
+export function unban(id, by) { const b = S.cfg.guard.banned[id]; delete S.cfg.guard.banned[id]; mark("cfg"); log({ sev: 2, act: "guard_unban", player: b?.name, playerId: id, admin: by }); }
+export function clearVL(id, by) {
+  const v = S.viol[id]; if (!v) return;
+  v.vl = {}; mark("viol");
+  log({ sev: 1, act: "vl_clear", player: v.name, playerId: id, admin: by });
+  const s = ST.get(id); if (s) { s.pun = {}; s.buf = {}; }
+}
+export function checkBan(p) {
+  const b = S.cfg.guard.banned[p.id];
+  if (b) { notify("viewAlerts", `§c[GG GUARD] Banned player ${p.name} joined (${b.reason}). Attempting kick.`); system.runTimeout(() => { if (alive(p)) kick(p, "You are banned: " + b.reason); }, 40); }
+}
+
+// ---------- movement sampling ----------
+function blk(p, y) { try { return p.dimension.getBlock({ x: Math.floor(p.location.x), y: Math.floor(y), z: Math.floor(p.location.z) }); } catch { return undefined; } }
+function sample(p, now) {
+  const s = st(p), L = p.location, dim = p.dimension.id, last = s.last;
+  s.last = { x: L.x, y: L.y, z: L.z, tick: now, dim };
+  const gm = gmode(p); if (s.gm !== null && s.gm !== gm) s.grace = now + 60; s.gm = gm;
+  if (!last || last.dim !== dim || now - last.tick > 60) { s.grace = Math.max(s.grace, now + 40); s.air = 0; s.pend = null; return; }
+  const dtT = now - last.tick, dt = dtT / 20, dx = L.x - last.x, dz = L.z - last.z, dy = L.y - last.y, hd = Math.hypot(dx, dz);
+  if (hd > 20 || Math.abs(dy) > 24) { s.grace = now + 60; s.air = 0; s.pend = null; return; } // teleport
+  if (p.isGliding === true) s.lastGlide = now;
+  if (gm === "creative" || gm === "spectator" || p.isFlying === true) { s.air = 0; s.pend = null; return; }
+  if (isLagging() || now < s.grace || now - s.lastGlide < 60 || p.getComponent("minecraft:riding")) { s.air = 0; s.pend = null; return; }
+
+  const sp = eff(p, "speed"), special = eff(p, "levitation") || eff(p, "jump_boost") || eff(p, "slow_falling");
+  if (special) s.effUntil = now + 60;
+  const bF = blk(p, L.y), bB = blk(p, L.y - 0.3), bB2 = blk(p, L.y - 1.3);
+  if (!bF || !bB) return;
+  const below = bB.typeId, t = T();
+  const airborne = bF.isAir && bB.isAir && bB2?.isAir === true;
+
+  // speed
+  const mult = 1 + (sp ? 0.2 * (sp.amplifier + 1) : 0);
+  const slippery = /ice|soul/.test(below);
+  hit(p, s, "speed", !slippery && hd / dt > t.maxSpeed * mult, `${(hd / dt).toFixed(1)} b/s (limit ${(t.maxSpeed * mult).toFixed(1)})`);
+
+  // fly / hover / nofall (own ground detection from blocks, so spoofed onGround is irrelevant)
+  const vertExempt = now < s.effUntil;
+  if (airborne && !vertExempt && !p.isInWater && !p.isClimbing) {
+    s.air += dtT; s.peak = Math.max(s.peak, L.y);
+    if (s.air / 20 > t.flyTime) {
+      const vy = dy / dt;
+      hit(p, s, "fly", vy > 2.0, `rising ${vy.toFixed(1)} b/s airborne ${(s.air / 20).toFixed(1)}s`);
+      hit(p, s, "hover", Math.abs(vy) < 1.0, `hovering airborne ${(s.air / 20).toFixed(1)}s`);
+    }
+  } else {
+    if (s.air > 0 && !vertExempt && !SOFT.test(below) && !p.isInWater) {
+      const fall = s.peak - L.y;
+      if (fall >= t.noFall && !eff(p, "resistance") && (gm === "survival" || gm === "adventure")) s.pend = { tick: now, fall };
+    }
+    s.air = 0; s.peak = L.y;
+  }
+  if (s.pend && now - s.pend.tick >= 12) {
+    if (s.fallHurt < s.pend.tick && on("noFall")) flag(p, "noFall", `fell ${s.pend.fall.toFixed(1)} blocks, no fall damage`);
+    s.pend = null;
+  }
+
+  // water walking
+  const wTop = below === "minecraft:water" && bF.isAir && !p.isInWater && !p.isSwimming;
+  hit(p, s, "waterWalk", wTop && hd / dt > 1.0, `moving ${(hd / dt).toFixed(1)} b/s on water`);
+
+  // remember a safe, grounded position for setbacks
+  if (!airborne && !bB.isAir && !/water|lava/.test(below) && now - s.lastFlag > 40) s.safe = { x: L.x, y: L.y, z: L.z, dim };
+}
+
+// ---------- combat / world events ----------
+const rate = (arr, now, win) => { arr.push(now); while (arr.length && now - arr[0] > win) arr.shift(); return arr.length; };
+const ready = (p) => S.ready && S.cfg.guard.enabled && alive(p) && !exempt(p);
+function onHit(ev) {
+  const p = ev.damagingEntity, t = ev.hitEntity;
+  if (p?.typeId !== "minecraft:player" || !ready(p)) return;
+  const s = st(p), now = system.currentTick, th = T();
+  s.hitLog.push(now); if (s.hitLog.length > 12) s.hitLog.shift();
+  const cps = rate(s.hits, now, 20);
+  hit(p, s, "attackSpeed", cps > th.cps, `${cps} hits/s (limit ${th.cps})`, 2);
+  if (s.hitLog.length === 12) {
+    const iv = []; for (let i = 1; i < 12; i++) iv.push(s.hitLog[i] - s.hitLog[i - 1]);
+    const m = iv.reduce((a, b) => a + b, 0) / iv.length, sd = Math.sqrt(iv.reduce((a, b) => a + (b - m) ** 2, 0) / iv.length);
+    if (m > 0 && m <= 3.5 && sd < 0.45) { flag(p, "attackSpeed", `machine-uniform hit timing (mean ${m.toFixed(1)}t, sd ${sd.toFixed(2)})`, 0.7); s.hitLog = []; }
+  }
+  s.targets.push({ t: now, id: t.id }); s.targets = s.targets.filter((x) => now - x.t <= 10);
+  const n = new Set(s.targets.map((x) => x.id)).size;
+  hit(p, s, "multiTarget", n >= th.multi, `${n} targets within 0.5s`, 1);
+  if (isLagging() || now < s.grace || gmode(p) === "creative" || p.getComponent("minecraft:riding") || BIG.has(t.typeId)) return;
+  const pl = p.location, tl = t.location, d = Math.hypot(tl.x - pl.x, tl.z - pl.z);
+  hit(p, s, "reach", d > th.reach, `hit at ${d.toFixed(2)} blocks (limit ${th.reach})`, 2);
+  try {
+    const h = p.getHeadLocation(), v = p.getViewDirection();
+    const vx = tl.x - h.x, vy = tl.y + 0.9 - h.y, vz = tl.z - h.z, len = Math.hypot(vx, vy, vz);
+    if (len > 1.5) {
+      const ang = (Math.acos(Math.max(-1, Math.min(1, (vx * v.x + vy * v.y + vz * v.z) / len))) * 180) / Math.PI;
+      hit(p, s, "killAura", ang > th.angle, `hit target ${ang.toFixed(0)}° off crosshair`, th.buffer);
+    }
+  } catch { /* head/view unavailable */ }
+}
+function onBreak(ev) {
+  const p = ev.player; if (!ready(p) || gmode(p) === "creative") return;
+  const s = st(p), now = system.currentTick, th = T(), n = rate(s.breaks, now, 20);
+  const haste = eff(p, "haste");
+  hit(p, s, "nuker", !haste && n > th.nuker, `${n} blocks broken in 1s`, 2);
+  try {
+    const h = p.getHeadLocation(), b = ev.block.location, d = Math.hypot(b.x + 0.5 - h.x, b.y + 0.5 - h.y, b.z + 0.5 - h.z);
+    hit(p, s, "nuker", d > th.breakReach && !isLagging(), `broke block ${d.toFixed(1)} away`, 2);
+  } catch { /* ignore */ }
+}
+function onPlace(ev) {
+  const p = ev.player; if (!ready(p) || gmode(p) === "creative") return;
+  const s = st(p), th = T(), n = rate(s.places, system.currentTick, 20);
+  hit(p, s, "fastPlace", n > th.fastPlace, `${n} blocks placed in 1s`, 2);
+}
+function onUse(ev) {
+  const p = ev.source; if (!ready(p)) return;
+  const s = st(p), now = system.currentTick, th = T();
+  if (GRACE_ITEMS.has(ev.itemStack?.typeId)) s.grace = Math.max(s.grace, now + 100);
+  const n = rate(s.uses, now, 20);
+  hit(p, s, "itemSpam", n > th.itemSpam, `${n} item uses in 1s`, 2);
+}
+function onInteract(ev) {
+  const p = ev.player; if (!ready(p)) return;
+  const s = st(p), th = T(), n = rate(s.ints, system.currentTick, 20);
+  hit(p, s, "interactSpam", n > th.interact, `${n} block interactions in 1s`, 2);
+}
+function onHurt(ev) {
+  const p = ev.hurtEntity; if (p?.typeId !== "minecraft:player") return;
+  const s = st(p), now = system.currentTick, c = String(ev.damageSource.cause);
+  if (c === "fall") s.fallHurt = now;
+  s.grace = Math.max(s.grace, now + (/explosion/.test(c) ? 80 : 30)); // knockback grace
+}
+
+export function initGuard() {
+  world.afterEvents.entityHitEntity.subscribe(onHit);
+  world.afterEvents.playerBreakBlock.subscribe(onBreak);
+  world.afterEvents.playerPlaceBlock.subscribe(onPlace);
+  world.afterEvents.itemUse.subscribe(onUse);
+  world.afterEvents.playerInteractWithBlock.subscribe(onInteract);
+  world.afterEvents.entityHurt.subscribe(onHurt);
+  let lastMs = Date.now(), lastTick = system.currentTick;
+  system.runInterval(() => {
+    if (!S.ready) return;
+    const now = system.currentTick;
+    if (now - lastTick >= 10) { // server-lag detector: wall-clock per tick
+      const ms = Date.now() - lastMs; if (ms > (now - lastTick) * 50 * 1.5 + 100) lagUntil = now + 60;
+      lastMs = Date.now(); lastTick = now;
+    }
+    if (!S.cfg.guard.enabled) return;
+    const k = Math.max(1, S.cfg.guard.sampleTicks), ps = world.getAllPlayers();
+    for (let i = 0; i < ps.length; i++) {
+      if ((i + now) % k !== 0) continue; // spread players over ticks to keep per-tick cost flat
+      const p = ps[i]; if (!alive(p) || exempt(p)) continue;
+      try { sample(p, now); } catch (e) { console.warn("guard sample: " + e); }
+    }
+  }, 1);
+  system.runInterval(() => { // VL decay
+    if (!S.ready) return;
+    const dec = (S.cfg.guard.decayPerMin * 200) / 1200;
+    for (const [id, v] of Object.entries(S.viol)) {
+      let ch = false;
+      for (const k of Object.keys(v.vl)) { v.vl[k] -= dec; ch = true; if (v.vl[k] <= 0.05) delete v.vl[k]; }
+      const s = ST.get(id);
+      if (s) for (const g of GROUPS) if ((s.pun[g] ?? 0) && groupVL(v, g) < (S.cfg.guard.punish[g]?.warn ?? 0) * 0.5) s.pun[g] = 0;
+      if (ch) mark("viol");
+    }
+  }, 200);
+}
+
+```
+
+`scripts/inventory.js`:
+
+```js
+import { EquipmentSlot } from "@minecraft/server";
+
+const EQ = [["Helmet", EquipmentSlot.Head], ["Chestplate", EquipmentSlot.Chest], ["Leggings", EquipmentSlot.Legs], ["Boots", EquipmentSlot.Feet], ["Offhand", EquipmentSlot.Offhand]];
+export const alive = (p) => { try { const v = p.isValid; return typeof v === "function" ? p.isValid() : v !== false; } catch { return false; } };
+export const pretty = (id) => id.replace("minecraft:", "").replace(/_/g, " ");
+
+export function listSlots(p) {
+  const slots = [], errors = [];
+  try {
+    const c = p.getComponent("minecraft:inventory")?.container;
+    if (!c) errors.push("Inventory component unavailable");
+    else for (let i = 0; i < c.size; i++) {
+      const it = c.getItem(i);
+      if (it) slots.push({ loc: "inventory", index: i, label: i < 9 ? `Hotbar ${i + 1}` : `Slot ${i}`, item: it });
+    }
+  } catch (e) { errors.push("Inventory read failed: " + e); }
+  try {
+    const eq = p.getComponent("minecraft:equippable");
+    if (!eq) errors.push("Equippable component unavailable");
+    else for (const [label, slot] of EQ) {
+      const it = eq.getEquipment(slot);
+      if (it) slots.push({ loc: "equip", slot, label, item: it });
+    }
+  } catch (e) { errors.push("Equipment read failed: " + e); }
+  return { slots, errors };
+}
+export function readRef(p, ref) {
+  try {
+    if (ref.loc === "inventory") return p.getComponent("minecraft:inventory")?.container?.getItem(ref.index);
+    return p.getComponent("minecraft:equippable")?.getEquipment(ref.slot);
+  } catch { return undefined; }
+}
+// Re-reads the slot and only clears it if it still holds the expected item type (prevents removing a swapped item).
+export function removeSlot(p, ref, expectId) {
+  if (!alive(p)) return { ok: false, reason: "player offline" };
+  try {
+    const cur = readRef(p, ref);
+    if (!cur) return { ok: false, reason: "slot empty" };
+    if (cur.typeId !== expectId) return { ok: false, reason: "slot changed" };
+    const qty = cur.amount;
+    if (ref.loc === "inventory") p.getComponent("minecraft:inventory").container.setItem(ref.index, undefined);
+    else p.getComponent("minecraft:equippable").setEquipment(ref.slot, undefined);
+    return { ok: true, qty };
+  } catch (e) { return { ok: false, reason: String(e) }; }
+}
+export function getEnchants(item) {
+  try {
+    const c = item.getComponent("minecraft:enchantable");
+    if (!c) return [];
+    return c.getEnchantments().map((e) => ({ id: e.type.id, level: e.level, max: e.type.maxLevel }));
+  } catch { return []; }
+}
+export function describe(item) {
+  const L = [`ID: ${item.typeId}`, `Quantity: ${item.amount} / ${item.maxAmount}`];
+  if (item.nameTag) L.push(`Name tag: ${item.nameTag}`);
+  const en = getEnchants(item);
+  L.push(en.length ? "Enchantments: " + en.map((e) => `${e.id} ${e.level}${e.level > e.max ? ` (max ${e.max}!)` : ""}`).join(", ") : "Enchantments: none / not accessible");
+  try { const d = item.getComponent("minecraft:durability"); if (d) L.push(`Durability: ${d.maxDurability - d.damage} / ${d.maxDurability}`); } catch { /* none */ }
+  try { const lore = item.getLore(); if (lore.length) L.push("Lore: " + lore.join(" | ")); } catch { /* none */ }
+  try { const t = item.getTags(); if (t.length) L.push("Tags: " + t.slice(0, 8).join(", ")); } catch { /* none */ }
+  try { const d = item.getDynamicPropertyIds(); if (d.length) L.push("Dynamic props: " + d.join(", ")); } catch { /* none */ }
+  try { const k = item.lockMode; if (k && k !== "none") L.push("Lock mode: " + k); } catch { /* none */ }
+  return L;
+}
+
+```
+
+`scripts/main.js`:
+
+```js
+import { world, system, ScriptEventSource } from "@minecraft/server";
+import { S, loadAll, flush, mark, save, log, sessions, tracking } from "./store.js";
+import { can, roleOf, notify } from "./perms.js";
+import { OWNER_BOOTSTRAP_NAMES, PANEL_ITEM } from "./config.js";
+import { startScanner, forgetPlayer } from "./scanner.js";
+import { initGuard, dropState, checkBan } from "./guard.js";
+import { openMain } from "./ui.js";
+import { alive } from "./inventory.js";
+
+
+function record(p) {
+  const l = p.location;
+  const r = (S.players[p.id] ??= { name: p.name, first: Date.now() });
+  r.name = p.name; r.last = Date.now(); r.online = true;
+  r.loc = [Math.round(l.x), Math.round(l.y), Math.round(l.z)]; r.dim = p.dimension.id;
+  mark("players");
+}
+function onJoin(p) {
+  if (!S.ready) return;
+  sessions.set(p.id, Date.now());
+  if (!S.admins[p.id] && OWNER_BOOTSTRAP_NAMES.some((n) => n.toLowerCase() === p.name.toLowerCase())) {
+    S.admins[p.id] = { name: p.name, role: 3, by: "bootstrap", t: Date.now() }; save("admins");
+    log({ sev: 3, act: "role_change", player: p.name, playerId: p.id, detail: "bootstrap OWNER" });
+  }
+  record(p); checkBan(p);
+}
+world.afterEvents.playerSpawn.subscribe((ev) => { if (ev.initialSpawn) onJoin(ev.player); });
+world.afterEvents.playerLeave.subscribe((ev) => {
+  if (!S.ready) return;
+  const r = S.players[ev.playerId]; if (r) { r.online = false; r.last = Date.now(); mark("players"); }
+  sessions.delete(ev.playerId); dropState(ev.playerId); forgetPlayer(ev.playerId); tracking.delete(ev.playerId);
+  for (const [a, t] of tracking) if (t === ev.playerId) tracking.delete(a);
+  flush();
+});
+
+function deny(p, how) {
+  log({ sev: 2, act: "unauthorized", player: p.name, playerId: p.id, detail: "panel via " + how });
+  notify("viewAlerts", `§e[GG] §f${p.name} §7tried to open the admin panel (${how}) without permission.`);
+  p.sendMessage("§cYou do not have permission to use this.");
+}
+function open(p, how) { if (!S.ready) return; if (roleOf(p) < 1) return deny(p, how); openMain(p); }
+
+world.afterEvents.itemUse.subscribe((ev) => {
+  const it = ev.itemStack;
+  if (it?.typeId !== PANEL_ITEM.typeId || (it.nameTag ?? "").replace(/§./g, "") !== PANEL_ITEM.name) return;
+  system.run(() => open(ev.source, "item"));
+});
+system.afterEvents.scriptEventReceive.subscribe((ev) => {
+  const p = ev.sourceEntity;
+  if (ev.sourceType !== ScriptEventSource.Entity || p?.typeId !== "minecraft:player" || !S.ready) return;
+  if (ev.id === "gg:panel") open(p, "scriptevent");
+  else if (ev.id === "gg:claim") { // first-run bootstrap: only when no OWNER exists and the caller is a world operator
+    const hasOwner = Object.values(S.admins).some((a) => a.role === 3);
+    let op = false; try { op = typeof p.isOp === "function" ? p.isOp() : p.isOp === true; } catch { /* unknown */ }
+    if (hasOwner || !op) { p.sendMessage("§cClaim refused (an OWNER already exists, or you are not an operator)."); log({ sev: 3, act: "unauthorized", player: p.name, playerId: p.id, detail: "gg:claim refused" }); return; }
+    S.admins[p.id] = { name: p.name, role: 3, by: "claim", t: Date.now() }; save("admins");
+    log({ sev: 3, act: "role_change", player: p.name, playerId: p.id, detail: "claimed OWNER" });
+    p.sendMessage("§aYou are now OWNER. Use a compass renamed 'GG Panel' or /scriptevent gg:panel.");
+  }
+});
+
+system.run(() => {
+  loadAll();
+  for (const p of world.getAllPlayers()) onJoin(p);
+  initGuard(); startScanner();
+  let last = 0;
+  system.runInterval(() => { // monitor + live coordinate tracking + persistence
+    const now = system.currentTick;
+    if (now - last >= S.cfg.monitor.intervalTicks) {
+      last = now;
+      for (const p of world.getAllPlayers()) if (alive(p)) { try { record(p); } catch { /* left */ } }
+      for (const [aid, tid] of tracking) {
+        const a = world.getAllPlayers().find((x) => x.id === aid), t = world.getAllPlayers().find((x) => x.id === tid);
+        if (!a || !t || !can(a, "viewCoords")) { tracking.delete(aid); continue; }
+        const l = t.location;
+        a.onScreenDisplay.setActionBar(`§a${t.name} §7X:${Math.round(l.x)} Y:${Math.round(l.y)} Z:${Math.round(l.z)} §8${t.dimension.id.replace("minecraft:", "")}`);
+      }
+    }
+    if (now % 200 === 0) flush();
+  }, 5);
+  console.warn("[GildedGens] Admin Control System ready");
+});
+
+```
+
+`scripts/perms.js`:
+
+```js
+import { world } from "@minecraft/server";
+import { S, save, log } from "./store.js";
+import { OPERATOR_ROLE } from "./config.js";
+
+export const ROLE_NAMES = ["PLAYER", "MODERATOR", "ADMIN", "OWNER"];
+const PERMS = {
+  viewPlayers: 1, viewCoords: 1, viewAlerts: 1, guardView: 1,
+  inspect: 2, confiscate: 2, viewLogs: 2, viewSecurity: 2, clearVL: 2,
+  manageAdmins: 3, configSecurity: 3, configGuard: 3, enforcement: 3,
+};
+const isOp = (p) => { try { return typeof p.isOp === "function" ? p.isOp() : p.isOp === true; } catch { return false; } };
+// Stored role, or the operator role if the player is a Realm operator (whichever is higher).
+export const roleOf = (p) => Math.max(S.admins[p.id]?.role ?? 0, OPERATOR_ROLE > 0 && isOp(p) ? OPERATOR_ROLE : 0);
+export const roleOfId = (id) => S.admins[id]?.role ?? 0;
+export const can = (p, perm) => roleOf(p) >= (PERMS[perm] ?? 99);
+
+export function notify(perm, msg) {
+  for (const p of world.getAllPlayers()) { try { if (can(p, perm)) p.sendMessage(msg); } catch { /* player left */ } }
+}
+const owners = () => Object.values(S.admins).filter((a) => a.role === 3).length;
+
+export function setRole(actor, id, name, role) {
+  if (!can(actor, "manageAdmins")) { log({ sev: 3, act: "unauthorized", admin: actor.name, adminId: actor.id, detail: "setRole denied" }); return "Permission denied."; }
+  const cur = S.admins[id];
+  if (cur?.role === 3 && role < 3 && owners() <= 1) return "Cannot demote the last OWNER.";
+  const from = cur?.role ?? 0;
+  if (role === 0) delete S.admins[id]; else S.admins[id] = { name, role, by: actor.name, t: Date.now() };
+  save("admins");
+  log({ sev: 3, act: "role_change", admin: actor.name, adminId: actor.id, player: name, playerId: id, detail: `${ROLE_NAMES[from]} -> ${ROLE_NAMES[role]}` });
+  return null;
+}
+
+```
+
+`scripts/scanner.js`:
+
+```js
+import { world, system } from "@minecraft/server";
+import { S, log } from "./store.js";
+import { roleOf, notify } from "./perms.js";
+import { listSlots, removeSlot, alive, getEnchants } from "./inventory.js";
+import { flag } from "./guard.js";
+
+const seen = new Map(); // report-cooldown keys -> tick (pruned every scan; no unbounded growth)
+const rx = new Map();
+let running = false, lastScan = -1e9;
+
+function matcher(pat) {
+  let r = rx.get(pat);
+  if (!r) { r = new RegExp("^" + pat.split("*").map((s) => s.replace(/[.+?^${}()|[\]\\]/g, "\\$&")).join(".*") + "$"); rx.set(pat, r); }
+  return r;
+}
+export const matchEntry = (typeId) => S.bl.find((e) => e.enabled && matcher(e.id).test(typeId));
+export function isAuthorized(p, e) {
+  if (e.allowedIds?.includes(p.id)) return true;
+  return roleOf(p) >= ({ NONE: 99, ADMIN: 2, OWNER: 3 }[e.minRole] ?? 99);
+}
+const gOn = (c) => S.cfg.guard.enabled && S.cfg.guard.checks[c];
+
+function cooled(key, now, cd = 1200) { if (now - (seen.get(key) ?? -1e9) < cd) return false; seen.set(key, now); return true; }
+
+function enforceRemove(p, ref, why, sev, alsoFlag) {
+  const it = ref.item, now = system.currentTick;
+  const base = { sev, player: p.name, playerId: p.id, item: it.typeId, qty: it.amount, loc: ref.label };
+  const canRemove = !S.cfg.scan.dryRun && why.remove;
+  if (canRemove) {
+    const r = removeSlot(p, ref, it.typeId);
+    if (r.ok) {
+      S.stats.detected++; S.stats.confiscated += r.qty;
+      log({ ...base, act: "auto_remove", status: "removed", detail: why.text });
+      notify("viewAlerts", `§c[GG SECURITY] §fRemoved §e${r.qty}x ${it.typeId} §ffrom §b${p.name} §7(${ref.label}) §8- ${why.text}`);
+    } else {
+      S.stats.failed++;
+      log({ ...base, sev: 3, act: "auto_remove", status: "FAILED: " + r.reason, detail: why.text });
+      notify("viewAlerts", `§4[GG SECURITY] FAILED to remove ${it.typeId} from ${p.name} (${ref.label}): ${r.reason}`);
+    }
+  } else if (cooled(`${p.id}|${ref.label}|${it.typeId}|${why.text}`, now)) {
+    S.stats.detected++;
+    log({ ...base, act: "detect", status: S.cfg.scan.dryRun ? "dry-run (not removed)" : "flag only", detail: why.text });
+    notify("viewAlerts", `§e[GG SECURITY] §f${p.name} §7has §e${it.amount}x ${it.typeId} §7(${ref.label}) §8- ${why.text}${S.cfg.scan.dryRun ? " §b[dry-run]" : ""}`);
+  } else return;
+  if (alsoFlag && gOn(alsoFlag)) flag(p, alsoFlag, `${it.typeId} x${it.amount} in ${ref.label}`);
+}
+
+function scanPlayer(p) {
+  if (!alive(p)) return;
+  const { slots } = listSlots(p), totals = {}, g = S.cfg.guard;
+  const guardRemove = g.inventoryConfiscate && g.mode === "punish";
+  const staff = roleOf(p) >= 2;
+  for (const ref of slots) {
+    const it = ref.item; totals[it.typeId] = (totals[it.typeId] || 0) + it.amount;
+    const e = matchEntry(it.typeId);
+    if (e && !isAuthorized(p, e)) { enforceRemove(p, ref, { text: `blacklisted: ${e.name}`, remove: e.autoRemove }, e.severity, "invBannedItem"); continue; }
+    if (it.amount > it.maxAmount && gOn("invIllegalStack")) { enforceRemove(p, ref, { text: `illegal stack ${it.amount}>${it.maxAmount}`, remove: guardRemove }, 2, "invIllegalStack"); continue; }
+    if (gOn("invEnchant")) {
+      const bad = getEnchants(it).find((x) => x.level > x.max);
+      if (bad) { enforceRemove(p, ref, { text: `enchant ${bad.id} ${bad.level}>${bad.max}`, remove: guardRemove }, 2, "invEnchant"); continue; }
+    }
+    if (ref.loc === "equip" && gOn("invRestricted") && !staff && g.restrictedEquipment.includes(it.typeId))
+      enforceRemove(p, ref, { text: "restricted equipment", remove: guardRemove }, 1, "invRestricted");
+  }
+  if (gOn("invQuantity") && !staff) {
+    for (const [id, n] of Object.entries(totals)) {
+      if (n > S.cfg.scan.suspiciousQty && cooled(`${p.id}|qty|${id}`, system.currentTick, 6000)) {
+        log({ sev: 1, act: "detect", player: p.name, playerId: p.id, item: id, qty: n, loc: "inventory total", status: "flag only", detail: "suspicious total quantity" });
+        flag(p, "invQuantity", `${n}x ${id} carried`);
+      }
+    }
+  }
+}
+function* job() {
+  try {
+    for (const p of world.getAllPlayers()) { try { scanPlayer(p); } catch (e) { console.warn("scan error: " + e); } yield; }
+  } finally {
+    running = false;
+    const now = system.currentTick; for (const [k, t] of seen) if (now - t > 7200) seen.delete(k);
+  }
+}
+export function scanNow() { if (running) return false; running = true; lastScan = system.currentTick; system.runJob(job()); return true; }
+export function startScanner() {
+  system.runInterval(() => {
+    if (!S.ready || !S.cfg.scan.enabled || running) return;
+    if (system.currentTick - lastScan < S.cfg.scan.intervalTicks) return;
+    scanNow();
+  }, 20);
+}
+export const forgetPlayer = (id) => { for (const k of seen.keys()) if (k.startsWith(id + "|")) seen.delete(k); };
+
+```
+
+`scripts/store.js`:
+
+```js
+import { world } from "@minecraft/server";
+import { DEFAULT_CONFIG, DEFAULT_BLACKLIST } from "./config.js";
+
+export const sessions = new Map(); // playerId -> join ms
+export const tracking = new Map(); // adminId -> targetId
+const CHUNK = 8000, MAX_LOG = 400;
+export const S = {
+  ready: false, cfg: null, admins: {}, bl: [], players: {}, viol: {}, logs: [],
+  stats: { detected: 0, confiscated: 0, failed: 0, punished: 0 }, dirty: new Set(),
+};
+
+function merge(def, sav) {
+  if (typeof def !== "object" || def === null || Array.isArray(def)) return sav === undefined ? def : sav;
+  const s = sav && typeof sav === "object" && !Array.isArray(sav) ? sav : {};
+  const out = {};
+  for (const k of new Set([...Object.keys(def), ...Object.keys(s)])) out[k] = k in def ? merge(def[k], s[k]) : s[k];
+  return out;
+}
+function saveBlob(key, obj) {
+  const s = JSON.stringify(obj), n = Math.max(1, Math.ceil(s.length / CHUNK));
+  const old = Number(world.getDynamicProperty(key + "#n") || 0);
+  for (let i = 0; i < n; i++) world.setDynamicProperty(`${key}#${i}`, s.slice(i * CHUNK, (i + 1) * CHUNK));
+  world.setDynamicProperty(key + "#n", n);
+  for (let i = n; i < old; i++) world.setDynamicProperty(`${key}#${i}`, undefined);
+}
+function loadBlob(key, fallback) {
+  const n = Number(world.getDynamicProperty(key + "#n") || 0);
+  if (!n) return fallback;
+  let s = "";
+  for (let i = 0; i < n; i++) s += world.getDynamicProperty(`${key}#${i}`) ?? "";
+  try { return JSON.parse(s); } catch { return fallback; }
+}
+const GET = { cfg: () => S.cfg, admins: () => S.admins, bl: () => S.bl, players: () => S.players, viol: () => S.viol, logs: () => S.logs, stats: () => S.stats };
+export function save(name) { try { saveBlob(name, GET[name]()); S.dirty.delete(name); } catch (e) { console.warn("save failed " + name + ": " + e); } }
+export const mark = (name) => S.dirty.add(name);
+export function flush() { for (const n of [...S.dirty]) save(n); }
+
+export function loadAll() {
+  S.cfg = merge(DEFAULT_CONFIG, loadBlob("cfg", {}));
+  S.admins = loadBlob("admins", {});
+  const bl = loadBlob("bl", null);
+  S.bl = bl ?? JSON.parse(JSON.stringify(DEFAULT_BLACKLIST));
+  S.players = loadBlob("players", {});
+  S.viol = loadBlob("viol", {});
+  S.logs = loadBlob("logs", []);
+  S.stats = merge(S.stats, loadBlob("stats", {}));
+  S.ready = true;
+  if (bl === null) save("bl");
+}
+
+// sev: 0 info, 1 low, 2 medium, 3 high
+export function log(e) {
+  S.logs.push({ t: Date.now(), sev: 0, ...e });
+  if (S.logs.length > MAX_LOG) S.logs.splice(0, S.logs.length - MAX_LOG);
+  mark("logs");
+}
+
+```
+
+`scripts/ui.js`:
+
+```js
+import { world, system } from "@minecraft/server";
+import { ActionFormData, ModalFormData, FormCancelationReason } from "@minecraft/server-ui";
+import { S, log, save, mark, sessions, tracking } from "./store.js";
+import { can, roleOf, ROLE_NAMES, setRole } from "./perms.js";
+import { listSlots, readRef, removeSlot, describe, pretty, alive } from "./inventory.js";
+import { matchEntry, scanNow } from "./scanner.js";
+import { CHECKS, GROUPS, totalVL, groupVL, clearVL, banPlayer, unban, isLagging } from "./guard.js";
+import { PRESETS } from "./config.js";
+
+const TITLE = (t) => `§2▌§a§l${t}§r§2▐`;
+const sleep = (n) => new Promise((r) => system.runTimeout(r, n));
+async function show(p, form) {
+  for (let i = 0; i < 12; i++) {
+    const r = await form.show(p);
+    if (r.canceled && r.cancelationReason === FormCancelationReason.UserBusy) { await sleep(20); continue; }
+    return r;
+  }
+  return { canceled: true };
+}
+const need = (p, perm) => {
+  if (can(p, perm)) return true;
+  log({ sev: 2, act: "unauthorized", player: p.name, playerId: p.id, detail: "ui perm " + perm });
+  p.sendMessage("§cPermission denied."); return false;
+};
+async function menu(p, title, body, items) {
+  const vis = items.filter((i) => !i.perm || can(p, i.perm));
+  const f = new ActionFormData().title(TITLE(title)).body(body);
+  vis.forEach((i) => f.button(i.label));
+  const r = await show(p, f); if (r.canceled) return;
+  await vis[r.selection].fn();
+}
+const notice = (p, title, body, back) => menu(p, title, body, [{ label: "§2◀ Back", fn: back }]);
+const online = () => world.getAllPlayers().filter(alive);
+const byId = (id) => online().find((x) => x.id === id);
+const fmtT = (t) => (t ? new Date(t).toISOString().slice(0, 16).replace("T", " ") + "Z" : "-");
+const xyz = (l) => `${Math.round(l.x)}, ${Math.round(l.y)}, ${Math.round(l.z)}`;
+const dimN = (d) => (d || "").replace("minecraft:", "");
+const mmss = (ms) => `${Math.floor(ms / 3600000)}h ${Math.floor(ms / 60000) % 60}m`;
+const SEV = ["§7", "§e", "§6", "§c"];
+const logLine = (e) => `§8${fmtT(e.t)} ${SEV[e.sev] ?? "§7"}${e.act} §f${e.player ?? ""} §7${e.item ?? ""}${e.qty ? " x" + e.qty : ""} ${e.loc ?? ""} ${e.status ?? ""} ${e.detail ?? ""}${e.admin ? " §8by " + e.admin : ""}`;
+
+// ================= MAIN =================
+export async function openMain(p) {
+  if (roleOf(p) < 1) return;
+  const g = S.cfg.guard;
+  await menu(p, "GILDEDGENS", `§7Role: §a${ROLE_NAMES[roleOf(p)]}\n§7Online: §f${online().length}   §7Enforcement: ${S.cfg.scan.dryRun ? "§bDRY-RUN" : "§cACTIVE"}   §7Guard: ${g.enabled ? (g.mode === "punish" ? "§cPUNISH" : "§eLOG-ONLY") : "§8OFF"}`, [
+    { label: "§aDashboard", perm: "viewPlayers", fn: () => dashboard(p) },
+    { label: "§aPlayer Management", perm: "viewPlayers", fn: () => players(p) },
+    { label: "§aSecurity (Items)", perm: "viewSecurity", fn: () => security(p) },
+    { label: "§c§lGILDEDGENS GUARD", perm: "guardView", fn: () => guard(p) },
+    { label: "§aAdministration", perm: "viewLogs", fn: () => admin(p) },
+  ]);
+}
+const back = (p) => () => openMain(p);
+
+async function dashboard(p) {
+  const vl = Object.entries(S.viol).filter(([, v]) => totalVL(v) > 0);
+  const recent = S.logs.filter((e) => e.sev >= 1).slice(-6).reverse().map(logLine).join("\n") || "§7none";
+  await menu(p, "DASHBOARD",
+    `§aOnline: §f${online().length}   §aObserved: §f${Object.keys(S.players).length}\n§aUnauthorized detections: §f${S.stats.detected}   §aItems confiscated: §f${S.stats.confiscated}   §cFailed removals: §f${S.stats.failed}\n§aFlagged by Guard: §f${vl.length}   §aPunishments: §f${S.stats.punished}\n§aServer lag now: §f${isLagging() ? "yes (checks paused)" : "no"}\n\n§l§aRecent alerts§r\n${recent}`,
+    [{ label: "§2⟳ Refresh", fn: () => dashboard(p) }, { label: "§2◀ Back", fn: back(p) }]);
+}
+
+// ================= PLAYERS =================
+async function players(p) {
+  if (!need(p, "viewPlayers")) return;
+  const ps = online().sort((a, b) => a.name.localeCompare(b.name));
+  const items = ps.map((t) => ({ label: `§a${t.name}${can(p, "viewCoords") ? ` §7${xyz(t.location)}` : ""}`, fn: () => playerPanel(p, t.id) }));
+  items.push({ label: "§e🔍 Search players", fn: () => search(p) }, { label: "§7Observed / offline players", fn: () => observed(p, "") }, { label: "§2◀ Back", fn: back(p) });
+  await menu(p, "PLAYERS", `§7${ps.length} online`, items);
+}
+async function search(p) {
+  const r = await show(p, new ModalFormData().title(TITLE("SEARCH")).textField("Username contains", "name"));
+  if (r.canceled) return players(p);
+  await observed(p, String(r.formValues[0] ?? ""));
+}
+async function observed(p, q) {
+  const ql = q.toLowerCase();
+  const list = Object.entries(S.players).filter(([, r]) => r.name.toLowerCase().includes(ql)).sort((a, b) => (b[1].online - a[1].online) || (b[1].last - a[1].last)).slice(0, 40);
+  await menu(p, "RESULTS", `§7${list.length} shown (max 40)`, [
+    ...list.map(([id, r]) => ({ label: `${r.online ? "§a●" : "§8○"} §f${r.name}${r.online ? "" : " §7" + fmtT(r.last)}`, fn: () => playerPanel(p, id) })),
+    { label: "§2◀ Back", fn: () => players(p) }]);
+}
+async function playerPanel(p, id) {
+  if (!need(p, "viewPlayers")) return;
+  const t = byId(id), rec = S.players[id], coords = can(p, "viewCoords");
+  const lines = [`§aName: §f${t?.name ?? rec?.name}`, `§aID: §f${id}`, `§aStatus: ${t ? "§aONLINE" : "§8OFFLINE (last seen " + fmtT(rec?.last) + ")"}`, `§aRole: §f${ROLE_NAMES[roleOfId(id)]}`];
+  if (t) {
+    let hp = "?"; try { const h = t.getComponent("minecraft:health"); hp = `${h.currentValue.toFixed(1)}/${h.effectiveMax}`; } catch { /* n/a */ }
+    let gm = "n/a"; try { gm = String(t.getGameMode()); } catch { /* n/a */ }
+    lines.push(`§aHealth: §f${hp}`, `§aGame mode: §f${gm}`, `§aDimension: §f${dimN(t.dimension.id)}`);
+    if (coords) lines.push(`§aCoordinates: §f${xyz(t.location)}`);
+    lines.push(`§aConnected: §f${sessions.has(id) ? mmss(Date.now() - sessions.get(id)) : "unknown"}`);
+  } else if (coords && rec?.loc) lines.push(`§aLast known: §f${rec.loc.join(", ")} §7(${dimN(rec.dim)})`);
+  const vlTotal = S.viol[id] ? totalVL(S.viol[id]) : 0; lines.push(`§cGuard VL: §f${vlTotal.toFixed(1)}`);
+  await menu(p, "PLAYER", lines.join("\n"), [
+    { label: "§aInventory Inspector", perm: "inspect", fn: () => inventory(p, id) },
+    { label: "§cGuard violation profile", perm: "guardView", fn: () => profile(p, id) },
+    { label: tracking.get(p.id) === id ? "§eStop live coordinate tracking" : "§aTrack coordinates live (action bar)", perm: "viewCoords", fn: async () => { if (tracking.get(p.id) === id) tracking.delete(p.id); else if (t) tracking.set(p.id, id); await playerPanel(p, id); } },
+    { label: "§2⟳ Refresh", fn: () => playerPanel(p, id) },
+    { label: "§2◀ Back", fn: () => players(p) }]);
+}
+const roleOfId = (id) => S.admins[id]?.role ?? 0;
+
+// ================= INVENTORY INSPECTOR =================
+async function inventory(p, id) {
+  if (!need(p, "inspect")) return;
+  const t = byId(id);
+  if (!t) return notice(p, "INVENTORY", "§cPlayer is offline. Offline inventories cannot be read through the Script API.", () => playerPanel(p, id));
+  log({ sev: 0, act: "inspect", admin: p.name, adminId: p.id, player: t.name, playerId: id });
+  const { slots, errors } = listSlots(t);
+  const items = slots.map((r) => {
+    const bl = matchEntry(r.item.typeId);
+    return { label: `${bl ? "§c" : "§a"}${r.label}: §f${pretty(r.item.typeId)} x${r.item.amount}`, fn: () => itemDetail(p, id, r) };
+  });
+  items.push({ label: "§2⟳ Refresh", fn: () => inventory(p, id) }, { label: "§2◀ Back", fn: () => playerPanel(p, id) });
+  await menu(p, "INVENTORY", `§a${t.name}§7: ${slots.length} occupied slots (inventory + armor + offhand)\n§6Ender Chest: §cNOT ACCESSIBLE - the official Script API cannot read personal Ender Chest contents. Items taken out of it are caught by scans once they enter the inventory.\n§7Items inside shulker boxes/bundles are also not readable.${errors.length ? "\n§c" + errors.join("; ") : ""}`, items);
+}
+async function itemDetail(p, id, ref) {
+  if (!need(p, "inspect")) return;
+  const t = byId(id); if (!t) return notice(p, "ITEM", "§cPlayer left.", () => players(p));
+  const it = readRef(t, ref);
+  if (!it) return notice(p, "ITEM", "§cSlot is now empty.", () => inventory(p, id));
+  const e = matchEntry(it.typeId);
+  const info = describe(it).join("\n") + (e ? `\n§cBlacklisted: ${e.name} (severity ${e.severity})` : "");
+  await menu(p, "ITEM", `§7${ref.label}\n§f${info}`, [
+    { label: "§c§lConfiscate", perm: "confiscate", fn: () => confirmConfiscate(p, id, ref, it) },
+    { label: "§2◀ Back", fn: () => inventory(p, id) }]);
+}
+async function confirmConfiscate(p, id, ref, it) {
+  if (!need(p, "confiscate")) return;
+  const t = byId(id);
+  const f = new ActionFormData().title(TITLE("CONFIRM")).body(`§cDestroy §e${it.amount}x ${it.typeId}§c from §f${t?.name}§c (${ref.label})?\nThis cannot be undone.`).button("§4CONFISCATE").button("§aCancel");
+  const r = await show(p, f); if (r.canceled || r.selection !== 0) return itemDetail(p, id, ref);
+  if (!t) return notice(p, "RESULT", "§cPlayer left before removal.", () => players(p));
+  const res = removeSlot(t, ref, it.typeId);
+  const base = { admin: p.name, adminId: p.id, player: t.name, playerId: id, item: it.typeId, qty: it.amount, loc: ref.label };
+  if (res.ok) { S.stats.confiscated += res.qty; log({ ...base, sev: 2, act: "confiscate", status: "removed" }); }
+  else { S.stats.failed++; log({ ...base, sev: 3, act: "confiscate", status: "FAILED: " + res.reason }); }
+  await notice(p, "RESULT", res.ok ? `§aRemoved ${res.qty}x ${it.typeId}.` : `§cFailed: ${res.reason}`, () => inventory(p, id));
+}
+
+// ================= SECURITY =================
+async function security(p) {
+  if (!need(p, "viewSecurity")) return;
+  const sc = S.cfg.scan;
+  await menu(p, "SECURITY", `§aScanner: §f${sc.enabled ? "on" : "off"} every ${(sc.intervalTicks / 20).toFixed(0)}s   §aMode: ${sc.dryRun ? "§bDRY-RUN (detect only)" : "§cENFORCING"}\n§aBlacklist entries: §f${S.bl.length}`, [
+    { label: "§aItem blacklist", fn: () => blacklist(p) },
+    { label: "§aAdd blacklist entry", perm: "configSecurity", fn: () => editEntry(p, { id: "minecraft:", name: "", minRole: "ADMIN", allowedIds: [], severity: 2, autoRemove: true, enabled: true }, -1) },
+    { label: "§aScan & enforcement settings", perm: "enforcement", fn: () => scanSettings(p) },
+    { label: "§aRun scan now", perm: "inspect", fn: async () => { scanNow(); await notice(p, "SCAN", "§aScan started.", () => security(p)); } },
+    { label: "§aDetection history", perm: "viewLogs", fn: () => logs(p, { acts: ["detect", "auto_remove", "confiscate"] }, 0, () => security(p)) },
+    { label: "§2◀ Back", fn: back(p) }]);
+}
+async function blacklist(p) {
+  await menu(p, "BLACKLIST", "§7Select an entry. Only OWNER can edit.", [
+    ...S.bl.map((e, i) => ({ label: `${e.enabled ? "§a" : "§8"}${e.name || e.id} §7${e.minRole} sev${e.severity}${e.autoRemove ? " §cAUTO" : ""}`, fn: () => (can(p, "configSecurity") ? editEntry(p, e, i) : notice(p, "ENTRY", `§f${e.id}\n§7Exempt: ${e.minRole}, ids: ${e.allowedIds.join(", ") || "-"}`, () => blacklist(p))) })),
+    { label: "§2◀ Back", fn: () => security(p) }]);
+}
+const ROLES3 = ["NONE", "ADMIN", "OWNER"];
+async function editEntry(p, e, idx) {
+  if (!need(p, "configSecurity")) return;
+  const f = new ModalFormData().title(TITLE("ENTRY")).textField("Item id (wildcard *)", "minecraft:command_block", { defaultValue: e.id }).textField("Display name", "name", { defaultValue: e.name })
+    .dropdown("Exempt role (NONE = only listed ids)", ROLES3, { defaultValueIndex: Math.max(0, ROLES3.indexOf(e.minRole)) }).textField("Allowed player ids (comma separated)", "id1,id2", { defaultValue: e.allowedIds.join(",") })
+    .slider("Severity", 1, 3, { valueStep: 1, defaultValue: e.severity }).toggle("Auto-remove", { defaultValue: e.autoRemove }).toggle("Enabled", { defaultValue: e.enabled }).toggle("DELETE this entry", { defaultValue: false });
+  const r = await show(p, f); if (r.canceled) return blacklist(p);
+  const [id, name, role, ids, sev, auto, en, del] = r.formValues;
+  if (del && idx >= 0) { S.bl.splice(idx, 1); log({ sev: 3, act: "blacklist_change", admin: p.name, adminId: p.id, item: e.id, detail: "deleted" }); }
+  else {
+    const n = { id: String(id).trim(), name: String(name).trim() || String(id).trim(), minRole: ROLES3[role], allowedIds: String(ids).split(",").map((s) => s.trim()).filter(Boolean), severity: sev, autoRemove: auto, enabled: en };
+    if (!n.id.includes(":")) return notice(p, "ENTRY", "§cItem id must look like minecraft:name", () => blacklist(p));
+    if (idx >= 0) S.bl[idx] = n; else S.bl.push(n);
+    log({ sev: 3, act: "blacklist_change", admin: p.name, adminId: p.id, item: n.id, detail: `${idx >= 0 ? "edited" : "added"} exempt=${n.minRole} auto=${n.autoRemove} on=${n.enabled}` });
+  }
+  save("bl"); await blacklist(p);
+}
+async function scanSettings(p) {
+  if (!need(p, "enforcement")) return;
+  const sc = S.cfg.scan;
+  const r = await show(p, new ModalFormData().title(TITLE("SCAN")).toggle("Scanner enabled", { defaultValue: sc.enabled }).toggle("DRY-RUN (detect only, never remove)", { defaultValue: sc.dryRun })
+    .slider("Scan interval (seconds)", 2, 120, { valueStep: 1, defaultValue: Math.round(sc.intervalTicks / 20) }).slider("Monitor interval (seconds)", 1, 30, { valueStep: 1, defaultValue: Math.round(S.cfg.monitor.intervalTicks / 20) })
+    .textField("Suspicious total quantity per item", "2304", { defaultValue: String(sc.suspiciousQty) }));
+  if (r.canceled) return security(p);
+  const [en, dry, iv, mon, q] = r.formValues;
+  Object.assign(sc, { enabled: en, dryRun: dry, intervalTicks: iv * 20, suspiciousQty: Math.max(1, Number(q) || 2304) });
+  S.cfg.monitor.intervalTicks = mon * 20; save("cfg");
+  log({ sev: 3, act: "config_change", admin: p.name, adminId: p.id, detail: `scan on=${en} dryRun=${dry} every ${iv}s` });
+  await security(p);
+}
+
+// ================= GUARD =================
+async function guard(p) {
+  if (!need(p, "guardView")) return;
+  const g = S.cfg.guard, flagged = Object.entries(S.viol).filter(([, v]) => totalVL(v) >= 1).sort((a, b) => totalVL(b[1]) - totalVL(a[1]));
+  const punished = Object.values(S.viol).flatMap((v) => v.pun.map((x) => ({ ...x, n: v.name }))).sort((a, b) => b.t - a.t).slice(0, 3).map((x) => `${x.n} ${x.a}`).join(", ") || "none";
+  const mods = GROUPS.map((gr) => `§7${gr}: ` + Object.entries(CHECKS).filter(([, c]) => c.group === gr).map(([k]) => (g.checks[k] ? "§a" : "§8") + k).join("§7 ")).join("\n");
+  await menu(p, "GILDEDGENS GUARD", `§aState: ${g.enabled ? "§aON" : "§8OFF"}  §aMode: ${g.mode === "punish" ? "§cPUNISH" : "§eLOG-ONLY"}  §aPreset: §f${g.preset}\n§aFlagged players: §f${flagged.length}  §aTotal violations logged: §f${Object.values(S.viol).reduce((a, v) => a + v.hist.length, 0)}\n§aTop VL: §f${flagged.slice(0, 3).map(([, v]) => `${v.name} ${totalVL(v).toFixed(1)}`).join(", ") || "none"}\n§aRecently punished: §f${punished}\n§aLag pause: §f${isLagging() ? "yes" : "no"}\n§7Modules:\n${mods}\n§8Heuristics from observable API state - not packet-level.`, [
+    { label: "§aLive detections", fn: () => logs(p, { actsPrefix: "guard:" }, 0, () => guard(p)) },
+    { label: "§aViolation profiles", fn: () => profiles(p) },
+    { label: "§aModules (enable/disable)", perm: "configGuard", fn: () => modules(p) },
+    { label: "§aPreset, mode & decay", perm: "configGuard", fn: () => guardMode(p) },
+    { label: "§aPunishment thresholds", perm: "configGuard", fn: () => thresholds(p) },
+    { label: "§aExemptions", perm: "configGuard", fn: () => exemptions(p) },
+    { label: "§aGuard ban list", perm: "guardView", fn: () => bans(p) },
+    { label: "§2◀ Back", fn: back(p) }]);
+}
+async function profiles(p) {
+  const list = Object.entries(S.viol).sort((a, b) => totalVL(b[1]) - totalVL(a[1])).slice(0, 40);
+  await menu(p, "PROFILES", "§7Highest violation level first", [...list.map(([id, v]) => ({ label: `§f${v.name} §cVL ${totalVL(v).toFixed(1)}`, fn: () => profile(p, id) })), { label: "§2◀ Back", fn: () => guard(p) }]);
+}
+async function profile(p, id) {
+  if (!need(p, "guardView")) return;
+  const v = S.viol[id], name = v?.name ?? S.players[id]?.name ?? id;
+  if (!v) return notice(p, "PROFILE", `§f${name}§7 has no recorded violations.`, () => playerPanel(p, id));
+  const per = Object.entries(v.vl).map(([k, x]) => `${k} ${x.toFixed(1)}`).join(", ") || "none";
+  const hist = v.hist.slice(-8).reverse().map((h) => `§8${fmtT(h.t)} §f${h.check} §e+${h.pts} §7${h.d}`).join("\n");
+  await menu(p, "PROFILE", `§a${name}\n§cTotal VL: §f${totalVL(v).toFixed(1)}\n§7Per check: ${per}\n§7Punishments: ${v.pun.map((x) => x.a).join(", ") || "none"}\n\n${hist}`, [
+    { label: "§aClear violation levels", perm: "clearVL", fn: async () => { clearVL(id, p.name); await profile(p, id); } },
+    { label: S.cfg.guard.banned[id] ? "§aRemove from guard ban list" : "§cAdd to guard ban list", perm: "configGuard", fn: async () => { if (S.cfg.guard.banned[id]) unban(id, p.name); else banPlayer(id, name, "Manual by " + p.name, p.name); await profile(p, id); } },
+    { label: "§2◀ Back", fn: () => profiles(p) }]);
+}
+async function modules(p) {
+  if (!need(p, "configGuard")) return;
+  const g = S.cfg.guard, keys = Object.keys(CHECKS), f = new ModalFormData().title(TITLE("MODULES")).toggle("GUARD master switch", { defaultValue: g.enabled });
+  keys.forEach((k) => f.toggle(`${CHECKS[k].group}: ${CHECKS[k].label}`, { defaultValue: g.checks[k] }));
+  const r = await show(p, f); if (r.canceled) return guard(p);
+  g.enabled = r.formValues[0]; keys.forEach((k, i) => (g.checks[k] = r.formValues[i + 1])); save("cfg");
+  log({ sev: 3, act: "config_change", admin: p.name, adminId: p.id, detail: "guard modules changed" }); await guard(p);
+}
+async function guardMode(p) {
+  if (!need(p, "configGuard")) return;
+  const g = S.cfg.guard, pr = Object.keys(PRESETS);
+  const r = await show(p, new ModalFormData().title(TITLE("MODE")).dropdown("Sensitivity preset", pr, { defaultValueIndex: Math.max(0, pr.indexOf(g.preset)) }).dropdown("Mode", ["log only (no punishment)", "punish"], { defaultValueIndex: g.mode === "punish" ? 1 : 0 })
+    .slider("VL decay per minute", 0, 20, { valueStep: 1, defaultValue: g.decayPerMin }).toggle("Exempt staff (ADMIN+)", { defaultValue: g.exemptStaff }).toggle("Guard inventory detections may confiscate", { defaultValue: g.inventoryConfiscate })
+    .textField("Restricted equipment ids (comma separated)", "minecraft:elytra", { defaultValue: g.restrictedEquipment.join(",") }));
+  if (r.canceled) return guard(p);
+  const [pi, mi, dec, ex, inv, re] = r.formValues;
+  Object.assign(g, { preset: pr[pi], mode: mi === 1 ? "punish" : "log", decayPerMin: dec, exemptStaff: ex, inventoryConfiscate: inv, restrictedEquipment: String(re).split(",").map((s) => s.trim()).filter(Boolean) }); save("cfg");
+  log({ sev: 3, act: "config_change", admin: p.name, adminId: p.id, detail: `guard preset=${g.preset} mode=${g.mode}` }); await guard(p);
+}
+async function thresholds(p) {
+  await menu(p, "THRESHOLDS", "§7VL needed per action. 0 disables an action. Applies only in PUNISH mode.", [...GROUPS.map((gr) => ({ label: `§a${gr}`, fn: () => thresholdGroup(p, gr) })), { label: "§2◀ Back", fn: () => guard(p) }]);
+}
+async function thresholdGroup(p, gr) {
+  if (!need(p, "configGuard")) return;
+  const th = S.cfg.guard.punish[gr], acts = ["warn", "setback", "restrict", "kick", "ban"], f = new ModalFormData().title(TITLE(gr.toUpperCase()));
+  acts.forEach((a) => f.slider(a, 0, 150, { valueStep: 1, defaultValue: Math.min(150, th[a]) }));
+  const r = await show(p, f); if (r.canceled) return thresholds(p);
+  acts.forEach((a, i) => (th[a] = r.formValues[i])); save("cfg");
+  log({ sev: 3, act: "config_change", admin: p.name, adminId: p.id, detail: `thresholds ${gr}: ${JSON.stringify(th)}` }); await thresholds(p);
+}
+async function exemptions(p) {
+  const ex = S.cfg.guard.exempt, ids = Object.keys(ex);
+  await menu(p, "EXEMPTIONS", `§7Exempt players are skipped by every Guard check.\n${ids.map((i) => "§f" + ex[i].name).join(", ") || "none"}`, [
+    { label: "§aAdd online player", fn: async () => { const ps = online(); if (!ps.length) return exemptions(p); const r = await show(p, new ModalFormData().title(TITLE("EXEMPT")).dropdown("Player", ps.map((x) => x.name))); if (!r.canceled) { const t = ps[r.formValues[0]]; ex[t.id] = { name: t.name }; save("cfg"); log({ sev: 2, act: "guard_exempt", admin: p.name, adminId: p.id, player: t.name, playerId: t.id, detail: "added" }); } await exemptions(p); } },
+    ...ids.map((i) => ({ label: `§cRemove ${ex[i].name}`, fn: async () => { delete ex[i]; save("cfg"); log({ sev: 2, act: "guard_exempt", admin: p.name, adminId: p.id, playerId: i, detail: "removed" }); await exemptions(p); } })),
+    { label: "§2◀ Back", fn: () => guard(p) }]);
+}
+async function bans(p) {
+  const b = S.cfg.guard.banned, ids = Object.keys(b);
+  await menu(p, "GUARD BANS", "§7Local list only. Joining players on it are kicked if the kick command works on this Realm.", [
+    ...ids.map((i) => ({ label: `§c${b[i].name} §7(${b[i].reason})`, fn: async () => { if (can(p, "configGuard")) { unban(i, p.name); } await bans(p); } })),
+    { label: "§2◀ Back", fn: () => guard(p) }]);
+}
+
+// ================= ADMINISTRATION =================
+async function admin(p) {
+  await menu(p, "ADMINISTRATION", "§7Audit logs, administrators, system settings", [
+    { label: "§aAudit logs", perm: "viewLogs", fn: () => logs(p, {}, 0, () => admin(p)) },
+    { label: "§aFilter audit logs", perm: "viewLogs", fn: () => logFilter(p) },
+    { label: "§aAdministrators", perm: "manageAdmins", fn: () => admins(p) },
+    { label: "§aSystem settings", perm: "configGuard", fn: () => scanSettings(p) },
+    { label: "§2◀ Back", fn: back(p) }]);
+}
+async function admins(p) {
+  if (!need(p, "manageAdmins")) return;
+  await menu(p, "ADMINISTRATORS", "§7Roles are stored by stable player ID.", [
+    ...Object.entries(S.admins).map(([id, a]) => ({ label: `§f${a.name} §a${ROLE_NAMES[a.role]}`, fn: () => setRoleForm(p, id, a.name, a.role) })),
+    { label: "§aAdd / change (from observed players)", fn: async () => { const list = Object.entries(S.players).sort((a, b) => b[1].last - a[1].last).slice(0, 60); if (!list.length) return admins(p); const r = await show(p, new ModalFormData().title(TITLE("ADD")).dropdown("Player", list.map(([, x]) => x.name)).dropdown("Role", ROLE_NAMES, { defaultValueIndex: 1 })); if (r.canceled) return admins(p); const [id, rec] = list[r.formValues[0]]; await applyRole(p, id, rec.name, r.formValues[1]); } },
+    { label: "§2◀ Back", fn: () => admin(p) }]);
+}
+async function setRoleForm(p, id, name, role) {
+  const r = await show(p, new ModalFormData().title(TITLE(name)).dropdown("Role (PLAYER = remove)", ROLE_NAMES, { defaultValueIndex: role }));
+  if (r.canceled) return admins(p);
+  await applyRole(p, id, name, r.formValues[0]);
+}
+async function applyRole(p, id, name, role) {
+  const err = setRole(p, id, name, role);
+  if (err) return notice(p, "ROLE", "§c" + err, () => admins(p));
+  await admins(p);
+}
+
+// ================= LOG VIEWER =================
+const lastFilter = new Map();
+async function logFilter(p) {
+  const acts = ["(all)", ...new Set(S.logs.map((e) => e.act))].slice(0, 40);
+  const r = await show(p, new ModalFormData().title(TITLE("FILTER")).textField("Player contains", "").textField("Item contains", "").dropdown("Action", acts).dropdown("Min severity", ["info", "low", "medium", "high"]).textField("Last N days (0 = all)", "0", { defaultValue: "0" }));
+  if (r.canceled) return admin(p);
+  const [pl, item, ai, sev, days] = r.formValues;
+  await logs(p, { player: String(pl).toLowerCase(), item: String(item).toLowerCase(), acts: ai > 0 ? [acts[ai]] : undefined, sev, days: Number(days) || 0 }, 0, () => admin(p));
+}
+async function logs(p, flt, page, backFn) {
+  if (!need(p, "viewLogs")) return;
+  const cut = flt.days ? Date.now() - flt.days * 86400000 : 0;
+  const all = S.logs.filter((e) => (!flt.player || (e.player ?? "").toLowerCase().includes(flt.player)) && (!flt.item || (e.item ?? "").toLowerCase().includes(flt.item)) && (!flt.acts || flt.acts.includes(e.act)) && (!flt.actsPrefix || e.act.startsWith(flt.actsPrefix)) && (e.sev ?? 0) >= (flt.sev ?? 0) && e.t >= cut).reverse();
+  const per = 8, pages = Math.max(1, Math.ceil(all.length / per)), pg = Math.min(page, pages - 1);
+  const items = [];
+  if (pg < pages - 1) items.push({ label: "§aOlder ▶", fn: () => logs(p, flt, pg + 1, backFn) });
+  if (pg > 0) items.push({ label: "§a◀ Newer", fn: () => logs(p, flt, pg - 1, backFn) });
+  items.push({ label: "§2◀ Back", fn: backFn });
+  await menu(p, "LOGS", `§7${all.length} entries - page ${pg + 1}/${pages}\n\n` + (all.slice(pg * per, pg * per + per).map(logLine).join("\n") || "§7no entries"), items);
+}
+
+```
