@@ -1247,6 +1247,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/DimaReverse/nuitka-themida-unpacker [Two-stage unpacking pipeline that chains Themida/WinLicense dynamic unpacking (unlicense) with Nuitka onefile KAX/KAY static extraction]
 - https://github.com/Hendi48/Magicmida [Themida auto-unpacker for 32/64-bit apps with dump and section restore helpers]
 - https://github.com/guoxing2024/magicmida-rs [Rust reimplementation of Magicmida Themida unpacker with IAT rebuild and OEP discovery]
+- https://github.com/pkochubey/Unmida [Go CLI Themida unpacker for PE32/PE32+ with debugger-driven in-memory dump, OEP/IAT reconstruction, and ScyllaHide integration]
 - https://github.com/bobalkkagi/bobalkkagi [Themida 3.x unpacking/unwrapping via API-hook emulation (Tiger red64)]
 - https://github.com/stuxnet147/Themida-Research [Themida 3.x research]
 - https://github.com/arcticbyp/seb-re-toolkit [Python RE toolkit for Themida-protected Safe Exam Browser seb_x64.dll: PE/static analysis, packer detection, BSTR export calls, Frida tracing, and GUI]
@@ -2662,6 +2663,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ocornut/imgui_club [Official Dear ImGui extensions including a hex memory editor widget]
 - https://github.com/XeTrinityz/Oracle [MIT-licensed in-game cheat/tweak menu for Batman: Arkham Knight (BmSDK-AK), Trinity Edition with modular hooks and settings.toml]
 - https://github.com/misnopini1987/GTA-5-Trainer-Menu-Base [MIT C++17 DirectX 11 / ImGui scaffold (MenuForge) for building modular in-game trainer overlay menus for GTA V on Windows]
+- https://github.com/dxxxxy/Icarus [Cross-loader Minecraft mod library that builds skeet/fatality-style config menus from annotated fields, with configs, keybinds, and Jar-in-Jar packaging]
 
 > Vulnerable Driver 
 - https://www.loldrivers.io/drivers [Living Off The Land Drivers]
@@ -4868,6 +4870,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/NaySurGithub/Amethyst [Prediction-based movement anti-cheat plugin for PowerNukkitX that replays Bedrock physics to flag unexplained client positions]
 - https://github.com/BlaizerBrumo/SafeGuard [Minecraft Bedrock behavior-pack anti-cheat add-on with combat, item, and world-abuse detections plus admin moderation tools]
 - https://github.com/StarBloomMinecraft/BlarionAntiCheat [Minecraft Bedrock behavior-pack anti-cheat on ScriptAPI with 40+ combat/movement/inventory detection modules]
+- https://github.com/regentdata8479/GildedGens-Admin-Tool-Anti-Cheat [Minecraft Bedrock Realms behavior-pack admin suite with inventory scanning, GILDEDGENS GUARD heuristics (reach/speed/fly), violation levels, roles, and audit logging]
 - https://github.com/Eangly99/AstroX-AntiCheat [GeyserMC extension anti-cheat for Minecraft Bedrock intercepting raw RakNet packets before Java translation]
 - https://github.com/majimaakane/7dtd-AntiCheatMod [Server-side 7 Days to Die mod blocking cheat commands and detecting fly, teleport, speedhack, and godmode]
 - https://github.com/CTRLKirk/7DTD-Anti-Cheat [Server-side 7 Days to Die mod detecting god mode, teleport, speed/fly/noclip, illegal items, damage, reach, and progression anomalies (EAC-compatible)]
