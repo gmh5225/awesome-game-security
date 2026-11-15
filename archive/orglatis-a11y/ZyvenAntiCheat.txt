@@ -1,0 +1,1296 @@
+Project Path: arc_orglatis-a11y_ZyvenAntiCheat_ih9ttjj_
+
+Source Tree:
+
+```txt
+arc_orglatis-a11y_ZyvenAntiCheat_ih9ttjj_
+├── README.md
+├── pom.xml
+└── src
+    └── main
+        ├── java
+        │   └── com
+        │       └── zyven
+        │           └── anticheat
+        │               ├── AntiEsp.java
+        │               ├── BaitBlocks.java
+        │               ├── CombatCheck.java
+        │               ├── Los.java
+        │               ├── MiningCheck.java
+        │               ├── MovementCheck.java
+        │               ├── PlayerData.java
+        │               ├── UtilityCheck.java
+        │               ├── VehicleCheck.java
+        │               └── ZyvenAntiCheat.java
+        └── resources
+            ├── config.yml
+            └── plugin.yml
+
+```
+
+`README.md`:
+
+```md
+# ZyvenAntiCheat
+```
+
+`pom.xml`:
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.zyven</groupId>
+  <artifactId>ZyvenAntiCheat</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <repositories>
+    <repository><id>papermc</id><url>https://repo.papermc.io/repository/maven-public/</url></repository>
+  </repositories>
+  <dependencies>
+    <dependency>
+      <groupId>io.papermc.paper</groupId>
+      <artifactId>paper-api</artifactId>
+      <version>1.21.4-R0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>
+
+```
+
+`src/main/java/com/zyven/anticheat/AntiEsp.java`:
+
+```java
+package com.zyven.anticheat;
+
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.*;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
+
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+
+/**
+ * Anti-ESP / Anti-Freecam:
+ *  1. Entities with no line of sight to the player's REAL body are hidden (never sent to the client),
+ *     so ESP and freecam have nothing to render.
+ *  2. A per-player invisible decoy is placed behind walls. Only that player is sent it. If they keep
+ *     aiming at it through walls they are flagged as ESP and get a particle flood (client lag).
+ */
+public class AntiEsp extends BukkitRunnable {
+    private final ZyvenAntiCheat ac;
+    private final Set<UUID> decoyIds = new HashSet<>();
+
+    public AntiEsp(ZyvenAntiCheat ac) { this.ac = ac; }
+
+    @Override
+    public void run() {
+        FileConfiguration cfg = ac.getConfig();
+        double range = cfg.getDouble("anti-esp.range", 64);
+        double close = cfg.getDouble("anti-esp.close-distance", 6);
+        boolean mobs = cfg.getBoolean("anti-esp.hide-mobs", true);
+        boolean decoyOn = cfg.getBoolean("anti-esp.decoy.enabled", true) && ac.enabled("esp");
+        int stareMax = cfg.getInt("anti-esp.decoy.stare-samples", 14);
+        long now = System.currentTimeMillis();
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            PlayerData d = ac.data(p);
+            if (p.hasPermission("zyven.bypass") || p.getGameMode() == GameMode.SPECTATOR) {
+                showAll(p, d);
+                removeDecoy(d);
+                continue;
+            }
+            Location eye = p.getEyeLocation();
+            Set<UUID> seen = new HashSet<>();
+
+            for (Entity t : p.getNearbyEntities(range, range, range)) {
+                if (!(t instanceof LivingEntity) || t instanceof ArmorStand || decoyIds.contains(t.getUniqueId())) continue;
+                if (!(t instanceof Player) && !mobs) continue;
+                if (p.getPassengers().contains(t) || t.equals(p.getVehicle())) continue;
+                UUID id = t.getUniqueId();
+                seen.add(id);
+                boolean vis = t.getLocation().distanceSquared(p.getLocation()) <= close * close || visible(eye, t.getBoundingBox());
+                boolean hid = d.hidden.contains(id);
+                if (!vis && !hid) { p.hideEntity(ac, t); d.hidden.add(id); }
+                else if (vis && hid) { p.showEntity(ac, t); d.hidden.remove(id); }
+            }
+            // release entities that left range / despawned
+            Iterator<UUID> it = d.hidden.iterator();
+            while (it.hasNext()) {
+                UUID id = it.next();
+                if (seen.contains(id)) continue;
+                Entity en = Bukkit.getEntity(id);
+                if (en != null) p.showEntity(ac, en);
+                it.remove();
+            }
+
+            // decoy / honeypot
+            if (decoyOn && p.getGameMode() == GameMode.SURVIVAL) {
+                if (d.decoy == null || !d.decoy.isValid() || now - d.decoyMoved > 10000) {
+                    spawnDecoy(p, d, eye);
+                }
+                if (d.decoy != null && d.decoy.isValid()) {
+                    BoundingBox bb = d.decoy.getBoundingBox();
+                    Vector to = bb.getCenter().subtract(eye.toVector());
+                    double ang = Math.toDegrees(eye.getDirection().angle(to.clone().normalize()));
+                    boolean hiddenNow = !visible(eye, bb);
+                    if (hiddenNow && ang < 4) d.stare++; else d.stare = Math.max(0, d.stare - 1);
+                    if (d.stare >= stareMax) {
+                        d.stare = 0;
+                        ac.flag(p, "esp", 4, "tracking hidden decoy through walls");
+                        d.punishUntil = now + cfg.getLong("anti-esp.punish.seconds", 30) * 1000L;
+                        removeDecoy(d);
+                    }
+                }
+            }
+
+            // visual lag for confirmed ESP users (only they receive it)
+            if (now < d.punishUntil) {
+                int n = Math.min(cfg.getInt("anti-esp.punish.particles", 300), 800);
+                Location l = p.getLocation();
+                for (Particle pt : new Particle[]{Particle.CLOUD, Particle.END_ROD, Particle.FLAME}) {
+                    p.spawnParticle(pt, l, n, 8, 4, 8, 0.05);
+                }
+            }
+        }
+    }
+
+    private void spawnDecoy(Player p, PlayerData d, Location eye) {
+        removeDecoy(d);
+        World w = p.getWorld();
+        ThreadLocalRandom r = ThreadLocalRandom.current();
+        for (int i = 0; i < 12; i++) {
+            double ang = r.nextDouble(Math.PI * 2), dist = 8 + r.nextDouble() * 8;
+            Location loc = p.getLocation().add(Math.cos(ang) * dist, r.nextDouble(-1, 2), Math.sin(ang) * dist);
+            if (!w.isChunkLoaded(loc.getBlockX() >> 4, loc.getBlockZ() >> 4)) continue;
+            BoundingBox probe = BoundingBox.of(loc.toVector(), 0.3, 0.9, 0.3);
+            if (visible(eye, probe)) continue; // must be hidden from legit sight
+            Villager v = w.spawn(loc, Villager.class, e -> {
+                e.setVisibleByDefault(false);
+                e.setInvisible(true);
+                e.setAI(false);
+                e.setSilent(true);
+                e.setInvulnerable(true);
+                e.setCollidable(false);
+                e.setGravity(false);
+                e.setPersistent(false);
+                e.setRemoveWhenFarAway(true);
+            });
+            p.showEntity(ac, v); // only this player is sent the decoy
+            d.decoy = v;
+            d.decoyMoved = System.currentTimeMillis();
+            d.stare = 0;
+            decoyIds.add(v.getUniqueId());
+            return;
+        }
+    }
+
+    public void removeDecoy(PlayerData d) {
+        if (d.decoy != null) {
+            decoyIds.remove(d.decoy.getUniqueId());
+            d.decoy.remove();
+            d.decoy = null;
+        }
+    }
+
+    private void showAll(Player p, PlayerData d) {
+        for (UUID id : d.hidden) {
+            Entity en = Bukkit.getEntity(id);
+            if (en != null) p.showEntity(ac, en);
+        }
+        d.hidden.clear();
+    }
+
+    public void cleanup() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            PlayerData d = ac.data(p);
+            showAll(p, d);
+            removeDecoy(d);
+        }
+    }
+
+    // ---- line of sight ----
+    private boolean visible(Location eye, BoundingBox b) {
+        double cx = b.getCenterX(), cy = b.getCenterY(), cz = b.getCenterZ();
+        Vector[] pts = {
+                new Vector(cx, cy, cz), new Vector(cx, b.getMinY() + 0.1, cz), new Vector(cx, b.getMaxY() - 0.1, cz),
+                new Vector(b.getMinX(), cy, b.getMinZ()), new Vector(b.getMaxX(), cy, b.getMinZ()),
+                new Vector(b.getMinX(), cy, b.getMaxZ()), new Vector(b.getMaxX(), cy, b.getMaxZ())
+        };
+        for (Vector v : pts) if (clear(eye, v)) return true;
+        return false;
+    }
+
+    private boolean clear(Location eye, Vector target) {
+        World w = eye.getWorld();
+        Vector from = eye.toVector();
+        for (int i = 0; i < 8; i++) {
+            Vector dir = target.clone().subtract(from);
+            double dist = dir.length();
+            if (dist < 0.1) return true;
+            Vector unit = dir.clone().normalize();
+            RayTraceResult res = w.rayTraceBlocks(from.toLocation(w), unit, dist, FluidCollisionMode.NEVER, true);
+            if (res == null || res.getHitBlock() == null) return true;
+            Block hb = res.getHitBlock();
+            if (hb.getType().isOccluding()) return false;
+            from = res.getHitPosition().clone().add(unit.multiply(1.0)); // pass through glass etc.
+        }
+        return false;
+    }
+}
+
+```
+
+`src/main/java/com/zyven/anticheat/BaitBlocks.java`:
+
+```java
+package com.zyven.anticheat;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+/**
+ * Anti base-finder / block ESP / storage ESP / chunk scanner bait.
+ * Fake valuable blocks are sent ONLY to one player's client, buried inside solid rock (never reachable
+ * by legit exploring). Cheat clients that scan blocks light them up. Mining toward one = flagged.
+ */
+public class BaitBlocks extends BukkitRunnable implements Listener {
+    private static final Material[] TYPES = {
+            Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE, Material.ANCIENT_DEBRIS,
+            Material.SPAWNER, Material.CHEST, Material.ENDER_CHEST
+    };
+    private final ZyvenAntiCheat ac;
+
+    public BaitBlocks(ZyvenAntiCheat ac) { this.ac = ac; }
+
+    @Override
+    public void run() {
+        if (!ac.getConfig().getBoolean("bait.enabled", true) || !ac.enabled("baitesp")) return;
+        long now = System.currentTimeMillis();
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (p.hasPermission("zyven.bypass") || p.getGameMode() != org.bukkit.GameMode.SURVIVAL) continue;
+            PlayerData d = ac.data(p);
+            if (d.bait != null && (now - d.baitTime > 90000 || !d.bait.getWorld().equals(p.getWorld())
+                    || d.bait.distanceSquared(p.getLocation()) > 40 * 40)) clear(p, d);
+            if (d.bait == null && p.getLocation().getY() < 50) place(p, d, now);
+        }
+    }
+
+    private static boolean loaded(World w, int x, int z) { return w.isChunkLoaded(x >> 4, z >> 4); }
+
+    private static boolean buried(World w, int x, int y, int z) {
+        int[][] n = {{0, 0, 0}, {1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
+        for (int[] o : n) {
+            if (!loaded(w, x + o[0], z + o[2])) return false;
+            Material m = w.getBlockAt(x + o[0], y + o[1], z + o[2]).getType();
+            if (!m.isSolid() || !m.isOccluding()) return false;
+        }
+        return true;
+    }
+
+    private void place(Player p, PlayerData d, long now) {
+        World w = p.getWorld();
+        ThreadLocalRandom r = ThreadLocalRandom.current();
+        Location pl = p.getLocation();
+        for (int i = 0; i < 20; i++) {
+            double ang = r.nextDouble(Math.PI * 2), dist = 7 + r.nextDouble() * 12;
+            int x = (int) Math.floor(pl.getX() + Math.cos(ang) * dist);
+            int z = (int) Math.floor(pl.getZ() + Math.sin(ang) * dist);
+            int y = (int) pl.getY() + r.nextInt(-8, 9);
+            if (y < w.getMinHeight() + 2 || y > w.getMaxHeight() - 2) continue;
+            if (!buried(w, x, y, z)) continue;
+            Location loc = new Location(w, x, y, z);
+            p.sendBlockChange(loc, TYPES[r.nextInt(TYPES.length)].createBlockData());
+            d.bait = loc;
+            d.baitTime = now;
+            return;
+        }
+    }
+
+    private void clear(Player p, PlayerData d) {
+        Location b = d.bait;
+        d.bait = null;
+        if (b != null && b.getWorld() != null && loaded(b.getWorld(), b.getBlockX(), b.getBlockZ())) {
+            p.sendBlockChange(b, b.getBlock().getBlockData());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onDamage(BlockDamageEvent e) {
+        Player p = e.getPlayer();
+        PlayerData d = ac.data(p);
+        Block b = e.getBlock();
+        if (d.bait != null && d.bait.getBlockX() == b.getX() && d.bait.getBlockY() == b.getY()
+                && d.bait.getBlockZ() == b.getZ() && b.getWorld().equals(d.bait.getWorld())) {
+            e.setCancelled(true);
+            ac.flag(p, "baitesp", 3.0, "mined hidden bait block (base finder / ESP)");
+            clear(p, d);
+        }
+    }
+}
+
+```
+
+`src/main/java/com/zyven/anticheat/CombatCheck.java`:
+
+```java
+package com.zyven.anticheat;
+
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.EnderCrystal;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Vector;
+
+public class CombatCheck implements Listener {
+    private final ZyvenAntiCheat ac;
+
+    public CombatCheck(ZyvenAntiCheat ac) { this.ac = ac; }
+
+    private static double clamp(double v, double lo, double hi) { return Math.max(lo, Math.min(hi, v)); }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onHit(EntityDamageByEntityEvent e) {
+        if (!(e.getDamager() instanceof Player p)) return;
+        if (e.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) return;
+        GameMode gm = p.getGameMode();
+        if (p.hasPermission("zyven.bypass") || gm == GameMode.CREATIVE || gm == GameMode.SPECTATOR) return;
+
+        Entity t = e.getEntity();
+        PlayerData d = ac.data(p);
+        long now = System.currentTimeMillis();
+        Location eye = p.getEyeLocation();
+        Vector ev = eye.toVector();
+        BoundingBox bb = t.getBoundingBox();
+        Vector closest = new Vector(clamp(ev.getX(), bb.getMinX(), bb.getMaxX()),
+                clamp(ev.getY(), bb.getMinY(), bb.getMaxY()), clamp(ev.getZ(), bb.getMinZ(), bb.getMaxZ()));
+        double dist = closest.distance(ev);
+        Vector toCenter = bb.getCenter().subtract(ev);
+        double angle = (dist > 1.0 && toCenter.lengthSquared() > 0)
+                ? Math.toDegrees(eye.getDirection().angle(toCenter.clone().normalize())) : 0;
+        boolean cancel = false;
+
+        // Reach
+        if (ac.enabled("reach")) {
+            double max = ac.getConfig().getDouble("checks.reach.max", 3.4);
+            if (dist > max) {
+                if (++d.reachBuf >= 2) { ac.flag(p, "reach", 1.0, "dist=" + String.format("%.2f", dist)); cancel = true; }
+            } else d.reachBuf = Math.max(0, d.reachBuf - 1);
+        }
+
+        if (ac.enabled("killaura")) {
+            // hitting something you are not looking at
+            if (angle > 55) {
+                if (++d.angleBuf >= 3) { ac.flag(p, "killaura", 1.0, "angle=" + (int) angle); cancel = true; }
+            } else d.angleBuf = Math.max(0, d.angleBuf - 1);
+
+            // hitting through walls
+            if (dist > 1.5 && !Los.visible(eye, bb)) {
+                if (++d.wallBuf >= 2) { ac.flag(p, "killaura", 1.0, "hit through wall"); cancel = true; }
+            } else d.wallBuf = Math.max(0, d.wallBuf - 1);
+
+            // multi-aura
+            if (t instanceof LivingEntity) {
+                d.recentHits.values().removeIf(t0 -> now - t0 > 350);
+                d.recentHits.put(t.getUniqueId(), now);
+                if (d.recentHits.size() >= 3) {
+                    ac.flag(p, "killaura", 1.0, "multi-target " + d.recentHits.size() + " in 350ms");
+                    d.recentHits.clear();
+                    cancel = true;
+                }
+            }
+        }
+
+        // aim assist: sudden big snap then perfectly on target
+        if (ac.enabled("aimassist")) {
+            if (angle < 3 && now - d.yawDeltaAt < 120 && d.lastYawDelta > 45) {
+                if (++d.aimBuf >= 6) { ac.flag(p, "aimassist", 0.5, "snap " + (int) d.lastYawDelta + " deg"); d.aimBuf = 0; }
+            } else d.aimBuf = Math.max(0, d.aimBuf - 1);
+        }
+
+        // crystal aura: breaking a crystal almost instantly after placing, or too many per second
+        if (t instanceof EnderCrystal && ac.enabled("crystalaura")) {
+            long gap = now - d.lastCrystalPlace;
+            if (now - d.crystalWin > 1000) { d.crystalWin = now; d.crystalCount = 0; }
+            d.crystalCount++;
+            if (gap < 60 || d.crystalCount > 10) {
+                if (++d.crystalBuf >= 3) {
+                    ac.flag(p, "crystalaura", 1.0, "place->hit " + gap + "ms, " + d.crystalCount + "/s");
+                    cancel = true;
+                }
+            } else d.crystalBuf = Math.max(0, d.crystalBuf - 1);
+        }
+
+        if (cancel) e.setCancelled(true);
+    }
+
+    /** Autoclicker: arm swings per second. */
+    @EventHandler(ignoreCancelled = true)
+    public void onSwing(PlayerAnimationEvent e) {
+        Player p = e.getPlayer();
+        if (p.hasPermission("zyven.bypass") || !ac.enabled("autoclick")) return;
+        PlayerData d = ac.data(p);
+        long now = System.currentTimeMillis();
+        d.cps++;
+        if (now - d.cpsWindow >= 1000) {
+            if (d.cps > 22) {
+                if (++d.cpsBuf >= 2) ac.flag(p, "autoclick", 1.0, d.cps + " clicks/s");
+            } else d.cpsBuf = Math.max(0, d.cpsBuf - 1);
+            d.cps = 0;
+            d.cpsWindow = now;
+        }
+    }
+
+    /** Crystal placement timing + respawn anchor spam. */
+    @EventHandler
+    public void onInteract(PlayerInteractEvent e) {
+        if (e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        Player p = e.getPlayer();
+        PlayerData d = ac.data(p);
+        long now = System.currentTimeMillis();
+        if (e.getItem() != null && e.getItem().getType() == Material.END_CRYSTAL) d.lastCrystalPlace = now;
+
+        if (e.getClickedBlock() != null && e.getClickedBlock().getType() == Material.RESPAWN_ANCHOR
+                && ac.enabled("anchoraura") && !p.hasPermission("zyven.bypass")) {
+            if (now - d.anchorWin > 1000) { d.anchorWin = now; d.anchorCount = 0; }
+            if (++d.anchorCount > 8) {
+                ac.flag(p, "anchoraura", 1.0, d.anchorCount + " anchor clicks/s");
+                e.setCancelled(true);
+            }
+        }
+    }
+}
+
+```
+
+`src/main/java/com/zyven/anticheat/Los.java`:
+
+```java
+package com.zyven.anticheat;
+
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
+
+final class Los {
+    private Los() {}
+
+    static boolean visible(Location eye, BoundingBox b) {
+        double cx = b.getCenterX(), cy = b.getCenterY(), cz = b.getCenterZ();
+        Vector[] pts = {
+                new Vector(cx, cy, cz), new Vector(cx, b.getMinY() + 0.1, cz), new Vector(cx, b.getMaxY() - 0.1, cz),
+                new Vector(b.getMinX(), cy, b.getMinZ()), new Vector(b.getMaxX(), cy, b.getMinZ()),
+                new Vector(b.getMinX(), cy, b.getMaxZ()), new Vector(b.getMaxX(), cy, b.getMaxZ())
+        };
+        for (Vector v : pts) if (clear(eye, v)) return true;
+        return false;
+    }
+
+    static boolean clear(Location eye, Vector target) {
+        World w = eye.getWorld();
+        Vector from = eye.toVector();
+        for (int i = 0; i < 8; i++) {
+            Vector dir = target.clone().subtract(from);
+            double dist = dir.length();
+            if (dist < 0.1) return true;
+            Vector unit = dir.clone().normalize();
+            RayTraceResult res = w.rayTraceBlocks(from.toLocation(w), unit, dist, FluidCollisionMode.NEVER, true);
+            if (res == null || res.getHitBlock() == null) return true;
+            Block hb = res.getHitBlock();
+            if (hb.getType().isOccluding()) return false;
+            from = res.getHitPosition().clone().add(unit.multiply(1.0));
+        }
+        return false;
+    }
+}
+
+```
+
+`src/main/java/com/zyven/anticheat/MiningCheck.java`:
+
+```java
+package com.zyven.anticheat;
+
+import org.bukkit.GameMode;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDamageEvent;
+
+public class MiningCheck implements Listener {
+    private final ZyvenAntiCheat ac;
+
+    public MiningCheck(ZyvenAntiCheat ac) { this.ac = ac; }
+
+    private boolean skip(Player p) {
+        return p.getGameMode() != GameMode.SURVIVAL || p.hasPermission("zyven.bypass");
+    }
+
+    /** NoDelay: gap between breaking a block and starting the next one. */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onDamage(BlockDamageEvent e) {
+        Player p = e.getPlayer();
+        PlayerData d = ac.data(p);
+        long now = System.currentTimeMillis();
+
+        if (!skip(p) && ac.enabled("nodelay") && d.lastBreak > 0) {
+            long gap = now - d.lastBreak;
+            long min = ac.getConfig().getLong("checks.nodelay.min-gap-ms", 150);
+            if (gap < min) {
+                d.noDelayBuf++;
+                if (d.noDelayBuf >= ac.getConfig().getInt("checks.nodelay.buffer", 4)) {
+                    ac.flag(p, "nodelay", 1.0, "gap=" + gap + "ms (vanilla ~250ms)");
+                    d.lastNoDelayFlag = now;
+                    d.digLoc = null;
+                    e.setCancelled(true);
+                    return;
+                }
+            } else {
+                d.noDelayBuf = Math.max(0, d.noDelayBuf - 1);
+            }
+        }
+        d.digLoc = e.getBlock().getLocation();
+        d.digStart = now;
+    }
+
+    /** Speed mine: total time to break, based on the player's real break speed. */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBreak(BlockBreakEvent e) {
+        Player p = e.getPlayer();
+        if (skip(p) || !ac.enabled("speedmine")) return;
+        Block b = e.getBlock();
+        PlayerData d = ac.data(p);
+        long now = System.currentTimeMillis();
+
+        boolean tracked = d.digLoc != null && d.digLoc.equals(b.getLocation());
+        long elapsed = tracked ? now - d.digStart : 0;
+        d.digLoc = null;
+
+        // Break after a cancelled (NoDelay) dig: just block it, already flagged.
+        if (!tracked && now - d.lastNoDelayFlag < 500) { e.setCancelled(true); return; }
+
+        // getBreakSpeed already includes Haste, Mining Fatigue, Efficiency, tool, Aqua Affinity, air penalty.
+        float speed = b.getBreakSpeed(p);
+        if (speed >= 1f || speed <= 0f || b.getType().getHardness() == 0) return; // instant-break
+        double ticks = Math.ceil(1.0 / speed);
+        if (ticks <= 3) return; // very fast legit setups (Haste + Efficiency): timing is not reliable, NoDelay check covers them
+
+        double tol = ac.getConfig().getDouble("checks.speedmine.tolerance", 0.7);
+        double required = (ticks - 1) * 50.0 * tol - Math.min(p.getPing(), 300);
+        if (elapsed < required) {
+            d.mineBuf++;
+            if (d.mineBuf >= 2) { // never punish a single odd break
+                e.setCancelled(true);
+                ac.flag(p, "speedmine", 1.5, "took " + elapsed + "ms, needs ~" + (long) required + "ms");
+            }
+        } else {
+            d.mineBuf = Math.max(0, d.mineBuf - 1);
+        }
+    }
+
+    /** Record the break time only if the break actually went through. */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBreakDone(BlockBreakEvent e) {
+        ac.data(e.getPlayer()).lastBreak = System.currentTimeMillis();
+    }
+}
+
+```
+
+`src/main/java/com/zyven/anticheat/MovementCheck.java`:
+
+```java
+package com.zyven.anticheat;
+
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Tag;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Boat;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Shulker;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.*;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+public class MovementCheck implements Listener {
+    private final ZyvenAntiCheat ac;
+
+    public MovementCheck(ZyvenAntiCheat ac) { this.ac = ac; }
+
+    @EventHandler
+    public void onVelocity(PlayerVelocityEvent e) { ac.data(e.getPlayer()).lastVelocity = System.currentTimeMillis(); }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent e) {
+        PlayerData d = ac.data(e.getPlayer());
+        d.lastTeleport = System.currentTimeMillis();
+        d.reset(e.getTo());
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        PlayerData d = ac.data(e.getPlayer());
+        d.lastTeleport = System.currentTimeMillis();
+        d.reset(e.getPlayer().getLocation());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onMove(PlayerMoveEvent e) {
+        Player p = e.getPlayer();
+        Location from = e.getFrom(), to = e.getTo();
+        if (to == null || from.getWorld() != to.getWorld()) return;
+        PlayerData d = ac.data(p);
+        long now = System.currentTimeMillis();
+
+        double dx = to.getX() - from.getX(), dz = to.getZ() - from.getZ(), dy = to.getY() - from.getY();
+        double h = Math.hypot(dx, dz);
+
+        // rotation tracking (used by aim-assist check)
+        double yd = Math.abs(((to.getYaw() - from.getYaw() + 540) % 360) - 180);
+        if (yd > 1) { d.lastYawDelta = yd; d.yawDeltaAt = now; }
+        d.lastMove = now;
+
+        if (!p.isGliding()) d.glideTicks = 0;
+        boolean special = special(to);
+
+        // ---- Elytra ----
+        if (p.isGliding() && !ac.exempt(p)) {
+            elytra(p, d, h, dy, now, to);
+            d.lastSpecial = now;
+            d.reset(to);
+            d.lastGround = true;
+            return;
+        }
+
+        if (p.isRiptiding() || special) d.lastSpecial = now;
+        boolean exempt = ac.exempt(p) || p.isInsideVehicle()
+                || now - d.lastTeleport < 1000 || now - d.lastVelocity < 1500 || now - d.lastSpecial < 1500
+                || p.hasPotionEffect(PotionEffectType.LEVITATION) || p.hasPotionEffect(PotionEffectType.SLOW_FALLING);
+        if (exempt) { d.reset(to); d.lastGround = true; return; }
+        if (d.lastSafe == null) d.reset(from);
+
+        boolean ground = groundBelow(to, 0.1) || standingOnEntity(p);
+        Block feet = to.getBlock();
+        boolean liquid = feet.isLiquid() || to.clone().add(0, 1, 0).getBlock().isLiquid();
+        boolean climb = Tag.CLIMBABLE.isTagged(feet.getType());
+        Material below = to.clone().subtract(0, 0.3, 0).getBlock().getType();
+        if (below.name().contains("ICE")) d.lastIce = now;
+
+        String flagged = null, info = "";
+
+        // ---- Click TP / teleport ----
+        if (h > 7) { flagged = "clicktp"; info = "h=" + r(h); }
+
+        if (ground || liquid || climb) {
+            d.groundY = to.getY();
+            d.airTicks = 0;
+            d.flyBuf = 0;
+        } else {
+            d.airTicks++;
+            double expected = (d.lastDy - 0.08) * 0.98;
+            int jb = amp(p, PotionEffectType.JUMP_BOOST);
+
+            // jump start: NoJumpDelay + high jump
+            if (d.lastGround && dy > 0.3) {
+                long gap = now - d.lastJump;
+                if (d.lastJump > 0 && gap < 420) {
+                    d.jumpBuf++;
+                    if (d.jumpBuf >= 3 && flagged == null) { flagged = "nojumpdelay"; info = "gap=" + gap + "ms"; }
+                } else d.jumpBuf = Math.max(0, d.jumpBuf - 1);
+                d.lastJump = now;
+                if (flagged == null && dy > 0.42 + 0.1 * jb + 0.06) { flagged = "highjump"; info = "jump dy=" + r(dy); }
+            }
+
+            // gravity prediction (fly / spider)
+            if (flagged == null && d.airTicks >= 3) {
+                if (dy > expected + 0.06) {
+                    if (++d.flyBuf >= 3) {
+                        flagged = (touchingWall(to) && dy > 0) ? "spider" : "fly";
+                        info = "dy=" + r(dy) + " exp=" + r(expected);
+                    }
+                } else d.flyBuf = Math.max(0, d.flyBuf - 1);
+            }
+            // hover
+            if (flagged == null && d.airTicks > 12 && Math.abs(dy) < 0.02) { flagged = "fly"; info = "hover"; }
+
+            // total rise
+            double maxRise = 1.30 + 0.6 * jb + 0.15;
+            if (flagged == null && to.getY() - d.groundY > maxRise) {
+                flagged = "highjump"; info = "rise=" + r(to.getY() - d.groundY);
+            }
+
+            // NoFall: client claims onGround while falling with nothing below
+            if (flagged == null) {
+                if (p.isOnGround() && dy < -0.25 && !groundBelow(to, 0.9)) {
+                    if (++d.nofallBuf >= 4) { flagged = "nofall"; info = "spoofed onGround dy=" + r(dy); }
+                } else d.nofallBuf = Math.max(0, d.nofallBuf - 1);
+            }
+        }
+
+        // speed
+        if (flagged == null && h > 0) {
+            double limit = ground ? 0.37 : 0.42;
+            limit *= p.getWalkSpeed() / 0.2;
+            int sp = amp(p, PotionEffectType.SPEED);
+            if (sp > 0) limit *= 1 + 0.2 * sp;
+            if (now - d.lastIce < 1500) limit *= 1.8;
+            if (below.name().contains("SOUL")) limit *= 1.8;
+            if (h > limit) {
+                d.speedBuf += 1;
+                if (d.speedBuf >= 4) { flagged = "speed"; info = "h=" + r(h) + " max=" + r(limit); }
+            } else d.speedBuf = Math.max(0, d.speedBuf - 0.5);
+        }
+
+        // jesus
+        if (flagged == null) {
+            Block under = to.clone().subtract(0, 0.2, 0).getBlock();
+            boolean walkingOnWater = under.isLiquid() && !feet.isLiquid() && !p.isSwimming()
+                    && feet.getType() != Material.LILY_PAD && Math.abs(dy) < 0.05 && h > 0.05;
+            if (walkingOnWater) d.waterTicks++; else d.waterTicks = 0;
+            if (d.waterTicks >= 6) { flagged = "jesus"; info = "walking on liquid"; }
+        }
+
+        if (flagged != null && ac.enabled(flagged)) {
+            ac.flag(p, flagged, 1.0, info);
+            if (ac.getConfig().getBoolean("setback", true)) {
+                Location back = d.lastSafe.clone();
+                back.setYaw(to.getYaw());
+                back.setPitch(to.getPitch());
+                e.setTo(back);
+                d.airTicks = 0; d.flyBuf = 0; d.waterTicks = 0; d.speedBuf = 0; d.lastDy = 0;
+                d.lastGround = true;
+                return;
+            }
+        } else if (ground) {
+            d.lastSafe = to.clone();
+        }
+
+        d.lastDy = dy;
+        d.lastGround = ground;
+    }
+
+    private void elytra(Player p, PlayerData d, double h, double dy, long now, Location to) {
+        if (!ac.enabled("elytrafly")) return;
+        boolean boosted = now - d.lastElytraBoost < 4000 || now - d.lastVelocity < 2500;
+        d.glideTicks++;
+        if (d.glideTicks == 1) d.glideStartY = to.getY();
+        if (boosted) { d.hoverGlide = 0; d.glideStartY = Math.max(d.glideStartY, to.getY()); return; }
+
+        if (h > 4.5) ac.flag(p, "elytrafly", 1.0, "speed h=" + r(h));
+
+        if (h < 0.15 && Math.abs(dy) < 0.03) d.hoverGlide++; else d.hoverGlide = Math.max(0, d.hoverGlide - 1);
+        if (d.hoverGlide >= 15) { ac.flag(p, "elytrafly", 1.0, "hovering"); d.hoverGlide = 0; }
+
+        if (d.glideTicks > 20 && to.getY() - d.glideStartY > 12) {
+            ac.flag(p, "elytrafly", 1.0, "climbing without firework");
+            d.glideStartY = to.getY();
+        }
+    }
+
+    private static String r(double v) { return String.format("%.3f", v); }
+
+    private static int amp(Player p, PotionEffectType t) {
+        PotionEffect pe = p.getPotionEffect(t);
+        return pe == null ? 0 : pe.getAmplifier() + 1;
+    }
+
+    static boolean groundBelow(Location l, double depth) {
+        double[] offs = {-0.31, 0, 0.31};
+        for (double ox : offs)
+            for (double oz : offs) {
+                int x = (int) Math.floor(l.getX() + ox), z = (int) Math.floor(l.getZ() + oz);
+                Block b = l.getWorld().getBlockAt(x, (int) Math.floor(l.getY() - depth), z);
+                if (!b.isPassable() && !b.isLiquid()) return true;
+                Material m = l.getWorld().getBlockAt(x, (int) Math.floor(l.getY() - depth - 0.5), z).getType();
+                if (Tag.FENCES.isTagged(m) || Tag.WALLS.isTagged(m) || Tag.FENCE_GATES.isTagged(m)) return true;
+            }
+        return false;
+    }
+
+    static boolean standingOnEntity(Player p) {
+        for (Entity en : p.getNearbyEntities(1.5, 1.5, 1.5))
+            if (en instanceof Boat || en instanceof Shulker) return true;
+        return false;
+    }
+
+    private static boolean touchingWall(Location l) {
+        double[][] offs = {{0.35, 0}, {-0.35, 0}, {0, 0.35}, {0, -0.35}};
+        for (double[] o : offs)
+            for (double y : new double[]{0.5, 1.4})
+                if (!l.clone().add(o[0], y, o[1]).getBlock().isPassable()) return true;
+        return false;
+    }
+
+    static boolean special(Location l) {
+        for (double y : new double[]{0, -0.5, -1.2}) {
+            Material m = l.clone().add(0, y, 0).getBlock().getType();
+            if (m == Material.SLIME_BLOCK || m == Material.HONEY_BLOCK || m == Material.COBWEB
+                    || m == Material.POWDER_SNOW || m == Material.BUBBLE_COLUMN
+                    || m == Material.SWEET_BERRY_BUSH || m == Material.SCAFFOLDING
+                    || m == Material.BIG_DRIPLEAF || Tag.BEDS.isTagged(m) || Tag.CLIMBABLE.isTagged(m)) return true;
+        }
+        return false;
+    }
+}
+
+```
+
+`src/main/java/com/zyven/anticheat/PlayerData.java`:
+
+```java
+package com.zyven.anticheat;
+
+import org.bukkit.Location;
+import org.bukkit.entity.Villager;
+import java.util.*;
+
+public class PlayerData {
+    public final Map<String, Double> vl = new HashMap<>();
+    public final Set<UUID> hidden = new HashSet<>();
+    public final Map<UUID, Long> recentHits = new HashMap<>();
+    public Location lastSafe, digLoc, bait;
+    public long lastTeleport = System.currentTimeMillis(), lastVelocity, lastSpecial, digStart, punishUntil, decoyMoved,
+            lastIce, lastBreak, lastNoDelayFlag, lastMove, lastJump, lastElytraBoost, useStart, lastCrystalPlace,
+            lastXp, yawDeltaAt, cpsWindow, anchorWin, crystalWin, baitTime;
+    public double lastDy, groundY, speedBuf, glideStartY, lastYawDelta;
+    public int noDelayBuf, mineBuf, airTicks, flyBuf, waterTicks, stare, jumpBuf, nofallBuf, airStuckBuf, reachBuf,
+            angleBuf, wallBuf, aimBuf, crystalBuf, crystalCount, fastUseBuf, cps, cpsBuf, anchorCount, glideTicks,
+            hoverGlide, xpBuf, boatBuf, vehSpeedBuf, vehControlBuf;
+    public boolean lastGround;
+    public Villager decoy;
+
+    public void reset(Location l) {
+        lastSafe = l.clone();
+        airTicks = 0; flyBuf = 0; waterTicks = 0; speedBuf = 0;
+        lastDy = 0; groundY = l.getY();
+    }
+}
+
+```
+
+`src/main/java/com/zyven/anticheat/UtilityCheck.java`:
+
+```java
+package com.zyven.anticheat;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.ThrownExpBottle;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityResurrectEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.ItemStack;
+
+public class UtilityCheck implements Listener {
+    private final ZyvenAntiCheat ac;
+
+    public UtilityCheck(ZyvenAntiCheat ac) {
+        this.ac = ac;
+        startAirStuckTask();
+    }
+
+    private static boolean consumable(Material m) {
+        return m.isEdible() || m == Material.POTION || m == Material.MILK_BUCKET || m == Material.HONEY_BOTTLE;
+    }
+
+    @EventHandler
+    public void onInteract(PlayerInteractEvent e) {
+        ItemStack it = e.getItem();
+        if (it == null) return;
+        PlayerData d = ac.data(e.getPlayer());
+        long now = System.currentTimeMillis();
+        if (it.getType() == Material.FIREWORK_ROCKET) d.lastElytraBoost = now;
+        if (consumable(it.getType()) && d.useStart == 0) d.useStart = now;
+    }
+
+    /** Fast eat / fast drink: items take 0.85s to 1.6s to consume in vanilla. */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onConsume(PlayerItemConsumeEvent e) {
+        Player p = e.getPlayer();
+        PlayerData d = ac.data(p);
+        long start = d.useStart;
+        d.useStart = 0;
+        if (start == 0 || !ac.enabled("fastuse") || p.hasPermission("zyven.bypass")) return;
+        long elapsed = System.currentTimeMillis() - start;
+        long min = ac.getConfig().getLong("checks.fastuse.min-ms", 650);
+        long required = min - Math.min(p.getPing(), 250);
+        if (elapsed < required) {
+            if (++d.fastUseBuf >= 2) {
+                e.setCancelled(true);
+                ac.flag(p, "fastuse", 1.0, "consumed in " + elapsed + "ms");
+            }
+        } else d.fastUseBuf = Math.max(0, d.fastUseBuf - 1);
+    }
+
+    /** Fast XP bottle throwing. */
+    @EventHandler(ignoreCancelled = true)
+    public void onLaunch(ProjectileLaunchEvent e) {
+        if (!(e.getEntity() instanceof ThrownExpBottle) || !(e.getEntity().getShooter() instanceof Player p)) return;
+        if (!ac.enabled("fastxp") || p.hasPermission("zyven.bypass")) return;
+        PlayerData d = ac.data(p);
+        long now = System.currentTimeMillis();
+        if (d.lastXp > 0 && now - d.lastXp < 120) {
+            if (++d.xpBuf >= 3) { e.setCancelled(true); ac.flag(p, "fastxp", 1.0, "bottle gap " + (now - d.lastXp) + "ms"); }
+        } else d.xpBuf = Math.max(0, d.xpBuf - 1);
+        d.lastXp = now;
+    }
+
+    /** Auto totem / hover totem / inventory totem: a new totem in the offhand within 2 ticks of a pop. */
+    @EventHandler(ignoreCancelled = true)
+    public void onResurrect(EntityResurrectEvent e) {
+        if (!(e.getEntity() instanceof Player p) || !ac.enabled("autototem") || p.hasPermission("zyven.bypass")) return;
+        boolean main = p.getInventory().getItemInMainHand().getType() == Material.TOTEM_OF_UNDYING;
+        boolean off = p.getInventory().getItemInOffHand().getType() == Material.TOTEM_OF_UNDYING;
+        if (main || !off) return; // mainhand totem gets used first, so offhand is not a re-equip
+        Bukkit.getScheduler().runTaskLater(ac, () -> {
+            if (!p.isOnline()) return;
+            if (p.getInventory().getItemInOffHand().getType() == Material.TOTEM_OF_UNDYING) {
+                ac.flag(p, "autototem", 1.0, "offhand refilled within 2 ticks of pop");
+            }
+        }, 2L);
+    }
+
+    /** Air stuck: no movement packets while hanging in the air. */
+    private void startAirStuckTask() {
+        Bukkit.getScheduler().runTaskTimer(ac, () -> {
+            if (!ac.enabled("airstuck")) return;
+            long now = System.currentTimeMillis();
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (ac.exempt(p) || p.isInsideVehicle() || p.isGliding() || p.isSleeping() || p.getPing() > 400) continue;
+                PlayerData d = ac.data(p);
+                if (d.lastMove == 0 || now - d.lastTeleport < 3000 || now - d.lastSpecial < 3000
+                        || now - d.lastVelocity < 3000) { d.airStuckBuf = 0; continue; }
+                Location l = p.getLocation();
+                boolean air = !MovementCheck.groundBelow(l, 0.1) && !MovementCheck.groundBelow(l, 0.9)
+                        && !l.getBlock().isLiquid() && !MovementCheck.special(l) && !MovementCheck.standingOnEntity(p);
+                if (air && now - d.lastMove > 1500) {
+                    if (++d.airStuckBuf >= 3) {
+                        ac.flag(p, "airstuck", 1.0, "frozen in air " + (now - d.lastMove) + "ms");
+                        p.teleport(d.lastSafe != null ? d.lastSafe : l);
+                        d.lastTeleport = now;
+                        d.airStuckBuf = 0;
+                    }
+                } else d.airStuckBuf = 0;
+            }
+        }, 40L, 10L);
+    }
+}
+
+```
+
+`src/main/java/com/zyven/anticheat/VehicleCheck.java`:
+
+```java
+package com.zyven.anticheat;
+
+import org.bukkit.Location;
+import org.bukkit.entity.AbstractHorse;
+import org.bukkit.entity.Boat;
+import org.bukkit.entity.Llama;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Steerable;
+import org.bukkit.entity.Vehicle;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.vehicle.VehicleMoveEvent;
+
+public class VehicleCheck implements Listener {
+    private final ZyvenAntiCheat ac;
+
+    public VehicleCheck(ZyvenAntiCheat ac) { this.ac = ac; }
+
+    @EventHandler
+    public void onVehicleMove(VehicleMoveEvent e) {
+        Vehicle v = e.getVehicle();
+        if (v.getPassengers().isEmpty() || !(v.getPassengers().get(0) instanceof Player p)) return;
+        if (ac.exempt(p)) return;
+        PlayerData d = ac.data(p);
+        long now = System.currentTimeMillis();
+        if (now - d.lastVelocity < 1500 || now - d.lastTeleport < 1000) return;
+
+        Location f = e.getFrom(), t = e.getTo();
+        double h = Math.hypot(t.getX() - f.getX(), t.getZ() - f.getZ());
+        double dy = t.getY() - f.getY();
+
+        if (v instanceof Boat) {
+            if (!ac.enabled("boatfly")) return;
+            boolean water = t.getBlock().isLiquid() || t.clone().subtract(0, 0.4, 0).getBlock().isLiquid();
+            boolean solid = !t.clone().subtract(0, 0.3, 0).getBlock().isPassable();
+            boolean ice = false;
+            for (double y = 0; y <= 1.5; y += 0.5)
+                if (t.clone().subtract(0, y, 0).getBlock().getType().name().contains("ICE")) ice = true;
+            if (MovementCheck.special(t)) return;
+
+            double limit = ice ? 3.8 : 0.75;
+            if (h > limit) {
+                if (++d.vehSpeedBuf >= 3) { ac.flag(p, "boatfly", 1.0, "boat speed " + String.format("%.2f", h)); d.vehSpeedBuf = 0; }
+            } else d.vehSpeedBuf = Math.max(0, d.vehSpeedBuf - 1);
+
+            if (!water && !solid) {
+                if (dy > 0.04 || (Math.abs(dy) < 0.01 && h > 0.05)) {
+                    if (++d.boatBuf >= 8) { ac.flag(p, "boatfly", 1.0, "boat flying dy=" + String.format("%.3f", dy)); d.boatBuf = 0; }
+                }
+            } else d.boatBuf = Math.max(0, d.boatBuf - 1);
+            return;
+        }
+
+        // ridden animals: EntitySpeed / EntityControl
+        if (v instanceof AbstractHorse || v instanceof Steerable) {
+            if (ac.enabled("entityspeed")) {
+                if (h > 1.0) {
+                    if (++d.vehSpeedBuf >= 4) { ac.flag(p, "entityspeed", 1.0, "mount speed " + String.format("%.2f", h)); d.vehSpeedBuf = 0; }
+                } else d.vehSpeedBuf = Math.max(0, d.vehSpeedBuf - 1);
+            }
+            if (ac.enabled("entitycontrol") && !(v instanceof Llama) && h > 0.35) {
+                boolean saddled = true;
+                if (v instanceof AbstractHorse ah) saddled = ah.getInventory().getSaddle() != null;
+                else if (v instanceof Steerable st) saddled = st.hasSaddle();
+                if (!saddled) {
+                    if (++d.vehControlBuf >= 5) { ac.flag(p, "entitycontrol", 1.0, "steering mount without saddle"); d.vehControlBuf = 0; }
+                } else d.vehControlBuf = Math.max(0, d.vehControlBuf - 1);
+            }
+        }
+    }
+}
+
+```
+
+`src/main/java/com/zyven/anticheat/ZyvenAntiCheat.java`:
+
+```java
+package com.zyven.anticheat;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class ZyvenAntiCheat extends JavaPlugin implements Listener {
+    private final Map<UUID, PlayerData> data = new ConcurrentHashMap<>();
+    private final Set<UUID> alertsOff = new HashSet<>();
+    private AntiEsp esp;
+
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+        Bukkit.getPluginManager().registerEvents(this, this);
+        Bukkit.getPluginManager().registerEvents(new MovementCheck(this), this);
+        Bukkit.getPluginManager().registerEvents(new MiningCheck(this), this);
+        Bukkit.getPluginManager().registerEvents(new CombatCheck(this), this);
+        Bukkit.getPluginManager().registerEvents(new VehicleCheck(this), this);
+        Bukkit.getPluginManager().registerEvents(new UtilityCheck(this), this);
+        BaitBlocks bait = new BaitBlocks(this);
+        Bukkit.getPluginManager().registerEvents(bait, this);
+        bait.runTaskTimer(this, 60L, 40L);
+        esp = new AntiEsp(this);
+        if (getConfig().getBoolean("anti-esp.enabled", true)) {
+            esp.runTaskTimer(this, 20L, Math.max(1, getConfig().getLong("anti-esp.interval-ticks", 5)));
+        }
+        // violation decay
+        Bukkit.getScheduler().runTaskTimer(this, () -> data.values().forEach(d ->
+                d.vl.replaceAll((k, v) -> Math.max(0, v - 0.5))), 200L, 200L);
+        getLogger().info("ZyvenAntiCheat enabled.");
+    }
+
+    @Override
+    public void onDisable() {
+        if (esp != null) esp.cleanup();
+    }
+
+    public PlayerData data(Player p) {
+        return data.computeIfAbsent(p.getUniqueId(), k -> new PlayerData());
+    }
+
+    public boolean enabled(String check) {
+        return getConfig().getBoolean("checks." + check + ".enabled", true);
+    }
+
+    public boolean exempt(Player p) {
+        GameMode gm = p.getGameMode();
+        return p.hasPermission("zyven.bypass") || gm == GameMode.CREATIVE || gm == GameMode.SPECTATOR
+                || p.getAllowFlight() || p.isFlying() || p.isDead();
+    }
+
+    public void flag(Player p, String check, double add, String info) {
+        PlayerData d = data(p);
+        double vl = d.vl.merge(check, add, Double::sum);
+        String msg = ChatColor.translateAlternateColorCodes('&', getConfig().getString("alert-format", "%player% %check% %vl%")
+                .replace("%player%", p.getName()).replace("%check%", check)
+                .replace("%vl%", String.format("%.1f", vl)).replace("%info%", info));
+        for (Player s : Bukkit.getOnlinePlayers()) {
+            if (s.hasPermission("zyven.alerts") && !alertsOff.contains(s.getUniqueId())) s.sendMessage(msg);
+        }
+        getLogger().info(ChatColor.stripColor(msg));
+        double limit = getConfig().getDouble("checks." + check + ".kick-vl", 15);
+        if (vl >= limit) {
+            d.vl.put(check, 0.0);
+            String cmd = getConfig().getString("punish-command", "kick %player%")
+                    .replace("%player%", p.getName()).replace("%check%", check);
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+        }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        PlayerData d = data.remove(e.getPlayer().getUniqueId());
+        if (d != null && esp != null) esp.removeDecoy(d);
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, Command c, String l, String[] a) {
+        if (a.length == 0) { s.sendMessage("§b/zac <alerts|vl <player>|reload>"); return true; }
+        switch (a[0].toLowerCase()) {
+            case "alerts" -> {
+                if (!(s instanceof Player p)) return true;
+                if (!alertsOff.remove(p.getUniqueId())) alertsOff.add(p.getUniqueId());
+                s.sendMessage("§bAlerts " + (alertsOff.contains(p.getUniqueId()) ? "§coff" : "§aon"));
+            }
+            case "vl" -> {
+                Player t = a.length > 1 ? Bukkit.getPlayer(a[1]) : null;
+                if (t == null) { s.sendMessage("§cPlayer not found."); return true; }
+                s.sendMessage("§b" + t.getName() + " §7VL: §f" + data(t).vl);
+            }
+            case "reload" -> { reloadConfig(); s.sendMessage("§aConfig reloaded."); }
+            default -> s.sendMessage("§cUnknown subcommand.");
+        }
+        return true;
+    }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+alert-format: "&8[&bZyven&8] &f%player% &7failed &c%check% &8(&7vl %vl%&8) &7%info%"
+punish-command: "kick %player% ZyvenAntiCheat: Unfair advantage detected (%check%)"
+setback: true
+
+checks:
+  fly:           { enabled: true, kick-vl: 12 }
+  speed:         { enabled: true, kick-vl: 15 }
+  jesus:         { enabled: true, kick-vl: 10 }
+  spider:        { enabled: true, kick-vl: 10 }
+  highjump:      { enabled: true, kick-vl: 8 }
+  nojumpdelay:   { enabled: true, kick-vl: 10 }
+  nofall:        { enabled: true, kick-vl: 8 }
+  clicktp:       { enabled: true, kick-vl: 4 }
+  airstuck:      { enabled: true, kick-vl: 5 }
+  elytrafly:     { enabled: true, kick-vl: 8 }
+  boatfly:       { enabled: true, kick-vl: 8 }
+  entityspeed:   { enabled: true, kick-vl: 8 }
+  entitycontrol: { enabled: true, kick-vl: 6 }
+  speedmine:     { enabled: true, kick-vl: 10, tolerance: 0.7 }
+  nodelay:       { enabled: true, kick-vl: 8, min-gap-ms: 150, buffer: 4 }
+  reach:         { enabled: true, kick-vl: 8, max: 3.4 }
+  killaura:      { enabled: true, kick-vl: 8 }
+  aimassist:     { enabled: true, kick-vl: 10 }
+  autoclick:     { enabled: true, kick-vl: 6 }
+  crystalaura:   { enabled: true, kick-vl: 6 }
+  anchoraura:    { enabled: true, kick-vl: 6 }
+  autototem:     { enabled: true, kick-vl: 5 }
+  fastuse:       { enabled: true, kick-vl: 6, min-ms: 650 }
+  fastxp:        { enabled: true, kick-vl: 6 }
+  esp:           { enabled: true, kick-vl: 8 }
+  baitesp:       { enabled: true, kick-vl: 9 }
+
+bait:
+  enabled: true
+
+anti-esp:
+  enabled: true
+  interval-ticks: 5
+  range: 64
+  close-distance: 6
+  hide-mobs: true
+  decoy:
+    enabled: true
+    stare-samples: 14
+  punish:
+    seconds: 30
+    particles: 300
+
+```
+
+`src/main/resources/plugin.yml`:
+
+```yml
+name: ZyvenAntiCheat
+version: 1.0.0
+main: com.zyven.anticheat.ZyvenAntiCheat
+api-version: '1.21'
+author: Zyven
+description: Server-side anti-cheat with movement, mining and anti-ESP protection.
+commands:
+  zac:
+    description: ZyvenAntiCheat admin command
+    usage: /zac <alerts|vl|reload>
+    permission: zyven.admin
+permissions:
+  zyven.admin:
+    default: op
+  zyven.alerts:
+    default: op
+  zyven.bypass:
+    default: false
+
+```

