@@ -1,0 +1,3368 @@
+Project Path: arc_phantantai73_AmberAntiCheat_nvoyjmq_
+
+Source Tree:
+
+```txt
+arc_phantantai73_AmberAntiCheat_nvoyjmq_
+├── README.md
+├── pom.xml
+└── src
+    └── main
+        ├── java
+        │   └── vn
+        │       └── amber
+        │           └── anticheat
+        │               ├── AmberAntiCheat.java
+        │               ├── AntiBlockEspListener.java
+        │               ├── AntiXrayManager.java
+        │               ├── AsyncOcclusionEngine.java
+        │               ├── CheckListener.java
+        │               ├── PacketCheckListener.java
+        │               ├── SettingsGuiManager.java
+        │               └── SuspectGuiManager.java
+        └── resources
+            ├── config.yml
+            └── plugin.yml
+
+```
+
+`README.md`:
+
+```md
+# AmberAntiCheat
+```
+
+`pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>vn.amber</groupId>
+    <artifactId>AmberAntiCheat</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>AmberAntiCheat</name>
+
+    <properties>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>papermc-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>codemc-releases</id>
+            <url>https://repo.codemc.io/repository/maven-releases/</url>
+        </repository>
+        <repository>
+            <id>codemc-snapshots</id>
+            <url>https://repo.codemc.io/repository/maven-snapshots/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21.4-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.retrooper</groupId>
+            <artifactId>packetevents-spigot</artifactId>
+            <version>2.7.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>clean package</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <release>21</release>
+                </configuration>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+</project>
+
+```
+
+`src/main/java/vn/amber/anticheat/AmberAntiCheat.java`:
+
+```java
+package vn.amber.anticheat;
+
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.messaging.PluginMessageListener;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.StringUtil;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class AmberAntiCheat extends JavaPlugin implements Listener, CommandExecutor, TabCompleter, PluginMessageListener {
+
+    private final Map<UUID, Integer> violations = new ConcurrentHashMap<>();
+    private final Map<UUID, String> clientBrands = new ConcurrentHashMap<>();
+    private final Map<UUID, Set<UUID>> hiddenPlayersMap = new ConcurrentHashMap<>();
+    private final Set<UUID> quittingPlayers = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, Boolean> playerAboveLayerState = new ConcurrentHashMap<>();
+    private final Map<String, Long> lastSeenTimestampMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> logCooldownMap = new ConcurrentHashMap<>();
+
+    private AsyncOcclusionEngine occlusionEngine;
+    private AntiXrayManager antiXrayManager;
+    private AntiBlockEspListener blockEspListener;
+    private SettingsGuiManager settingsGuiManager;
+    private SuspectGuiManager suspectGuiManager;
+    private PacketCheckListener packetCheckListener;
+
+    private final SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+
+        this.occlusionEngine = new AsyncOcclusionEngine(this);
+        this.antiXrayManager = new AntiXrayManager(this);
+        this.blockEspListener = new AntiBlockEspListener(this, occlusionEngine);
+        this.settingsGuiManager = new SettingsGuiManager(this);
+        this.suspectGuiManager = new SuspectGuiManager(this);
+        this.packetCheckListener = new PacketCheckListener(this, antiXrayManager);
+
+        getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(occlusionEngine, this);
+        getServer().getPluginManager().registerEvents(antiXrayManager, this);
+        getServer().getPluginManager().registerEvents(blockEspListener, this);
+        getServer().getPluginManager().registerEvents(settingsGuiManager, this);
+        getServer().getPluginManager().registerEvents(suspectGuiManager, this);
+        getServer().getPluginManager().registerEvents(new CheckListener(this, occlusionEngine), this);
+
+        PacketEvents.getAPI().getEventManager().registerListener(packetCheckListener, PacketListenerPriority.NORMAL);
+
+        getServer().getMessenger().registerIncomingPluginChannel(this, "minecraft:brand", this);
+
+        PluginCommand mainCmd = getCommand("amberac");
+        if (mainCmd != null) {
+            mainCmd.setExecutor(this);
+            mainCmd.setTabCompleter(this);
+        }
+        if (getCommand("acsettings") != null) getCommand("acsettings").setExecutor(this);
+        if (getCommand("sus") != null) getCommand("sus").setExecutor(this);
+
+        blockEspListener.startTask();
+        Bukkit.getScheduler().runTaskTimer(this, this::runAntiPlayerEspTask, 20L, 2L);
+        Bukkit.getScheduler().runTaskTimer(this, () -> {
+            for (UUID id : violations.keySet()) {
+                violations.computeIfPresent(id, (k, v) -> v > 1 ? v - 1 : null);
+            }
+        }, 600L, 600L);
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            applyAllowedChunkRadius(p);
+        }
+
+        getLogger().info("Amber AntiCheat (All-in-One 20 TPS) da kich hoat thanh cong!");
+    }
+
+    @Override
+    public void onDisable() {
+        revealAllHiddenPlayers();
+        if (blockEspListener != null) {
+            blockEspListener.restoreAllHiddenBlocks();
+        }
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.setSendViewDistance(-1);
+        }
+    }
+
+    public AntiXrayManager getAntiXrayManager() {
+        return antiXrayManager;
+    }
+
+    public AntiBlockEspListener getBlockEspListener() {
+        return blockEspListener;
+    }
+
+    public SuspectGuiManager getSuspectGuiManager() {
+        return suspectGuiManager;
+    }
+
+    public AsyncOcclusionEngine getOcclusionEngine() {
+        return occlusionEngine;
+    }
+
+    public boolean isPlayerQuitting(UUID uuid) {
+        return quittingPlayers.contains(uuid);
+    }
+
+    public String getClientBrand(UUID uuid) {
+        return clientBrands.getOrDefault(uuid, "Vanilla");
+    }
+
+    public void clearPlayerViolations(UUID uuid) {
+        violations.remove(uuid);
+    }
+
+    public void reloadPluginConfig() {
+        reloadConfig();
+        if (antiXrayManager != null) {
+            antiXrayManager.reloadStateMappings();
+        }
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            applyAllowedChunkRadius(p);
+        }
+        if (!getConfig().getBoolean("anti-player-esp.bat", true)
+                && !getConfig().getBoolean("hien-tren-an-duoi.bat", true)) {
+            revealAllHiddenPlayers();
+        }
+        if (!getConfig().getBoolean("anti-block-esp.bat", true)
+                && !getConfig().getBoolean("hien-tren-an-duoi.bat", true)
+                && blockEspListener != null) {
+            blockEspListener.restoreAllHiddenBlocks();
+        }
+    }
+
+    public boolean isFullSolidBlock(Material mat) {
+        if (mat == null || mat.isAir() || !mat.isBlock() || !mat.isSolid() || !mat.isOccluding()) {
+            return false;
+        }
+        String name = mat.name();
+        return !name.contains("GLASS")
+                && !name.contains("LEAVES")
+                && !name.contains("FENCE")
+                && !name.contains("WALL")
+                && !name.contains("STAIRS")
+                && !name.contains("SLAB")
+                && !name.contains("DOOR")
+                && !name.contains("TRAPDOOR")
+                && !name.contains("BARS")
+                && !name.contains("CHEST")
+                && !name.contains("SHULKER")
+                && !name.equals("SPAWNER")
+                && !name.equals("HOPPER")
+                && !name.equals("SLIME_BLOCK")
+                && !name.equals("HONEY_BLOCK")
+                && !name.equals("ICE");
+    }
+
+    public boolean isHiddenByYLayer(Player viewer, double targetY, boolean isPlayerTarget) {
+        if (!getConfig().getBoolean("hien-tren-an-duoi.bat", true)) return false;
+        if (isPlayerTarget && !getConfig().getBoolean("hien-tren-an-duoi.an-nguoi-choi", true)) return false;
+        if (!isPlayerTarget && !getConfig().getBoolean("hien-tren-an-duoi.an-ruong-block", true)) return false;
+
+        double splitY = getConfig().getDouble("hien-tren-an-duoi.moc-do-cao-y", 35.0);
+        boolean viewerAbove = playerAboveLayerState.computeIfAbsent(
+                viewer.getUniqueId(), k -> viewer.getLocation().getY() > splitY
+        );
+        boolean targetAbove = targetY > splitY;
+        return viewerAbove != targetAbove;
+    }
+
+    public boolean isHiddenByYLayer(double viewerY, double targetY, boolean isPlayerTarget) {
+        if (!getConfig().getBoolean("hien-tren-an-duoi.bat", true)) return false;
+        if (isPlayerTarget && !getConfig().getBoolean("hien-tren-an-duoi.an-nguoi-choi", true)) return false;
+        if (!isPlayerTarget && !getConfig().getBoolean("hien-tren-an-duoi.an-ruong-block", true)) return false;
+
+        double splitY = getConfig().getDouble("hien-tren-an-duoi.moc-do-cao-y", 35.0);
+        return (viewerY > splitY) != (targetY > splitY);
+    }
+
+    public void applyAllowedChunkRadius(Player p) {
+        if (!getConfig().getBoolean("hien-tren-an-duoi.bat", true) || p.hasPermission("amberac.bypass")) {
+            p.setSendViewDistance(-1);
+            return;
+        }
+        int splitY = getConfig().getInt("hien-tren-an-duoi.moc-do-cao-y", 35);
+        boolean isAbove = playerAboveLayerState.computeIfAbsent(p.getUniqueId(), k -> p.getLocation().getBlockY() > splitY);
+
+        int surfaceChunks = Math.max(2, getConfig().getInt("hien-tren-an-duoi.chunk-cho-phep-tren-mat-dat", 6));
+        int undergroundChunks = Math.max(2, getConfig().getInt("hien-tren-an-duoi.chunk-cho-phep-duoi-ham", 2));
+
+        int allowedRadius = isAbove ? surfaceChunks : undergroundChunks;
+        if (p.getSendViewDistance() != allowedRadius) {
+            p.setSendViewDistance(allowedRadius);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onCrossYThreshold(PlayerMoveEvent e) {
+        if (e.getTo() == null || e.getFrom().getBlockY() == e.getTo().getBlockY()) return;
+        if (!getConfig().getBoolean("hien-tren-an-duoi.bat", true)) return;
+
+        Player p = e.getPlayer();
+        UUID uuid = p.getUniqueId();
+        int splitY = getConfig().getInt("hien-tren-an-duoi.moc-do-cao-y", 35);
+        int hysteresis = getConfig().getInt("hien-tren-an-duoi.do-tre-do-cao-y", 2);
+        int currentY = e.getTo().getBlockY();
+
+        boolean wasAbove = playerAboveLayerState.computeIfAbsent(uuid, k -> e.getFrom().getBlockY() > splitY);
+        boolean switched = false;
+
+        if (wasAbove && currentY <= (splitY - hysteresis)) {
+            playerAboveLayerState.put(uuid, false);
+            switched = true;
+        } else if (!wasAbove && currentY >= (splitY + hysteresis)) {
+            playerAboveLayerState.put(uuid, true);
+            switched = true;
+        }
+
+        if (switched) {
+            applyAllowedChunkRadius(p);
+            if (blockEspListener != null) {
+                blockEspListener.clearPlayerCache(uuid);
+            }
+        }
+    }
+
+    private void runAntiPlayerEspTask() {
+        boolean wallEspEnabled = getConfig().getBoolean("anti-player-esp.bat", true);
+        boolean layerEspEnabled = getConfig().getBoolean("hien-tren-an-duoi.bat", true)
+                && getConfig().getBoolean("hien-tren-an-duoi.an-nguoi-choi", true);
+
+        if (!wallEspEnabled && !layerEspEnabled) {
+            revealAllHiddenPlayers();
+            return;
+        }
+
+        double maxViewDist = getConfig().getDouble("anti-player-esp.khoang-cach-toi-da", 64.0);
+        double wallHideDist = getConfig().getDouble("anti-player-esp.khoang-cach-xuyen-tuong", 8.0);
+        long now = System.currentTimeMillis();
+        int rayBudget = 250;
+
+        List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
+
+        for (Player viewer : players) {
+            UUID viewerId = viewer.getUniqueId();
+            Set<UUID> hiddenSet = hiddenPlayersMap.computeIfAbsent(viewerId, k -> ConcurrentHashMap.newKeySet());
+
+            if (viewer.hasPermission("amberac.bypass")
+                    || viewer.getGameMode() == GameMode.SPECTATOR
+                    || viewer.getGameMode() == GameMode.CREATIVE) {
+                for (UUID targetId : new HashSet<>(hiddenSet)) {
+                    Player t = Bukkit.getPlayer(targetId);
+                    if (t != null) showEntityModelOnly(viewer, t);
+                    hiddenSet.remove(targetId);
+                }
+                continue;
+            }
+
+            Location eye = viewer.getEyeLocation();
+
+            for (Player target : players) {
+                if (viewer.equals(target)) continue;
+                UUID targetId = target.getUniqueId();
+
+                if (!viewer.getWorld().equals(target.getWorld())) {
+                    hiddenSet.remove(targetId);
+                    continue;
+                }
+
+                String pairKey = viewerId + ":" + targetId;
+                boolean occludedNow = false;
+
+                if (!target.isGlowing()) {
+                    double dist = eye.distance(target.getLocation());
+
+                    if (layerEspEnabled && isHiddenByYLayer(viewer, target.getLocation().getY(), true)) {
+                        if (dist <= 10.0 && !isCompletelyOccluded(viewer, target)) {
+                            occludedNow = false;
+                        } else {
+                            occludedNow = true;
+                            lastSeenTimestampMap.remove(pairKey);
+                        }
+                    } else if (wallEspEnabled) {
+                        if (dist > maxViewDist) {
+                            occludedNow = true;
+                        } else if (dist > wallHideDist && rayBudget > 0) {
+                            rayBudget -= 3;
+                            occludedNow = isCompletelyOccluded(viewer, target);
+                        }
+                    }
+                }
+
+                if (!occludedNow) {
+                    lastSeenTimestampMap.put(pairKey, now);
+                    if (hiddenSet.remove(targetId)) {
+                        showEntityModelOnly(viewer, target);
+                    }
+                } else {
+                    long lastSeen = lastSeenTimestampMap.getOrDefault(pairKey, 0L);
+                    if (now - lastSeen >= 1500L) {
+                        if (hiddenSet.add(targetId)) {
+                            hideEntityModelKeepTab(viewer, target);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isCompletelyOccluded(Player viewer, Player target) {
+        if (occlusionEngine == null) return false;
+        Location eye = viewer.getEyeLocation();
+        BoundingBox box = target.getBoundingBox();
+        return occlusionEngine.isTargetOccludedAsync(
+                viewer.getWorld().getName(),
+                eye.getX(), eye.getY(), eye.getZ(),
+                box.getMinX(), box.getMinY(), box.getMinZ(),
+                box.getMaxX(), box.getMaxY(), box.getMaxZ()
+        );
+    }
+
+    private void hideEntityModelKeepTab(Player viewer, Player target) {
+        viewer.hidePlayer(this, target);
+    }
+
+    private void showEntityModelOnly(Player viewer, Player target) {
+        viewer.showPlayer(this, target);
+    }
+
+    public void revealAllHiddenPlayers() {
+        for (Map.Entry<UUID, Set<UUID>> entry : hiddenPlayersMap.entrySet()) {
+            Player viewer = Bukkit.getPlayer(entry.getKey());
+            if (viewer == null) continue;
+            for (UUID targetId : entry.getValue()) {
+                Player target = Bukkit.getPlayer(targetId);
+                if (target != null) {
+                    viewer.showPlayer(this, target);
+                }
+            }
+            entry.getValue().clear();
+        }
+        hiddenPlayersMap.clear();
+        lastSeenTimestampMap.clear();
+    }
+
+    public void flag(Player p, String checkName, String detail) {
+        if (!getConfig().getBoolean("he-thong.anticheat", true)) return;
+        if (p.hasPermission("amberac.bypass")) return;
+
+        int maxPing = getConfig().getInt("chong-ban-nham.ping-toi-da-kiem-tra", 280);
+        double minTps = getConfig().getDouble("chong-ban-nham.tps-toi-thieu-kiem-tra", 17.5);
+        double currentTps = Bukkit.getTPS()[0];
+
+        if (p.getPing() > maxPing || currentTps < minTps) return;
+
+        UUID uuid = p.getUniqueId();
+        int vl = violations.merge(uuid, 1, Integer::sum);
+
+        if (suspectGuiManager != null) {
+            suspectGuiManager.recordViolation(p, checkName, detail, vl);
+        }
+
+        if (getConfig().getBoolean("he-thong.thong-bao-staff", true)) {
+            sendClickableAlert(p, checkName, detail, vl);
+        }
+
+        long now = System.currentTimeMillis();
+        if (now - logCooldownMap.getOrDefault(uuid, 0L) >= 4000L) {
+            logCooldownMap.put(uuid, now);
+            logViolationAsync(p.getName(), checkName, detail, vl, p.getPing(), currentTps);
+        }
+
+        boolean safeMode = getConfig().getBoolean("chong-ban-nham.che-do-an-toan-khong-ban", true);
+        int maxVl = getConfig().getInt("chong-ban-nham.nguong-vi-pham-toi-da", 25);
+
+        if (!safeMode && vl >= maxVl) {
+            violations.remove(uuid);
+            String cmd = getConfig().getString("chong-ban-nham.lenh-xu-phat", "kick %player% [Amber AntiCheat] Gian lan (%check%)")
+                    .replace("%player%", p.getName())
+                    .replace("%check%", checkName);
+            Bukkit.getScheduler().runTask(this, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
+        }
+    }
+
+    private void sendClickableAlert(Player suspect, String check, String detail, int vl) {
+        String msg = ChatColor.translateAlternateColorCodes('&',
+                "&8[&6&lAmber AntiCheat&8] &e" + suspect.getName() + " &7vi phạm &c&l" + check
+                        + " &8(&f" + detail + "&8) &7[&c" + vl + " VL&7] ");
+
+        TextComponent mainComp = new TextComponent(msg);
+        TextComponent btnWatch = new TextComponent(ChatColor.translateAlternateColorCodes('&', "&b&l[Theo dõi]"));
+        btnWatch.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ac watch " + suspect.getName()));
+        btnWatch.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new Text(ChatColor.translateAlternateColorCodes('&', "&aChạm để tự bật &f/vanish &avà dịch chuyển tới &e" + suspect.getName()))));
+        mainComp.addExtra(btnWatch);
+
+        for (Player staff : Bukkit.getOnlinePlayers()) {
+            if (staff.hasPermission("amberac.staff") || staff.hasPermission("amberac.admin")) {
+                staff.spigot().sendMessage(mainComp);
+            }
+        }
+    }
+
+    public void executeStaffWatch(Player staff, Player target) {
+        if (Bukkit.getPluginManager().isPluginEnabled("Essentials")) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "vanish " + staff.getName() + " on");
+        }
+        staff.setAllowFlight(true);
+        staff.setFlying(true);
+
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            if (staff.isOnline() && target.isOnline()) {
+                staff.teleport(target.getLocation());
+                staff.sendMessage(color("&8[&6&lAmber AntiCheat&8] &aĐã bật &fVanish + Fly &avà dịch chuyển tới &e" + target.getName() + "&a!"));
+            }
+        }, 1L);
+    }
+
+    private void logViolationAsync(String playerName, String check, String detail, int vl, int ping, double tps) {
+        boolean saveFile = getConfig().getBoolean("he-thong.luu-file-log", true);
+        String webhook = getConfig().getString("he-thong.discord-webhook-url", "");
+
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            String timeStr = logDateFormat.format(new Date());
+            String line = String.format("[%s] %s | %s (%s) | VL:%d | Ping:%dms | TPS:%.1f",
+                    timeStr, playerName, check, detail, vl, ping, tps);
+
+            if (saveFile) {
+                try {
+                    File file = new File(getDataFolder(), "violations.log");
+                    try (PrintWriter out = new PrintWriter(new FileWriter(file, true))) {
+                        out.println(line);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+
+            if (webhook != null && webhook.startsWith("http")) {
+                try {
+                    HttpURLConnection conn = (HttpURLConnection) URI.create(webhook).toURL().openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    conn.setDoOutput(true);
+                    String json = "{\"content\": \"**[Amber AntiCheat]** `" + playerName + "` vi phạm **" + check
+                            + "** (`" + detail + "`) - **" + vl + " VL** (Ping: `" + ping + "ms`)\"}";
+                    try (OutputStream os = conn.getOutputStream()) {
+                        os.write(json.getBytes(StandardCharsets.UTF_8));
+                    }
+                    conn.getResponseCode();
+                    conn.disconnect();
+                } catch (Exception ignored) {
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+        if (!channel.equals("minecraft:brand") || message == null || message.length <= 1) return;
+        String brand = new String(message, 1, message.length - 1, StandardCharsets.UTF_8).trim();
+        clientBrands.put(player.getUniqueId(), brand);
+
+        if (!getConfig().getBoolean("kiem-tra-client.bat", true) || player.hasPermission("amberac.bypass")) return;
+
+        String lower = brand.toLowerCase(Locale.ROOT);
+        for (String banned : getConfig().getStringList("kiem-tra-client.danh-sach-cam")) {
+            if (lower.contains(banned.toLowerCase(Locale.ROOT))) {
+                flag(player, "CLIENT-BRAND", "Client cấm: " + brand);
+                if (getConfig().getBoolean("kiem-tra-client.tu-dong-kick", false)) {
+                    Bukkit.getScheduler().runTask(this, () ->
+                            player.kickPlayer(color("&c[Amber AntiCheat] Máy chủ không cho phép sử dụng Client: &e" + brand)));
+                }
+                break;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        quittingPlayers.remove(p.getUniqueId());
+        int splitY = getConfig().getInt("hien-tren-an-duoi.moc-do-cao-y", 35);
+        playerAboveLayerState.put(p.getUniqueId(), p.getLocation().getBlockY() > splitY);
+
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            if (p.isOnline()) applyAllowedChunkRadius(p);
+        }, 5L);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onQuit(PlayerQuitEvent e) {
+        UUID uuid = e.getPlayer().getUniqueId();
+        quittingPlayers.add(uuid);
+        hiddenPlayersMap.remove(uuid);
+        playerAboveLayerState.remove(uuid);
+        clientBrands.remove(uuid);
+        logCooldownMap.remove(uuid);
+        if (packetCheckListener != null) {
+            packetCheckListener.clearPlayerData(uuid);
+        }
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        String cmdName = cmd.getName().toLowerCase(Locale.ROOT);
+
+        if (cmdName.equals("acsettings")) {
+            if (!(sender instanceof Player p)) return true;
+            if (!p.hasPermission("amberac.admin")) {
+                p.sendMessage(color("&cBạn không có quyền mở bảng cài đặt Amber AntiCheat!"));
+                return true;
+            }
+            settingsGuiManager.openMainGui(p);
+            return true;
+        }
+
+        if (cmdName.equals("sus")) {
+            if (!(sender instanceof Player p)) return true;
+            if (!p.hasPermission("amberac.staff") && !p.hasPermission("amberac.admin")) {
+                p.sendMessage(color("&cBạn không có quyền mở danh sách nghi phạm!"));
+                return true;
+            }
+            suspectGuiManager.openSuspectGui(p, 0);
+            return true;
+        }
+
+        if (args.length >= 2 && args[0].equalsIgnoreCase("watch")) {
+            if (!(sender instanceof Player staff)) return true;
+            if (!staff.hasPermission("amberac.staff") && !staff.hasPermission("amberac.admin")) return true;
+            Player target = Bukkit.getPlayerExact(args[1]);
+            if (target == null) {
+                staff.sendMessage(color("&8[&6&lAmber AntiCheat&8] &cNgười chơi &e" + args[1] + " &ckhông online!"));
+                return true;
+            }
+            executeStaffWatch(staff, target);
+            return true;
+        }
+
+        if (args.length >= 2 && args[0].equalsIgnoreCase("freeze")) {
+            if (!sender.hasPermission("amberac.staff") && !sender.hasPermission("amberac.admin")) return true;
+            Player target = Bukkit.getPlayerExact(args[1]);
+            if (target == null) {
+                sender.sendMessage(color("&8[&6&lAmber AntiCheat&8] &cNgười chơi &e" + args[1] + " &ckhông online!"));
+                return true;
+            }
+            suspectGuiManager.toggleFreeze(sender, target);
+            return true;
+        }
+
+        if (args.length >= 1 && args[0].equalsIgnoreCase("reload")) {
+            if (!sender.hasPermission("amberac.admin")) {
+                sender.sendMessage(color("&8[&6&lAmber AntiCheat&8] &cBạn cần quyền &eamberac.admin &cđể nạp lại cấu hình!"));
+                return true;
+            }
+            reloadPluginConfig();
+            sender.sendMessage(color("&8[&6&lAmber AntiCheat&8] &aĐã nạp lại cấu hình thành công!"));
+            return true;
+        }
+
+        sender.sendMessage(color("&8&m----------------------------------------"));
+        sender.sendMessage(color(" &6&lAmber AntiCheat &7- &fAMBER SMP (20.0 TPS)"));
+        sender.sendMessage(color(" &e/sus &7- Mở bảng danh sách nghi phạm (Đầu Steve)"));
+        sender.sendMessage(color(" &e/acsettings &7- Mở bảng bật/tắt 7 Module"));
+        sender.sendMessage(color(" &e/ac watch <tên> &7- Tự bật Vanish + Fly + TP"));
+        sender.sendMessage(color(" &e/ac freeze <tên> &7- Đóng băng / Mở băng kiểm tra"));
+        sender.sendMessage(color(" &e/ac reload &7- Nạp lại tệp config.yml"));
+        sender.sendMessage(color("&8&m----------------------------------------"));
+        return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
+        if (!sender.hasPermission("amberac.staff") && !sender.hasPermission("amberac.admin")) {
+            return Collections.emptyList();
+        }
+
+        if (args.length == 1) {
+            List<String> subCommands = new ArrayList<>(Arrays.asList("watch", "freeze"));
+            if (sender.hasPermission("amberac.admin")) {
+                subCommands.add("reload");
+            }
+            return StringUtil.copyPartialMatches(args[0], subCommands, new ArrayList<>());
+        }
+
+        if (args.length == 2 && (args[0].equalsIgnoreCase("watch") || args[0].equalsIgnoreCase("freeze"))) {
+            List<String> names = new ArrayList<>();
+            for (Player online : Bukkit.getOnlinePlayers()) {
+                names.add(online.getName());
+            }
+            return StringUtil.copyPartialMatches(args[1], names, new ArrayList<>());
+        }
+
+        return Collections.emptyList();
+    }
+
+    private String color(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s);
+    }
+}
+
+```
+
+`src/main/java/vn/amber/anticheat/AntiBlockEspListener.java`:
+
+```java
+package vn.amber.anticheat;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Allay;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Boat;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.IronGolem;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.Minecart;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.util.BoundingBox;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class AntiBlockEspListener implements Listener {
+
+    public record BlockPos(String world, int x, int y, int z) {}
+
+    private final AmberAntiCheat plugin;
+    private final AsyncOcclusionEngine occlusionEngine;
+
+    private final Map<String, Map<Long, Set<BlockPos>>> trackedBlocks = new ConcurrentHashMap<>();
+    private final Map<UUID, Set<BlockPos>> revealedBlocksByPlayer = new ConcurrentHashMap<>();
+    private final Map<String, Long> lastSeenBlockTime = new ConcurrentHashMap<>();
+
+    private final BlockData stoneData = Material.STONE.createBlockData();
+    private final BlockData deepslateData = Material.DEEPSLATE.createBlockData();
+    private final BlockData netherrackData = Material.NETHERRACK.createBlockData();
+
+    private static final double MAX_REVEAL_DISTANCE = 24.0;
+    private static final double MAX_REVEAL_DIST_SQ = MAX_REVEAL_DISTANCE * MAX_REVEAL_DISTANCE;
+    private static final int MAX_BLOCKS_PER_PLAYER = 64;
+
+    public AntiBlockEspListener(AmberAntiCheat plugin, AsyncOcclusionEngine occlusionEngine) {
+        this.plugin = plugin;
+        this.occlusionEngine = occlusionEngine;
+
+        for (World world : Bukkit.getWorlds()) {
+            for (Chunk chunk : world.getLoadedChunks()) {
+                scanChunk(chunk);
+            }
+        }
+    }
+
+    public void startTask() {
+        Bukkit.getScheduler().runTaskTimer(plugin, this::updateBlocksForAll, 20L, 8L);
+    }
+
+    private boolean isTargetMaterial(Material mat) {
+        if (mat == null) return false;
+        String name = mat.name();
+        if (name.endsWith("SHULKER_BOX") || name.endsWith("_BED") || name.endsWith("_SIGN")) return true;
+        if (name.equals("HOPPER") || name.equals("FURNACE") || name.equals("BLAST_FURNACE")
+                || name.equals("SMOKER") || name.equals("DISPENSER") || name.equals("DROPPER")
+                || name.equals("BREWING_STAND") || name.equals("ENCHANTING_TABLE")
+                || name.equals("ANVIL") || name.equals("CHIPPED_ANVIL") || name.equals("DAMAGED_ANVIL")
+                || name.equals("BEACON") || name.equals("CRAFTER") || name.equals("LECTERN")) {
+            return true;
+        }
+        List<String> list = plugin.getConfig().getStringList("anti-block-esp.danh-sach-block");
+        return list.contains(name);
+    }
+
+    private long getChunkKey(int cx, int cz) {
+        return (((long) cx) << 32) | (cz & 0xffffffffL);
+    }
+
+    private void scanChunk(Chunk chunk) {
+        if (chunk.getWorld().getEnvironment() == World.Environment.THE_END) return;
+        String worldName = chunk.getWorld().getName();
+        long key = getChunkKey(chunk.getX(), chunk.getZ());
+        Set<BlockPos> set = ConcurrentHashMap.newKeySet();
+
+        for (BlockState state : chunk.getTileEntities()) {
+            if (isTargetMaterial(state.getType())) {
+                set.add(new BlockPos(worldName, state.getX(), state.getY(), state.getZ()));
+            }
+        }
+        if (!set.isEmpty()) {
+            trackedBlocks.computeIfAbsent(worldName, k -> new ConcurrentHashMap<>()).put(key, set);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onChunkLoad(ChunkLoadEvent e) {
+        scanChunk(e.getChunk());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onChunkUnload(ChunkUnloadEvent e) {
+        Map<Long, Set<BlockPos>> map = trackedBlocks.get(e.getWorld().getName());
+        if (map != null) {
+            map.remove(getChunkKey(e.getChunk().getX(), e.getChunk().getZ()));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent e) {
+        Block b = e.getBlockPlaced();
+        if (!isTargetMaterial(b.getType())) return;
+
+        World w = b.getWorld();
+        BlockPos pos = new BlockPos(w.getName(), b.getX(), b.getY(), b.getZ());
+        long key = getChunkKey(b.getX() >> 4, b.getZ() >> 4);
+        trackedBlocks.computeIfAbsent(w.getName(), k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet())
+                .add(pos);
+
+        revealedBlocksByPlayer.computeIfAbsent(e.getPlayer().getUniqueId(), k -> ConcurrentHashMap.newKeySet()).add(pos);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!isTargetMaterial(b.getType())) return;
+            Location loc = b.getLocation();
+            BlockData mask = getMaskData(w, b.getY());
+            for (Player p : w.getPlayers()) {
+                if (p.equals(e.getPlayer()) || p.hasPermission("amberac.bypass")) continue;
+                Set<BlockPos> rev = revealedBlocksByPlayer.get(p.getUniqueId());
+                if (rev == null || !rev.contains(pos)) {
+                    p.sendBlockChange(loc, mask);
+                }
+            }
+        }, 1L);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent e) {
+        removeTrackedBlock(e.getBlock());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent e) {
+        for (Block b : e.blockList()) {
+            removeTrackedBlock(b);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockExplode(BlockExplodeEvent e) {
+        for (Block b : e.blockList()) {
+            removeTrackedBlock(b);
+        }
+    }
+
+    private void removeTrackedBlock(Block b) {
+        Map<Long, Set<BlockPos>> map = trackedBlocks.get(b.getWorld().getName());
+        if (map != null) {
+            Set<BlockPos> set = map.get(getChunkKey(b.getX() >> 4, b.getZ() >> 4));
+            if (set != null) {
+                BlockPos pos = new BlockPos(b.getWorld().getName(), b.getX(), b.getY(), b.getZ());
+                set.remove(pos);
+                for (Set<BlockPos> rev : revealedBlocksByPlayer.values()) {
+                    rev.remove(pos);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        revealedBlocksByPlayer.remove(e.getPlayer().getUniqueId());
+    }
+
+    public void clearPlayerCache(UUID uuid) {
+        Player p = Bukkit.getPlayer(uuid);
+        Set<BlockPos> rev = revealedBlocksByPlayer.remove(uuid);
+        if (p != null && rev != null) {
+            for (BlockPos pos : rev) {
+                World w = Bukkit.getWorld(pos.world());
+                if (w != null && w.equals(p.getWorld())) {
+                    p.sendBlockChange(new Location(w, pos.x(), pos.y(), pos.z()), getMaskData(w, pos.y()));
+                }
+            }
+        }
+    }
+
+    private void updateBlocksForAll() {
+        boolean wallBlockEsp = plugin.getConfig().getBoolean("anti-block-esp.bat", true);
+        boolean layerBlockEsp = plugin.getConfig().getBoolean("hien-tren-an-duoi.bat", true)
+                && plugin.getConfig().getBoolean("hien-tren-an-duoi.an-ruong-block", true);
+
+        if (!wallBlockEsp && !layerBlockEsp) {
+            restoreAllHiddenBlocks();
+            return;
+        }
+
+        double minAlwaysShowDist = plugin.getConfig().getDouble("anti-block-esp.khoang-cach-luon-hien", 2.5);
+        double minShowDistSq = minAlwaysShowDist * minAlwaysShowDist;
+        long now = System.currentTimeMillis();
+
+        for (Player viewer : Bukkit.getOnlinePlayers()) {
+            World world = viewer.getWorld();
+            if (world.getEnvironment() == World.Environment.THE_END) continue;
+
+            if (viewer.hasPermission("amberac.bypass")
+                    || viewer.getGameMode() == GameMode.SPECTATOR
+                    || viewer.getGameMode() == GameMode.CREATIVE) {
+                revealNearbyForBypass(viewer);
+                continue;
+            }
+
+            Set<BlockPos> revealedSet = revealedBlocksByPlayer.computeIfAbsent(viewer.getUniqueId(), k -> ConcurrentHashMap.newKeySet());
+            Location eye = viewer.getEyeLocation();
+            double eyeX = eye.getX(), eyeY = eye.getY(), eyeZ = eye.getZ();
+            String worldName = world.getName();
+
+            Iterator<BlockPos> it = revealedSet.iterator();
+            while (it.hasNext()) {
+                BlockPos pos = it.next();
+                if (!pos.world().equals(worldName)) {
+                    it.remove();
+                    continue;
+                }
+                double distSq = Math.pow(eyeX - (pos.x() + 0.5), 2)
+                        + Math.pow(eyeY - (pos.y() + 0.5), 2)
+                        + Math.pow(eyeZ - (pos.z() + 0.5), 2);
+
+                boolean differentLayer = layerBlockEsp && plugin.isHiddenByYLayer(viewer, pos.y(), false);
+                if (distSq > MAX_REVEAL_DIST_SQ || differentLayer) {
+                    it.remove();
+                    viewer.sendBlockChange(new Location(world, pos.x(), pos.y(), pos.z()), getMaskData(world, pos.y()));
+                }
+            }
+
+            Map<Long, Set<BlockPos>> worldMap = trackedBlocks.get(worldName);
+            if (worldMap != null && !worldMap.isEmpty()) {
+                int pChunkX = eye.getBlockX() >> 4;
+                int pChunkZ = eye.getBlockZ() >> 4;
+                int checkedCount = 0;
+
+                outerLoop:
+                for (int dx = -2; dx <= 2; dx++) {
+                    for (int dz = -2; dz <= 2; dz++) {
+                        Set<BlockPos> blocksInChunk = worldMap.get(getChunkKey(pChunkX + dx, pChunkZ + dz));
+                        if (blocksInChunk == null || blocksInChunk.isEmpty()) continue;
+
+                        for (BlockPos pos : blocksInChunk) {
+                            double distSq = Math.pow(eyeX - (pos.x() + 0.5), 2)
+                                    + Math.pow(eyeY - (pos.y() + 0.5), 2)
+                                    + Math.pow(eyeZ - (pos.z() + 0.5), 2);
+
+                            if (distSq > MAX_REVEAL_DIST_SQ) continue;
+                            if (layerBlockEsp && plugin.isHiddenByYLayer(viewer, pos.y(), false)) continue;
+
+                            if (++checkedCount > MAX_BLOCKS_PER_PLAYER) break outerLoop;
+
+                            Block block = world.getBlockAt(pos.x(), pos.y(), pos.z());
+                            if (!isTargetMaterial(block.getType())) {
+                                blocksInChunk.remove(pos);
+                                revealedSet.remove(pos);
+                                continue;
+                            }
+
+                            boolean canSee = true;
+                            if (wallBlockEsp && distSq >= minShowDistSq && occlusionEngine != null) {
+                                canSee = !occlusionEngine.isTargetOccludedAsync(
+                                        worldName, eyeX, eyeY, eyeZ,
+                                        pos.x(), pos.y(), pos.z(),
+                                        pos.x() + 1.0, pos.y() + 1.0, pos.z() + 1.0
+                                );
+                            }
+
+                            String timeKey = viewer.getUniqueId() + ":" + pos.x() + "," + pos.y() + "," + pos.z();
+                            Location blockLoc = block.getLocation();
+
+                            if (canSee) {
+                                lastSeenBlockTime.put(timeKey, now);
+                                if (revealedSet.add(pos)) {
+                                    viewer.sendBlockChange(blockLoc, block.getBlockData());
+                                }
+                            } else {
+                                if (revealedSet.contains(pos)) {
+                                    long lastSeen = lastSeenBlockTime.getOrDefault(timeKey, 0L);
+                                    if (now - lastSeen >= 1500L) {
+                                        revealedSet.remove(pos);
+                                        viewer.sendBlockChange(blockLoc, getMaskData(world, pos.y()));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            updateBaseEntitiesForViewer(viewer, wallBlockEsp, layerBlockEsp);
+        }
+    }
+
+    private boolean isBaseEntity(Entity entity) {
+        return entity instanceof Villager
+                || entity instanceof ItemFrame
+                || entity instanceof ArmorStand
+                || entity instanceof Minecart
+                || entity instanceof IronGolem
+                || entity instanceof Allay
+                || entity instanceof Boat;
+    }
+
+    private void updateBaseEntitiesForViewer(Player viewer, boolean wallEsp, boolean layerEsp) {
+        World world = viewer.getWorld();
+        Location eye = viewer.getEyeLocation();
+        int pChunkX = eye.getBlockX() >> 4;
+        int pChunkZ = eye.getBlockZ() >> 4;
+
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                if (!world.isChunkLoaded(pChunkX + dx, pChunkZ + dz)) continue;
+                Chunk chunk = world.getChunkAt(pChunkX + dx, pChunkZ + dz);
+
+                for (Entity ent : chunk.getEntities()) {
+                    if (!isBaseEntity(ent)) continue;
+
+                    Location entLoc = ent.getLocation();
+                    boolean shouldHide = false;
+
+                    if (layerEsp && plugin.isHiddenByYLayer(viewer, entLoc.getY(), false)) {
+                        shouldHide = true;
+                    } else if (wallEsp) {
+                        double distSq = eye.distanceSquared(entLoc);
+                        if (distSq > MAX_REVEAL_DIST_SQ) {
+                            shouldHide = true;
+                        } else if (distSq > 16.0 && occlusionEngine != null) {
+                            BoundingBox box = ent.getBoundingBox();
+                            shouldHide = occlusionEngine.isTargetOccludedAsync(
+                                    world.getName(), eye.getX(), eye.getY(), eye.getZ(),
+                                    box.getMinX(), box.getMinY(), box.getMinZ(),
+                                    box.getMaxX(), box.getMaxY(), box.getMaxZ()
+                            );
+                        }
+                    }
+
+                    if (shouldHide) {
+                        viewer.hideEntity(plugin, ent);
+                    } else {
+                        viewer.showEntity(plugin, ent);
+                    }
+                }
+            }
+        }
+    }
+
+    private void revealNearbyForBypass(Player viewer) {
+        World world = viewer.getWorld();
+        int cx = viewer.getLocation().getBlockX() >> 4;
+        int cz = viewer.getLocation().getBlockZ() >> 4;
+
+        Map<Long, Set<BlockPos>> worldMap = trackedBlocks.get(world.getName());
+        Set<BlockPos> rev = revealedBlocksByPlayer.computeIfAbsent(viewer.getUniqueId(), k -> ConcurrentHashMap.newKeySet());
+
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                if (worldMap != null) {
+                    Set<BlockPos> set = worldMap.get(getChunkKey(cx + dx, cz + dz));
+                    if (set != null) {
+                        for (BlockPos pos : set) {
+                            if (rev.add(pos)) {
+                                Block b = world.getBlockAt(pos.x(), pos.y(), pos.z());
+                                viewer.sendBlockChange(b.getLocation(), b.getBlockData());
+                            }
+                        }
+                    }
+                }
+                if (world.isChunkLoaded(cx + dx, cz + dz)) {
+                    Chunk chunk = world.getChunkAt(cx + dx, cz + dz);
+                    for (Entity ent : chunk.getEntities()) {
+                        if (isBaseEntity(ent)) {
+                            viewer.showEntity(plugin, ent);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private BlockData getMaskData(World world, int y) {
+        if (world.getEnvironment() == World.Environment.NETHER) return netherrackData;
+        return y < 0 ? deepslateData : stoneData;
+    }
+
+    public void restoreAllHiddenBlocks() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            revealNearbyForBypass(p);
+        }
+        revealedBlocksByPlayer.clear();
+        lastSeenBlockTime.clear();
+    }
+}
+
+```
+
+`src/main/java/vn/amber/anticheat/AntiXrayManager.java`:
+
+```java
+package vn.amber.anticheat;
+
+import com.github.retrooper.packetevents.protocol.world.chunk.BaseChunk;
+import com.github.retrooper.packetevents.protocol.world.chunk.Column;
+import com.github.retrooper.packetevents.protocol.world.states.WrappedBlockState;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerChunkData;
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+
+import java.util.Arrays;
+import java.util.List;
+
+public class AntiXrayManager implements Listener {
+
+    private final AmberAntiCheat plugin;
+
+    private static final int MAX_STATE_ID = 65536;
+    private volatile boolean[] transparentTable = new boolean[MAX_STATE_ID];
+    private volatile boolean[] overworldOreTable = new boolean[MAX_STATE_ID];
+    private volatile boolean[] netherOreTable = new boolean[MAX_STATE_ID];
+    private volatile boolean[] storageBlockTable = new boolean[MAX_STATE_ID];
+    private volatile boolean[] oreMaterialTable = new boolean[Material.values().length];
+
+    private volatile int stoneId;
+    private volatile int deepslateId;
+    private volatile int netherrackId;
+
+    private static final int[][] ADJACENT_OFFSETS = {
+            {1, 0, 0}, {-1, 0, 0},
+            {0, 1, 0}, {0, -1, 0},
+            {0, 0, 1}, {0, 0, -1}
+    };
+
+    public AntiXrayManager(AmberAntiCheat plugin) {
+        this.plugin = plugin;
+        reloadStateMappings();
+    }
+
+    public void reloadStateMappings() {
+        boolean[] newTransparent = new boolean[MAX_STATE_ID];
+        boolean[] newOwOres = new boolean[MAX_STATE_ID];
+        boolean[] newNetherOres = new boolean[MAX_STATE_ID];
+        boolean[] newStorage = new boolean[MAX_STATE_ID];
+        boolean[] newOreMat = new boolean[Material.values().length];
+
+        stoneId = getGlobalId(Material.STONE);
+        deepslateId = getGlobalId(Material.DEEPSLATE);
+        netherrackId = getGlobalId(Material.NETHERRACK);
+
+        List<String> owList = plugin.getConfig().getStringList("anti-xray.quang-overworld");
+        List<String> netherList = plugin.getConfig().getStringList("anti-xray.quang-nether");
+        List<String> blockEspList = plugin.getConfig().getStringList("anti-block-esp.danh-sach-block");
+
+        List<String> pieChartExtras = Arrays.asList(
+                "HOPPER", "FURNACE", "BLAST_FURNACE", "SMOKER", "DISPENSER", "DROPPER",
+                "PISTON", "STICKY_PISTON", "MOVING_PISTON", "BEACON", "BREWING_STAND",
+                "ENCHANTING_TABLE", "BELL", "CRAFTER", "DECORATED_POT", "LECTERN",
+                "ANVIL", "CHIPPED_ANVIL", "DAMAGED_ANVIL"
+        );
+
+        for (Material mat : Material.values()) {
+            if (!mat.isBlock()) continue;
+            int id = getGlobalId(mat);
+            if (id < 0 || id >= MAX_STATE_ID) continue;
+
+            if (mat.isAir() || !plugin.isFullSolidBlock(mat)) {
+                newTransparent[id] = true;
+            }
+
+            String name = mat.name();
+            boolean isOw = owList.contains(name);
+            boolean isNether = netherList.contains(name);
+            boolean isStorageOrTile = name.endsWith("SHULKER_BOX")
+                    || blockEspList.contains(name)
+                    || pieChartExtras.contains(name)
+                    || name.endsWith("_BED")
+                    || name.endsWith("_SIGN");
+
+            if (isOw) newOwOres[id] = true;
+            if (isNether) newNetherOres[id] = true;
+            if (isStorageOrTile) newStorage[id] = true;
+            if (isOw || isNether) {
+                newOreMat[mat.ordinal()] = true;
+            }
+        }
+
+        this.transparentTable = newTransparent;
+        this.overworldOreTable = newOwOres;
+        this.netherOreTable = newNetherOres;
+        this.storageBlockTable = newStorage;
+        this.oreMaterialTable = newOreMat;
+    }
+
+    private int getGlobalId(Material mat) {
+        try {
+            return SpigotConversionUtil.fromBukkitBlockData(mat.createBlockData()).getGlobalId();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private int getBlockStateId(BaseChunk section, int x, int y, int z) {
+        WrappedBlockState state = section.get(x, y, z);
+        return state != null ? state.getGlobalId() : 0;
+    }
+
+    public boolean obfuscateChunkPacket(Player player, WrapperPlayServerChunkData wrapper) {
+        if (player == null) return false;
+        GameMode gm = player.getGameMode();
+        if (gm == GameMode.SPECTATOR || gm == GameMode.CREATIVE || player.hasPermission("amberac.bypass")) {
+            return false;
+        }
+
+        World world = player.getWorld();
+        World.Environment env = world.getEnvironment();
+        if (env == World.Environment.THE_END) return false;
+
+        boolean xrayEnabled = plugin.getConfig().getBoolean("anti-xray.bat", true);
+        boolean hideStorageOnChunk = plugin.getConfig().getBoolean("anti-block-esp.bat", true);
+        boolean layerEnabled = plugin.getConfig().getBoolean("hien-tren-an-duoi.bat", true);
+        boolean pieChartProtect = layerEnabled && plugin.getConfig().getBoolean("hien-tren-an-duoi.chong-pie-chart-f3", true);
+
+        if (!xrayEnabled && !hideStorageOnChunk && !layerEnabled) return false;
+
+        int maxScanY = plugin.getConfig().getInt("anti-xray.do-cao-quet-toi-da", 64);
+
+        Column column = wrapper.getColumn();
+        BaseChunk[] sections = column.getChunks();
+        if (sections == null || sections.length == 0) return false;
+
+        int minY = world.getMinHeight();
+        boolean isNether = (env == World.Environment.NETHER);
+        boolean[] oreTable = isNether ? netherOreTable : overworldOreTable;
+        boolean modified = false;
+
+        long[] transparentMask = new long[64];
+
+        for (int secIdx = 0; secIdx < sections.length; secIdx++) {
+            int sectionBaseY = minY + (secIdx << 4);
+            if (sectionBaseY > maxScanY && !hideStorageOnChunk && !pieChartProtect) break;
+
+            BaseChunk section = sections[secIdx];
+            if (section == null || section.isEmpty()) continue;
+
+            boolean maskBuilt = false;
+
+            for (int y = 0; y < 16; y++) {
+                int worldY = sectionBaseY + y;
+                boolean scanOreHere = xrayEnabled && worldY <= maxScanY;
+
+                if (!scanOreHere && !hideStorageOnChunk && !pieChartProtect) continue;
+
+                int defaultMaskId = isNether ? netherrackId : (worldY < 0 ? deepslateId : stoneId);
+
+                for (int z = 0; z < 16; z++) {
+                    for (int x = 0; x < 16; x++) {
+                        int currentId = getBlockStateId(section, x, y, z);
+                        if (currentId <= 0 || currentId >= MAX_STATE_ID) continue;
+
+                        if ((hideStorageOnChunk || pieChartProtect) && storageBlockTable[currentId]) {
+                            section.set(x, y, z, defaultMaskId);
+                            modified = true;
+                            continue;
+                        }
+
+                        if (scanOreHere && oreTable[currentId]) {
+                            if (!maskBuilt) {
+                                buildTransparentMask(section, transparentMask);
+                                maskBuilt = true;
+                            }
+                            if (!isExposedFast(sections, secIdx, transparentMask, x, y, z)) {
+                                section.set(x, y, z, defaultMaskId);
+                                modified = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return modified;
+    }
+
+    private void buildTransparentMask(BaseChunk section, long[] mask) {
+        Arrays.fill(mask, 0L);
+        boolean[] trans = this.transparentTable;
+        for (int y = 0; y < 16; y++) {
+            int yOff = y << 8;
+            for (int z = 0; z < 16; z++) {
+                int zOff = yOff | (z << 4);
+                for (int x = 0; x < 16; x++) {
+                    int id = getBlockStateId(section, x, y, z);
+                    if (id >= 0 && id < MAX_STATE_ID && trans[id]) {
+                        int idx = zOff | x;
+                        mask[idx >> 6] |= (1L << (idx & 63));
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isExposedFast(BaseChunk[] sections, int secIdx, long[] mask, int x, int y, int z) {
+        if (x == 0 || x == 15 || z == 0 || z == 15) return true;
+
+        if (isMaskBitSet(mask, x - 1, y, z)) return true;
+        if (isMaskBitSet(mask, x + 1, y, z)) return true;
+        if (isMaskBitSet(mask, x, y, z - 1)) return true;
+        if (isMaskBitSet(mask, x, y, z + 1)) return true;
+
+        if (y > 0) {
+            if (isMaskBitSet(mask, x, y - 1, z)) return true;
+        } else if (secIdx > 0) {
+            BaseChunk below = sections[secIdx - 1];
+            if (below == null || below.isEmpty()) return true;
+            int id = getBlockStateId(below, x, 15, z);
+            if (id >= 0 && id < MAX_STATE_ID && transparentTable[id]) return true;
+        }
+
+        if (y < 15) {
+            if (isMaskBitSet(mask, x, y + 1, z)) return true;
+        } else if (secIdx + 1 < sections.length) {
+            BaseChunk above = sections[secIdx + 1];
+            if (above == null || above.isEmpty()) return true;
+            int id = getBlockStateId(above, x, 0, z);
+            if (id >= 0 && id < MAX_STATE_ID && transparentTable[id]) return true;
+        }
+
+        return false;
+    }
+
+    private boolean isMaskBitSet(long[] mask, int x, int y, int z) {
+        int idx = (y << 8) | (z << 4) | x;
+        return (mask[idx >> 6] & (1L << (idx & 63))) != 0L;
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent e) {
+        revealAdjacentBlocks(e.getBlock());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent e) {
+        for (Block b : e.blockList()) revealAdjacentBlocks(b);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockExplode(BlockExplodeEvent e) {
+        for (Block b : e.blockList()) revealAdjacentBlocks(b);
+    }
+
+    public void revealAdjacentBlocks(Block center) {
+        if (!plugin.getConfig().getBoolean("anti-xray.bat", true)) return;
+
+        World world = center.getWorld();
+        if (world.getEnvironment() == World.Environment.THE_END) return;
+
+        int by = center.getY();
+        int maxScanY = plugin.getConfig().getInt("anti-xray.do-cao-quet-toi-da", 64);
+        if (by > maxScanY + 1) return;
+
+        int bx = center.getX();
+        int bz = center.getZ();
+        double centerX = bx + 0.5;
+        double centerY = by + 0.5;
+        double centerZ = bz + 0.5;
+        boolean[] ores = this.oreMaterialTable;
+
+        for (int[] offset : ADJACENT_OFFSETS) {
+            Block adj = world.getBlockAt(bx + offset[0], by + offset[1], bz + offset[2]);
+            Material type = adj.getType();
+            if (!ores[type.ordinal()]) continue;
+
+            Location adjLoc = adj.getLocation();
+            BlockData realData = adj.getBlockData();
+            for (Player p : world.getPlayers()) {
+                if (plugin.isHiddenByYLayer(p, adjLoc.getY(), false)) continue;
+                Location pLoc = p.getLocation();
+                double dx = pLoc.getX() - centerX;
+                double dy = pLoc.getY() - centerY;
+                double dz = pLoc.getZ() - centerZ;
+                if ((dx * dx + dy * dy + dz * dz) <= 576.0) {
+                    p.sendBlockChange(adjLoc, realData);
+                }
+            }
+        }
+    }
+}
+
+```
+
+`src/main/java/vn/amber/anticheat/AsyncOcclusionEngine.java`:
+
+```java
+package vn.amber.anticheat;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.ChunkSnapshot;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
+
+import java.util.BitSet;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class AsyncOcclusionEngine implements Listener {
+
+    private static class ChunkBitMask {
+        final int minY;
+        final int height;
+        final BitSet solidBits;
+
+        ChunkBitMask(int minY, int maxY) {
+            this.minY = minY;
+            this.height = maxY - minY;
+            this.solidBits = new BitSet(16 * 16 * this.height);
+        }
+
+        int getIndex(int localX, int worldY, int localZ) {
+            int relY = worldY - minY;
+            if (relY < 0 || relY >= height) return -1;
+            return (relY << 8) | (localZ << 4) | (localX & 15);
+        }
+
+        synchronized void setSolid(int localX, int worldY, int localZ, boolean solid) {
+            int idx = getIndex(localX, worldY, localZ);
+            if (idx >= 0) {
+                solidBits.set(idx, solid);
+            }
+        }
+
+        synchronized boolean isSolid(int localX, int worldY, int localZ) {
+            int idx = getIndex(localX, worldY, localZ);
+            return idx >= 0 && solidBits.get(idx);
+        }
+    }
+
+    private final AmberAntiCheat plugin;
+    private final Map<String, Map<Long, ChunkBitMask>> worldChunkMasks = new ConcurrentHashMap<>();
+
+    public AsyncOcclusionEngine(AmberAntiCheat plugin) {
+        this.plugin = plugin;
+        for (World world : Bukkit.getWorlds()) {
+            for (Chunk chunk : world.getLoadedChunks()) {
+                indexChunkAsync(chunk);
+            }
+        }
+    }
+
+    private long getChunkKey(int cx, int cz) {
+        return (((long) cx) << 32) | (cz & 0xffffffffL);
+    }
+
+    private void indexChunkAsync(Chunk chunk) {
+        World world = chunk.getWorld();
+        String worldName = world.getName();
+        int minY = world.getMinHeight();
+        int maxY = world.getMaxHeight();
+        long key = getChunkKey(chunk.getX(), chunk.getZ());
+        ChunkSnapshot snapshot = chunk.getChunkSnapshot(false, false, false);
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            ChunkBitMask mask = new ChunkBitMask(minY, maxY);
+            for (int y = minY; y < maxY; y++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int x = 0; x < 16; x++) {
+                        Material mat = snapshot.getBlockType(x, y, z);
+                        if (plugin.isFullSolidBlock(mat)) {
+                            mask.setSolid(x, y, z, true);
+                        }
+                    }
+                }
+            }
+            worldChunkMasks.computeIfAbsent(worldName, k -> new ConcurrentHashMap<>()).put(key, mask);
+        });
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onChunkLoad(ChunkLoadEvent e) {
+        indexChunkAsync(e.getChunk());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onChunkUnload(ChunkUnloadEvent e) {
+        Map<Long, ChunkBitMask> map = worldChunkMasks.get(e.getWorld().getName());
+        if (map != null) {
+            map.remove(getChunkKey(e.getChunk().getX(), e.getChunk().getZ()));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent e) {
+        updateSingleBlock(e.getBlockPlaced(), e.getBlockPlaced().getType());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent e) {
+        updateSingleBlock(e.getBlock(), Material.AIR);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent e) {
+        for (Block b : e.blockList()) {
+            updateSingleBlock(b, Material.AIR);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockExplode(BlockExplodeEvent e) {
+        for (Block b : e.blockList()) {
+            updateSingleBlock(b, Material.AIR);
+        }
+    }
+
+    private void updateSingleBlock(Block b, Material newType) {
+        Map<Long, ChunkBitMask> map = worldChunkMasks.get(b.getWorld().getName());
+        if (map == null) return;
+        ChunkBitMask mask = map.get(getChunkKey(b.getX() >> 4, b.getZ() >> 4));
+        if (mask != null) {
+            mask.setSolid(b.getX() & 15, b.getY(), b.getZ() & 15, plugin.isFullSolidBlock(newType));
+        }
+    }
+
+    public boolean isTargetOccludedAsync(
+            String worldName,
+            double eyeX, double eyeY, double eyeZ,
+            double minX, double minY, double minZ,
+            double maxX, double maxY, double maxZ) {
+
+        double midX = (minX + maxX) * 0.5;
+        double midY = (minY + maxY) * 0.5;
+        double midZ = (minZ + maxZ) * 0.5;
+
+        double[][] points = {
+                {midX, midY, midZ},
+                {midX, maxY - 0.1, midZ},
+                {midX, minY + 0.1, midZ},
+                {minX + 0.1, midY, minZ + 0.1},
+                {maxX - 0.1, midY, maxZ - 0.1}
+        };
+
+        for (double[] pt : points) {
+            if (!isRayBlockedAsync(worldName, eyeX, eyeY, eyeZ, pt[0], pt[1], pt[2])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isRayBlockedAsync(String worldName, double x0, double y0, double z0, double x1, double y1, double z1) {
+        Map<Long, ChunkBitMask> worldMap = worldChunkMasks.get(worldName);
+        if (worldMap == null) return false;
+
+        double dx = x1 - x0;
+        double dy = y1 - y0;
+        double dz = z1 - z0;
+        double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (dist < 0.6) return false;
+
+        int steps = (int) Math.ceil(dist * 2.5);
+        double stepX = dx / steps;
+        double stepY = dy / steps;
+        double stepZ = dz / steps;
+
+        int endBlockX = (int) Math.floor(x1);
+        int endBlockY = (int) Math.floor(y1);
+        int endBlockZ = (int) Math.floor(z1);
+
+        double curX = x0 + stepX;
+        double curY = y0 + stepY;
+        double curZ = z0 + stepZ;
+
+        long cachedChunkKey = Long.MIN_VALUE;
+        ChunkBitMask currentMask = null;
+
+        for (int i = 1; i < steps; i++) {
+            int bx = (int) Math.floor(curX);
+            int by = (int) Math.floor(curY);
+            int bz = (int) Math.floor(curZ);
+
+            if (bx == endBlockX && by == endBlockY && bz == endBlockZ) {
+                return false;
+            }
+
+            long ck = getChunkKey(bx >> 4, bz >> 4);
+            if (ck != cachedChunkKey) {
+                cachedChunkKey = ck;
+                currentMask = worldMap.get(ck);
+            }
+
+            if (currentMask != null && currentMask.isSolid(bx & 15, by, bz & 15)) {
+                return true;
+            }
+
+            curX += stepX;
+            curY += stepY;
+            curZ += stepZ;
+        }
+        return false;
+    }
+}
+
+```
+
+`src/main/java/vn/amber/anticheat/CheckListener.java`:
+
+```java
+package vn.amber.anticheat;
+
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.BoundingBox;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class CheckListener implements Listener {
+
+    private final AmberAntiCheat plugin;
+    private final AsyncOcclusionEngine occlusionEngine;
+
+    private final Map<UUID, Long> cpsWindowMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> cpsCountMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> airTicksMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastPlaceTimeMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> fastPlaceStreak = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastMoveTimeMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> movementGraceTimeMap = new ConcurrentHashMap<>();
+
+    public CheckListener(AmberAntiCheat plugin, AsyncOcclusionEngine occlusionEngine) {
+        this.plugin = plugin;
+        this.occlusionEngine = occlusionEngine;
+    }
+
+    private boolean isWallBetween(Player player, Location targetCenter, double halfWidth, double halfHeight) {
+        if (occlusionEngine == null) return false;
+        Location eye = player.getEyeLocation();
+        double ex = eye.getX(), ey = eye.getY(), ez = eye.getZ();
+        double tx = targetCenter.getX(), ty = targetCenter.getY(), tz = targetCenter.getZ();
+
+        double distSq = Math.pow(ex - tx, 2) + Math.pow(ey - ty, 2) + Math.pow(ez - tz, 2);
+        if (distSq <= 2.25) return false;
+
+        return occlusionEngine.isTargetOccludedAsync(
+                player.getWorld().getName(), ex, ey, ez,
+                tx - halfWidth, ty - halfHeight, tz - halfWidth,
+                tx + halfWidth, ty + halfHeight, tz + halfWidth
+        );
+    }
+
+    private boolean isSensitiveInteractMaterial(Material type) {
+        String name = type.name();
+        return name.contains("CHEST")
+                || name.endsWith("SHULKER_BOX")
+                || name.equals("BARREL")
+                || name.equals("HOPPER")
+                || name.contains("FURNACE")
+                || name.equals("SMOKER")
+                || name.equals("DISPENSER")
+                || name.equals("DROPPER")
+                || name.equals("BREWING_STAND")
+                || name.equals("BEACON")
+                || name.equals("CRAFTER")
+                || name.contains("ANVIL")
+                || name.endsWith("_BUTTON")
+                || name.equals("LEVER")
+                || name.endsWith("_BED")
+                || name.equals("RESPAWN_ANCHOR");
+    }
+
+    // =========================================================================
+    // 1. KIỂM TRA COMBAT (REACH, CPS/KILLAURA, WALL-HIT)
+    // =========================================================================
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onCombatChecks(EntityDamageByEntityEvent e) {
+        // Chỉ kiểm tra đòn đánh cận chiến trực tiếp (Loại bỏ bắt nhầm Giáp Gai Thorns & Chém lan Sweep)
+        if (e.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) return;
+        if (!(e.getDamager() instanceof Player attacker)) return;
+
+        if (attacker.hasPermission("amberac.bypass")
+                || attacker.getGameMode() == GameMode.CREATIVE
+                || attacker.getGameMode() == GameMode.SPECTATOR) {
+            return;
+        }
+
+        Entity target = e.getEntity();
+        UUID uuid = attacker.getUniqueId();
+        long now = System.currentTimeMillis();
+
+        // 1. CPS / KillAura
+        long start = cpsWindowMap.computeIfAbsent(uuid, k -> now);
+        int cps = cpsCountMap.merge(uuid, 1, Integer::sum);
+        if (now - start >= 1000L) {
+            int maxCps = plugin.getConfig().getInt("checks.combat.max-cps", 22);
+            if (cps > maxCps) {
+                e.setCancelled(true);
+                plugin.flag(attacker, "KILLAURA-CPS", "CPS: " + cps);
+            }
+            cpsWindowMap.put(uuid, now);
+            cpsCountMap.put(uuid, 0);
+        }
+
+        // 2. Reach (Tính từ mắt tới cạnh Hitbox gần nhất của mục tiêu)
+        BoundingBox box = target.getBoundingBox();
+        Location eye = attacker.getEyeLocation();
+        double dx = Math.max(box.getMinX() - eye.getX(), Math.max(0, eye.getX() - box.getMaxX()));
+        double dy = Math.max(box.getMinY() - eye.getY(), Math.max(0, eye.getY() - box.getMaxY()));
+        double dz = Math.max(box.getMinZ() - eye.getZ(), Math.max(0, eye.getZ() - box.getMaxZ()));
+        double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        double maxReach = plugin.getConfig().getDouble("checks.combat.reach-max", 3.55);
+        if (attacker.getPing() > 120) maxReach += 0.25;
+
+        if (dist > maxReach) {
+            e.setCancelled(true);
+            plugin.flag(attacker, "REACH", String.format("Khoảng cách: %.2fm", dist));
+            return;
+        }
+
+        // 3. Đánh xuyên tường đặc (Wall-Hit / Freecam)
+        if (target instanceof LivingEntity && isWallBetween(attacker, box.getCenter().toLocation(attacker.getWorld()), 0.35, 0.8)) {
+            e.setCancelled(true);
+            plugin.flag(attacker, "WALL-HIT", "Đánh xuyên tường đặc");
+        }
+    }
+
+    // =========================================================================
+    // 2. KIỂM TRA DI CHUYỂN (FLY, SPEED, INV-MOVE) & BỘ ĐỆM CHỐNG BẮT NHẦM
+    // =========================================================================
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerDamaged(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Player p) {
+            // Miễn trừ kiểm tra Speed/Fly trong 1.5s sau khi bị đánh văng / nổ TNT / Wind Charge
+            movementGraceTimeMap.put(p.getUniqueId(), System.currentTimeMillis() + 1500L);
+            airTicksMap.remove(p.getUniqueId());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerTeleport(PlayerTeleportEvent e) {
+        UUID uuid = e.getPlayer().getUniqueId();
+        movementGraceTimeMap.put(uuid, System.currentTimeMillis() + 1500L);
+        airTicksMap.remove(uuid);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onMove(PlayerMoveEvent e) {
+        if (e.getTo() == null) return;
+        if (e.getFrom().getX() == e.getTo().getX()
+                && e.getFrom().getY() == e.getTo().getY()
+                && e.getFrom().getZ() == e.getTo().getZ()) {
+            return;
+        }
+
+        Player p = e.getPlayer();
+        UUID uuid = p.getUniqueId();
+
+        if (plugin.getSuspectGuiManager() != null && plugin.getSuspectGuiManager().isFrozen(uuid)) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        if (p.hasPermission("amberac.bypass")
+                || p.getGameMode() == GameMode.CREATIVE
+                || p.getGameMode() == GameMode.SPECTATOR
+                || p.getAllowFlight()
+                || p.isInsideVehicle()
+                || p.isGliding()
+                || p.isRiptiding()) {
+            airTicksMap.remove(uuid);
+            movementGraceTimeMap.put(uuid, now + 1200L);
+            return;
+        }
+
+        lastMoveTimeMap.put(uuid, now);
+
+        // Đang trong thời gian miễn trừ sau khi bị đẩy lùi / nổ / dịch chuyển
+        if (now < movementGraceTimeMap.getOrDefault(uuid, 0L)) {
+            airTicksMap.remove(uuid);
+            return;
+        }
+
+        Location from = e.getFrom();
+        Location to = e.getTo();
+        double dx = to.getX() - from.getX();
+        double dy = to.getY() - from.getY();
+        double dz = to.getZ() - from.getZ();
+        double horizontalSpeed = Math.sqrt(dx * dx + dz * dz);
+
+        // 1. Check Speed
+        double maxSpeed = 0.78;
+        PotionEffect speedEffect = p.getPotionEffect(PotionEffectType.SPEED);
+        if (speedEffect != null) {
+            maxSpeed += (speedEffect.getAmplifier() + 1) * 0.18;
+        }
+        if (horizontalSpeed > maxSpeed && p.getVelocity().length() < 0.1) {
+            plugin.flag(p, "SPEED", String.format("Tốc độ: %.2f", horizontalSpeed));
+        }
+
+        // 2. Check Fly
+        Block below = to.clone().subtract(0, 0.55, 0).getBlock();
+        boolean nearGround = !below.getType().isAir()
+                || p.isOnGround()
+                || p.isSwimming()
+                || p.isClimbing()
+                || p.hasPotionEffect(PotionEffectType.LEVITATION)
+                || p.hasPotionEffect(PotionEffectType.SLOW_FALLING);
+
+        if (!nearGround) {
+            int airTicks = airTicksMap.merge(uuid, 1, Integer::sum);
+            if (airTicks > 20 && dy >= -0.02 && p.getVelocity().getY() <= 0.0) {
+                plugin.flag(p, "FLY", "Lơ lửng trên không (" + airTicks + " ticks)");
+            }
+        } else {
+            airTicksMap.remove(uuid);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onInventoryClickWhileMoving(InventoryClickEvent e) {
+        if (!(e.getWhoClicked() instanceof Player p)) return;
+        if (p.hasPermission("amberac.bypass") || p.getGameMode() == GameMode.CREATIVE) return;
+
+        long now = System.currentTimeMillis();
+        if (now < movementGraceTimeMap.getOrDefault(p.getUniqueId(), 0L)) return;
+
+        long lastMove = lastMoveTimeMap.getOrDefault(p.getUniqueId(), 0L);
+        if (now - lastMove < 50L && p.isSprinting() && !p.isSwimming() && !p.isFlying()) {
+            plugin.flag(p, "INV-MOVE", "Thao tác túi đồ khi đang chạy nước rút");
+        }
+    }
+
+    // =========================================================================
+    // 3. CHẶN FREECAM TƯƠNG TÁC XUYÊN TƯỜNG & SCAFFOLD
+    // =========================================================================
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onFreecamInteractBlock(PlayerInteractEvent e) {
+        if (e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        Block b = e.getClickedBlock();
+        if (b == null) return;
+
+        Player p = e.getPlayer();
+        if (p.hasPermission("amberac.bypass") || p.getGameMode() == GameMode.SPECTATOR) return;
+
+        Material type = b.getType();
+        if (!isSensitiveInteractMaterial(type)) return;
+
+        Location blockCenter = b.getLocation().add(0.5, 0.5, 0.5);
+        double dist = p.getEyeLocation().distance(blockCenter);
+        if (dist > 6.0) {
+            e.setCancelled(true);
+            plugin.flag(p, "FREECAM-REACH", String.format("Mở khối quá xa (%.1fm)", dist));
+            return;
+        }
+
+        if (isWallBetween(p, blockCenter, 0.45, 0.45)) {
+            e.setCancelled(true);
+            plugin.flag(p, "FREECAM-WALL", "Tương tác " + type.name() + " xuyên tường");
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onFreecamInteractEntity(PlayerInteractEntityEvent e) {
+        checkEntityWallInteraction(e.getPlayer(), e.getRightClicked(), e);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onFreecamArmorStand(PlayerArmorStandManipulateEvent e) {
+        checkEntityWallInteraction(e.getPlayer(), e.getRightClicked(), e);
+    }
+
+    private void checkEntityWallInteraction(Player p, Entity target, Cancellable event) {
+        if (p.hasPermission("amberac.bypass") || p.getGameMode() == GameMode.SPECTATOR) return;
+
+        BoundingBox box = target.getBoundingBox();
+        Location center = box.getCenter().toLocation(p.getWorld());
+        double dist = p.getEyeLocation().distance(center);
+
+        if (dist > 6.0) {
+            event.setCancelled(true);
+            plugin.flag(p, "FREECAM-ENTITY", String.format("Chuột phải thực thể quá xa (%.1fm)", dist));
+            return;
+        }
+
+        double halfW = Math.max(0.25, box.getWidthX() * 0.45);
+        double halfH = Math.max(0.25, box.getHeight() * 0.45);
+        if (isWallBetween(p, center, halfW, halfH)) {
+            event.setCancelled(true);
+            plugin.flag(p, "FREECAM-ENTITY", "Tương tác " + target.getType().name() + " xuyên tường");
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onFreecamBreak(BlockBreakEvent e) {
+        Player p = e.getPlayer();
+        if (p.hasPermission("amberac.bypass") || p.getGameMode() == GameMode.SPECTATOR) return;
+
+        Location center = e.getBlock().getLocation().add(0.5, 0.5, 0.5);
+        if (p.getEyeLocation().distance(center) > 6.2 || isWallBetween(p, center, 0.45, 0.45)) {
+            e.setCancelled(true);
+            plugin.flag(p, "FREECAM-BREAK", "Đập " + e.getBlock().getType().name() + " xuyên tường");
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onFreecamPlaceAndScaffold(BlockPlaceEvent e) {
+        Player p = e.getPlayer();
+        if (p.hasPermission("amberac.bypass") || p.getGameMode() == GameMode.SPECTATOR) return;
+
+        Location againstCenter = e.getBlockAgainst().getLocation().add(0.5, 0.5, 0.5);
+        if (p.getEyeLocation().distance(againstCenter) > 6.5 || isWallBetween(p, againstCenter, 0.48, 0.48)) {
+            e.setCancelled(true);
+            plugin.flag(p, "FREECAM-PLACE", "Đặt " + e.getBlockPlaced().getType().name() + " xuyên tường");
+            return;
+        }
+
+        UUID uuid = p.getUniqueId();
+        long now = System.currentTimeMillis();
+        long diff = now - lastPlaceTimeMap.getOrDefault(uuid, 0L);
+        lastPlaceTimeMap.put(uuid, now);
+
+        if (diff < 45L && p.getGameMode() != GameMode.CREATIVE) {
+            int streak = fastPlaceStreak.merge(uuid, 1, Integer::sum);
+            if (streak >= 5) {
+                e.setCancelled(true);
+                fastPlaceStreak.put(uuid, 0);
+                plugin.flag(p, "SCAFFOLD", "Đặt block siêu tốc (" + diff + "ms)");
+            }
+        } else {
+            fastPlaceStreak.put(uuid, 0);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onFreecamBucket(PlayerBucketEmptyEvent e) {
+        Player p = e.getPlayer();
+        if (p.hasPermission("amberac.bypass") || p.getGameMode() == GameMode.SPECTATOR) return;
+
+        Location center = e.getBlockClicked().getLocation().add(0.5, 0.5, 0.5);
+        if (p.getEyeLocation().distance(center) > 6.2 || isWallBetween(p, center, 0.45, 0.45)) {
+            e.setCancelled(true);
+            plugin.flag(p, "FREECAM-BUCKET", "Đổ xô " + e.getBucket().name() + " xuyên tường");
+        }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        UUID uuid = e.getPlayer().getUniqueId();
+        cpsWindowMap.remove(uuid);
+        cpsCountMap.remove(uuid);
+        airTicksMap.remove(uuid);
+        lastPlaceTimeMap.remove(uuid);
+        fastPlaceStreak.remove(uuid);
+        lastMoveTimeMap.remove(uuid);
+        movementGraceTimeMap.remove(uuid);
+    }
+}
+
+```
+
+`src/main/java/vn/amber/anticheat/PacketCheckListener.java`:
+
+```java
+package vn.amber.anticheat;
+
+import com.github.retrooper.packetevents.event.PacketListener;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerFlying;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerPosition;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerPositionAndRotation;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerRotation;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockEntityData;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerChunkData;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityVelocity;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerParticle;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSoundEffect;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class PacketCheckListener implements PacketListener {
+
+    private final AmberAntiCheat plugin;
+    private final AntiXrayManager antiXrayManager;
+
+    private final Map<UUID, Long> timerWindowStart = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> timerPacketCount = new ConcurrentHashMap<>();
+    private final Map<UUID, Float> lastPitchMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Float> lastDeltaPitchMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> gcdStreakMap = new ConcurrentHashMap<>();
+
+    private final Map<UUID, Long> pendingVelocityTime = new ConcurrentHashMap<>();
+    private final Map<UUID, Double> velocityStartY = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> velocityFailStreak = new ConcurrentHashMap<>();
+
+    public PacketCheckListener(AmberAntiCheat plugin, AntiXrayManager antiXrayManager) {
+        this.plugin = plugin;
+        this.antiXrayManager = antiXrayManager;
+    }
+
+    public void clearPlayerData(UUID uuid) {
+        timerWindowStart.remove(uuid);
+        timerPacketCount.remove(uuid);
+        lastPitchMap.remove(uuid);
+        lastDeltaPitchMap.remove(uuid);
+        gcdStreakMap.remove(uuid);
+        pendingVelocityTime.remove(uuid);
+        velocityStartY.remove(uuid);
+        velocityFailStreak.remove(uuid);
+    }
+
+    @Override
+    public void onPacketSend(PacketSendEvent event) {
+        if (!(event.getPlayer() instanceof Player player)) return;
+
+        // 1. Giữ nguyên tên trên bảng Tab khi ẩn mô hình 3D bằng Anti-PlayerESP
+        if (event.getPacketType() == PacketType.Play.Server.PLAYER_INFO_REMOVE) {
+            WrapperPlayServerPlayerInfoRemove removePacket = new WrapperPlayServerPlayerInfoRemove(event);
+            List<UUID> uuids = new ArrayList<>(removePacket.getProfileIds());
+            boolean modified = uuids.removeIf(targetId -> {
+                Player target = Bukkit.getPlayer(targetId);
+                return target != null && target.isOnline() && !plugin.isPlayerQuitting(targetId);
+            });
+            if (modified) {
+                if (uuids.isEmpty()) {
+                    event.setCancelled(true);
+                } else {
+                    removePacket.setProfileIds(uuids);
+                    event.markForReEncode(true);
+                }
+            }
+            return;
+        }
+
+        boolean bypassVisuals = player.hasPermission("amberac.bypass")
+                || player.getGameMode() == GameMode.SPECTATOR
+                || player.getGameMode() == GameMode.CREATIVE;
+
+        // 2. Chặn gói NBT của TileEntity khác tầng Y (Chống lộ căn cứ qua Shift+F3 Pie-Chart)
+        if (event.getPacketType() == PacketType.Play.Server.BLOCK_ENTITY_DATA) {
+            if (!bypassVisuals
+                    && plugin.getConfig().getBoolean("hien-tren-an-duoi.bat", true)
+                    && plugin.getConfig().getBoolean("hien-tren-an-duoi.chong-pie-chart-f3", true)) {
+                WrapperPlayServerBlockEntityData bePacket = new WrapperPlayServerBlockEntityData(event);
+                int blockY = bePacket.getPosition().getY();
+                if (plugin.isHiddenByYLayer(player, blockY, false)) {
+                    event.setCancelled(true);
+                }
+            }
+            return;
+        }
+
+        // 3. Chặn âm thanh phát ra từ tầng bị ẩn (Chống SoundESP)
+        if (event.getPacketType() == PacketType.Play.Server.SOUND_EFFECT) {
+            if (!bypassVisuals
+                    && plugin.getConfig().getBoolean("hien-tren-an-duoi.bat", true)
+                    && plugin.getConfig().getBoolean("hien-tren-an-duoi.chan-am-thanh-khac-tang", true)) {
+                WrapperPlayServerSoundEffect soundPacket = new WrapperPlayServerSoundEffect(event);
+                double soundY = soundPacket.getEffectPosition().getY() / 8.0;
+                if (plugin.isHiddenByYLayer(player, soundY, false)) {
+                    event.setCancelled(true);
+                }
+            }
+            return;
+        }
+
+        // 4. Chặn hạt hiệu ứng (Particle) phát ra từ tầng bị ẩn
+        if (event.getPacketType() == PacketType.Play.Server.PARTICLE) {
+            if (!bypassVisuals && plugin.getConfig().getBoolean("hien-tren-an-duoi.bat", true)) {
+                WrapperPlayServerParticle particlePacket = new WrapperPlayServerParticle(event);
+                double particleY = particlePacket.getPosition().getY();
+                if (plugin.isHiddenByYLayer(player, particleY, false)) {
+                    event.setCancelled(true);
+                }
+            }
+            return;
+        }
+
+        // 5. Ghi nhận thời điểm gửi gói đẩy lùi (Velocity) để bắt Anti-Knockback
+        if (event.getPacketType() == PacketType.Play.Server.ENTITY_VELOCITY) {
+            WrapperPlayServerEntityVelocity vel = new WrapperPlayServerEntityVelocity(event);
+            if (vel.getEntityId() == player.getEntityId() && vel.getVelocity().getY() > 0.25) {
+                UUID uuid = player.getUniqueId();
+                pendingVelocityTime.put(uuid, System.currentTimeMillis());
+                velocityStartY.put(uuid, player.getLocation().getY());
+            }
+            return;
+        }
+
+        // 6. Xử lý gói CHUNK_DATA (Anti-Xray 1 Mode + Khóa Rương/Máy móc thành Đá)
+        if (event.getPacketType() == PacketType.Play.Server.CHUNK_DATA) {
+            if (!bypassVisuals && antiXrayManager != null) {
+                try {
+                    WrapperPlayServerChunkData chunkData = new WrapperPlayServerChunkData(event);
+                    if (antiXrayManager.obfuscateChunkPacket(player, chunkData)) {
+                        event.markForReEncode(true);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onPacketReceive(PacketReceiveEvent event) {
+        if (!(event.getPlayer() instanceof Player player)) return;
+        if (!plugin.getConfig().getBoolean("he-thong.anticheat", true)) return;
+        if (player.hasPermission("amberac.bypass")) return;
+
+        UUID uuid = player.getUniqueId();
+        if (plugin.getSuspectGuiManager() != null && plugin.getSuspectGuiManager().isFrozen(uuid)) {
+            return;
+        }
+
+        if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
+            long now = System.currentTimeMillis();
+
+            // 1. Check Timer (Tua nhanh tốc độ game)
+            long start = timerWindowStart.computeIfAbsent(uuid, k -> now);
+            int count = timerPacketCount.merge(uuid, 1, Integer::sum);
+            if (now - start >= 1000L) {
+                int maxPackets = plugin.getConfig().getInt("checks.movement.timer-max-packets-per-sec", 26);
+                if (count > maxPackets && !player.isInsideVehicle() && !player.isGliding()) {
+                    int finalCount = count;
+                    Bukkit.getScheduler().runTask(plugin, () ->
+                            plugin.flag(player, "TIMER", finalCount + " gói/giây"));
+                }
+                timerWindowStart.put(uuid, now);
+                timerPacketCount.put(uuid, 0);
+            }
+
+            // 2. Check Velocity (Anti-Knockback)
+            Long velTime = pendingVelocityTime.get(uuid);
+            if (velTime != null) {
+                long elapsed = now - velTime;
+                double currentY = player.getLocation().getY();
+                if (event.getPacketType() == PacketType.Play.Client.PLAYER_POSITION) {
+                    currentY = new WrapperPlayClientPlayerPosition(event).getPosition().getY();
+                } else if (event.getPacketType() == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION) {
+                    currentY = new WrapperPlayClientPlayerPositionAndRotation(event).getPosition().getY();
+                }
+
+                double startY = velocityStartY.getOrDefault(uuid, currentY);
+                if (currentY - startY > 0.08) {
+                    pendingVelocityTime.remove(uuid);
+                    velocityFailStreak.put(uuid, 0);
+                } else if (elapsed > Math.max(350L, player.getPing() + 180L)) {
+                    pendingVelocityTime.remove(uuid);
+                    if (!player.isInsideVehicle() && !player.isSwimming() && !player.isClimbing()) {
+                        int streak = velocityFailStreak.merge(uuid, 1, Integer::sum);
+                        if (streak >= 3) {
+                            velocityFailStreak.put(uuid, 0);
+                            Bukkit.getScheduler().runTask(plugin, () ->
+                                    plugin.flag(player, "VELOCITY", "Không nhận lực đẩy lùi (Anti-KB)"));
+                        }
+                    }
+                }
+            }
+
+            // 3. Check Aim-GCD (Aimbot khóa tâm)
+            float pitch = Float.NaN;
+            if (event.getPacketType() == PacketType.Play.Client.PLAYER_ROTATION) {
+                pitch = new WrapperPlayClientPlayerRotation(event).getPitch();
+            } else if (event.getPacketType() == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION) {
+                pitch = new WrapperPlayClientPlayerPositionAndRotation(event).getPitch();
+            }
+
+            if (!Float.isNaN(pitch) && Math.abs(pitch) < 89.0f) {
+                Float prevPitch = lastPitchMap.put(uuid, pitch);
+                if (prevPitch != null) {
+                    float deltaPitch = Math.abs(pitch - prevPitch);
+                    if (deltaPitch > 0.5f && deltaPitch < 25.0f) {
+                        Float prevDelta = lastDeltaPitchMap.put(uuid, deltaPitch);
+                        if (prevDelta != null) {
+                            long expandedCurr = (long) (deltaPitch * 16777216.0f);
+                            long expandedPrev = (long) (prevDelta * 16777216.0f);
+                            long gcd = computeGcd(expandedCurr, expandedPrev);
+                            if (gcd > 0 && gcd < 131072L) {
+                                int streak = gcdStreakMap.merge(uuid, 1, Integer::sum);
+                                if (streak >= 14) {
+                                    gcdStreakMap.put(uuid, 0);
+                                    Bukkit.getScheduler().runTask(plugin, () ->
+                                            plugin.flag(player, "AIM-GCD", "Khóa tâm bất thường"));
+                                }
+                            } else {
+                                gcdStreakMap.computeIfPresent(uuid, (k, v) -> v > 0 ? v - 1 : 0);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private long computeGcd(long a, long b) {
+        while (b != 0) {
+            long t = b;
+            b = a % b;
+            a = t;
+        }
+        return a;
+    }
+}
+
+```
+
+`src/main/java/vn/amber/anticheat/SettingsGuiManager.java`:
+
+```java
+package vn.amber.anticheat;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class SettingsGuiManager implements Listener {
+
+    private final AmberAntiCheat plugin;
+    public static final String GUI_TITLE = ChatColor.DARK_GRAY + "⚙ " + ChatColor.GOLD + ChatColor.BOLD + "Amber AntiCheat " + ChatColor.DARK_GRAY + "| " + ChatColor.WHITE + "Cài Đặt";
+
+    private final Map<Integer, String> slotToConfigPath = new HashMap<>();
+
+    public SettingsGuiManager(AmberAntiCheat plugin) {
+        this.plugin = plugin;
+
+        slotToConfigPath.put(10, "he-thong.anticheat");
+        slotToConfigPath.put(11, "anti-xray.bat");
+        slotToConfigPath.put(12, "anti-player-esp.bat");
+        slotToConfigPath.put(13, "anti-block-esp.bat");
+        slotToConfigPath.put(14, "hien-tren-an-duoi.bat");
+        slotToConfigPath.put(15, "kiem-tra-client.bat");
+        slotToConfigPath.put(16, "chong-ban-nham.che-do-an-toan-khong-ban");
+        slotToConfigPath.put(21, "he-thong.thong-bao-staff");
+    }
+
+    public void openMainGui(Player player) {
+        Inventory inv = Bukkit.createInventory(null, 27, GUI_TITLE);
+        renderItems(inv);
+        player.openInventory(inv);
+    }
+
+    private void renderItems(Inventory inv) {
+        ItemStack filler = createDecorationGlass();
+        for (int i = 0; i < 27; i++) {
+            inv.setItem(i, filler);
+        }
+
+        inv.setItem(10, createSwitchItem(
+                Material.DIAMOND_SWORD,
+                "AntiCheat (PvP, Movement, Freecam)",
+                "he-thong.anticheat",
+                Arrays.asList(
+                        "&7• Bắt Reach, KillAura, Aim-GCD, Velocity.",
+                        "&7• Bắt Timer, Fly, Speed, Scaffold.",
+                        "&7• Chặn Freecam mở rương/đập đặt xuyên tường.",
+                        "&8Mức tải: &aSiêu nhẹ (< 0.2ms MSPT)"
+                )
+        ));
+
+        inv.setItem(11, createSwitchItem(
+                Material.NETHERITE_PICKAXE,
+                "Anti-Xray (1 Mode Tối Ưu)",
+                "anti-xray.bat",
+                Arrays.asList(
+                        "&7• Biến quặng chôn kín 6 mặt (Y <= 64) thành Đá.",
+                        "&7• Tự mở khóa đúng 6 mặt sát vách khi đào.",
+                        "&8Mức tải: &aNhẹ (Chạy trên luồng Netty)"
+                )
+        ));
+
+        inv.setItem(12, createSwitchItem(
+                Material.ENDER_EYE,
+                "Anti-PlayerESP (Xuyên Tường)",
+                "anti-player-esp.bat",
+                Arrays.asList(
+                        "&7• Ẩn mô hình 3D người chơi sau tường (> 8m)",
+                        "&7  hoặc đứng quá xa (> 64m).",
+                        "&7• Giữ nguyên tên trên bảng Tab + Trễ ẩn 1.5s.",
+                        "&8Mức tải: &aNhẹ (Dò tia Async trên BitSet)"
+                )
+        ));
+
+        inv.setItem(13, createSwitchItem(
+                Material.CHEST,
+                "Anti-BlockESP & Anti-Base",
+                "anti-block-esp.bat",
+                Arrays.asList(
+                        "&7• Mặc định biến Rương, Shulker, Spawner, Phễu,",
+                        "&7  Lò nung, Giường, Đe thành Đá khi tải chunk.",
+                        "&7• Chỉ mở khóa khi <= 24m + không bị tường che.",
+                        "&8Mức tải: &eTrung bình - Nhẹ (Giới hạn 64 khối)"
+                )
+        ));
+
+        inv.setItem(14, createSwitchItem(
+                Material.RECOVERY_COMPASS,
+                "Phân Tầng Y=35 (2 Chiều) & Khóa Chunk",
+                "hien-tren-an-duoi.bat",
+                Arrays.asList(
+                        "&7• Ở trên Y=35: Ẩn sạch người & base dưới hầm.",
+                        "&7• Ở dưới Y=35: Ẩn sạch người & base mặt đất.",
+                        "&7• Khóa tầm nhìn: Mặt đất 6 chunks, Hầm 2 chunks.",
+                        "&7• Chặn Shift+F3 Pie-Chart, Âm thanh & Hạt.",
+                        "&8Mức tải: &a0.0ms RayTrace (Chạy độc lập)"
+                )
+        ));
+
+        inv.setItem(15, createSwitchItem(
+                Material.SPYGLASS,
+                "Kiểm Tra Client (Brand Checker)",
+                "kiem-tra-client.bat",
+                Arrays.asList(
+                        "&7• Đọc nhãn Client ngay khi người chơi kết nối.",
+                        "&7• Tự động cảnh báo các bản mod/hack cấm.",
+                        "&8Mức tải: &a0.0ms"
+                )
+        ));
+
+        inv.setItem(16, createSwitchItem(
+                Material.TOTEM_OF_UNDYING,
+                "Chế Độ An Toàn (Chống Ban Nhầm)",
+                "chong-ban-nham.che-do-an-toan-khong-ban",
+                Arrays.asList(
+                        "&7• Khi BẬT: Không tự động Ban/Kick,",
+                        "&7  chỉ hủy thao tác hack và lưu vào &e/sus&7.",
+                        "&8Khuyên dùng: &aNên BẬT cho SMP đông người"
+                )
+        ));
+
+        inv.setItem(21, createSwitchItem(
+                Material.BELL,
+                "Thông Báo Cảnh Báo Staff",
+                "he-thong.thong-bao-staff",
+                Arrays.asList(
+                        "&7• Bật/tắt dòng cảnh báo vi phạm trên chat",
+                        "&7  kèm nút chạm &b[Theo dõi]&7 nhanh."
+                )
+        ));
+
+        inv.setItem(22, createActionItem(
+                Material.NETHER_STAR,
+                "&b&lTải Lại Cấu Hình (Reload Config)",
+                Arrays.asList(
+                        "&7• Đọc lại tệp &fconfig.yml&7 từ ổ cứng.",
+                        "&7• Cập nhật lại bảng mã Block & Chunk.",
+                        "",
+                        "&e▶ Chạm để nạp lại ngay lập tức!"
+                )
+        ));
+
+        inv.setItem(23, createActionItem(
+                Material.FEATHER,
+                "&a&lChế Độ Nhẹ Server (Ưu Tiên 20 TPS)",
+                Arrays.asList(
+                        "&7• Tự động TẮT: &fAnti-Xray, PlayerESP, BlockESP&7.",
+                        "&7• Giữ nguyên: &aAntiCheat PvP + Phân Tầng Y=35&7.",
+                        "",
+                        "&e▶ Chạm để kích hoạt Chế Độ Nhẹ!"
+                )
+        ));
+    }
+
+    private ItemStack createDecorationGlass() {
+        ItemStack item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(" ");
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private ItemStack createSwitchItem(Material icon, String title, String configPath, List<String> description) {
+        boolean enabled = plugin.getConfig().getBoolean(configPath, true);
+        ItemStack item = new ItemStack(icon);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            String statusBadge = enabled ? "&a&l[ĐANG BẬT]" : "&c&l[ĐANG TẮT]";
+            meta.setDisplayName(color(statusBadge + " &f" + title));
+
+            List<String> lore = new ArrayList<>();
+            lore.add(color("&8▪ Trạng thái: " + (enabled ? "&aHoạt động ✔" : "&cĐã vô hiệu hóa ✘")));
+            lore.add("");
+            for (String line : description) {
+                lore.add(color(line));
+            }
+            lore.add("");
+            lore.add(color(enabled ? "&e▶ Chạm để &cTẮT &echức năng này" : "&e▶ Chạm để &aBẬT &echức năng này"));
+
+            meta.setLore(lore);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private ItemStack createActionItem(Material icon, String title, List<String> description) {
+        ItemStack item = new ItemStack(icon);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(color(title));
+            List<String> lore = new ArrayList<>();
+            for (String line : description) {
+                lore.add(color(line));
+            }
+            meta.setLore(lore);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onMenuClick(InventoryClickEvent e) {
+        if (!e.getView().getTitle().equals(GUI_TITLE)) return;
+        e.setCancelled(true);
+
+        if (!(e.getWhoClicked() instanceof Player player)) return;
+        if (!player.hasPermission("amberac.admin")) {
+            player.closeInventory();
+            return;
+        }
+
+        int slot = e.getRawSlot();
+        if (slot < 0 || slot >= 27) return;
+
+        Inventory topInv = e.getView().getTopInventory();
+
+        if (slotToConfigPath.containsKey(slot)) {
+            String path = slotToConfigPath.get(slot);
+            boolean current = plugin.getConfig().getBoolean(path, true);
+            boolean nextState = !current;
+
+            plugin.getConfig().set(path, nextState);
+            plugin.saveConfig();
+            syncModuleStateImmediately(path, nextState);
+
+            player.playSound(player.getLocation(),
+                    nextState ? Sound.BLOCK_NOTE_BLOCK_PLING : Sound.BLOCK_NOTE_BLOCK_BASS,
+                    1.0f, nextState ? 1.5f : 0.8f);
+            renderItems(topInv);
+            return;
+        }
+
+        if (slot == 22) {
+            plugin.reloadPluginConfig();
+            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
+            player.sendMessage(color("&8[&6&lAmber AntiCheat&8] &aĐã tải lại cấu hình và đồng bộ tầm nhìn thành công!"));
+            renderItems(topInv);
+            return;
+        }
+
+        if (slot == 23) {
+            plugin.getConfig().set("anti-xray.bat", false);
+            plugin.getConfig().set("anti-player-esp.bat", false);
+            plugin.getConfig().set("anti-block-esp.bat", false);
+            plugin.getConfig().set("he-thong.anticheat", true);
+            plugin.getConfig().set("hien-tren-an-duoi.bat", true);
+            plugin.saveConfig();
+
+            plugin.reloadPluginConfig();
+            player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.8f, 1.2f);
+            player.sendMessage(color("&8[&6&lAmber AntiCheat&8] &aĐã kích hoạt &e&lChế Độ Nhẹ Server&a!"));
+            renderItems(topInv);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onMenuDrag(InventoryDragEvent e) {
+        if (e.getView().getTitle().equals(GUI_TITLE)) {
+            e.setCancelled(true);
+        }
+    }
+
+    private void syncModuleStateImmediately(String path, boolean enabled) {
+        switch (path) {
+            case "anti-xray.bat" -> {
+                if (plugin.getAntiXrayManager() != null) {
+                    plugin.getAntiXrayManager().reloadStateMappings();
+                }
+            }
+            case "anti-player-esp.bat" -> {
+                if (!enabled && !plugin.getConfig().getBoolean("hien-tren-an-duoi.bat", true)) {
+                    plugin.revealAllHiddenPlayers();
+                }
+            }
+            case "anti-block-esp.bat" -> {
+                if (plugin.getAntiXrayManager() != null) {
+                    plugin.getAntiXrayManager().reloadStateMappings();
+                }
+                if (!enabled && !plugin.getConfig().getBoolean("hien-tren-an-duoi.bat", true)
+                        && plugin.getBlockEspListener() != null) {
+                    plugin.getBlockEspListener().restoreAllHiddenBlocks();
+                }
+            }
+            case "hien-tren-an-duoi.bat" -> {
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    plugin.applyAllowedChunkRadius(p);
+                }
+                if (!enabled) {
+                    if (!plugin.getConfig().getBoolean("anti-player-esp.bat", true)) {
+                        plugin.revealAllHiddenPlayers();
+                    }
+                    if (!plugin.getConfig().getBoolean("anti-block-esp.bat", true)
+                            && plugin.getBlockEspListener() != null) {
+                        plugin.getBlockEspListener().restoreAllHiddenBlocks();
+                    }
+                }
+            }
+        }
+    }
+
+    private String color(String text) {
+        return ChatColor.translateAlternateColorCodes('&', text);
+    }
+}
+
+```
+
+`src/main/java/vn/amber/anticheat/SuspectGuiManager.java`:
+
+```java
+package vn.amber.anticheat;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.Statistic;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+public class SuspectGuiManager implements Listener {
+
+    public enum FilterMode {
+        ALL("Tất cả (Online + Offline 30p)"),
+        ONLINE_ONLY("Chỉ người đang Online"),
+        NEW_ACCOUNTS("Chỉ tài khoản mới (< 30 phút)");
+
+        private final String label;
+        FilterMode(String label) { this.label = label; }
+        public String getLabel() { return label; }
+        public FilterMode next() {
+            FilterMode[] vals = values();
+            return vals[(this.ordinal() + 1) % vals.length];
+        }
+    }
+
+    public static class SuspectProfile {
+        public final UUID uuid;
+        public String name;
+        public String clientBrand = "Vanilla";
+        public final Map<String, Integer> violations = new ConcurrentHashMap<>();
+        public String lastDetail = "";
+        public long lastFlagTime = System.currentTimeMillis();
+        public long quitTimestamp = 0L;
+        public int lastPing = 0;
+        public long playMinutes = 0;
+
+        public SuspectProfile(UUID uuid, String name) {
+            this.uuid = uuid;
+            this.name = name;
+        }
+
+        public int getTotalViolations() {
+            int sum = 0;
+            for (int v : violations.values()) sum += v;
+            return sum;
+        }
+
+        public int getRiskScore() {
+            return getTotalViolations() + (violations.size() * 3) + (isNewAccount() ? 5 : 0);
+        }
+
+        public boolean isNewAccount() {
+            return playMinutes < 30;
+        }
+
+        public boolean isOnline() {
+            Player p = Bukkit.getPlayer(uuid);
+            return p != null && p.isOnline();
+        }
+    }
+
+    private final AmberAntiCheat plugin;
+    public static final String MAIN_GUI_TITLE = ChatColor.DARK_GRAY + "⚠ " + ChatColor.GOLD + ChatColor.BOLD + "AMBER-AC " + ChatColor.DARK_GRAY + "| " + ChatColor.RED + "Nghi Phạm (/sus)";
+    public static final String ACTION_GUI_PREFIX = ChatColor.DARK_GRAY + "🔍 " + ChatColor.GOLD + ChatColor.BOLD + "Kiểm Tra: " + ChatColor.WHITE;
+
+    private final Map<UUID, SuspectProfile> suspectMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> staffPageMap = new ConcurrentHashMap<>();
+    private final Map<UUID, FilterMode> staffFilterMap = new ConcurrentHashMap<>();
+    private final Map<UUID, List<UUID>> staffDisplayedList = new ConcurrentHashMap<>();
+    private final Map<UUID, UUID> staffSelectedSuspect = new ConcurrentHashMap<>();
+    private final Set<UUID> frozenPlayers = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> invseeStaffSet = ConcurrentHashMap.newKeySet();
+
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+
+    public SuspectGuiManager(AmberAntiCheat plugin) {
+        this.plugin = plugin;
+        Bukkit.getScheduler().runTaskTimer(plugin, this::cleanupExpiredProfiles, 1200L, 1200L);
+    }
+
+    public boolean isFrozen(UUID uuid) {
+        return frozenPlayers.contains(uuid);
+    }
+
+    public void recordViolation(Player p, String checkType, String detail, int totalPlayerVl) {
+        UUID uuid = p.getUniqueId();
+        SuspectProfile profile = suspectMap.computeIfAbsent(uuid, k -> new SuspectProfile(uuid, p.getName()));
+        profile.name = p.getName();
+        profile.clientBrand = plugin.getClientBrand(uuid);
+        profile.lastDetail = detail;
+        profile.lastFlagTime = System.currentTimeMillis();
+        profile.quitTimestamp = 0L;
+        profile.lastPing = p.getPing();
+
+        try {
+            int ticks = p.getStatistic(Statistic.PLAY_ONE_MINUTE);
+            profile.playMinutes = ticks / (20L * 60L);
+        } catch (Exception ignored) {
+        }
+
+        profile.violations.merge(checkType, 1, Integer::sum);
+    }
+
+    private void cleanupExpiredProfiles() {
+        long now = System.currentTimeMillis();
+        long expireMs = 30L * 60L * 1000L;
+        suspectMap.entrySet().removeIf(entry -> {
+            SuspectProfile prof = entry.getValue();
+            return !prof.isOnline() && prof.quitTimestamp > 0 && (now - prof.quitTimestamp) > expireMs;
+        });
+    }
+
+    public void openSuspectGui(Player staff, int page) {
+        Inventory inv = Bukkit.createInventory(null, 54, MAIN_GUI_TITLE);
+        renderSuspectList(staff, inv, page);
+        staff.openInventory(inv);
+    }
+
+    private void renderSuspectList(Player staff, Inventory inv, int page) {
+        cleanupExpiredProfiles();
+        inv.clear();
+
+        FilterMode mode = staffFilterMap.computeIfAbsent(staff.getUniqueId(), k -> FilterMode.ALL);
+
+        List<SuspectProfile> filtered = suspectMap.values().stream()
+                .filter(prof -> prof.getTotalViolations() >= 3 || prof.violations.size() >= 2)
+                .filter(prof -> {
+                    if (mode == FilterMode.ONLINE_ONLY) return prof.isOnline();
+                    if (mode == FilterMode.NEW_ACCOUNTS) return prof.isNewAccount();
+                    return true;
+                })
+                .sorted(Comparator.comparingInt(SuspectProfile::getRiskScore).reversed())
+                .collect(Collectors.toList());
+
+        int maxPage = Math.max(0, (filtered.size() - 1) / 45);
+        int safePage = Math.max(0, Math.min(page, maxPage));
+        staffPageMap.put(staff.getUniqueId(), safePage);
+
+        List<UUID> displayedIds = new ArrayList<>();
+        int startIdx = safePage * 45;
+        int endIdx = Math.min(startIdx + 45, filtered.size());
+
+        for (int i = startIdx; i < endIdx; i++) {
+            SuspectProfile prof = filtered.get(i);
+            int slot = i - startIdx;
+            inv.setItem(slot, createSuspectHeadItem(prof));
+            displayedIds.add(prof.uuid);
+        }
+        staffDisplayedList.put(staff.getUniqueId(), displayedIds);
+
+        ItemStack glass = createSimpleItem(Material.BLACK_STAINED_GLASS_PANE, " ", Collections.emptyList());
+        for (int s = 45; s < 54; s++) inv.setItem(s, glass);
+
+        if (safePage > 0) {
+            inv.setItem(45, createSimpleItem(Material.ARROW, "&e« Trang Trước",
+                    Collections.singletonList("&7Chuyển về trang " + safePage)));
+        }
+
+        inv.setItem(48, createSimpleItem(Material.HOPPER, "&b&lBộ Lọc Danh Sách", Arrays.asList(
+                "&7• Chế độ hiện tại: &a" + mode.getLabel(),
+                "&7• Tổng số nghi phạm khớp: &e" + filtered.size(),
+                "",
+                "&e▶ Chạm để đổi chế độ lọc!"
+        )));
+
+        inv.setItem(49, createSimpleItem(Material.CLOCK, "&a&lLàm Mới Danh Sách", Arrays.asList(
+                "&7• Trang hiện tại: &f" + (safePage + 1) + "/" + (maxPage + 1),
+                "",
+                "&e▶ Chạm để cập nhật dữ liệu mới nhất!"
+        )));
+
+        inv.setItem(50, createSimpleItem(Material.BARRIER, "&c&lXóa Toàn Bộ Danh Sách", Arrays.asList(
+                "&7• Dọn sạch toàn bộ hồ sơ nghi phạm",
+                "&7  đang lưu trong bộ nhớ tạm.",
+                "",
+                "&c▶ Chạm để xóa sạch!"
+        )));
+
+        if (safePage < maxPage) {
+            inv.setItem(53, createSimpleItem(Material.ARROW, "&eTrang Sau »",
+                    Collections.singletonList("&7Chuyển sang trang " + (safePage + 2))));
+        }
+    }
+
+    private ItemStack createSuspectHeadItem(SuspectProfile prof) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        head.setAmount(Math.max(1, Math.min(64, prof.getTotalViolations())));
+        ItemMeta meta = head.getItemMeta();
+        if (meta != null) {
+            boolean online = prof.isOnline();
+            boolean frozen = frozenPlayers.contains(prof.uuid);
+
+            String statusPrefix = online ? "&a● " : "&7○ ";
+            String altBadge = prof.isNewAccount() ? " &d&l[Alt / Mới]" : "";
+            String freezeBadge = frozen ? " &b&l[ĐANG ĐÓNG BĂNG]" : "";
+
+            meta.setDisplayName(color(statusPrefix + "&e&l" + prof.name + altBadge + freezeBadge));
+
+            List<String> lore = new ArrayList<>();
+            lore.add(color("&8▪ Trạng thái: " + (online ? "&aĐang Online" : "&cĐã thoát (" + getOfflineMinutes(prof) + " phút trước)")));
+            lore.add(color("&8▪ Điểm nguy hiểm: &c&l" + prof.getRiskScore() + " điểm &7(Tổng: &f" + prof.getTotalViolations() + " VL&7)"));
+            lore.add(color("&8▪ Thời gian chơi: &f" + prof.playMinutes + " phút" + (prof.isNewAccount() ? " &d(Nick mới tạo)" : "")));
+            Player onlinePlayer = Bukkit.getPlayer(prof.uuid);
+            int currentPing = (online && onlinePlayer != null) ? onlinePlayer.getPing() : prof.lastPing;
+            lore.add(color("&8▪ Client: &b" + prof.clientBrand + " &8| &7Ping: &a" + currentPing + "ms"));
+            lore.add("");
+            lore.add(color("&6&lCác hành vi bị phát hiện:"));
+            prof.violations.entrySet().stream()
+                    .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                    .limit(6)
+                    .forEach(e -> lore.add(color(" &8- &f" + e.getKey() + ": &c" + e.getValue() + " lần")));
+
+            lore.add("");
+            lore.add(color("&7Chi tiết cuối: &f" + prof.lastDetail));
+            lore.add(color("&7Lúc: &7" + timeFormat.format(new Date(prof.lastFlagTime))));
+            lore.add("");
+            lore.add(color("&e▶ Chạm để mở Menu Kiểm Tra (TP / Freeze / Invsee)"));
+
+            meta.setLore(lore);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            head.setItemMeta(meta);
+        }
+        return head;
+    }
+
+    private long getOfflineMinutes(SuspectProfile prof) {
+        if (prof.quitTimestamp <= 0) return 0;
+        return Math.max(1, (System.currentTimeMillis() - prof.quitTimestamp) / 60000L);
+    }
+
+    public void openActionSubMenu(Player staff, SuspectProfile prof) {
+        staffSelectedSuspect.put(staff.getUniqueId(), prof.uuid);
+        Inventory inv = Bukkit.createInventory(null, 27, ACTION_GUI_PREFIX + prof.name);
+        renderActionSubMenu(inv, prof);
+        staff.openInventory(inv);
+    }
+
+    private void renderActionSubMenu(Inventory inv, SuspectProfile prof) {
+        ItemStack glass = createSimpleItem(Material.BLACK_STAINED_GLASS_PANE, " ", Collections.emptyList());
+        for (int i = 0; i < 27; i++) inv.setItem(i, glass);
+
+        inv.setItem(4, createSuspectHeadItem(prof));
+
+        inv.setItem(10, createSimpleItem(Material.ENDER_EYE, "&a&lTàng Hình & Dịch Chuyển (Watch)", Arrays.asList(
+                "&7• Tự động bật &f/vanish &7(Essentials).",
+                "&7• Tự động bật chế độ Bay (&fAllowFlight&7).",
+                "&7• Dịch chuyển tới vị trí của &e" + prof.name + "&7.",
+                "",
+                "&e▶ Chạm để theo dõi ngay!"
+        )));
+
+        boolean isFrozenNow = frozenPlayers.contains(prof.uuid);
+        inv.setItem(12, createSimpleItem(Material.PACKED_ICE,
+                isFrozenNow ? "&b&lMở Đóng Băng (Unfreeze)" : "&3&lĐóng Băng Nghi Phạm (Freeze)",
+                Arrays.asList(
+                        "&7• Trạng thái hiện tại: " + (isFrozenNow ? "&bĐANG ĐÓNG BĂNG ❄" : "&aBình thường"),
+                        "&7• Khóa cứng di chuyển, lệnh, vứt đồ & PvP.",
+                        "&7• Tự động cảnh báo đỏ nếu tự ý thoát game!",
+                        "",
+                        "&e▶ Chạm để " + (isFrozenNow ? "&aMỞ BĂNG" : "&bĐÓNG BĂNG") + "!"
+                )));
+
+        inv.setItem(14, createSimpleItem(Material.CHEST, "&6&lKiểm Tra Túi Đồ (Invsee)", Arrays.asList(
+                "&7• Xem trực tiếp toàn bộ vật phẩm trong",
+                "&7  túi đồ của &e" + prof.name + "&7.",
+                "",
+                "&e▶ Chạm để mở túi đồ!"
+        )));
+
+        inv.setItem(16, createSimpleItem(Material.TNT, "&c&lXóa Hồ Sơ (Bắt Nhầm / Đã Xử Lý)", Arrays.asList(
+                "&7• Xóa &e" + prof.name + " &7khỏi danh sách &f/sus&7",
+                "&7  và gỡ bỏ đóng băng (nếu có).",
+                "",
+                "&c▶ Chạm để xóa hồ sơ này!"
+        )));
+
+        inv.setItem(22, createSimpleItem(Material.ARROW, "&e« Quay Lại Danh Sách /sus",
+                Collections.singletonList("&7Trở về bảng danh sách nghi phạm")));
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onGuiClick(InventoryClickEvent e) {
+        String title = e.getView().getTitle();
+        if (!(e.getWhoClicked() instanceof Player staff)) return;
+
+        if (invseeStaffSet.contains(staff.getUniqueId()) && !staff.hasPermission("amberac.admin")) {
+            e.setCancelled(true);
+            return;
+        }
+
+        if (title.equals(MAIN_GUI_TITLE)) {
+            e.setCancelled(true);
+            int slot = e.getRawSlot();
+            if (slot < 0 || slot >= 54) return;
+
+            Inventory topInv = e.getView().getTopInventory();
+            int currentPage = staffPageMap.getOrDefault(staff.getUniqueId(), 0);
+
+            if (slot < 45) {
+                List<UUID> list = staffDisplayedList.get(staff.getUniqueId());
+                if (list != null && slot < list.size()) {
+                    UUID suspectId = list.get(slot);
+                    SuspectProfile prof = suspectMap.get(suspectId);
+                    if (prof != null) {
+                        staff.playSound(staff.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.2f);
+                        openActionSubMenu(staff, prof);
+                    }
+                }
+                return;
+            }
+
+            switch (slot) {
+                case 45 -> {
+                    if (currentPage > 0) renderSuspectList(staff, topInv, currentPage - 1);
+                }
+                case 48 -> {
+                    FilterMode currentMode = staffFilterMap.getOrDefault(staff.getUniqueId(), FilterMode.ALL);
+                    staffFilterMap.put(staff.getUniqueId(), currentMode.next());
+                    staff.playSound(staff.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.4f);
+                    renderSuspectList(staff, topInv, 0);
+                }
+                case 49 -> {
+                    staff.playSound(staff.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
+                    renderSuspectList(staff, topInv, currentPage);
+                }
+                case 50 -> {
+                    suspectMap.clear();
+                    frozenPlayers.clear();
+                    staff.playSound(staff.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 0.7f, 1.2f);
+                    staff.sendMessage(color("&8[&6&lAmber AntiCheat&8] &aĐã xóa sạch toàn bộ danh sách nghi phạm trong &e/sus&a!"));
+                    renderSuspectList(staff, topInv, 0);
+                }
+                case 53 -> renderSuspectList(staff, topInv, currentPage + 1);
+            }
+            return;
+        }
+
+        if (title.startsWith(ACTION_GUI_PREFIX)) {
+            e.setCancelled(true);
+            int slot = e.getRawSlot();
+            if (slot < 0 || slot >= 27) return;
+
+            UUID targetId = staffSelectedSuspect.get(staff.getUniqueId());
+            SuspectProfile prof = targetId != null ? suspectMap.get(targetId) : null;
+
+            if (slot == 22 || prof == null) {
+                openSuspectGui(staff, staffPageMap.getOrDefault(staff.getUniqueId(), 0));
+                return;
+            }
+
+            Player targetOnline = Bukkit.getPlayer(prof.uuid);
+
+            switch (slot) {
+                case 10 -> {
+                    staff.closeInventory();
+                    if (targetOnline == null || !targetOnline.isOnline()) {
+                        staff.sendMessage(color("&8[&6&lAmber AntiCheat&8] &cNgười chơi &e" + prof.name + " &chiện đã thoát game!"));
+                        return;
+                    }
+                    plugin.executeStaffWatch(staff, targetOnline);
+                }
+                case 12 -> {
+                    if (targetOnline == null || !targetOnline.isOnline()) {
+                        staff.sendMessage(color("&8[&6&lAmber AntiCheat&8] &cNgười chơi &e" + prof.name + " &ckhông online để đóng băng!"));
+                        return;
+                    }
+                    toggleFreeze(staff, targetOnline);
+                    renderActionSubMenu(e.getView().getTopInventory(), prof);
+                }
+                case 14 -> {
+                    if (targetOnline == null || !targetOnline.isOnline()) {
+                        staff.sendMessage(color("&8[&6&lAmber AntiCheat&8] &cNgười chơi &e" + prof.name + " &cđã thoát game!"));
+                        return;
+                    }
+                    invseeStaffSet.add(staff.getUniqueId());
+                    staff.playSound(staff.getLocation(), Sound.BLOCK_CHEST_OPEN, 1.0f, 1.0f);
+                    staff.openInventory(targetOnline.getInventory());
+                }
+                case 16 -> {
+                    suspectMap.remove(prof.uuid);
+                    frozenPlayers.remove(prof.uuid);
+                    plugin.clearPlayerViolations(prof.uuid);
+                    staff.playSound(staff.getLocation(), Sound.ITEM_SHIELD_BREAK, 1.0f, 1.2f);
+                    staff.sendMessage(color("&8[&6&lAmber AntiCheat&8] &aĐã xóa hồ sơ của &e" + prof.name + " &akhỏi danh sách nghi phạm!"));
+                    openSuspectGui(staff, staffPageMap.getOrDefault(staff.getUniqueId(), 0));
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInvseeClose(InventoryCloseEvent e) {
+        invseeStaffSet.remove(e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onGuiDrag(InventoryDragEvent e) {
+        String title = e.getView().getTitle();
+        if (title.equals(MAIN_GUI_TITLE)
+                || title.startsWith(ACTION_GUI_PREFIX)
+                || invseeStaffSet.contains(e.getWhoClicked().getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+
+    public void toggleFreeze(CommandSender staff, Player target) {
+        UUID id = target.getUniqueId();
+
+        if (frozenPlayers.remove(id)) {
+            target.sendTitle(color("&a&lĐÃ MỞ ĐÓNG BĂNG"), color("&fBạn có thể tiếp tục chơi bình thường!"), 5, 40, 10);
+            target.sendMessage(color("&8[&6&lAmber AntiCheat&8] &aBạn đã được Staff kiểm tra xong và gỡ bỏ đóng băng."));
+            staff.sendMessage(color("&8[&6&lAmber AntiCheat&8] &aĐã mở đóng băng cho &e" + target.getName() + "&a."));
+            if (staff instanceof Player pStaff) {
+                pStaff.playSound(pStaff.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 1.0f, 1.2f);
+            }
+            return;
+        }
+
+        if (staff instanceof Player pStaff && pStaff.getUniqueId().equals(id)) {
+            staff.sendMessage(color("&8[&6&lAmber AntiCheat&8] &cBạn không thể tự đóng băng chính mình!"));
+            return;
+        }
+        if (target.hasPermission("amberac.admin") || target.hasPermission("amberac.bypass")) {
+            staff.sendMessage(color("&8[&6&lAmber AntiCheat&8] &cKhông thể đóng băng người chơi có quyền Admin/Bypass!"));
+            return;
+        }
+
+        frozenPlayers.add(id);
+        target.closeInventory();
+        target.sendTitle(color("&c&lBẠN ĐANG BỊ KIỂM TRA!"), color("&eTuyệt đối KHÔNG thoát game nếu không muốn bị Ban!"), 5, 100, 10);
+        target.sendMessage(color("&c&m-----------------------------------------------------"));
+        target.sendMessage(color(" &c&l⚠ BẠN ĐÃ BỊ ĐÓNG BĂNG ĐỂ KIỂM TRA GIAN LẬN!"));
+        target.sendMessage(color(" &f• Vui lòng đứng yên và làm theo hướng dẫn của Staff trên chat."));
+        target.sendMessage(color(" &e• Cảnh báo: &cTự ý thoát game lúc này sẽ bị xử phạt ngay lập tức!"));
+        target.sendMessage(color("&c&m-----------------------------------------------------"));
+        staff.sendMessage(color("&8[&6&lAmber AntiCheat&8] &bĐã đóng băng &e" + target.getName() + "&b!"));
+        if (staff instanceof Player pStaff) {
+            pStaff.playSound(pStaff.getLocation(), Sound.BLOCK_GLASS_BREAK, 1.0f, 0.8f);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onFrozenMove(PlayerMoveEvent e) {
+        Player p = e.getPlayer();
+        if (!frozenPlayers.contains(p.getUniqueId())) return;
+
+        p.setFallDistance(0f);
+        Location from = e.getFrom();
+        Location to = e.getTo();
+        if (to == null) return;
+
+        // Khóa di chuyển ngang (X, Z) và nhảy lên (Y > from.Y), nhưng cho phép rơi chạm đất để không bị Vanilla kick Fly
+        if (from.getX() != to.getX() || from.getZ() != to.getZ() || to.getY() > from.getY()) {
+            Location locked = from.clone();
+            locked.setY(Math.min(from.getY(), to.getY()));
+            locked.setYaw(to.getYaw());
+            locked.setPitch(to.getPitch());
+            e.setTo(locked);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onFrozenCommand(PlayerCommandPreprocessEvent e) {
+        Player p = e.getPlayer();
+        if (!frozenPlayers.contains(p.getUniqueId())) return;
+
+        String msg = e.getMessage().toLowerCase(Locale.ROOT);
+        // Chỉ cho phép nhắn tin riêng trả lời Staff (/msg, /r, /w, /tell)
+        if (!msg.startsWith("/msg ") && !msg.startsWith("/r ") && !msg.startsWith("/w ") && !msg.startsWith("/tell ")) {
+            e.setCancelled(true);
+            p.sendMessage(color("&8[&6&lAmber AntiCheat&8] &cBạn không thể dùng lệnh khi đang bị đóng băng kiểm tra!"));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onFrozenDropItem(PlayerDropItemEvent e) {
+        if (frozenPlayers.contains(e.getPlayer().getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onFrozenInteract(PlayerInteractEvent e) {
+        if (frozenPlayers.contains(e.getPlayer().getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onFrozenBreak(BlockBreakEvent e) {
+        if (frozenPlayers.contains(e.getPlayer().getUniqueId())) e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onFrozenPlace(BlockPlaceEvent e) {
+        if (frozenPlayers.contains(e.getPlayer().getUniqueId())) e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onFrozenDamage(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Player p && frozenPlayers.contains(p.getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onFrozenAttack(EntityDamageByEntityEvent e) {
+        if (e.getDamager() instanceof Player p && frozenPlayers.contains(p.getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onSuspectQuit(PlayerQuitEvent e) {
+        Player p = e.getPlayer();
+        UUID uuid = p.getUniqueId();
+
+        SuspectProfile prof = suspectMap.get(uuid);
+        if (prof != null) {
+            prof.quitTimestamp = System.currentTimeMillis();
+        }
+
+        if (frozenPlayers.remove(uuid)) {
+            String alert = color("&4&l[BÁO ĐỘNG] &e&l" + p.getName() + " &c&lĐÃ THOÁT GAME KHI ĐANG BỊ ĐÓNG BĂNG KIỂM TRA!");
+            for (Player online : Bukkit.getOnlinePlayers()) {
+                if (online.hasPermission("amberac.staff") || online.hasPermission("amberac.admin")) {
+                    online.sendMessage(alert);
+                    online.playSound(online.getLocation(), Sound.ENTITY_WITHER_SPAWN, 0.8f, 1.2f);
+                }
+            }
+            plugin.getLogger().warning("[FREEZE-QUIT] " + p.getName() + " da thoat game khi dang bi dong bang!");
+        }
+
+        staffPageMap.remove(uuid);
+        staffFilterMap.remove(uuid);
+        staffDisplayedList.remove(uuid);
+        staffSelectedSuspect.remove(uuid);
+        invseeStaffSet.remove(uuid);
+    }
+
+    private ItemStack createSimpleItem(Material mat, String title, List<String> loreLines) {
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(color(title));
+            List<String> colored = new ArrayList<>();
+            for (String line : loreLines) colored.add(color(line));
+            meta.setLore(colored);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private String color(String text) {
+        return ChatColor.translateAlternateColorCodes('&', text);
+    }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+he-thong:
+  anticheat: true
+  thong-bao-staff: true
+  luu-file-log: true
+  discord-webhook-url: ""
+
+chong-ban-nham:
+  che-do-an-toan-khong-ban: true
+  ping-toi-da-kiem-tra: 280
+  tps-toi-thieu-kiem-tra: 17.5
+  nguong-vi-pham-toi-da: 25
+  lenh-xu-phat: "kick %player% [Amber AntiCheat] Phat hien hanh vi gian lan (%check%)"
+
+kiem-tra-client:
+  bat: true
+  tu-dong-kick: false
+  danh-sach-cam:
+    - "meteor"
+    - "wurst"
+    - "aristois"
+    - "inertia"
+    - "impact"
+    - "future"
+    - "rusherhack"
+    - "mio"
+    - "doomsday"
+    - "bleachhack"
+
+hien-tren-an-duoi:
+  bat: true
+  moc-do-cao-y: 35
+  do-tre-do-cao-y: 2
+  chunk-cho-phep-tren-mat-dat: 6
+  chunk-cho-phep-duoi-ham: 2
+  an-nguoi-choi: true
+  an-ruong-block: true
+  chong-pie-chart-f3: true
+  chan-am-thanh-khac-tang: true
+
+anti-player-esp:
+  bat: true
+  khoang-cach-toi-da: 64.0
+  khoang-cach-xuyen-tuong: 8.0
+
+anti-block-esp:
+  bat: true
+  khoang-cach-luon-hien: 2.5
+  danh-sach-block:
+    - CHEST
+    - TRAPPED_CHEST
+    - BARREL
+    - ENDER_CHEST
+    - SPAWNER
+
+anti-xray:
+  bat: true
+  do-cao-quet-toi-da: 64
+  quang-overworld:
+    - DIAMOND_ORE
+    - DEEPSLATE_DIAMOND_ORE
+    - EMERALD_ORE
+    - DEEPSLATE_EMERALD_ORE
+    - GOLD_ORE
+    - DEEPSLATE_GOLD_ORE
+    - IRON_ORE
+    - DEEPSLATE_IRON_ORE
+    - REDSTONE_ORE
+    - DEEPSLATE_REDSTONE_ORE
+    - LAPIS_ORE
+    - DEEPSLATE_LAPIS_ORE
+  quang-nether:
+    - ANCIENT_DEBRIS
+    - NETHER_GOLD_ORE
+    - NETHER_QUARTZ_ORE
+
+checks:
+  combat:
+    reach-max: 3.55
+    max-cps: 22
+  movement:
+    timer-max-packets-per-sec: 26
+
+```
+
+`src/main/resources/plugin.yml`:
+
+```yml
+name: AmberAntiCheat
+version: '1.0.0'
+main: vn.amber.anticheat.AmberAntiCheat
+api-version: '1.21'
+depend: [packetevents]
+softdepend: [Essentials]
+authors: [AMBER_SMP]
+description: Amber AntiCheat - He thong AntiCheat, Anti-Xray, Anti-ESP, Phan Tang Y & /sus 20 TPS
+
+commands:
+  amberac:
+    aliases: [ac, nvnac]
+    description: Lenh quan tri Amber AntiCheat (/ac watch, /ac freeze, /ac reload)
+    permission: amberac.staff
+  acsettings:
+    description: Mo bang GUI cai dat 7 Module Amber AntiCheat
+    permission: amberac.admin
+  sus:
+    aliases: [suspects, nghipham]
+    description: Mo bang danh sach nghi pham chuan DonutSMP
+    permission: amberac.staff
+
+permissions:
+  amberac.admin:
+    description: Toan quyen chinh sua cai dat Amber AntiCheat
+    default: op
+    children:
+      amberac.staff: true
+  amberac.staff:
+    description: Quyen xem canh bao, dung /sus, /ac watch va /ac freeze
+    default: op
+  amberac.bypass:
+    description: Bo qua toan bo kiem tra cua Amber AntiCheat
+    default: false
+
+```
