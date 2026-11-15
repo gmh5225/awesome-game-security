@@ -752,6 +752,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/microsoft/D3D9On12 [The Direct3D9-On-12 mapping layer]
 - https://github.com/Daniel-Lobo/WineHooks [Compatibility and enhancement framework for classic PC games]
 - https://github.com/samuelgr/Xidi [DirectInput interface for XInput controllers]
+- https://github.com/bothamad/legacy-game-launcher [.NET launcher that diagnoses and applies Win11 fixes (compat flags, D3D8 wrappers, DirectInput) for legacy 32-bit DirectX games with backups and crash reporting]
 
 > Overlay
 - https://github.com/SeanPesce/Direct3D9-Overlay
@@ -1120,6 +1121,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/TalhaMudo/NFSU2Recomp [Static recompilation pipeline and runtime lifting Need for Speed: Underground 2 (Win32/x86, D3D9) to native ARM64 macOS with documented RE tooling]
 - https://github.com/ranggacasper/mostwanted-android [Unofficial Android arm64 port of NFS Most Wanted (Xbox BE) via XboxXBE-Recomp static lifting, Vulkan/SDL3 runtime, and Black-Android host; BYO assets]
 - https://github.com/CiPH3R-88/NFSMW_WideScreenFix [C++ ASI plugin for NFS Most Wanted (2005) v1.3: widescreen HUD/FOV, display modes, and engine hooks built via IDA Pro reverse engineering]
+- https://github.com/CiPH3R-88/NFSMW_ControllerSupport [C++ ASI plugin for NFS Most Wanted (2005) v1.3 adding Xbox/PlayStation glyphs and full gamepad UI, engineered with IDA Pro reverse engineering of the FEng UI pipeline]
 - https://github.com/elkir0/sc2-android-recomp [StarCraft II static recompilation toolkit (x86-32 to ARM64): per-function difftest oracle, D3D9 shader translation, MPQ tools, pcrecomp closure extensions, and Android porting helpers—method and tooling only, no game assets]
 - https://github.com/gamboozino/ngbrecomp [Static recompilation of Ninja Gaiden Black (Xbox OG) to native Linux/Windows with a custom Vulkan renderer; BYO game assets]
 - https://github.com/gamboozino/ng2recomp [Static recompilation of Ninja Gaiden II (Xbox 360) to native Linux/Windows via ReXGlue with a custom Vulkan renderer; BYO game assets]
@@ -4206,6 +4208,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/techiew/EldenRingMods [Mod]
 - https://github.com/gmh5225/EldenRingLauncher [Launcher]
 - https://github.com/gmh5225/Elden-Ring-Debug-Tool [Debug tool for Elden Ring modding]
+- https://github.com/Magicdaclip52/elden-ring-trainer [Windows ImGui overlay trainer for Elden Ring 1.17.2 (single-player) exposing rune, stat, stamina, fly, and drop cheats via a CMake C++ build]
 
 > Game:Dark Souls
 - https://github.com/igromanru/Dark-Souls-III-Cheat-Engine-Guide
