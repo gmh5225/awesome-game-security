@@ -31,4 +31,4 @@ Targets survival and PvP server operators who want lightweight, configurable gam
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[detector-operations]] · [[minecraft-anti-cheat]] · [[civ-anticheat]] · [[larping-anti-cheat]] · [[kozy-anticheat]]
+[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[detector-operations]] · [[minecraft-anti-cheat]] · [[amber-anticheat]] · [[civ-anticheat]] · [[larping-anti-cheat]] · [[kozy-anticheat]]
