@@ -1731,6 +1731,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/lzghzr/APatch_kpm [APatch modules]
 - https://github.com/abcz316/SKRoot-linuxKernelRoot
 - https://github.com/0x36/Pixel_GPU_Exploit
+- https://github.com/wuying2021/mibox3s-utgard-lpe [Documented Mali-400 GPU write-back chain from adb shell to root with SELinux permissive on Xiaomi Mi Box 3S (Utgard / kernel 3.14)]
 - https://github.com/0xCD4/SSL-bypass [Root Detection & SSL Bypass Script]
 - https://github.com/Nai64/Nai64Patches [Curated Morphe patch source for Android games — root/integrity bypass, license checks, Play Integrity spoof, and SSL pinning]
 - https://github.com/quarkslab/android-hardware-attestation-demo [Bypass backend hardware Key Attestation on rooted/unlocked-bootloader devices by Frida-relaying the backend challenge to a clean attestation oracle — genuine TEE/StrongBox chain, no forgery]
@@ -4782,6 +4783,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/maximumemails-cmd/RainInjectable [Injectable Windows C++/Java runtime that rebuilds the Rain 1.8.9 client-side cheat observer for Forge and Badlion, with JNI bootstrap, detection research docs, and local-only evidence review]
 - https://github.com/YcbrYL1/YCBR-AntiCheat [Paper 1.8.9 Minecraft anti-cheat plugin with 19 combat/movement/protocol checks, auth, DDoS protection, and admin GUI]
 - https://github.com/flameteamdev/LavaGuardAC [Open-source Bukkit/Spigot Minecraft server anti-cheat plugin with movement, combat, and block-break checks, violation tracking, admin GUI, and Discord webhook alerts]
+- https://github.com/orglatis-a11y/ZyvenAntiCheat [Open-source Bukkit/Paper 1.21 server plugin with movement, combat, mining, vehicle, utility checks, and anti-ESP modules]
 - https://github.com/mayankpatil3/vulcan-anticheat-built [From-scratch Paper/Spigot Minecraft anti-cheat plugin with movement/combat detections, violation tracking, alerts, and punishment commands]
 - https://github.com/ValenMyHeartDev/BloonAntiCheat [Paper/Spigot Minecraft server plugin with fly, reach, autoclicker, and triggerbot checks plus admin punishment flow]
 - https://github.com/NoCheatPlus/NoCheatPlus [Open-source anti-cheat plugin for Minecraft (Bukkit/Spigot)]
