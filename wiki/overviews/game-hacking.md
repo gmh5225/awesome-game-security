@@ -828,6 +828,7 @@ sources:
   - wiki/sources/descriptions/ergrelet__themida-unmutate.md
   - wiki/sources/descriptions/ergrelet__unlicense.md
   - wiki/sources/descriptions/x86rc__unthemidator.md
+  - wiki/sources/descriptions/pkochubey__Unmida.md
   - wiki/sources/descriptions/erfur__linjector-rs.md
   - wiki/sources/descriptions/eteran__edb-debugger.md
   - wiki/sources/descriptions/execnone__simple-cs-16-multihack.md
@@ -2346,6 +2347,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Themida IDA plugin / Fix Themida via [[tde]] (devirtualization engine for Themida-protected binaries) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/sodareverse__TDE.md)
 - Original Pascal Themida auto-unpacker via [[magicmida]] (Hendi48; custom user-mode debugger; 32/64-bit PE + .NET dump; import rebuild + section restore; BeaEngine disasm; GUI + `/unpack` CLI; ScyllaHide anti-debug settings; Fix Themida) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/Hendi48__Magicmida.md)
 - Automatic Themida v1/v2/v3 unpack via [[magicmida-rs]] (Rust Win32 Debug API debugger; OEP discovery + memory dump + PE IAT/section rebuild; optional ScyllaHide anti-debug bypass; verify mode) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/guoxing2024__magicmida-rs.md)
+- Go CLI Themida unpack via [[unmida]] (pkochubey; PE32/PE32+ EXE/DLL; debugger wait-for-unpack then OEP/IAT dump; ScyllaHide; section-shrink/build + PID attach; Fix Themida) also sits in that lane. (source: wiki/sources/descriptions/pkochubey__Unmida.md)
 - Themida 3.1.3 Tiger red64 unpack/unwrap via [[bobalkkagi]] (Python; Unicorn emulation + win10_v1903 API hooks; fast/hook_block/hook_code modes; optional OEP; planned devirt; Capstone/distorm3) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/bobalkkagi__bobalkkagi.md)
 - Oreans VM unvirtualization in Ghidra via [[ghidr-orean]] (Marisa-Chan; Python Ghidra scripts; Deathway Unvirtualizer reimplementation; CISC complete, TIGER largely finished, RISC/FISH assembler configs; main Orean script + configurable working directory; Themida/WinLicense/Code Virtualizer; Cheat Fix Themida / Ghidra Scripts) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/Marisa-Chan__GhidrOrean.md)
 - Dynamic Themida/WinLicense 2.x/3.x unpack via [[unlicense]] (Python 3; Frida instrumentation; OEP recovery + obfuscated IAT rebuild; x86/x64 native PE/DLL + .NET EXE; LIEF/Capstone) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/ergrelet__unlicense.md)
