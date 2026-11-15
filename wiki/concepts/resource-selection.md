@@ -5,7 +5,7 @@ topics: [overview]
 sources:
   - wiki/sources/skills/overview.md
   - wiki/sources/README-categories.md
-updated: 2026-11-14
+updated: 2026-11-15
 confidence: high
 ---
 
@@ -13,7 +13,7 @@ confidence: high
 
 Workflow for connecting a concrete question to the awesome-game-security collection: start from the user's object and desired output, select the relevant domain skill, then only the resource layers needed to answer it. (source: wiki/sources/skills/overview.md)
 
-For README section names, link totals, and sub-bucket lists (e.g. `Anti Cheat` → `Detection:DMA`) rely on the regenerated projection `wiki/sources/README-categories.md` when you need a lightweight map; pair with [[repository-navigation]] for deterministic owner/repo lookup. Anchor sizes as of 2026-11-14: `Cheat` **3091**, `Anti Cheat` **906**, `Game Engine` **159**, `Game Develop` **205**, `DirectX` **49**, `Renderer` **18**, `Game Network` **36**, `Some Tricks` **120**, `Game Testing` **23**, console lanes `PlayStation` **15** / `Xbox` **13** / `Nintendo Switch` **11** / `Nintendo 3DS` **4** / `Game Boy` **6** (projection `link_count`; discovery not verification). (source: wiki/sources/README-categories.md)
+For README section names, link totals, and sub-bucket lists (e.g. `Anti Cheat` → `Detection:DMA`) rely on the regenerated projection `wiki/sources/README-categories.md` when you need a lightweight map; pair with [[repository-navigation]] for deterministic owner/repo lookup. Anchor sizes as of 2026-11-15: `Cheat` **3092**, `Anti Cheat` **907**, `Game Engine` **159**, `Game Develop` **205**, `DirectX` **49**, `Renderer` **18**, `Game Network` **36**, `Some Tricks` **120**, `Game Testing` **23**, console lanes `PlayStation` **15** / `Xbox` **13** / `Nintendo Switch` **11** / `Nintendo 3DS` **4** / `Game Boy` **6** (projection `link_count`; discovery not verification). (source: wiki/sources/README-categories.md)
 
 ## Principles
 
