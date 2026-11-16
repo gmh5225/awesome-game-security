@@ -595,7 +595,7 @@ sources:
   - wiki/sources/descriptions/lotty520__Detect-Any.md
   - wiki/sources/descriptions/wuying2021__mibox3s-utgard-lpe.md
   - wiki/sources/descriptions/stupidgiraffe__android-root-feed-bridge.md
-updated: 2026-11-15
+updated: 2026-11-16
 confidence: high
 ---
 
@@ -683,6 +683,8 @@ Root paths: `/proc/<pid>/mem` pread/pwrite, GameGuardian-style editors, ceserver
 Client-side Play Billing hooks such as [[freedom]] intercept the billing service interface and return fake purchase confirmations—useful for studying IAP verification weaknesses on Android games that trust local billing callbacks without robust server-side receipt checks. (source: wiki/sources/descriptions/gmh5225__freedom.md) Multi-store billing hook module [[com-fuck-iab]] (FKIAB; LSPosed/Xposed; intercepts Google Play, Bazaar, and Myket billing service binders; embeds Frida Gum for compiled TypeScript per-package scripts; restore purchases / bypass local checks; Cheat / Xposed) extends that lane for regional storefronts and scriptable per-title IAP analysis. (source: wiki/sources/descriptions/Xposed-Modules-Repo__com.fuck.iab.md)
 
 Virtual microphone and audio-capture routing module [[io-mo-glassmic]] (lm060719; LSPosed on rooted devices; Kotlin Compose + Java/C++ shadowhook; hooks AudioRecord/AAudio/OpenSL ES so targets read imported PCM, TTS, or experimental playback-loop samples; optional root AudioPolicy inject; floating diagnostics; Cheat / Xposed / audio-pipeline testing) supports controlled microphone-routing and capture-compatibility experiments beside voice-biometrics and anti-spoof research—not production AC bypass. (source: wiki/sources/descriptions/lm060719__io.mo.glassmic.md)
+
+PayPal RASP anti-tamper study module [[oslokrok]] (Ascen1ty; LSPosed/Vector; DexKit-resolved hooks on AppVerifier and legacy root-detection channels; prevents kill-on-launch when exercising PayPal or similar RASP-guarded Android apps on rooted devices; Cheat / Xposed) illustrates commercial mobile shielding hook points beside [[appsealing-reversal]] and [[com-fuck-iab]] billing bypass research—not game AC endorsement. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/Ascen1ty__oslokrok.md)
 
 ## Mobile anti-cheat
 
