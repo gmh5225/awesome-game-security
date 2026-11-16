@@ -1134,6 +1134,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/valentderah/totk-pc-recomp [Static recompilation of The Legend of Zelda: Tears of the Kingdom to native Windows x86-64 with a Vulkan renderer (BYO game assets)]
 - https://github.com/HanYolo1/timeLink [Active Longshot fork: Switch static recompilation to native Windows/Linux with Vulkan, documented status tables and BYO-assets build flow]
 - https://github.com/Lucas-blip-png/dkb-pc-recomp [Static recompilation of Donkey Kong Bananza (Switch 2) to native Windows with a Vulkan renderer; BYO assets, documented NVN/SPIR-V RE pipeline (early, tutorial-level progress)]
+- https://github.com/Elie-0066/SPR-Recomp-Project [Static recompilation of Splatoon Raiders (Switch 2) to native Windows x86-64 with a Vulkan renderer; BYO dump, no game assets]
 - https://github.com/STS78721/MKW-THWOMP [Static recompilation of Mario Kart World (Switch 2, 1.8.0) to native Windows with NVN-on-Vulkan runtime, codegen, and build tooling; BYO dump]
 - https://github.com/XiONDiGiTaL/EmblemWeave [Rust static recompilation of Fire Emblem: Fortune's Weave (Switch 2) to native Windows with runtime, patches, save editor, and in-game mod/cheat tooling; BYO dump]
 - https://github.com/jmars125/xcx-recomp [Static recompilation of Xenoblade Chronicles X: Definitive Edition (Switch) to native Windows x86-64 with Vulkan renderer; fork of TotK Recomp, BYO game assets]
@@ -2665,6 +2666,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/adamhlt/ImGui-Standalone
 - https://github.com/ocornut/imgui_club [Official Dear ImGui extensions including a hex memory editor widget]
 - https://github.com/XeTrinityz/Oracle [MIT-licensed in-game cheat/tweak menu for Batman: Arkham Knight (BmSDK-AK), Trinity Edition with modular hooks and settings.toml]
+- https://github.com/N00bPrograms/net-worthless-mod-menu [Open-source Godot in-game cheat/mod menu for Net Worthless via autoload override and documented feature toggles]
 - https://github.com/misnopini1987/GTA-5-Trainer-Menu-Base [MIT C++17 DirectX 11 / ImGui scaffold (MenuForge) for building modular in-game trainer overlay menus for GTA V on Windows]
 - https://github.com/dxxxxy/Icarus [Cross-loader Minecraft mod library that builds skeet/fatality-style config menus from annotated fields, with configs, keybinds, and Jar-in-Jar packaging]
 
@@ -3774,6 +3776,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Kryx7z/Conglomerate-Cs2 [Open-source internal Counter-Strike 2 cheat in C++ (TempleWare-based) with Visual Studio build and DLL injection workflow]
 - https://github.com/bootmgfw/cs2-cheat-source [Internal CS2 cheat with skin/glove changer, DirectX hooks, and Source 2 SDK headers]
 - https://github.com/BrufelFX/RabsztynCC-CS2-Internal [CS2 internal research framework with direct syscalls, optional kernel driver IPC, DX11 hooks, and ImGui menu]
+- https://github.com/crackallergicaleinstein/HVHGOD-paid-cheat-free-forever- [Cracked CS2 internal with launcher, manual mapper, patched payload, and documented VAC-oriented build notes in-repo]
 - https://github.com/Leksa667/YOLOv8-Overlay-CS2 [YOLOv8 in CS2]
 - https://github.com/ccsimplyspolit/CS2-P2C-TEMPLATES [CS2 security-research P2C templates: VMProtect FVA reconstruction, kernel drivers, and user-mode injectors]
   
@@ -5613,6 +5616,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/DrYenyen/Drive-Cloning-For-PS4-PS5 [Research and instructions for cloning PS4 and PS5 internal storage drives]
 - https://gist.github.com/flatz/620ddda6d64acca6d1c990dc3080ac0e [PS5 Hypervisor exploit]
 - https://github.com/ps5-linux/ps5-linux-loader [Linux payload implementing HV exploits to run a custom bootloader]
+- https://github.com/zorde23/kyty-gpu-hybrid [Kyty PS5 GPU stack (CP, shader recompiler, Vulkan) built as a DLL for hybrid PS5-on-PC compatibility layers; GPL-2.0 fork]
 - https://github.com/Ston3dd/ReaperPy [Python PS5 toolkit on ps5debug-NG: memory scanner, debugger, patches/code caves, UE live tools, and GoldHEN/etaHEN cheat export]
 - https://github.com/NetVar1337/SlopStation [Windows Tauri PS4 reverse-engineering workbench over ps4debug-NG: live memory, debugger, scanner, decompiler, x86-64 emulator, Lua scripting, and MCP for agents]
 - https://github.com/cragson/a53-code-exec [PoC for code execution on a53 used by PS5 on fw 02.00]
