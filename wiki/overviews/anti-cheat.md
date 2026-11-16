@@ -950,6 +950,7 @@ sources:
   - wiki/sources/descriptions/chaeyk__eac-leak.md
   - wiki/sources/descriptions/ch4ncellor__EAC-Reversal.md
   - wiki/sources/descriptions/BishopTopG__all-about-eac.md
+  - wiki/sources/descriptions/jhon2f__fortnite-ac-reversal.md
   - wiki/sources/descriptions/gmh5225__EAC-Driver-UD-for-now.md
   - wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheatMemorySig.md
   - wiki/sources/descriptions/gmh5225__EAC-shellcode-1.md
@@ -1069,7 +1070,7 @@ sources:
   - wiki/sources/descriptions/Vagdedes__Spartan-AntiCheat-In-Rewrite.md
   - wiki/sources/descriptions/phantantai73__AmberAntiCheat.md
   - wiki/sources/descriptions/optic-fyi__windows-driver.md
-updated: 2026-11-15
+updated: 2026-11-16
 confidence: high
 ---
 
@@ -1138,6 +1139,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 - [[eac]] — mixed EAC study pack: reversed `easyanticheat.sys` kernel callback/heuristic logic + EAC/EOS SDK drop with headers and `EOS_FileDecryptionTool` (Study pack lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC.md)
 - [[eac-reversal]] — updated devirtualized EAC driver internals: callback checks, dispatch verification, callback enumeration, certificate validation, and code integrity as C++ pseudocode (Reversed driver lane; ch4ncellor) (source: wiki/sources/descriptions/ch4ncellor__EAC-Reversal.md)
 - [[all-about-eac]] — Memflow-only external-VM RE dossier on one captured Fortnite `EasyAntiCheat_EOS.sys` build; passive physical-memory acquisition + matched kernel PDB layouts; maps process/thread/image callbacks, Ob handle policy, registry callbacks, minifilter, device IPC, and per-thread callback contexts; evidence-labeled claims + Python validation; studies lifecycle/persistence/executable-mapping/platform-state monitoring; no bypass material (External VM memory-forensics lane; BishopTopG) (source: wiki/sources/descriptions/BishopTopG__all-about-eac.md)
+- [[fortnite-ac-reversal]] — late-2026 Fortnite/EAC **stack reversal** knowledge base (jhon2f; Markdown dossier on classic + EOS EAC, UE5 integrity, server checks; driver IOCTLs, pipe IPC, `rules.bin`, HWID/fingerprint catalog, telemetry, trust-score model, ETW-TI; build-current driver offset notes; compilable minimal EAC usermode stub PoC + emulator architecture notes; architectural map—not live bypass; Cheat / Explore AntiCheat System:EAC) (source: wiki/sources/descriptions/jhon2f__fortnite-ac-reversal.md)
 - [[eac-emu]] — simple x64 EAC DLL emulator stub; exports expected anti-cheat API functions with placeholder implementations; C++ plus assembly patch helpers; PoC for RE and compatibility testing of EAC-linked client code (Client stub lane; Rat431) (source: wiki/sources/descriptions/Rat431__EAC_Emu.md)
 - [[easyanticheat-emulator]] — lightweight EAC client-interface DLL stub; fake client-side exports so game binaries proceed as if anti-cheat is present; debugging-oriented; no server-side protocol spoofing (Client stub lane; CamxxCore [EAC Emulator]) (source: wiki/sources/descriptions/CamxxCore__EasyAntiCheat-Emulator.md)
 - [[anticheatplugin-easyanticheat]] — Windows x86 C++20 EAC middleware plugin via Epic Online Services SDK; host-game plugin interface for player registration, session management, integrity-violation callbacks, and EOS P2P secure transport with peer authentication and latency tracking; CMake build for legacy/custom online titles (Open Source Anti Cheat System) (source: wiki/sources/descriptions/GeneralsOnlineDevelopmentTeam__AntiCheatPlugin_EasyAntiCheat.md)
