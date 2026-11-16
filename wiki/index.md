@@ -1965,6 +1965,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HintInject](entities/hintinject.md) — PE import-table shellcode staging (Hint/Name Table chunks; loader IAT resolution; Hint/Name Table; frkngksl)
 - [hint-break](entities/hint-break.md) — RE-tool ghost opcodes `0F 1A`/`0F 1B` (Anti Debugging / anti-disasm)
 - [Hooking-via-InstrumentationCallback](entities/hooking-via-instrumentation-callback.md) — Ring3 Instrumentation Callback hook (NtSetInformationProcess; no ntdll patch)
+- [HirschgangWare](entities/hirschgang-ware.md) — DayZ second-PC DMA external (C++17 MSVC; PCILeech/MemProcFS read-only Enfusion reads; DX11 ImGui ESP, second-monitor radar, loot filters; kmbox/MAKCU triggerbot; VMM keyboard state; weikiboy-tech; cheat / game:dayz [DMA External])
 - [HiveWE](entities/hivewe.md) — WC3 World Editor alternative (large-map editor; cheat / game:warcraft iii)
 - [Holodori-Kernel-Bypass](entities/holodori-kernel-bypass.md) — userspace emu of Hololive Dreams usrdrv017964.sys (Wine/Proton; MinHook)
 - [halflife](entities/halflife.md) — Half-Life 1 GoldSrc engine and SDK source (C/C++; client/server/shared interfaces; Windows + Linux builds; modding-oriented architecture; Game Engine / source; ValveSoftware)
