@@ -4280,6 +4280,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [codex-vmprotect-unpack-skill](entities/codex-vmprotect-unpack-skill.md) — Codex/Claude agent skill; vmp-lazy-unpack tracer + Python PE/import audit; anti-debug/anti-VM reasoning; unpack vs devirt; bundled VMP training sample; VMP 3.5.0–3.10.4 x64/x86; Fix VMP (UzawaReisaQwQ)
 - [VMProtect](entities/vmprotect.md) — VM-based code obfuscation engine (software CPU + memory/I/O; Fix VMP study; gmh5225)
 - [VMProtect Dumper](entities/vmprotect-dumper.md) — Windows C console live-memory VMProtect PE unpacker (OEP/IAT recovery, dynamic exec-region harvest, optional PE-sieve; drag-drop/dropper/DLL modes; IOC extract; password-protected artifact archive; Fix VMP / Unpacker; whoamicrash)
+- [VMProtect Resource Extractor](entities/vmprotect-resource-extractor.md) — ivanpotatoes; locate VMProtect encrypted PE resource table, derive protection key, dump resources (static C++ CLI, Unicorn startup emulation, x64dbg live-memory plugin; manifest type/name/language/size/RVA; VMP 3.3.x–3.10.x; Cheat / RE Tools)
 - [VMPStatic](entities/vmpstatic.md) — static Go VMProtect PE unpacker (VMP 1.x–3.x rebuild; Fix VMP / Unpacker)
 - [vmpunpack](entities/vmpunpack.md) — Python x64 VMProtect/packer unpacker (sogen emulation to OEP; PE rebuild + IOC extract; no devirt; Fix VMP / Unpacker)
 - [VMPUnpacker](entities/vmpunpacker.md) — VMProtect PE unpacker (C++/Python; LZMA → sections/IAT; Fix VMP / Unpacker)
