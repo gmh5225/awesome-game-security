@@ -1240,6 +1240,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/tomhamidi97-arch/frida-vmp-bypass [Frida boundary-hook writeup for reversing stacked VMProtect and OLLVM on Android via libc/JNI/Java exit monitoring]
 - https://github.com/7777lolonlyyou/VMProtect-LLM-SKILL [LLM-oriented devirtualization workflow skill for VMProtect, Themida, and custom VM protections (Triton, Misasm, LLVM references)]
 - https://github.com/UzawaReisaQwQ/codex-vmprotect-unpack-skill [Codex/Claude agent skill and sample workflow to unpack VMProtect 3.5–3.10.x PEs: strip debugger/VM checks and rebuild IAT for local debugging]
+- https://github.com/ivanpotatoes/VMProtect-Resource-Extractor [Static, Unicorn emulation, and x64dbg plugin workflows to discover and extract VMProtect encrypted PE/DLL resources with manifest output]
 
 > Fix Themida
 - https://github.com/sodareverse/TDE
@@ -1473,6 +1474,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/j-hc/FlagSecurePatcher [Disable flag secure and screenshot listeners]
 - https://github.com/ShivamXD6/Simple-Flag-Secure [Standalone Magisk/KernelSU/APatch module that patches services.jar to disable FLAG_SECURE and block screenshot detection on Android 14+]
 - https://github.com/saadnahid7/smalipatcher_reborn [Magisk/KernelSU/APatch module that patches services.jar on-device for mock-location spoofing and secure-window screenshot bypass on Android 10–17]
+- https://github.com/Mods-Center/Apk-Protection-Patch [Magisk/KernelSU module that patches framework/services JARs so modified or unsigned APKs can run as system apps on Android 13+ OEM ROMs]
+- https://github.com/Mods-Center/Apk-Signature-Verification-Patch [Magisk/KernelSU module that disables system APK signature checks by patching framework and OEM service JARs (Android 16 / ColorOS supported)]
 - https://github.com/hackcatml/zygisk-memdump [A zygisk module that dumps so file from process memory]
 - https://github.com/PerformanC/ReZygisk [Transparent implementation of Zygisk]
 - https://github.com/VeryBaaad/ZygiskNextNext [Magisk/KernelSU/APatch module implementing the Zygisk Next API to load ZygiskNext-style modules (inline/PLT hooking, HyperOS Runtime injection)]
