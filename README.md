@@ -1750,6 +1750,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/eltavine/Duck-Detector-Refactoring [DuckDetector refactor: Android local device-integrity inspector for root tampering, runtime hooking, mount anomalies, attestation trust, and virtualization evidence]
 - https://github.com/systemnb/RootSocketKit [Root privilege IPC via Unix Socket — Magisk/KernelSU/APatch compatible JNI client, reinforcement-proof, low-latency root ops (OpenProcess, ReadMemory)]
 - https://github.com/AtawurRahmanTanvir/NEXUS [Root-required Kotlin/Compose Android utility for device identity spoofing, environment sanitization, kernel memory purge, and telemetry/log cleanup]
+- https://github.com/reinanbr/uburoot [Installs Ubuntu arm64 in a Magisk/KernelSU/APatch chroot on Android with a real terminal, kernel/hardware opt-ins, and CI-tested releases]
 
 > Android Kernel driver development
 - https://github.com/gmh5225/AndroidDriveSignity [Bypass driver signature verification in Android kernel(ARMv8.3)]
@@ -2584,6 +2585,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/orphannn/hoozi-cs2-dma [CS2 external DMA assistant with configurable player ESP, map collision visibility checks, and LeechCore/VMM integration]
 - https://github.com/nbnmvwpptxsf/faceit-dma-cs2 [CS2 DMA radar/ESP described for FACEIT with PCIe DMA hardware]
 - https://github.com/MGreif/PCILeech_DMA_Proxy [A DLL with Loader that hooks common windows memory API functions and proxies them to the remote device via DMA]
+- https://github.com/weikiboy-tech/HirschgangWare [Open-source DayZ external DMA cheat: MemProcFS/PCILeech reads, ESP overlay, second-monitor radar, loot filters, and kmbox/MAKCU triggerbot]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
@@ -2978,6 +2980,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Zagrios/Obelisk [Open-source Apple silicon macOS launcher for Steam/Epic/GOG with Voile Wine runtime and voile-lkd for Windows and Linux anti-cheat–supported titles]
 - https://github.com/CDJuaum/RunEXE [Python PE analyzer and Wine launcher that flags kernel anti-cheat/DRM blockers and auto-provisions prefixes and dependencies before running Windows games on Linux]
 - https://github.com/Glory42/RigCheck [Rust Linux desktop app that verdicts Steam games against your hardware, ProtonDB, and anti-cheat Linux blockers; local-first]
+- https://github.com/ruodou233/mac-game-library-advisor [Claude/agent skill to classify a Steam library on Mac by native play, Wine/GPTK viability, and kernel anti-cheat blockers (EAC, BE, Vanguard)]
 - https://github.com/ertunc-ozbay/pointblank-linux [Rust standalone launcher to run Point Blank (Zepetto/TAM) on Linux with unmodified CheatBlocker anti-cheat via Wine-GE/Proton, TLS-aligned runner, and prefix setup]
 - https://github.com/BlaMacfly/ArchMod [Native Rust/Tauri cheat panel for Steam games on Proton: launch Windows trainers in the correct prefix, scan memory natively, and share community address profiles]
 - https://github.com/DeckCheatz/DeckCheatz [AGPL Rust trainer launcher for Steam Deck and Linux with Flatpak/Nix packaging and Proton/Wine-friendly trainer UI]
@@ -3206,6 +3209,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/atenfyr/UAssetGUI [Viewing and modifying UE4 game assets]
 - https://github.com/UE-Explorer/UE-Explorer [Browser and decompiler for UE packages]
 - https://github.com/UE4SS-RE/RE-UE4SS [Re-Host of Unreal Engine 4/5 Scripting System]
+- https://github.com/T0PGLitch3r/UE4SS-Launcher [Windows launcher and in-game UE4SS editor for single-player Unreal games: mods, freecam, cheat manager unlock, level browser, and GLB/FBX model import/export]
 - https://github.com/gmh5225/Unreal-Engine-5-PDB [UE5 PDB]
 
 > Game Engine Explorer:Unity
