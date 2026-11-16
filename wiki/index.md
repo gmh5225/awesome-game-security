@@ -3090,6 +3090,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [overload](entities/overload.md) — open-source C++ 3D engine + integrated editor (Lua scripting; render/physics/audio/profiling/material tooling; Game Engine / source)
 - [Orkige](entities/orkige.md) — C++20 OGRE/Ogre-Next engine (Lua hot-reload; ImGui; desktop/mobile/Wasm; Game Engine)
 - [Orbit](entities/orbit.md) — Google C++ native profiler (dynamic runtime instrumentation; call graphs / threads / memory; Linux remote + Windows UI; Game Testing)
+- [Orbis Web Manager](entities/orbis-web-manager.md) — kromossomom-debug; browser-based GoldHEN PS4 LAN admin (C# HttpListener + HTML/JS; dashboard, FTP, PKG remote install, cheat JSON + CUSA conversion, BinLoader :9090/:12800; PlayStation / homebrew)
 - [Origami](entities/origami.md) — .NET assembly packer (compressed payload in PE debug directory or `.origami` section; RelocLoader; PE format abuse; Anti Cheat → Binary Packer / `.NET`)
 - [Overgrowth](entities/overgrowth.md) — open-source Wolfire Games action game + custom engine (rendering/physics/animation/AI/level editor/scripting; Game Engine / source)
 - [Overwatch 1 Cheat Source](entities/overwatch-1-cheat-source.md) — Overwatch 1 internal DX11 DLL (Detours Present + ImGui ESP/aimbot/skin changer; Warden stack spoof; VMProtect; HWBP hooks; cheat / game:overwatch; gmh5225)

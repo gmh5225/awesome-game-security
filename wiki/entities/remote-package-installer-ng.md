@@ -5,7 +5,7 @@ topics: [game-hacking, reverse-engineering]
 sources:
   - wiki/sources/descriptions/AldySan__Remote-Package-Installer-NG.md
   - wiki/sources/README-categories.md
-updated: 2026-11-10
+updated: 2026-11-16
 confidence: medium
 ---
 
@@ -23,4 +23,4 @@ README lists it under **PlayStation** (projected category map).
 
 ## Related
 
-[[psfree-enhanced]] · [[cheatrunner-patches]] · [[drive-cloning-for-ps4-ps5]] · [[ghidra-orbis]] · [[ida-ps4-helper]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[orbis-web-manager]] · [[psfree-enhanced]] · [[cheatrunner-patches]] · [[drive-cloning-for-ps4-ps5]] · [[ghidra-orbis]] · [[ida-ps4-helper]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
