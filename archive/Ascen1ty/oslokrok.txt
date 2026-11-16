@@ -1,0 +1,531 @@
+Project Path: arc_Ascen1ty_oslokrok_m7j8h3zx
+
+Source Tree:
+
+```txt
+arc_Ascen1ty_oslokrok_m7j8h3zx
+├── LICENSE
+├── README.md
+├── THIRD_PARTY_NOTICES.md
+├── app
+│   ├── build.gradle
+│   └── src
+│       └── main
+│           ├── AndroidManifest.xml
+│           ├── assets
+│           │   └── xposed_init
+│           ├── java
+│           │   └── net
+│           │       └── oslokrok
+│           │           └── hook
+│           │               └── Hook.java
+│           └── res
+│               └── values
+│                   └── arrays.xml
+├── build.gradle
+├── gradle.properties
+└── settings.gradle
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Oslokrok contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+[![GitHub release](https://img.shields.io/github/v/release/Ascen1ty/oslokrok?style=for-the-badge)](../../releases)
+[![Downloads](https://img.shields.io/github/downloads/Ascen1ty/oslokrok/total?style=for-the-badge)](../../releases)
+
+# Oslokrok - PayPal root-detection bypass
+
+**A Vector (formerly Xposed/LSPosed) module that prevents the PayPal app from crashing on rooted devices.**
+
+This crash is caused by PayPal's own on-device anti-tamper (RASP), which
+kills the app a few seconds after launch on rooted devices. Oslokrok neutralises
+the mechanism that causes this crash, allowing the PayPal app to run normally.
+
+---
+
+## 🪝 Oslokrok?
+PayPal's internal package name = `com.paypal.oslo`.<br/>
+Oslo = Norway.<br/>
+Hook = `Krok` in Norwegian.<br/>
+PayPal Hook = `Oslokrok.`<br/>
+
+---
+
+## ✨ Features
+
+- ✅ Prevents on-launch anti-tamper crash (`AppVerifier` for 10.19.0+, `s=root` for pre-10.19.0).
+- ✅ Self-healing: targets are resolved at runtime with DexKit, not hardcoded names.
+- ✅ Falls back to fixed hooks if DexKit is unavailable.
+
+---
+
+## 🛠️ How It Works
+
+- **AppVerifier (10.19.0+)** - this is a startup integrity check that crashes the process on a mismatch. No-opping its `run()` method prevents the crash.
+- **Legacy (pre-10.19.0)**   - RASP has several detection channels, but only the root channel is set up to cause the crash. No-opping this channel means the crash never happens.
+
+### 🔍 Target(s)
+
+| Check | Method | Package |
+| --- | --- | --- |
+| AppVerifier (10.19.0+) | `AppVerifier.run()` | `com.paypal.oslo.core.startup` |
+| Legacy (pre-10.19.0) | `RaspDetectionDataSourceImpl.signal()` | `com.paypal.oslo.core.security.rasp` |
+
+Oslokrok locates both methods with [DexKit](https://github.com/LuckyPray/DexKit)
+using structural anchors (package names + method shape) with a fixed-name fallback 
+so hooks should survive updates, unless these are removed.
+
+---
+
+## 🧪 Requirements
+
+- ✅ Root + an Xposed framework: **Vector** or **LSPosed** with Zygisk.
+- ✅ Working root hiding (DenyList / HMA / Shamiko, etc).
+- ❗ **arm64-v8a** only.
+- ❗ Oslokrok only prevents the crash; it does **not** hide root from PayPal's servers.
+
+---
+
+## 🚀 Installation
+
+1. Download the latest `Oslokrok-*.apk` from [Releases](../../releases) and install it.
+2. Enable **Oslokrok** in your LSPosed / Vector app; confirm **PayPal** is in scope (ticked/selected).
+3. Force-stop PayPal (and/or reboot) and reopen PayPal.
+
+> ⚠️ Upon install, Play Protect will probably say it *"hasn't seen an app from  
+> this developer"* - this is due to a new-signing-key reputation notice. Tap
+> **More details → Install anyway**.
+
+Check LSPosed/Vector log (filter `oslokrok`) for:
+`signal hooks=1, verifier hooks=1 (dexkit)`.
+
+---
+
+## 🧠 Notes
+
+- If an update changes the package/interface/method so that nothing hooks
+  (`signal hooks=0, verifier hooks=0`), the anchors in
+  `app/src/main/java/net/oslokrok/hook/Hook.java` need updating.
+- Tested on v10.14.0, v10.16.0, v10.17.0, v10.18.0 and v10.19.0, v10.20.0, v10.21.0.
+
+---
+
+## 🙏 Credits
+
+- **[Santand3rp](https://github.com/mwilky/Santand3rp)** by **mwilky** — for inspiring the
+  initial concept for this project and the two-hook approach to defeating the in-process anti-tamper.
+- **[DexKit](https://github.com/LuckyPray/DexKit)** by **LuckyPray** — the
+  runtime dex-search engine that makes the hooks "self-healing".
+
+---
+
+## 📄 License
+
+Oslokrok is released under the **MIT License** — see [`LICENSE`](LICENSE).
+
+Release builds bundle third-party components (DexKit, Kotlin stdlib, FlatBuffers)
+under their own licenses — see [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+DexKit is dual-licensed LGPL-3.0 / Apache-2.0 and is used here under Apache-2.0.
+
+---
+
+> This module is in no way affiliated with, or endorsed by, PayPal. No
+> PayPal code, assets, or trademarks are included; "PayPal" is used
+> only to name the app this module works with.
+
+```
+
+`THIRD_PARTY_NOTICES.md`:
+
+```md
+# Third-Party Notices
+
+Oslokrok itself is MIT-licensed (see `LICENSE`). Released apks bundle the
+following third-party components, redistributed under their own licenses.
+
+## DexKit
+- Project: https://github.com/LuckyPray/DexKit
+- Copyright: © LuckyPray
+- License: dual-licensed **GNU LGPL-3.0** *or* **Apache License 2.0**
+  (https://www.apache.org/licenses/LICENSE-2.0). Used here under **Apache-2.0**.
+- Usage: consumed unmodified as a Maven dependency (`org.luckypray:dexkit`).
+
+## Kotlin Standard Library
+- Project: https://github.com/JetBrains/kotlin
+- Copyright: © JetBrains s.r.o. and Kotlin Programming Language contributors
+- License: Apache License 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
+- Usage: transitive dependency of DexKit.
+
+## FlatBuffers (flatbuffers-java)
+- Project: https://github.com/google/flatbuffers
+- Copyright: © Google Inc.
+- License: Apache License 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
+- Usage: transitive dependency of DexKit.
+
+```
+
+`app/build.gradle`:
+
+```gradle
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'net.oslokrok.hook'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'net.oslokrok.hook'
+        minSdk 26
+        targetSdk 34
+        versionCode (project.hasProperty('vCode') ? project.vCode.toInteger() : 1)
+        versionName (project.hasProperty('vName') ? project.vName.toString().replaceFirst('^v','') : '1.0')
+        // arm64-v8a (fix libddexkit)
+        ndk { abiFilters 'arm64-v8a' }
+    }
+
+    signingConfigs {
+        release {
+            def ks = System.getenv('KEYSTORE_FILE')
+            if (ks) {
+                storeFile file(ks)
+                storePassword System.getenv('KEYSTORE_PASSWORD')
+                keyAlias System.getenv('KEY_ALIAS')
+                keyPassword System.getenv('KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig System.getenv('KEYSTORE_FILE') ? signingConfigs.release : null
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Xposed.
+    compileOnly 'de.robv.android.xposed:api:82'
+    // DexKit native lib + flatbuffers + kotlin-stdlib.
+    implementation 'org.luckypray:dexkit:2.3.0'
+	implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.24'
+}
+
+```
+
+`app/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:label="Oslokrok"
+        android:hasCode="true">
+        <meta-data android:name="xposedmodule" android:value="true"/>
+        <meta-data android:name="xposeddescription"
+            android:value="Neutralises PayPal's on-launch root-detection crash."/>
+        <meta-data android:name="xposedminversion" android:value="82"/>
+        <meta-data android:name="xposedscope" android:resource="@array/xposed_scope"/>
+    </application>
+</manifest>
+
+```
+
+`app/src/main/assets/xposed_init`:
+
+```
+net.oslokrok.hook.Hook
+
+```
+
+`app/src/main/java/net/oslokrok/hook/Hook.java`:
+
+```java
+package net.oslokrok.hook;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Member;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.IXposedHookZygoteInit;
+import de.robv.android.xposed.XC_MethodReplacement;
+import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.XposedHelpers;
+import de.robv.android.xposed.callbacks.XC_LoadPackage;
+
+import org.luckypray.dexkit.DexKitBridge;
+import org.luckypray.dexkit.query.FindClass;
+import org.luckypray.dexkit.query.FindMethod;
+import org.luckypray.dexkit.query.matchers.ClassMatcher;
+import org.luckypray.dexkit.query.matchers.MethodMatcher;
+import org.luckypray.dexkit.query.enums.StringMatchType;
+import org.luckypray.dexkit.result.ClassData;
+import org.luckypray.dexkit.result.ClassDataList;
+import org.luckypray.dexkit.result.MethodData;
+import org.luckypray.dexkit.result.MethodDataList;
+
+/**
+ * Each machanism is resolved dynamically via DexKit (structural
+ * anchors in package tree) with a hardcoded fallbacks:
+ *
+ *   1. signal()  - original RASP detection-signal emit point (RaspDetectionDataSourceImpl.signal).
+ *                  Reduntant on 10.19.0+ (as is removed), but is kept here for older builds.
+ *
+ *   2. AppVerifier.run() - the 10.19.0 startup verifier (oslo.core.startup). DexGuard VM launched 
+ *                   by AppVerifierInitializer crashes (NPE / heap exhaustion) on tamper mismatch.
+ *                  Nothing consumes its result, so replacing run() with no-op resolves the crash.
+ */
+
+public class Hook implements IXposedHookLoadPackage, IXposedHookZygoteInit {
+
+    private static final String TARGET = "com.paypal.android.p2pmobile";
+    private static final String IFACE  = "com.paypal.oslo.core.security.rasp.SignalRaspDetectionDataSource";
+    private static final String IMPL   = "com.paypal.oslo.core.security.rasp.RaspDetectionDataSourceImpl";
+    private static final String PKG    = "com.paypal.oslo.core.security.rasp";
+    private static final String SIGNAL = "signal";
+
+    private static final String STARTUP_PKG = "com.paypal.oslo.core.startup";
+    private static final String APPVERIFIER = "com.paypal.oslo.core.startup.AppVerifier";
+    private static final String RUN         = "run";
+
+    private static final String ABI    = "arm64-v8a";
+    private static final String TAG    = "[oslokrok] ";
+
+    private static boolean nativeLoaded = false;
+    private String modulePath;
+
+    @Override
+    public void initZygote(IXposedHookZygoteInit.StartupParam startupParam) {
+        this.modulePath = startupParam.modulePath;
+    }
+
+    @Override
+    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) {
+        if (!TARGET.equals(lpparam.packageName)) return;
+        ClassLoader cl = lpparam.classLoader;
+
+        boolean nativeOk = loadDexKitNative(lpparam);
+
+        Set<Member> signalTargets = new HashSet<>();
+        Set<Member> verifierTargets = new HashSet<>();
+
+        if (nativeOk) {
+            DexKitBridge bridge = null;
+            try {
+                bridge = DexKitBridge.create(cl, true);
+
+                try {
+                    MethodDataList ms = bridge.findMethod(FindMethod.create().matcher(
+                            MethodMatcher.create()
+                                    .declaredClass(PKG, StringMatchType.Contains)
+                                    .name(SIGNAL)
+                                    .paramCount(0)));
+                    for (MethodData md : ms) {
+                        try { signalTargets.add(md.getMethodInstance(cl)); } catch (Throwable ignored) {}
+                    }
+                } catch (Throwable t) { XposedBridge.log(TAG + "query A failed: " + t); }
+
+                try {
+                    ClassDataList impls = bridge.findClass(FindClass.create().matcher(
+                            ClassMatcher.create().addInterface(IFACE)));
+                    for (ClassData cd : impls) {
+                        try { signalTargets.add(cd.getInstance(cl).getDeclaredMethod(SIGNAL)); }
+                        catch (Throwable ignored) {}
+                    }
+                } catch (Throwable t) { XposedBridge.log(TAG + "query B failed: " + t); }
+
+                try {
+                    MethodDataList ms = bridge.findMethod(FindMethod.create().matcher(
+                            MethodMatcher.create()
+                                    .declaredClass(STARTUP_PKG, StringMatchType.Contains)
+                                    .name(RUN)
+                                    .paramCount(0)));
+                    for (MethodData md : ms) {
+                        try { verifierTargets.add(md.getMethodInstance(cl)); } catch (Throwable ignored) {}
+                    }
+                } catch (Throwable t) { XposedBridge.log(TAG + "query C failed: " + t); }
+
+            } catch (Throwable t) {
+                XposedBridge.log(TAG + "DexKit init failed: " + t);
+            } finally {
+                if (bridge != null) try { bridge.close(); } catch (Throwable ignored) {}
+            }
+        }
+
+        // signal()
+        int signalHooks = 0;
+        for (Member m : signalTargets) {
+            if ((m.getModifiers() & Modifier.ABSTRACT) != 0) continue;
+            try {
+                XposedBridge.hookMethod(m, XC_MethodReplacement.returnConstant(null));
+                signalHooks++;
+                XposedBridge.log(TAG + "hooked (dynamic) " + m);
+            } catch (Throwable t) { XposedBridge.log(TAG + "hook failed on " + m + ": " + t); }
+        }
+        if (signalHooks == 0) {
+            try {
+                XposedHelpers.findAndHookMethod(IMPL, cl, SIGNAL,
+                        XC_MethodReplacement.returnConstant(null));
+                signalHooks++;
+                XposedBridge.log(TAG + "hooked (fallback) " + IMPL + "." + SIGNAL + "()");
+            } catch (Throwable t) {
+                XposedBridge.log(TAG + "signal fallback failed: " + t);
+            }
+        }
+
+        // appverif
+        int verifierHooks = 0;
+        for (Member m : verifierTargets) {
+            if ((m.getModifiers() & Modifier.ABSTRACT) != 0) continue;
+            try {
+                XposedBridge.hookMethod(m, XC_MethodReplacement.returnConstant(null));
+                verifierHooks++;
+                XposedBridge.log(TAG + "neutralised (dynamic) " + m);
+            } catch (Throwable t) { XposedBridge.log(TAG + "verifier hook failed on " + m + ": " + t); }
+        }
+        if (verifierHooks == 0) {
+            try {
+                XposedHelpers.findAndHookMethod(APPVERIFIER, cl, RUN,
+                        XC_MethodReplacement.returnConstant(null));
+                verifierHooks++;
+                XposedBridge.log(TAG + "neutralised (fallback) " + APPVERIFIER + "." + RUN + "()");
+            } catch (Throwable t) {
+                // pre-10.19.0
+                XposedBridge.log(TAG + "no AppVerifier on this version: " + t);
+            }
+        }
+
+        XposedBridge.log(TAG + "active on " + TARGET
+                + ", signal hooks=" + signalHooks
+                + ", verifier hooks=" + verifierHooks
+                + (nativeOk ? " (dexkit)" : " (no-dexkit)"));
+    }
+
+    /** Load libdexkit.so */
+    private boolean loadDexKitNative(XC_LoadPackage.LoadPackageParam lpparam) {
+        if (nativeLoaded) return true;
+        try { System.loadLibrary("dexkit"); nativeLoaded = true; return true; }
+        catch (Throwable ignored) {}
+
+        try {
+            if (modulePath == null) { XposedBridge.log(TAG + "modulePath unknown; cannot extract .so"); return false; }
+            String base = (lpparam.appInfo != null && lpparam.appInfo.dataDir != null)
+                    ? lpparam.appInfo.dataDir : "/data/local/tmp";
+            File dir = new File(base, ".oslokrok");
+            dir.mkdirs();
+            File so = new File(dir, "libdexkit.so");
+
+            ZipFile zf = new ZipFile(modulePath);
+            try {
+                ZipEntry e = zf.getEntry("lib/" + ABI + "/libdexkit.so");
+                if (e == null) { XposedBridge.log(TAG + ".so not found in module APK"); return false; }
+                if (!so.exists() || so.length() != e.getSize()) {
+                    InputStream in = zf.getInputStream(e);
+                    OutputStream out = new FileOutputStream(so);
+                    try {
+                        byte[] buf = new byte[8192]; int n;
+                        while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                    } finally { out.close(); in.close(); }
+                    so.setReadable(true, false);
+                    so.setExecutable(true, false);
+                }
+            } finally { zf.close(); }
+
+            System.load(so.getAbsolutePath());
+            nativeLoaded = true;
+            XposedBridge.log(TAG + "loaded libdexkit.so from " + so.getAbsolutePath());
+            return true;
+        } catch (Throwable t) {
+            XposedBridge.log(TAG + "native extract/load failed: " + t);
+            return false;
+        }
+    }
+}
+
+```
+
+`app/src/main/res/values/arrays.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="xposed_scope">
+        <item>com.paypal.android.p2pmobile</item>
+    </string-array>
+</resources>
+
+```
+
+`build.gradle`:
+
+```gradle
+plugins {
+    id 'com.android.application' version '8.5.2' apply false
+}
+
+```
+
+`gradle.properties`:
+
+```properties
+android.useAndroidX=true
+org.gradle.jvmargs=-Xmx2048m
+android.nonTransitiveRClass=true
+
+```
+
+`settings.gradle`:
+
+```gradle
+pluginManagement {
+    repositories { google(); mavenCentral(); gradlePluginPortal() }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories { google(); mavenCentral(); maven { url = uri('https://api.xposed.info/') } }
+}
+rootProject.name = "Oslokrok"
+include(":app")
+
+```
