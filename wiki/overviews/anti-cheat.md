@@ -387,6 +387,7 @@ sources:
   - wiki/sources/descriptions/TOSTcRa__vigil.md
   - wiki/sources/descriptions/vylorq__anti-cheat.md
   - wiki/sources/descriptions/ertunc-ozbay__pointblank-linux.md
+  - wiki/sources/descriptions/ruodou233__mac-game-library-advisor.md
   - wiki/sources/descriptions/mikio815__linux-anticheat.md
   - wiki/sources/descriptions/daswareinfach__Battleye-VAC-EAC-Kernel-Bypass.md
   - wiki/sources/descriptions/dashingsoft__pyarmor.md
@@ -1292,6 +1293,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 - [[aleph0-virtualization-hypervisor]] — Rust Intel VT-x UEFI hypervisor (alephc0rporation; VMX root with nested Hyper-V; EPT-backed memory management; below-OS process-memory introspection and protection for game anti-cheat research; Open Source Anti Cheat System) (source: wiki/sources/descriptions/alephc0rporation__Aleph0-Virtualization-Hypervisor.md)
 - [[pointblank-linux]] — Rust/Slint community launcher for Zepetto/TAM Point Blank on Linux via isolated Wine prefix + TLS-aligned Wine 11/Wine-GE; Winetricks VC++/DX9/DX11/WebView2; unmodified native CheatBlocker with binary integrity verification; legitimate play / reproducible Wine+AC compatibility research—not bypass (ertunc-ozbay) (source: wiki/sources/descriptions/ertunc-ozbay__pointblank-linux.md)
 - [[obelisk]] — Zagrios Apple silicon macOS native Steam/Epic/GOG launcher (SwiftUI + Rust storefront protocols via SteamKit/Legendary patterns; cloud saves, friends, chat, overlay without official clients); bundled Voile Wine with per-game Rosetta Wine vs **voile-lkd** Linux engine for titles whose anti-cheat supports Linux/Proton; Metal D3DMetal/DXMT; legitimate launch diagnostics without bypassing anti-cheat (source: wiki/sources/descriptions/Zagrios__Obelisk.md) (source: wiki/sources/README-categories.md)
+- [[mac-game-library-advisor]] — packaged agent skill classifying macOS Steam titles by native/Wine/GPTK playability and explicitly flagging kernel AC blockers ([[easy-anti-cheat]], [[battleye]], Vanguard, Ricochet) plus third-party launchers that reject Wine-style runtimes; fresh wiki/community lookups; compatibility triage without bypass (ruodou233) (source: wiki/sources/descriptions/ruodou233__mac-game-library-advisor.md)
 - [[ac-compat-research]] — vendor-agnostic Linux kernel AC hosting feasibility study (IZxMD; LSM/signing/isolation/ABI constraints; non-virtualized architecture dossier + knowledge graph; no bypass material; Anti Cheat / Guide) (source: wiki/sources/descriptions/IZxMD__ac-compat-research.md)
 - [[eac-compliance]] — Arch Linux guide + `check-eac-compliance.sh` sysfs/procfs auditor for EAC Linux v2 (Secure Boot, TPM 2.0, kernel lockdown, DKMS module signing, IOMMU; NVIDIA/VirtualBox coexistence notes; legitimate host-hardening—not bypass; Anti Cheat / Guide) (source: wiki/sources/descriptions/MarceloAlm__EAC-compliance.md)
 - [[gexec]] — register-machine bytecode interpreter for Windows kernel drivers (gasm, gvmlift PE lifter, embeddable host API; updatable portable logic without native recompile; zer0condition; kernel AC development research) (source: wiki/sources/descriptions/zer0condition__gexec.md)

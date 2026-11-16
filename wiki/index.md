@@ -2621,6 +2621,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [LuaMachine](entities/luamachine.md) — UE4 Lua gameplay scripting plugin (Blueprint assets / metatables; Plugins:Unreal)
 - [Lua-Obfuscator-Clyde-Protection](entities/lua-obfuscator-clyde-protection.md) — Luau/Lua VM obfuscator (AST + stack/register VM; Roblox script protection)
 - [m0dern_p4cker](entities/m0dern-p4cker.md) — C/C++ ELF binary packer (`[ELF]`; Anti Cheat → Binary Packer)
+- [mac-game-library-advisor](entities/mac-game-library-advisor.md) — Claude/agent skill; macOS Steam library audit (native/Wine/GPTK, mod frameworks, kernel AC blockers EAC/BE/Vanguard; AppleGamingWiki/PCGamingWiki/ProtonDB lookups; ruodou233; cheat / guide)
 - [macroquad](entities/macroquad.md) — Rust 2D game lib (shaders / render / audio; Game Engine / source)
 - [MacShade](entities/macshade.md) — macOS ReShade 6.8 port; SwiftUI launcher; dyld interposing; Metal/OpenGL/MoltenVK inject bridges; bundled FX + per-game presets (klotzbrocken; Renderer)
 - [methanekit](entities/methanekit.md) — cross-platform C++ graphics/application framework (D3D12/Vulkan/Metal; shared shader workflows; CMake; tutorials/samples/modular runtime; Game Engine / source)
