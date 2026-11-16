@@ -1735,6 +1735,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/tbc0309/KPA-Root [Bootloader unlock, Magisk root, and restore toolkit for the KONKR Pocket Advance gaming handheld with integrity-module support]
 - https://github.com/yingyangdao/honor-v10-lab [Documented Honor V10 (EMUI 9) root lab: SWTP bootloader unlock, Magisk 20.1, EdXposed, Frida Gadget workaround for Huawei SELinux limits, tcpdump, and reusable scripts]
 - https://github.com/bmax121/APatch
+- https://github.com/Chill-Astro/FOSS-Root-Checker [Open-source Android app to verify Magisk, KernelSU, APatch, and legacy root/BusyBox status on Android 7+]
 - https://github.com/lzghzr/APatch_kpm [APatch modules]
 - https://github.com/abcz316/SKRoot-linuxKernelRoot
 - https://github.com/0x36/Pixel_GPU_Exploit
@@ -5258,6 +5259,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/hawkeye-Leo/hawkeye [Official GitHub Pages site for Hawkeye — Windows kernel security and anti-cheat research console with live probing, ETW, and automated detection reports (GPL source in hawkeye-community)]
 - https://github.com/winzysss/JarAnalyzer [Windows Minecraft screenshare cheat forensics scanner — MFT-walks disks, scans JAR constant pools against blacklists, flags obfuscated archives, exports evidence reports]
 - https://github.com/ItzMeow80/jvm-inspector [PowerShell Minecraft screenshare forensics: live JVM audit (javaagents, injection flags) plus disk scans for renamed/repacked jars and cheat signatures]
+- https://github.com/Werta1z/Avgar-AntiCheats [PowerShell Minecraft Java screenshare forensics: JVM memory and in-memory JAR bytecode scans, injection signatures, and Windows OS artifact checks]
 - https://github.com/klasscripts/ffs-explorer [Cross-platform PySide6 viewer for iOS/Android GrayKey and Cellebrite UFED Full File System ZIP extractions — stream-browse without unpacking, vendor metadata reconstruction, SQLite/WAL preview, and artefact shortcuts]
 - https://github.com/NotSkrib/error-pc-check [Open-source consensual Minecraft Java screenshare workflow: signed C# client agent, staff web panel, and Supabase backend for live forensic scans and severity-ranked cheat evidence reports]
 - https://github.com/abdulhamitakdag/hapiscanner [Open-source, consent-based Windows PC verification and Minecraft cheat-evidence scanner for server screenshares (MFT/USN, process modules, rule-based reports)]
