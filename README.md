@@ -1490,6 +1490,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Xposed
 - https://github.com/lm060719/io.mo.glassmic [LSPosed module that routes imported or TTS audio into target apps via AudioRecord/AAudio hooks for rooted Android audio-pipeline testing]
 - https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
+- https://github.com/Ascen1ty/oslokrok [LSPosed/Vector module that hooks PayPal RASP (AppVerifier and legacy root channels) via DexKit-resolved targets to prevent anti-tamper kill-on-launch on rooted Android]
 - https://github.com/xposed-modules-repo/com.fuck.iab [LSPosed/Xposed module that hooks Google Play, Bazaar, and Myket in-app billing to bypass purchases, with per-package Frida script support]
 - https://github.com/mabbcoll13/xposed-module-kit [Xposed/LSPosed module scaffold with hook templates and root-detection bypass example]
 - https://github.com/Jordan231111/lsposed-universal-template [LSPosed/LSPatch module template with Unity/Unreal/Godot engine detection, native pattern scan and memory helpers, and runtime overlay toggles]
@@ -5614,6 +5615,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ntfargo/CSSFontFace-Exploit [WebKit CSSFontFace UAF for PS4/PS5; PS4 6.00-11.02 (kernel chain 7.00-11.02); PS5 needs separate ASLR/vtable defeat; writeup: linearfox.com]
 - https://github.com/ArabPixel/PSFree-Enhanced [Feature-rich PS4 WebKit jailbreak exploit host — chains PSFree/Bad Hoist/CSSFontFace userland with Lapse/NetCtrl/sleirsgoevy kernel exploits (FW 6.00-11.02), auto fw/console detection, GoldHEN/HEN selector, payload loader on port 9020]
 - https://github.com/AldySan/Remote-Package-Installer-NG [Cross-platform Rust desktop app to queue and install PS4 .pkg files over LAN via GoldHEN Package Installer or RPI NextGen, with progress, pause, and resume]
+- https://github.com/kromossomom-debug/orbis-web-manager [Browser-based PS4 management suite over the LAN: dashboard, FTP file manager, PKG handling, and GoldHEN cheat JSON viewing with CUSA region conversion]
 - https://github.com/notmaj0r/CheatRunner_Patches [Community PS4/PS5 Title-ID patch XML collection for CheatRunner (FPS, resolution, and in-game byte patches)]
 - https://github.com/niakw/NiakPS5 [Native full-screen PS5 homebrew dashboard with DualSense UI, game library, LaunchBox artwork, and local title launching]
 - https://github.com/thereal47Ronin/GBAR5 [Native PS5 homebrew GBA/GB player (mGBA libretro, Vulkan UI) with libretro cheat DB, save states, and RetroAchievements for jailbroken consoles]
