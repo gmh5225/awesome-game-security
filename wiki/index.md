@@ -1528,6 +1528,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FlagSecurePatcher](entities/flagsecurepatcher.md) — Android FLAG_SECURE + screenshot-listener disable (Cheat / Magisk reference)
 - [Force Page Protection](entities/force-page-protection.md) — x64dbg plugin: force page protection on mapped views when NtProtectVirtualMemory fails; SEC_NO_CHANGE remap bypass (changeofpace; Bypass Remap Memory)
 - [ForceIO](entities/forceio.md) — no-CRT BYOPD CLI; WHCP-signed IObitUnlocker.sys force delete/move/copy below WdFilter and other minifilters (wesmar; cheat)
+- [FOSS Root Checker](entities/foss-root-checker.md) — Chill-Astro open-source Kotlin Compose Android root auditor; 40+ path scans + live `su -c id`; Magisk/KernelSU/APatch/legacy BusyBox; official vs offline APK; Android 7+; cheat / Android root)
 - [Forensia](entities/forensia.md) — Windows anti-forensics utility (C++; file shredding, event-log/prefetch suppression, USN journal handling, timestamp cleanup, shell/cache artifact removal, Defender quarantine clearing, self-removal; post-exploitation trace reduction; red-team / IR validation; PaulNorman01)
 - [Fibratus](entities/fibratus.md) — Go Windows kernel ETW observability (rules / Elasticsearch; exploration & tracing)
 - [Fiano](entities/fiano.md) — Go UEFI firmware parse/edit toolkit (Firmware Volumes, FFS, PE32, LZMA/Tiano; flash extract/replace/remove)
