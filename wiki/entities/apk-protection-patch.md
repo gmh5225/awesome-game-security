@@ -20,4 +20,4 @@ Sits beside install-time `services.jar` patchers such as [[simple-flag-secure]] 
 
 ## Related
 
-[[overviews/mobile-security]] · [[magisk]] · [[kernelsu]] · [[apatch]] · [[simple-flag-secure]] · [[smalipatcher-reborn]] · [[apktool]] · [[android-modding]]
+[[overviews/mobile-security]] · [[apk-signature-verification-patch]] · [[magisk]] · [[kernelsu]] · [[apatch]] · [[simple-flag-secure]] · [[smalipatcher-reborn]] · [[apktool]] · [[android-modding]]
