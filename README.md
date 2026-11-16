@@ -1132,6 +1132,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/raulzrrs/letsgo-recomp [Native Windows port of Pokémon: Let's Go, Eevee!/Pikachu! (Switch 1.0.0) via static recompilation on LAS Recomp; BYO game dump, no assets in repo]
 - https://github.com/finalpantasy/new-pokemon-snap-recomp [Static recompilation of New Pokémon Snap (Switch 2.0.1) to native Windows (AArch64→C) with NVN-on-Vulkan runtime and input remapping; BYO dump, no game assets in repo]
 - https://github.com/valentderah/totk-pc-recomp [Static recompilation of The Legend of Zelda: Tears of the Kingdom to native Windows x86-64 with a Vulkan renderer (BYO game assets)]
+- https://github.com/HanYolo1/timeLink [Active Longshot fork: Switch static recompilation to native Windows/Linux with Vulkan, documented status tables and BYO-assets build flow]
 - https://github.com/Lucas-blip-png/dkb-pc-recomp [Static recompilation of Donkey Kong Bananza (Switch 2) to native Windows with a Vulkan renderer; BYO assets, documented NVN/SPIR-V RE pipeline (early, tutorial-level progress)]
 - https://github.com/STS78721/MKW-THWOMP [Static recompilation of Mario Kart World (Switch 2, 1.8.0) to native Windows with NVN-on-Vulkan runtime, codegen, and build tooling; BYO dump]
 - https://github.com/XiONDiGiTaL/EmblemWeave [Rust static recompilation of Fire Emblem: Fortune's Weave (Switch 2) to native Windows with runtime, patches, save editor, and in-game mod/cheat tooling; BYO dump]
@@ -3310,6 +3311,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/464943-eac-nmi-bypass-callbacks.html [NMI Bypass]
 - https://github.com/gmh5225/EasyAntiCheat-Reversing
 - https://github.com/BishopTopG/all-about-eac [Memflow-based external VM reverse-engineering dossier on a captured EasyAntiCheat_EOS.sys build, documenting kernel callbacks, minifilter policy, and device IPC with reproducible evidence]
+- https://github.com/jhon2f/fortnite-ac-reversal [Late-2026 Fortnite/EAC stack reversal: driver IOCTLs, rules.bin, HWID/fingerprint catalog, telemetry, trust-score model, and compilable EAC user-mode stub PoC]
 - https://github.com/19h/eac-analysis [eac.elf VM reconstruction: dlopen/trace harness, dispatch & VMTAIL probes, bytecode recover/IR/CFG, handler ISA, static path replay, MBA reducers; Linux ELF]
 - https://github.com/unicbda-droid/cachyos-eac-secure-boot [CachyOS dual UEFI boot paths: daily Secure Boot GRUB plus CachyOS-signed EAC kernel (lockdown=integrity, module.sig_enforce) for Easy Anti-Cheat Linux v2]
 - https://github.com/Sinclairq/hiearchy-eac [Integrity Checks]
@@ -4793,6 +4795,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/YcbrYL1/YCBR-AntiCheat [Paper 1.8.9 Minecraft anti-cheat plugin with 19 combat/movement/protocol checks, auth, DDoS protection, and admin GUI]
 - https://github.com/flameteamdev/LavaGuardAC [Open-source Bukkit/Spigot Minecraft server anti-cheat plugin with movement, combat, and block-break checks, violation tracking, admin GUI, and Discord webhook alerts]
 - https://github.com/orglatis-a11y/ZyvenAntiCheat [Open-source Bukkit/Paper 1.21 server plugin with movement, combat, mining, vehicle, utility checks, and anti-ESP modules]
+- https://github.com/elijoewashacked-pixel/VyxAntiCheat [Open-source Paper 1.20+ Minecraft server anti-cheat: movement/combat/packet checks, AI monitor hooks, punish flow, and in-game configuration GUI]
 - https://github.com/phantantai73/AmberAntiCheat [Paper/Spigot Minecraft server anti-cheat plugin with async occlusion, anti-Xray, anti-block-ESP checks, and packet-based violation tracking]
 - https://github.com/mayankpatil3/vulcan-anticheat-built [From-scratch Paper/Spigot Minecraft anti-cheat plugin with movement/combat detections, violation tracking, alerts, and punishment commands]
 - https://github.com/ValenMyHeartDev/BloonAntiCheat [Paper/Spigot Minecraft server plugin with fly, reach, autoclicker, and triggerbot checks plus admin punishment flow]
