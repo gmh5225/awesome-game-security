@@ -1,0 +1,615 @@
+Project Path: arc_N00bPrograms_net-worthless-mod-menu_jpdak_zd
+
+Source Tree:
+
+```txt
+arc_N00bPrograms_net-worthless-mod-menu_jpdak_zd
+├── README.md
+└── mod
+    ├── NWModMenu
+    │   └── nw_mod_menu.gd
+    └── override.cfg
+
+```
+
+`README.md`:
+
+```md
+# Net Worthless Mod Menu
+
+An in-game cheat menu for **Net Worthless** (Godot 4.7, Steam app 4878900). Press **Insert** to open or close it. It uses the game's own theme and drives the game's own systems, so the HUD, logs and saves stay consistent.
+
+## Install
+Copy the contents of `mod/` into the game folder, next to `net_worthless.exe`:
+
+```
+Net Worthless/
+  net_worthless.exe
+  override.cfg          <- adds the menu as an autoload
+  NWModMenu/nw_mod_menu.gd
+```
+
+To uninstall, delete `override.cfg` and the `NWModMenu` folder.
+
+## Features
+- **Player:** +$1K/10K/100K/1M, set exact cash, lock cash, full health and happiness, lock health and happiness at 100, cure negative status effects
+- **Skills:** a slider for each skill (intellect, charisma, fitness, cunning, creativity), max all, lock all at 100
+- **Life:** skip ahead N months (events auto-resolve with the first workable choice), age ±1/−5 years (minimum 18), move into any home for free, re-roll Marketplace and Classifieds listings
+- **Settings:** block Steam achievements (on by default). While this is on, the achievement system's month-end and game-over checks are detached, so neither Steam nor the local achievement ledger records anything.
+
+## Notes
+- Big cash jumps can meet a run's net-worth goal right away, which ends the run with "Goal achieved". Use **Continue without a goal** to keep playing.
+- Dev testing: set `DEV_CMD := true` and the menu reads commands from `NWModMenu/nwcmd.txt` (`money 1000`, `skip 3`, `shot`, `eval <expr>`, `newrun [archetype]`...) and writes the results to `nwcmd.out`.
+
+```
+
+`mod/NWModMenu/nw_mod_menu.gd`:
+
+```gd
+extends Node
+## Net Worthless Mod Menu — injected through override.cfg as an autoload.
+## Press Insert to toggle. Talks to the game's own autoloads / systems.
+
+const VERSION := "1.0"
+const TOGGLE_KEY := KEY_INSERT
+const REASON := "cheat"
+const DEV_CMD := false  # true = read NWModMenu/nwcmd.txt test commands
+
+var _layer: CanvasLayer
+var _panel: PanelContainer
+var _status: Label
+var _info: Label
+var _skill_rows: Dictionary = {}
+var _housing_opt: OptionButton
+var _housing_ids: Array = []
+var _skip_spin: SpinBox
+var _money_spin: SpinBox
+
+var lock_health := false
+var lock_happiness := false
+var lock_money := false
+var lock_skills := false
+var block_achievements := true
+
+var _locked_money := 0
+var _tick := 0.0
+var _ach_node: Object = null
+var _ach_detached := false
+var _cmd_path := ""
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	_cmd_path = OS.get_executable_path().get_base_dir().path_join("NWModMenu")
+	_build_ui()
+	_panel.visible = false
+	print("[NWModMenu] v%s loaded — press Insert" % VERSION)
+
+
+# ---------------------------------------------------------------- game access
+func _g(name: String):
+	return get_tree().root.get_node_or_null(name)
+
+func _run():
+	var gs = _g("GameState")
+	return gs.current_run if gs != null else null
+
+func _char():
+	var gs = _g("GameState")
+	return gs.get_character() if gs != null else null
+
+func _orch():
+	var ds = _g("DebugService")
+	if ds == null:
+		return null
+	var o = ds.get("_orchestrator")
+	if o == null or not is_instance_valid(o):
+		return null
+	return o
+
+func _signal_bus():
+	return _g("SignalBus")
+
+func _refresh_hud() -> void:
+	var scene := get_tree().current_scene
+	if scene != null and scene.has_method("_refresh"):
+		scene.call("_refresh")
+
+func _need_run() -> bool:
+	if _char() == null or _orch() == null:
+		_set_status("Start or load a run first.")
+		return false
+	return true
+
+
+# ---------------------------------------------------------------- cheats
+func add_money(amount: int) -> void:
+	if not _need_run():
+		return
+	_orch().resource_system.modify_money(amount, REASON)
+	_locked_money = _char().money
+	_set_status("Cash %s$%s" % ["+" if amount >= 0 else "-", _fmt(absi(amount))])
+
+func set_money(value: int) -> void:
+	if not _need_run():
+		return
+	add_money(value - int(_char().money))
+
+func set_health(v: float) -> void:
+	if not _need_run():
+		return
+	_orch().resource_system.modify_health(v - float(_char().health), REASON)
+	_set_status("Health = %d" % int(v))
+
+func set_happiness(v: float) -> void:
+	if not _need_run():
+		return
+	_orch().resource_system.modify_happiness(v - float(_char().happiness), REASON)
+	_set_status("Happiness = %d" % int(v))
+
+func set_skill(id: String, v: int) -> void:
+	if not _need_run():
+		return
+	var c = _char()
+	var cur := int(c.skills.get(id, 0))
+	_orch().resource_system.modify_skill(id, v - cur, REASON)
+
+func max_all_skills() -> void:
+	if not _need_run():
+		return
+	for id in _skill_ids():
+		set_skill(id, 100)
+	_set_status("All skills maxed")
+
+func _skill_ids() -> Array:
+	var out: Array = []
+	var db = _g("ContentDB")
+	if db != null:
+		for d in db.get_skills():
+			out.append(String(d.id))
+	return out
+
+func skip_months(n: int) -> void:
+	var o = _orch()
+	if not _need_run():
+		return
+	if o.is_resolving_month():
+		_set_status("Wait for the current month to finish.")
+		return
+	var done := 0
+	for _i in n:
+		if o.is_run_over():
+			break
+		o.advance_month()
+		if o.is_awaiting_choices():
+			for def in o.event_system.get_pending_choices():
+				for i in def.choices.size():
+					if o.event_system.apply_choice(def.id, i):
+						break
+		o.advance_month_finalize()
+		done += 1
+	_refresh_hud()
+	_set_status("Skipped %d month(s)%s" % [done, " — run ended" if o.is_run_over() else ""])
+
+func change_age(years: int) -> void:
+	if not _need_run():
+		return
+	var c = _char()
+	c.age_months = maxi(18 * 12, int(c.age_months) + years * 12)
+	_refresh_hud()
+	_set_status("Age is now %d" % c.age_years())
+
+func cure_debuffs() -> void:
+	if not _need_run():
+		return
+	var sys = _orch().status_effect_system
+	var db = _g("ContentDB")
+	var n := 0
+	for id in sys.get_active_effect_ids():
+		var def = db.get_status_effect(id)
+		if def != null and String(def.polarity) == "debuff":
+			if sys.remove_effect(id, REASON):
+				n += 1
+	_refresh_hud()
+	_set_status("Removed %d negative effect(s)" % n)
+
+func relocate(housing_id: String) -> void:
+	if not _need_run():
+		return
+	if _orch().housing_system.debug_relocate(housing_id):
+		_refresh_hud()
+		_set_status("Moved to %s" % _housing_label(housing_id))
+	else:
+		_set_status("Move failed")
+
+func reroll_listings() -> void:
+	if not _need_run():
+		return
+	var db = _g("ContentDB")
+	for cat in db.get_all_marketplace_categories():
+		_orch().marketplace_system.refresh_category(cat.id)
+	for cat in db.get_all_classifieds_categories():
+		_orch().classifieds_system.refresh_category(cat.id)
+	_set_status("Marketplace and classifieds re-rolled")
+
+
+# ---------------------------------------------------------------- achievements
+func _sync_achievement_block() -> void:
+	var o = _orch()
+	var ach = null
+	if o != null:
+		ach = o.get("achievement_system")
+	if ach != _ach_node:
+		_ach_node = ach
+		_ach_detached = false
+	if ach == null or not is_instance_valid(ach):
+		return
+	var sb = _signal_bus()
+	var pairs := [[sb.month_resolved, Callable(ach, "_on_month_resolved")],
+		[sb.game_over, Callable(ach, "_on_game_over")]]
+	if block_achievements and not _ach_detached:
+		for p in pairs:
+			if p[0].is_connected(p[1]):
+				p[0].disconnect(p[1])
+		_ach_detached = true
+	elif not block_achievements and _ach_detached:
+		for p in pairs:
+			if not p[0].is_connected(p[1]):
+				p[0].connect(p[1])
+		_ach_detached = false
+
+
+# ---------------------------------------------------------------- loop
+func _process(delta: float) -> void:
+	_tick += delta
+	if _tick < 0.25:
+		return
+	_tick = 0.0
+	_sync_achievement_block()
+	if DEV_CMD:
+		_poll_cmd()
+	var c = _char()
+	var o = _orch()
+	if c != null and o != null:
+		if lock_health and float(c.health) < 100.0:
+			o.resource_system.modify_health(100.0 - float(c.health), REASON)
+		if lock_happiness and float(c.happiness) < 100.0:
+			o.resource_system.modify_happiness(100.0 - float(c.happiness), REASON)
+		if lock_money and int(c.money) < _locked_money:
+			o.resource_system.modify_money(_locked_money - int(c.money), REASON)
+		if lock_skills:
+			for id in _skill_ids():
+				if int(c.skills.get(id, 0)) < 100:
+					o.resource_system.modify_skill(id, 100 - int(c.skills.get(id, 0)), REASON)
+	if _panel.visible:
+		_update_info()
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == TOGGLE_KEY:
+		_panel.visible = not _panel.visible
+		if _panel.visible:
+			_refresh_lists()
+			_update_info()
+		get_viewport().set_input_as_handled()
+
+
+# ---------------------------------------------------------------- UI
+func _build_ui() -> void:
+	_layer = CanvasLayer.new()
+	_layer.layer = 120
+	add_child(_layer)
+
+	_panel = PanelContainer.new()
+	_panel.position = Vector2(40, 90)
+	_panel.custom_minimum_size = Vector2(430, 0)
+	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_layer.add_child(_panel)
+
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 8)
+	_panel.add_child(root)
+
+	var title_bar := HBoxContainer.new()
+	root.add_child(title_bar)
+	var title := Label.new()
+	title.text = "NET WORTHLESS  ·  MOD MENU"
+	title.add_theme_font_size_override("font_size", 18)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_bar.add_child(title)
+	var close := Button.new()
+	close.text = "✕"
+	close.flat = true
+	close.pressed.connect(func(): _panel.visible = false)
+	title_bar.add_child(close)
+	_make_draggable(title)
+
+	_info = Label.new()
+	_info.add_theme_font_size_override("font_size", 13)
+	_info.modulate = Color(1, 1, 1, 0.75)
+	root.add_child(_info)
+
+	var tabs := TabContainer.new()
+	tabs.custom_minimum_size = Vector2(0, 330)
+	root.add_child(tabs)
+
+	# --- Player
+	var p := _tab(tabs, "Player")
+	_section(p, "Cash")
+	var row := _row(p)
+	for amt in [1000, 10000, 100000, 1000000]:
+		_btn(row, "+$" + _short(amt), add_money.bind(amt))
+	row = _row(p)
+	_money_spin = SpinBox.new()
+	_money_spin.min_value = -1000000000
+	_money_spin.max_value = 1000000000000
+	_money_spin.step = 1
+	_money_spin.value = 1000000
+	_money_spin.prefix = "$"
+	_money_spin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(_money_spin)
+	_btn(row, "Set cash", func(): set_money(int(_money_spin.value)))
+	_check(p, "Lock cash (spending refunds itself)", func(on):
+		lock_money = on
+		var c = _char()
+		if c != null:
+			_locked_money = int(c.money))
+	_section(p, "Wellbeing")
+	row = _row(p)
+	_btn(row, "Full health", set_health.bind(100.0))
+	_btn(row, "Full happiness", set_happiness.bind(100.0))
+	_check(p, "Lock health at 100", func(on): lock_health = on)
+	_check(p, "Lock happiness at 100", func(on): lock_happiness = on)
+	row = _row(p)
+	_btn(row, "Cure negative effects", cure_debuffs)
+
+	# --- Skills
+	var s := _tab(tabs, "Skills")
+	_section(s, "Skill levels (0-100)")
+	for id in ["intellect", "charisma", "fitness", "cunning", "creativity"]:
+		var r := _row(s)
+		var l := Label.new()
+		l.text = id.capitalize()
+		l.custom_minimum_size = Vector2(100, 0)
+		r.add_child(l)
+		var sl := HSlider.new()
+		sl.min_value = 0
+		sl.max_value = 100
+		sl.step = 1
+		sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		sl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		r.add_child(sl)
+		var v := Label.new()
+		v.custom_minimum_size = Vector2(34, 0)
+		v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		r.add_child(v)
+		sl.value_changed.connect(func(val): v.text = str(int(val)))
+		sl.drag_ended.connect(func(_c): set_skill(id, int(sl.value)))
+		_skill_rows[id] = sl
+	var srow := _row(s)
+	_btn(srow, "Max all skills", func():
+		max_all_skills()
+		_refresh_lists())
+	_check(s, "Lock all skills at 100", func(on): lock_skills = on)
+
+	# --- Life
+	var lf := _tab(tabs, "Life")
+	_section(lf, "Time")
+	row = _row(lf)
+	_skip_spin = SpinBox.new()
+	_skip_spin.min_value = 1
+	_skip_spin.max_value = 120
+	_skip_spin.value = 12
+	_skip_spin.suffix = "months"
+	_skip_spin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(_skip_spin)
+	_btn(row, "Skip ahead", func(): skip_months(int(_skip_spin.value)))
+	var note := Label.new()
+	note.text = "Skipping auto-picks the first workable choice in events."
+	note.add_theme_font_size_override("font_size", 12)
+	note.modulate = Color(1, 1, 1, 0.6)
+	lf.add_child(note)
+	row = _row(lf)
+	_btn(row, "Age -5 years", change_age.bind(-5))
+	_btn(row, "Age -1 year", change_age.bind(-1))
+	_btn(row, "Age +1 year", change_age.bind(1))
+	_section(lf, "Home")
+	row = _row(lf)
+	_housing_opt = OptionButton.new()
+	_housing_opt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(_housing_opt)
+	_btn(row, "Move in free", func():
+		if _housing_opt.selected >= 0 and _housing_opt.selected < _housing_ids.size():
+			relocate(_housing_ids[_housing_opt.selected]))
+	_section(lf, "Listings")
+	row = _row(lf)
+	_btn(row, "Re-roll marketplace + classifieds", reroll_listings)
+
+	# --- Settings
+	var st := _tab(tabs, "Settings")
+	var ach := _check(st, "Block Steam achievements while the menu is loaded", func(on):
+		block_achievements = on
+		_sync_achievement_block())
+	ach.button_pressed = true
+	var info := Label.new()
+	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	info.text = "Insert opens or closes this menu. Drag the title to move it.\nCheats use the game's own systems, so the HUD, logs and saves stay consistent.\nMod Menu v%s" % VERSION
+	info.modulate = Color(1, 1, 1, 0.7)
+	st.add_child(info)
+
+	_status = Label.new()
+	_status.add_theme_font_size_override("font_size", 13)
+	_status.text = "Ready."
+	root.add_child(_status)
+
+
+func _tab(tabs: TabContainer, name: String) -> VBoxContainer:
+	var m := MarginContainer.new()
+	m.name = name
+	for side in ["left", "right", "top", "bottom"]:
+		m.add_theme_constant_override("margin_" + side, 10)
+	tabs.add_child(m)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	m.add_child(v)
+	return v
+
+func _section(parent: Control, text: String) -> void:
+	var l := Label.new()
+	l.text = text.to_upper()
+	l.add_theme_font_size_override("font_size", 12)
+	l.modulate = Color(1, 1, 1, 0.55)
+	parent.add_child(l)
+
+func _row(parent: Control) -> HBoxContainer:
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 6)
+	parent.add_child(h)
+	return h
+
+func _btn(parent: Control, text: String, cb: Callable) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.focus_mode = Control.FOCUS_NONE
+	b.pressed.connect(cb)
+	parent.add_child(b)
+	return b
+
+func _check(parent: Control, text: String, cb: Callable) -> CheckBox:
+	var c := CheckBox.new()
+	c.text = text
+	c.focus_mode = Control.FOCUS_NONE
+	c.toggled.connect(cb)
+	parent.add_child(c)
+	return c
+
+func _make_draggable(handle: Control) -> void:
+	handle.mouse_filter = Control.MOUSE_FILTER_STOP
+	handle.mouse_default_cursor_shape = Control.CURSOR_MOVE
+	handle.gui_input.connect(func(e):
+		if e is InputEventMouseMotion and (e.button_mask & MOUSE_BUTTON_MASK_LEFT):
+			_panel.position += e.relative)
+
+func _refresh_lists() -> void:
+	var c = _char()
+	for id in _skill_rows:
+		var sl: HSlider = _skill_rows[id]
+		sl.set_value_no_signal(int(c.skills.get(id, 0)) if c != null else 0)
+		sl.value_changed.emit(sl.value)
+	var db = _g("ContentDB")
+	if db != null and _housing_ids.is_empty():
+		var defs: Array = db.get_all_housing()
+		defs.sort_custom(func(a, b): return a.tier < b.tier)
+		for d in defs:
+			_housing_ids.append(String(d.id))
+			_housing_opt.add_item("Tier %d · %s" % [d.tier, _housing_label(String(d.id))])
+
+func _housing_label(id: String) -> String:
+	var db = _g("ContentDB")
+	var ls = _g("LocaleService")
+	if db != null and ls != null:
+		var d = db.get_housing(id)
+		if d != null:
+			return ls.t(d.name_key)
+	return id
+
+func _update_info() -> void:
+	var c = _char()
+	if c == null:
+		_info.text = "No run loaded — start or continue a life."
+		return
+	_info.text = "Cash $%s  ·  Health %d  ·  Happiness %d  ·  Age %d" % [
+		_fmt(int(c.money)), roundi(c.health), roundi(c.happiness), c.age_years()]
+
+func _set_status(t: String) -> void:
+	_status.text = t
+	print("[NWModMenu] " + t)
+
+func _fmt(n: int) -> String:
+	var s := str(absi(n))
+	var out := ""
+	while s.length() > 3:
+		out = "," + s.substr(s.length() - 3) + out
+		s = s.substr(0, s.length() - 3)
+	return ("-" if n < 0 else "") + s + out
+
+func _short(n: int) -> String:
+	if n >= 1000000:
+		return "%dM" % (n / 1000000)
+	if n >= 1000:
+		return "%dK" % (n / 1000)
+	return str(n)
+
+
+# ---------------------------------------------------------------- dev hook
+func _poll_cmd() -> void:
+	var path := _cmd_path.path_join("nwcmd.txt")
+	if not FileAccess.file_exists(path):
+		return
+	var txt := FileAccess.get_file_as_string(path)
+	DirAccess.remove_absolute(path)
+	var out := PackedStringArray()
+	for line in txt.split("\n", false):
+		out.append("> " + line.strip_edges())
+		out.append(_dev(line.strip_edges().split(" ", false)))
+	var f := FileAccess.open(_cmd_path.path_join("nwcmd.out"), FileAccess.WRITE)
+	f.store_string("\n".join(out))
+	f.close()
+
+func _save_shot() -> void:
+	get_viewport().get_texture().get_image().save_png(_cmd_path.path_join("shot.png"))
+
+func _dev(a: PackedStringArray) -> String:
+	if a.is_empty():
+		return ""
+	match a[0]:
+		"menu":
+			_panel.visible = not _panel.visible
+			_refresh_lists()
+			_update_info()
+		"tab":
+			(_panel.find_children("*", "TabContainer", true, false)[0] as TabContainer).current_tab = int(a[1])
+		"shot":
+			RenderingServer.frame_post_draw.connect(_save_shot, CONNECT_ONE_SHOT)
+		"money": add_money(int(a[1]))
+		"setmoney": set_money(int(a[1]))
+		"health": set_health(float(a[1]))
+		"happy": set_happiness(float(a[1]))
+		"maxskills": max_all_skills()
+		"skip": skip_months(int(a[1]))
+		"age": change_age(int(a[1]))
+		"cure": cure_debuffs()
+		"house": relocate(a[1])
+		"reroll": reroll_listings()
+		"lockhp": lock_health = a[1] == "1"
+		"lockmoney":
+			lock_money = a[1] == "1"
+			_locked_money = int(_char().money) if _char() != null else 0
+		"ach": return "detached=%s node=%s" % [_ach_detached, _ach_node]
+		"eval":
+			var e := Expression.new()
+			if e.parse(" ".join(a.slice(1))) != OK:
+				return "parse error: " + e.get_error_text()
+			return str(e.execute([], self))
+		"newrun":
+			var db = _g("ContentDB")
+			var arch: String = a[1] if a.size() > 1 else String(db.get_archetypes()[0].id)
+			_g("GameState").new_run(arch)
+			get_tree().change_scene_to_file("res://scenes/main/game_main.tscn")
+			return "started " + arch
+	var c = _char()
+	if c == null:
+		return "status=%s | no run" % _status.text
+	return "status=%s | money=%d hp=%.1f hap=%.1f age=%d skills=%s" % [_status.text, c.money, c.health, c.happiness, c.age_years(), c.skills]
+
+```
+
+`mod/override.cfg`:
+
+```cfg
+[autoload]
+
+NWModMenu="*res://NWModMenu/nw_mod_menu.gd"
+
+```
