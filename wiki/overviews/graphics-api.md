@@ -391,7 +391,8 @@ sources:
   - wiki/sources/descriptions/husnaintariq577__kx-vision.md
   - wiki/sources/descriptions/effcol__wiz3D.md
   - wiki/sources/descriptions/ocornut__imgui_test_engine.md
-updated: 2026-11-15
+  - wiki/sources/descriptions/zorde23__kyty-gpu-hybrid.md
+updated: 2026-11-16
 confidence: high
 ---
 
@@ -536,6 +537,7 @@ Windows documents `SwapBuffers` through GDI; do not assume a similarly named wra
 - Cross-API runtime shader capture/flatten/replace tooling such as [[game-lag-reducer]] (baobao1044; WPF .NET 8 launcher + C++20 HookDll; D3D11 COM vtable hooks + OpenGL/Vulkan IAT hooks; shader cache/substitution, tessellation/MSAA disable, FPS caps; user-consented GPU visual reduction for FPS—not AC bypass) sits in the DirectX Hook / draw-call research lane beside [[shader-injector]] and [[reshade]]. (source: wiki/sources/descriptions/baobao1044__GameLagReducer.md)
 - D3D11 GPU payload-transport research PoCs such as [[dxinject-uc]] (a0yark; cross-process DXGI shared buffers; shellcode encoded to GPU memory and decoded by HLSL compute shader before CPU execution; process-hollowing sync via named events + shared memory—not Present-hook overlay tooling) sit in the DirectX / compute-shader abuse lane beside draw-call hooks. (source: wiki/sources/descriptions/a0yark__DXInject-UC.md)
 - QEMU/KVM Windows guest graphics labs such as [[vmlab-win3d]] (VMLabDev; WDDM/Venus stack build/validation; GPU passthrough + virtio/virgl; signed drivers + Mesa OpenGL + D3D12 + Vulkan; Docker/cross-compile packaging; automated D3D9–12/OpenGL/Vulkan acceptance on Win10/11 AMD/NVIDIA hosts including commercial games; fence/DMA/DWM/dmabuf/Secure Boot pinning experiments; isolated full-stack graphics + display-driver study for AC/RE; Windows Emulator) complement in-guest capture/profiler tooling when reproducing WDDM behavior in VMs. (source: wiki/sources/descriptions/VMLabDev__vmlab-win3d.md)
+- PS5 guest→host hybrid GPU via [[kyty-gpu-hybrid]] (Kyty fork; guest PM4 command processor + tiling/PSSR paths; host Vulkan renderer from SPIR-V tooling, compute tiler shaders, resource caches; Rust cross-install pipeline-share server; SDL3/ImGui front end—emulator GPU stack study beside full VM labs; not Present-hook overlay research) (source: wiki/sources/descriptions/zorde23__kyty-gpu-hybrid.md)
 
 ## Related concepts
 
