@@ -278,6 +278,7 @@ sources:
   - wiki/sources/descriptions/TheQmaks__phantom-frida.md
   - wiki/sources/descriptions/CrackerCat__strongR-frida-android.md
   - wiki/sources/descriptions/AsenOsen__frida-stealth.md
+  - wiki/sources/descriptions/Ascen1ty__oslokrok.md
   - wiki/sources/descriptions/1013503897__Morphida.md
   - wiki/sources/descriptions/noobpk__frida-android-hook.md
   - wiki/sources/descriptions/su-vikas__conbeerlib.md
