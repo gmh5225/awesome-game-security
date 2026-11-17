@@ -1971,6 +1971,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/frinet [Frida-based tracer]
 - https://github.com/ys1231/idafridascript [IDA Pro 9 plugin to one-click generate Frida hook scripts from the disassembly view (shortcut F), with optional MCP integration]
 - https://github.com/gmh5225/findcrypt-yara [Find crypto constants]
+- https://github.com/shadowstrike-labs/cryptolens [IDA Pro plugin and Python package to locate crypto algorithms, hashes, magic constants, API-name hashes, and memory-resident keys in x86/x64 Windows binaries]
 - https://github.com/gmh5225/VMAttack [VMAttack PlugIn for IDA Pro]
 - https://github.com/gmh5225/sk3wldbg [Unicorn]
 - https://github.com/gmh5225/Classy [Manage classes]
