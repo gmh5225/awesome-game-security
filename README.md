@@ -5187,6 +5187,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Rem01Gaming/meowna_detector [Prove of concept of detecting meowna module]
 - https://github.com/WsttXm/RiskEngine [Android risk-control SDK and management platform: device fingerprinting and runtime detection (root/hook/emulator/debug/sandbox)]
 - https://github.com/venkata-ram/DroidShield [Android RASP SDK with root/debugger/hook/emulator/tamper checks and polymorphic per-build ordering]
+- https://github.com/Inforaam/MobShield-Android [Modular open-source Android RASP SDK with weighted root, Frida/LSPosed, debugger, emulator, and integrity detectors plus Gradle per-build personalization]
 - https://github.com/NoobDigital/react-native-shieldscan [React Native root/jailbreak, Frida, debugger, emulator, and hook-framework detection]
 - https://github.com/talsec/Free-RASP-Community [Community hub for the freeRASP mobile RASP SDK (root/Magisk, Frida, hook, emulator, tamper, and integrity detection)]
 - https://github.com/talsec/Free-RASP-Android [Native Android freeRASP SDK for root/Magisk, Frida, hook, emulator, tamper, and integrity detection]
