@@ -29,6 +29,7 @@ sources:
   - wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md
   - wiki/sources/descriptions/gjones01__NullCS.md
   - wiki/sources/descriptions/essensha__cs2-anti-cheat-ml-research.md
+  - wiki/sources/descriptions/eysang-blip__pubg-match-pipeline.md
   - wiki/sources/descriptions/ImNotVirgola__VirgolaAntiCheat.md
   - wiki/sources/descriptions/InsideExploit__phoenix-ac.md
   - wiki/sources/descriptions/flameteamdev__LavaGuardAC.md
@@ -1568,6 +1569,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Fabric review-first AC + protection:** [[vylorq-vigil]] (vylorq; Java Fabric **1.21.11** mod; movement upper-bound prediction, lag-compensated reach/aim/autoclick checks, anti-x-ray ore hiding; Watcher telemetry; violations scored into admin review cases with evidence clips—not auto-bans; claims, barriers, jails, PvP arenas, secure trading, watchlists, rollback, Vigil Panel GUI; optional Geyser/Floodgate Java+Bedrock crossplay; CI gametest coverage; Anti Cheat / game:minecraft) beside offline-mode suites such as [[bastion]] and alert-only mods such as [[silent-anticheat]]. Distinct from [[vigil]] (TOSTcRa eBPF Linux AC). (source: wiki/sources/descriptions/vylorq__anti-cheat.md)
 
 **Server-log FPS evidence pipeline:** [[detect-fps-hackers]] (Nimdy/fpsdet; Python 3.11+ CLI; ingests dedicated-server JSON combat/movement logs; scores gear violations, statistical outliers, information-theoretic aim signals, and cross-account humanizer patterns; human-review case files without client installs or auto-bans; Unity/Unreal/Godot emitter examples; Grafana/Kibana/Splunk mappings; Anti Cheat / Open Source Anti Cheat System) beside demo-telemetry research such as [[yaacs-anticheat]] and behavioral labs such as [[apex-anticheat-lab]]. (source: wiki/sources/descriptions/Nimdy__detect-FPS-hackers.md)
+
+**PUBG official API review pipeline:** [[pubg-match-pipeline]] (eysang-blip; Python; incremental PUBG match API JSON ingest with rate-limit handling; SQLite store with deterministic rebuilds; nine-check data-quality gate; SQL views ranking squad human players via per-match damage-per-minute z-scores and headshot-rate outliers for manual AC review—public match summaries only, not in-client telemetry; Anti Cheat / Open Source Anti Cheat System) beside batch PySpark pipelines such as [[pubg-bigdata-analytics]] and server-log FPS evidence tooling such as [[detect-fps-hackers]]. (source: wiki/sources/descriptions/eysang-blip__pubg-match-pipeline.md)
 
 **Mobile server-authoritative move replay:** [[blastscale]] (AtakanKeser; Java Spring Boot modular monolith + Unity C# client + React/TypeScript admin; MySQL/Redis/MongoDB/Elasticsearch; issues level seeds and replays submitted moves through a deterministic board engine; chain-of-responsibility pipeline validates sessions, timing, score bounds, and move sequences before rewards; exactly-once economy via idempotency keys and append-only ledger; Redis leaderboards + LiveOps events/remote config/A/B tests + Prometheus/Grafana; Open Source Anti Cheat System / mobile puzzle) beside [[cobra-snake]] (browser score HMAC) and [[shinobix]] (browser MMORPG reward-integrity) for engineers studying server-side validation patterns on casual mobile titles. (source: wiki/sources/descriptions/AtakanKeser__BlastScale.md)
 
