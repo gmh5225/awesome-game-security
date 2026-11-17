@@ -49,7 +49,8 @@ sources:
   - wiki/sources/descriptions/mrKozy__KozyAntiCheat.md
   - wiki/sources/descriptions/Pai100707__PaiAC.md
   - wiki/sources/descriptions/elijoewashacked-pixel__VyxAntiCheat.md
-updated: 2026-11-16
+  - wiki/sources/descriptions/phugiadang12__aegis-ac.md
+updated: 2026-11-17
 confidence: high
 ---
 
@@ -103,6 +104,8 @@ Educational Markdown such as [[minecraft-anticheat-docs]] (aethelreborn) walks t
 Console receipt verifiers such as [[qortime-ai]] (ConWan30; Meta Muse/SAM advisory layer over signed match-integrity receipts) encode **lower-only** AI policy—generative advisories may reduce `VERIFIED` to `PARTIAL` but cannot upgrade or replace deterministic referee outcomes; pair red-team receipt tampering (Muse Wonder) with Ed25519-bound advisory sidecars when rehearsing adversarial testing of verifiers. (source: wiki/sources/descriptions/ConWan30__qortime-ai.md)
 
 Desktop stream-processing prototypes such as [[adaptive-anti-cheat-stream-processor]] (ShaniTheDeveloper; C++/Qt; simulated telemetry ingest with Bloom filters, count-min sketches, and sliding-window heuristics for input cadence, movement velocity, and aim vectors; dashboard throughput/latency metrics) rehearse real-time anomaly scoring with explicit **hint-not-verdict** alerts—calibrate thresholds and treat pipeline health metrics separately from misconduct attribution before mapping patterns to enforcement ladders. (source: wiki/sources/descriptions/ShaniTheDeveloper__Adaptive_Anti-Cheat_Stream_Processor.md)
+
+Multiplayer-FPS behavioural stacks such as [[aegis-ac-fps]] (phugiadang12; Python collector/detection/soc-agent + React dashboard; FastAPI JSONL ingest; explainable rule scores; Claude-powered SOC case triage with human approval; **delayed ban waves** and Discord notifications—treat LLM advisories as review evidence, not autonomous sanctions) rehearse end-to-end server-only enforcement ops beside prototype review queues such as [[aimguard]]. (source: wiki/sources/descriptions/phugiadang12__aegis-ac.md)
 
 ## Related
 
