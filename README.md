@@ -810,6 +810,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/mytechnotalent/go-hacking [Free step-by-step Golang reverse-engineering course (x64/ARM64/ARM32) with PDF book and per-chapter labs]
 - https://github.com/mytechnotalent/embedded-hacking [Free embedded reverse-engineering course (RP2350/Pico 2) with GDB, Ghidra, OpenOCD, and hands-on firmware hacking labs]
 - https://github.com/kotae4/intro-to-gamehacking
+- https://github.com/strimpel1/gh-remake [Structured game-hacking and reverse-engineering curriculum with Hebrew lesson site, English explainer videos, lab captures, and Cheat Engine workflows]
 - https://github.com/ridpath/gamehacking-cheatsheet [Game-hacking cheatsheet covering memory RE, injection, and anti-cheat topics]
 - https://github.com/mrphrazer/binary-cartography [Binary Cartography webinar series with slides, samples, and Docker RE labs on agentic reverse engineering, malware analysis, code identification, and deobfuscation workflows]
 - https://github.com/LordeTyrael/PokeAllianceAntiCheatAnalysis [Static audit of PokeAlliance client telemetry: server-triggered process/DLL/window enumeration, login hardware fingerprinting, and supporting Frida/tracer scripts]
