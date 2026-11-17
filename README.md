@@ -733,6 +733,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/visotw/3d9 [Fixing broken stereoscopic effects in DX11 games]
 - https://github.com/adriank56793/rdc-cli [Scriptable CLI to query RenderDoc .rdc captures (draws, shaders, diffs) for terminal, CI, and agent workflows on D3D/Vulkan/OpenGL frames]
 - https://github.com/Kalmarv/locum [D3D11/DXGI proxy capture: record every draw, shader, and resource for a frame into SQLite for browse, SQL query, live edits, and offline replay—RenderDoc-style analysis from DLLs beside the game exe]
+- https://github.com/iamnotoneself/GameApiDetector [Windows Rust utility that scans local game libraries and running processes to detect DXGI/Vulkan/OpenGL usage and manage DXVK installs]
 
 > Emulation 
 - https://github.com/code-tom-code/Software_D3D9 [DX9]
@@ -1656,6 +1657,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/BuSung-dev/Root-My-Galaxy [Samsung Galaxy KernelSU installer — CVE-2026-43499]
 - https://github.com/alex193a/Root-My-Pixel [Jailbreak supported Google Pixel phones with CVE-2026-43499]
 - https://github.com/JoinChang/ghostlock-oneplus [GhostLock (CVE-2026-43499) futex PI UAF exploit with multi-device offset tables for locked-bootloader OnePlus/OPPO/realme/Xiaomi root + KernelSU]
+- https://github.com/kipcloud120/oppo-k3-root-research [Documented no-go OPPO K3 (SDM710, 4.9.227) temp-root feasibility study: KGSL, GhostLock, binder, and FastRPC attack surfaces with reproducible negative results and tooling]
 - https://github.com/Romk-a/CVE-2026-43499-ghostlock-vivo-x100-ultra-root [GhostLock PI-futex exploit port for Vivo X100 Ultra with KernelSU and vr.ko anti-root bypass research]
 - https://github.com/zsw125/o3root [Shizuku-driven CVE-2026-98260 LPE chain with matching KernelSU-family LKM loader for Xiaomi yingtian/lhasa (HyperOS 4, kernel 6.18.21)]
 - https://github.com/YuKongA/ghostlock-app [GhostLock One-Tap Execution App - CVE-2026-43499]
