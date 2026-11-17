@@ -4750,6 +4750,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/B6sse/modManager [Star Wars Battlefront (2015) mod manager: SHA-256-verified approved mods only, in-memory apply via Auric, no unauthorized imports]
 - https://github.com/Parko-Developer/guard-game [Node.js server-side cheat detection: clients report movement/actions, server validates against world limits; TCP/HTTP protocol, admin API, and engine SDKs (C#, GDScript, JS, Luau)]
 - https://github.com/Ajitha-2001/aimguard [Python server-side anti-cheat prototype: telemetry ingestion, lag-compensated validation, PVS replication, behavioral detectors, moderator review workflow, and HTTP API on synthetic gameplay data]
+- https://github.com/phugiadang12/aegis-ac [Server-side behavioural anti-cheat for multiplayer FPS: telemetry pipeline, honeypot detection, Claude SOC analyst, delayed ban waves, and React enforcement dashboard]
 - https://github.com/vul-os/magnetite [Rust self-hostable game platform with magnetite-anticheat: server-authoritative deterministic replay verification and composable cheat validators]
 - https://github.com/marclourens19/ghostline [Godot 4 arena shooter reference with headless deterministic input replay verification, ASP.NET Core validation API, and PostgreSQL cheat-proof leaderboards]
 - https://github.com/nimjump/game [Godot 4 Web3 game with server-side replay verification, signed seed batches, and documented minimal client-authority anti-cheat design]
