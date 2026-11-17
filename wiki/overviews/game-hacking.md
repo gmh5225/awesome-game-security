@@ -442,6 +442,7 @@ sources:
   - wiki/sources/descriptions/coleleavitt__ida-mcp-server.md
   - wiki/sources/descriptions/clementine44613__seiun-ac.md
   - wiki/sources/descriptions/XuJun05__FairCount.md
+  - wiki/sources/descriptions/Fi3w0__Fiw-Anticheat.md
   - wiki/sources/descriptions/cklsit__AdvancedAntiCheat.md
   - wiki/sources/descriptions/cocomelonc__pawtrace.md
   - wiki/sources/descriptions/CookiePLMonster__UptimeFaker.md
@@ -2033,7 +2034,7 @@ sources:
   - wiki/sources/descriptions/phantantai73__AmberAntiCheat.md
   - wiki/sources/descriptions/Magicdaclip52__elden-ring-trainer.md
   - wiki/sources/descriptions/Werta1z__Avgar-AntiCheats.md
-updated: 2026-11-16
+updated: 2026-11-17
 confidence: high
 ---
 
@@ -2833,6 +2834,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Server-side Fabric **1.21.5+** packet anti-cheat mods such as [[windfall-anticheatf]] (enis1enis2; dozens of combat/movement/packet/inventory checks—KillAura, reach, flight, speed, scaffold, bad packets; vanilla-accurate physics prediction + latency simulation; adaptive thresholds; Discord/Prometheus; Geyser/Bedrock; one-to-one port of [[windfall-anticheat]]; Anti Cheat / game:minecraft) sit in the authoritative Fabric-server lane beside Spigot/Paper plugins such as [[dakotaac]] and offensive Fabric clients such as [[lenrete-mod]]. (source: wiki/sources/descriptions/enis1enis2__WindfallAntiCheatF.md)
 - Fabric **1.21.11** client-integrity anti-cheat mods such as [[seiun-ac]] (clementine44613; hash whitelists/blacklists/gray lists for installed mods and resource packs on join; Mixins + custom network packets; mid-session pack-change detection; Discord alerts; complements Discord-based whitelisting in the same project family; Anti Cheat / game:minecraft) sit in the client-mod enforcement lane beside packet gameplay AC such as [[windfall-anticheatf]] and opposite offensive Fabric clients such as [[lenrete-mod]]. (source: wiki/sources/descriptions/clementine44613__seiun-ac.md)
 - Fabric mod/resource-pack whitelist anti-cheat mods such as [[faircount]] (XuJun05; Java; join-time client mod inventory incl. nested jar-in-jar; SHA-256 hash verification against server whitelists; disconnects clients missing FairCount or carrying unauthorized mods; external resource-pack whitelist/hash checks; admin commands + localized kick messages; competitive PvP/vanilla-fair hosts; Anti Cheat / game:minecraft) sit in the Fabric client-integrity lane beside hash-tier mods such as [[seiun-ac]] and NeoForge checksum stacks such as [[katapult-anticheat]]. (source: wiki/sources/descriptions/XuJun05__FairCount.md)
+- Cross-loader Gradle modpack verification stacks such as [[fiw-anticheat]] (Fi3w0; shared rule engine across Fabric/Forge/NeoForge; join challenges + companion mod/JAR/resource-pack telemetry; signature unfair-mod detection; blacklist/whitelist modpack modes; monitor-only policy rollout; Floodgate; Anti Cheat / game:minecraft) complement loader-specific whitelist mods such as [[faircount]] and consent admission such as [[mcace]]. (source: wiki/sources/descriptions/Fi3w0__Fiw-Anticheat.md)
 - NeoForge **1.21.1** client-and-server mod-integrity anti-cheat mods such as [[katapult-anticheat]] (Gitex68; Java; SHA-256 checksums on client mod JARs and resource packs against server whitelists; real-time join/reload resource-pack monitoring incl. renamed X-ray textures; hot-reloadable config, whitelist regeneration, live re-validation commands; NeoForge networking payloads + Gson whitelist management; Anti Cheat / game:minecraft) sit in the NeoForge client-mod enforcement lane beside Fabric hash-list mods such as [[seiun-ac]] and opposite multi-loader utility clients such as [[epsilon]]. (source: wiki/sources/descriptions/Gitex68__Katapult-AntiCheat.md)
 - Forge **1.20.1** client-side peer-mod detection mods such as [[crispy-wafer-anti-cheat-assistant-waferaca]] (sodium-CrispyWafer; Java; server-cooperative FML mod-list extraction + custom network packets, or client-only rotation/flick/tracking aimbot heuristics; public cheat alerts and per-player mod commands; Anti Cheat / game:minecraft) sit in the Forge peer-visibility lane beside integrity mods such as [[katapult-anticheat]] and passive client monitors such as [[local-anticheat-1-8-9]]. (source: wiki/sources/descriptions/sodium-CrispyWafer__CrispyWafer-Anti-Cheat-Assistant-WaferACA.md)
 - Cross-platform Bedrock/Java client-resident anti-cheat platforms such as [[pacc4-0]] (EPOTATOTV; PACC; on-device memory/process/HID inspection, AI behavior scoring, encrypted signed event pipeline, red-screen warnings, separate PTV admin backend without server ban hooks; Windows/Linux/Android/iOS/HarmonyOS native probes; Anti Cheat / game:minecraft) sit in the multi-platform client AC lane beside Forge peer-mod detectors such as [[crispy-wafer-anti-cheat-assistant-waferaca]] and QA clients such as [[anticheat-qa]]. (source: wiki/sources/descriptions/EPOTATOTV__PACC4_0.md)
