@@ -3862,6 +3862,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sts2-kitlib](entities/sts2-kitlib.md) — Slay the Spire 2 in-game mod dev toolkit (C# Harmony; dev rail, cheat presets, Harmony analysis, hooks, MCP bridge; WRXinYue; cheat / Game Develop)
 - [SteamAntiAntiDebug](entities/steam-anti-anti-debug.md) — bypass Steam anti-debug for debugger attach (x64dbg; Steam)
 - [steam-ai-reporter](entities/steam-ai-reporter.md) — Tag Kit for Steam: TypeScript extension/userscript; GetItems/HTML tags for kernel AC, AI disclosure, DRM, PvP, third-party accounts/EULAs; badges/hover cards/banners on search/wishlist/hubs/sales; per-tag show/dim/hide + ignore list; content-script-only (jrv97; Anti Cheat / Guide)
+- [steam-auto-profiler](entities/steam-auto-profiler.md) — Renaus-FI; Bash; Linux Steam/Wayland pre-launch orchestrator; AppID + EAC/BattlEye filesystem heuristics → competitive-AC / FSR / upscaler / low-latency profiles; `localconfig` launch sync; no overlays/injection (Cheat / Steam)
 - [steam-hook-render-poc](entities/steam-hook-render-poc.md) — Steam GameOverlayRenderer render-pipeline hijack PoC (custom draw via trusted overlay; gmh5225; README [Steam])
 - [steam-overlay-x64](entities/steam-overlay-x64.md) — Steam overlay / modding research (C; memory analysis)
 - [StrongSteam](entities/strongsteam.md) — kernel-assisted Steam overlay GDI renderer (Splitx12; C++/ASM; Steam-overlay-style in-game visual demo; overlay / cheat UI rendering research; README [GDI + Steam])
