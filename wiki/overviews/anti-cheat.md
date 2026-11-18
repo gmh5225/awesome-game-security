@@ -897,6 +897,7 @@ sources:
   - wiki/sources/descriptions/roomyoni__Nvidia-GPU-Spoof.md
   - wiki/sources/descriptions/shalzuth__NativeNetSharp.md
   - wiki/sources/descriptions/samshine__ScyllaHideDetector2.md
+  - wiki/sources/descriptions/ScaxeTeam__Scaxe-AntiCheat-OSS.md
   - wiki/sources/descriptions/rrbranco__blackhat2012.md
   - wiki/sources/descriptions/rogerxiii__kernel-codecave-poc.md
   - wiki/sources/descriptions/vovasicidk__sentinelac.md
@@ -1548,6 +1549,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Offline CS2 demo evidence tables:** [[nullcs]] (gjones01; demoparser2/awpy `.dem` → per-engagement windows; CNN on aim/mouse/visibility/timing sequences + XGBoost over ~450 player features for lobby rankings; Next.js + FastAPI-style upload/desktop workflows; tabular evidence for human review—no automated bans; Anti Cheat / Analysis Framework) beside [[cs2-overwatch]] and [[yaacs-anticheat]] demo-telemetry lanes. (source: wiki/sources/descriptions/gjones01__NullCS.md)
 
 **CS2 synthetic telemetry ML bench:** [[cs2-anti-cheat-ml-research]] (essensha; Jupyter + Python on fully synthetic player/match telemetry—individual and coordinated cheat scenarios; temporal validation; logistic regression and Isolation Forest baselines; probability calibration and threshold trade-offs; NetworkX co-play graphs; concept drift, label bias, and skill-segment fairness studies; review-throughput/backlog simulations and safe model-unavailable fallbacks; reproducible dataset generators + fairness-by-skill offline evaluation; research-only—not production AC or auto-ban; Anti Cheat / Machine Learning) beside demo parsers such as [[cs2-overwatch]]/[[nullcs]] and match-stat classifiers such as [[ban-hammer]]. (source: wiki/sources/descriptions/essensha__cs2-anti-cheat-ml-research.md)
+
+**Minecraft temporal-behavior OSS weights:** [[scaxe-anti-cheat-oss]] (ScaxeTeam; open **Safetensors** checkpoint **PRC-Open-0.5.5-1M**—~1M-parameter **Conformer** encoder for short-sequence Minecraft player-behavior tensors; weights for research/integration beside rule-based Paper plugins; CC BY-NC-SA 4.0; Anti Cheat / Machine Learning) next to training plugins such as [[minecraft-anticheatai]] and [[mlanticheat]]. (source: wiki/sources/descriptions/ScaxeTeam__Scaxe-AntiCheat-OSS.md)
 
 **Educational AC curriculum:** [[anticheat-lab]] (Ogonx; six-month self-study track on deliberately vulnerable own-game builds—x64 ASM/C++ memory layout, RE tooling, server authority, statistical/client checks; Compiler Explorer + VS stack tracing; devlog; VM-only scope; Anti Cheat) complements guide-style labs such as [[minecraft-anticheat-docs]] and telemetry research stacks such as [[apex-anticheat-lab]]. (source: wiki/sources/descriptions/Ogonx__anticheat-lab.md) (source: wiki/sources/README-categories.md)
 

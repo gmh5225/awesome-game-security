@@ -63,7 +63,8 @@ sources:
   - wiki/sources/descriptions/essensha__cs2-anti-cheat-ml-research.md
   - wiki/sources/descriptions/elijoewashacked-pixel__VyxAntiCheat.md
   - wiki/sources/descriptions/phugiadang12__aegis-ac.md
-updated: 2026-11-17
+  - wiki/sources/descriptions/ScaxeTeam__Scaxe-AntiCheat-OSS.md
+updated: 2026-11-18
 confidence: medium
 ---
 
@@ -146,6 +147,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[battlerite-bot]] — Battlerite arena brawler automation bot (memory or screen recognition; ability casting, targeting, movement; gmh5225)
 - [[auto-simulated-universe]] — Honkai: Star Rail Simulated Universe automation bot (screen recognition + input; pathfinding, combat rotation, blessing selection; gmh5225)
 - [[minecraft-anticheatai]] — Minecraft Paper DeepGuard; ONNX 1D-CNN over server-side behavior sequences (scaffold-bridging focus; BehaviorRecorder + PyTorch training pipeline)
+- [[scaxe-anti-cheat-oss]] — ScaxeTeam open **Safetensors** weights **PRC-Open-0.5.5-1M**; ~1M-parameter **Conformer** encoder for batched float32 short-sequence Minecraft temporal behavior features—integrator supplies extraction and policy; CC BY-NC-SA 4.0 research weights (source: wiki/sources/descriptions/ScaxeTeam__Scaxe-AntiCheat-OSS.md)
 - [[tfg-anticheat-serverside]] — Alexramirezzz Paper/Spigot **1.18.2** thesis autoclicker defense; labelled sessions from cleaned swing/interact streams; threshold rules vs isolation forest/one-class SVM/ensemble/sequence-CNN baselines with adversarial and lag robustness studies; ONNX off-thread inference and CPS rule fail-safe; auditable low-overhead server timing under man-at-the-end client distrust (source: wiki/sources/descriptions/Alexramirezzz__TFG-AntiCheat-ServerSide.md)
 - [[eigen-anticheat]] — voilecx Paper/Folia Scala 3 plugin; PacketEvents per-tick aim/movement feature rows with lag-compensated client-view reconstruction; combat vs baseline windows streamed to authenticated WebSocket ML backend for labelled datasets and inference (GrimAC/Shard-inspired transaction lag compensation) (source: wiki/sources/descriptions/voilecx__eigen.md)
 - [[powerac]] — katze225 Paper/Folia Java plugin; embedded CNN over fixed-window rotation telemetry from packet listeners; in-game labeled-sample collection with asynchronous on-server retraining; staff logs, Discord webhooks, and plugin API/events—no remote inference or license server (source: wiki/sources/descriptions/katze225__PowerAC.md)
