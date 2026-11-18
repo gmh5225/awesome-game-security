@@ -1,0 +1,866 @@
+Project Path: arc_Yoshino-Loli_UE4SS-KartRiderDrift_vbeiyr6f
+
+Source Tree:
+
+```txt
+arc_Yoshino-Loli_UE4SS-KartRiderDrift_vbeiyr6f
+├── README.md
+├── patches
+│   └── patternsleuth-bounds-check.patch
+├── pktcap
+│   ├── inject.py
+│   ├── pktdump.py
+│   └── src
+│       └── pktcap.cpp
+└── scripts
+    └── switch_ue4ss.bat
+
+```
+
+`README.md`:
+
+```md
+# UE4SS-KartRiderDrift
+
+针对 **Themida 加壳的《跑跑卡丁车：漂移》客户端**（KartRider Drift，UE 4.27 / Win64）的 UE4SS 4.0.0 修复构建。
+
+修复了 UE4SS 在加壳 PE 上随机崩溃（约 50%）的问题，并附带一个 socket 层抓包工具，用于协议分析。
+
+---
+
+## 一、问题现象
+
+UE4SS 4.0.0 注入后，进程在初始化阶段随机终止（约 50% 概率），日志固定停在：
+
+```
+[PS] Reading image
+```
+
+有时能撑过去，有时直接死。Windows 事件日志里**没有任何 Application Error / WER 记录**，说明不是普通的访问违例。
+
+UE4SS 控制台里能看到真正的原因：
+
+```
+thread '<unnamed>' panicked at deps\first\patternsleuth\src\process\internal.rs:58:44:
+range start index 1200470886 out of range for slice of length 142950400
+note: panic in a function that cannot unwind
+```
+
+- `142950400` = `0x8854000` = 客户端的 `SizeOfImage`
+- `1200470886` = `0x478F2B26` = 越界的切片起点
+
+---
+
+## 二、根因
+
+`patternsleuth`（UE4SS 的 Rust 签名扫描库）在 Windows 下这样取节数据：
+
+```rust
+// deps/first/patternsleuth/patternsleuth/src/process/internal.rs
+let memory = unsafe {
+    std::slice::from_raw_parts(
+        mod_info.lpBaseOfDll as *mut u8,
+        mod_info.SizeOfImage as usize,
+    )
+};
+
+let object = object::File::parse(memory)?;
+let image_base_address = object.relative_address_base();
+
+for section in object.sections() {
+    let addr = (section.address() - image_base_address) as usize;
+    let size = section.size() as usize;
+    sections.push((section, &memory[addr..addr + size]));   // ← 无边界检查
+}
+```
+
+三个问题：
+
+1. `section.address() - image_base_address` 是**无符号减法**，节表异常时下溢成天文数字
+2. `&memory[addr..addr + size]` **没有任何 `addr + size <= memory.len()` 校验**
+3. `memory` 由 `from_raw_parts` 直接构造，内容完全不校验
+
+Themida 会在运行时改写内存中的 PE 头（反 dump 常规操作）。扫描时若节表已被改写，`addr` 就越界。
+
+**为什么是 50%**：取决于 UE4SS 开始扫描的那一刻，内存里的 PE 头是否已被改写。
+**为什么延迟无效**：延迟只会让扫描必然落在改写之后，反而变成 100% 失败。
+
+> Rust 的 panic 在跨越 `extern "C"` 边界时无法 unwind，直接走 `abort()`，所以是**整个进程终止**，而不是仅该线程退出。
+
+---
+
+## 三、修复
+
+在越界时跳过该节，而不是 panic：
+
+```rust
+for section in object.sections() {
+    let addr = (section.address() - image_base_address) as usize;
+    let size = section.size() as usize;
+    if addr
+        .checked_add(size)
+        .map_or(true, |end| end > memory.len())
+    {
+        continue;
+    }
+    sections.push((section, &memory[addr..addr + size]));
+}
+```
+
+补丁文件见 [`patches/patternsleuth-bounds-check.patch`](patches/patternsleuth-bounds-check.patch)。
+
+应用方式（在 `RE-UE4SS` 仓库根目录）：
+
+```bash
+git submodule update --init --recursive
+git -C deps/first/patternsleuth apply ../../patches/patternsleuth-bounds-check.patch
+```
+
+---
+
+## 四、构建
+
+### 环境
+
+| 组件 | 版本 |
+|---|---|
+| MSVC | 14.51（VS 2026，工具集 v145） |
+| Windows SDK | 10.0.26100.0 |
+| CMake | 4.3.1 |
+| Ninja | 1.13.2 |
+| Rust | 1.88.0 |
+
+### 命令
+
+```powershell
+$msvc = "E:\Microsoft Visual Studio\18\Enterprise\VC\Tools\MSVC\14.51.36231"
+$sdk  = "E:\Windows Kits\10"; $ver = "10.0.26100.0"
+$ninja = "E:\Microsoft Visual Studio\18\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja"
+$cmake = "E:\Microsoft Visual Studio\18\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
+
+$env:INCLUDE = "$msvc\include;$sdk\Include\$ver\ucrt;$sdk\Include\$ver\um;$sdk\Include\$ver\shared;$sdk\Include\$ver\winrt"
+$env:LIB     = "$msvc\lib\x64;$sdk\Lib\$ver\ucrt\x64;$sdk\Lib\$ver\um\x64"
+$env:PATH    = "$msvc\bin\Hostx64\x64;$sdk\bin\$ver\x64;$ninja;C:\Users\<you>\.cargo\bin;$env:PATH"
+
+cmake -B build_ninja -G Ninja -DCMAKE_BUILD_TYPE=Game__Shipping__Win64 `
+      -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
+cmake --build build_ninja
+```
+
+产物：`build_ninja/Game__Shipping__Win64/bin/UE4SS.dll`（约 20.8 MB）
+
+> 用 `Visual Studio 18 2026` 生成器时 CMake 找不到编译器（VS 实例未注册给 CMake），所以走 Ninja + 手动设置 MSVC 环境变量。
+
+---
+
+## 五、必须的第二个补丁：DllMain 分支（1 字节）
+
+UE4SS 原版在 `dll_process_attached` 里判断当前线程是否主线程：
+
+```cpp
+if (GetCurrentThreadId() == get_main_thread_id()) {
+    QueueUserAPC(process_initialized, GetCurrentThread(), moduleHandle);   // 等主线程 alertable
+} else {
+    process_initialized(moduleHandle);                                     // 直接执行
+}
+```
+
+通过代理 DLL 加载时走的是 APC 分支，但**这个客户端的主线程从不进入 alertable 等待**，APC 永远不触发 → UE4SS 初始化永远不执行。
+
+解决办法：把 `jne`（跳过 APC 分支）改成 `jmp`，强制走直接调用。
+
+### 定位方法
+
+在 `UE4SS.dll` 中搜索字节模式：
+
+```
+3B C7 75 ?? C6 05 ?? ?? ?? ?? 01
+```
+
+即 `cmp eax, edi` / `jne +0x??` / `mov byte ptr [rip+xxxxxxxx], 1`（置 `s_wait_for_ue4ss = 1`）。
+
+把 `75`（`jne`）改成 `EB`（`jmp`）即可。
+
+### 本次构建的偏移
+
+| 项 | 值 |
+|---|---|
+| 文件偏移 | `0x3F0FE0` |
+| 原字节 | `75` |
+| 改为 | `EB` |
+
+> 偏移**随构建变化**，重新编译后必须重新定位，不要直接套用。
+
+---
+
+## 六、验证结果
+
+修复后连续启动 3 次：
+
+| 轮次 | 进程 | 日志行数 | 扫描 | 结果 |
+|---|---|---|---|---|
+| 1 | ALIVE | 898 | 成功 | 无 panic |
+| 2 | ALIVE | 904 | 成功 | 无 panic |
+| 3 | ALIVE | 928 | 成功 | 无 panic |
+
+日志均推进到 `FCallbackGarbageCollector`（主循环阶段）。
+
+修复前：约 50% 概率在 `[PS] Reading image` 处进程终止。
+
+---
+
+## 七、附带工具：socket 层抓包
+
+`pktcap/` 是一个独立 DLL，hook `ws2_32` 的收发函数，把原始字节落盘。用于协议分析 / 服务器模拟器研究。
+
+### 支持
+
+- `send` / `recv` / `sendto` / `recvfrom`
+- `WSASend` / `WSARecv` / `WSASendTo` / `WSARecvFrom`
+- **重叠 I/O**：通过 hook `WSAGetOverlappedResult`，用 overlapped 指针回查缓冲区
+
+### 落盘格式
+
+```
+[0]       char     'S'=发送 'R'=接收
+[1..4]    uint32   载荷长度
+[5..12]   uint64   GetTickCount64 时间戳(ms)
+[13..16]  uint32   对端 IPv4
+[17..18]  uint16   对端端口
+[19..]    bytes    载荷
+```
+
+文件头：`PKTCAP01` + `uint32` 版本号（当前 2）
+
+### 使用
+
+两种加载方式：
+
+1. **作为 UE4SS C++ mod**：放到 `ue4ss/Mods/PktCap/dlls/main.dll`，并在 `mods.txt` 加 `PktCap : 1`
+   - 该 DLL 导出了 `start_mod` / `uninstall_mod`（返回 `NULL`），满足 UE4SS 的 mod 加载要求
+2. **独立注入**：`python inject.py pktcap.dll`
+
+解析：`python pktdump.py <文件> [--hex] [--max N]`
+
+---
+
+## 八、注意事项
+
+- 本仓库**不包含**任何游戏文件、客户端二进制或 UE4SS 的完整源码，只有补丁和自研工具。
+- 补丁针对的是 UE4SS 上游的一个真实 bug（对不可信输入缺少边界检查），理论上对所有加壳 PE 都有意义。
+- 抓包工具仅用于分析自己有权访问的客户端与服务端通信。
+
+---
+
+## 九、文件清单
+
+```
+patches/patternsleuth-bounds-check.patch   patternsleuth 越界修复
+scripts/switch_ue4ss.bat                   UE4SS 版本切换（2.5.2 / 4.0.0）
+pktcap/src/pktcap.cpp                      抓包 DLL 源码
+pktcap/inject.py                           DLL 注入器
+pktcap/pktdump.py                          抓包解析器
+```
+
+```
+
+`patches/patternsleuth-bounds-check.patch`:
+
+```patch
+diff --git a/patternsleuth/src/process/internal.rs b/patternsleuth/src/process/internal.rs
+index 9ad19c4..5f59d51 100644
+--- a/patternsleuth/src/process/internal.rs
++++ b/patternsleuth/src/process/internal.rs
+@@ -155,6 +155,14 @@ mod windows {
+         for section in object.sections() {
+             let addr = (section.address() - image_base_address) as usize;
+             let size = section.size() as usize;
++            // 加壳 PE 的内存头不可信：Themida 会在运行时改写节表，
++            // 导致 addr 越界。这里跳过越界节，而不是让 Rust 触发 panic 终止进程。
++            if addr
++                .checked_add(size)
++                .map_or(true, |end| end > memory.len())
++            {
++                continue;
++            }
+             sections.push((section, &memory[addr..addr + size]));
+         }
+ 
+
+```
+
+`pktcap/inject.py`:
+
+```py
+"""把 DLL 注入到指定进程（CreateRemoteThread + LoadLibraryW）。
+
+用法:
+    python inject.py <dll路径> [进程名] [--wait 秒数]
+
+默认进程名 KartDrift-Win64-Shipping.exe；--wait 会轮询等待进程出现。
+"""
+import ctypes, ctypes.wintypes as wt, sys, time, os
+
+k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+
+PROCESS_ALL_ACCESS = 0x1F0FFF
+MEM_COMMIT_RESERVE = 0x3000
+PAGE_READWRITE = 0x04
+
+k32.OpenProcess.restype = wt.HANDLE
+k32.VirtualAllocEx.restype = ctypes.c_void_p
+k32.VirtualAllocEx.argtypes = [wt.HANDLE, ctypes.c_void_p, ctypes.c_size_t, wt.DWORD, wt.DWORD]
+k32.WriteProcessMemory.argtypes = [wt.HANDLE, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_size_t)]
+k32.CreateRemoteThread.restype = wt.HANDLE
+k32.CreateRemoteThread.argtypes = [wt.HANDLE, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_void_p, wt.DWORD, ctypes.POINTER(wt.DWORD)]
+k32.GetModuleHandleW.restype = ctypes.c_void_p
+k32.GetProcAddress.restype = ctypes.c_void_p
+k32.GetProcAddress.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+
+
+def find_pid(name):
+    import subprocess
+    try:
+        out = subprocess.check_output(
+            ["tasklist", "/fi", f"imagename eq {name}", "/fo", "csv", "/nh"],
+            stderr=subprocess.DEVNULL).decode("gbk", errors="replace").strip()
+    except Exception:
+        return None
+    if not out or out.startswith("信息") or "INFO" in out.upper():
+        return None
+    first = out.splitlines()[0]
+    parts = first.split('","')
+    if len(parts) < 2:
+        return None
+    try:
+        return int(parts[1].strip('"'))
+    except ValueError:
+        return None
+
+
+def inject(pid, dll_path):
+    h = k32.OpenProcess(PROCESS_ALL_ACCESS, False, pid)
+    if not h:
+        print("OpenProcess 失败:", ctypes.get_last_error()); return False
+
+    buf = (ctypes.c_wchar * (len(dll_path) + 1))(*dll_path)
+    size = ctypes.sizeof(buf)
+    addr = k32.VirtualAllocEx(h, None, size, MEM_COMMIT_RESERVE, PAGE_READWRITE)
+    if not addr:
+        print("VirtualAllocEx 失败:", ctypes.get_last_error()); return False
+
+    written = ctypes.c_size_t(0)
+    if not k32.WriteProcessMemory(h, addr, buf, size, ctypes.byref(written)):
+        print("WriteProcessMemory 失败:", ctypes.get_last_error()); return False
+
+    k32.GetModuleHandleW.restype = ctypes.c_void_p
+    hk = k32.GetModuleHandleW("kernel32.dll")
+    load_lib = k32.GetProcAddress(hk, b"LoadLibraryW")
+    if not load_lib:
+        print("找不到 LoadLibraryW"); return False
+
+    tid = wt.DWORD(0)
+    th = k32.CreateRemoteThread(h, None, 0, load_lib, ctypes.c_void_p(addr), 0, ctypes.byref(tid))
+    if not th:
+        print("CreateRemoteThread 失败:", ctypes.get_last_error()); return False
+
+    k32.WaitForSingleObject(th, 8000)
+    code = wt.DWORD(0)
+    k32.GetExitCodeThread(th, ctypes.byref(code))
+    k32.CloseHandle(th)
+    k32.CloseHandle(h)
+
+    if code.value == 0:
+        print(f"注入失败（LoadLibrary 返回 0），PID={pid}")
+        return False
+    print(f"注入成功 PID={pid} 模块句柄=0x{code.value:X}")
+    return True
+
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__); return
+    dll = os.path.abspath(sys.argv[1])
+    name = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith("--") else "KartDrift-Win64-Shipping.exe"
+    wait_s = 0
+    if "--wait" in sys.argv:
+        i = sys.argv.index("--wait")
+        wait_s = int(sys.argv[i + 1]) if i + 1 < len(sys.argv) else 60
+
+    if not os.path.isfile(dll):
+        print("DLL 不存在:", dll); return
+
+    deadline = time.time() + wait_s
+    pid = None
+    while True:
+        pid = find_pid(name)
+        if pid or time.time() >= deadline:
+            break
+        time.sleep(0.2)   # 尽量赶在登录握手前注入
+
+    if not pid:
+        print(f"没找到进程: {name}")
+        return
+    inject(pid, dll)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`pktcap/pktdump.py`:
+
+```py
+"""解析 pktcap.dll 生成的 .bin 抓包文件。
+
+用法:
+    python pktdump.py <文件> [--hex] [--filter 关键字] [--max N]
+"""
+import sys, os, struct, datetime
+
+HDR = b"PKTCAP01"
+
+def parse(path):
+    with open(path, "rb") as f:
+        data = f.read()
+    if data[:8] != HDR:
+        raise SystemExit("不是 pktcap 文件（缺少 PKTCAP01 头）")
+    i = 12
+    recs = []
+    while i + 19 <= len(data):
+        direction = chr(data[i])
+        ln, ts, ip, port = struct.unpack_from("<IQIH", data, i + 1)
+        payload = data[i + 19:i + 19 + ln]
+        if len(payload) < ln:
+            break
+        recs.append((direction, ts, ip, port, payload))
+        i += 19 + ln
+    return recs
+
+def ipstr(ip):
+    return "%d.%d.%d.%d" % ((ip >> 24) & 255, (ip >> 16) & 255, (ip >> 8) & 255, ip & 255)
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__); return
+    path = sys.argv[1]
+    show_hex = "--hex" in sys.argv
+    flt = None
+    if "--filter" in sys.argv:
+        flt = sys.argv[sys.argv.index("--filter") + 1]
+    limit = None
+    if "--max" in sys.argv:
+        limit = int(sys.argv[sys.argv.index("--max") + 1])
+
+    recs = parse(path)
+    t0 = recs[0][1] if recs else 0
+    print(f"文件: {os.path.basename(path)}  记录数: {len(recs)}  总字节: {sum(len(r[4]) for r in recs)}")
+    print(f"{'#':>6} {'t(ms)':>9} {'dir':>3} {'len':>5}  对端                预览")
+    print("-" * 100)
+
+    n = 0
+    for idx, (d, ts, ip, port, payload) in enumerate(recs):
+        text = payload.decode("latin-1")
+        if flt and flt.lower() not in text.lower() and flt not in payload.hex():
+            continue
+        preview = "".join(chr(b) if 32 <= b < 127 else "." for b in payload[:48])
+        print(f"{idx:>6} {ts - t0:>9} {d:>3} {len(payload):>5}  {ipstr(ip) + ':' + str(port):<20} {preview}")
+        if show_hex:
+            for off in range(0, min(len(payload), 128), 16):
+                chunk = payload[off:off + 16]
+                print("        %04X  %-47s  %s" % (
+                    off, " ".join("%02X" % b for b in chunk),
+                    "".join(chr(b) if 32 <= b < 127 else "." for b in chunk)))
+        n += 1
+        if limit and n >= limit:
+            break
+    print(f"\n显示 {n} 条")
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`pktcap/src/pktcap.cpp`:
+
+```cpp
+// pktcap.dll - 网络收发包录制
+// hook ws2_32 的收发函数（含重叠 I/O），把原始字节落盘
+//
+// 记录格式（小端）:
+//   [0]      char     方向 'S'=发送 'R'=接收
+//   [1..4]   uint32   载荷长度
+//   [5..12]  uint64   GetTickCount64 时间戳(ms)
+//   [13..16] uint32   对端 IPv4
+//   [17..18] uint16   对端端口
+//   [19..]   bytes    载荷
+// 文件头: "PKTCAP01" + uint32 版本(2)
+
+#define WIN32_LEAN_AND_MEAN
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+#include <stdio.h>
+#include <stdint.h>
+#include "MinHook.h"
+
+#pragma comment(lib, "ws2_32.lib")
+
+static FILE*            g_file  = NULL;
+static CRITICAL_SECTION g_cs;
+static volatile LONG    g_count = 0;
+static volatile LONG    g_bytes = 0;
+static wchar_t          g_outdir[MAX_PATH] = {0};
+
+// ---------- 重叠 I/O 追踪 ----------
+#define MAX_OV   2048
+#define MAX_BUFS 8
+struct OvEntry {
+    LPWSAOVERLAPPED  ov;
+    char             dir;
+    DWORD            cnt;
+    WSABUF           bufs[MAX_BUFS];
+    struct sockaddr* from;
+    LPINT            fromlen;
+};
+static OvEntry          g_ov[MAX_OV];
+static CRITICAL_SECTION g_ovcs;
+
+// ---------- 原始函数 ----------
+typedef int (WSAAPI *pfn_send)(SOCKET, const char*, int, int);
+typedef int (WSAAPI *pfn_recv)(SOCKET, char*, int, int);
+typedef int (WSAAPI *pfn_sendto)(SOCKET, const char*, int, int, const struct sockaddr*, int);
+typedef int (WSAAPI *pfn_recvfrom)(SOCKET, char*, int, int, struct sockaddr*, int*);
+typedef int (WSAAPI *pfn_WSASend)(SOCKET, LPWSABUF, DWORD, LPDWORD, DWORD, LPWSAOVERLAPPED, LPWSAOVERLAPPED_COMPLETION_ROUTINE);
+typedef int (WSAAPI *pfn_WSARecv)(SOCKET, LPWSABUF, DWORD, LPDWORD, LPDWORD, LPWSAOVERLAPPED, LPWSAOVERLAPPED_COMPLETION_ROUTINE);
+typedef int (WSAAPI *pfn_WSASendTo)(SOCKET, LPWSABUF, DWORD, LPDWORD, DWORD, const struct sockaddr*, int, LPWSAOVERLAPPED, LPWSAOVERLAPPED_COMPLETION_ROUTINE);
+typedef int (WSAAPI *pfn_WSARecvFrom)(SOCKET, LPWSABUF, DWORD, LPDWORD, LPDWORD, struct sockaddr*, LPINT, LPWSAOVERLAPPED, LPWSAOVERLAPPED_COMPLETION_ROUTINE);
+typedef BOOL (WSAAPI *pfn_WSAGetOverlappedResult)(SOCKET, LPWSAOVERLAPPED, LPDWORD, BOOL, LPDWORD);
+
+static pfn_send                   o_send                   = NULL;
+static pfn_recv                   o_recv                   = NULL;
+static pfn_sendto                 o_sendto                 = NULL;
+static pfn_recvfrom               o_recvfrom               = NULL;
+static pfn_WSASend                o_WSASend                = NULL;
+static pfn_WSARecv                o_WSARecv                = NULL;
+static pfn_WSASendTo              o_WSASendTo              = NULL;
+static pfn_WSARecvFrom            o_WSARecvFrom            = NULL;
+static pfn_WSAGetOverlappedResult o_WSAGetOverlappedResult = NULL;
+
+// ---------- 落盘 ----------
+static void log_pkt(char dir, const char* data, int len, const struct sockaddr* sa)
+{
+    if (!g_file || !data || len <= 0) return;
+
+    uint32_t ip = 0;
+    uint16_t port = 0;
+    if (sa && sa->sa_family == AF_INET) {
+        const struct sockaddr_in* in4 = (const struct sockaddr_in*)sa;
+        ip   = ntohl(in4->sin_addr.s_addr);
+        port = ntohs(in4->sin_port);
+    }
+
+    uint32_t n  = (uint32_t)len;
+    uint64_t ts = GetTickCount64();
+
+    EnterCriticalSection(&g_cs);
+    if (g_file) {
+        fwrite(&dir,  1, 1, g_file);
+        fwrite(&n,    4, 1, g_file);
+        fwrite(&ts,   8, 1, g_file);
+        fwrite(&ip,   4, 1, g_file);
+        fwrite(&port, 2, 1, g_file);
+        fwrite(data,  1, (size_t)len, g_file);
+        fflush(g_file);
+        g_count++;
+        g_bytes += len;
+    }
+    LeaveCriticalSection(&g_cs);
+}
+
+static void log_wsabufs(char dir, LPWSABUF bufs, DWORD cnt, const struct sockaddr* sa)
+{
+    for (DWORD i = 0; i < cnt; ++i) {
+        if (bufs[i].buf && bufs[i].len) log_pkt(dir, bufs[i].buf, (int)bufs[i].len, sa);
+    }
+}
+
+// ---------- 重叠 I/O 记录表 ----------
+static void ov_store(LPWSAOVERLAPPED ov, char dir, LPWSABUF bufs, DWORD cnt,
+                     struct sockaddr* from, LPINT fromlen)
+{
+    if (!ov || !bufs || !cnt) return;
+    EnterCriticalSection(&g_ovcs);
+    for (int i = 0; i < MAX_OV; ++i) {
+        if (g_ov[i].ov == NULL) {
+            g_ov[i].ov   = ov;
+            g_ov[i].dir  = dir;
+            g_ov[i].cnt  = cnt > MAX_BUFS ? MAX_BUFS : cnt;
+            for (DWORD j = 0; j < g_ov[i].cnt; ++j) g_ov[i].bufs[j] = bufs[j];
+            g_ov[i].from    = from;
+            g_ov[i].fromlen = fromlen;
+            break;
+        }
+    }
+    LeaveCriticalSection(&g_ovcs);
+}
+
+static void ov_complete(LPWSAOVERLAPPED ov, DWORD transferred)
+{
+    if (!ov || !transferred) return;
+    EnterCriticalSection(&g_ovcs);
+    for (int i = 0; i < MAX_OV; ++i) {
+        if (g_ov[i].ov == ov) {
+            const struct sockaddr* sa = NULL;
+            if (g_ov[i].dir == 'R' && g_ov[i].from && g_ov[i].fromlen && *g_ov[i].fromlen > 0)
+                sa = g_ov[i].from;
+
+            DWORD remain = transferred;
+            for (DWORD j = 0; j < g_ov[i].cnt && remain; ++j) {
+                DWORD n = g_ov[i].bufs[j].len < remain ? g_ov[i].bufs[j].len : remain;
+                if (g_ov[i].bufs[j].buf && n) log_pkt(g_ov[i].dir, g_ov[i].bufs[j].buf, (int)n, sa);
+                remain -= n;
+            }
+            g_ov[i].ov = NULL;
+            break;
+        }
+    }
+    LeaveCriticalSection(&g_ovcs);
+}
+
+// ---------- detour ----------
+static int WSAAPI h_send(SOCKET s, const char* buf, int len, int flags)
+{
+    log_pkt('S', buf, len, NULL);
+    return o_send(s, buf, len, flags);
+}
+
+static int WSAAPI h_recv(SOCKET s, char* buf, int len, int flags)
+{
+    int r = o_recv(s, buf, len, flags);
+    if (r > 0) log_pkt('R', buf, r, NULL);
+    return r;
+}
+
+static int WSAAPI h_sendto(SOCKET s, const char* buf, int len, int flags, const struct sockaddr* to, int tolen)
+{
+    log_pkt('S', buf, len, to);
+    return o_sendto(s, buf, len, flags, to, tolen);
+}
+
+static int WSAAPI h_recvfrom(SOCKET s, char* buf, int len, int flags, struct sockaddr* from, int* fromlen)
+{
+    int r = o_recvfrom(s, buf, len, flags, from, fromlen);
+    if (r > 0) log_pkt('R', buf, r, from);
+    return r;
+}
+
+static int WSAAPI h_WSASend(SOCKET s, LPWSABUF bufs, DWORD cnt, LPDWORD sent, DWORD flags,
+                            LPWSAOVERLAPPED ov, LPWSAOVERLAPPED_COMPLETION_ROUTINE cb)
+{
+    if (ov) ov_store(ov, 'S', bufs, cnt, NULL, NULL);
+    else    log_wsabufs('S', bufs, cnt, NULL);
+    return o_WSASend(s, bufs, cnt, sent, flags, ov, cb);
+}
+
+static int WSAAPI h_WSARecv(SOCKET s, LPWSABUF bufs, DWORD cnt, LPDWORD recvd, LPDWORD flags,
+                            LPWSAOVERLAPPED ov, LPWSAOVERLAPPED_COMPLETION_ROUTINE cb)
+{
+    if (ov) ov_store(ov, 'R', bufs, cnt, NULL, NULL);
+    int r = o_WSARecv(s, bufs, cnt, recvd, flags, ov, cb);
+    if (r == 0 && !ov && recvd && *recvd) log_wsabufs('R', bufs, cnt, NULL);
+    return r;
+}
+
+static int WSAAPI h_WSASendTo(SOCKET s, LPWSABUF bufs, DWORD cnt, LPDWORD sent, DWORD flags,
+                              const struct sockaddr* to, int tolen,
+                              LPWSAOVERLAPPED ov, LPWSAOVERLAPPED_COMPLETION_ROUTINE cb)
+{
+    if (ov) ov_store(ov, 'S', bufs, cnt, NULL, NULL);
+    else    log_wsabufs('S', bufs, cnt, to);
+    return o_WSASendTo(s, bufs, cnt, sent, flags, to, tolen, ov, cb);
+}
+
+static int WSAAPI h_WSARecvFrom(SOCKET s, LPWSABUF bufs, DWORD cnt, LPDWORD recvd, LPDWORD flags,
+                                struct sockaddr* from, LPINT fromlen,
+                                LPWSAOVERLAPPED ov, LPWSAOVERLAPPED_COMPLETION_ROUTINE cb)
+{
+    if (ov) ov_store(ov, 'R', bufs, cnt, from, fromlen);
+    int r = o_WSARecvFrom(s, bufs, cnt, recvd, flags, from, fromlen, ov, cb);
+    if (r == 0 && !ov && recvd && *recvd) log_wsabufs('R', bufs, cnt, from);
+    return r;
+}
+
+static BOOL WSAAPI h_WSAGetOverlappedResult(SOCKET s, LPWSAOVERLAPPED ov, LPDWORD cbTransfer,
+                                            BOOL fWait, LPDWORD flags)
+{
+    BOOL r = o_WSAGetOverlappedResult(s, ov, cbTransfer, fWait, flags);
+    if (r && cbTransfer && *cbTransfer) ov_complete(ov, *cbTransfer);
+    return r;
+}
+
+// ---------- 初始化 ----------
+static void open_log()
+{
+    wchar_t exe[MAX_PATH] = {0};
+    GetModuleFileNameW(NULL, exe, MAX_PATH);
+    wchar_t* slash = wcsrchr(exe, L'\\');
+    if (slash) *slash = 0;
+
+    swprintf_s(g_outdir, MAX_PATH, L"%s\\pktcap", exe);
+    CreateDirectoryW(g_outdir, NULL);
+
+    wchar_t path[MAX_PATH];
+    SYSTEMTIME st; GetLocalTime(&st);
+    swprintf_s(path, MAX_PATH, L"%s\\pkt_%04d%02d%02d_%02d%02d%02d_pid%lu.bin",
+               g_outdir, st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond,
+               GetCurrentProcessId());
+
+    g_file = _wfopen(path, L"wb");
+    if (g_file) {
+        const char hdr[8] = {'P','K','T','C','A','P','0','1'};
+        uint32_t ver = 2;
+        fwrite(hdr, 1, 8, g_file);
+        fwrite(&ver, 4, 1, g_file);
+        fflush(g_file);
+    }
+}
+
+static DWORD WINAPI worker(LPVOID)
+{
+    // 本线程由 DllMain 创建，必须等 DllMain 返回、加载器锁释放后再动手
+    Sleep(1500);
+
+    InitializeCriticalSection(&g_cs);
+    InitializeCriticalSection(&g_ovcs);
+    open_log();
+
+    // 只等 ws2_32 自己出现，绝不主动 LoadLibrary
+    HMODULE ws2 = NULL;
+    for (int i = 0; i < 120; ++i) {
+        ws2 = GetModuleHandleW(L"ws2_32.dll");
+        if (ws2) break;
+        Sleep(100);
+    }
+    if (!ws2) return 0;
+
+    if (MH_Initialize() != MH_OK) return 0;
+
+    struct { const char* name; LPVOID det; LPVOID* orig; } hooks[] = {
+        { "send",                  (LPVOID)h_send,                  (LPVOID*)&o_send                  },
+        { "recv",                  (LPVOID)h_recv,                  (LPVOID*)&o_recv                  },
+        { "sendto",                (LPVOID)h_sendto,                (LPVOID*)&o_sendto                },
+        { "recvfrom",              (LPVOID)h_recvfrom,              (LPVOID*)&o_recvfrom              },
+        { "WSASend",               (LPVOID)h_WSASend,               (LPVOID*)&o_WSASend               },
+        { "WSARecv",               (LPVOID)h_WSARecv,               (LPVOID*)&o_WSARecv               },
+        { "WSASendTo",             (LPVOID)h_WSASendTo,             (LPVOID*)&o_WSASendTo             },
+        { "WSARecvFrom",           (LPVOID)h_WSARecvFrom,           (LPVOID*)&o_WSARecvFrom           },
+        { "WSAGetOverlappedResult",(LPVOID)h_WSAGetOverlappedResult,(LPVOID*)&o_WSAGetOverlappedResult },
+    };
+
+    for (auto& h : hooks) {
+        LPVOID target = (LPVOID)GetProcAddress(ws2, h.name);
+        if (target && MH_CreateHook(target, h.det, h.orig) == MH_OK) MH_EnableHook(target);
+    }
+    return 0;
+}
+
+extern "C" __declspec(dllexport) long  PktCap_Count() { return g_count; }
+extern "C" __declspec(dllexport) long  PktCap_Bytes() { return g_bytes; }
+extern "C" __declspec(dllexport) const wchar_t* PktCap_Dir() { return g_outdir; }
+
+// ---- UE4SS C++ mod 兼容 ----
+// UE4SS 的 CppMod 加载流程：LoadLibraryExW(dlls\main.dll) -> GetProcAddress("start_mod")
+// -> GetProcAddress("uninstall_mod")。任一导出缺失就会 FreeLibrary，把我们的钩子一起撕掉。
+extern "C" __declspec(dllexport) void* start_mod() { return NULL; }
+extern "C" __declspec(dllexport) void  uninstall_mod(void*) {}
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID)
+{
+    if (reason == DLL_PROCESS_ATTACH) {
+        DisableThreadLibraryCalls(hModule);
+        HANDLE t = CreateThread(NULL, 0, worker, NULL, 0, NULL);
+        if (t) CloseHandle(t);
+    }
+    return TRUE;
+}
+
+```
+
+`scripts/switch_ue4ss.bat`:
+
+```bat
+@echo off
+setlocal enabledelayedexpansion
+rem ============================================================
+rem  UE4SS version switcher
+rem    cap  -> UE4SS 2.5.2  (stable, packet capture)
+rem    mod  -> UE4SS 4.0.0  (patched build: bounds-check fix, Lua / SDK dump)
+rem  Folders: ue4ss = active, ue4ss.other = inactive
+rem ============================================================
+set "HERE=%~dp0"
+set "ACTIVE=%HERE%ue4ss"
+set "OTHER=%HERE%ue4ss.other"
+
+if /i "%~1"=="status" goto :status
+if /i "%~1"=="cap"    set "WANT=2.5.2" & goto :switch
+if /i "%~1"=="mod"    set "WANT=4.0.0" & goto :switch
+goto :usage
+
+:switch
+tasklist /fi "imagename eq KartDrift-Win64-Shipping.exe" /nh 2>nul | "%SystemRoot%\System32\findstr.exe" /i "KartDrift" >nul
+if not errorlevel 1 (
+    echo [X] Game is running. Close it first.
+    exit /b 1
+)
+
+set "CUR="
+if exist "%ACTIVE%\.version" set /p CUR=<"%ACTIVE%\.version"
+if not defined CUR (
+    echo [X] Cannot detect current version ^(missing ue4ss\.version^)
+    exit /b 1
+)
+if "%CUR%"=="%WANT%" (
+    echo [=] Already on %WANT%
+    exit /b 0
+)
+
+set "OTHERV="
+if exist "%OTHER%\.version" set /p OTHERV=<"%OTHER%\.version"
+if not "%OTHERV%"=="%WANT%" (
+    echo [X] ue4ss.other is version "%OTHERV%", expected "%WANT%"
+    echo     Rename folders manually or reinstall that version.
+    exit /b 1
+)
+
+ren "%ACTIVE%" "ue4ss.swap"
+if errorlevel 1 ( echo [X] rename active failed & exit /b 1 )
+ren "%OTHER%"  "ue4ss"
+if errorlevel 1 ( echo [X] rename other failed & ren "%HERE%ue4ss.swap" "ue4ss" & exit /b 1 )
+ren "%HERE%ue4ss.swap" "ue4ss.other"
+if errorlevel 1 ( echo [X] rename swap failed & exit /b 1 )
+
+echo [OK] Switched: %CUR% -^> %WANT%
+echo      Active folder now: ue4ss ^(v%WANT%^)
+exit /b 0
+
+:status
+set "CUR=?"
+if exist "%ACTIVE%\.version" set /p CUR=<"%ACTIVE%\.version"
+set "OTHERV=?"
+if exist "%OTHER%\.version" set /p OTHERV=<"%OTHER%\.version"
+echo Active   ue4ss        = %CUR%
+echo Inactive ue4ss.other  = %OTHERV%
+if "%CUR%"=="2.5.2" echo Mode: cap  ^(stable, packet capture^)
+if "%CUR%"=="4.0.0" echo Mode: mod  ^(patched build, Lua / SDK dump^)
+exit /b 0
+
+:usage
+echo Usage: switch_ue4ss.bat [cap^|mod^|status]
+echo   cap     UE4SS 2.5.2 - stable, for packet capture
+echo   mod     UE4SS 4.0.0 - patched build, Lua / SDK dump
+echo   status  show current mode
+exit /b 1
+
+```
