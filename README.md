@@ -3176,6 +3176,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cqcallaw/shootergame [ShooterGame Demo]
 - https://github.com/CorrM/CleanCheat [Game cheat base]
 - https://github.com/trumank/patternsleuth [Unreal Engine address scanner and test suite]
+- https://github.com/Yoshino-Loli/UE4SS-KartRiderDrift [Patched UE4SS 4.0.0 for Themida-packed KartRider Drift: patternsleuth bounds-check fix plus socket-layer pktcap for protocol analysis]
 - https://github.com/trumank/jmap [Unreal Engine reflection data format and extractor]
 - https://github.com/Encryqed/Dumper-7 [SDK Dump for all of UE4 and UE5]
 - https://github.com/TheHolyOneZ/Zircon-UE-Dumper [Runtime UE 4.22–5.7 reflection dumper: C++ SDK, .usmap, IDA/Ghidra/BN types, Frida bindings, and Python stubs from live process, minidump, or disk]
