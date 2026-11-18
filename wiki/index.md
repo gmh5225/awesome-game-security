@@ -3636,6 +3636,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rust-cheat-external](entities/rust-cheat-external.md) — Facepunch Rust external cheat (C/C++; driver / modding / SDK generation; cheat / game:rust [External]; gmh5225)
 - [rust-cheat-external-main](entities/rust-cheat-external-main.md) — Facepunch Rust external framework (Disline1337; Windows driver IOCTL memory R/W + usermode overlay + gameplay SDK helpers; UnityPlayer/GameAssembly module handling; driver-assisted external + AC attack-pattern research; cheat / game:rust [External])
 - [rust-dma-cheat](entities/rust-dma-cheat.md) — Facepunch Rust DMA cheat framework (IntelSDM; C++; ESP + recoil/FOV/lighting/admin-view mods; PCILeech/MemProcFS/Il2CppDumper/DMALibrary; hardware-assisted external cheat research; cheat / game:rust [DMA])
+- [RX25 DMA Reader](entities/rx25-dma-reader.md) — Guosstar two-board FPGA PCIe host physical-memory reader over 25G optical link; no target-OS driver; Corundum-style Ethernet + deep TLP/BAR RTL; KMDF initiator + LeechCore `device rx25` ([[pcileech]]/VMM); forensics / DMA / AC research)
 - [rust-dll-crab](entities/rust-dll-crab.md) — Rust Windows DLL injector (multiple methods; Injection Testing; gmh5225)
 - [RustBlox](entities/rustblox.md) — Rust Windows Roblox launcher with TheWatcher client-side watchdog (cheat process/DLL injection/executor scan; isolated CDN install; FastFlags; egui dashboard; no1qq)
 - [SetWindowHookEx (ekknod)](entities/setwindowhookex.md) — SetWindowHookEx preinjected DLL research (C; hooking; Some Tricks / Windows Ring3; ekknod)
