@@ -1,0 +1,1643 @@
+Project Path: arc_bvishwesh_AntiCheat-Engine_h72me9y7
+
+Source Tree:
+
+```txt
+arc_bvishwesh_AntiCheat-Engine_h72me9y7
+├── README.md
+├── api.py
+├── confidence.py
+├── dashboard.html
+├── detector.py
+├── dynamic_lobby.py
+├── lobby.py
+├── main.py
+├── requirements.txt
+└── simulator.py
+
+```
+
+`README.md`:
+
+```md
+# Anti-Cheat Detection Engine 🛡️🎮
+
+A behavioral anomaly detection system for multiplayer games using unsupervised machine learning.
+
+## 🌟 Key Features
+- **Unsupervised Anomaly Detection**: Isolation Forest model trained strictly on normal player profiles to catch novel and adaptive cheats.
+- **Cheat Vector Detection**: Detects **Aimbots**, **Speedhacks**, and **Score Farmers / Macro bots**.
+- **Multi-Session Confidence**: Aggregates infraction telemetry across rounds to prevent false bans.
+- **Shadow Lobby Silent Quarantine**: Silently segregates flagged cheaters into dedicated shadow matchmaking queues.
+- **Dynamic Lobby Matchmaking**: Adaptive thresholding that scales detection sensitivity.
+- **FastAPI Real-Time Service**: High-performance REST API for live telemetry processing (`/analyze`, `/status/{player_id}`, `/dashboard`).
+- **Live Operations Dashboard**: Dark-themed SecOps console in HTML5/CSS3/JavaScript.
+
+## 📊 Monitored Behavioral Telemetry
+
+| Metric | Normal Range | Exploit Anomaly | Detected Exploit |
+| :--- | :--- | :--- | :--- |
+| `avg_velocity` | 3.0 - 6.0 | 15.0 - 25.0 | Speedhack |
+| `max_velocity` | avg + 0.5 - 2.0 | avg + 5.0 - 10.0 | Speedhack / Teleport |
+| `accuracy` | 20% - 60% | 92% - 100% | Aimbot / Silent Aim |
+| `headshot_rate` | 5% - 40% | 85% - 100% | Aimbot |
+| `actions_per_sec` | 1.0 - 3.5 | 8.0 - 15.0 | Score Farmer / Auto-Clicker |
+| `score_per_min` | 10 - 80 | 500 - 1000+ | Score Farming |
+| `session_duration`| 15 - 60 min | 5 - 20 min | Farming Bots |
+
+## 🚀 Quickstart
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run CLI detector
+python main.py
+
+# Run confidence evaluation
+python confidence.py
+
+# Run dynamic lobby matchmaker
+python dynamic_lobby.py
+
+# Start API service
+uvicorn api:app --reload --port 8000
+```
+
+```
+
+`api.py`:
+
+```py
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Optional, Union
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import StandardScaler
+from collections import defaultdict
+import warnings
+warnings.filterwarnings("ignore")
+
+from simulator import generate_all_players
+
+app = FastAPI(
+    title="Anti-Cheat Detection Engine",
+    description="Behavioral anomaly detection system for multiplayer games",
+    version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+FEATURES = [
+    "avg_velocity",
+    "max_velocity",
+    "accuracy",
+    "actions_per_sec",
+    "score_per_min",
+    "headshot_rate",
+    "session_duration"
+]
+
+model                 = None
+scaler                = None
+player_flag_counts    = defaultdict(int)
+player_session_counts = defaultdict(int)
+player_registry       = {}
+BAN_THRESHOLD         = 3
+
+
+def train_on_startup():
+    global model, scaler
+    print("Training model on normal player behavior...")
+    df      = pd.DataFrame(generate_all_players())
+    normal  = df[df["is_cheater"] == False]
+    X       = normal[FEATURES]
+    sc      = StandardScaler()
+    X_sc    = sc.fit_transform(X)
+    m       = IsolationForest(
+        n_estimators=200,
+        contamination=0.05,
+        random_state=42
+    )
+    m.fit(X_sc)
+    model  = m
+    scaler = sc
+    print("Model ready. API is live.")
+
+
+train_on_startup()
+
+
+class PlayerSession(BaseModel):
+    player_id        : str
+    player_name      : str
+    avg_velocity     : float
+    max_velocity     : float
+    accuracy         : float
+    actions_per_sec  : float
+    score_per_min    : float
+    headshot_rate    : float
+    session_duration : float
+
+
+class DetectionResult(BaseModel):
+    player_id        : str
+    player_name      : str
+    flagged          : bool
+    suspicion_score  : float
+    times_flagged    : int
+    sessions_observed: int
+    verdict          : str
+    lobby            : str
+
+
+@app.get("/")
+def root():
+    return {
+        "message": "Anti-Cheat Detection Engine is running",
+        "version": "1.0.0",
+        "status" : "online"
+    }
+
+
+@app.post("/analyze")
+def analyze_player(session: PlayerSession):
+    global model, scaler
+    global player_flag_counts, player_session_counts, player_registry
+
+    if model is None or scaler is None:
+        raise HTTPException(status_code=503, detail="Model not ready.")
+
+    features = np.array([[
+        session.avg_velocity,
+        session.max_velocity,
+        session.accuracy,
+        session.actions_per_sec,
+        session.score_per_min,
+        session.headshot_rate,
+        session.session_duration
+    ]])
+
+    features_scaled = scaler.transform(features)
+    prediction      = model.predict(features_scaled)[0]
+    raw_score       = model.decision_function(features_scaled)[0]
+    suspicion_score = round(float(-raw_score), 4)
+    flagged         = bool(prediction == -1)
+
+    pid = session.player_id
+    player_session_counts[pid] += 1
+    player_registry[pid]        = session.player_name
+
+    if flagged:
+        player_flag_counts[pid] += 1
+
+    times_flagged     = int(player_flag_counts[pid])
+    sessions_observed = int(player_session_counts[pid])
+    is_banned         = times_flagged >= BAN_THRESHOLD
+
+    if is_banned:
+        verdict = "BANNED"
+        lobby   = "shadow_lobby"
+    elif flagged:
+        verdict = "SUSPICIOUS"
+        lobby   = "normal_lobby"
+    else:
+        verdict = "CLEAN"
+        lobby   = "normal_lobby"
+
+    return {
+        "player_id"        : pid,
+        "player_name"      : session.player_name,
+        "flagged"          : flagged,
+        "suspicion_score"  : suspicion_score,
+        "times_flagged"    : times_flagged,
+        "sessions_observed": sessions_observed,
+        "verdict"          : verdict,
+        "lobby"            : lobby
+    }
+
+
+@app.get("/status/{player_id}")
+def get_player_status(player_id: str):
+    if player_id not in player_registry:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Player {player_id} not found."
+        )
+
+    times_flagged     = int(player_flag_counts[player_id])
+    sessions_observed = int(player_session_counts[player_id])
+    is_banned         = times_flagged >= BAN_THRESHOLD
+
+    return {
+        "player_id"        : player_id,
+        "player_name"      : player_registry[player_id],
+        "times_flagged"    : times_flagged,
+        "sessions_observed": sessions_observed,
+        "lobby"            : "shadow_lobby" if is_banned else "normal_lobby",
+        "verdict"          : "BANNED" if is_banned else "ACTIVE"
+    }
+
+
+@app.get("/dashboard")
+def get_dashboard():
+    total  = len(player_registry)
+    banned = sum(
+        1 for pid in player_registry
+        if player_flag_counts[pid] >= BAN_THRESHOLD
+    )
+    players = []
+
+    for pid, name in player_registry.items():
+        flags    = int(player_flag_counts[pid])
+        sessions = int(player_session_counts[pid])
+        is_b     = flags >= BAN_THRESHOLD
+        players.append({
+            "player_id"        : pid,
+            "player_name"      : name,
+            "times_flagged"    : flags,
+            "sessions_observed": sessions,
+            "lobby"            : "shadow_lobby" if is_b else "normal_lobby",
+            "verdict"          : "BANNED" if is_b else "ACTIVE"
+        })
+
+    return {
+        "total_players_tracked": total,
+        "total_banned"         : banned,
+        "total_active"         : total - banned,
+        "ban_threshold"        : BAN_THRESHOLD,
+        "players"              : sorted(players, key=lambda x: -x["times_flagged"])
+    }
+```
+
+`confidence.py`:
+
+```py
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import StandardScaler
+from collections import defaultdict
+import warnings
+warnings.filterwarnings("ignore")
+
+# -----------------------------------------------
+# This file simulates running the detection
+# engine across MULTIPLE game sessions per player
+# and only banning players who are consistently
+# flagged. One bad session does not get you banned.
+# This is exactly how EA's real system works.
+# -----------------------------------------------
+
+FEATURES = [
+    "avg_velocity",
+    "max_velocity",
+    "accuracy",
+    "actions_per_sec",
+    "score_per_min",
+    "headshot_rate",
+    "session_duration"
+]
+
+# How many sessions we simulate per player
+SESSIONS_PER_PLAYER = 5
+
+# How many flags needed across sessions to get banned
+BAN_THRESHOLD = 3
+
+
+# -----------------------------------------------
+# Import the simulator to generate fresh sessions
+# -----------------------------------------------
+
+from simulator import generate_all_players, generate_session
+import random
+import faker as fk
+
+fake = fk.Faker()
+
+
+def simulate_multiple_sessions(n_sessions=SESSIONS_PER_PLAYER):
+    """
+    Generate multiple sessions for each player.
+    Cheaters cheat consistently. Normal players
+    may occasionally have unusual stats but will
+    not be flagged repeatedly across sessions.
+    """
+    all_sessions = []
+
+    base_players = generate_all_players()
+
+    for session_num in range(n_sessions):
+        for player in base_players:
+            pid        = player["player_id"]
+            pname      = player["player_name"]
+            is_cheater = player["is_cheater"]
+            cheat_type = player["cheat_type"] if is_cheater else None
+
+            session = generate_session(
+                pid, pname, is_cheater, cheat_type
+            )
+            session["session_num"] = session_num + 1
+            all_sessions.append(session)
+
+    return pd.DataFrame(all_sessions)
+
+
+def train_model(df):
+    normal = df[df["is_cheater"] == False]
+    X      = normal[FEATURES]
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    model = IsolationForest(
+        n_estimators=200,
+        contamination=0.05,
+        random_state=42
+    )
+    model.fit(X_scaled)
+    return model, scaler
+
+
+def run_multisession_detection(df, model, scaler):
+    """
+    Run detection on every session.
+    Track how many times each player gets flagged.
+    Only ban players flagged in 3 or more sessions.
+    """
+    flag_counts    = defaultdict(int)
+    player_info    = {}
+
+    for session_num in df["session_num"].unique():
+        session_df  = df[df["session_num"] == session_num].copy()
+        X           = session_df[FEATURES]
+        X_scaled    = scaler.transform(X)
+        preds       = model.predict(X_scaled)
+        scores      = model.decision_function(X_scaled)
+
+        session_df["flagged"]         = preds == -1
+        session_df["suspicion_score"] = np.round(-scores, 4)
+
+        for _, row in session_df.iterrows():
+            pid = row["player_id"]
+            if row["flagged"]:
+                flag_counts[pid] += 1
+            if pid not in player_info:
+                player_info[pid] = {
+                    "player_name" : row["player_name"],
+                    "is_cheater"  : row["is_cheater"],
+                    "cheat_type"  : row["cheat_type"]
+                }
+
+    return flag_counts, player_info
+
+
+def print_final_report(flag_counts, player_info):
+    print("\n========================================")
+    print("   MULTI-SESSION CONFIDENCE REPORT      ")
+    print(f"   Sessions per player : {SESSIONS_PER_PLAYER}")
+    print(f"   Ban threshold       : {BAN_THRESHOLD}+ flags")
+    print("========================================\n")
+
+    banned          = []
+    cleared         = []
+    actual_cheaters = []
+    actual_innocent = []
+
+    for pid, info in player_info.items():
+        flags     = flag_counts.get(pid, 0)
+        is_banned = flags >= BAN_THRESHOLD
+
+        entry = {
+            "player_id"   : pid,
+            "player_name" : info["player_name"],
+            "cheat_type"  : info["cheat_type"],
+            "times_flagged": flags,
+            "is_cheater"  : info["is_cheater"],
+            "banned"      : is_banned
+        }
+
+        if is_banned:
+            banned.append(entry)
+        else:
+            cleared.append(entry)
+
+        if info["is_cheater"]:
+            actual_cheaters.append(pid)
+        else:
+            actual_innocent.append(pid)
+
+    banned_ids  = set(e["player_id"] for e in banned)
+    cheater_ids = set(actual_cheaters)
+
+    true_positives  = banned_ids & cheater_ids
+    false_positives = banned_ids - cheater_ids
+    false_negatives = cheater_ids - banned_ids
+
+    print(f"Total players    : {len(player_info)}")
+    print(f"Banned           : {len(banned)}")
+    print(f"Cleared          : {len(cleared)}")
+
+    print("\n--- BANNED PLAYERS ---")
+    for e in sorted(banned, key=lambda x: -x["times_flagged"]):
+        label = "CHEATER" if e["is_cheater"] else "FALSE POSITIVE"
+        print(f"  {e['player_id']} | {e['player_name']:<20} | "
+              f"Flagged {e['times_flagged']}/{SESSIONS_PER_PLAYER} sessions | "
+              f"{e['cheat_type']:<12} | {label}")
+
+    print("\n--- DETECTION ACCURACY ---")
+    print(f"Actual cheaters          : {len(cheater_ids)}")
+    print(f"Correctly banned    (TP) : {len(true_positives)}")
+    print(f"Wrongly banned      (FP) : {len(false_positives)}")
+    print(f"Cheaters missed     (FN) : {len(false_negatives)}")
+
+    precision = (len(true_positives) / len(banned_ids) * 100) if banned_ids else 0
+    recall    = (len(true_positives) / len(cheater_ids) * 100) if cheater_ids else 0
+
+    print(f"\nPrecision : {precision:.1f}%  "
+          f"(of banned players, how many were actual cheaters)")
+    print(f"Recall    : {recall:.1f}%  "
+          f"(of all cheaters, how many did we catch)")
+
+
+if __name__ == "__main__":
+    print("Simulating 5 sessions for 200 players...")
+    df             = simulate_multiple_sessions()
+
+    print("Training model on normal player behavior...")
+    model, scaler  = train_model(df)
+
+    print("Running multi-session detection...")
+    flag_counts, player_info = run_multisession_detection(df, model, scaler)
+
+    print_final_report(flag_counts, player_info)
+    
+
+```
+
+`dashboard.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anti-Cheat Detection Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a0f;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border-bottom: 2px solid #00d4ff;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { font-size: 24px; color: #00d4ff; letter-spacing: 2px; text-transform: uppercase; }
+    header span { font-size: 13px; color: #888; }
+    .stats-bar {
+      display: flex; gap: 20px; padding: 24px 40px;
+      background: #0f0f1a; border-bottom: 1px solid #1e1e3a;
+    }
+    .stat-card {
+      flex: 1; background: #13132a; border: 1px solid #1e1e3a;
+      border-radius: 10px; padding: 20px; text-align: center;
+    }
+    .stat-card .number { font-size: 36px; font-weight: bold; margin-bottom: 6px; }
+    .stat-card .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+    .total   .number { color: #00d4ff; }
+    .banned  .number { color: #ff4444; }
+    .active  .number { color: #00ff88; }
+    .suspect .number { color: #ffaa00; }
+    .controls {
+      padding: 20px 40px; display: flex; gap: 12px;
+      align-items: center; background: #0a0a0f; flex-wrap: wrap;
+    }
+    button {
+      padding: 10px 24px; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 14px; font-weight: 600;
+      letter-spacing: 1px; transition: all 0.2s;
+    }
+    .btn-refresh  { background: #00d4ff; color: #000; }
+    .btn-refresh:hover { background: #00b8d9; }
+    .btn-simulate { background: #ff4444; color: #fff; }
+    .btn-simulate:hover { background: #cc0000; }
+    .btn-clean    { background: #00ff88; color: #000; }
+    .btn-clean:hover { background: #00cc66; }
+    .btn-new      { background: #ffaa00; color: #000; }
+    .btn-new:hover { background: #cc8800; }
+    .btn-switch   { background: #9b59b6; color: #fff; }
+    .btn-switch:hover { background: #7d3c98; }
+    .status-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #00ff88; display: inline-block;
+      margin-right: 6px; animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .table-container { padding: 0 40px 40px; }
+    .section-title {
+      font-size: 14px; color: #888; text-transform: uppercase;
+      letter-spacing: 2px; margin: 24px 0 12px;
+    }
+    table { width: 100%; border-collapse: collapse; background: #0f0f1a; border-radius: 10px; overflow: hidden; }
+    th {
+      background: #13132a; padding: 14px 16px; text-align: left;
+      font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+      color: #00d4ff; border-bottom: 1px solid #1e1e3a;
+    }
+    td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #0a0a0f; }
+    tr:hover td { background: #13132a; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    }
+    .badge-banned     { background: #ff444422; color: #ff4444; border: 1px solid #ff4444; }
+    .badge-suspicious { background: #ffaa0022; color: #ffaa00; border: 1px solid #ffaa00; }
+    .badge-clean      { background: #00ff8822; color: #00ff88; border: 1px solid #00ff88; }
+    .badge-shadow     { background: #ff000015; color: #ff6666; border: 1px solid #ff333344; }
+    .badge-normal     { background: #00ff8815; color: #00ff88; border: 1px solid #00ff8844; }
+    .score-bar-wrap   { display: flex; align-items: center; gap: 8px; }
+    .score-bar        { height: 6px; border-radius: 3px; background: #1e1e3a; width: 80px; overflow: hidden; }
+    .score-bar-fill   { height: 100%; border-radius: 3px; transition: width 0.4s; }
+    .empty-state      { text-align: center; padding: 60px; color: #444; font-size: 14px; }
+    .log-box {
+      margin: 0 40px 40px; background: #0f0f1a; border: 1px solid #1e1e3a;
+      border-radius: 10px; padding: 16px; font-family: monospace;
+      font-size: 12px; color: #666; height: 150px; overflow-y: auto;
+    }
+    .log-box p  { margin-bottom: 4px; }
+    .log-ok     { color: #00ff88; }
+    .log-ban    { color: #ff4444; }
+    .log-sus    { color: #ffaa00; }
+    .current-target {
+      margin: 0 40px 0px;
+      background: #13132a;
+      border: 1px solid #ffaa0044;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 13px;
+      color: #ffaa00;
+    }
+    .selector-row {
+      padding: 12px 40px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: #0a0a0f;
+    }
+    .selector-row label { color: #888; font-size: 13px; letter-spacing: 1px; white-space: nowrap; }
+    #cheater-select {
+      background: #13132a;
+      color: #ffaa00;
+      border: 1px solid #ffaa0044;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      flex: 1;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Anti-Cheat Detection Engine</h1>
+  <span><span class="status-dot"></span>API LIVE &nbsp;|&nbsp; 127.0.0.1:8000</span>
+</header>
+
+<div class="stats-bar">
+  <div class="stat-card total">
+    <div class="number" id="stat-total">0</div>
+    <div class="label">Total Tracked</div>
+  </div>
+  <div class="stat-card banned">
+    <div class="number" id="stat-banned">0</div>
+    <div class="label">Banned</div>
+  </div>
+  <div class="stat-card active">
+    <div class="number" id="stat-active">0</div>
+    <div class="label">Clean</div>
+  </div>
+  <div class="stat-card suspect">
+    <div class="number" id="stat-threshold">3</div>
+    <div class="label">Ban Threshold</div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn-refresh"  onclick="loadDashboard()">Refresh Dashboard</button>
+  <button class="btn-new"      onclick="createNewCheater()">New Cheater</button>
+  <button class="btn-simulate" onclick="submitCheaterSession()">Submit Session</button>
+  <button class="btn-clean"    onclick="simulateClean()">Simulate Clean Player</button>
+</div>
+
+<div class="selector-row">
+  <label>SELECT TARGET:</label>
+  <select id="cheater-select" onchange="switchTarget()">
+    <option value="">-- Create a cheater first --</option>
+  </select>
+</div>
+
+<div class="current-target" id="current-target">
+  No active cheater. Click "New Cheater" to create one, then click "Submit Session" to flag them.
+</div>
+
+<div class="table-container">
+  <div class="section-title">Player Registry</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Player ID</th>
+        <th>Player Name</th>
+        <th>Sessions</th>
+        <th>Times Flagged</th>
+        <th>Suspicion Progress</th>
+        <th>Verdict</th>
+        <th>Lobby</th>
+      </tr>
+    </thead>
+    <tbody id="player-table">
+      <tr>
+        <td colspan="7">
+          <div class="empty-state">No players tracked yet. Click New Cheater to begin.</div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section-title" style="padding: 0 40px;">Activity Log</div>
+<div class="log-box" id="log-box">
+  <p class="log-ok">System initialized. Waiting for player sessions...</p>
+</div>
+
+<script>
+  const API = "http://127.0.0.1:8000";
+  let playerCounter = 1000;
+  let activeCheater = null;
+  const allCheaters = {};
+
+  const cheatProfiles = [
+    { label: "Aimbot",      accuracy: 0.97, headshot_rate: 0.94, score_per_min: 390, avg_velocity: 4.5, max_velocity: 6.1, actions_per_sec: 2.8, session_duration: 35 },
+    { label: "Speedhack",   accuracy: 0.35, headshot_rate: 0.12, score_per_min: 160, avg_velocity: 22,  max_velocity: 31,  actions_per_sec: 2.5, session_duration: 25 },
+    { label: "Scorefarmer", accuracy: 0.40, headshot_rate: 0.10, score_per_min: 820, avg_velocity: 5.1, max_velocity: 6.8, actions_per_sec: 13,  session_duration: 12 }
+  ];
+
+  function log(msg, type = "ok") {
+    const box = document.getElementById("log-box");
+    const p   = document.createElement("p");
+    p.className   = "log-" + type;
+    p.textContent = "[" + new Date().toLocaleTimeString() + "] " + msg;
+    box.appendChild(p);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function updateTargetBar() {
+    const bar = document.getElementById("current-target");
+    if (!activeCheater) {
+      bar.textContent       = "No active cheater. Click 'New Cheater' to create one.";
+      bar.style.borderColor = "#ffaa0044";
+      bar.style.color       = "#ffaa00";
+    } else {
+      const s = activeCheater.sessions;
+      const banned = s >= 3;
+      bar.innerHTML = `Active Target: <strong>${activeCheater.name}</strong> 
+        (${activeCheater.id}) &nbsp;|&nbsp; Type: ${activeCheater.label} 
+        &nbsp;|&nbsp; Sessions submitted: ${s} / 3 
+        &nbsp;|&nbsp; ${banned ? "BANNED — create a new cheater." : 'Click "Submit Session" to flag them.'}`;
+      bar.style.borderColor = banned ? "#ff444444" : "#ffaa0044";
+      bar.style.color       = banned ? "#ff4444"   : "#ffaa00";
+    }
+
+    // Sync dropdown to active cheater
+    if (activeCheater) {
+      document.getElementById("cheater-select").value = activeCheater.id;
+    }
+  }
+
+  function addToDropdown(id, name, label) {
+    const select = document.getElementById("cheater-select");
+    const option = document.createElement("option");
+    option.value       = id;
+    option.id          = "opt-" + id;
+    option.textContent = name + " (" + id + ") | " + label;
+    select.appendChild(option);
+    select.value = id;
+  }
+
+  function updateDropdownLabel(id) {
+    const option = document.getElementById("opt-" + id);
+    if (!option) return;
+    const c = allCheaters[id];
+    const status = c.sessions >= 3 ? " | BANNED" : " | " + c.sessions + "/3";
+    option.textContent = c.name + " (" + id + ") | " + c.label + status;
+  }
+
+  function switchTarget() {
+    const select   = document.getElementById("cheater-select");
+    const selected = select.value;
+    if (!selected || !allCheaters[selected]) return;
+    activeCheater = allCheaters[selected];
+    log("Switched target to " + activeCheater.name +
+        " | Sessions so far: " + activeCheater.sessions + "/3", "sus");
+    updateTargetBar();
+  }
+
+  function createNewCheater() {
+    playerCounter++;
+    const profile = cheatProfiles[Math.floor(Math.random() * cheatProfiles.length)];
+    const newCheater = {
+      id      : "C" + playerCounter,
+      name    : "cheater_" + playerCounter,
+      label   : profile.label,
+      profile : profile,
+      sessions: 0
+    };
+    activeCheater              = newCheater;
+    allCheaters[newCheater.id] = newCheater;
+    addToDropdown(newCheater.id, newCheater.name, newCheater.label);
+    log("New cheater created: " + newCheater.name +
+        " (" + newCheater.id + ") | Type: " + profile.label +
+        " | Click Submit Session to begin flagging.", "sus");
+    updateTargetBar();
+  }
+
+  async function submitCheaterSession() {
+    if (!activeCheater) {
+      log("No active cheater. Click 'New Cheater' first.", "ban");
+      return;
+    }
+    if (activeCheater.sessions >= 3) {
+      log("This cheater is already BANNED. Select another or create a new one.", "ban");
+      return;
+    }
+
+    activeCheater.sessions += 1;
+    const { id, name, profile } = activeCheater;
+
+    await sendSession({
+      player_id        : id,
+      player_name      : name,
+      accuracy         : profile.accuracy,
+      headshot_rate    : profile.headshot_rate,
+      score_per_min    : profile.score_per_min,
+      avg_velocity     : profile.avg_velocity,
+      max_velocity     : profile.max_velocity,
+      actions_per_sec  : profile.actions_per_sec,
+      session_duration : profile.session_duration
+    });
+
+    updateDropdownLabel(id);
+    updateTargetBar();
+
+    if (activeCheater.sessions >= 3) {
+      log("Cheater " + name + " is now BANNED and silently moved to shadow_lobby.", "ban");
+    }
+  }
+
+  async function sendSession(playerData) {
+    try {
+      const res  = await fetch(API + "/analyze", {
+        method : "POST",
+        headers: { "Content-Type": "application/json" },
+        body   : JSON.stringify(playerData)
+      });
+      const data = await res.json();
+      const type = data.verdict === "BANNED"     ? "ban"
+                 : data.verdict === "SUSPICIOUS" ? "sus" : "ok";
+      log(
+        data.player_name + " (" + data.player_id + ") → " + data.verdict +
+        " | Flagged " + data.times_flagged + "x | Lobby: " + data.lobby,
+        type
+      );
+      await loadDashboard();
+    } catch(e) {
+      log("API call failed: " + e.message, "ban");
+    }
+  }
+
+  function simulateClean() {
+    playerCounter++;
+    sendSession({
+      player_id        : "N" + playerCounter,
+      player_name      : "player_" + playerCounter,
+      avg_velocity     : 4    + Math.random() * 2,
+      max_velocity     : 6    + Math.random() * 1.5,
+      accuracy         : 0.2  + Math.random() * 0.35,
+      actions_per_sec  : 1    + Math.random() * 2.5,
+      score_per_min    : 10   + Math.random() * 70,
+      headshot_rate    : 0.05 + Math.random() * 0.35,
+      session_duration : 15   + Math.random() * 45
+    });
+  }
+
+  async function loadDashboard() {
+  try {
+    const res = await fetch(API + "/dashboard");
+
+    if (!res.ok) {
+      throw new Error("Dashboard API returned " + res.status);
+    }
+
+    const data = await res.json();
+
+    document.getElementById("stat-total").textContent = data.total_players_tracked;
+    document.getElementById("stat-banned").textContent = data.total_banned;
+    document.getElementById("stat-active").textContent = data.total_active;
+    document.getElementById("stat-threshold").textContent = data.ban_threshold;
+
+    const tbody = document.getElementById("player-table");
+
+    if (data.players.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7">
+        <div class="empty-state">No players tracked yet.</div>
+      </td></tr>`;
+
+      log("Dashboard refreshed. No players tracked yet.", "ok");
+      return;
+    }
+
+    tbody.innerHTML = data.players.map(p => {
+      const flagRatio = Math.min(p.times_flagged / data.ban_threshold, 1);
+      const barColor = p.verdict === "BANNED" ? "#ff4444"
+                     : p.times_flagged > 0 ? "#ffaa00"
+                     : "#00ff88";
+
+      const vBadge = p.verdict === "BANNED" ? "badge-banned" : "badge-clean";
+      const lBadge = p.lobby === "shadow_lobby" ? "badge-shadow" : "badge-normal";
+
+      return `<tr>
+        <td style="color:#888;font-family:monospace">${p.player_id}</td>
+        <td style="font-weight:600">${p.player_name}</td>
+        <td>${p.sessions_observed}</td>
+        <td>${p.times_flagged} / ${data.ban_threshold}</td>
+        <td>
+          <div class="score-bar-wrap">
+            <div class="score-bar">
+              <div class="score-bar-fill"
+                   style="width:${flagRatio * 100}%;background:${barColor}">
+              </div>
+            </div>
+            <span style="color:${barColor};font-size:11px">
+              ${Math.round(flagRatio * 100)}%
+            </span>
+          </div>
+        </td>
+        <td><span class="badge ${vBadge}">${p.verdict}</span></td>
+        <td><span class="badge ${lBadge}">${p.lobby}</span></td>
+      </tr>`;
+    }).join("");
+
+    log("Dashboard refreshed successfully. Players tracked: " + data.total_players_tracked, "ok");
+
+  } catch (e) {
+    log("Failed to reach API. Is uvicorn running? " + e.message, "ban");
+  }
+}
+
+
+  loadDashboard();
+  setInterval(loadDashboard, 5000);
+  updateTargetBar();
+</script>
+</body>
+</html>
+```
+
+`detector.py`:
+
+```py
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import StandardScaler
+import warnings
+warnings.filterwarnings("ignore")
+
+# -----------------------------------------------
+# Load the player data generated by simulator.py
+# -----------------------------------------------
+
+def load_data():
+    df = pd.read_csv("player_data.csv")
+    return df
+
+
+# -----------------------------------------------
+# These are the behavioral features the model
+# will use to detect anomalies. It does NOT use
+# player_id, player_name, or is_cheater.
+# The model learns purely from behavior.
+# -----------------------------------------------
+
+FEATURES = [
+    "avg_velocity",
+    "max_velocity",
+    "accuracy",
+    "actions_per_sec",
+    "score_per_min",
+    "headshot_rate",
+    "session_duration"
+]
+
+
+# -----------------------------------------------
+# Train the Isolation Forest model only on
+# normal player data. The model learns what
+# normal behavior looks like.
+# -----------------------------------------------
+
+def train_model(df):
+    normal_players = df[df["is_cheater"] == False]
+    X_train = normal_players[FEATURES]
+
+    # Normalize the data so all features are on the same scale
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+    # Train Isolation Forest
+    # contamination=0.05 means we expect roughly 5% anomalies
+    model = IsolationForest(
+        n_estimators=200,
+        contamination=0.05,
+        random_state=42
+    )
+    model.fit(X_train_scaled)
+
+    print(f"Model trained successfully on {len(normal_players)} normal players.")
+
+    return model, scaler
+
+
+# -----------------------------------------------
+# Run the model on ALL 200 players and see
+# who it flags as suspicious
+# -----------------------------------------------
+
+def detect_cheaters(df, model, scaler):
+    X_all = df[FEATURES]
+    X_all_scaled = scaler.transform(X_all)
+
+    # Isolation Forest returns -1 for anomaly, 1 for normal
+    predictions = model.predict(X_all_scaled)
+
+    # Anomaly score: more negative = more suspicious
+    scores = model.decision_function(X_all_scaled)
+
+    df = df.copy()
+    df["anomaly_flag"] = predictions
+    df["suspicion_score"] = np.round(-scores, 4)  # flip so higher = more suspicious
+
+    return df
+
+
+# -----------------------------------------------
+# Print a clean report of results
+# -----------------------------------------------
+
+def print_report(df):
+    flagged = df[df["anomaly_flag"] == -1]
+    not_flagged = df[df["anomaly_flag"] == 1]
+
+    print("\n========================================")
+    print("       ANTI-CHEAT DETECTION REPORT      ")
+    print("========================================")
+    print(f"Total players analyzed : {len(df)}")
+    print(f"Players flagged        : {len(flagged)}")
+    print(f"Players cleared        : {len(not_flagged)}")
+
+    print("\n--- FLAGGED PLAYERS ---")
+    report_cols = ["player_id", "player_name", "cheat_type", 
+                   "suspicion_score", "accuracy", "avg_velocity", 
+                   "score_per_min", "headshot_rate", "actions_per_sec"]
+    
+    print(flagged[report_cols].sort_values(
+        "suspicion_score", ascending=False
+    ).to_string(index=False))
+
+    print("\n--- DETECTION ACCURACY ---")
+    actual_cheaters   = set(df[df["is_cheater"] == True]["player_id"])
+    flagged_players   = set(flagged["player_id"])
+
+    true_positives    = actual_cheaters & flagged_players
+    false_positives   = flagged_players - actual_cheaters
+    false_negatives   = actual_cheaters - flagged_players
+
+    print(f"Actual cheaters in dataset     : {len(actual_cheaters)}")
+    print(f"Correctly caught (TP)          : {len(true_positives)}")
+    print(f"Innocent players wrongly flagged (FP) : {len(false_positives)}")
+    print(f"Cheaters who slipped through (FN)     : {len(false_negatives)}")
+
+    if true_positives:
+        print(f"\nCheaters correctly identified  : {', '.join(true_positives)}")
+    if false_positives:
+        print(f"Innocent players flagged       : {', '.join(false_positives)}")
+    if false_negatives:
+        print(f"Cheaters missed                : {', '.join(false_negatives)}")
+
+
+# -----------------------------------------------
+# Main execution
+# -----------------------------------------------
+
+if __name__ == "__main__":
+    df              = load_data()
+    model, scaler   = train_model(df)
+    results         = detect_cheaters(df, model, scaler)
+    print_report(results)
+
+    results.to_csv("detection_results.csv", index=False)
+    print("\nFull results saved to detection_results.csv")
+
+```
+
+`dynamic_lobby.py`:
+
+```py
+import random
+from collections import defaultdict
+
+import numpy as np
+import pandas as pd
+from faker import Faker
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import StandardScaler
+
+from simulator import generate_session
+
+
+fake = Faker()
+
+FEATURES = [
+    "avg_velocity",
+    "max_velocity",
+    "accuracy",
+    "actions_per_sec",
+    "score_per_min",
+    "headshot_rate",
+    "session_duration"
+]
+
+
+def generate_base_players(total_players, cheater_count):
+    players = []
+    cheat_types = ["speedhack", "aimbot", "scorefarmer"]
+
+    normal_count = total_players - cheater_count
+
+    for i in range(1, total_players + 1):
+        player_id = f"P{str(i).zfill(4)}"
+        player_name = fake.user_name()
+
+        if i <= normal_count:
+            player = {
+                "player_id": player_id,
+                "player_name": player_name,
+                "is_cheater": False,
+                "cheat_type": "none"
+            }
+        else:
+            player = {
+                "player_id": player_id,
+                "player_name": player_name,
+                "is_cheater": True,
+                "cheat_type": random.choice(cheat_types)
+            }
+
+        players.append(player)
+
+    return players
+
+
+def simulate_dynamic_sessions(total_players, cheater_count, sessions_per_player):
+    all_sessions = []
+    base_players = generate_base_players(total_players, cheater_count)
+
+    for session_num in range(1, sessions_per_player + 1):
+        for player in base_players:
+            cheat_type = player["cheat_type"] if player["is_cheater"] else None
+
+            session = generate_session(
+                player["player_id"],
+                player["player_name"],
+                player["is_cheater"],
+                cheat_type
+            )
+
+            session["session_num"] = session_num
+            all_sessions.append(session)
+
+    return pd.DataFrame(all_sessions)
+
+
+def train_model(df):
+    normal_players = df[df["is_cheater"] == False]
+    X_train = normal_players[FEATURES]
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+    model = IsolationForest(
+        n_estimators=200,
+        contamination=0.05,
+        random_state=42
+    )
+
+    model.fit(X_train_scaled)
+
+    print(f"Model trained successfully on {len(normal_players)} normal sessions.")
+
+    return model, scaler
+
+
+def run_detection_across_sessions(df, model, scaler):
+    flag_counts = defaultdict(int)
+    player_info = {}
+
+    for session_num in sorted(df["session_num"].unique()):
+        session_df = df[df["session_num"] == session_num].copy()
+
+        X = session_df[FEATURES]
+        X_scaled = scaler.transform(X)
+
+        predictions = model.predict(X_scaled)
+        scores = model.decision_function(X_scaled)
+
+        session_df["flagged"] = predictions == -1
+        session_df["suspicion_score"] = np.round(-scores, 4)
+
+        for _, row in session_df.iterrows():
+            player_id = row["player_id"]
+
+            if row["flagged"]:
+                flag_counts[player_id] += 1
+
+            if player_id not in player_info:
+                player_info[player_id] = {
+                    "player_name": row["player_name"],
+                    "is_cheater": row["is_cheater"],
+                    "cheat_type": row["cheat_type"]
+                }
+
+    return flag_counts, player_info
+
+
+def assign_lobbies(flag_counts, player_info, ban_threshold, sessions_per_player):
+    lobby_rows = []
+
+    for player_id, info in player_info.items():
+        times_flagged = flag_counts.get(player_id, 0)
+
+        if times_flagged >= ban_threshold:
+            assigned_lobby = "shadow_lobby"
+            action = "silently_redirect"
+        else:
+            assigned_lobby = "normal_lobby"
+            action = "allow"
+
+        lobby_rows.append({
+            "player_id": player_id,
+            "player_name": info["player_name"],
+            "is_cheater": info["is_cheater"],
+            "cheat_type": info["cheat_type"],
+            "times_flagged": times_flagged,
+            "sessions_observed": sessions_per_player,
+            "assigned_lobby": assigned_lobby,
+            "action": action
+        })
+
+    return pd.DataFrame(lobby_rows)
+
+
+def print_report(lobby_df):
+    shadow_lobby = lobby_df[lobby_df["assigned_lobby"] == "shadow_lobby"]
+    normal_lobby = lobby_df[lobby_df["assigned_lobby"] == "normal_lobby"]
+
+    actual_cheaters = set(lobby_df[lobby_df["is_cheater"] == True]["player_id"])
+    shadow_players = set(shadow_lobby["player_id"])
+
+    true_positives = shadow_players & actual_cheaters
+    false_positives = shadow_players - actual_cheaters
+    false_negatives = actual_cheaters - shadow_players
+
+    print("\n========================================")
+    print("     DYNAMIC SHADOW LOBBY REPORT        ")
+    print("========================================")
+    print(f"Total players analyzed : {len(lobby_df)}")
+    print(f"Normal lobby players   : {len(normal_lobby)}")
+    print(f"Shadow lobby players   : {len(shadow_lobby)}")
+
+    print("\n--- SHADOW LOBBY PLAYERS ---")
+
+    if shadow_lobby.empty:
+        print("No players were moved to the shadow lobby.")
+    else:
+        columns = [
+            "player_id",
+            "player_name",
+            "cheat_type",
+            "times_flagged",
+            "sessions_observed",
+            "assigned_lobby"
+        ]
+
+        print(
+            shadow_lobby[columns]
+            .sort_values("times_flagged", ascending=False)
+            .to_string(index=False)
+        )
+
+    print("\n--- ROUTING ACCURACY ---")
+    print(f"Actual cheaters                  : {len(actual_cheaters)}")
+    print(f"Correctly shadowed cheaters (TP) : {len(true_positives)}")
+    print(f"Innocent players shadowed (FP)   : {len(false_positives)}")
+    print(f"Cheaters kept normal lobby (FN)  : {len(false_negatives)}")
+
+    precision = len(true_positives) / len(shadow_players) * 100 if shadow_players else 0
+    recall = len(true_positives) / len(actual_cheaters) * 100 if actual_cheaters else 0
+
+    print(f"\nPrecision : {precision:.1f}%")
+    print(f"Recall    : {recall:.1f}%")
+
+
+if __name__ == "__main__":
+    print("DYNAMIC ANTI-CHEAT SHADOW LOBBY")
+    print("================================")
+
+    total_players = int(input("Enter total number of players: "))
+    cheater_count = int(input("Enter number of cheaters: "))
+    sessions_per_player = int(input("Enter number of sessions per player: "))
+    ban_threshold = int(input("Enter ban threshold: "))
+
+    if total_players <= 0:
+        print("Total players must be greater than 0.")
+        exit()
+
+    if cheater_count < 0 or cheater_count >= total_players:
+        print("Cheater count must be at least 0 and less than total players.")
+        exit()
+
+    if sessions_per_player <= 0:
+        print("Sessions per player must be greater than 0.")
+        exit()
+
+    if ban_threshold <= 0 or ban_threshold > sessions_per_player:
+        print("Ban threshold must be between 1 and the number of sessions.")
+        exit()
+
+    print("\nGenerating dynamic multi-session data...")
+    df = simulate_dynamic_sessions(
+        total_players,
+        cheater_count,
+        sessions_per_player
+    )
+
+    df.to_csv("dynamic_player_sessions.csv", index=False)
+
+    print("Training anomaly detection model...")
+    model, scaler = train_model(df)
+
+    print("Running detection across sessions...")
+    flag_counts, player_info = run_detection_across_sessions(df, model, scaler)
+
+    print("Assigning players to lobbies...")
+    lobby_df = assign_lobbies(
+        flag_counts,
+        player_info,
+        ban_threshold,
+        sessions_per_player
+    )
+
+    print_report(lobby_df)
+
+    lobby_df.to_csv("dynamic_lobby_assignments.csv", index=False)
+    print("\nDynamic session data saved to dynamic_player_sessions.csv")
+    print("Dynamic lobby assignments saved to dynamic_lobby_assignments.csv")
+
+```
+
+`lobby.py`:
+
+```py
+import pandas as pd
+
+from confidence import (
+    simulate_multiple_sessions,
+    train_model,
+    run_multisession_detection,
+    BAN_THRESHOLD,
+    SESSIONS_PER_PLAYER
+)
+
+
+def assign_lobbies(flag_counts, player_info):
+    """
+    Assign players to either the normal lobby or shadow lobby.
+
+    Players are moved to the shadow lobby only if they are flagged
+    repeatedly across multiple sessions.
+    """
+    lobby_rows = []
+
+    for player_id, info in player_info.items():
+        times_flagged = flag_counts.get(player_id, 0)
+
+        if times_flagged >= BAN_THRESHOLD:
+            lobby = "shadow_lobby"
+            action = "silently_redirect"
+        else:
+            lobby = "normal_lobby"
+            action = "allow"
+
+        lobby_rows.append({
+            "player_id": player_id,
+            "player_name": info["player_name"],
+            "is_cheater": info["is_cheater"],
+            "cheat_type": info["cheat_type"],
+            "times_flagged": times_flagged,
+            "sessions_observed": SESSIONS_PER_PLAYER,
+            "assigned_lobby": lobby,
+            "action": action
+        })
+
+    return pd.DataFrame(lobby_rows)
+
+
+def print_lobby_report(lobby_df):
+    shadow_lobby = lobby_df[lobby_df["assigned_lobby"] == "shadow_lobby"]
+    normal_lobby = lobby_df[lobby_df["assigned_lobby"] == "normal_lobby"]
+
+    actual_cheaters = set(lobby_df[lobby_df["is_cheater"] == True]["player_id"])
+    shadow_players = set(shadow_lobby["player_id"])
+
+    true_positives = shadow_players & actual_cheaters
+    false_positives = shadow_players - actual_cheaters
+    false_negatives = actual_cheaters - shadow_players
+
+    print("\n========================================")
+    print("        SHADOW LOBBY ROUTING REPORT     ")
+    print("========================================")
+    print(f"Total players analyzed : {len(lobby_df)}")
+    print(f"Normal lobby players   : {len(normal_lobby)}")
+    print(f"Shadow lobby players   : {len(shadow_lobby)}")
+
+    print("\n--- SHADOW LOBBY PLAYERS ---")
+    if shadow_lobby.empty:
+        print("No players were moved to the shadow lobby.")
+    else:
+        columns = [
+            "player_id",
+            "player_name",
+            "cheat_type",
+            "times_flagged",
+            "assigned_lobby"
+        ]
+        print(
+            shadow_lobby[columns]
+            .sort_values("times_flagged", ascending=False)
+            .to_string(index=False)
+        )
+
+    print("\n--- ROUTING ACCURACY ---")
+    print(f"Correctly shadowed cheaters (TP) : {len(true_positives)}")
+    print(f"Innocent players shadowed (FP)   : {len(false_positives)}")
+    print(f"Cheaters kept in normal lobby (FN): {len(false_negatives)}")
+
+    precision = len(true_positives) / len(shadow_players) * 100 if shadow_players else 0
+    recall = len(true_positives) / len(actual_cheaters) * 100 if actual_cheaters else 0
+
+    print(f"\nPrecision : {precision:.1f}%")
+    print(f"Recall    : {recall:.1f}%")
+
+
+if __name__ == "__main__":
+    print("Generating multi-session player behavior...")
+    df = simulate_multiple_sessions()
+
+    print("Training anomaly detection model...")
+    model, scaler = train_model(df)
+
+    print("Running confidence-based detection...")
+    flag_counts, player_info = run_multisession_detection(df, model, scaler)
+
+    print("Assigning players to lobbies...")
+    lobby_df = assign_lobbies(flag_counts, player_info)
+
+    print_lobby_report(lobby_df)
+
+    lobby_df.to_csv("lobby_assignments.csv", index=False)
+    print("\nLobby assignments saved to lobby_assignments.csv")
+
+```
+
+`main.py`:
+
+```py
+from simulator import generate_session
+from detector import train_model, detect_cheaters, print_report
+import pandas as pd
+import random
+from faker import Faker
+
+fake = Faker()
+
+
+def generate_custom_players(total_players, cheater_count):
+    players = []
+    cheat_types = ["speedhack", "aimbot", "scorefarmer"]
+
+    normal_count = total_players - cheater_count
+
+    for i in range(1, total_players + 1):
+        player_id = f"P{str(i).zfill(4)}"
+        player_name = fake.user_name()
+
+        if i <= normal_count:
+            session = generate_session(
+                player_id,
+                player_name,
+                is_cheater=False
+            )
+        else:
+            cheat_type = random.choice(cheat_types)
+            session = generate_session(
+                player_id,
+                player_name,
+                is_cheater=True,
+                cheat_type=cheat_type
+            )
+
+        players.append(session)
+
+    return pd.DataFrame(players)
+
+
+if __name__ == "__main__":
+    print("ANTI-CHEAT AGENT")
+    print("================")
+
+    total_players = int(input("Enter total number of players: "))
+    cheater_count = int(input("Enter number of cheaters: "))
+
+    if cheater_count >= total_players:
+        print("Cheater count must be less than total players.")
+        exit()
+
+    df = generate_custom_players(total_players, cheater_count)
+
+    df.to_csv("player_data.csv", index=False)
+
+    print("\nTraining model...")
+    model, scaler = train_model(df)
+
+    print("Running detection...")
+    results = detect_cheaters(df, model, scaler)
+
+    print_report(results)
+
+    results.to_csv("detection_results.csv", index=False)
+
+    print("\nResults saved to detection_results.csv")
+
+```
+
+`requirements.txt`:
+
+```txt
+fastapi>=0.100.0
+uvicorn>=0.23.0
+pydantic>=2.0.0
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+faker>=19.0.0
+
+```
+
+`simulator.py`:
+
+```py
+import random
+import numpy as np
+from faker import Faker
+
+fake = Faker()
+random.seed(42)
+np.random.seed(42)
+
+# -----------------------------------------------
+# This function generates one session of data
+# for a single player based on their player type
+# -----------------------------------------------
+
+def generate_session(player_id, player_name, is_cheater, cheat_type=None):
+    
+    if not is_cheater:
+        # Normal player behavior - all values are realistic
+        avg_velocity      = round(random.uniform(3.0, 6.0), 2)
+        max_velocity      = round(avg_velocity + random.uniform(0.5, 2.0), 2)
+        accuracy          = round(random.uniform(0.20, 0.60), 2)
+        actions_per_sec   = round(random.uniform(1.0, 3.5), 2)
+        score_per_min     = round(random.uniform(10, 80), 2)
+        headshot_rate     = round(random.uniform(0.05, 0.40), 2)
+        session_duration  = round(random.uniform(15, 60), 2)
+
+    else:
+        # Cheater behavior - values are abnormal based on cheat type
+        if cheat_type == "speedhack":
+            avg_velocity      = round(random.uniform(15.0, 25.0), 2)
+            max_velocity      = round(avg_velocity + random.uniform(5.0, 10.0), 2)
+            accuracy          = round(random.uniform(0.20, 0.55), 2)
+            actions_per_sec   = round(random.uniform(1.0, 3.5), 2)
+            score_per_min     = round(random.uniform(80, 200), 2)
+            headshot_rate     = round(random.uniform(0.05, 0.35), 2)
+            session_duration  = round(random.uniform(10, 40), 2)
+
+        elif cheat_type == "aimbot":
+            avg_velocity      = round(random.uniform(3.0, 6.0), 2)
+            max_velocity      = round(avg_velocity + random.uniform(0.5, 2.0), 2)
+            accuracy          = round(random.uniform(0.92, 1.00), 2)
+            actions_per_sec   = round(random.uniform(1.0, 3.5), 2)
+            score_per_min     = round(random.uniform(150, 400), 2)
+            headshot_rate     = round(random.uniform(0.85, 1.00), 2)
+            session_duration  = round(random.uniform(20, 60), 2)
+
+        elif cheat_type == "scorefarmer":
+            avg_velocity      = round(random.uniform(3.0, 6.0), 2)
+            max_velocity      = round(avg_velocity + random.uniform(0.5, 2.0), 2)
+            accuracy          = round(random.uniform(0.20, 0.55), 2)
+            actions_per_sec   = round(random.uniform(8.0, 15.0), 2)
+            score_per_min     = round(random.uniform(500, 1000), 2)
+            headshot_rate     = round(random.uniform(0.05, 0.35), 2)
+            session_duration  = round(random.uniform(5, 20), 2)
+
+    return {
+        "player_id"       : player_id,
+        "player_name"     : player_name,
+        "is_cheater"      : is_cheater,
+        "cheat_type"      : cheat_type if is_cheater else "none",
+        "avg_velocity"    : avg_velocity,
+        "max_velocity"    : max_velocity,
+        "accuracy"        : accuracy,
+        "actions_per_sec" : actions_per_sec,
+        "score_per_min"   : score_per_min,
+        "headshot_rate"   : headshot_rate,
+        "session_duration": session_duration
+    }
+
+
+# -----------------------------------------------
+# Generate 200 players: 190 normal, 10 cheaters
+# -----------------------------------------------
+
+def generate_all_players():
+    players = []
+    cheat_types = ["speedhack", "aimbot", "scorefarmer"]
+
+    for i in range(1, 201):
+        player_id   = f"P{str(i).zfill(4)}"
+        player_name = fake.user_name()
+
+        if i <= 190:
+            session = generate_session(player_id, player_name, is_cheater=False)
+        else:
+            cheat_type = cheat_types[(i - 191) % 3]
+            session = generate_session(player_id, player_name, is_cheater=True, cheat_type=cheat_type)
+
+        players.append(session)
+
+    return players
+
+
+if __name__ == "__main__":
+    import pandas as pd
+
+    all_players = generate_all_players()
+    df = pd.DataFrame(all_players)
+
+    print("\n--- SAMPLE OF NORMAL PLAYERS ---")
+    print(df[df.is_cheater == False].head(5).to_string(index=False))
+
+    print("\n--- SAMPLE OF CHEATERS ---")
+    print(df[df.is_cheater == True].to_string(index=False))
+
+    df.to_csv("player_data.csv", index=False)
+    print("\n--- player_data.csv saved successfully ---")
+```
