@@ -39,4 +39,4 @@ Researchers and modders with a local PC client or extracted copy doing deep form
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[xenia]] · [[idaxex]] · [[ida-vmx128-helper]] · [[menace-reverse-engineering]] · [[static-runtime-evidence]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[bfbc2-tool-suite]] · [[xenia]] · [[idaxex]] · [[ida-vmx128-helper]] · [[menace-reverse-engineering]] · [[static-runtime-evidence]]

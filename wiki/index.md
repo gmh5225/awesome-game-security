@@ -119,6 +119,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BattleField-1-Internal](entities/battlefield-1-internal.md) — BF1 internal: DirectX / SDK generation / hooking (C++)
 - [BF1-ESP-AND-AIMBOT](entities/bf1-esp-and-aimbot.md) — BF1 ESP/aimbot: DirectX / rendering / hooking (C/C++; gmh5225; cheat / game:battlefield 1)
 - [BF1943 Tool Suite](entities/bf1943-tool-suite.md) — mathewsbinny; Frostbite BF1943 DBX/FBRB/bundle/terrain RE, NavKit navmesh, offline Xenia bot kit, XEX/VMX128 helpers (Python/C#/Java; Cheat / RE Tools)
+- [BFBC2 Tool Suite](entities/bfbc2-tool-suite.md) — mathewsbinny; Frostbite BC2 map/DBX/FBRB/NavKit suite, crash reader, bot/map test harness (Python/Rust; Cheat / RE Tools)
 - [BF4-Internal-overlay](entities/bf4-internal-overlay.md) — BF4 internal overlay: DirectX / rendering / SDK generation (C++; gmh5225; cheat / game:battlefield 4)
 - [battlefield-2042-internal-sdk](entities/battlefield-2042-internal-sdk.md) — BF2042 internal SDK scaffold (Skengdo; C++; entity/player/vehicle/weapon structures, rendering, W2S; incomplete; cheat / game:battlefield 2042 [Internal])
 - [battlebit-revival](entities/battlebit-revival.md) — Self-hosted BattleBit Remastered master (.NET 10), Windows launcher proxy, IL2CPP GameAssembly.dll auth/protocol patch scripts, optional launcher AC + server ban config (MythicalFentWizard; private clusters after official shutdown)
