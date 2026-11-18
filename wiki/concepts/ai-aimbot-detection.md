@@ -64,6 +64,7 @@ sources:
   - wiki/sources/descriptions/elijoewashacked-pixel__VyxAntiCheat.md
   - wiki/sources/descriptions/phugiadang12__aegis-ac.md
   - wiki/sources/descriptions/ScaxeTeam__Scaxe-AntiCheat-OSS.md
+  - wiki/sources/descriptions/bvishwesh__AntiCheat-Engine.md
 updated: 2026-11-18
 confidence: medium
 ---
@@ -158,6 +159,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[mlanticheat]] — Minecraft Paper 1.21.4+ combat AC; per-server ensemble neural + logistic models + anomaly detection over combat rotations; operator labeling, Shadow Mode review, optional PacketEvents rotation tracking, automatic retraining (gravemaulr)
 - [[model-anti-cheat]] — DayZ server-side ML pipeline; mission-script per-second telemetry (position, view, weapon, raycast line-of-sight) + Python feature extraction + RandomForest aimbot/movement anomaly classifier (sample cheater sessions)
 - [[cs2-anti-cheat-ml-research]] — essensha CS2-framed notebooks on **synthetic** match telemetry: temporal validation, calibrated logistic/Isolation Forest baselines, NetworkX co-play coordination graphs, concept drift and skill-segment fairness metrics, and human-review capacity simulations—offline pipeline research, not live AC (source: wiki/sources/descriptions/essensha__cs2-anti-cheat-ml-research.md)
+- [[anticheat-engine]] — bvishwesh unsupervised **Isolation Forest** over multiplayer session telemetry (velocity, accuracy, headshot rate, APS); **FastAPI** scoring, multi-session confidence, shadow-lobby quarantine, adaptive thresholds, SecOps HTML dashboard + simulator—end-to-end behavioral AC prototype without signature lists (source: wiki/sources/descriptions/bvishwesh__AntiCheat-Engine.md)
 - [[deep-learning-anti-cheat-csgo]] — CS:GO deep-learning anti-cheat implementation (memory scan, code integrity, process/debugger checks, network packet validation; detection-to-response pipeline; gmh5225)
 - [[ark]] — distributed-GPU deep learning framework for scaled offensive/defensive ML training (gmh5225; cheat / Tool)
 - [[game-cheating-exploit-detection-agent-skill]] — Claude Code skill + Python engine; statistical/invariant aimbot, wallhack, macro, memory-tamper, and exploit detectors with evidence-chain verdicts and CI-tested harness (dungnotnull)
