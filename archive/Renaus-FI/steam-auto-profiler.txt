@@ -1,0 +1,1077 @@
+Project Path: arc_Renaus-FI_steam-auto-profiler_kxf6vfwl
+
+Source Tree:
+
+```txt
+arc_Renaus-FI_steam-auto-profiler_kxf6vfwl
+├── LICENSE
+├── README.md
+├── bin
+│   ├── steam-auto-detect
+│   ├── steam-auto-run
+│   ├── steam-auto-sync
+│   └── steam-net-boost
+├── docs
+│   └── ARCHITECTURE.md
+└── install.sh
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Oleksandr
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Steam Auto-Profiler
+
+**Context-aware heuristic game classifier and pre-launch orchestrator for Steam on Linux.**
+
+Steam Auto-Profiler is a working reference prototype for Wayland/KDE/GNOME systems. It
+inspects the local Steam installation, classifies a game into one of four profiles, and
+adds safe launch defaults without requiring the user to maintain a long environment
+variable string.
+
+## Classification
+
+| Priority | Class | Detection signal | Default behavior |
+| --- | --- | --- | --- |
+| 1 | `competitive-anticheat` | Known competitive AppID or anti-cheat runtime files | Disable OptiScaler and frame generation; enable online network profile |
+| 2 | `native-fsr` | Native FSR 3.1+ / FSR 4 libraries | Prefer the driver-level FSR upgrade path |
+| 3 | `legacy-upscaler` | DLSS, XeSS, or FSR 2 libraries | Mark the title for an optional upscaler bridge |
+| 4 | `standard` | No anti-cheat or modern upscaler detected | Use a safe low-latency VRR profile |
+
+The classifier checks Steam library folders and the current AppID manifest, then scans
+the installed game directory to ten levels deep.
+
+## Quick start
+
+```bash
+git clone https://github.com/Renaus-FI/steam-auto-profiler.git
+cd steam-auto-profiler
+./install.sh
+```
+
+Inspect an installed title without launching it:
+
+```bash
+steam-auto-run --inspect 2357570
+```
+
+Set the Steam launch options to:
+
+```text
+steam-auto-run %command%
+```
+
+Preview batch integration and apply it after closing Steam:
+
+```bash
+steam-auto-sync --dry-run
+steam-auto-sync
+```
+
+Use `./install.sh --with-net-boost` only if you want the optional session network helper
+installed system-wide with an explicit sudoers rule. The network helper can use CAKE or
+`fq_codel`, but it is not required for normal profile inspection or launching.
+
+## Commands
+
+- `steam-auto-detect [--inspect] [APPID]` - classify an AppID and print the result.
+- `steam-auto-run [--inspect|--configure|--reset] [APPID]` - orchestrate a Steam launch.
+- `steam-auto-sync [--dry-run|--remove]` - update Steam `localconfig.vdf` launch options.
+- `steam-auto-net-boost [on|off|status]` - apply or restore optional network tuning.
+
+## Requirements
+
+The core scripts require Bash and standard Linux utilities. Steam and Proton provide the
+game runtime; no third-party overlay or injection library is bundled. Optional GUI
+dialogs use `kdialog` or `zenity` when available.
+
+Environment overrides include `NO_GUI=1`, `XWAYLAND=1`, `MLFG=1`, `NETOPT=1`, and
+`VRR_CAP=<fps>`.
+
+## Architecture
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the proposed Steam/Proton integration
+model.
+
+## License
+
+MIT
+
+```
+
+`bin/steam-auto-detect`:
+
+```
+#!/usr/bin/env bash
+
+# Context-aware heuristic game classifier for Steam on Linux.
+
+set -euo pipefail
+
+INSPECT_MODE=0
+APPID=""
+
+usage() {
+    cat <<'EOF'
+Usage: steam-auto-detect [--inspect] [APPID]
+
+Options:
+  --inspect, -i  Print a human-readable diagnostic report
+  --help, -h     Show this help message
+EOF
+}
+
+while (($#)); do
+    case "$1" in
+        --inspect|-i)
+            INSPECT_MODE=1
+            shift
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        -*)
+            echo "Unknown option: $1" >&2
+            usage >&2
+            exit 2
+            ;;
+        *)
+            APPID="$1"
+            shift
+            ;;
+    esac
+done
+
+APPID="${APPID:-${SteamAppId:-${STEAM_COMPAT_APP_ID:-}}}"
+
+AUTO_CLASS="standard"
+AUTO_PRESET="standard"
+AUTO_OPTISCALER=0
+AUTO_SHARPEN=1
+AUTO_NET_OPT=0
+AUTO_CEF_FIX=0
+AUTO_NATIVE_LINUX=0
+AUTO_REASON="No anti-cheat or modern upscaler DLLs detected; using standard low-latency profile"
+GAME_NAME="Unknown / Non-Steam"
+GAME_DIR=""
+
+find_steam_roots() {
+    local candidates=(
+        "$HOME/.local/share/Steam"
+        "$HOME/.steam/steam"
+        "$HOME/.var/app/com.valvesoftware.Steam/.local/share/Steam"
+    )
+    local root
+    for root in "${candidates[@]}"; do
+        if [[ -d "$root/steamapps" ]]; then
+            printf '%s\n' "$root"
+        fi
+    done
+}
+
+if [[ -n "$APPID" ]]; then
+    declare -a libs=()
+    declare -A seen_roots=()
+
+    while IFS= read -r root; do
+        [[ -n "$root" && -z "${seen_roots[$root]:-}" ]] || continue
+        seen_roots["$root"]=1
+        libs+=("$root")
+
+        local_vdf="$root/steamapps/libraryfolders.vdf"
+        if [[ -f "$local_vdf" ]]; then
+            while IFS= read -r library_path; do
+                [[ -d "$library_path/steamapps" ]] || continue
+                [[ -z "${seen_roots[$library_path]:-}" ]] || continue
+                seen_roots["$library_path"]=1
+                libs+=("$library_path")
+            done < <(
+                grep -oE '"path"[[:space:]]+"[^"]+"' "$local_vdf" \
+                    | sed -E 's/"path"[[:space:]]+"([^"]+)"/\1/'
+            )
+        fi
+    done < <(find_steam_roots)
+
+    for lib in "${libs[@]}"; do
+        acf="$lib/steamapps/appmanifest_${APPID}.acf"
+        [[ -f "$acf" ]] || continue
+
+        GAME_NAME=$(
+            grep -m1 '"name"' "$acf" \
+                | sed -E 's/.*"name"[[:space:]]+"([^"]+)".*/\1/' \
+                || printf '%s' "$APPID"
+        )
+        install_dir=$(
+            grep -m1 '"installdir"' "$acf" \
+                | sed -E 's/.*"installdir"[[:space:]]+"([^"]+)".*/\1/' \
+                || true
+        )
+        if [[ -n "$install_dir" && -d "$lib/steamapps/common/$install_dir" ]]; then
+            GAME_DIR="$lib/steamapps/common/$install_dir"
+        fi
+        break
+    done
+
+    if [[ -n "$GAME_DIR" ]] &&
+        ! find "$GAME_DIR" -maxdepth 4 -iname '*.exe' -print -quit 2>/dev/null | grep -q .; then
+        AUTO_NATIVE_LINUX=1
+    fi
+
+    IS_ANTICHEAT=0
+    case "$APPID" in
+        730|570|252490|304390|393380|553850|581320|594650|1085660|1172470|1172620|1874880|1938090|2051620|2073850|2100280|2357570|2479810|2767030|2887580)
+            IS_ANTICHEAT=1
+            AUTO_REASON="Known competitive multiplayer / anti-cheat AppID ($APPID)"
+            ;;
+    esac
+
+    if [[ "$IS_ANTICHEAT" -eq 0 && -n "$GAME_DIR" ]]; then
+        AC_MATCH=$(
+            find "$GAME_DIR" -maxdepth 10 \( \
+                -iname '*EasyAntiCheat*' -o \
+                -iname '*BattlEye*' -o \
+                -iname '*BEService*' -o \
+                -iname '*randgrid*' -o \
+                -iname '*Ricochet*.sys' -o \
+                -iname '*ACE-Base*' -o \
+                -iname '*AntiCheatExpert*' -o \
+                -iname '*nProtect*' -o \
+                -iname '*GameGuard*' -o \
+                -iname '*XIGNCODE*' -o \
+                -iname '*Wellbia*' -o \
+                -iname '*mhyprot*' -o \
+                -iname '*HoYoKProtect*' -o \
+                -iname '*EQU8*' -o \
+                -iname '*FairFight*' -o \
+                -iname '*PunkBuster*' -o \
+                -iname '*anticheat*.exe' -o \
+                -iname '*anticheat*.dll' -o \
+                -iname '*anticheat*.sys' -o \
+                -iname '*anticheat*.so' -o \
+                -type d -iname '*anticheat*' \
+            \) -print -quit 2>/dev/null || true
+        )
+        if [[ -n "$AC_MATCH" ]]; then
+            IS_ANTICHEAT=1
+            AUTO_REASON="Anti-cheat runtime detected: $(basename "$AC_MATCH")"
+        fi
+    fi
+
+    if [[ "$IS_ANTICHEAT" -eq 1 ]]; then
+        AUTO_CLASS="competitive-anticheat"
+        AUTO_PRESET="competitive"
+        AUTO_OPTISCALER=0
+        AUTO_SHARPEN=1
+        AUTO_NET_OPT=1
+    elif [[ -n "$GAME_DIR" ]] && FSR_MATCH=$(
+        find "$GAME_DIR" -maxdepth 10 \( \
+            -iname 'amd_fidelityfx_dx12.dll' -o \
+            -iname 'amd_fidelityfx_vk.dll' -o \
+            -iname 'amd_fidelityfx_loader_dx12.dll' -o \
+            -iname 'amd_fidelityfx_loader_vk.dll' -o \
+            -iname 'amd_fidelityfx_upscaler_dx12.dll' -o \
+            -iname 'amd_fidelityfx_upscaler_vk.dll' -o \
+            -iname 'amdxcffx64.dll' \
+        \) -print -quit 2>/dev/null
+    ) && [[ -n "$FSR_MATCH" ]]; then
+        AUTO_CLASS="native-fsr"
+        AUTO_PRESET="standard"
+        AUTO_OPTISCALER=0
+        AUTO_SHARPEN=0
+        AUTO_REASON="Native FSR 3.1+ library detected ($(basename "$FSR_MATCH")); using driver-level FSR upgrade"
+    elif [[ -n "$GAME_DIR" ]] && UPSCALE_MATCH=$(
+        find "$GAME_DIR" -maxdepth 10 \( \
+            -iname 'nvngx_dlss*.dll' -o \
+            -iname 'libxess.dll' -o \
+            -iname 'sl.interposer.dll' -o \
+            -iname 'ffx_fsr2_api*.dll' \
+        \) -print -quit 2>/dev/null
+    ) && [[ -n "$UPSCALE_MATCH" ]]; then
+        AUTO_CLASS="legacy-upscaler"
+        AUTO_PRESET="standard"
+        AUTO_OPTISCALER=1
+        AUTO_SHARPEN=0
+        AUTO_REASON="Legacy upscaler detected ($(basename "$UPSCALE_MATCH")); optional bridge may be used"
+    fi
+
+    if [[ -n "$GAME_DIR" ]] &&
+        find "$GAME_DIR" -maxdepth 6 \( \
+            -iname '*EADesktop*' -o -iname '*OriginThinSetup*' -o \
+            -iname '*UbisoftConnect*' -o -iname '*Uplay*' -o \
+            -iname '*Battle.net*' -o -iname '*Rockstar-Games-Launcher*' \
+        \) -print -quit 2>/dev/null | grep -q .; then
+        AUTO_CEF_FIX=1
+    fi
+fi
+
+if [[ "$INSPECT_MODE" -eq 1 ]]; then
+    cat <<EOF
+=== Steam Auto-Profiler Inspection ===
+AppID        : ${APPID:-N/A}
+Game         : $GAME_NAME
+Install Dir  : ${GAME_DIR:-Not found locally}
+Runtime      : $([[ "$AUTO_NATIVE_LINUX" -eq 1 ]] && echo "Native Linux" || echo "Proton / Windows")
+Class        : $AUTO_CLASS
+Preset       : $AUTO_PRESET
+Net QoS Hook : $AUTO_NET_OPT
+CEF Fix      : $AUTO_CEF_FIX
+Sharpen Layer: $AUTO_SHARPEN
+OptiScaler   : $AUTO_OPTISCALER (optional plugin)
+Rationale    : $AUTO_REASON
+EOF
+else
+    printf 'AUTO_CLASS=%q\n' "$AUTO_CLASS"
+    printf 'AUTO_PRESET=%q\n' "$AUTO_PRESET"
+    printf 'AUTO_OPTISCALER=%q\n' "$AUTO_OPTISCALER"
+    printf 'AUTO_SHARPEN=%q\n' "$AUTO_SHARPEN"
+    printf 'AUTO_NET_OPT=%q\n' "$AUTO_NET_OPT"
+    printf 'AUTO_CEF_FIX=%q\n' "$AUTO_CEF_FIX"
+    printf 'AUTO_NATIVE_LINUX=%q\n' "$AUTO_NATIVE_LINUX"
+    printf 'AUTO_REASON=%q\n' "$AUTO_REASON"
+fi
+
+```
+
+`bin/steam-auto-run`:
+
+```
+#!/usr/bin/env bash
+
+# Context-aware pre-launch orchestrator for Steam on Linux.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DETECT_BIN=""
+for candidate in "$SCRIPT_DIR/steam-auto-detect" "$HOME/.local/bin/steam-auto-detect" "/usr/local/bin/steam-auto-detect"; do
+    if [[ -x "$candidate" ]]; then
+        DETECT_BIN="$candidate"
+        break
+    fi
+done
+
+PROFILE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/steam-auto-profiler/profiles"
+mkdir -p "$PROFILE_DIR"
+
+usage() {
+    cat <<'EOF'
+Usage:
+  steam-auto-run %command%
+  steam-auto-run [OPTIONS] [APPID]
+
+Options:
+  --help, -h        Show this help message
+  --inspect         Run the heuristic scanner
+  --configure       Force-open the optional configuration GUI
+  --reset APPID     Remove a saved profile
+
+Environment overrides:
+  FORCE_GUI=1       Re-open the GUI for a saved profile
+  NO_GUI=1          Run silently
+  VRR_CAP=<fps>     Override the calculated VRR frame cap
+  XWAYLAND=1        Force XWayland
+  MLFG=1            Enable frame generation
+  NETOPT=1          Enable the optional network profile
+EOF
+}
+
+CONFIGURE_ONLY=0
+case "${1:-}" in
+    -h|--help|--help)
+        usage
+        exit 0
+        ;;
+    --inspect|-i)
+        if [[ -n "$DETECT_BIN" ]]; then
+            exec "$DETECT_BIN" --inspect "${2:-}"
+        fi
+        echo "Error: steam-auto-detect not found." >&2
+        exit 1
+        ;;
+    --reset)
+        if [[ -z "${2:-}" ]]; then
+            echo "Usage: steam-auto-run --reset APPID" >&2
+            exit 2
+        fi
+        rm -f "$PROFILE_DIR/$2.env"
+        echo "Profile reset for AppID $2."
+        exit 0
+        ;;
+    --configure)
+        if [[ -z "${2:-}" ]]; then
+            echo "Usage: steam-auto-run --configure APPID" >&2
+            exit 2
+        fi
+        export SteamAppId="$2"
+        export FORCE_GUI=1
+        CONFIGURE_ONLY=1
+        shift 2
+        ;;
+esac
+
+detect_gpu_vendor() {
+    local vendor_file
+    for vendor_file in /sys/class/drm/card*/device/vendor; do
+        [[ -r "$vendor_file" ]] || continue
+        case "$(cat "$vendor_file" 2>/dev/null)" in
+            0x1002) echo amd; return ;;
+            0x10de) echo nvidia; return ;;
+            0x8086) echo intel; return ;;
+        esac
+    done
+    echo unknown
+}
+
+detect_vrr_cap() {
+    if [[ -n "${VRR_CAP:-}" ]]; then
+        echo "$VRR_CAP"
+        return
+    fi
+
+    local hz=""
+    if command -v kscreen-doctor >/dev/null 2>&1; then
+        hz=$(
+            kscreen-doctor -o 2>/dev/null \
+                | grep -oE '[0-9]+(\.[0-9]+)?Hz' \
+                | tr -d 'Hz' | sort -nr | head -n1 | cut -d. -f1
+        )
+    elif command -v wlr-randr >/dev/null 2>&1; then
+        hz=$(
+            wlr-randr 2>/dev/null \
+                | awk '/current/ {for(i=1;i<=NF;i++) if($i ~ /Hz/) print $(i-1)}' \
+                | sort -nr | head -n1 | cut -d. -f1
+        )
+    elif command -v xrandr >/dev/null 2>&1; then
+        hz=$(
+            xrandr --current 2>/dev/null \
+                | grep -oE '[0-9]+\.[0-9]+\*' \
+                | tr -d '*' | sort -nr | head -n1 | cut -d. -f1
+        )
+    fi
+
+    if [[ -n "$hz" ]] && (( hz > 60 )); then
+        echo $((hz * 94 / 100))
+    else
+        echo 0
+    fi
+}
+
+GPU_VENDOR="$(detect_gpu_vendor)"
+AUTO_VRR_CAP="$(detect_vrr_cap)"
+
+export LD_PRELOAD=""
+
+if [[ "$GPU_VENDOR" == "amd" ]]; then
+    export AMD_VULKAN_ICD="${AMD_VULKAN_ICD:-RADV}"
+    export RADV_PERFTEST="${RADV_PERFTEST:-sam}"
+fi
+
+export MESA_DISK_CACHE_SINGLE_FILE="${MESA_DISK_CACHE_SINGLE_FILE:-1}"
+export MESA_SHADER_CACHE_MAX_SIZE="${MESA_SHADER_CACHE_MAX_SIZE:-64G}"
+export PROTON_LOCAL_SHADER_CACHE="${PROTON_LOCAL_SHADER_CACHE:-1}"
+export PROTON_USE_PIPEWIRE="${PROTON_USE_PIPEWIRE:-1}"
+
+APPID="${SteamAppId:-${STEAM_COMPAT_APP_ID:-}}"
+PROFILE_FILE=""
+[[ -n "$APPID" ]] && PROFILE_FILE="$PROFILE_DIR/$APPID.env"
+
+USE_XWAYLAND=0
+USE_MLFG=0
+USE_OPTISCALER=0
+USE_SHARPEN=0
+USE_VIVID=0
+USE_NET_OPT=0
+USE_SDL=0
+USE_VIDEO_FIX=0
+USE_CEF_FIX=0
+USE_SAFEDX12=0
+USE_FSR_HUD=0
+USE_VULKAN=0
+
+AUTO_CLASS="standard"
+AUTO_PRESET="standard"
+AUTO_OPTISCALER=0
+AUTO_SHARPEN=0
+AUTO_NET_OPT=0
+AUTO_CEF_FIX=0
+AUTO_NATIVE_LINUX=0
+AUTO_REASON=""
+
+if [[ -n "$DETECT_BIN" ]]; then
+    eval "$("$DETECT_BIN" "$APPID")"
+fi
+
+SKIP_GUI=0
+if [[ -n "$PROFILE_FILE" && -f "$PROFILE_FILE" && "${FORCE_GUI:-0}" -ne 1 ]]; then
+    # shellcheck disable=SC1090
+    source "$PROFILE_FILE"
+    SKIP_GUI=1
+else
+    USE_OPTISCALER="$AUTO_OPTISCALER"
+    USE_SHARPEN="$AUTO_SHARPEN"
+    USE_NET_OPT="$AUTO_NET_OPT"
+    USE_CEF_FIX="$AUTO_CEF_FIX"
+fi
+
+flag_kd() { [[ "${1:-0}" -eq 1 ]] && echo on || echo off; }
+flag_zn() { [[ "${1:-0}" -eq 1 ]] && echo TRUE || echo FALSE; }
+
+if [[ "$SKIP_GUI" -eq 0 && "${NO_GUI:-0}" -ne 1 &&
+      (-n "${WAYLAND_DISPLAY:-}" || -n "${DISPLAY:-}") ]]; then
+    SELECTED=""
+    EXIT_CODE=1
+    DIALOG_TEXT="Detected class: [$AUTO_CLASS] - ${AUTO_REASON:-Ready}\nSelect launch options:"
+
+    if command -v kdialog >/dev/null 2>&1; then
+        SELECTED=$(
+            env -u LD_LIBRARY_PATH -u LD_PRELOAD QT_QPA_PLATFORM="wayland;xcb" \
+                kdialog --title "Steam Auto-Profiler (AppID: ${APPID:-Local})" \
+                --separate-output --checklist "$DIALOG_TEXT" \
+                xwayland "Use XWayland instead of native Wayland" "$(flag_kd "$USE_XWAYLAND")" \
+                mlfg "Enable frame generation" "$(flag_kd "$USE_MLFG")" \
+                optiscaler "Optional upscaler bridge" "$(flag_kd "$USE_OPTISCALER")" \
+                sharpen "Post-process sharpening" "$(flag_kd "$USE_SHARPEN")" \
+                netopt "Session network QoS" "$(flag_kd "$USE_NET_OPT")" \
+                cef "CEF launcher Wayland fix" "$(flag_kd "$USE_CEF_FIX")" \
+                remember "Save profile for future launches" off 2>/dev/null
+        )
+        EXIT_CODE=$?
+    elif command -v zenity >/dev/null 2>&1; then
+        SELECTED=$(
+            env -u LD_LIBRARY_PATH -u LD_PRELOAD GDK_BACKEND="wayland,x11" \
+                zenity --list --checklist --title="Steam Auto-Profiler" \
+                --text="$DIALOG_TEXT" --column="" --column="Code" --column="Setting" \
+                --hide-column=2 --separator=$'\n' \
+                "$(flag_zn "$USE_XWAYLAND")" xwayland "Use XWayland instead of native Wayland" \
+                "$(flag_zn "$USE_MLFG")" mlfg "Enable frame generation" \
+                "$(flag_zn "$USE_OPTISCALER")" optiscaler "Optional upscaler bridge" \
+                "$(flag_zn "$USE_SHARPEN")" sharpen "Post-process sharpening" \
+                "$(flag_zn "$USE_NET_OPT")" netopt "Session network QoS" \
+                "$(flag_zn "$USE_CEF_FIX")" cef "CEF launcher Wayland fix" \
+                FALSE remember "Save profile for future launches" 2>/dev/null
+        )
+        EXIT_CODE=$?
+    fi
+
+    if [[ "$EXIT_CODE" -eq 0 ]]; then
+        USE_XWAYLAND=0
+        USE_MLFG=0
+        USE_OPTISCALER=0
+        USE_SHARPEN=0
+        USE_NET_OPT=0
+        USE_CEF_FIX=0
+        SAVE_PROFILE=0
+
+        for choice in $SELECTED; do
+            case "$choice" in
+                xwayland) USE_XWAYLAND=1 ;;
+                mlfg) USE_MLFG=1 ;;
+                optiscaler) USE_OPTISCALER=1 ;;
+                sharpen) USE_SHARPEN=1 ;;
+                netopt) USE_NET_OPT=1 ;;
+                cef) USE_CEF_FIX=1 ;;
+                remember) SAVE_PROFILE=1 ;;
+            esac
+        done
+
+        if [[ "$SAVE_PROFILE" -eq 1 && -n "$PROFILE_FILE" ]]; then
+            cat >"$PROFILE_FILE" <<EOF
+USE_XWAYLAND=$USE_XWAYLAND
+USE_MLFG=$USE_MLFG
+USE_OPTISCALER=$USE_OPTISCALER
+USE_SHARPEN=$USE_SHARPEN
+USE_NET_OPT=$USE_NET_OPT
+USE_CEF_FIX=$USE_CEF_FIX
+AUTO_PRESET=$AUTO_PRESET
+EOF
+        fi
+    fi
+fi
+
+[[ "${XWAYLAND:-0}" -eq 1 ]] && USE_XWAYLAND=1
+[[ "${MLFG:-0}" -eq 1 ]] && USE_MLFG=1
+[[ "${OPTISCALER:-0}" -eq 1 ]] && USE_OPTISCALER=1
+[[ "${SHARPEN:-0}" -eq 1 || "${RCAS:-0}" -eq 1 ]] && USE_SHARPEN=1
+[[ "${NETOPT:-0}" -eq 1 ]] && USE_NET_OPT=1
+[[ "${CEF:-0}" -eq 1 ]] && USE_CEF_FIX=1
+[[ "${VULKAN:-0}" -eq 1 ]] && USE_VULKAN=1
+
+if [[ "$AUTO_CLASS" == "competitive-anticheat" ]]; then
+    USE_OPTISCALER=0
+    USE_MLFG=0
+fi
+
+if [[ "$USE_XWAYLAND" -eq 1 ]]; then
+    export PROTON_ENABLE_WAYLAND=0
+    export SDL_VIDEODRIVER=x11
+else
+    export PROTON_ENABLE_WAYLAND=1
+    export SDL_VIDEODRIVER="${SDL_VIDEODRIVER:-wayland,x11}"
+    export DXVK_HDR="${DXVK_HDR:-1}"
+fi
+
+if [[ "$USE_MLFG" -eq 1 ]]; then
+    export PROTON_MLFG_UPGRADE=1
+    export MLFG_UPGRADE=1
+    export PROTON_VKD3D_LOWLATENCY=0
+    export PROTON_DXVK_LOWLATENCY=0
+else
+    export PROTON_MLFG_UPGRADE=0
+    export MLFG_UPGRADE=0
+    export ENABLE_LAYER_MESA_ANTI_LAG="${ENABLE_LAYER_MESA_ANTI_LAG:-1}"
+    export DXVK_FRAME_PACE="${DXVK_FRAME_PACE:-low-latency-vrr}"
+    if (( AUTO_VRR_CAP > 0 )); then
+        export DXVK_FRAME_RATE="${DXVK_FRAME_RATE:-$AUTO_VRR_CAP}"
+        export VKD3D_FRAME_RATE="${VKD3D_FRAME_RATE:-$AUTO_VRR_CAP}"
+    fi
+fi
+
+export PROTON_FSR4_UPGRADE=1
+if [[ "$USE_OPTISCALER" -eq 1 ]]; then
+    export PROTON_USE_OPTISCALER=1
+else
+    export PROTON_USE_OPTISCALER=0
+fi
+
+if [[ "$USE_SHARPEN" -eq 1 && "$USE_OPTISCALER" -ne 1 ]]; then
+    export ENABLE_VKBASALT=1
+else
+    export ENABLE_VKBASALT=0
+fi
+
+EXTRA_ARGS=()
+[[ "$USE_CEF_FIX" -eq 1 ]] && EXTRA_ARGS+=("--in-process-gpu")
+[[ "$USE_VULKAN" -eq 1 ]] && EXTRA_ARGS+=("-vulkan")
+
+run_with_scheduler() {
+    if command -v game-performance >/dev/null 2>&1; then
+        game-performance "$@"
+    elif command -v gamemoderun >/dev/null 2>&1; then
+        gamemoderun "$@"
+    else
+        "$@"
+    fi
+}
+
+NET_BOOST_BIN=""
+for net_candidate in "$SCRIPT_DIR/steam-net-boost" "$HOME/.local/bin/steam-net-boost" "/usr/local/bin/steam-net-boost"; do
+    if [[ -x "$net_candidate" ]]; then
+        NET_BOOST_BIN="$net_candidate"
+        break
+    fi
+done
+
+if [[ "$USE_NET_OPT" -eq 1 && -n "$NET_BOOST_BIN" ]]; then
+    cleanup_net() { sudo -n "$NET_BOOST_BIN" off >/dev/null 2>&1 || true; }
+    trap cleanup_net EXIT INT TERM
+    sudo -n "$NET_BOOST_BIN" on >/dev/null 2>&1 || true
+fi
+
+run_with_scheduler "$@" "${EXTRA_ARGS[@]}"
+
+```
+
+`bin/steam-auto-sync`:
+
+```
+#!/usr/bin/env python3
+"""Batch-inject or remove steam-auto-run in Steam localconfig.vdf."""
+
+import argparse
+import re
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+
+def parse_vdf(text):
+    tokens = []
+    i = 0
+    while i < len(text):
+        char = text[i]
+        if char.isspace():
+            i += 1
+        elif char == "/" and i + 1 < len(text) and text[i + 1] == "/":
+            newline = text.find("\n", i)
+            i = len(text) if newline == -1 else newline + 1
+        elif char in "{}":
+            tokens.append(("BRACE", char, i, i + 1))
+            i += 1
+        elif char == '"':
+            j = i + 1
+            parts = []
+            while j < len(text):
+                if text[j] == "\\" and j + 1 < len(text):
+                    parts.append(text[j + 1])
+                    j += 2
+                elif text[j] == '"':
+                    break
+                else:
+                    parts.append(text[j])
+                    j += 1
+            tokens.append(("STR", "".join(parts), i, j + 1))
+            i = j + 1
+        else:
+            j = i
+            while j < len(text) and not text[j].isspace() and text[j] not in '{}"':
+                j += 1
+            tokens.append(("STR", text[i:j], i, j))
+            i = j
+    return tokens
+
+
+def find_launch_options(text):
+    tokens = parse_vdf(text)
+    stack = []
+    pending_key = None
+    app_launch = {}
+    app_close = {}
+    apps_close = None
+
+    for kind, value, start, end in tokens:
+        if kind == "STR":
+            if pending_key is None:
+                pending_key = value
+            else:
+                if len(stack) == 6 and stack[:5] == [
+                    "userlocalconfigstore", "software", "valve", "steam", "apps"
+                ]:
+                    if pending_key.lower() == "launchoptions":
+                        app_launch[stack[5]] = (value, start, end)
+                pending_key = None
+        elif kind == "BRACE" and value == "{":
+            stack.append((pending_key or "").lower())
+            pending_key = None
+        elif kind == "BRACE" and value == "}":
+            if len(stack) == 6 and stack[:5] == [
+                "userlocalconfigstore", "software", "valve", "steam", "apps"
+            ]:
+                app_close[stack[5]] = start
+            elif len(stack) == 5 and stack == [
+                "userlocalconfigstore", "software", "valve", "steam", "apps"
+            ]:
+                apps_close = start
+            if stack:
+                stack.pop()
+            pending_key = None
+
+    return app_launch, app_close, apps_close
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Batch-inject or remove steam-auto-run in Steam localconfig.vdf."
+    )
+    parser.add_argument("-n", "--dry-run", action="store_true")
+    parser.add_argument("--remove", action="store_true")
+    parser.add_argument("--wrapper", default="steam-auto-run")
+    args = parser.parse_args()
+
+    if not args.dry_run:
+        if subprocess.run(["pgrep", "-x", "steam"], capture_output=True).returncode == 0:
+            print("Error: Close Steam completely before syncing.", file=sys.stderr)
+            return 1
+
+    home = Path.home()
+    candidates = [
+        home / ".local/share/Steam",
+        home / ".steam/steam",
+        home / ".var/app/com.valvesoftware.Steam/.local/share/Steam",
+    ]
+
+    roots = []
+    seen = set()
+    for candidate in candidates:
+        if (candidate / "steamapps").is_dir():
+            resolved = candidate.resolve()
+            if resolved not in seen:
+                seen.add(resolved)
+                roots.append(candidate)
+
+    if not roots:
+        print("No Steam installation directory found.", file=sys.stderr)
+        return 1
+
+    skip_re = re.compile(
+        r"^(Proton\b|Steam Linux Runtime|Steamworks Common Redistributables|"
+        r"Wallpaper Engine|Lossless Scaling)",
+        re.I,
+    )
+
+    for steam_root in roots:
+        libraries = [steam_root]
+        library_vdf = steam_root / "steamapps/libraryfolders.vdf"
+        if library_vdf.exists():
+            for match in re.finditer(
+                r'"path"\s+"([^"]+)"',
+                library_vdf.read_text(encoding="utf-8", errors="ignore"),
+            ):
+                path = Path(match.group(1))
+                if path not in libraries and (path / "steamapps").is_dir():
+                    libraries.append(path)
+
+        games = {}
+        for library in libraries:
+            for acf in (library / "steamapps").glob("appmanifest_*.acf"):
+                text = acf.read_text(encoding="utf-8", errors="ignore")
+                appid_match = re.search(r'"appid"\s+"(\d+)"', text)
+                name_match = re.search(r'"name"\s+"([^"]+)"', text)
+                if not appid_match:
+                    continue
+                appid = appid_match.group(1)
+                name = name_match.group(1) if name_match else appid
+                if appid == "228980" or skip_re.search(name):
+                    continue
+                games[appid] = name
+
+        for config in (steam_root / "userdata").glob("*/config/localconfig.vdf"):
+            raw = config.read_text(encoding="utf-8", errors="ignore")
+            app_launch, app_close, apps_close = find_launch_options(raw)
+            if apps_close is None:
+                continue
+
+            edits = []
+            changed = []
+            for appid, name in sorted(games.items(), key=lambda item: item[1].lower()):
+                if appid not in app_launch:
+                    pos = app_close.get(appid, apps_close)
+                    if appid in app_close:
+                        rep = (
+                            f'\t\t\t\t"LaunchOptions"\t\t"{args.wrapper} %command%"\n'
+                            "\t\t\t"
+                        )
+                    else:
+                        rep = (
+                            f'\t"{appid}"\n'
+                            "\t\t{\n"
+                            f'\t\t\t"LaunchOptions"\t\t"{args.wrapper} %command%"\n'
+                            "\t\t}\n"
+                        )
+                    edits.append((pos, pos, rep))
+                    changed.append((appid, name))
+                    continue
+
+                current, start, end = app_launch[appid]
+                if args.remove:
+                    if args.wrapper not in current:
+                        continue
+                    replacement = re.sub(
+                        rf"\b{re.escape(args.wrapper)}\s+%command%", "%command%", current
+                    ).strip()
+                    if replacement == "%command%":
+                        replacement = ""
+                else:
+                    if args.wrapper in current:
+                        continue
+                    if "%command%" in current:
+                        replacement = current.replace(
+                            "%command%", f"{args.wrapper} %command%", 1
+                        )
+                    elif current.strip():
+                        replacement = f"{args.wrapper} %command% {current.strip()}"
+                    else:
+                        replacement = f"{args.wrapper} %command%"
+
+                escaped = replacement.replace("\\", "\\\\").replace('"', '\\"')
+                edits.append((start, end, f'"{escaped}"'))
+                changed.append((appid, name))
+
+            if edits and not args.dry_run:
+                backup = config.with_name(f"localconfig.vdf.bak.{int(time.time())}")
+                shutil.copy2(config, backup)
+                output = raw
+                for start, end, replacement in sorted(edits, key=lambda edit: edit[0], reverse=True):
+                    output = output[:start] + replacement + output[end:]
+                config.write_text(output, encoding="utf-8")
+
+            prefix = "[DRY-RUN] " if args.dry_run else ""
+            action = "Removed from" if args.remove else "Updated"
+            print(f"{prefix}{action} {len(changed)} game(s) in profile {config.parent.parent.name}:")
+            for appid, name in changed:
+                print(f"  {'-' if args.remove else '+'} [{appid}] {name}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`bin/steam-net-boost`:
+
+```
+#!/usr/bin/env bash
+
+# Session-scoped network and NIC power-save helper.
+
+set -euo pipefail
+
+MODE="${1:-status}"
+
+detect_default_iface() {
+    ip -o -4 route show to default 2>/dev/null | awk '{print $5; exit}' \
+        || ip -o -6 route show to default 2>/dev/null | awk '{print $5; exit}'
+}
+
+IFACE="$(detect_default_iface)"
+[[ -n "$IFACE" ]] || exit 0
+
+case "$MODE" in
+    on)
+        if command -v tc >/dev/null 2>&1; then
+            tc qdisc replace dev "$IFACE" root cake diffserv4 triple-isolate 2>/dev/null \
+                || tc qdisc replace dev "$IFACE" root fq_codel 2>/dev/null \
+                || true
+        fi
+        ip link set dev "$IFACE" txqueuelen 500 2>/dev/null || true
+        if [[ -d "/sys/class/net/$IFACE/wireless" ]]; then
+            command -v iw >/dev/null 2>&1 && iw dev "$IFACE" set power_save off 2>/dev/null || true
+        else
+            command -v ethtool >/dev/null 2>&1 && ethtool --set-eee "$IFACE" eee off 2>/dev/null || true
+        fi
+        ;;
+    off)
+        if command -v tc >/dev/null 2>&1; then
+            tc qdisc replace dev "$IFACE" root fq_codel 2>/dev/null || true
+        fi
+        ip link set dev "$IFACE" txqueuelen 1000 2>/dev/null || true
+        if [[ -d "/sys/class/net/$IFACE/wireless" ]]; then
+            command -v iw >/dev/null 2>&1 && iw dev "$IFACE" set power_save on 2>/dev/null || true
+        else
+            command -v ethtool >/dev/null 2>&1 && ethtool --set-eee "$IFACE" eee on 2>/dev/null || true
+        fi
+        ;;
+    status)
+        echo "Interface : $IFACE"
+        command -v tc >/dev/null 2>&1 && tc qdisc show dev "$IFACE" 2>/dev/null || true
+        ;;
+    *)
+        echo "Usage: steam-net-boost [on|off|status]" >&2
+        exit 2
+        ;;
+esac
+
+```
+
+`docs/ARCHITECTURE.md`:
+
+```md
+# Native Context-Aware Profiling in Steam and Proton
+
+## Goal
+
+Give desktop Linux and SteamOS users a safe, context-aware launch experience without
+requiring them to copy launch strings from forums or combine conflicting environment
+variables.
+
+## Steam client
+
+Steam could replace raw launch environment strings with structured per-AppID settings:
+
+- Display backend: Automatic Wayland, HDR, or XWayland fallback
+- Frame pacing: Automatic VRR cap, frame generation, or uncapped
+- Controller pipeline: Steam Input or direct SDL input
+- Network priority: Multiplayer QoS or off
+- Profile persistence: Steam Cloud or the existing `localconfig.vdf`
+
+## Steam Linux Runtime
+
+Before launching Proton, the runtime could run a lightweight game classifier:
+
+- Detect Easy Anti-Cheat, BattlEye, Ricochet, ACE, and other guardrail runtimes.
+- Detect native FSR, legacy DLSS/XeSS/FSR libraries, and third-party CEF launchers.
+- Disable third-party Vulkan and DLL hooks for anti-cheat titles.
+- Keep a deterministic precedence order for conflicting launch options.
+
+## Proton and graphics drivers
+
+Proton and Mesa/Vulkan could resolve settings centrally:
+
+- Enforce mutual exclusion between frame generation and low-latency VRR frame caps.
+- Disable external sharpening when an upscaler bridge is active.
+- Use the active compositor refresh rate to calculate a safe VRR ceiling.
+- Preserve explicit user overrides while applying anti-cheat and crash-safety guardrails.
+
+```
+
+`install.sh`:
+
+```sh
+#!/usr/bin/env bash
+
+# Installer for steam-auto-profiler.
+
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TARGET_DIR="${HOME}/.local/bin"
+WITH_NET_BOOST=0
+
+for arg in "$@"; do
+    case "$arg" in
+        --with-net-boost)
+            WITH_NET_BOOST=1
+            ;;
+        --help|-h)
+            echo "Usage: ./install.sh [--with-net-boost]"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $arg" >&2
+            exit 2
+            ;;
+    esac
+done
+
+mkdir -p "$TARGET_DIR" "${XDG_CONFIG_HOME:-$HOME/.config}/steam-auto-profiler/profiles"
+
+for script in steam-auto-run steam-auto-detect steam-auto-sync steam-net-boost; do
+    install -m 755 "$REPO_DIR/bin/$script" "$TARGET_DIR/$script"
+    echo "Installed $TARGET_DIR/$script"
+done
+
+if [[ "$WITH_NET_BOOST" -eq 1 ]]; then
+    USER_NAME="$(id -un)"
+    TMP_SUDOERS="$(mktemp)"
+    printf '%s ALL=(root) NOPASSWD: /usr/local/bin/steam-net-boost\n' "$USER_NAME" >"$TMP_SUDOERS"
+    sudo install -m 755 "$REPO_DIR/bin/steam-net-boost" /usr/local/bin/steam-net-boost
+    sudo install -m 440 "$TMP_SUDOERS" /etc/sudoers.d/steam-net-boost
+    sudo visudo -cf /etc/sudoers.d/steam-net-boost
+    rm -f "$TMP_SUDOERS"
+    echo "Installed optional network helper and sudoers rule"
+fi
+
+echo "Done! Test with: $TARGET_DIR/steam-auto-run --help"
+
+```
