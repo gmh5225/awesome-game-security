@@ -1,0 +1,2923 @@
+Project Path: arc_overkazaf_VulnHunter4Ghidra_201pvett
+
+Source Tree:
+
+```txt
+arc_overkazaf_VulnHunter4Ghidra_201pvett
+├── Module.manifest
+├── README.md
+├── build.gradle
+├── extension.properties
+├── python
+│   └── vulnhunter4ghidra_engine
+│       ├── __init__.py
+│       ├── __main__.py
+│       ├── cli.py
+│       ├── engine.py
+│       ├── models.py
+│       ├── protocol.py
+│       ├── server.py
+│       ├── sinks.py
+│       ├── sources.py
+│       └── taint.py
+├── settings.gradle
+├── src
+│   └── main
+│       └── java
+│           └── vulnhunter4ghidra
+│               ├── VulnHunter4GhidraPlugin.java
+│               ├── actions
+│               │   ├── AnalyzeTaintAction.java
+│               │   └── ScanVulnsAction.java
+│               └── engine
+│                   ├── EngineManager.java
+│                   └── EngineProtocol.java
+└── test
+    ├── __init__.py
+    ├── test_engine.py
+    ├── test_models.py
+    ├── test_protocol.py
+    ├── test_sinks.py
+    ├── test_sources.py
+    └── test_taint.py
+
+```
+
+`Module.manifest`:
+
+```manifest
+MODULE FILE LICENSE: Apache License 2.0
+
+```
+
+`README.md`:
+
+```md
+# VulnHunter4Ghidra
+
+**Interactive vulnerability detection and taint analysis for native binaries.**
+
+VulnHunter4Ghidra finds vulnerabilities in compiled binaries (ELF, PE, Mach-O) by tracing data flow from user-controlled inputs (sources) to dangerous function calls (sinks). It runs as a Ghidra plugin for interactive analysis, or as a standalone CLI tool for CI/CD integration.
+
+## Key Features
+
+- **Source-Sink Taint Analysis** — traces data flow from `recv`, `read`, `fgets`, `scanf`, `argv`, and function parameters to dangerous sinks like `memcpy`, `strcpy`, `sprintf`, `system`, and `free`
+- **CWE Classification** — maps each finding to a CWE ID (CWE-120 Buffer Overflow, CWE-134 Format String, CWE-78 Command Injection, CWE-416 Use-After-Free, etc.) with severity levels
+- **Intra & Inter-procedural Analysis** — tracks taint within functions and across call boundaries up to configurable depth
+- **20+ Architecture Support** — inherits Ghidra's architecture support: x86, x64, ARM, MIPS, PowerPC, RISC-V, and more
+- **Dual Mode** — Ghidra plugin (interactive GUI) or standalone CLI (headless, CI/CD-ready)
+- **JSON Output** — machine-parseable findings for pipeline integration
+
+## Architecture
+
+```
+┌────────────────────┐     JSON-line TCP      ┌─────────────────────┐
+│   Ghidra Plugin    │◄──────────────────────►│   Python Engine     │
+│   (Java)           │      port 13372        │   (angr + Z3)       │
+│                    │                        │                     │
+│  • ScanVulnsAction │                        │  • CFG Analysis     │
+│  • AnalyzeTaint    │                        │  • Source/Sink ID   │
+│  • Result Display  │                        │  • Taint Propagation│
+└────────────────────┘                        └─────────────────────┘
+```
+
+The Java side extracts function metadata (callsites, parameters, exports) from Ghidra's program model and sends it to the Python engine over a JSON-line TCP protocol. The engine uses [angr](https://angr.io/) for CFG construction and data-flow analysis, with optional Z3-based symbolic verification of reachability.
+
+## Installation
+
+### Prerequisites
+
+- **Ghidra** 11.x+
+- **Python** 3.10+ with angr: `pip install angr`
+- **Java** 17+ (for building)
+
+### Build
+
+```bash
+# Set your Ghidra installation path
+export GHIDRA_INSTALL_DIR=/path/to/ghidra_11.x
+
+# Build the extension
+gradle buildExtension -PGHIDRA_INSTALL_DIR=$GHIDRA_INSTALL_DIR
+
+# Install: copy dist/*.zip to $GHIDRA_INSTALL_DIR/Extensions/Ghidra
+```
+
+### Python Engine Setup
+
+```bash
+# Create a virtualenv with angr
+python3 -m venv .venv
+source .venv/bin/activate
+pip install angr
+
+# Verify
+python -c "import angr; print(angr.__version__)"
+```
+
+## Usage
+
+### Ghidra Plugin
+
+1. Open a binary in Ghidra's CodeBrowser
+2. Enable the plugin: **File → Configure → Analysis → VulnHunter4Ghidra**
+3. **VulnHunter4Ghidra → Scan Functions** — identifies sources and sinks across all functions
+4. **VulnHunter4Ghidra → Analyze Taint** — runs taint analysis and displays findings with CWE classifications
+
+The plugin automatically starts the Python engine and initializes it with the current binary.
+
+### Standalone CLI
+
+The Python engine runs independently without Ghidra, designed for CI/CD pipelines:
+
+```bash
+# Quick scan: identify sources and sinks
+python -m vulnhunter4ghidra_engine.cli scan ./target_binary
+
+# Full taint analysis (default depth: 5)
+python -m vulnhunter4ghidra_engine.cli taint ./target_binary --depth 8
+
+# Full report with JSON output for CI/CD
+python -m vulnhunter4ghidra_engine.cli report ./target_binary --json
+```
+
+**Exit codes** (CI-friendly):
+| Code | Meaning |
+|------|---------|
+| 0    | No findings |
+| 1    | Findings detected |
+| 2    | Analysis error |
+
+**JSON output example:**
+
+```json
+{
+  "binary": "./target_binary",
+  "arch": "AMD64",
+  "functions_scanned": 142,
+  "total_sources": 23,
+  "total_sinks": 18,
+  "taint_paths": 7,
+  "findings_count": 5,
+  "findings": [
+    {
+      "finding_id": 1,
+      "cwe": "CWE-120",
+      "severity": "high",
+      "title": "buffer_overflow: memcpy in handle_request",
+      "description": "User-controlled data from recv() flows to memcpy() at 0x401234",
+      "taint_path": {
+        "source": { "func_name": "handle_request", "source_type": "RECV" },
+        "sink": { "func_name": "handle_request", "callee_name": "memcpy" },
+        "path_funcs": ["handle_request"],
+        "path_length": 3
+      }
+    }
+  ],
+  "severity_summary": { "high": 3, "medium": 2 }
+}
+```
+
+### CI/CD Integration
+
+**GitHub Actions:**
+
+```yaml
+- name: Binary Vulnerability Scan
+  run: |
+    pip install angr
+    python -m vulnhunter4ghidra_engine.cli report \
+      ./build/output/binary --json > vulnhunter-report.json
+    python -m vulnhunter4ghidra_engine.cli report \
+      ./build/output/binary  # exits 1 if findings → fails the step
+```
+
+**Pre-merge gate:**
+
+```bash
+#!/bin/bash
+# pre-merge-vuln-check.sh
+python -m vulnhunter4ghidra_engine.cli taint "$1" --json \
+  | jq -e '.findings | length == 0' > /dev/null
+```
+
+**DefectDojo import:** The JSON output maps directly to DefectDojo's generic findings format — CWE IDs, severity levels, and file paths are all present.
+
+---
+
+## Comparison with Other Tools
+
+### VulnHunter4Ghidra vs. AppShark (ByteDance)
+
+[AppShark](https://github.com/niceas/appshark) is ByteDance's open-source static analysis tool for Android applications. While both tools perform taint analysis, they operate in completely different domains:
+
+| | VulnHunter4Ghidra | AppShark |
+|---|---|---|
+| **Target** | Native binaries (ELF, PE, Mach-O, .so) | Android APK (Java/Dalvik bytecode) |
+| **Analysis Level** | Machine code (stripped binaries OK) | Java source / Jimple IR |
+| **Engine** | angr + Z3 (CFG + symbolic execution) | Soot / FlowDroid (Jimple-based) |
+| **Architecture** | x86, x64, ARM, MIPS, PowerPC, RISC-V, ... | Dalvik only |
+| **Stripped Binary Support** | Yes — works without symbols | N/A (requires class metadata) |
+| **Native Code (.so)** | Yes — primary target | No — cannot analyze JNI native code |
+| **Interactive UI** | Ghidra plugin with decompiler integration | Config-driven batch only |
+| **CI/CD Mode** | Standalone CLI with JSON output | CLI with JSON rules |
+| **CWE Coverage** | Memory corruption, format string, command injection, UAF | Privacy leaks, SQL injection, WebView XSS, intent redirect |
+| **License** | Apache 2.0 | Apache 2.0 |
+
+**When to use VulnHunter4Ghidra:**
+
+- Analyzing compiled C/C++ binaries, firmware, IoT devices, or shared libraries (.so, .dylib)
+- Reverse engineering stripped binaries without source code
+- Auditing native code for memory corruption vulnerabilities (buffer overflow, UAF, format string)
+- Integrating binary security scanning into build pipelines
+
+**When to use AppShark:**
+
+- Auditing Android Java/Kotlin application code for privacy leaks and API misuse
+- Detecting intent redirect, WebView JavaScript injection, or SQL injection in APKs
+- Policy compliance scanning of Android apps
+
+**Together:** For Android applications with JNI native libraries, use AppShark for the Java layer and VulnHunter4Ghidra for the native .so libraries. AppShark cannot see into native code, and VulnHunter4Ghidra cannot analyze Dalvik bytecode — they are complementary.
+
+### VulnHunter4Ghidra vs. cwe_checker
+
+[cwe_checker](https://github.com/fkie-cad/cwe_checker) is a pattern-matching tool that uses Ghidra as a disassembly frontend:
+
+| | VulnHunter4Ghidra | cwe_checker |
+|---|---|---|
+| **Analysis Method** | Data-flow taint analysis (source → sink paths) | Pattern matching on IR |
+| **Ghidra Integration** | Native plugin (menu actions, decompiler view) | External CLI only (uses Ghidra headless) |
+| **Findings** | Concrete taint paths with full call chain | CWE pattern matches (no data-flow proof) |
+| **False Positive Rate** | Lower (requires actual data flow) | Higher (pattern match without flow context) |
+| **Symbolic Verification** | Z3-backed reachability check (planned) | None |
+| **Interactive Use** | Click-through from finding to decompiler | Batch output only |
+
+VulnHunter4Ghidra provides deeper analysis with actual data-flow evidence, while cwe_checker is faster for broad pattern sweeps. Use cwe_checker for a quick first pass and VulnHunter4Ghidra for confirmed, path-verified findings.
+
+---
+
+## Supported Vulnerability Classes
+
+| CWE | Type | Severity | Sink Functions |
+|-----|------|----------|----------------|
+| CWE-120 | Buffer Overflow | High | `memcpy`, `strcpy`, `strncpy`, `strcat`, `gets`, `recv`, `read` |
+| CWE-134 | Format String | High | `printf`, `sprintf`, `fprintf`, `snprintf`, `syslog` |
+| CWE-78 | OS Command Injection | Critical | `system`, `popen`, `execve` |
+| CWE-416 | Use-After-Free | High | `free` (tracked across subsequent dereferences) |
+| CWE-415 | Double Free | High | `free` (duplicate call detection) |
+| CWE-190 | Integer Overflow | Medium | Size arguments to allocation/copy functions |
+| CWE-476 | NULL Pointer Dereference | Medium | Unchecked return values from allocation |
+
+## Source Types
+
+| Type | Description | Examples |
+|------|-------------|---------|
+| `FUNC_PARAM` | Buffer-type parameters of exported functions | `void parse(char *buf, int len)` |
+| `ARGV` | Command-line arguments via main() | `main(int argc, char **argv)` |
+| `RECV` / `READ` | Network/file input functions | `recv()`, `read()` |
+| `FGETS` / `SCANF` | Formatted input | `fgets()`, `scanf()`, `fscanf()` |
+| `STDIN` | Standard input reads | `getchar()`, `getline()` |
+| `ENV` | Environment variables | `getenv()` |
+| `FILE_READ` | File content reads | `fread()` |
+
+## Development
+
+```bash
+# Run Python tests (54 tests)
+PYTHONPATH=python python -m pytest test/ -v
+
+# Build Java extension
+gradle buildExtension -PGHIDRA_INSTALL_DIR=$GHIDRA_INSTALL_DIR
+
+# Start engine in development mode
+PYTHONPATH=python python -m vulnhunter4ghidra_engine -v
+```
+
+### Project Structure
+
+```
+VulnHunter4Ghidra/
+├── src/main/java/vulnhunter4ghidra/
+│   ├── VulnHunter4GhidraPlugin.java    # Plugin entry point
+│   ├── engine/
+│   │   ├── EngineProtocol.java          # JSON-line protocol
+│   │   └── EngineManager.java           # Python process lifecycle
+│   └── actions/
+│       ├── ScanVulnsAction.java          # Scan menu action
+│       └── AnalyzeTaintAction.java       # Taint analysis action
+├── python/vulnhunter4ghidra_engine/
+│   ├── protocol.py     # JSON-line command/response
+│   ├── models.py       # Source, Sink, TaintPath, VulnFinding
+│   ├── sources.py      # Source identification
+│   ├── sinks.py        # Sink identification + CWE mapping
+│   ├── taint.py        # Taint propagation (intra + inter-procedural)
+│   ├── engine.py       # Orchestration
+│   ├── server.py       # TCP server (port 13372)
+│   └── cli.py          # Standalone CLI
+└── test/               # 54 unit tests
+```
+
+## License
+
+Apache License 2.0
+
+```
+
+`build.gradle`:
+
+```gradle
+apply plugin: 'java'
+
+def ghidraInstallDir
+
+if (System.env.GHIDRA_INSTALL_DIR) {
+    ghidraInstallDir = System.env.GHIDRA_INSTALL_DIR
+} else if (project.hasProperty("GHIDRA_INSTALL_DIR")) {
+    ghidraInstallDir = project.getProperty("GHIDRA_INSTALL_DIR")
+} else {
+    throw new GradleException("GHIDRA_INSTALL_DIR is not defined")
+}
+
+apply from: new File(ghidraInstallDir).toPath().resolve("support/buildExtension.gradle").toFile()
+
+tasks.named('buildExtension') {
+	exclude '**/__pycache__/**'
+	exclude '**/.venv/**'
+	exclude '**/test/**'
+}
+
+```
+
+`extension.properties`:
+
+```properties
+name=VulnHunter4Ghidra
+description=Interactive vulnerability detection and taint analysis for Ghidra, powered by angr
+author=
+createdOn=2026-10-27
+version=@extversion@
+
+```
+
+`python/vulnhunter4ghidra_engine/__main__.py`:
+
+```py
+from .server import main
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`python/vulnhunter4ghidra_engine/cli.py`:
+
+```py
+"""VulnHunter4Ghidra standalone CLI — run vulnerability scans without Ghidra.
+
+Usage:
+    vulnhunter scan   <binary>               # quick source/sink identification
+    vulnhunter taint  <binary> [--depth N]    # full taint analysis
+    vulnhunter report <binary> [--json]       # scan + taint + report
+
+Designed for CI/CD integration: exits 0 if no findings, 1 if findings found,
+2 on error. JSON output (--json) is machine-parseable.
+"""
+import argparse
+import json
+import logging
+import sys
+
+logger = logging.getLogger("vulnhunter4ghidra")
+
+
+def _normalize_func_name(name: str) -> str:
+    """Normalize platform-specific function names to canonical form.
+
+    Handles: macOS leading underscore (_fgets -> fgets),
+    hardened variants (___memcpy_chk -> memcpy, ___sprintf_chk -> sprintf).
+    """
+    if name.startswith("___") and name.endswith("_chk"):
+        name = name[3:-4]
+    name = name.lstrip("_")
+    return name
+
+
+def _build_stub_map(project) -> dict[int, str]:
+    """Map Mach-O stub addresses to resolved import names.
+
+    On Mach-O, external calls go through short stub functions that jump
+    through GOT slots. angr names these sub_XXXXX instead of the import name.
+    """
+    main_obj = project.loader.main_object
+    if not hasattr(main_obj, "imports"):
+        return {}
+
+    got_to_name: dict[int, str] = {}
+    for imp_name, reloc in main_obj.imports.items():
+        if reloc.rebased_addr:
+            got_to_name[reloc.rebased_addr] = _normalize_func_name(imp_name)
+
+    if not got_to_name:
+        return {}
+
+    stub_map: dict[int, str] = {}
+    for addr, func in project.kb.functions.items():
+        if func.is_simprocedure or len(func.graph) != 1:
+            continue
+        block = next(iter(func.graph.nodes()))
+        try:
+            irsb = project.factory.block(block.addr, size=block.size).vex
+            for stmt in irsb.statements:
+                if hasattr(stmt, "constants"):
+                    for const in stmt.constants:
+                        if const.value in got_to_name:
+                            stub_map[addr] = got_to_name[const.value]
+        except Exception:
+            pass
+    return stub_map
+
+
+def _build_function_info(project) -> list[dict]:
+    """Extract function metadata from angr's knowledge base."""
+    from .sinks import get_sink_functions
+    from .sources import INPUT_FUNCTIONS
+
+    known_callees = set(INPUT_FUNCTIONS.keys()) | get_sink_functions()
+    kb_funcs = project.kb.functions
+    main_obj = project.loader.main_object
+
+    stub_map = _build_stub_map(project)
+
+    exported = set()
+    for sym in main_obj.symbols:
+        if sym.is_export:
+            exported.add(sym.rebased_addr)
+
+    export_names: dict[int, str] = {}
+    for sym in main_obj.symbols:
+        if sym.is_export and sym.rebased_addr:
+            export_names[sym.rebased_addr] = _normalize_func_name(sym.name)
+
+    func_name_map: dict[int, str] = {}
+    for addr, func in kb_funcs.items():
+        if addr in stub_map:
+            func_name_map[addr] = stub_map[addr]
+        elif addr in export_names:
+            func_name_map[addr] = export_names[addr]
+        else:
+            func_name_map[addr] = _normalize_func_name(func.name)
+
+    results = []
+    for addr, func in kb_funcs.items():
+        if func.is_simprocedure or func.is_plt:
+            continue
+        if len(func.graph) < 2:
+            continue
+
+        clean_name = func_name_map.get(addr, func.name)
+
+        callsites = []
+        for site in func.get_call_sites():
+            target_addr = func.get_call_target(site)
+            if target_addr is not None and target_addr in kb_funcs:
+                callee_name = func_name_map.get(target_addr, kb_funcs[target_addr].name)
+                if callee_name in known_callees:
+                    callsites.append({
+                        "address": site,
+                        "callee_name": callee_name,
+                    })
+
+        results.append({
+            "func_addr": addr,
+            "func_name": clean_name,
+            "callsites": callsites,
+            "params": [],
+            "is_exported": addr in exported,
+        })
+    return results
+
+
+def cmd_scan(args):
+    import angr
+    from .engine import VulnHunterEngine
+
+    engine = VulnHunterEngine()
+    engine.init(args.binary)
+
+    logger.info("Building CFG...")
+    engine.project.analyses.CFGFast(normalize=True, show_progressbar=False)
+    funcs = _build_function_info(engine.project)
+    logger.info("Scanning %d functions...", len(funcs))
+
+    total_sources = 0
+    total_sinks = 0
+    for fi in funcs:
+        result = engine.scan_function(
+            func_addr=fi["func_addr"],
+            func_name=fi["func_name"],
+            callsites=fi["callsites"],
+            params=fi["params"],
+            is_exported=fi["is_exported"],
+        )
+        total_sources += result["sources_found"]
+        total_sinks += result["sinks_found"]
+
+    if args.json:
+        print(json.dumps({
+            "binary": args.binary,
+            "functions_scanned": len(funcs),
+            "sources": engine.get_sources(),
+            "sinks": engine.get_sinks(),
+        }, indent=2))
+    else:
+        print(f"Binary: {args.binary}")
+        print(f"Functions scanned: {len(funcs)}")
+        print(f"Sources found: {total_sources}")
+        print(f"Sinks found: {total_sinks}")
+        if total_sources:
+            print("\nSources:")
+            for s in engine.get_sources():
+                print(f"  [{s['source_type']}] {s['func_name']} @ {s['address']}: {s['description']}")
+        if total_sinks:
+            print("\nSinks:")
+            for s in engine.get_sinks():
+                print(f"  [{s['sink_type']}] {s['func_name']} @ {s['address']}: {s['callee_name']}() [{s['cwe']}]")
+
+
+def cmd_taint(args):
+    import angr
+    from .engine import VulnHunterEngine
+
+    engine = VulnHunterEngine()
+    engine.init(args.binary)
+
+    logger.info("Building CFG...")
+    engine.project.analyses.CFGFast(normalize=True, show_progressbar=False)
+    funcs = _build_function_info(engine.project)
+    logger.info("Scanning %d functions...", len(funcs))
+
+    for fi in funcs:
+        engine.scan_function(
+            func_addr=fi["func_addr"],
+            func_name=fi["func_name"],
+            callsites=fi["callsites"],
+            params=fi["params"],
+            is_exported=fi["is_exported"],
+        )
+
+    logger.info("Running taint analysis (depth=%d)...", args.depth)
+    result = engine.analyze_taint(max_depth=args.depth)
+    findings = result["findings"]
+
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        print(f"Sources: {result['total_sources']}, Sinks: {result['total_sinks']}")
+        print(f"Taint paths: {result['taint_paths']}, Findings: {len(findings)}")
+        if findings:
+            print()
+            for f in findings:
+                sev = f["severity"].upper()
+                print(f"  [{sev}] {f['cwe']} — {f['title']}")
+                print(f"         {f['description']}")
+                tp = f["taint_path"]
+                print(f"         Path: {' → '.join(tp['path_funcs'])} ({tp['path_length']} nodes)")
+                print()
+
+    sys.exit(1 if findings else 0)
+
+
+def cmd_report(args):
+    import angr
+    from .engine import VulnHunterEngine
+
+    engine = VulnHunterEngine()
+    engine.init(args.binary)
+
+    logger.info("Building CFG...")
+    engine.project.analyses.CFGFast(normalize=True, show_progressbar=False)
+    funcs = _build_function_info(engine.project)
+    logger.info("Scanning %d functions...", len(funcs))
+
+    for fi in funcs:
+        engine.scan_function(
+            func_addr=fi["func_addr"],
+            func_name=fi["func_name"],
+            callsites=fi["callsites"],
+            params=fi["params"],
+            is_exported=fi["is_exported"],
+        )
+
+    logger.info("Running taint analysis...")
+    result = engine.analyze_taint(max_depth=args.depth)
+    findings = result["findings"]
+
+    report = {
+        "binary": args.binary,
+        "arch": engine.project.arch.name,
+        "functions_scanned": len(funcs),
+        "total_sources": result["total_sources"],
+        "total_sinks": result["total_sinks"],
+        "taint_paths": result["taint_paths"],
+        "findings_count": len(findings),
+        "findings": findings,
+        "severity_summary": {},
+    }
+    for f in findings:
+        sev = f["severity"]
+        report["severity_summary"][sev] = report["severity_summary"].get(sev, 0) + 1
+
+    if args.json:
+        print(json.dumps(report, indent=2))
+    else:
+        print("=" * 60)
+        print(f"VulnHunter4Ghidra Report — {args.binary}")
+        print("=" * 60)
+        print(f"Architecture: {report['arch']}")
+        print(f"Functions:    {report['functions_scanned']}")
+        print(f"Sources:      {report['total_sources']}")
+        print(f"Sinks:        {report['total_sinks']}")
+        print(f"Taint Paths:  {report['taint_paths']}")
+        print(f"Findings:     {report['findings_count']}")
+        if report["severity_summary"]:
+            print(f"  Severity:   {report['severity_summary']}")
+        print("-" * 60)
+        if findings:
+            for i, f in enumerate(findings, 1):
+                sev = f["severity"].upper()
+                print(f"\n#{i} [{sev}] {f['cwe']} — {f['title']}")
+                print(f"   {f['description']}")
+                tp = f["taint_path"]
+                src = tp["source"]
+                snk = tp["sink"]
+                print(f"   Source: {src['func_name']} @ {src['address']} ({src['source_type']})")
+                print(f"   Sink:   {snk['func_name']} @ {snk['address']} ({snk['callee_name']})")
+                print(f"   Path:   {' → '.join(tp['path_funcs'])}")
+        else:
+            print("\nNo vulnerabilities found.")
+        print("=" * 60)
+
+    sys.exit(1 if findings else 0)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog="vulnhunter",
+        description="VulnHunter4Ghidra — Binary vulnerability scanner (standalone CLI)",
+    )
+    parser.add_argument("-v", "--verbose", action="store_true")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p_scan = sub.add_parser("scan", help="Identify sources and sinks")
+    p_scan.add_argument("binary", help="Path to the binary to analyze")
+    p_scan.add_argument("--json", action="store_true", help="Output JSON")
+
+    p_taint = sub.add_parser("taint", help="Run full taint analysis")
+    p_taint.add_argument("binary", help="Path to the binary to analyze")
+    p_taint.add_argument("--depth", type=int, default=5, help="Max call depth (default: 5)")
+    p_taint.add_argument("--json", action="store_true", help="Output JSON")
+
+    p_report = sub.add_parser("report", help="Generate full vulnerability report")
+    p_report.add_argument("binary", help="Path to the binary to analyze")
+    p_report.add_argument("--depth", type=int, default=5, help="Max call depth (default: 5)")
+    p_report.add_argument("--json", action="store_true", help="Output JSON for CI/CD")
+
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format="[vulnhunter] %(levelname)s %(message)s",
+    )
+
+    try:
+        {"scan": cmd_scan, "taint": cmd_taint, "report": cmd_report}[args.command](args)
+    except Exception as e:
+        logger.error("Fatal: %s", e)
+        if args.verbose:
+            import traceback
+            traceback.print_exc()
+        sys.exit(2)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`python/vulnhunter4ghidra_engine/engine.py`:
+
+```py
+import logging
+from .models import Source, Sink, TaintPath, VulnFinding, classify_severity
+from .sources import (
+    identify_sources_from_callsites,
+    identify_sources_from_params,
+    identify_argv_source,
+)
+from .sinks import identify_sinks
+from .taint import find_taint_paths_intraprocedural, find_taint_paths_interprocedural
+
+logger = logging.getLogger("vulnhunter4ghidra")
+
+
+class VulnHunterEngine:
+    def __init__(self):
+        self.project = None
+        self.binary_path: str | None = None
+        self._finding_counter = 0
+        self._all_sources: list[Source] = []
+        self._all_sinks: list[Sink] = []
+        self._findings: list[VulnFinding] = []
+
+    def init(self, binary_path: str) -> dict:
+        import angr
+        self.project = angr.Project(binary_path, auto_load_libs=False)
+        self.binary_path = binary_path
+        self._finding_counter = 0
+        self._all_sources = []
+        self._all_sinks = []
+        self._findings = []
+        logger.info("Loaded binary: %s (%s)", binary_path, self.project.arch.name)
+        return {
+            "arch": self.project.arch.name,
+            "entry": hex(self.project.entry),
+            "binary": binary_path,
+        }
+
+    def scan_function(
+        self,
+        func_addr: int,
+        func_name: str,
+        callsites: list[dict],
+        params: list[dict],
+        is_exported: bool = False,
+    ) -> dict:
+        """Scan a single function for sources and sinks. Returns counts."""
+        sources = identify_sources_from_callsites(func_addr, func_name, callsites)
+        sources += identify_sources_from_params(func_addr, func_name, params, is_exported)
+        argv_src = identify_argv_source(func_addr, func_name, params)
+        if argv_src:
+            sources.append(argv_src)
+
+        sinks = identify_sinks(func_addr, func_name, callsites)
+
+        self._all_sources.extend(sources)
+        self._all_sinks.extend(sinks)
+
+        return {
+            "func_addr": hex(func_addr),
+            "func_name": func_name,
+            "sources_found": len(sources),
+            "sinks_found": len(sinks),
+            "sources": [s.to_dict() for s in sources],
+            "sinks": [s.to_dict() for s in sinks],
+        }
+
+    def analyze_taint(self, max_depth: int = 5) -> dict:
+        """Run taint analysis across all collected sources and sinks."""
+        if self.project is None:
+            raise RuntimeError("Binary not loaded — call init first")
+
+        self.project.analyses.CFGFast(normalize=True, show_progressbar=False)
+
+        intra_by_func: dict[int, tuple[list[Source], list[Sink]]] = {}
+        for src in self._all_sources:
+            intra_by_func.setdefault(src.func_addr, ([], []))[0].append(src)
+        for snk in self._all_sinks:
+            intra_by_func.setdefault(snk.func_addr, ([], []))[1].append(snk)
+
+        all_paths: list[TaintPath] = []
+
+        for func_addr, (func_sources, func_sinks) in intra_by_func.items():
+            if func_sources and func_sinks:
+                paths = find_taint_paths_intraprocedural(
+                    self.project, func_addr, func_sources, func_sinks,
+                )
+                all_paths.extend(paths)
+
+        inter_paths = find_taint_paths_interprocedural(
+            self.project, self._all_sources, self._all_sinks, max_depth,
+        )
+        all_paths.extend(inter_paths)
+
+        seen = set()
+        unique_paths = []
+        for p in all_paths:
+            key = (p.source.address, p.sink.address)
+            if key not in seen:
+                seen.add(key)
+                unique_paths.append(p)
+
+        self._findings = []
+        for path in unique_paths:
+            self._finding_counter += 1
+            cwe = path.sink.cwe
+            severity = classify_severity(cwe)
+            finding = VulnFinding(
+                finding_id=self._finding_counter,
+                taint_path=path,
+                cwe=cwe,
+                severity=severity,
+                title=f"{path.sink.sink_type.value}: {path.sink.callee_name} in {path.sink.func_name}",
+                description=(
+                    f"User-controlled data from {path.source.description} "
+                    f"flows to {path.sink.callee_name}() at {hex(path.sink.address)}"
+                ),
+            )
+            self._findings.append(finding)
+
+        logger.info(
+            "Taint analysis complete: %d paths, %d findings",
+            len(unique_paths), len(self._findings),
+        )
+
+        return {
+            "total_sources": len(self._all_sources),
+            "total_sinks": len(self._all_sinks),
+            "taint_paths": len(unique_paths),
+            "findings": [f.to_dict() for f in self._findings],
+        }
+
+    def get_findings(self) -> list[dict]:
+        return [f.to_dict() for f in self._findings]
+
+    def get_sources(self) -> list[dict]:
+        return [s.to_dict() for s in self._all_sources]
+
+    def get_sinks(self) -> list[dict]:
+        return [s.to_dict() for s in self._all_sinks]
+
+```
+
+`python/vulnhunter4ghidra_engine/models.py`:
+
+```py
+from dataclasses import dataclass, field
+from enum import Enum
+
+
+class SourceType(Enum):
+    FUNC_PARAM = "func_param"
+    ARGV = "argv"
+    STDIN = "stdin"
+    RECV = "recv"
+    READ = "read"
+    FGETS = "fgets"
+    SCANF = "scanf"
+    ENV = "env"
+    FILE_READ = "file_read"
+
+
+class SinkType(Enum):
+    BUFFER_OVERFLOW = "buffer_overflow"
+    FORMAT_STRING = "format_string"
+    USE_AFTER_FREE = "use_after_free"
+    DOUBLE_FREE = "double_free"
+    COMMAND_INJECTION = "command_injection"
+    INTEGER_OVERFLOW = "integer_overflow"
+    NULL_DEREF = "null_deref"
+
+
+class Severity(Enum):
+    CRITICAL = "critical"
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+    INFO = "info"
+
+
+@dataclass
+class Source:
+    address: int
+    func_addr: int
+    func_name: str
+    source_type: SourceType
+    description: str
+    param_index: int | None = None
+
+    def to_dict(self) -> dict:
+        d = {
+            "address": hex(self.address),
+            "func_addr": hex(self.func_addr),
+            "func_name": self.func_name,
+            "source_type": self.source_type.value,
+            "description": self.description,
+        }
+        if self.param_index is not None:
+            d["param_index"] = self.param_index
+        return d
+
+
+@dataclass
+class Sink:
+    address: int
+    func_addr: int
+    func_name: str
+    callee_name: str
+    sink_type: SinkType
+    cwe: str
+    vulnerable_arg_index: int
+
+    def to_dict(self) -> dict:
+        return {
+            "address": hex(self.address),
+            "func_addr": hex(self.func_addr),
+            "func_name": self.func_name,
+            "callee_name": self.callee_name,
+            "sink_type": self.sink_type.value,
+            "cwe": self.cwe,
+            "vulnerable_arg_index": self.vulnerable_arg_index,
+        }
+
+
+@dataclass
+class TaintPath:
+    source: Source
+    sink: Sink
+    path_addrs: list[int]
+    path_funcs: list[str]
+
+    def to_dict(self) -> dict:
+        return {
+            "source": self.source.to_dict(),
+            "sink": self.sink.to_dict(),
+            "path_addrs": [hex(a) for a in self.path_addrs],
+            "path_funcs": self.path_funcs,
+            "path_length": len(self.path_addrs),
+        }
+
+
+CWE_SEVERITY: dict[str, Severity] = {
+    "CWE-119": Severity.CRITICAL,
+    "CWE-120": Severity.CRITICAL,
+    "CWE-121": Severity.CRITICAL,
+    "CWE-122": Severity.CRITICAL,
+    "CWE-124": Severity.HIGH,
+    "CWE-125": Severity.HIGH,
+    "CWE-126": Severity.HIGH,
+    "CWE-127": Severity.HIGH,
+    "CWE-134": Severity.CRITICAL,
+    "CWE-190": Severity.HIGH,
+    "CWE-415": Severity.CRITICAL,
+    "CWE-416": Severity.CRITICAL,
+    "CWE-476": Severity.MEDIUM,
+    "CWE-676": Severity.MEDIUM,
+    "CWE-787": Severity.CRITICAL,
+    "CWE-78": Severity.CRITICAL,
+}
+
+
+@dataclass
+class VulnFinding:
+    finding_id: int
+    taint_path: TaintPath
+    cwe: str
+    severity: Severity
+    title: str
+    description: str
+    verified: bool = False
+
+    def to_dict(self) -> dict:
+        return {
+            "finding_id": self.finding_id,
+            "taint_path": self.taint_path.to_dict(),
+            "cwe": self.cwe,
+            "severity": self.severity.value,
+            "title": self.title,
+            "description": self.description,
+            "verified": self.verified,
+        }
+
+
+def classify_severity(cwe: str) -> Severity:
+    return CWE_SEVERITY.get(cwe, Severity.MEDIUM)
+
+```
+
+`python/vulnhunter4ghidra_engine/protocol.py`:
+
+```py
+import json
+from dataclasses import dataclass, field
+
+
+@dataclass
+class Command:
+    type: str
+    params: dict = field(default_factory=dict)
+
+
+@dataclass
+class Response:
+    status: str
+    data: dict | None = None
+    message: str | None = None
+
+    def to_json(self) -> str:
+        d = {"status": self.status}
+        if self.data is not None:
+            d["data"] = self.data
+        if self.message is not None:
+            d["message"] = self.message
+        return json.dumps(d)
+
+
+def parse_command(line: str) -> Command:
+    obj = json.loads(line)
+    return Command(type=obj["type"], params=obj.get("params", {}))
+
+
+def ok(data: dict | None = None) -> Response:
+    return Response(status="ok", data=data)
+
+
+def error(message: str) -> Response:
+    return Response(status="error", message=message)
+
+
+def progress(data: dict) -> Response:
+    return Response(status="progress", data=data)
+
+```
+
+`python/vulnhunter4ghidra_engine/server.py`:
+
+```py
+import argparse
+import logging
+import socket
+import threading
+
+from .engine import VulnHunterEngine
+from .protocol import parse_command, ok, error, progress
+
+HOST = "127.0.0.1"
+PORT = 13372
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[vulnhunter4ghidra] %(levelname)s %(message)s",
+)
+logger = logging.getLogger("vulnhunter4ghidra")
+
+HANDLERS = {
+    "init": lambda eng, p: eng.init(p["binary_path"]),
+    "scan_function": lambda eng, p: eng.scan_function(
+        func_addr=int(p["func_addr"], 16) if isinstance(p["func_addr"], str) else p["func_addr"],
+        func_name=p["func_name"],
+        callsites=p.get("callsites", []),
+        params=p.get("params", []),
+        is_exported=p.get("is_exported", False),
+    ),
+    "get_findings": lambda eng, p: {"findings": eng.get_findings()},
+    "get_sources": lambda eng, p: {"sources": eng.get_sources()},
+    "get_sinks": lambda eng, p: {"sinks": eng.get_sinks()},
+}
+
+
+def handle_client(conn: socket.socket, engine: VulnHunterEngine):
+    with conn.makefile("r", encoding="utf-8") as reader, \
+         conn.makefile("w", encoding="utf-8") as writer:
+        for line in reader:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                cmd = parse_command(line)
+                logger.info("CMD: %s", cmd.type)
+                if cmd.type == "analyze_taint":
+                    max_depth = cmd.params.get("max_depth", 5)
+                    result = engine.analyze_taint(max_depth=max_depth)
+                    resp = ok(result)
+                elif cmd.type == "scan_functions":
+                    functions = cmd.params.get("functions", [])
+                    results = []
+                    for i, func_info in enumerate(functions):
+                        func_result = engine.scan_function(
+                            func_addr=int(func_info["func_addr"], 16) if isinstance(func_info["func_addr"], str) else func_info["func_addr"],
+                            func_name=func_info["func_name"],
+                            callsites=func_info.get("callsites", []),
+                            params=func_info.get("params", []),
+                            is_exported=func_info.get("is_exported", False),
+                        )
+                        results.append(func_result)
+                        if i % 20 == 0:
+                            writer.write(progress({"scanned": i, "total": len(functions)}).to_json() + "\n")
+                            writer.flush()
+                    resp = ok({"results": results})
+                else:
+                    handler = HANDLERS.get(cmd.type)
+                    if handler is None:
+                        resp = error(f"Unknown command: {cmd.type}")
+                    else:
+                        result = handler(engine, cmd.params)
+                        resp = ok(result)
+            except Exception as e:
+                logger.exception("Error handling command")
+                resp = error(str(e))
+            writer.write(resp.to_json() + "\n")
+            writer.flush()
+
+
+def main():
+    parser = argparse.ArgumentParser(description="VulnHunter4Ghidra analysis engine")
+    parser.add_argument("--port", type=int, default=PORT)
+    parser.add_argument("--host", default=HOST)
+    parser.add_argument("-v", "--verbose", action="store_true")
+    args = parser.parse_args()
+    if args.verbose:
+        logging.getLogger("vulnhunter4ghidra").setLevel(logging.DEBUG)
+
+    engine = VulnHunterEngine()
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind((args.host, args.port))
+    server.listen(1)
+    logger.info("VulnHunter4Ghidra engine listening on %s:%d", args.host, args.port)
+
+    try:
+        while True:
+            conn, addr = server.accept()
+            logger.info("Client connected from %s", addr)
+            thread = threading.Thread(target=handle_client, args=(conn, engine), daemon=True)
+            thread.start()
+    except KeyboardInterrupt:
+        logger.info("Shutting down")
+    finally:
+        server.close()
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`python/vulnhunter4ghidra_engine/sinks.py`:
+
+```py
+from .models import Sink, SinkType
+
+SINK_SIGNATURES: dict[str, tuple[SinkType, str, int]] = {
+    # (sink_type, CWE, vulnerable_arg_index)
+    # Buffer overflow sinks
+    "memcpy":   (SinkType.BUFFER_OVERFLOW, "CWE-120", 0),
+    "memmove":  (SinkType.BUFFER_OVERFLOW, "CWE-120", 0),
+    "strcpy":   (SinkType.BUFFER_OVERFLOW, "CWE-120", 0),
+    "strncpy":  (SinkType.BUFFER_OVERFLOW, "CWE-120", 0),
+    "strcat":   (SinkType.BUFFER_OVERFLOW, "CWE-120", 0),
+    "strncat":  (SinkType.BUFFER_OVERFLOW, "CWE-120", 0),
+    "gets":     (SinkType.BUFFER_OVERFLOW, "CWE-120", 0),
+    "read":     (SinkType.BUFFER_OVERFLOW, "CWE-120", 1),
+    "recv":     (SinkType.BUFFER_OVERFLOW, "CWE-120", 1),
+    "recvfrom": (SinkType.BUFFER_OVERFLOW, "CWE-120", 1),
+    # Format string sinks
+    "printf":   (SinkType.FORMAT_STRING, "CWE-134", 0),
+    "sprintf":  (SinkType.FORMAT_STRING, "CWE-134", 1),
+    "fprintf":  (SinkType.FORMAT_STRING, "CWE-134", 1),
+    "snprintf": (SinkType.FORMAT_STRING, "CWE-134", 2),
+    "syslog":   (SinkType.FORMAT_STRING, "CWE-134", 1),
+    # Use-after-free / double-free sinks
+    "free":     (SinkType.USE_AFTER_FREE, "CWE-416", 0),
+    # Command injection sinks
+    "system":   (SinkType.COMMAND_INJECTION, "CWE-78", 0),
+    "popen":    (SinkType.COMMAND_INJECTION, "CWE-78", 0),
+    "execve":   (SinkType.COMMAND_INJECTION, "CWE-78", 0),
+    "execvp":   (SinkType.COMMAND_INJECTION, "CWE-78", 0),
+}
+
+
+def identify_sinks(
+    func_addr: int,
+    func_name: str,
+    callsites: list[dict],
+) -> list[Sink]:
+    """Identify sinks from call sites within a function.
+
+    Each callsite dict has: address (int), callee_name (str).
+    """
+    sinks = []
+    for cs in callsites:
+        callee = cs.get("callee_name", "")
+        addr = cs["address"]
+        if callee in SINK_SIGNATURES:
+            sink_type, cwe, vuln_arg = SINK_SIGNATURES[callee]
+            sinks.append(Sink(
+                address=addr,
+                func_addr=func_addr,
+                func_name=func_name,
+                callee_name=callee,
+                sink_type=sink_type,
+                cwe=cwe,
+                vulnerable_arg_index=vuln_arg,
+            ))
+    return sinks
+
+
+def get_sink_functions() -> set[str]:
+    """Return the set of all known sink function names."""
+    return set(SINK_SIGNATURES.keys())
+
+
+def get_cwe_for_function(func_name: str) -> str | None:
+    """Return the CWE ID for a known sink function, or None."""
+    entry = SINK_SIGNATURES.get(func_name)
+    return entry[1] if entry else None
+
+```
+
+`python/vulnhunter4ghidra_engine/sources.py`:
+
+```py
+from .models import Source, SourceType
+
+INPUT_FUNCTIONS: dict[str, SourceType] = {
+    "recv": SourceType.RECV,
+    "recvfrom": SourceType.RECV,
+    "recvmsg": SourceType.RECV,
+    "read": SourceType.READ,
+    "pread": SourceType.READ,
+    "fread": SourceType.FILE_READ,
+    "fgets": SourceType.FGETS,
+    "gets": SourceType.FGETS,
+    "scanf": SourceType.SCANF,
+    "sscanf": SourceType.SCANF,
+    "fscanf": SourceType.SCANF,
+    "getenv": SourceType.ENV,
+}
+
+BUFFER_PARAM_TYPES = frozenset({
+    "void *", "byte *", "char *", "uchar *",
+    "uint8_t *", "int8_t *", "unsigned char *",
+})
+
+
+def identify_sources_from_callsites(
+    func_addr: int,
+    func_name: str,
+    callsites: list[dict],
+) -> list[Source]:
+    """Identify sources from call sites within a function.
+
+    Each callsite dict has: address (int), callee_name (str).
+    """
+    sources = []
+    for cs in callsites:
+        callee = cs.get("callee_name", "")
+        addr = cs["address"]
+        if callee in INPUT_FUNCTIONS:
+            sources.append(Source(
+                address=addr,
+                func_addr=func_addr,
+                func_name=func_name,
+                source_type=INPUT_FUNCTIONS[callee],
+                description=f"Call to {callee}()",
+            ))
+    return sources
+
+
+def identify_sources_from_params(
+    func_addr: int,
+    func_name: str,
+    params: list[dict],
+    is_exported: bool = False,
+) -> list[Source]:
+    """Identify sources from function parameters.
+
+    Each param dict has: index (int), name (str), type (str).
+    Exported functions with buffer-type parameters are sources.
+    """
+    sources = []
+    for p in params:
+        ptype = p.get("type", "")
+        if ptype in BUFFER_PARAM_TYPES or (is_exported and ptype.endswith("*")):
+            sources.append(Source(
+                address=func_addr,
+                func_addr=func_addr,
+                func_name=func_name,
+                source_type=SourceType.FUNC_PARAM,
+                description=f"Parameter {p['index']}: {p.get('name', '?')} ({ptype})",
+                param_index=p["index"],
+            ))
+    return sources
+
+
+def identify_argv_source(
+    func_addr: int,
+    func_name: str,
+    params: list[dict],
+) -> Source | None:
+    """Identify argv source in main-like functions."""
+    if func_name not in ("main", "_main", "entry"):
+        return None
+    for p in params:
+        if p.get("name") in ("argv", "args") or p.get("type") == "char * *":
+            return Source(
+                address=func_addr,
+                func_addr=func_addr,
+                func_name=func_name,
+                source_type=SourceType.ARGV,
+                description="argv from main()",
+                param_index=p["index"],
+            )
+    return None
+
+```
+
+`python/vulnhunter4ghidra_engine/taint.py`:
+
+```py
+import logging
+from .models import Source, Sink, TaintPath
+
+logger = logging.getLogger("vulnhunter4ghidra")
+
+
+def find_taint_paths_intraprocedural(
+    project,
+    func_addr: int,
+    sources: list[Source],
+    sinks: list[Sink],
+) -> list[TaintPath]:
+    """Find taint paths within a single function using CFG reachability.
+
+    Uses angr's CFG to check if there is a path from each source address
+    to each sink address within the function's graph.
+    """
+    if not sources or not sinks:
+        return []
+
+    cfg = project.kb.cfgs.get_most_accurate()
+    if cfg is None:
+        cfg = project.analyses.CFGFast(
+            regions=[(func_addr, func_addr + 0x10000)],
+            normalize=True,
+            show_progressbar=False,
+        )
+
+    func = project.kb.functions.get(func_addr)
+    if func is None:
+        logger.warning("Function at %#x not found in KB", func_addr)
+        return []
+
+    func_graph = func.graph
+    node_map: dict[int, object] = {}
+    for node in func_graph.nodes():
+        node_map[node.addr] = node
+
+    paths = []
+    for source in sources:
+        for sink in sinks:
+            if source.address == sink.address:
+                continue
+            src_node = _find_nearest_node(node_map, source.address, func_graph)
+            snk_node = _find_nearest_node(node_map, sink.address, func_graph)
+            if src_node is None or snk_node is None:
+                continue
+            if src_node == snk_node:
+                has_cycle = any(
+                    _is_reachable(func_graph, succ, snk_node)
+                    for succ in func_graph.successors(src_node)
+                )
+                if source.address < sink.address or has_cycle:
+                    paths.append(TaintPath(
+                        source=source,
+                        sink=sink,
+                        path_addrs=[src_node.addr],
+                        path_funcs=[func.name],
+                    ))
+            elif _is_reachable(func_graph, src_node, snk_node):
+                path_addrs = _extract_path_addrs(func_graph, src_node, snk_node)
+                paths.append(TaintPath(
+                    source=source,
+                    sink=sink,
+                    path_addrs=path_addrs,
+                    path_funcs=[func.name],
+                ))
+    return paths
+
+
+def find_taint_paths_interprocedural(
+    project,
+    sources: list[Source],
+    sinks: list[Sink],
+    max_depth: int = 5,
+) -> list[TaintPath]:
+    """Find taint paths across function boundaries using the call graph.
+
+    Checks if a function containing a source can reach a function containing
+    a sink within max_depth calls.
+    """
+    if not sources or not sinks:
+        return []
+
+    cfg = project.kb.cfgs.get_most_accurate()
+    if cfg is None:
+        cfg = project.analyses.CFGFast(normalize=True, show_progressbar=False)
+
+    call_graph = project.kb.callgraph
+
+    source_funcs: dict[int, list[Source]] = {}
+    for s in sources:
+        source_funcs.setdefault(s.func_addr, []).append(s)
+
+    sink_funcs: dict[int, list[Sink]] = {}
+    for s in sinks:
+        sink_funcs.setdefault(s.func_addr, []).append(s)
+
+    paths = []
+    for src_func_addr, func_sources in source_funcs.items():
+        reachable = _bfs_reachable_funcs(call_graph, src_func_addr, max_depth)
+        for snk_func_addr, func_sinks in sink_funcs.items():
+            if snk_func_addr == src_func_addr or snk_func_addr not in reachable:
+                continue
+            func_path = reachable[snk_func_addr]
+            func_names = []
+            for addr in func_path:
+                f = project.kb.functions.get(addr)
+                func_names.append(f.name if f else hex(addr))
+            for source in func_sources:
+                for sink in func_sinks:
+                    paths.append(TaintPath(
+                        source=source,
+                        sink=sink,
+                        path_addrs=func_path,
+                        path_funcs=func_names,
+                    ))
+    return paths
+
+
+def _find_nearest_node(node_map, addr, graph):
+    if addr in node_map:
+        return node_map[addr]
+    for node in graph.nodes():
+        if node.addr <= addr < node.addr + node.size:
+            return node
+    return None
+
+
+def _is_reachable(graph, src_node, dst_node) -> bool:
+    visited = set()
+    queue = [src_node]
+    while queue:
+        node = queue.pop(0)
+        if node == dst_node:
+            return True
+        if node in visited:
+            continue
+        visited.add(node)
+        for succ in graph.successors(node):
+            queue.append(succ)
+    return False
+
+
+def _extract_path_addrs(graph, src_node, dst_node) -> list[int]:
+    if src_node == dst_node:
+        return [src_node.addr]
+    visited = {}
+    queue = [src_node]
+    visited[src_node] = None
+    while queue:
+        node = queue.pop(0)
+        if node == dst_node:
+            path = []
+            cur = node
+            while cur is not None:
+                path.append(cur.addr)
+                cur = visited[cur]
+            return list(reversed(path))
+        for succ in graph.successors(node):
+            if succ not in visited:
+                visited[succ] = node
+                queue.append(succ)
+    return [src_node.addr, dst_node.addr]
+
+
+def _bfs_reachable_funcs(
+    call_graph, start_addr: int, max_depth: int
+) -> dict[int, list[int]]:
+    """BFS over the call graph. Returns {reachable_addr: [path from start]}."""
+    reachable = {start_addr: [start_addr]}
+    queue = [(start_addr, [start_addr], 0)]
+    while queue:
+        addr, path, depth = queue.pop(0)
+        if depth >= max_depth:
+            continue
+        try:
+            successors = list(call_graph.successors(addr))
+        except Exception:
+            continue
+        for succ in successors:
+            if succ not in reachable:
+                new_path = path + [succ]
+                reachable[succ] = new_path
+                queue.append((succ, new_path, depth + 1))
+    return reachable
+
+```
+
+`settings.gradle`:
+
+```gradle
+rootProject.name = 'VulnHunter4Ghidra'
+
+```
+
+`src/main/java/vulnhunter4ghidra/VulnHunter4GhidraPlugin.java`:
+
+```java
+package vulnhunter4ghidra;
+
+import java.io.IOException;
+
+import ghidra.app.plugin.PluginCategoryNames;
+import ghidra.app.services.ProgramManager;
+import ghidra.framework.plugintool.*;
+import ghidra.framework.plugintool.util.PluginStatus;
+import ghidra.program.model.listing.Program;
+import ghidra.util.Msg;
+import vulnhunter4ghidra.actions.*;
+import vulnhunter4ghidra.engine.EngineManager;
+import vulnhunter4ghidra.engine.EngineProtocol;
+
+//@formatter:off
+@PluginInfo(
+	status = PluginStatus.UNSTABLE,
+	packageName = "VulnHunter4Ghidra",
+	category = PluginCategoryNames.ANALYSIS,
+	shortDescription = "Interactive Vulnerability Detection & Taint Analysis",
+	description = "Detects vulnerabilities via source-sink taint analysis powered by angr."
+)
+//@formatter:on
+public class VulnHunter4GhidraPlugin extends Plugin {
+
+	private EngineManager engineManager;
+
+	public VulnHunter4GhidraPlugin(PluginTool tool) {
+		super(tool);
+		engineManager = new EngineManager();
+		new ScanVulnsAction(this);
+		new AnalyzeTaintAction(this);
+	}
+
+	public EngineManager getEngineManager() {
+		return engineManager;
+	}
+
+	public void ensureEngineStarted() {
+		if (!engineManager.isRunning()) {
+			try {
+				engineManager.start();
+			}
+			catch (Exception e) {
+				Msg.showError(this, null, "VulnHunter4Ghidra",
+					"Failed to start engine: " + e.getMessage(), e);
+				return;
+			}
+		}
+		ensureInitialized();
+	}
+
+	public boolean ensureInitialized() {
+		ProgramManager pm = tool.getService(ProgramManager.class);
+		if (pm == null) return false;
+		Program program = pm.getCurrentProgram();
+		if (program == null) return false;
+
+		String path = program.getExecutablePath();
+		if (path == null || path.isBlank()) {
+			Msg.showError(this, null, "VulnHunter4Ghidra",
+				"Could not determine the file path of the current program.");
+			return false;
+		}
+
+		if (!engineManager.isRunning()) {
+			Msg.showError(this, null, "VulnHunter4Ghidra",
+				"Engine is not running.");
+			return false;
+		}
+
+		try {
+			EngineProtocol.Response resp = engineManager.sendCommand(
+				EngineProtocol.initCmd(path));
+			if (resp.isOk()) {
+				Msg.info(this, "Initialized engine with: " + path);
+				return true;
+			}
+			Msg.showError(this, null, "VulnHunter4Ghidra",
+				"Failed to load binary: " + resp.getMessage());
+			return false;
+		}
+		catch (IOException e) {
+			Msg.showError(this, null, "VulnHunter4Ghidra",
+				"Lost connection to engine: " + e.getMessage());
+			engineManager.stop();
+			return false;
+		}
+	}
+
+	@Override
+	protected void dispose() {
+		engineManager.dispose();
+		super.dispose();
+	}
+}
+
+```
+
+`src/main/java/vulnhunter4ghidra/actions/AnalyzeTaintAction.java`:
+
+```java
+package vulnhunter4ghidra.actions;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import docking.ActionContext;
+import docking.action.DockingAction;
+import docking.action.MenuData;
+import ghidra.util.Msg;
+import vulnhunter4ghidra.VulnHunter4GhidraPlugin;
+import vulnhunter4ghidra.engine.EngineProtocol;
+import vulnhunter4ghidra.engine.EngineProtocol.Response;
+
+public class AnalyzeTaintAction extends DockingAction {
+
+	private final VulnHunter4GhidraPlugin plugin;
+
+	public AnalyzeTaintAction(VulnHunter4GhidraPlugin plugin) {
+		super("Analyze Taint Paths", plugin.getName());
+		this.plugin = plugin;
+		setMenuBarData(new MenuData(
+			new String[] { "VulnHunter4Ghidra", "Analyze Taint" }, null, "VulnHunter"));
+		plugin.getTool().addAction(this);
+	}
+
+	@Override
+	public void actionPerformed(ActionContext context) {
+		if (!plugin.getEngineManager().isRunning()) {
+			Msg.showError(this, null, "VulnHunter4Ghidra",
+				"Engine is not running. Run 'Scan Functions' first.");
+			return;
+		}
+
+		try {
+			Response resp = plugin.getEngineManager().sendCommand(
+				EngineProtocol.analyzeTaintCmd(5));
+			if (resp.isOk()) {
+				JsonObject data = resp.getData();
+				long totalSources = data.get("total_sources").getAsLong();
+				long totalSinks = data.get("total_sinks").getAsLong();
+				long taintPaths = data.get("taint_paths").getAsLong();
+				JsonArray findings = data.getAsJsonArray("findings");
+				int findingsCount = findings != null ? findings.size() : 0;
+
+				StringBuilder sb = new StringBuilder();
+				sb.append(String.format("Sources: %d, Sinks: %d\n", totalSources, totalSinks));
+				sb.append(String.format("Taint paths: %d, Findings: %d\n\n", taintPaths, findingsCount));
+
+				if (findings != null) {
+					for (JsonElement el : findings) {
+						JsonObject f = el.getAsJsonObject();
+						sb.append(String.format("[%s] %s — %s\n",
+							f.get("severity").getAsString().toUpperCase(),
+							f.get("cwe").getAsString(),
+							f.get("title").getAsString()));
+					}
+				}
+
+				Msg.showInfo(this, null, "VulnHunter4Ghidra — Results", sb.toString());
+			} else {
+				Msg.showError(this, null, "VulnHunter4Ghidra",
+					"Analysis failed: " + resp.getMessage());
+			}
+		}
+		catch (Exception e) {
+			Msg.showError(this, null, "VulnHunter4Ghidra",
+				"Error during taint analysis: " + e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public boolean isEnabledForContext(ActionContext context) {
+		return true;
+	}
+}
+
+```
+
+`src/main/java/vulnhunter4ghidra/actions/ScanVulnsAction.java`:
+
+```java
+package vulnhunter4ghidra.actions;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+import docking.ActionContext;
+import docking.action.DockingAction;
+import docking.action.MenuData;
+import ghidra.app.services.ProgramManager;
+import ghidra.program.model.listing.*;
+import ghidra.program.model.symbol.Symbol;
+import ghidra.program.model.symbol.SymbolTable;
+import ghidra.util.Msg;
+import ghidra.util.task.TaskMonitor;
+import vulnhunter4ghidra.VulnHunter4GhidraPlugin;
+import vulnhunter4ghidra.engine.EngineProtocol;
+import vulnhunter4ghidra.engine.EngineProtocol.Response;
+
+public class ScanVulnsAction extends DockingAction {
+
+	private final VulnHunter4GhidraPlugin plugin;
+	private static final Gson GSON = new Gson();
+
+	public ScanVulnsAction(VulnHunter4GhidraPlugin plugin) {
+		super("Scan for Vulnerabilities", plugin.getName());
+		this.plugin = plugin;
+		setMenuBarData(new MenuData(
+			new String[] { "VulnHunter4Ghidra", "Scan Functions" }, null, "VulnHunter"));
+		plugin.getTool().addAction(this);
+	}
+
+	@Override
+	public void actionPerformed(ActionContext context) {
+		plugin.ensureEngineStarted();
+		if (!plugin.getEngineManager().isRunning()) {
+			return;
+		}
+
+		ProgramManager pm = plugin.getTool().getService(ProgramManager.class);
+		if (pm == null) return;
+		Program program = pm.getCurrentProgram();
+		if (program == null) return;
+
+		FunctionManager fm = program.getFunctionManager();
+		FunctionIterator functions = fm.getFunctions(true);
+
+		JsonArray funcArray = new JsonArray();
+		while (functions.hasNext()) {
+			Function func = functions.next();
+			if (func.isExternal() || func.isThunk()) {
+				continue;
+			}
+			JsonObject funcObj = new JsonObject();
+			funcObj.addProperty("func_addr", "0x" + Long.toHexString(func.getEntryPoint().getOffset()));
+			funcObj.addProperty("func_name", func.getName());
+			funcObj.addProperty("is_exported",
+				program.getSymbolTable().isExternalEntryPoint(func.getEntryPoint()));
+
+			JsonArray callsites = new JsonArray();
+			InstructionIterator instructions = program.getListing().getInstructions(func.getBody(), true);
+			while (instructions.hasNext()) {
+				var instr = instructions.next();
+				if (instr.getFlowType().isCall()) {
+					var refs = instr.getReferencesFrom();
+					for (var ref : refs) {
+						if (ref.getReferenceType().isCall()) {
+							Function callee = fm.getFunctionAt(ref.getToAddress());
+							if (callee != null) {
+								JsonObject cs = new JsonObject();
+								cs.addProperty("address", instr.getAddress().getOffset());
+								cs.addProperty("callee_name", callee.getName());
+								callsites.add(cs);
+							}
+						}
+					}
+				}
+			}
+			funcObj.add("callsites", callsites);
+
+			JsonArray params = new JsonArray();
+			for (int i = 0; i < func.getParameterCount(); i++) {
+				var p = func.getParameter(i);
+				JsonObject paramObj = new JsonObject();
+				paramObj.addProperty("index", i);
+				paramObj.addProperty("name", p.getName());
+				paramObj.addProperty("type", p.getDataType().getDisplayName());
+				paramObj.addProperty("size", p.getLength());
+				params.add(paramObj);
+			}
+			funcObj.add("params", params);
+			funcArray.add(funcObj);
+		}
+
+		try {
+			Response resp = plugin.getEngineManager().sendCommandWithProgress(
+				EngineProtocol.scanFunctionsCmd(GSON.toJson(funcArray)),
+				progress -> {
+					if (progress.getData() != null) {
+						Msg.info(this, String.format("Scanning: %d/%d functions",
+							progress.getDataLong("scanned", 0),
+							progress.getDataLong("total", 0)));
+					}
+				});
+			if (resp.isOk()) {
+				Msg.showInfo(this, null, "VulnHunter4Ghidra",
+					"Scan complete. Use 'Analyze Taint' to find vulnerability paths.");
+			} else {
+				Msg.showError(this, null, "VulnHunter4Ghidra",
+					"Scan failed: " + resp.getMessage());
+			}
+		}
+		catch (Exception e) {
+			Msg.showError(this, null, "VulnHunter4Ghidra",
+				"Error during scan: " + e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public boolean isEnabledForContext(ActionContext context) {
+		return true;
+	}
+}
+
+```
+
+`src/main/java/vulnhunter4ghidra/engine/EngineManager.java`:
+
+```java
+package vulnhunter4ghidra.engine;
+
+import java.io.*;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+
+import generic.jar.ResourceFile;
+import ghidra.framework.Application;
+import ghidra.util.Msg;
+import vulnhunter4ghidra.engine.EngineProtocol.Command;
+import vulnhunter4ghidra.engine.EngineProtocol.Response;
+
+public class EngineManager {
+
+	private static final String HOST = "127.0.0.1";
+	private static final int PORT = 13372;
+	private static final int CONNECT_TIMEOUT_MS = 10000;
+	private static final int CONNECT_RETRY_DELAY_MS = 500;
+
+	private Process pythonProcess;
+	private Socket socket;
+	private BufferedWriter writer;
+	private BufferedReader reader;
+	private final ExecutorService executor = Executors.newSingleThreadExecutor();
+	private volatile boolean running;
+
+	public void start() throws IOException {
+		if (running) {
+			return;
+		}
+
+		String pythonPath = findPython();
+		String serverModule = findServerModule();
+
+		ProcessBuilder pb = new ProcessBuilder(
+			pythonPath, "-m", "vulnhunter4ghidra_engine.server");
+		pb.environment().put("PYTHONPATH", serverModule);
+		pb.redirectErrorStream(true);
+		pythonProcess = pb.start();
+
+		startLogReader(pythonProcess.getInputStream());
+		connectWithRetry();
+		running = true;
+		Msg.info(this, "VulnHunter4Ghidra engine started on port " + PORT);
+	}
+
+	public void stop() {
+		running = false;
+		closeSocket();
+		if (pythonProcess != null && pythonProcess.isAlive()) {
+			pythonProcess.destroy();
+			try {
+				pythonProcess.waitFor(5, TimeUnit.SECONDS);
+			}
+			catch (InterruptedException e) {
+				pythonProcess.destroyForcibly();
+			}
+		}
+		pythonProcess = null;
+		Msg.info(this, "VulnHunter4Ghidra engine stopped");
+	}
+
+	public boolean isRunning() {
+		return running && socket != null && socket.isConnected() && !socket.isClosed();
+	}
+
+	public Response sendCommand(Command cmd) throws IOException {
+		if (!isRunning()) {
+			throw new IOException("Engine is not running");
+		}
+		String json = EngineProtocol.serialize(cmd);
+		synchronized (this) {
+			writer.write(json);
+			writer.newLine();
+			writer.flush();
+			String responseLine = reader.readLine();
+			if (responseLine == null) {
+				throw new IOException("Engine connection closed");
+			}
+			return EngineProtocol.deserialize(responseLine);
+		}
+	}
+
+	public CompletableFuture<Response> sendCommandAsync(Command cmd) {
+		return CompletableFuture.supplyAsync(() -> {
+			try {
+				return sendCommand(cmd);
+			}
+			catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}, executor);
+	}
+
+	public Response sendCommandWithProgress(Command cmd,
+			Consumer<Response> onProgress) throws IOException {
+		if (!isRunning()) {
+			throw new IOException("Engine is not running");
+		}
+		String json = EngineProtocol.serialize(cmd);
+		synchronized (this) {
+			writer.write(json);
+			writer.newLine();
+			writer.flush();
+			while (true) {
+				String responseLine = reader.readLine();
+				if (responseLine == null) {
+					throw new IOException("Engine connection closed");
+				}
+				Response resp = EngineProtocol.deserialize(responseLine);
+				if (resp.isProgress()) {
+					if (onProgress != null) {
+						onProgress.accept(resp);
+					}
+					continue;
+				}
+				return resp;
+			}
+		}
+	}
+
+	public void dispose() {
+		stop();
+		executor.shutdownNow();
+	}
+
+	private void connectWithRetry() throws IOException {
+		long deadline = System.currentTimeMillis() + CONNECT_TIMEOUT_MS;
+		IOException lastException = null;
+
+		while (System.currentTimeMillis() < deadline) {
+			try {
+				socket = new Socket(HOST, PORT);
+				writer = new BufferedWriter(
+					new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
+				reader = new BufferedReader(
+					new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+				return;
+			}
+			catch (IOException e) {
+				lastException = e;
+				try {
+					Thread.sleep(CONNECT_RETRY_DELAY_MS);
+				}
+				catch (InterruptedException ie) {
+					Thread.currentThread().interrupt();
+					throw new IOException("Interrupted while connecting", ie);
+				}
+			}
+		}
+		throw new IOException("Failed to connect to engine after " + CONNECT_TIMEOUT_MS + "ms",
+			lastException);
+	}
+
+	private void closeSocket() {
+		try {
+			if (writer != null) writer.close();
+			if (reader != null) reader.close();
+			if (socket != null) socket.close();
+		}
+		catch (IOException e) {
+			Msg.warn(this, "Error closing engine connection", e);
+		}
+		writer = null;
+		reader = null;
+		socket = null;
+	}
+
+	private void startLogReader(InputStream inputStream) {
+		Thread logThread = new Thread(() -> {
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+				String line;
+				while ((line = br.readLine()) != null) {
+					Msg.info(this, "[vulnhunter] " + line);
+				}
+			}
+			catch (IOException e) {
+				if (running) {
+					Msg.warn(this, "Engine log reader stopped", e);
+				}
+			}
+		}, "VulnHunter4Ghidra-LogReader");
+		logThread.setDaemon(true);
+		logThread.start();
+	}
+
+	private String findPython() {
+		String envPython = System.getenv("VULNHUNTER_PYTHON");
+		if (envPython != null && new File(envPython).isFile()) {
+			Msg.info(this, "Using VULNHUNTER_PYTHON: " + envPython);
+			return envPython;
+		}
+
+		try {
+			ResourceFile moduleDir = Application.getModuleDataSubDirectory("");
+			File extRoot = moduleDir.getParentFile().getFile(false);
+			File dir = extRoot;
+			for (int i = 0; i < 8 && dir != null; i++) {
+				File venvPython = new File(dir, ".venv/bin/python3");
+				if (venvPython.isFile()) {
+					Msg.info(this, "Using venv Python: " + venvPython.getAbsolutePath());
+					return venvPython.getAbsolutePath();
+				}
+				dir = dir.getParentFile();
+			}
+		}
+		catch (Exception e) {
+			// fall through
+		}
+
+		String[] candidates = { "python3", "python" };
+		for (String candidate : candidates) {
+			try {
+				Process p = new ProcessBuilder(candidate, "--version")
+					.redirectErrorStream(true).start();
+				if (p.waitFor(5, TimeUnit.SECONDS) && p.exitValue() == 0) {
+					return candidate;
+				}
+			}
+			catch (Exception e) {
+				// try next
+			}
+		}
+		return "python3";
+	}
+
+	private String findServerModule() {
+		try {
+			ResourceFile moduleDir = Application.getModuleDataSubDirectory("");
+			File pythonDir = new File(moduleDir.getParentFile().getFile(false), "python");
+			if (pythonDir.isDirectory()) {
+				return pythonDir.getAbsolutePath();
+			}
+		}
+		catch (Exception e) {
+			Msg.warn(this, "Could not locate bundled python modules", e);
+		}
+		return ".";
+	}
+}
+
+```
+
+`src/main/java/vulnhunter4ghidra/engine/EngineProtocol.java`:
+
+```java
+package vulnhunter4ghidra.engine;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+public class EngineProtocol {
+
+	private static final Gson GSON = new GsonBuilder().create();
+
+	public static class Command {
+		private final String type;
+		private final Map<String, Object> params;
+
+		public Command(String type, Map<String, Object> params) {
+			this.type = type;
+			this.params = params;
+		}
+
+		public String getType() { return type; }
+		public Map<String, Object> getParams() { return params; }
+	}
+
+	public static class Response {
+		private String status;
+		private JsonObject data;
+		private String message;
+
+		public boolean isOk() { return "ok".equals(status); }
+		public boolean isError() { return "error".equals(status); }
+		public boolean isProgress() { return "progress".equals(status); }
+		public String getStatus() { return status; }
+		public JsonObject getData() { return data; }
+		public String getMessage() { return message; }
+
+		public String getDataString(String key) {
+			if (data == null || !data.has(key)) return null;
+			JsonElement el = data.get(key);
+			return el.isJsonNull() ? null : el.getAsString();
+		}
+
+		public long getDataLong(String key, long defaultValue) {
+			if (data == null || !data.has(key)) return defaultValue;
+			return data.get(key).getAsLong();
+		}
+
+		public boolean getDataBoolean(String key, boolean defaultValue) {
+			if (data == null || !data.has(key)) return defaultValue;
+			JsonElement el = data.get(key);
+			return el.isJsonNull() ? defaultValue : el.getAsBoolean();
+		}
+
+		public JsonArray getDataArray(String key) {
+			if (data == null || !data.has(key)) return null;
+			return data.getAsJsonArray(key);
+		}
+	}
+
+	public static String serialize(Command cmd) {
+		return GSON.toJson(cmd);
+	}
+
+	public static Response deserialize(String json) {
+		return GSON.fromJson(json, Response.class);
+	}
+
+	public static Command initCmd(String binaryPath) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("binary_path", binaryPath);
+		return new Command("init", params);
+	}
+
+	public static Command scanFunctionsCmd(String functionsJson) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("functions", GSON.fromJson(functionsJson, Object.class));
+		return new Command("scan_functions", params);
+	}
+
+	public static Command scanFunctionCmd(
+			String funcAddr, String funcName,
+			String callsitesJson, String paramsJson, boolean isExported) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("func_addr", funcAddr);
+		params.put("func_name", funcName);
+		params.put("callsites", GSON.fromJson(callsitesJson, Object.class));
+		params.put("params", GSON.fromJson(paramsJson, Object.class));
+		params.put("is_exported", isExported);
+		return new Command("scan_function", params);
+	}
+
+	public static Command analyzeTaintCmd(int maxDepth) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("max_depth", maxDepth);
+		return new Command("analyze_taint", params);
+	}
+
+	public static Command getFindingsCmd() {
+		return new Command("get_findings", new HashMap<>());
+	}
+
+	public static Command getSourcesCmd() {
+		return new Command("get_sources", new HashMap<>());
+	}
+
+	public static Command getSinksCmd() {
+		return new Command("get_sinks", new HashMap<>());
+	}
+}
+
+```
+
+`test/test_engine.py`:
+
+```py
+import pytest
+from vulnhunter4ghidra_engine.engine import VulnHunterEngine
+
+
+def test_engine_init_state():
+    engine = VulnHunterEngine()
+    assert engine.project is None
+    assert engine.binary_path is None
+    assert engine._all_sources == []
+    assert engine._all_sinks == []
+    assert engine._findings == []
+
+
+def test_engine_init_nonexistent_binary():
+    engine = VulnHunterEngine()
+    with pytest.raises(Exception):
+        engine.init("/nonexistent/binary")
+
+
+def test_analyze_taint_requires_init():
+    engine = VulnHunterEngine()
+    with pytest.raises(RuntimeError, match="not loaded"):
+        engine.analyze_taint()
+
+
+def test_scan_function_with_source_and_sink():
+    engine = VulnHunterEngine()
+    result = engine.scan_function(
+        func_addr=0x401000,
+        func_name="handle_request",
+        callsites=[
+            {"address": 0x401010, "callee_name": "fgets"},
+            {"address": 0x401040, "callee_name": "memcpy"},
+        ],
+        params=[
+            {"index": 0, "name": "sock", "type": "int"},
+        ],
+        is_exported=False,
+    )
+    assert result["sources_found"] == 1  # fgets
+    assert result["sinks_found"] == 1    # memcpy
+    assert len(engine._all_sources) == 1
+    assert len(engine._all_sinks) == 1
+
+
+def test_scan_function_no_sources_or_sinks():
+    engine = VulnHunterEngine()
+    result = engine.scan_function(
+        func_addr=0x401000,
+        func_name="safe_func",
+        callsites=[
+            {"address": 0x401010, "callee_name": "strlen"},
+        ],
+        params=[{"index": 0, "name": "n", "type": "int"}],
+    )
+    assert result["sources_found"] == 0
+    assert result["sinks_found"] == 0
+
+
+def test_scan_function_with_buffer_param():
+    engine = VulnHunterEngine()
+    result = engine.scan_function(
+        func_addr=0x401000,
+        func_name="parse",
+        callsites=[],
+        params=[
+            {"index": 0, "name": "buf", "type": "char *"},
+            {"index": 1, "name": "len", "type": "int"},
+        ],
+        is_exported=True,
+    )
+    # char * is a buffer type, always a source
+    # len with type "int" and is_exported -> also a source for exported funcs with ptr param
+    assert result["sources_found"] >= 1
+
+
+def test_scan_function_argv_in_main():
+    engine = VulnHunterEngine()
+    result = engine.scan_function(
+        func_addr=0x401000,
+        func_name="main",
+        callsites=[],
+        params=[
+            {"index": 0, "name": "argc", "type": "int"},
+            {"index": 1, "name": "argv", "type": "char * *"},
+        ],
+    )
+    assert result["sources_found"] == 1  # argv
+
+
+def test_get_findings_empty():
+    engine = VulnHunterEngine()
+    assert engine.get_findings() == []
+
+
+def test_get_sources_empty():
+    engine = VulnHunterEngine()
+    assert engine.get_sources() == []
+
+
+def test_get_sinks_empty():
+    engine = VulnHunterEngine()
+    assert engine.get_sinks() == []
+
+
+def test_scan_accumulates():
+    engine = VulnHunterEngine()
+    engine.scan_function(
+        0x401000, "func_a",
+        [{"address": 0x401010, "callee_name": "fgets"}],
+        [],
+    )
+    engine.scan_function(
+        0x402000, "func_b",
+        [{"address": 0x402010, "callee_name": "memcpy"}],
+        [],
+    )
+    assert len(engine._all_sources) == 1
+    assert len(engine._all_sinks) == 1
+
+```
+
+`test/test_models.py`:
+
+```py
+from vulnhunter4ghidra_engine.models import (
+    Source, Sink, TaintPath, VulnFinding,
+    SourceType, SinkType, Severity,
+    classify_severity,
+)
+
+
+def _make_source(addr=0x401000, func_addr=0x401000, func_name="parse_input"):
+    return Source(
+        address=addr, func_addr=func_addr, func_name=func_name,
+        source_type=SourceType.FUNC_PARAM,
+        description="Parameter 0 of parse_input",
+        param_index=0,
+    )
+
+
+def _make_sink(addr=0x401050, func_addr=0x401000, func_name="parse_input"):
+    return Sink(
+        address=addr, func_addr=func_addr, func_name=func_name,
+        callee_name="memcpy", sink_type=SinkType.BUFFER_OVERFLOW,
+        cwe="CWE-120", vulnerable_arg_index=0,
+    )
+
+
+def test_source_to_dict():
+    s = _make_source()
+    d = s.to_dict()
+    assert d["address"] == "0x401000"
+    assert d["source_type"] == "func_param"
+    assert d["param_index"] == 0
+
+
+def test_source_to_dict_no_param_index():
+    s = Source(
+        address=0x402000, func_addr=0x402000, func_name="main",
+        source_type=SourceType.ARGV, description="argv",
+    )
+    d = s.to_dict()
+    assert "param_index" not in d
+
+
+def test_sink_to_dict():
+    s = _make_sink()
+    d = s.to_dict()
+    assert d["callee_name"] == "memcpy"
+    assert d["cwe"] == "CWE-120"
+    assert d["sink_type"] == "buffer_overflow"
+
+
+def test_taint_path_to_dict():
+    src = _make_source()
+    snk = _make_sink()
+    tp = TaintPath(
+        source=src, sink=snk,
+        path_addrs=[0x401000, 0x401020, 0x401050],
+        path_funcs=["parse_input"],
+    )
+    d = tp.to_dict()
+    assert d["path_length"] == 3
+    assert d["path_addrs"] == ["0x401000", "0x401020", "0x401050"]
+
+
+def test_vuln_finding_to_dict():
+    src = _make_source()
+    snk = _make_sink()
+    tp = TaintPath(source=src, sink=snk, path_addrs=[0x401000, 0x401050], path_funcs=["parse_input"])
+    f = VulnFinding(
+        finding_id=1, taint_path=tp, cwe="CWE-120",
+        severity=Severity.CRITICAL,
+        title="Buffer overflow in parse_input",
+        description="memcpy with user-controlled size",
+    )
+    d = f.to_dict()
+    assert d["finding_id"] == 1
+    assert d["cwe"] == "CWE-120"
+    assert d["severity"] == "critical"
+    assert d["verified"] is False
+
+
+def test_classify_severity_known():
+    assert classify_severity("CWE-119") == Severity.CRITICAL
+    assert classify_severity("CWE-476") == Severity.MEDIUM
+
+
+def test_classify_severity_unknown():
+    assert classify_severity("CWE-999") == Severity.MEDIUM
+
+
+def test_source_types():
+    assert SourceType.RECV.value == "recv"
+    assert SourceType.SCANF.value == "scanf"
+
+
+def test_sink_types():
+    assert SinkType.FORMAT_STRING.value == "format_string"
+    assert SinkType.DOUBLE_FREE.value == "double_free"
+
+```
+
+`test/test_protocol.py`:
+
+```py
+import json
+from vulnhunter4ghidra_engine.protocol import parse_command, ok, error, progress, Command, Response
+
+
+def test_parse_command_basic():
+    cmd = parse_command('{"type": "scan_vulns", "params": {"binary_path": "/tmp/a.out"}}')
+    assert cmd.type == "scan_vulns"
+    assert cmd.params["binary_path"] == "/tmp/a.out"
+
+
+def test_parse_command_no_params():
+    cmd = parse_command('{"type": "ping"}')
+    assert cmd.type == "ping"
+    assert cmd.params == {}
+
+
+def test_ok_response():
+    r = ok({"count": 5})
+    d = json.loads(r.to_json())
+    assert d["status"] == "ok"
+    assert d["data"]["count"] == 5
+
+
+def test_ok_response_no_data():
+    r = ok()
+    d = json.loads(r.to_json())
+    assert d["status"] == "ok"
+    assert "data" not in d
+
+
+def test_error_response():
+    r = error("bad thing")
+    d = json.loads(r.to_json())
+    assert d["status"] == "error"
+    assert d["message"] == "bad thing"
+
+
+def test_progress_response():
+    r = progress({"step": 3, "total": 10})
+    d = json.loads(r.to_json())
+    assert d["status"] == "progress"
+    assert d["data"]["step"] == 3
+
+
+def test_response_to_json_roundtrip():
+    r = ok({"findings": [{"id": 1, "cwe": "CWE-119"}]})
+    j = r.to_json()
+    parsed = json.loads(j)
+    assert parsed["status"] == "ok"
+    assert parsed["data"]["findings"][0]["cwe"] == "CWE-119"
+
+```
+
+`test/test_sinks.py`:
+
+```py
+from vulnhunter4ghidra_engine.sinks import (
+    identify_sinks,
+    get_sink_functions,
+    get_cwe_for_function,
+)
+from vulnhunter4ghidra_engine.models import SinkType
+
+
+def test_identify_memcpy_sink():
+    callsites = [{"address": 0x401050, "callee_name": "memcpy"}]
+    sinks = identify_sinks(0x401000, "process_data", callsites)
+    assert len(sinks) == 1
+    assert sinks[0].callee_name == "memcpy"
+    assert sinks[0].cwe == "CWE-120"
+    assert sinks[0].sink_type == SinkType.BUFFER_OVERFLOW
+    assert sinks[0].vulnerable_arg_index == 0
+
+
+def test_identify_format_string_sink():
+    callsites = [{"address": 0x401080, "callee_name": "sprintf"}]
+    sinks = identify_sinks(0x401000, "log_msg", callsites)
+    assert len(sinks) == 1
+    assert sinks[0].cwe == "CWE-134"
+    assert sinks[0].sink_type == SinkType.FORMAT_STRING
+
+
+def test_identify_command_injection():
+    callsites = [{"address": 0x401090, "callee_name": "system"}]
+    sinks = identify_sinks(0x401000, "run_cmd", callsites)
+    assert len(sinks) == 1
+    assert sinks[0].cwe == "CWE-78"
+    assert sinks[0].sink_type == SinkType.COMMAND_INJECTION
+
+
+def test_multiple_sinks():
+    callsites = [
+        {"address": 0x401050, "callee_name": "memcpy"},
+        {"address": 0x401060, "callee_name": "strcpy"},
+        {"address": 0x401070, "callee_name": "printf"},
+    ]
+    sinks = identify_sinks(0x401000, "vulnerable_func", callsites)
+    assert len(sinks) == 3
+
+
+def test_no_sinks_from_safe_calls():
+    callsites = [
+        {"address": 0x401050, "callee_name": "strlen"},
+        {"address": 0x401060, "callee_name": "malloc"},
+    ]
+    sinks = identify_sinks(0x401000, "safe_func", callsites)
+    assert len(sinks) == 0
+
+
+def test_get_sink_functions():
+    fns = get_sink_functions()
+    assert "memcpy" in fns
+    assert "system" in fns
+    assert "strlen" not in fns
+
+
+def test_get_cwe_for_function_known():
+    assert get_cwe_for_function("memcpy") == "CWE-120"
+    assert get_cwe_for_function("printf") == "CWE-134"
+
+
+def test_get_cwe_for_function_unknown():
+    assert get_cwe_for_function("strlen") is None
+
+```
+
+`test/test_sources.py`:
+
+```py
+from vulnhunter4ghidra_engine.sources import (
+    identify_sources_from_callsites,
+    identify_sources_from_params,
+    identify_argv_source,
+)
+from vulnhunter4ghidra_engine.models import SourceType
+
+
+def test_identify_recv_source():
+    callsites = [{"address": 0x401020, "callee_name": "recv"}]
+    sources = identify_sources_from_callsites(0x401000, "handle_client", callsites)
+    assert len(sources) == 1
+    assert sources[0].source_type == SourceType.RECV
+    assert sources[0].address == 0x401020
+
+
+def test_identify_multiple_sources():
+    callsites = [
+        {"address": 0x401020, "callee_name": "recv"},
+        {"address": 0x401040, "callee_name": "fgets"},
+        {"address": 0x401060, "callee_name": "memcpy"},  # not a source
+    ]
+    sources = identify_sources_from_callsites(0x401000, "process", callsites)
+    assert len(sources) == 2
+
+
+def test_no_sources_from_safe_calls():
+    callsites = [
+        {"address": 0x401020, "callee_name": "memcpy"},
+        {"address": 0x401040, "callee_name": "strlen"},
+    ]
+    sources = identify_sources_from_callsites(0x401000, "safe_func", callsites)
+    assert len(sources) == 0
+
+
+def test_identify_buffer_param_source():
+    params = [
+        {"index": 0, "name": "buf", "type": "char *"},
+        {"index": 1, "name": "len", "type": "int"},
+    ]
+    sources = identify_sources_from_params(0x401000, "parse", params, is_exported=False)
+    assert len(sources) == 1
+    assert sources[0].param_index == 0
+    assert sources[0].source_type == SourceType.FUNC_PARAM
+
+
+def test_exported_pointer_param_is_source():
+    params = [
+        {"index": 0, "name": "data", "type": "mystruct *"},
+    ]
+    sources = identify_sources_from_params(0x401000, "api_call", params, is_exported=True)
+    assert len(sources) == 1
+
+
+def test_non_exported_struct_ptr_not_source():
+    params = [
+        {"index": 0, "name": "ctx", "type": "context *"},
+    ]
+    sources = identify_sources_from_params(0x401000, "internal", params, is_exported=False)
+    assert len(sources) == 0
+
+
+def test_identify_argv():
+    params = [
+        {"index": 0, "name": "argc", "type": "int"},
+        {"index": 1, "name": "argv", "type": "char * *"},
+    ]
+    src = identify_argv_source(0x401000, "main", params)
+    assert src is not None
+    assert src.source_type == SourceType.ARGV
+    assert src.param_index == 1
+
+
+def test_argv_not_in_non_main():
+    params = [{"index": 0, "name": "argv", "type": "char * *"}]
+    src = identify_argv_source(0x401000, "helper", params)
+    assert src is None
+
+```
+
+`test/test_taint.py`:
+
+```py
+import types
+from vulnhunter4ghidra_engine.models import Source, Sink, SourceType, SinkType
+from vulnhunter4ghidra_engine.taint import (
+    _is_reachable,
+    _extract_path_addrs,
+    _find_nearest_node,
+    _bfs_reachable_funcs,
+    find_taint_paths_intraprocedural,
+    find_taint_paths_interprocedural,
+)
+
+
+class MockNode:
+    def __init__(self, addr, size=16):
+        self.addr = addr
+        self.size = size
+
+    def __repr__(self):
+        return f"Node({hex(self.addr)})"
+
+    def __hash__(self):
+        return hash(self.addr)
+
+    def __eq__(self, other):
+        return isinstance(other, MockNode) and self.addr == other.addr
+
+
+class MockGraph:
+    def __init__(self):
+        self._adj: dict[MockNode, list[MockNode]] = {}
+
+    def add_node(self, node):
+        if node not in self._adj:
+            self._adj[node] = []
+
+    def add_edge(self, src, dst):
+        self.add_node(src)
+        self.add_node(dst)
+        self._adj[src].append(dst)
+
+    def nodes(self):
+        return self._adj.keys()
+
+    def successors(self, node):
+        return self._adj.get(node, [])
+
+
+def test_is_reachable_direct():
+    g = MockGraph()
+    a = MockNode(0x1000)
+    b = MockNode(0x1010)
+    g.add_edge(a, b)
+    assert _is_reachable(g, a, b) is True
+
+
+def test_is_reachable_indirect():
+    g = MockGraph()
+    a, b, c = MockNode(0x1000), MockNode(0x1010), MockNode(0x1020)
+    g.add_edge(a, b)
+    g.add_edge(b, c)
+    assert _is_reachable(g, a, c) is True
+
+
+def test_is_not_reachable():
+    g = MockGraph()
+    a, b = MockNode(0x1000), MockNode(0x1010)
+    g.add_node(a)
+    g.add_node(b)
+    assert _is_reachable(g, a, b) is False
+
+
+def test_extract_path_addrs_direct():
+    g = MockGraph()
+    a = MockNode(0x1000)
+    b = MockNode(0x1010)
+    g.add_edge(a, b)
+    path = _extract_path_addrs(g, a, b)
+    assert path == [0x1000, 0x1010]
+
+
+def test_extract_path_addrs_same_node():
+    g = MockGraph()
+    a = MockNode(0x1000)
+    g.add_node(a)
+    path = _extract_path_addrs(g, a, a)
+    assert path == [0x1000]
+
+
+def test_extract_path_addrs_multi_hop():
+    g = MockGraph()
+    a, b, c, d = MockNode(0x1000), MockNode(0x1010), MockNode(0x1020), MockNode(0x1030)
+    g.add_edge(a, b)
+    g.add_edge(b, c)
+    g.add_edge(c, d)
+    path = _extract_path_addrs(g, a, d)
+    assert path == [0x1000, 0x1010, 0x1020, 0x1030]
+
+
+def test_find_nearest_node_exact():
+    a = MockNode(0x1000, size=16)
+    node_map = {0x1000: a}
+    g = MockGraph()
+    g.add_node(a)
+    assert _find_nearest_node(node_map, 0x1000, g) == a
+
+
+def test_find_nearest_node_within_block():
+    a = MockNode(0x1000, size=32)
+    node_map = {}
+    g = MockGraph()
+    g.add_node(a)
+    result = _find_nearest_node(node_map, 0x1010, g)
+    assert result == a
+
+
+def test_find_nearest_node_not_found():
+    node_map = {}
+    g = MockGraph()
+    a = MockNode(0x1000, size=16)
+    g.add_node(a)
+    result = _find_nearest_node(node_map, 0x2000, g)
+    assert result is None
+
+
+def test_bfs_reachable_funcs():
+    g = MockGraph()
+    g.add_edge(0x1000, 0x2000)
+    g.add_edge(0x2000, 0x3000)
+    g.add_edge(0x3000, 0x4000)
+    result = _bfs_reachable_funcs(g, 0x1000, max_depth=3)
+    assert 0x1000 in result
+    assert 0x2000 in result
+    assert 0x3000 in result
+    assert 0x4000 in result
+
+
+def test_bfs_reachable_funcs_depth_limit():
+    g = MockGraph()
+    g.add_edge(0x1000, 0x2000)
+    g.add_edge(0x2000, 0x3000)
+    g.add_edge(0x3000, 0x4000)
+    result = _bfs_reachable_funcs(g, 0x1000, max_depth=1)
+    assert 0x1000 in result
+    assert 0x2000 in result
+    assert 0x3000 not in result
+
+
+def _make_mock_project(func_addr, func_name, graph):
+    func = types.SimpleNamespace(name=func_name, graph=graph)
+    cfgs = types.SimpleNamespace(get_most_accurate=lambda: object())
+    functions = types.SimpleNamespace(get=lambda addr: func if addr == func_addr else None)
+    kb = types.SimpleNamespace(cfgs=cfgs, functions=functions)
+    return types.SimpleNamespace(kb=kb)
+
+
+def test_intraprocedural_ignores_same_address_self_flow():
+    g = MockGraph()
+    g.add_node(MockNode(0x1000, size=64))
+    proj = _make_mock_project(0x1000, "vuln_func", g)
+
+    src = Source(
+        address=0x1020, func_addr=0x1000, func_name="vuln_func",
+        source_type=SourceType.READ, description="Call to read()",
+    )
+    snk = Sink(
+        address=0x1020, func_addr=0x1000, func_name="vuln_func",
+        callee_name="read", sink_type=SinkType.BUFFER_OVERFLOW,
+        cwe="CWE-120", vulnerable_arg_index=1,
+    )
+
+    paths = find_taint_paths_intraprocedural(proj, 0x1000, [src], [snk])
+    assert paths == []
+
+
+def test_intraprocedural_same_block_forward_flow():
+    g = MockGraph()
+    g.add_node(MockNode(0x1000, size=64))
+    proj = _make_mock_project(0x1000, "vuln_func", g)
+
+    src = Source(
+        address=0x1010, func_addr=0x1000, func_name="vuln_func",
+        source_type=SourceType.READ, description="Call to read()",
+    )
+    snk = Sink(
+        address=0x1030, func_addr=0x1000, func_name="vuln_func",
+        callee_name="memcpy", sink_type=SinkType.BUFFER_OVERFLOW,
+        cwe="CWE-120", vulnerable_arg_index=0,
+    )
+
+    paths = find_taint_paths_intraprocedural(proj, 0x1000, [src], [snk])
+    assert len(paths) == 1
+    assert paths[0].path_addrs == [0x1000]
+
+
+def test_intraprocedural_same_block_backward_without_cycle_ignored():
+    g = MockGraph()
+    g.add_node(MockNode(0x1000, size=64))
+    proj = _make_mock_project(0x1000, "vuln_func", g)
+
+    src = Source(
+        address=0x1030, func_addr=0x1000, func_name="vuln_func",
+        source_type=SourceType.READ, description="Call to read()",
+    )
+    snk = Sink(
+        address=0x1010, func_addr=0x1000, func_name="vuln_func",
+        callee_name="memcpy", sink_type=SinkType.BUFFER_OVERFLOW,
+        cwe="CWE-120", vulnerable_arg_index=0,
+    )
+
+    paths = find_taint_paths_intraprocedural(proj, 0x1000, [src], [snk])
+    assert paths == []
+
+
+def test_intraprocedural_same_block_backward_with_cycle_detected():
+    g = MockGraph()
+    n0 = MockNode(0x1000, size=64)
+    n1 = MockNode(0x1040, size=16)
+    g.add_edge(n0, n1)
+    g.add_edge(n1, n0)
+    proj = _make_mock_project(0x1000, "vuln_func", g)
+
+    src = Source(
+        address=0x1030, func_addr=0x1000, func_name="vuln_func",
+        source_type=SourceType.READ, description="Call to read()",
+    )
+    snk = Sink(
+        address=0x1010, func_addr=0x1000, func_name="vuln_func",
+        callee_name="memcpy", sink_type=SinkType.BUFFER_OVERFLOW,
+        cwe="CWE-120", vulnerable_arg_index=0,
+    )
+
+    paths = find_taint_paths_intraprocedural(proj, 0x1000, [src], [snk])
+    assert len(paths) == 1
+    assert paths[0].path_addrs == [0x1000]
+
+
+def test_interprocedural_skips_same_function():
+    cg = MockGraph()
+    cg.add_edge(0x1000, 0x2000)
+
+    funcs = {
+        0x1000: types.SimpleNamespace(name="caller_fn"),
+        0x2000: types.SimpleNamespace(name="callee_fn"),
+    }
+    kb = types.SimpleNamespace(
+        cfgs=types.SimpleNamespace(get_most_accurate=lambda: object()),
+        callgraph=cg,
+        functions=types.SimpleNamespace(get=lambda addr: funcs.get(addr)),
+    )
+    proj = types.SimpleNamespace(kb=kb)
+
+    src = Source(
+        address=0x1020, func_addr=0x1000, func_name="caller_fn",
+        source_type=SourceType.READ, description="Call to read()",
+    )
+    same_fn_snk = Sink(
+        address=0x1020, func_addr=0x1000, func_name="caller_fn",
+        callee_name="read", sink_type=SinkType.BUFFER_OVERFLOW,
+        cwe="CWE-120", vulnerable_arg_index=1,
+    )
+    other_fn_snk = Sink(
+        address=0x2040, func_addr=0x2000, func_name="callee_fn",
+        callee_name="memcpy", sink_type=SinkType.BUFFER_OVERFLOW,
+        cwe="CWE-120", vulnerable_arg_index=0,
+    )
+
+    paths = find_taint_paths_interprocedural(
+        proj, [src], [same_fn_snk, other_fn_snk], max_depth=3,
+    )
+    assert len(paths) == 1
+    assert paths[0].sink.func_addr == 0x2000
+    assert paths[0].path_funcs == ["caller_fn", "callee_fn"]
+
+```

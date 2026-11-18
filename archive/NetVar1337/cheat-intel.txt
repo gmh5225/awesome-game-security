@@ -1,0 +1,541 @@
+Project Path: arc_NetVar1337_cheat-intel_4gj1qbur
+
+Source Tree:
+
+```txt
+arc_NetVar1337_cheat-intel_4gj1qbur
+├── LICENSE
+├── README.md
+├── collector
+│   └── README.md
+├── docs
+│   └── methodology.md
+└── reports
+    ├── 2026-09-landscape.md
+    └── TEMPLATE.md
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 NetVar1337
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+
+# cheat-intel
+
+**Cheat-community intelligence: monitoring, trend reporting, and the intel → detection feedback loop.**
+
+`game security` · `threat intelligence` · `cheat market` · `anti-cheat` · `OSINT`
+
+</div>
+
+---
+
+## What this repo is
+
+Anti-cheat teams do not lose to technical sophistication alone. They lose to **tempo**. A
+public cheat build that lands the day after a patch, a new HWID spoofer that survives two ban
+waves, a reseller network that shifts from Discord to a marketplace — each one changes what
+your detections need to catch, and the change is visible in public community channels days to
+weeks before it shows up in your telemetry.
+
+This repo is the practice of **watching that surface on purpose**, and turning it into
+artefacts an enforcement team can act on.
+
+## Contents
+
+| Path | What it is |
+|:---|:---|
+| [`docs/methodology.md`](docs/methodology.md) | How to collect, verify, attribute and publish community intelligence |
+| [`reports/`](reports/) | Periodic trend reports, using [`reports/TEMPLATE.md`](reports/TEMPLATE.md) |
+| [`collector/`](collector/) | Tooling notes for structured, repeatable collection |
+
+## What a useful intel report contains
+
+1. **What changed** — new cheat families, loader/delivery shifts, spoofer generations,
+   peripheral/macros, account-market movements.
+2. **Why it matters** — which detection layer it stresses, and which of your existing signals
+   it evades.
+3. **What to do** — a concrete detection or process change, with an owner.
+4. **How confident we are** — sourcing grade per claim, and what would falsify it.
+
+Reports that only restate what a forum said are not intelligence. The value is in the
+*translation to detection*.
+
+## Sourcing grades
+
+| Grade | Meaning | Actionable? |
+|:---|:---|:---|
+| **A** | Primary artefact observed directly (sample, listing, official post) | Yes |
+| **B** | Corroborated by two or more independent sources | Yes, with confidence interval |
+| **C** | Single uncorroborated claim | No — monitor only |
+| **D** | Speculation / recycling of older claims | No — drop or mark explicitly |
+
+Most community claims arrive at grade C and are widely reported as fact. Say so in the report.
+
+## Scope and conduct
+
+- **Public sources only.** Public forums, public listings, vendor advisories, official game posts, published research.
+- **Independent research, not an internal feed.** I do not work for a studio. The landscape note in `reports/` is a graded working draft, not a brief you should forward.
+- **No purchasing, no operating, no distributing** cheat software, accounts, or spoofers.
+  Collection is observational. Buying a subscription is not "research"; it funds the operation
+  you are studying and creates handling obligations you do not need.
+- **No doxxing, no naming private individuals.** Report on products, services, techniques and
+  infrastructure — not on the people behind handles.
+- **Attribution hygiene.** Collection should not burn the account or the method. Rotate
+  collection identities, never reuse operational accounts, never log in to cheat services from
+  infrastructure tied to enforcement.
+- **Lawful collection only.** Respect site terms where they bind, and do not access systems you
+  are not permitted to access. Intelligence value does not require intrusion.
+
+## Related
+
+- [`apex-anticheat-lab`](https://github.com/NetVar1337/apex-anticheat-lab) — the detection
+  implementations this feeds.
+- [`account-security`](https://github.com/NetVar1337/account-security) — identity and account
+  market abuse, which is the economic half of the same problem.
+
+```
+
+`collector/README.md`:
+
+```md
+# Collector notes
+
+How to collect repeatably without burning sources or drowning in noise.
+
+## Principles
+
+1. **Structured beats clever.** A scheduled, boring collection that runs every week produces
+   more intelligence than an impressive one-off scrape that runs once.
+2. **Collect artefacts, not opinions.** Capture, timestamp, hash, archive. Then interpret.
+3. **Never let collection touch enforcement.** Separate identity, separate infrastructure,
+   separate browser profile, separate network egress.
+4. **Record negatives.** "Nothing found" is data.
+
+## What to collect per source class
+
+| Source class | Fields to capture |
+|:---|:---|
+| Official game / AC posts | URL, date, author, quoted metrics, enforcement categories named |
+| Cheat listings | URL, capture date, product name, delivery model, price + currency, update cadence, claimed platform |
+| Spoofer / hardware listings | Same, plus claimed identity fields covered and claimed detection status |
+| Account markets | Price bands, account age/level offered, bulk pricing, region |
+| Forum sentiment | Threads about detection status, dated; ban complaints; workaround discussion |
+| Patch / game updates | Version, date, what changed in security-relevant surface |
+
+## Storage shape
+
+Keep it as flat, dated records — a JSONL or SQLite table per source class. The shape that
+matters is: `captured_at`, `source_url`, `source_class`, `claim`, `evidence_ref`, `grade`,
+`notes`.
+
+Do not build a dashboard first. Build the records; the dashboard is a query away.
+
+## Suggested cadence
+
+| Task | Frequency | Time |
+|:---|:---|:---|
+| Official posts sweep | weekly | 20 min |
+| Listing sweep (public markets/forums) | weekly | 45 min |
+| Sentiment / detection-status churn | weekly | 30 min |
+| Regional ecosystem sweep | monthly | 2 h |
+| Report write-up | monthly | 2 h |
+| Post-wave retrospective | per enforcement wave | 1 h |
+
+## Automation
+
+Automation is for **collection and deduplication**, not for interpretation:
+
+- RSS / change-detection on official channels and vendor advisories — safe, reliable, automate fully.
+- Listing monitors — automate capture and archiving; the classification is still human.
+- Sentiment — automate *gathering*; never automate the claim into a report without a grade.
+
+What to avoid automating: anything that posts, contacts, purchases, or authenticates to a
+service. That is not collection, it is interaction, and it needs a different (and much more
+careful) process.
+
+## Handling
+
+- Binaries you legitimately handle go in a password-protected archive with the password
+  documented in your internal runbook (standard malware-handling convention: `infected`).
+- Retain evidence under your organisation's retention policy.
+- Be able to answer, for any line in a report: *where did this come from, when was it captured,
+  and what would prove it wrong?*
+
+```
+
+`docs/methodology.md`:
+
+```md
+# Collection methodology
+
+How to run cheat-community monitoring that produces usable intelligence rather than noise.
+
+## 1. Define the questions first
+
+Unstructured browsing produces unstructured reporting. Start from the decisions the team needs
+to make:
+
+- Which detection layer is about to be stressed?
+- Is an enforcement wave being adapted around, and how fast?
+- Is the threat shifting from software to hardware, or from PC to console?
+- Is the account/economics layer being used to launder bans?
+
+Every collection task should trace back to one of these. If it cannot, it is curiosity, and
+curiosity does not belong in a report.
+
+## 2. Source map
+
+| Source class | What it gives you | Reliability |
+|:---|:---|:---|
+| Official game / AC team posts | Ground truth on enforcement, bans, incidents | A |
+| Vendor / AC vendor advisories | Technical detail on detection categories | A-B |
+| Public research & writeups | Technique depth, especially hardware/DMA | A-B |
+| Public cheat forums and boards | What is shipping, pricing, customer sentiment | B-C |
+| Marketplaces and resellers | Pricing, account supply, spoofer generations | B-C |
+| Social / streaming platforms | Adoption signals, marketing claims, "UD status" claims | C |
+| Patch notes and game updates | What breaks; where breakage appears first | A |
+
+**Streaming and marketplace ecosystems vary sharply by region.** A monitoring plan that only
+reads English-language forums will systematically miss the Asian cheat market, which is large
+and differently distributed. Covering it needs language capability, not just translation —
+slang and euphemism are where the real product names live.
+
+## 3. Collection discipline
+
+- **Separate collection identity from everything else.** Never from an account tied to
+  enforcement, to your employer, or to your own reputation.
+- **Record the artefact, not the story.** Screenshot or archive the listing, capture the URL,
+  timestamp it, hash any binary you legitimately handle. A claim you cannot show is grade C.
+- **Time-stamp everything.** Cheat marketing moves on days. An undated observation is close
+  to useless.
+- **Log what you did *not* find.** Negative results (e.g. "no new DMA listings this period")
+  are often more valuable than positive ones, and they are almost never written down.
+
+## 4. Verification
+
+Community claims are marketing. Before promoting anything above grade C:
+
+1. **Find an independent second source.** Not a repost of the same original.
+2. **Look for contradiction.** "Undetected" claims sit alongside "banned in 2 hours" reports;
+   both are usually true of different builds. Date them.
+3. **Check the artefact if you can legitimately obtain one.** A listing saying "HWID spoof
+   supported" is a claim; a driver sample with the corresponding IOCTL surface is evidence.
+4. **State the falsifier.** For each claim, write down what observation would disprove it. If
+   you cannot, it is not a testable claim and should not drive a detection change.
+
+## 5. Translating to detection
+
+The step most intel programmes skip. For every report item, answer:
+
+- **Which detection layer?** Host / static / behavioral / economic
+  (see the mapping table in
+  [`apex-anticheat-lab/docs/cheat-taxonomy.md`](https://github.com/NetVar1337/apex-anticheat-lab/blob/main/docs/cheat-taxonomy.md)).
+- **What existing signal would catch this, and did it?** If yes, this is a measurement item.
+  If no, this is a detection gap with a concrete work item.
+- **What is the expected evasion cost?** Does closing it force the adversary into a more
+  expensive technique (e.g. from software to hardware, from hardware to account fraud)? That
+  is the real goal — raise the cost, do not chase every build.
+
+## 6. Reporting cadence
+
+| Artefact | Cadence | Audience |
+|:---|:---|:---|
+| Trend report | monthly | security + game teams |
+| Flash advisory | as needed | enforcement + on-call |
+| Detection gap ticket | continuous | detection engineering |
+| Post-wave retrospective | after each enforcement wave | security + analytics |
+
+The retrospective is the one that makes the programme compound: measure infection rate before
+and after, then ask whether the adversary adapted and how fast. That tempo number is your
+actual KPI.
+
+## 7. Handling what you find
+
+- **Do not publish operational detail that helps evasion.** Generic technique description
+  informs defenders; step-by-step configuration guides help the other side.
+- **Do not name individuals.** Products, services and techniques only.
+- **Escalate criminality through the right channel** (platform trust & safety, law enforcement
+  referral, vendor PSIRT) rather than public confrontation.
+- **Retain evidence under your own retention policy**, and be able to say where each claim in
+  a report came from.
+
+```
+
+`reports/2026-09-landscape.md`:
+
+```md
+# Cheat & anti-cheat landscape — 2026-09
+
+**Period covered:** 2025-Q4 → 2026-09
+**Sources:** public only (official game posts, vendor advisories, public research, public community listings)
+**Status:** working baseline report. Every claim carries a grade; several widely-repeated numbers
+are contested and are marked as such.
+
+**Read this before quoting it.** Most claims below are grade B or C by this repo's own scale. Grade C is not actionable. Section 4 is a coverage gap, not coverage: English-language sources do not see the Asian streaming and marketplace ecosystems. Do not send this note as a finished intel brief. A useful brief is one primary post, one detection implication, and one thing the post does not let you conclude.
+
+## Executive summary
+
+Three shifts define the current period: (1) the fight has moved down the stack, from user-mode
+cheats toward **hardware-assisted** and **external-input** techniques that never touch game
+memory; (2) enforcement has moved **up** the stack, into hardware identity, peripheral
+fingerprinting and retroactive competitive cleanup; and (3) cheat delivery is now a
+subscription **service economy**, which means signature-based detection loses on tempo and
+behavioral/economic detection carries the load.
+
+## 1. What changed
+
+### 1.1 DMA cheats are no longer a free pass
+
+**Observation.** For several years, a second machine reading physical memory over a PCIe/FPGA
+card was treated as effectively undetectable. Detection has matured across multiple vectors at
+once: PCIe device enumeration with vendor/device-ID and configuration-space scrutiny, timing
+characteristics, DMA-remapping (IOMMU/Vt-d) state, and known DMA-toolkit driver presence.
+Public anti-cheat communications now itemise hardware bans that explicitly include DMA-class
+devices rather than lumping them into "other".
+
+**Evidence.** Community analyses of anti-cheat DMA detection [1]; public ban/enforcement
+updates from Apex Legends' anti-cheat team [2][3].
+
+**Grade:** B (technique direction corroborated; specific enforcement counts are
+publisher-reported and not independently verifiable).
+
+**Falsifier:** sustained absence of hardware-class bans in enforcement reporting while
+community operators report unchanged DMA uptime.
+
+### 1.2 Peripheral / controller emulation is now a first-class enforcement target
+
+**Observation.** Macro and emulation devices (Cronus-class, Titan-class) that present as a
+controller while running scripted recoil, rapid-fire, or mouse-aim bridging are being addressed
+at the hardware/identity layer and at the distribution layer — including a notable case where a
+peripheral manufacturer cooperated with a publisher to remove game-specific macro scripts from
+its official distribution channels.
+
+**Evidence.** Public enforcement communication from the Apex anti-cheat team regarding
+controller/peripheral enforcement and manufacturer cooperation [2][3]; public discussion of
+cross-platform detection for unauthorised controller hardware [4].
+
+**Grade:** B for the enforcement direction; A for the manufacturer-cooperation item (it was
+announced publicly).
+
+**Falsifier:** official macro scripts reappearing in manufacturer distribution channels.
+
+### 1.3 PC anti-cheat ownership is consolidating in-house
+
+**Observation.** Apex Legends' PC anti-cheat moved from a third-party stack (Easy Anti-Cheat)
+to an EA-owned kernel-level solution. The strategic point is not the vendor change itself —
+it is **telemetry ownership**: an in-house stack lets the publisher correlate patch events,
+threat intake and enforcement response on its own timeline.
+
+**Evidence.** EA/Respawn public announcement of its kernel-level anti-cheat for Apex Legends [5].
+
+**Grade:** A.
+
+### 1.4 Enforcement is going retroactive and competitive-focused
+
+**Observation.** The metrics publishers are publishing have shifted from raw ban counts toward
+**competitive integrity**: ranked-point clawbacks from boosted/illegitimate accounts,
+suspensions for high-rank account sharing, and a reported decline in matchmaking "infection
+rate" (share of matches containing a confirmed cheater) after rolling ban waves.
+
+**Evidence.** Public anti-cheat team updates [2][3].
+
+**Grade:** B. The infection-rate figures quoted in the community (a decline from roughly the
+mid-single-digit percentage to a lower single-digit percentage) are publisher-reported; treat
+the *direction* as reliable and the *absolute numbers* as unverified.
+
+**Falsifier:** infection rate reverting while ban volume stays constant — which would indicate
+replacement-account churn rather than reduction.
+
+### 1.5 Cheat delivery is a subscription service economy
+
+**Observation.** Cheat distribution has professionalised: subscription pricing, per-build
+encryption, automated update pipelines, and support channels. Public market research puts the
+illicit cheat economy in the billions, though estimates vary by an order of magnitude depending
+on what is counted (cheats only vs. cheats + accounts + infrastructure) [6][7].
+
+**Grade:** C for any specific market figure — **these numbers are widely repeated and not
+independently auditable.** Grade B for the structural observation (subscription + automated
+update distribution), which is directly observable in public listings.
+
+**Falsifier:** a shift back to one-time-purchase public builds with no update channel.
+
+### 1.6 External / computer-vision aim is the growth area
+
+**Observation.** Because kernel protections now cover the memory-reading path, effort has moved
+to techniques that never read game memory: frame capture processed off-host (classical CV or a
+small model), with input returned through a USB HID or controller emulator. Detection here is
+**behavioral and device-level by necessity** — there is no binary to find on the target.
+
+**Evidence.** Public research and analysis of kernel anti-cheat and external cheat techniques
+[8][9].
+
+**Grade:** B.
+
+## 2. Detection impact
+
+| Change | Layer stressed | Existing signal catches it? | Action |
+|:---|:---|:---|:---|
+| DMA hardware cheats | host | partial | PCIe inventory + known-good allowlist; IOMMU posture; behavioral backstop |
+| Controller macro/emulation | host + behavioral | partial | HID descriptor/firmware fingerprinting; anti-recoil signature at input layer |
+| External CV aim | behavioral | no (by construction) | aim kinematics + input-timing analysis is the only path |
+| HWID spoofing | economic/identity | partial | cross-field fingerprint consistency, churn rate, banned-component reuse |
+| Subscription delivery | static | poor, short-lived | functional-trait YARA not product hashes; accept short signature lifespans |
+| Boosting / account markets | economic | no | duo-asymmetry, rank-trajectory, identity graph |
+
+## 3. Enforcement tempo
+
+Not measurable from public sources alone — this is the section a real programme fills from its
+own telemetry. What is publicly observable is the *shape*:
+
+- **Time-to-adaptation** appears to be days to low weeks for public cheat builds after a
+  detection update, based on community "undetected"/"detected" status churn.
+- **Evasion shift direction:** software → hardware → external input → identity/account fraud.
+  Each shift is *more expensive* for the adversary, which is the actual objective of enforcement
+  pressure, not elimination.
+
+## 4. Regional / ecosystem notes
+
+Coverage gap flagged. The Asian streaming and marketplace ecosystems carry a large share of
+cheat distribution and account resale, and are structurally under-observed by English-language
+monitoring: different platforms, different slang, different product naming conventions.
+Effective coverage requires language capability, not machine translation.
+
+## 5. Negative results
+
+- No credible public evidence of a fully working hypervisor-resident cheat against a modern
+  kernel anti-cheat being sold at retail scale in this period. Claims exist; artefacts do not.
+- No public evidence that anti-cheat kernel drivers have been abused for privilege escalation at
+  meaningful scale in this period. (The *theoretical* BYOVD surface remains large — see
+  [`apex-anticheat-lab/host/`](https://github.com/NetVar1337/apex-anticheat-lab/tree/main/host).)
+- No observed shift in the direction of server-side-only anti-cheat replacing client-side
+  enforcement. The opposite: client-side kernel enforcement deepened.
+
+## 6. Open questions
+
+1. What fraction of hardware bans in public reporting are DMA-class vs. peripheral-class? Not
+   disaggregated publicly.
+2. What is the actual false-positive rate of behavioral aim detection at the thresholds that
+   would be needed to catch external CV cheats? Requires labelled data, not public sources.
+3. How fast does the account market replace a banned population? This is the number that
+   determines whether account-level enforcement matters — see
+   [`account-security`](https://github.com/NetVar1337/account-security).
+
+## Sources
+
+1. Community technical analysis of DMA cheat detection vectors —
+   https://hwidchange.com/en/blog/how-anti-cheats-detect-dma-cheats (vendor blog; use for
+   technique direction, not for vendor claims)
+2. Apex Legends anti-cheat team update (2026-07-13) —
+   https://forums.ea.com/blog/apex-legends-game-info-hub-en/an-update-from-the-anti-cheat-team---07132026/13556167
+3. Apex Legends anti-cheat team update (2026-09-18) —
+   https://www.reddit.com/r/apexlegends/comments/1wjvxt1/an_update_from_the_anti_cheat_team_09182026/
+   (community mirror of an official post — verify against the EA forum original before citing)
+4. Controller / peripheral enforcement discussion —
+   https://www.reddit.com/r/apexlegends/comments/1w5grxp/controller_anticheat_enforcement_ban_wave_update/
+5. EA announcement of kernel-level anti-cheat for Apex Legends —
+   https://www.ea.com/en/games/apex-legends/apex-legends/news/javelin-anticheat-announcement
+6. Anti-cheat software market reports —
+   https://dataintelo.com/report/anti-cheat-software-market ·
+   https://www.verifiedmarketresearch.com/product/anti-cheat-software-market/
+   (**market-size figures vary widely between these; do not quote a single number**)
+7. Game security industry whitepaper (2026) — https://anybrain.gg/reports/anybrain-whitepaper-2026
+   (vendor publication)
+8. Kernel anti-cheat technical overview — https://s4dbrd.github.io/posts/how-kernel-anti-cheats-work/
+9. Gaming security trend commentary —
+   https://www.cm-alliance.com/cybersecurity-blog/top-10-trends-to-ensure-secure-gaming-in-2026
+
+---
+
+*Sourcing note: several of these are vendor publications or community reposts. Grades are
+assigned per-claim above, and a claim's grade should travel with it if this report is quoted
+elsewhere.*
+
+```
+
+`reports/TEMPLATE.md`:
+
+```md
+# Trend report template
+
+Copy to `reports/YYYY-MM-landscape.md` and fill in. Keep it short — a trend report that runs
+past ~2 pages is being padded.
+
+```markdown
+# Cheat & anti-cheat landscape — YYYY-MM
+
+**Author:** ...
+**Period covered:** YYYY-MM-DD → YYYY-MM-DD
+**Classification:** internal / public
+
+## Executive summary
+
+Three sentences maximum. What changed, what it means, what we should do.
+
+## 1. What changed this period
+
+### 1.1 <topic>
+- **Observation:** ...
+- **Evidence:** [source](url), captured YYYY-MM-DD, grade A/B/C
+- **Confidence:** ...
+- **Falsifier:** ...
+
+## 2. Detection impact
+
+| Change | Layer stressed | Existing signal catches it? | Gap / action | Owner |
+|:---|:---|:---|:---|:---|
+| ... | host/static/behavioral/economic | yes/no/partial | ... | ... |
+
+## 3. Enforcement tempo
+
+- Infection rate before last wave: ...
+- Infection rate after: ...
+- Time-to-adaptation (days from wave to first observed workaround): ...
+- Evasion shifts observed: ...
+
+## 4. Regional / ecosystem notes
+
+Language- and region-specific observations. Note coverage gaps explicitly.
+
+## 5. Negative results
+
+What we looked for and did not find. Do not omit this section.
+
+## 6. Open questions
+
+What we still cannot answer, and what evidence would answer it.
+
+## Sources
+
+Numbered list with URLs and capture dates.
+```
+
+```
