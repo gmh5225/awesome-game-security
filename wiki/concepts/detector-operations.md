@@ -51,6 +51,7 @@ sources:
   - wiki/sources/descriptions/elijoewashacked-pixel__VyxAntiCheat.md
   - wiki/sources/descriptions/phugiadang12__aegis-ac.md
   - wiki/sources/descriptions/NetVar1337__cheat-intel.md
+  - wiki/sources/descriptions/ArghadeepMisra__gamerfield-backend.md
 updated: 2026-11-18
 confidence: high
 ---
@@ -107,6 +108,8 @@ Console receipt verifiers such as [[qortime-ai]] (ConWan30; Meta Muse/SAM adviso
 Desktop stream-processing prototypes such as [[adaptive-anti-cheat-stream-processor]] (ShaniTheDeveloper; C++/Qt; simulated telemetry ingest with Bloom filters, count-min sketches, and sliding-window heuristics for input cadence, movement velocity, and aim vectors; dashboard throughput/latency metrics) rehearse real-time anomaly scoring with explicit **hint-not-verdict** alerts—calibrate thresholds and treat pipeline health metrics separately from misconduct attribution before mapping patterns to enforcement ladders. (source: wiki/sources/descriptions/ShaniTheDeveloper__Adaptive_Anti-Cheat_Stream_Processor.md)
 
 Multiplayer-FPS behavioural stacks such as [[aegis-ac-fps]] (phugiadang12; Python collector/detection/soc-agent + React dashboard; FastAPI JSONL ingest; explainable rule scores; Claude-powered SOC case triage with human approval; **delayed ban waves** and Discord notifications—treat LLM advisories as review evidence, not autonomous sanctions) rehearse end-to-end server-only enforcement ops beside prototype review queues such as [[aimguard]]. (source: wiki/sources/descriptions/phugiadang12__aegis-ac.md)
+
+Spring Boot integrity backends such as [[gamerfield-backend]] (ArghadeepMisra; **Fairplay Arena**; JWT-scoped players/moderators/trusted automated judges; moderation queue with **confidence-gated** auto-ban proposals; **append-only PostgreSQL audit** for enforcement actions; ban appeals; Redis leaderboard ranks—separate **decision state** from rank cache and treat judge threshold breaches as review evidence before high-impact sanctions) illustrate production-style human-in-the-loop cheat ops on a stateless REST source of truth. (source: wiki/sources/descriptions/ArghadeepMisra__gamerfield-backend.md)
 
 ## Related
 
