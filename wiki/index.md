@@ -4129,6 +4129,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Unity C# Reference](entities/unity-cs-reference.md) — official Unity engine/editor managed C# reference source (reference-only license; Game Engine / [C# reference]; Unity-Technologies)
 - [UnityDecompiled](entities/unity-decompiled.md) — unofficial ILSpy decompiled Unity 5.x editor/engine assembly mirror (00christian00; large C# solution; internal APIs/editor behavior; engine RE, tooling research, compatibility analysis; decompiled Unity dll files)
 - [UnityExplorer](entities/unityexplorer.md) — runtime Unity inspector (BepInEx/MelonLoader; hierarchy/REPL; Mono+IL2CPP)
+- [un-dma-v2](entities/un-dma-v2.md) — Overwatch 2 Unleashed-style DMA companion (RUC601; C++/CMake; LeechCore/VMM; ImGui launcher; entity/hitbox/aim/skill modules; PCILeech-class FPGA/FT601/FT2232H configs; cheat / game:overwatch 2 [DMA])
 - [unispect-dma-plugin](entities/unispect-dma-plugin.md) — Unispect Mono dump + DMA (Razchek fork fix; Memory Plugin dispose; cheat / game engine explorer:Unity [DMA])
 - [unity-vrchat-template](entities/unity-vrchat-template.md) — Unity VRChat starter template (graphics / audio / physics; Game Develop / source)
 - [Unity-game-hacking](entities/unity-game-hacking.md) — small Unity asset/code extraction and modding guide (asset pipelines; cheat / guide)
