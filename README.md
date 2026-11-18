@@ -4640,6 +4640,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Schich/Lucky-Spark [A stealthy loader for shellcode staged over HTTP/HTTPS, similar to Sliver]
 - https://github.com/Lavender-exe/Shellcrypt [A QoL tool to obfuscate shellcode. In the future will be able to chain encoding/encryption/compression methods]
 - https://github.com/n1h-nb/Shellcode-Obfuscation [Academic lab project with Caesar-cipher and encoding-based shellcode obfuscation (C loader + Python tooling) and AV bypass rate measurements]
+- https://github.com/Hika-sec/PayloadLab [Red-team lab pairing Python shellcode transform tools (XOR, RC4, ChaCha20, RLE, IP-style encoding) with minimal C/C++ in-memory loaders]
 - https://github.com/dobin/SuperMega [Stealthily inject shellcode into an executable]
 - https://github.com/mrexodia/RiscyWorkshop [Payload Obfuscation for Red Teams workshop materials]
 - https://github.com/umpolungfish/byvalver [Shellcode bad-byte banisher with preserved functionalities]
