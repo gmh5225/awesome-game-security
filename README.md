@@ -992,6 +992,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/protonspy/harness-for-rea [Desktop and TUI orchestrator for authorized binary RE: Docker-sandboxed Claude Code specialist with REA and Cheat Engine MCP integrations]
 - https://github.com/rollingrock/bethesda-modding-starter [Bootstrap for Bethesda script-extender plugin dev plus Ghidra/x64dbg MCP reverse-engineering toolchain]
 - https://github.com/mathewsbinny/bf1943-tool-suite [Open-source Frostbite tooling for Battlefield 1943: level inspection, DBX/FBRB/terrain format read-diff-rebuild, navmesh generation, and bot simulation (Xenia-compatible)]
+- https://github.com/mathewsbinny/bfbc2-tool-suite [Python/Rust BFBC2 modding suite: 3D map inspector, NavKit, DBX/FBRB diff and rebuild, crash reader, and bot/map test harness]
 - https://github.com/jlagedo/dreams-to-reality-re [Reverse-engineering research toolkit for Dreams to Reality (1997): Python asset decoders, Ghidra scripts, format documentation, and a Babylon.js viewer—tools only, no copyrighted game data]
 - https://github.com/tamcdonald42/legacy-recreated [Ghidra decompilation workbench and notes for Septerra Core 1.04 toward readable C without redistributing game data]
 - https://github.com/formix/sre-re [Solar Realms Elite 0.994b (DOS BBS) RE: Ghidra toolchain, decoded .II save formats, and recovered game rules toward a Linux remake]
@@ -2229,6 +2230,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Nalen98/AngryGhidra [Use angr in Ghidra]
 - https://github.com/overkazaf/Ponce4Ghidra [Interactive symbolic execution Ghidra plugin with angr and Z3 — symbolize inputs, set find/avoid targets, and solve constraints from the decompiler UI]
 - https://github.com/overkazaf/D810G [Ghidra deobfuscation framework for OLLVM/Tigress CFF, MBA (Z3), opaque predicates, BCF, strings, and VM devirtualization; CLI and analyzer plugin]
+- https://github.com/overkazaf/VulnHunter4Ghidra [Ghidra plugin and headless CLI for source-sink taint analysis on native binaries (angr-backed, CWE-tagged JSON output)]
 - https://github.com/justfoxing/ghidra_bridge [Python 3 bridge to Ghidra's Python scripting]
 - https://github.com/GalaxyBatMan111/dsh-plugins [DSH plugin bundle with PyGhidra Ghidra bridge for binary import, decompilation, strings, and xrefs]
 - https://github.com/Cristallin2006/ghidra-skill-for-dsh [dsh agent skill family: Ghidra headless RPC daemon plus seven RE scenarios (triage, unpack, static, vuln audit, dynamic, traffic, Android APK)]
@@ -3801,6 +3803,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/kotae4/lab-esp-and-aimbot [Walkthrough of an ESP and aimbot cheat from scratch]
 - https://github.com/s7shvets7s/simple_ac_internal_cheat [Educational C++20 AssaultCube internal: hooks, ESP, aimbot, ImGui overlay]
 - https://github.com/jerryshell/ac-esp [Rust-built 32-bit ESP overlay DLL for AssaultCube 1.3.0.2 with injection notes, tests, and release builds]
+- https://github.com/Hiba-Zahid/Game-Memory-Manipulation [AssaultCube hands-on lab: Cheat Engine scanning, health/ammo patches, speedhack, structure spider, and memory viewer notes]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
@@ -4993,6 +4996,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gjones01/NullCS [Offline CS2 demo (.dem) pipeline that extracts tick-level aim/visibility features and ranks players with evidence tables for human review—not automated bans]
 - https://github.com/AODOJUST/gomoku-anti-cheat-detector [Browser extension (Baishen) that replays gomoku.com and papergames.io games locally with Rapfi WASM to score AI-assistance suspicion via multi-engine move analysis and feature fingerprinting]
 - https://github.com/NetVar1337/apex-anticheat-lab [FPS anti-cheat research lab with cheat taxonomy docs, Python aim-kinematics detectors, match-integrity SQL, YARA loader rules, and PowerShell host driver/PCIe surveys]
+- https://github.com/NetVar1337/cheat-intel [Cheat-community OSINT methodology, trend report templates, and intel-to-detection workflow for FPS anti-cheat teams]
 - https://github.com/JoshRob297/halo-ce-server [OpenCE Halo CE dedicated-server packaging with documented host-authoritative anti-cheat audit, source-level protection matrix, and operator ban/HWID guidance]
 - https://github.com/saadahmedscse/kac-inspector [Windows CLI that enumerates known kernel anti-cheat drivers via SCM, driver store, and EnumDeviceDrivers with running/stale/orphaned states]
 - https://github.com/zzjjmkk/eagle-eye [Read-only Windows x64 CLI that scans local cheat artifacts (handles, drivers, injections, overlays, DMA PCIe devices) and emits JSON/HTML evidence-chain reports without hooking or reading game memory]
