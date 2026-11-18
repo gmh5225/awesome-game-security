@@ -38,6 +38,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__PreventVAC.md
   - wiki/sources/descriptions/gmh5225__Ponce.md
   - wiki/sources/descriptions/overkazaf__Ponce4Ghidra.md
+  - wiki/sources/descriptions/overkazaf__VulnHunter4Ghidra.md
   - wiki/sources/descriptions/overkazaf__D810G.md
   - wiki/sources/descriptions/stephane-perez__ik-plus-reforged.md
   - wiki/sources/descriptions/strimpel1__gh-remake.md
@@ -2338,6 +2339,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Core dynamic binary analysis library [[triton]] (JonathanSalwan; C++/Python; symbolic exec, taint analysis, SMT-backed RE automation; feeds [[ponce]], [[triton-bn]], [[titan]], and VMP deobfuscation workflows) anchors the Cheat Symbolic Execution / RE Tools lane. (source: wiki/sources/descriptions/JonathanSalwan__Triton.md)
 - In-IDA symbolic + taint execution via [[ponce]] (Triton integration; path constraints, tainted data flow, input generation for target paths; Cheat Symbolic Execution / IDA Plugins) sits in the same symbolic-exec / RE Tools lane. (source: wiki/sources/descriptions/gmh5225__Ponce.md)
 - Interactive Ghidra symbolic execution with angr/Z3 via [[ponce4ghidra]] (overkazaf; Java Ghidra extension + Python JSON/TCP backend; symbolize inputs, Find/Avoid targets from decompiler UI; constraint solving for license/anti-cheat checks; Cheat / RE Tools) (source: wiki/sources/descriptions/overkazaf__Ponce4Ghidra.md)
+- Ghidra source–sink taint + CWE-tagged vuln triage via [[vulnhunter4ghidra]] (overkazaf; Java plugin + Python angr/Z3 TCP backend; ELF/PE/Mach-O; headless JSON/CI; game-client and AC/DRM native audit; Cheat / RE Tools) (source: wiki/sources/descriptions/overkazaf__VulnHunter4Ghidra.md)
 - Ghidra deobfuscation framework via [[d810g]] (overkazaf; Java plugin + Python Z3/Unicorn/Capstone/Keystone engine; OLLVM/Tigress CFF deflattening, MBA simplification, opaque-predicate/BCF removal, string decrypt, VM devirt; CLI or one-click analyzer; Cheat / RE Tools) (source: wiki/sources/descriptions/overkazaf__D810G.md)
 - Function-level rip → Python/Unicorn harnesses via [[ripr]] (IDA plugin + r2pipe; BN/Unicorn packaging) sits in the Cheat IDA / Binary Ninja Plugins / RE Tools lane. (source: wiki/sources/descriptions/pbiernat__ripr.md)
 - Hex-Rays self-checking CPU emulator [[rax]] (Rust; multi-arch JIT; GDB stub for IDA Pro; instruction-level oracle diff vs KVM/QEMU; Linux boot + SDE trace; binary analysis / fuzzing; HexRaysSA) sits in the Cheat DBI / Windows Emulator / IDA integration lane. (source: wiki/sources/descriptions/HexRaysSA__rax.md)

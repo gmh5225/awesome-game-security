@@ -34,7 +34,7 @@ Aimed at reverse engineers and game security analysts tackling **crackmes**, **l
 
 ## Positioning
 
-Listed under **Cheat → RE Tools**. Complements in-Ghidra angr integration via [[angry-ghidra]] and in-IDA symbolic execution via [[ponce]]; pairs with core DBA libraries such as [[triton]] and radare2-backed [[radius2]]. Same symbolic-exec lane as Binary Ninja plugins [[seninja]] and [[triton-bn]].
+Listed under **Cheat → RE Tools**. Complements in-Ghidra angr integration via [[angry-ghidra]], source–sink taint auditing via sibling [[vulnhunter4ghidra]], and in-IDA symbolic execution via [[ponce]]; pairs with core DBA libraries such as [[triton]] and radare2-backed [[radius2]]. Same symbolic-exec lane as Binary Ninja plugins [[seninja]] and [[triton-bn]].
 
 ## Links
 
@@ -42,4 +42,4 @@ Listed under **Cheat → RE Tools**. Complements in-Ghidra angr integration via 
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra]] · [[angry-ghidra]] · [[ponce]] · [[triton]] · [[radius2]] · [[seninja]] · [[triton-bn]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra]] · [[vulnhunter4ghidra]] · [[angry-ghidra]] · [[ponce]] · [[triton]] · [[radius2]] · [[seninja]] · [[triton-bn]]
