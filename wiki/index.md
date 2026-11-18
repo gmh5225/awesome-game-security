@@ -3207,6 +3207,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pedigest](entities/pedigest.md) — C PE Authenticode digest library (hash-exclusion; BCrypt SHA-*; kernel ksecdd + usermode; WIN_CERTIFICATE parse; Anti Cheat → Sign Tools)
 - [payload_dumper](entities/payload-dumper.md) — Android OTA payload.bin dumper (Python; Magisk / ROM RE)
 - [payload-dumper-go](entities/payload-dumper-go.md) — Android OTA payload.bin dumper (Go; parallel xz / checksum / zip)
+- [PayloadLab](entities/payloadlab.md) — red-team lab pairing Python shellcode transforms (XOR, RC4, ChaCha20, RLE, IP-style encoding) with minimal C/C++ in-memory loaders (Anti Cheat → Shellcode Engine & Tricks)
 - [Packet-Sniffer](entities/packet-sniffer.md) — C/C++ packet logger/decryptor (networking + debugging; cheat / Packet Sniffer&Filter)
 - [PcapPlusPlus](entities/pcapplusplus.md) — multiplatform C++ packet capture/parse/craft (100+ protocols; libpcap/Npcap; Packet Capture&Parse)
 - [PCAPdroid](entities/pcapdroid.md) — privacy-friendly Android network monitor (track/analyze/block app connections; PCAP export; HTTP/TLS decrypt; cheat / Android Network Explorer)
