@@ -38,6 +38,7 @@ sources:
   - wiki/sources/descriptions/ValenMyHeartDev__BloonAntiCheat.md
   - wiki/sources/descriptions/N0tJ03__Investigacion-Kerne.md
   - wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md
+  - wiki/sources/descriptions/NetVar1337__cheat-intel.md
   - wiki/sources/descriptions/s4dbrd__s4dbrd.github.io.md
   - wiki/sources/descriptions/saadahmedscse__kac-inspector.md
   - wiki/sources/descriptions/dybeky__custos.md
@@ -1558,7 +1559,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 
 **FPS behavioral research lab:** [[apex-anticheat-lab]] (NetVar1337; Python server-side input telemetry; aim kinematics, reaction times, recoil regularity, triggerbot signatures; per-cohort baselines; analyst-review ranking; YARA loader/HWID-spoofer rules; read-only PowerShell host driver/PCIe/vulnerable-driver-blocklist survey; match-integrity SQL; FPS cheat taxonomy + threshold calibration docs; Anti Cheat / Open Source Anti Cheat System) beside demo-telemetry ML stacks such as [[yaacs-anticheat]], [[cs2guard]], and CS2 Parquet/JSON match-stat classifiers such as [[ban-hammer]] (sklearn/XGBoost on K/D, accuracy penalties, contextual kill ratios; no client hooks). (source: wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md) (source: wiki/sources/descriptions/AadityaPokhriyal__Ban-Hammer.md)
 
-**Cheat-community OSINT practice:** NetVar1337/cheat-intel (Markdown methodology, collector runbooks, periodic landscape reports, graded-claim intel-to-detection workflow for FPS AC teams—lawful OSINT only; Analysis Framework) pairs the [[apex-anticheat-lab]] technical detectors with forum/market tempo monitoring and attribution hygiene. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/NetVar1337__cheat-intel.md)
+**Cheat-community OSINT practice:** [[cheat-intel]] (NetVar1337; Markdown methodology, collector runbooks, periodic landscape reports, graded-claim intel-to-detection workflow; JSONL/SQLite capture guidance; loaders/spoofers/DMA/peripheral/subscription/account-market coverage; lawful OSINT only; Analysis Framework) pairs [[apex-anticheat-lab]] technical detectors with forum/market tempo monitoring and attribution hygiene. (source: wiki/sources/descriptions/NetVar1337__cheat-intel.md)
 
 **Kernel AC driver census:** [[kac-inspector]] (saadahmedscse; Rust Windows CLI; correlates EnumDeviceDrivers, SCM, and driver-store paths against a built-in DB of dozens of known kernel anti-cheat signatures plus heuristics for unlisted self-identified AC drivers; running/loaded/stopped/idle/orphaned/stale labels, concise verdict, related usermode services; read-only—no install, system change, or network; Anti Cheat / Open Source Anti Cheat System) for launch troubleshooting, privacy assessment, and game-security triage beside host surveys such as [[apex-anticheat-lab]] and [[dexcheck]]. (source: wiki/sources/descriptions/saadahmedscse__kac-inspector.md)
 

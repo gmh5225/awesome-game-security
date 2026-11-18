@@ -34,7 +34,7 @@ Complements CS2 demo-telemetry research stacks such as [[yaacs-anticheat]] and [
 
 ## Peers
 
-[[yaacs-anticheat]] · [[cs2guard]] · [[cs2-overwatch]] · [[dlac]] · [[deepaimdetector]] · [[blc-gamesec-lab]]
+[[yaacs-anticheat]] · [[cs2guard]] · [[cs2-overwatch]] · [[dlac]] · [[deepaimdetector]] · [[blc-gamesec-lab]] · [[cheat-intel]]
 
 ## Links
 
