@@ -1099,6 +1099,7 @@ sources:
   - wiki/sources/descriptions/hadevn__apex_full_cheat.md
   - wiki/sources/descriptions/ekknod__apex_linux.md
   - wiki/sources/descriptions/ales-drnz__vocem-overlay.md
+  - wiki/sources/descriptions/sorche942__VkHook.md
   - wiki/sources/descriptions/gmh5225__ayypex.md
   - wiki/sources/descriptions/gmh5225__apex_legends_sdk.md
   - wiki/sources/descriptions/gmh5225__Apex-ApexCheat.md
@@ -2044,7 +2045,7 @@ sources:
   - wiki/sources/descriptions/Magicdaclip52__elden-ring-trainer.md
   - wiki/sources/descriptions/Werta1z__Avgar-AntiCheats.md
   - wiki/sources/descriptions/ILFforever__YW4Recomp.md
-updated: 2026-11-18
+updated: 2026-11-19
 confidence: high
 ---
 
@@ -3053,7 +3054,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Hybrid Apex Legends UM+KM cheat frameworks such as [[project-branthium]] (KaylinOwO; C++ Visual Studio; user-mode client + kernel driver; aimbot, ESP, entity caching, weapon prediction; ImGui + DirectX 9 menu/overlay; low-level memory code in cheat and driver dirs; game-hacking experimentation + RE workflows; cheat / game:apex legends) sit beside [[apex-legends-cheat]] and [[apex-mizu-base]] in the same lane. (source: wiki/sources/descriptions/KaylinOwO__Project-Branthium.md)
 - Hybrid Apex Legends UM+KM frameworks such as [[uc-apex-remastered]] (BaconToaster; C++ Visual Studio/WDK; kernel driver for privileged memory ops + UM client for gameplay modules and process interaction; DirectX 9 + ImGui overlay and in-tool controls; driver-assisted memory access + real-time overlay research; cheat / game:apex legends) sit beside [[project-branthium]] and [[apex-legends-cheat]] in the same lane. (source: wiki/sources/descriptions/BaconToaster__UC-Apex-Remastered.md)
 - Educational Apex Legends user-mode external frameworks such as [[r5apex-usermode]] (3nolan5; C++; shared-memory communication with mapped kernel driver for process R/W; glow and highlight manipulation plus minimal extensible baseline architecture; external cheat design + driver-assisted memory access patterns; cheat / game:apex legends [External]) sit beside [[uc-apex-remastered]] and [[nullptr-apex-external]] in the driver-assisted external learning lane. (source: wiki/sources/descriptions/3nolan5__R5Apex-UserMode.md)
-- Linux internal Apex Legends samples such as [[ayypex]] (gmh5225; Vulkan implicit-layer overlay on the game window—MangoHud-style; cheat / game:apex legends [Linux] [Internal]) extend that lane to Proton/Linux clients. (source: wiki/sources/descriptions/gmh5225__ayypex.md) Linux Discord in-game overlays such as [[vocem-overlay]] (ales-drnz; Vulkan implicit layer + OpenGL interposer; daemon-isolated Discord I/O; in-process graphics hooking / overlay injection study surface—not commercial-AC tested) extend that lane with a non-cheat overlay reference beside MangoHud-style cheat samples. (source: wiki/sources/descriptions/ales-drnz__vocem-overlay.md)
+- Linux internal Apex Legends samples such as [[ayypex]] (gmh5225; Vulkan implicit-layer overlay on the game window—MangoHud-style; cheat / game:apex legends [Linux] [Internal]) extend that lane to Proton/Linux clients. (source: wiki/sources/descriptions/gmh5225__ayypex.md) Linux Discord in-game overlays such as [[vocem-overlay]] (ales-drnz; Vulkan implicit layer + OpenGL interposer; daemon-isolated Discord I/O; in-process graphics hooking / overlay injection study surface—not commercial-AC tested) extend that lane with a non-cheat overlay reference beside MangoHud-style cheat samples. (source: wiki/sources/descriptions/ales-drnz__vocem-overlay.md) Linux modding/post-process layers such as [[vkhook]] (sorche942; implicit Vulkan layer; OpenDLSS-NR/DLSS5, ReShade shader chains, depth capture, ImGui config on native Vulkan and Wine/Proton—graphics hooking without binary patches) extend the same Proton/Linux graphics-injection lane for research and modding. (source: wiki/sources/descriptions/sorche942__VkHook.md)
 - Linux-native Apex Legends cheat research such as [[apex-linux]] (ekknod; C++; cheat / game:apex legends [Linux]) complements [[ayypex]] on non-Windows Apex clients under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/ekknod__apex_linux.md)
 - Linux service-oriented Apex Legends external automation such as [[project-tanya]] (XRadius; C# / .NET; modular memory access, driver abstraction, game-state modeling, Aim/Sense layers; daemon build/install scripts; process isolation + ptrace hardening; long-running stealth-conscious memory-driven workflows; cheat / game:apex legends [Linux]) extends that lane beside KVM/DMA samples such as [[ez-apex-dma-aimbot]]. (source: wiki/sources/descriptions/XRadius__project-tanya.md)
 - Title-specific Apex Legends SDK samples such as [[apex-legends-sdk]] (gmh5225; C++; rendering / SDK generation; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__apex_legends_sdk.md)
