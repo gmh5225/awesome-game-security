@@ -4795,6 +4795,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Hansel38/Oblivion-6 [Client/server MMO anti-cheat reference with server ban lists and Windows client protection modules (anti-debug, integrity, injection/HWID checks)]
 - https://github.com/000nico/ringo-ac [Modular Windows kernel anti-cheat (driver, usermode client, analysis server) with HWID, hypervisor checks, and callback-based telemetry for learning and CS2-style server protection]
 - https://github.com/JUS7205/cheatguard [Rust engine-agnostic anti-cheat scanner: JSON signature ruleset, loaded-module enumeration, and deterministic 0–100 risk scoring with CLEAN/SUSPICIOUS/MALICIOUS verdicts]
+- https://github.com/Vanshu160/ABBYS-Anti-Cheat [PIN-based mobile anti-cheat: admin dashboard issues one-time codes, Android client consents and reports root, hooks, and debugger indicators to the server]
 - https://github.com/g8tsz/deadlock-anti-cheat [User-mode Deadlock anti-cheat client: process logging, game-window screenshots, key input, cheat-process matching, and Discord webhook upload]
 - https://github.com/sr-star-trek/konzte-faceit [Published KONZTE GUARD client and Windows service source for Combat Master: kernel-setting checks, module/signature scans, guarded uploads, and documented detection surfaces]
 - https://github.com/urcool626/Level-Hash [Geode Geometry Dash mod that SHA-256 fingerprints levels to help detect level-edit cheating]
