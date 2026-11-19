@@ -1951,6 +1951,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/ida-sigmaker [Signature Maker]
 - https://github.com/gmh5225/FakePDB [PDB Generation From IDA]
 - https://github.com/gmh5225/Ponce [Symbolic Execution]
+- https://github.com/khalilammarr/ida-arsenal [IDA Pro 9.1 plugin with angr-backed find/avoid path solving, input discovery, crypto recognition, Z3 tab, and Go symbol recovery for crackme, CTF, and malware-style RE]
 - https://github.com/gmh5225/ttddbg [Time Travel Debugging]
 - https://github.com/gmh5225/LazyIDA [LazyIDA]
 - https://github.com/gmh5225/HappyIDA [Hex-Rays decompiler utilities: parameter labeling, SEH, Rust strings]
