@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/Tobias1205__AntiCheat.md
   - wiki/sources/descriptions/LiteLDev__LeviAntiCheat.md
   - wiki/sources/descriptions/ohmk1811__MobSentry.md
+  - wiki/sources/descriptions/Vanshu160__ABBYS-Anti-Cheat.md
   - wiki/sources/descriptions/dancing4am__win-kernel-telemetry.md
   - wiki/sources/descriptions/starfallreverie__pfnwatch.md
   - wiki/sources/descriptions/odzhan__hwid.md
@@ -1266,6 +1267,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 - [[uac]] — anti-cheat development platform with Visual Studio kernel-mode driver (common cheat-technique detection routines; C++ framework for testing/validating kernel-level detection; cheat-dev weakness probing; c4kef; Cheat developer platform) (source: wiki/sources/descriptions/c4kef__UAC.md)
 - [[quack]] — universal anti-cheat research kit (C++; modular client-side monitoring, game integration examples, documentation, companion red-team adversarial tooling; experimentation/validation—not production; JonathanBerkeley) (source: wiki/sources/descriptions/JonathanBerkeley__Quack.md)
 - [[blc-gamesec-lab]] — authorized game-security validation and regression orchestration CLI (Python; BLCReverseLab intake, evidence graphs, build diffing, incremental anti-cheat retest scoping; `blc.gamesec.report/v1`; BLCCoreStudio; defensive authorized regression testing) (source: wiki/sources/descriptions/BLCCoreStudio__BLCGameSecLab.md)
+- [[abbys-anti-cheat]] — consent-based PIN mobile integrity workflow (Vanshu160; Kotlin/Jetpack Compose Android client + Node.js reporting server; admin dashboard short-lived PINs; session tokens beyond PIN guessing; native C++ root/Magisk/mount/Frida/LSPosed/debugger checks + Kotlin package/storage/Minecraft cheat indicators; HIGH/WARN/INFO finding tiers; community moderator screening; Open Source Anti Cheat System) (source: wiki/sources/descriptions/Vanshu160__ABBYS-Anti-Cheat.md)
 - [[mobsentry]] — evidence-first static analyzer for Android APK and iOS IPA (ohmk1811; Python Flask web UI + CLI; androguard + Mach-O/plist parsing; SSL pinning, root/jailbreak, anti-debug/Frida instrumentation, secrets/Firebase exposure, manifest/network-security misconfigurations; graded findings with confidence labels; stack-aware bypass guidance with Frida/objection snippets; web + PDF reports; Anti Cheat / Analysis Framework) (source: wiki/sources/descriptions/ohmk1811__MobSentry.md)
 - [[fivem-backdoor-scanner]] — offline static scanner for FiveM/RedM server resources before deploy (rpScripts; Node.js ESM; luaparse + fflate; versioned rules for HTTP/`load()` loaders, obfuscation, secret reads, shell exec; folder/ZIP + JSON + CI exit codes; Game Tools / supply-chain hygiene) (source: wiki/sources/descriptions/rpScripts__fivem-backdoor-scanner.md)
 - [[dead-anticheat]] — FiveM server-side Lua CitizenFX anticheat (Dead-Scripts; noclip/spectate/godmode/infinite-ammo/mod-menu globals; JSON ban list + Discord webhook logging with optional screenshots; configurable event/key/command/entity blacklists; staff bypass) (source: wiki/sources/descriptions/Dead-Scripts__Dead_antiCheat.md)

@@ -174,6 +174,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BigWhiteTool](entities/bigwhite-tool.md) — Android native UE memory/SDK utility (C/C++ NDK; GName/GObject metadata traversal, process R/W, SDK dump; ImGui Vulkan/OpenGL overlay; offset finding + runtime inspection; BigWhite666; cheat / [SDK Dump For Android])
 - [abyss](entities/abyss.md) — Android system call hook (C/C++; asset pipelines, SDK generation, hooking; cheat / RE tools)
 - [abyss-engine](entities/abyss-engine.md) — clean-room classic ARPG engine reimplementation (AbyssEngine; C; SDL2/FFmpeg/zlib/libarchive; rendering, audio, scene management, MPQ assets; cross-platform; modding/legacy-behavior research; Game Engine / source; `[ARPG]`)
+- [abbys-anti-cheat](entities/abbys-anti-cheat.md) — PIN-based consent mobile integrity workflow (Kotlin/Jetpack Compose Android + Node.js server; root/Magisk/Frida/LSPosed/debugger and Minecraft-oriented indicators; HIGH/WARN/INFO tiers; Vanshu160; Anti Cheat / Open Source Anti Cheat System)
 - [adbg](entities/adbg.md) — Linux anti-debugging techniques (C/C++; Anti Debugging)
 - [adbi](entities/adbi.md) — Android Dynamic Binary Instrumentation (ARM/Thumb hijack injector + inline entry hooking; NDK; mobile RE / security research; WaterlooBridge fork, crmulliner lineage)
 - [And64InlineHook](entities/and64-inline-hook.md) — Android ARM64 inline hooking library (C++; instruction patch + branch relocation + trampolines; executable-memory + I-cache flush; mobile RE / instrumentation; Rprop)
