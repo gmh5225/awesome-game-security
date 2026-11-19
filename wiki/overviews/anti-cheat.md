@@ -1020,6 +1020,7 @@ sources:
   - wiki/sources/descriptions/Dor00tkit__BamExtensionTableHook.md
   - wiki/sources/descriptions/D4stiny__PeaceMaker.md
   - wiki/sources/descriptions/Dead-Scripts__Dead_antiCheat.md
+  - wiki/sources/descriptions/ui2506__Sunrise.md
   - wiki/sources/descriptions/uamo11__y0x1Server.md
   - wiki/sources/descriptions/u8012146108-bit__anticheat-qa.md
   - wiki/sources/descriptions/senolbasyigit__anticheat-lab.md
@@ -1621,6 +1622,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **BONELAB LabFusion server-side:** [[fusion-anti-cheat]] (FusionGuard; C# MelonLoader .NET 6 mod; Harmony patches on LabFusion network actions—item spawn/despawn, teleport, avatar change, message floods; crash-barcode blocklist, rate limits, movement/score cheat detection, SteamID allow/deny lists, Discord webhooks, in-game admin panel; Open Source Anti Cheat System / game:bonelab) for BONELAB server hosts beside other title-specific server mods such as [[7dtd-anticheatmod]] and [[tshock]]. (source: wiki/sources/descriptions/irembo337__Fusion-AntiCheat.md)
 
 **Terraria server-side:** [[tshock]] (Pryaxis; C# .NET Terraria Server API plugin; **Bouncer** packet/action anti-cheat; permissions, regions, warps, item bans; SQLite/MySQL/PostgreSQL + REST + plugin system; protocol guards for known Terraria networking flaws; Open Source Anti Cheat System / game:terraria) for dedicated-host operators needing server-authoritative cheat prevention beside other title-specific server mods such as [[7dtd-anticheatmod]]; dedicated packet-level plugin [[tshock-anticheat]] (Ghou133; C# .NET 9; modular core/rule/persistence/TShock-adapter layers; ObserveOnly development source; map-brush, butcher-damage, item-duplication, health-lock, and protocol-abuse guards with optional banning/journaling) extends TShock with deeper cheat-client coverage for researchers and operators. (source: wiki/sources/descriptions/Pryaxis__TShock.md) (source: wiki/sources/descriptions/Ghou133__TShock-AntiCheat.md)
+
+**SCP: Secret Laboratory server-side:** [[sunrise]] (ui2506; C# LabAPI plugin; Harmony patches restore server authority over client-trusted combat backtrack, room/raycast anti-wallhack, pickup/door interaction validation, and Tesla gate damage; modular movement AC plus silent-aim/spinbot/wallhack/pickup-through-walls/Tesla-immunity mitigations; Open Source Anti Cheat System) for SCP:SL dedicated hosts beside other Unity dedicated-server Harmony AC such as [[fusion-anti-cheat]] and visibility-enforcement research such as [[corner-culling]]. (source: wiki/sources/descriptions/ui2506__Sunrise.md)
 
 **Meteor Litematica printer (offensive):** [[dino-printer]] (Gingerbeard5773; Java Fabric Meteor Client addon; auto-builds Litematica schematics with BlockState property matching for stairs, slabs, and rotatable blocks; multi-point raytracing for line-of-sight placement checks; hack rotation; configurable delay/range/sneak/inventory; built from scratch to adapt placement timing to strict/anarchy server rules rather than bypass detection; cheat / game:minecraft) illustrates client-side automation that conforms to server placement validation targeted by scaffold/fast-break modules in plugins such as [[hexze-anticheat]], [[larping-anti-cheat]], and [[grim]]. (source: wiki/sources/descriptions/Gingerbeard5773__dino-printer.md)
 
