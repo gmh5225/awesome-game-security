@@ -1351,6 +1351,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/zodiacon/InfStudio [GUI editor and section tree viewer for Windows driver installation (INF) files, with Scintilla editing, templates, and infverif integration]
 - https://github.com/kernullist/kn-diff-pool [Windows kernel Big Pool snapshot/diff tool with kernel driver and Go TUI]
 - https://github.com/zodiacon/PoolMonXv3 [GUI monitor for Windows kernel pool allocation tags with filtering, pause/resume, and WinDbg pooltag.txt integration]
+- https://github.com/zodiacon/windowskernelprogrammingbook2e [Official WDK chapter sample projects for Windows Kernel Programming, 2nd ed. (minifilters, callbacks, and related kernel-mode labs)]
 - https://github.com/kernullist/kn-live-dbg [Windows kernel live debugging — driver exposes memory primitives, user-mode TUI handles symbols, types, and UX (LiveKD-style)]
 - https://github.com/orinimron123/CVE-2026-40369-EXPLOIT [CVE-2026-40369 — arbitrary kernel increment via NtQuerySystemInformation class 253; browser sandbox escape PoC, Win11 24H2–25H2]
 - https://github.com/hfiref0x/KDU [Kernel Driver Utility Tool]
