@@ -1697,6 +1697,7 @@ sources:
   - wiki/sources/descriptions/kirovgrad__Renamaida.md
   - wiki/sources/descriptions/keowu__sourceengineexplorer.md
   - wiki/sources/descriptions/praydog__AutomataMP.md
+  - wiki/sources/descriptions/khalilammarr__ida-arsenal.md
   - wiki/sources/descriptions/khang06__genshinjumpfixer2.md
   - wiki/sources/descriptions/khang06__misc.md
   - wiki/sources/descriptions/khang06__mhynot2.md
@@ -2345,6 +2346,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Fast radare2 binary emulation + symbolic execution via [[radius2]] (Rust/C; modding / memory analysis) sits in the Cheat Radare Plugins / RE Tools lane. (source: wiki/sources/descriptions/radareorg__radius2.md)
 - Core dynamic binary analysis library [[triton]] (JonathanSalwan; C++/Python; symbolic exec, taint analysis, SMT-backed RE automation; feeds [[ponce]], [[triton-bn]], [[titan]], and VMP deobfuscation workflows) anchors the Cheat Symbolic Execution / RE Tools lane. (source: wiki/sources/descriptions/JonathanSalwan__Triton.md)
 - In-IDA symbolic + taint execution via [[ponce]] (Triton integration; path constraints, tainted data flow, input generation for target paths; Cheat Symbolic Execution / IDA Plugins) sits in the same symbolic-exec / RE Tools lane. (source: wiki/sources/descriptions/gmh5225__Ponce.md)
+- In-IDA angr/Z3 find/avoid path solving, input discovery, crypto/hash recognition, and RE triage via [[ida-arsenal]] (khalilammarr; IDA Pro 9.1 Python plugin + separate backend; stdin/argv/call-site recovery; Z3/SMT-LIB; Frida/GDB export; Go symbols; Linux x86-64 ELF; crackme/CTF and protected-game license checks; Cheat / RE Tools) (source: wiki/sources/descriptions/khalilammarr__ida-arsenal.md)
 - Interactive Ghidra symbolic execution with angr/Z3 via [[ponce4ghidra]] (overkazaf; Java Ghidra extension + Python JSON/TCP backend; symbolize inputs, Find/Avoid targets from decompiler UI; constraint solving for license/anti-cheat checks; Cheat / RE Tools) (source: wiki/sources/descriptions/overkazaf__Ponce4Ghidra.md)
 - Ghidra source–sink taint + CWE-tagged vuln triage via [[vulnhunter4ghidra]] (overkazaf; Java plugin + Python angr/Z3 TCP backend; ELF/PE/Mach-O; headless JSON/CI; game-client and AC/DRM native audit; Cheat / RE Tools) (source: wiki/sources/descriptions/overkazaf__VulnHunter4Ghidra.md)
 - Ghidra deobfuscation framework via [[d810g]] (overkazaf; Java plugin + Python Z3/Unicorn/Capstone/Keystone engine; OLLVM/Tigress CFF deflattening, MBA simplification, opaque-predicate/BCF removal, string decrypt, VM devirt; CLI or one-click analyzer; Cheat / RE Tools) (source: wiki/sources/descriptions/overkazaf__D810G.md)
