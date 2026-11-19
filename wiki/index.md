@@ -4403,6 +4403,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-kernel-exploits](entities/windows-kernel-exploits.md) — kernel exploit guide (Cheat / vulnerable driver)
 - [windows-kernel-pagehook](entities/windows-kernel-pagehook.md) — PTE Hook (shared kernel VA / per-process CR3; Some Tricks Ring0)
 - [windows-kernel-rs](entities/windows-kernel-rs.md) — Rust Windows kernel driver framework (bindings + IRP/device I/O abstractions; staged examples; StephanvanSchaik)
+- [Windows Kernel Programming Book 2e](entities/windowskernelprogrammingbook2e.md) — zodiacon official WDK chapter labs for *Windows Kernel Programming* 2nd ed. (WDM drivers + user clients; IRP/IOCTL; callbacks, minifilters, WFP, monitoring; shared ktl library; driver-dev / AC primitive baseline)
 - [windows-rapl-driver](entities/windows-rapl-driver.md) — Windows KM driver for bare-metal RAPL energy metrics (Detection:HWID)
 - [windows-runtime-attestation-report](entities/windows-runtime-attestation-report.md) — C++ GetRuntimeAttestationReport sample (signed driver + kernel hotpatch Runtime Report Packages; image hashes, publisher thumbprints, hotpatch sequence; VBS/HVCI; x64/ARM64; local inspection; CodeMaxx)
 - [windows-kernel-shadow-stack](entities/windows-kernel-shadow-stack.md) — Synacktiv KM CET/shadow-stack research (KVAS / PG; Windows Security Features)

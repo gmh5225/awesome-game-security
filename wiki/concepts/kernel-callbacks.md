@@ -35,7 +35,8 @@ sources:
   - wiki/sources/descriptions/Abdelnour2__MiniAntiCheatV2.md
   - wiki/sources/descriptions/LucasAlgera__Kernel-AC.md
   - wiki/sources/descriptions/dancing4am__win-kernel-telemetry.md
-updated: 2026-10-13
+  - wiki/sources/descriptions/zodiacon__windowskernelprogrammingbook2e.md
+updated: 2026-11-19
 confidence: high
 ---
 
@@ -53,7 +54,7 @@ Windows notify/object registration APIs used by anti-cheat and EDR to observe pr
 
 ## Reference
 
-Documentation catalogs such as [[kernel-callback-functions-list]] list Windows Ring0 callback registration APIs for anti-cheat engineers and defensive researchers—not a live enumeration or patch tool. (source: wiki/sources/descriptions/gmh5225__kernel-callback-functions-list.md) Live attach enumeration during kernel debugging via [[windbg-extensions]] walks `PspCreateProcessNotifyRoutine`, `PspCreateThreadNotifyRoutine`, and `PspLoadImageNotifyRoutine` with per-type filters (process/thread/image/all) and resolving driver modules—useful for rootkit and AC driver inspection. (source: wiki/sources/descriptions/ch3rn0byl__WinDbg-Extensions.md) Reusable kernel-mode code patterns such as [[kernel-snippets]] collect copy-paste callback registration, memory, and process-manipulation snippets for driver development—not a full framework. (source: wiki/sources/descriptions/gmh5225__KernelSnippets.md) Load-image notify hygiene samples such as [[ps-image-notify-routine-spam-filter]] (Staatsgeheim; filters noisy `PsImageNotifyRoutine` callbacks via `RtlWalkFrameChain` stack walking; practical callback hygiene for kernel monitoring and AC telemetry pipelines) complement enumeration catalogs. (source: wiki/sources/descriptions/Staatsgeheim__PsImageNotifyRoutineSpamFilter.md)
+Documentation catalogs such as [[kernel-callback-functions-list]] list Windows Ring0 callback registration APIs for anti-cheat engineers and defensive researchers—not a live enumeration or patch tool. (source: wiki/sources/descriptions/gmh5225__kernel-callback-functions-list.md) Live attach enumeration during kernel debugging via [[windbg-extensions]] walks `PspCreateProcessNotifyRoutine`, `PspCreateThreadNotifyRoutine`, and `PspLoadImageNotifyRoutine` with per-type filters (process/thread/image/all) and resolving driver modules—useful for rootkit and AC driver inspection. (source: wiki/sources/descriptions/ch3rn0byl__WinDbg-Extensions.md) Reusable kernel-mode code patterns such as [[kernel-snippets]] collect copy-paste callback registration, memory, and process-manipulation snippets for driver development—not a full framework. (source: wiki/sources/descriptions/gmh5225__KernelSnippets.md) Official book-aligned WDK chapter labs such as [[windowskernelprogrammingbook2e]] (zodiacon; *Windows Kernel Programming* 2e; callbacks, timers, minifilters, and monitoring drivers with user-mode IOCTL clients) provide a structured walkthrough of the same registration surfaces beside one-off snippets. (source: wiki/sources/descriptions/zodiacon__windowskernelprogrammingbook2e.md) Load-image notify hygiene samples such as [[ps-image-notify-routine-spam-filter]] (Staatsgeheim; filters noisy `PsImageNotifyRoutine` callbacks via `RtlWalkFrameChain` stack walking; practical callback hygiene for kernel monitoring and AC telemetry pipelines) complement enumeration catalogs. (source: wiki/sources/descriptions/Staatsgeheim__PsImageNotifyRoutineSpamFilter.md)
 
 ## Attack / defense
 
