@@ -1,5 +1,5 @@
 ---
-title: Command and Conquer: Red Alert
+title: "Command and Conquer: Red Alert"
 kind: entity
 topics: [game-engine, reverse-engineering]
 sources:
