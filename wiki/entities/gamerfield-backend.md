@@ -29,4 +29,4 @@ README category: Spring Boot REST backend for Fairplay anti-cheat (JWT auth, mat
 
 ## Related
 
-[[ghostline]] · [[blastscale]] · [[leaderboard]] · [[detector-operations]] · [[overviews/anti-cheat]]
+[[player-simulation]] · [[ghostline]] · [[blastscale]] · [[leaderboard]] · [[detector-operations]] · [[overviews/anti-cheat]]

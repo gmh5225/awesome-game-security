@@ -3312,6 +3312,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PIF Config Generator](entities/pif-config-generator.md) — automated Python pipeline for validated Play Integrity Fix JSON device profiles (Pixel build.prop tracking, Pydantic schemas, pif-gen CLI; Elcapitanoe; cheat / Android attestation spoof)
 - [PlayCanvas Engine](entities/engine.md) — open-source WebGL/WebGPU JS engine (PBR / Ammo.js / XR; HTML5 3D)
 - [PlayGoblin](entities/playgoblin.md) — overnight Unity/Unreal QA bot; Python CLI deterministic checks on structured run logs; evidence HTML/Markdown/GitHub issues; MCP + JSON for agents; local regression—not AC (grloper; Game Develop / AI Agents / Game Testing)
+- [player-simulation](entities/player-simulation.md) — Fairplay Telemetry Java Maven Kafka lab (~1k synthetic players + seeded cheaters; Kafka Streams hopping-window aimbot/speedhack detector; ground-truth verifier; exactly-once sequence-integrity demo; Docker/Prometheus/Grafana; ArghadeepMisra; Anti Cheat / Open Source Anti Cheat System)
 - [Playnite](entities/playnite.md) — OSS Windows game library manager/launcher (C#/XAML/.NET; plugin integrations/themes/automation; emulation + local metadata; Game Manager / JosefNemec)
 - [PltPatcher](entities/plt-patcher.md) — IDA Pro plugin set: repair ELF64 PLT entries when auto-analysis fails; thunk type preserver for extern-call decompilation (GAMMACASE; Python IDAPython; cheat / IDA Plugins)
 - [plthook](entities/plthook.md) — cross-platform PLT/GOT/IAT hook library (ELF/Mach-O/PE; Linux/macOS/Windows; cheat / hook research)

@@ -52,7 +52,8 @@ sources:
   - wiki/sources/descriptions/phugiadang12__aegis-ac.md
   - wiki/sources/descriptions/NetVar1337__cheat-intel.md
   - wiki/sources/descriptions/ArghadeepMisra__gamerfield-backend.md
-updated: 2026-11-18
+  - wiki/sources/descriptions/ArghadeepMisra__player-simulation.md
+updated: 2026-11-19
 confidence: high
 ---
 
@@ -110,6 +111,8 @@ Desktop stream-processing prototypes such as [[adaptive-anti-cheat-stream-proces
 Multiplayer-FPS behavioural stacks such as [[aegis-ac-fps]] (phugiadang12; Python collector/detection/soc-agent + React dashboard; FastAPI JSONL ingest; explainable rule scores; Claude-powered SOC case triage with human approval; **delayed ban waves** and Discord notifications—treat LLM advisories as review evidence, not autonomous sanctions) rehearse end-to-end server-only enforcement ops beside prototype review queues such as [[aimguard]]. (source: wiki/sources/descriptions/phugiadang12__aegis-ac.md)
 
 Spring Boot integrity backends such as [[gamerfield-backend]] (ArghadeepMisra; **Fairplay Arena**; JWT-scoped players/moderators/trusted automated judges; moderation queue with **confidence-gated** auto-ban proposals; **append-only PostgreSQL audit** for enforcement actions; ban appeals; Redis leaderboard ranks—separate **decision state** from rank cache and treat judge threshold breaches as review evidence before high-impact sanctions) illustrate production-style human-in-the-loop cheat ops on a stateless REST source of truth. (source: wiki/sources/descriptions/ArghadeepMisra__gamerfield-backend.md)
+
+Kafka streaming labs such as [[player-simulation]] (ArghadeepMisra; **Fairplay Telemetry**; Java simulator publishes high-rate match events with **seeded cheaters** and **ground-truth manifests**; replicated Kafka Streams hopping-window aimbot/speedhack rules emit **scored evidence**; optional verifier reconciles detector output and stream counts against simulator truth; exactly-once sequence-integrity exercises under failure—treat streaming flags as **measurement and calibration evidence**; pair with human review thresholds before mapping hop-window hits to enforcement ladders) complement desktop stream prototypes such as [[adaptive-anti-cheat-stream-processor]]. (source: wiki/sources/descriptions/ArghadeepMisra__player-simulation.md)
 
 ## Related
 
