@@ -2598,6 +2598,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/nbnmvwpptxsf/faceit-dma-cs2 [CS2 DMA radar/ESP described for FACEIT with PCIe DMA hardware]
 - https://github.com/MGreif/PCILeech_DMA_Proxy [A DLL with Loader that hooks common windows memory API functions and proxies them to the remote device via DMA]
 - https://github.com/weikiboy-tech/HirschgangWare [Open-source DayZ external DMA cheat: MemProcFS/PCILeech reads, ESP overlay, second-monitor radar, loot filters, and kmbox/MAKCU triggerbot]
+- https://github.com/Shurtug/LucidTarkovDMA [External Escape from Tarkov DMA stack on a second PC via PCIe card: ESP, loot radar, memory writes, and MAKCU USB aimbot with no in-process footprint on the game machine]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
