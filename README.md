@@ -785,6 +785,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/kirchesz/kiero2 [kiero v2 — locate Vulkan/D3D/OpenGL API method addresses at runtime; BYO hooking; Win/Linux/macOS]
 - https://github.com/klotzbrocken/MacShade [macOS ReShade 6.8 port with dyld interposing, MoltenVK/OpenGL/Metal injection bridges, and a SwiftUI per-game launcher]
 - https://github.com/ales-drnz/vocem-overlay [Linux in-game overlay via Vulkan implicit layer and OpenGL interposer]
+- https://github.com/sorche942/VkHook [Linux Vulkan implicit layer for OpenDLSS-NR (DLSS5) and ReShade chains with depth capture and an in-game ImGui overlay on native Vulkan and Wine/Proton titles]
 - https://github.com/blanec/cyberpunk-better-shaders [Vulkan implicit layer (VkLayer_callisto_spvswap) that hot-swaps Cyberpunk 2077 path-tracer ray-gen SPIR-V at load time via Proton on Linux]
 - https://github.com/bruhmoment21/UniversalHookX [X86/64 Windows]
 - https://github.com/gmh5225/Vulkan-Hook [X86/64 Windows]
@@ -4996,6 +4997,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Shrawan-13/ff-dts-analysis [Defensive Il2CPP static-analysis pipeline for Free Fire MAX (XOR metadata decrypt, Il2CppDumper workflow) to research client-side aim/cheat mechanics]
 - https://github.com/LooperSalty/cs2-tracker [CS2 stats tracker with local FastAPI, Game State Integration live match feed, and explainable heuristic anti-cheat suspicion scoring]
 - https://github.com/ShaniTheDeveloper/Adaptive_Anti-Cheat_Stream_Processor [C++/Qt desktop pipeline that ingests simulated gameplay telemetry and flags suspicious patterns with Bloom filters, count-min sketches, and sliding windows]
+- https://github.com/ArghadeepMisra/player-simulation [Fairplay Kafka Streams telemetry lab: simulates ~1,000 players, streams aimbot/speedhack detection flags, and verifies exactly-once processing with a ground-truth verifier]
 - https://github.com/ConWan30/qortime-ai [Muse explain/red-team and SAM visualization layer on deterministic console match-integrity receipts; AI advisories cannot upgrade referee verdicts]
 - https://github.com/oykuoner/YAACS-AntiCheat [CS2 anti-cheat research pipeline that parses HLTV demos with demoparser2, extracts spatiotemporal aim telemetry, and benchmarks heuristic plus ML aimbot classifiers]
 - https://github.com/essensha/cs2-anti-cheat-ml-research [CS2-framed ML research notebooks on synthetic telemetry: classifiers, calibration, concept drift, graph-based coordination, and production-style review-capacity simulations]
@@ -5098,6 +5100,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/helloobaby/Nmi-Callback [NMI Callback]
 - https://github.com/momo5502/ept-hook-detection [Detect EPT]
 - https://github.com/JustasMasiulis/rep_mov_ept_detecc [REP MOV based EPT detection]
+- https://github.com/IntelSDM/EPTHookDetection [LLVM 19 obfuscation pass embedding in-image EPT hook detection (REP MOVSB shadow-DR and LODSD checks) against HyperDbg/DBVM-style hooks without runtime JIT]
 - https://github.com/everdox/ermsb-meme [REP MOV based EPT detection]
 - https://github.com/gmh5225/Detect-Hypervisor_detect_ring_0
 - https://github.com/jonomango/nohv
