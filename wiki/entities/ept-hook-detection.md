@@ -12,7 +12,7 @@ confidence: medium
 
 User-mode tool that detects **EPT (Extended Page Table)** hooks installed by hypervisors using three independent methods: **timing-based detection** (execution latency discrepancies), **write-and-compare** checks (write to code pages and verify whether the hypervisor silently redirects reads), and **cross-thread consistency** checks (compare code views across CPU cores). Targets the README `Detect EPT` lane for AC engineers validating hypervisor-based code hiding or split views of executable pages. (source: wiki/sources/descriptions/momo5502__ept-hook-detection.md)
 
-Complements broader hacked-hypervisor probes such as [[hypervisor-detection]] and [[checkhv-um]], REP MOVS fault-pattern EPT probes such as [[rep-mov-ept-detecc]] and [[ermsb-meme]], VPGATHER / vectored-exception EPT probes such as [[bloodhound]], and sits opposite stealth Type-2 stacks such as [[ophion]] that rely on EPT for hooking and anti-detection.
+Complements broader hacked-hypervisor probes such as [[hypervisor-detection]] and [[checkhv-um]], REP MOVS fault-pattern EPT probes such as [[rep-mov-ept-detecc]] and [[ermsb-meme]], VPGATHER / vectored-exception EPT probes such as [[bloodhound]], compile-time LLVM in-image EPT instrumentation such as [[epthookdetection]], and sits opposite stealth Type-2 stacks such as [[ophion]] that rely on EPT for hooking and anti-detection.
 
 ## Links
 

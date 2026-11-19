@@ -2023,6 +2023,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Hypervisor From Scratch](entities/hypervisor-from-scratch.md) — SinaKarvandi; tutorial x86 hypervisor (VMX, VMCS, EPT, OS virtualization; C/C++/asm; educational HV internals; README [Hypervisor])
 - [hypervisor](entities/hypervisor.md) — experimental Intel VT-x Type-2 HV (EPT page hooks, violation watchpoints, per-process cleanup; integrity-check bypass research)
 - [ept-hook-detection](entities/ept-hook-detection.md) — usermode EPT hook detector (timing / write-compare / cross-core consistency; Detect EPT)
+- [epthookdetection](entities/epthookdetection.md) — IntelSDM LLVM 19 compile-time in-image EPT hook detection (ERMSB shadow-DR, LODSD gadgets, HyperDOS slowdown; HyperDbg/DBVM; Detect EPT)
 - [ermsb-meme](entities/ermsb-meme.md) — REP MOV / ERMSB side-channel EPT hook detector (C; everdox; Detection: Hacked Hypervisor)
 - [rep-mov-ept-detecc](entities/rep-mov-ept-detecc.md) — REP MOVS fault-pattern EPT hook/access monitor detector (Windows C++; JustasMasiulis; overwrite-pattern signal + exception handling; REP MOV based EPT detection)
 - [rhabdomancer](entities/rhabdomancer.md) — Rust idalib headless IDA plugin; locates insecure API calls (strcpy/sprintf/system/ioctl); tiered badness, bookmarks, backtrace audit paths; binary vulnerability triage (0xdea; cheat / IDA Plugins)
