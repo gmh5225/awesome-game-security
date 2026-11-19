@@ -41,7 +41,8 @@ sources:
   - wiki/sources/descriptions/KamiKitsune420__bgt-decomp-tools.md
   - wiki/sources/descriptions/tamcdonald42__legacy-recreated.md
   - wiki/sources/descriptions/ILFforever__YW4Recomp.md
-updated: 2026-11-18
+  - wiki/sources/descriptions/Revivedx__SavageWindRecomp.md
+updated: 2026-11-19
 confidence: high
 ---
 
@@ -109,6 +110,8 @@ Switch AArch64 static recompilation to native Windows x64 such as [[smo-recomp]]
 
 [[totk-pc-recomp]] (valentderah; *Tears of the Kingdom* Switch ARM64 **NSO** modules→C via Python lifter/codegen; **Unicorn** differential validation; version-specific retail patch lists; Windows runtime HLE for Horizon kernel, **NVN→Vulkan**, audio, input, filesystem; resolution scaling, ultrawide, frame-rate controls; **llvm-mingw** local compile—no shipped game binaries; BYO assets) extends the Switch static-recomp cluster—separate lifted guest code from reimplemented host services before preservation or modding claims. (source: wiki/sources/descriptions/valentderah__totk-pc-recomp.md)
 
+[[savage-wind-recomp]] (Revivedx; *Breath of the Wild* Switch **1.9.0**; **LAS Recomp**-style WIP AArch64 **NSO**→C lift with version-aware patches; Switch service **HLE**; **Maxwell→Vulkan** (optional **Metal** on macOS); Capstone/Unicorn/Ghidra codegen helpers; profiling, memory scanning, and gameplay/graphics customization—BYO dump; no shipped assets) extends the Zelda/Longshot static-recomp lane beside [[totk-pc-recomp]]—label lifted guest modules vs reimplemented OS/GPU services before preservation or modding claims. (source: wiki/sources/descriptions/Revivedx__SavageWindRecomp.md)
+
 [[timelink]] (HanYolo1; active **Longshot** fork; supported Switch title AArch64→C via Python **nx2** dump/lift/compile; **Horizon OS** + **NVN 2→Vulkan** host replay without CPU emulation; C/C++ runtime, optional upscaling/frame generation, launcher/builder from **BYO** local game files; **Unicorn** instruction checks, shader lowering/**SPIR-V**, pipeline cache, mesh-shader fallbacks; documented status tables; Windows/Linux native targets) extends the Longshot/TotK-line static-recomp cluster—label lifted guest modules vs reimplemented OS/GPU services before fidelity claims. (source: wiki/sources/descriptions/HanYolo1__timeLink.md)
 
 [[xcx-recomp]] (jmars125; *Xenoblade Chronicles X: Definitive Edition*; TotK Recomp fork; Switch ARM64 **NSO**→generated C with jumptable handling and version patch tables; **Unicorn** difftest oracle; SDK service HLE, **NVN→Vulkan** with Maxwell-oriented debug notes, audio/input/filesystem; setup tool from user dumps—no full Switch emulator) applies the same lift-vs-HLE labeling at commercial-title scale for preservation RE rather than online AC study. (source: wiki/sources/descriptions/jmars125__xcx-recomp.md)
@@ -149,4 +152,4 @@ Game-server PC checks often combine **offline host artifacts** (Prefetch, Amcach
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[smo-harmony]] · [[letsgo-recomp]] · [[yw4recomp]] · [[totk-pc-recomp]] · [[timelink]] · [[xcx-recomp]] · [[xc2-recomp]] · [[dkb-pc-recomp]] · [[mkw-thwomp]] · [[emblem-weave]] · [[spr-recomp-project]] · [[nakagawa-recomp]] · [[gow-pc-port]] · [[vp2s-recomp]] · [[mksm]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[ng2recomp]] · [[cod6-nx]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[legacy-recreated]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[smo-harmony]] · [[letsgo-recomp]] · [[yw4recomp]] · [[totk-pc-recomp]] · [[savage-wind-recomp]] · [[timelink]] · [[xcx-recomp]] · [[xc2-recomp]] · [[dkb-pc-recomp]] · [[mkw-thwomp]] · [[emblem-weave]] · [[spr-recomp-project]] · [[nakagawa-recomp]] · [[gow-pc-port]] · [[vp2s-recomp]] · [[mksm]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[ng2recomp]] · [[cod6-nx]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[legacy-recreated]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
