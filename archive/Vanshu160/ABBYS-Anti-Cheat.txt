@@ -1,0 +1,2735 @@
+Project Path: arc_Vanshu160_ABBYS-Anti-Cheat_m_6b6jmh
+
+Source Tree:
+
+```txt
+arc_Vanshu160_ABBYS-Anti-Cheat_m_6b6jmh
+├── README.md
+├── app
+│   ├── build.gradle.kts
+│   └── src
+│       └── main
+│           ├── AndroidManifest.xml
+│           ├── cpp
+│           │   ├── CMakeLists.txt
+│           │   └── native-lib.cpp
+│           └── java
+│               └── com
+│                   └── example
+│                       └── mobilescanner
+│                           ├── CheatScanner.kt
+│                           ├── MainActivity.kt
+│                           ├── MinecraftScanner.kt
+│                           ├── NativeBridge.kt
+│                           ├── ReportClient.kt
+│                           ├── SafFolderScanner.kt
+│                           └── StorageScanner.kt
+├── build.gradle.kts
+├── gradle.properties
+├── render.yaml
+├── server
+│   ├── package.json
+│   ├── public
+│   │   ├── app.js
+│   │   ├── index.html
+│   │   └── style.css
+│   └── server.js
+└── settings.gradle.kts
+
+```
+
+`README.md`:
+
+```md
+# ABBYS Anti-Cheat
+
+Admin generates a 6-digit PIN on a dashboard, the player enters it in the Android app, the app
+scans the device and sends the result back to the admin.
+
+## Deploy on Render
+
+1. Render dashboard -> New -> Blueprint -> select this repo. `render.yaml` creates a free web service named `abbys-anticheat`.
+2. Open the service URL. No admin key is needed: anyone can generate a PIN, and only the browser tab that created it can read its report.
+3. Free tier sleeps after inactivity (first request may take ~30-50s) and sessions are in memory, so a restart clears pending PINs.
+
+## Server (`server/`)
+
+```sh
+cd server
+npm install
+npm start
+```
+
+- Serve it over HTTPS (reverse proxy such as Caddy or nginx). Set `TRUST_PROXY=1` when behind one,
+  so rate limits use the real client address.
+- PINs are random, valid for 30 minutes, usable once, and rate limited.
+- Anyone can create a PIN (limited to 5 open PINs and 10 requests per minute per address). Creating one returns a secret session token that stays in that browser tab and is required to read the report, so guessing PINs does not expose reports. Closing the tab loses access to that PIN's report.
+- Data is held in memory only and is deleted after the PIN expires.
+
+## Android app (`app/`)
+
+`Config.SERVER_URL` in `ReportClient.kt` points at `https://abbys-anticheat.onrender.com`; change it if your Render service has a different name. The app asks for
+consent text up front, verifies the PIN with the server, scans, then uploads the report.
+
+Severity policy: HIGH is reserved for strong native signals (root files, hooks, debugger). App-name
+matches are WARN and say "name match only". Common innocent things (sideloaded apps, accessibility
+services, ADB) are INFO. Results are indicators for an admin to review, not proof.
+
+```
+
+`app/build.gradle.kts`:
+
+```kts
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+}
+
+android {
+    namespace = "com.example.mobilescanner"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.example.mobilescanner"
+        minSdk = 26
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+        }
+    }
+
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.8"
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+dependencies {
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation(platform("androidx.compose:compose-bom:2024.02.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+}
+
+```
+
+`app/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+
+    <application
+        android:allowBackup="false"
+        android:requestLegacyExternalStorage="true"
+        android:label="ABBYS Anti-Cheat"
+        android:theme="@android:style/Theme.Material.NoActionBar"
+        android:usesCleartextTraffic="false">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+```
+
+`app/src/main/cpp/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.22.1)
+project("abyssnative")
+
+add_library(
+        abyssnative
+        SHARED
+        native-lib.cpp)
+
+find_library(
+        log-lib
+        log)
+
+target_link_libraries(
+        abyssnative
+        ${log-lib})
+
+```
+
+`app/src/main/cpp/native-lib.cpp`:
+
+```cpp
+#include <jni.h>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <unistd.h>
+
+// Helper to check if a file or directory exists at the Linux level
+bool fileExists(const char* path) {
+    return access(path, F_OK) == 0;
+}
+
+// Helper to scan a /proc file for suspicious keywords
+bool scanProcFile(const char* procPath, const std::vector<std::string>& keywords) {
+    std::ifstream file(procPath);
+    if (!file.is_open()) return false;
+
+    std::string line;
+    while (std::getline(file, line)) {
+        for (const auto& kw : keywords) {
+            if (line.find(kw) != std::string::npos) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// Check if a debugger is attached via TracerPid in /proc/self/status
+bool isDebuggerAttached() {
+    std::ifstream statusFile("/proc/self/status");
+    std::string line;
+    while (std::getline(statusFile, line)) {
+        if (line.rfind("TracerPid:", 0) == 0) {
+            int pid = std::stoi(line.substr(10));
+            return pid > 0;
+        }
+    }
+    return false;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_example_mobilescanner_NativeBridge_runNativeChecks(
+        JNIEnv* env,
+        jobject /* this */) {
+
+    std::vector<std::string> flags;
+
+    // 1. Check Root / Magisk / KernelSU binaries
+    const char* rootPaths[] = {
+        "/system/bin/su",
+        "/system/xbin/su",
+        "/sbin/su",
+        "/data/adb/magisk",
+        "/data/adb/ksu",
+        "/data/adb/ap"
+    };
+    for (const char* path : rootPaths) {
+        if (fileExists(path)) {
+            flags.push_back("HIGH|Root or Magisk Binary Found|" + std::string(path));
+        }
+    }
+
+    // 2. Check /proc/self/mounts for Zygisk / Magisk / Shamiko mounts
+    if (scanProcFile("/proc/self/mounts", {"magisk", "zygisk", "kernelsu", "apatch"})) {
+        flags.push_back("HIGH|Root Mount Detected|/proc/self/mounts contains Magisk/Zygisk");
+    }
+
+    // 3. Check /proc/self/maps for Frida / Xposed / LSPosed injection
+    if (scanProcFile("/proc/self/maps", {"frida", "xposed", "lsposed", "substrate"})) {
+        flags.push_back("HIGH|Memory Hook Detected|Frida or LSPosed injected into scanner");
+    }
+
+    // 4. Check TracerPid for active debugger
+    if (isDebuggerAttached()) {
+        flags.push_back("HIGH|Debugger Attached|TracerPid is non-zero in /proc/self/status");
+    }
+
+    if (flags.empty()) {
+        return env->NewStringUTF("CLEAN");
+    }
+
+    std::ostringstream joined;
+    for (size_t i = 0; i < flags.size(); ++i) {
+        if (i > 0) joined << ";";
+        joined << flags[i];
+    }
+    return env->NewStringUTF(joined.str().c_str());
+}
+
+```
+
+`app/src/main/java/com/example/mobilescanner/CheatScanner.kt`:
+
+```kt
+package com.example.mobilescanner
+
+import android.accessibilityservice.AccessibilityServiceInfo
+import android.app.usage.UsageStatsManager
+import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import android.view.accessibility.AccessibilityManager
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+data class ScanFinding(
+    val severity: String,
+    val title: String,
+    val detail: String
+)
+
+/**
+ * Severity policy: HIGH is reserved for strong, hard-to-explain signals (the native root/hook/debugger
+ * checks, or a mod archive containing a known cheat client's code). A name match on an app or file is only WARN and says so. Things that are common and
+ * innocent (sideloaded apps, accessibility services, ADB) are INFO for the admin's context.
+ */
+object CheatScanner {
+
+    /** Distinctive enough to match inside the lowercase letters-only form of package + label. */
+    private val DISTINCTIVE = listOf("gameguardian", "luckypatcher", "lsposed", "kernelsu", "aimbot", "wallhack", "autoclicker")
+
+    /** Short words match only as whole words, never as substrings ("esp" must not hit "espn"). */
+    private val WHOLE_WORDS = setOf("xposed", "magisk", "injector", "modmenu")
+
+    private val TRUSTED_INSTALLERS = setOf(
+        "com.android.vending", "com.sec.android.app.samsungapps", "com.amazon.venezia", "org.fdroid.fdroid"
+    )
+
+    fun runFullScan(context: Context, safTree: Uri? = null): List<ScanFinding> {
+        val findings = mutableListOf<ScanFinding>()
+
+        findings.addAll(NativeBridge.getNativeFindings())
+        findings.addAll(checkInstalledPackages(context))
+        findings.addAll(checkAccessibility(context))
+        findings.addAll(checkRecentUsage(context))
+        val storage = StorageScanner.scan(context)
+        findings.addAll(storage.findings)
+        findings.addAll(MinecraftScanner.scan(context, storage.gameDirs, safTree))
+        findings.addAll(SafFolderScanner.scan(context, safTree))
+        findings.addAll(checkDeveloperSettings(context))
+
+        return capFindings(findings)
+    }
+
+    /** The server rejects reports over 200 findings, so keep the most severe ones. */
+    private fun capFindings(all: List<ScanFinding>, max: Int = 190): List<ScanFinding> {
+        if (all.size <= max) return all
+        val order = listOf("HIGH", "WARN", "INFO", "CLEAN")
+        val sorted = all.sortedBy { val i = order.indexOf(it.severity); if (i < 0) 2 else i }
+        val kept = sorted.take(max - 1)
+        return kept + ScanFinding("INFO", "Report truncated", "${all.size - kept.size} lower-priority findings were omitted to fit the report limit.")
+    }
+
+    private fun matchesSuspiciousName(pkgName: String, label: String): Boolean {
+        val letters = (pkgName + label).lowercase().filter { it.isLetter() }
+        if (DISTINCTIVE.any { letters.contains(it) }) return true
+        val words = (pkgName + "." + label).lowercase().split(Regex("[^a-z0-9]+")).filter { it.isNotEmpty() }
+        return words.any { it in WHOLE_WORDS }
+    }
+
+    private fun checkInstalledPackages(context: Context): List<ScanFinding> {
+        val results = mutableListOf<ScanFinding>()
+        val pm = context.packageManager
+        val packages = pm.getInstalledPackages(0)
+
+        for (pkg in packages) {
+            val pkgName = pkg.packageName.lowercase()
+            val appLabel = pkg.applicationInfo?.loadLabel(pm)?.toString() ?: pkgName
+
+            if (matchesSuspiciousName(pkgName, appLabel)) {
+                results.add(
+                    ScanFinding(
+                        "WARN", "App name resembles a known cheat/root tool",
+                        "$appLabel ($pkgName). Name match only; verify the app before drawing conclusions."
+                    )
+                )
+            }
+
+            val isSystem = ((pkg.applicationInfo?.flags ?: 0) and ApplicationInfo.FLAG_SYSTEM) != 0
+            if (!isSystem && pkgName != context.packageName) {
+                val installer = try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        pm.getInstallSourceInfo(pkg.packageName).installingPackageName
+                    } else {
+                        @Suppress("DEPRECATION")
+                        pm.getInstallerPackageName(pkg.packageName)
+                    }
+                } catch (e: Exception) {
+                    null
+                }
+
+                if (installer !in TRUSTED_INSTALLERS) {
+                    results.add(
+                        ScanFinding("INFO", "App not from a major store", "$appLabel (installer: ${installer ?: "none / APK file"})")
+                    )
+                }
+            }
+        }
+        return results
+    }
+
+    private fun checkAccessibility(context: Context): List<ScanFinding> {
+        val results = mutableListOf<ScanFinding>()
+        val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        val enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+        for (service in enabledServices) {
+            results.add(
+                ScanFinding(
+                    "INFO", "Accessibility service enabled",
+                    "${service.id ?: "unknown"} (often assistive technology such as a screen reader; not suspicious by itself)"
+                )
+            )
+        }
+        return results
+    }
+
+    private fun checkRecentUsage(context: Context): List<ScanFinding> {
+        val results = mutableListOf<ScanFinding>()
+        if (!hasUsageStatsPermission(context)) {
+            results.add(ScanFinding("INFO", "Recent-app check skipped", "Usage Access was not granted, so this part of the scan is incomplete."))
+            return results
+        }
+
+        val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        val endTime = System.currentTimeMillis()
+        val startTime = endTime - (15 * 60 * 1000)
+
+        val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
+        val formatter = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+
+        val recentApps = stats
+            .filter { it.lastTimeUsed >= startTime && it.packageName != context.packageName }
+            .sortedByDescending { it.lastTimeUsed }
+            .take(8)
+
+        for (app in recentApps) {
+            val timeStr = formatter.format(Date(app.lastTimeUsed))
+            results.add(ScanFinding("INFO", "Recent App ($timeStr)", app.packageName))
+        }
+        return results
+    }
+
+    private fun checkDeveloperSettings(context: Context): List<ScanFinding> {
+        val results = mutableListOf<ScanFinding>()
+        val adbEnabled = Settings.Global.getInt(context.contentResolver, Settings.Global.ADB_ENABLED, 0)
+        if (adbEnabled == 1) {
+            results.add(ScanFinding("INFO", "USB debugging (ADB) enabled", "Common on developer and hobbyist devices; not suspicious by itself."))
+        }
+        return results
+    }
+}
+
+```
+
+`app/src/main/java/com/example/mobilescanner/MainActivity.kt`:
+
+```kt
+package com.example.mobilescanner
+
+import android.Manifest
+import android.app.AppOpsManager
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.os.Environment
+import android.os.Process
+import android.provider.Settings
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme(colorScheme = darkColorScheme()) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    ScannerApp()
+                }
+            }
+        }
+    }
+}
+
+enum class ScanStep {
+    ENTER_PIN,
+    GRANT_PERMISSIONS,
+    SCANNING,
+    COMPLETED
+}
+
+@Composable
+fun ScannerApp() {
+    var currentStep by remember { mutableStateOf(ScanStep.ENTER_PIN) }
+    var pinCode by remember { mutableStateOf("") }
+    var scanProgress by remember { mutableFloatStateOf(0f) }
+    var scanStatusText by remember { mutableStateOf("Initializing...") }
+    var scanResults by remember { mutableStateOf<List<ScanFinding>>(emptyList()) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var verifying by remember { mutableStateOf(false) }
+    var pinError by remember { mutableStateOf<String?>(null) }
+    var uploadStatus by remember { mutableStateOf("") }
+    var permTick by remember { mutableIntStateOf(0) }
+    var safTree by remember { mutableStateOf<Uri?>(null) }
+
+    // Re-check permissions every time the player comes back from a settings screen.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) permTick++
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    val usageOk = remember(permTick) { hasUsageStatsPermission(context) }
+    val filesOk = remember(permTick) { hasAllFilesPermission(context) }
+    val treeLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> safTree = uri }
+    val storagePermLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { permTick++ }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = if (currentStep == ScanStep.COMPLETED) Arrangement.Top else Arrangement.Center
+    ) {
+        Text(
+            text = "ABBYS ANTI-CHEAT",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+
+        when (currentStep) {
+            ScanStep.ENTER_PIN -> {
+                Text("Enter the 6-digit PIN provided by the admin:")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "This scan reads: names of installed apps, enabled accessibility services, apps used in the " +
+                        "last 15 minutes, whether USB debugging is on, and basic root/debugger indicators. With All " +
+                        "Files Access it also lists file and folder names (with last-modified times) across your storage and trash, " +
+                        "and, if you pick one, the folder you choose. It also looks " +
+                        "inside Minecraft Java and Bedrock folders (mod file lists, configs, resource packs and recent game logs). It does not read " +
+                        "messages, photos, launcher login data or game worlds. " +
+                        "The result is sent to the admin who gave you this PIN.",
+                    fontSize = 12.sp,
+                    color = Color.LightGray
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = pinCode,
+                    onValueChange = { if (it.length <= 6 && it.all { c -> c.isDigit() }) pinCode = it },
+                    label = { Text("Session PIN") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                pinError?.let {
+                    Text(it, color = Color(0xFFD32F2F), fontSize = 13.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                Button(
+                    onClick = {
+                        verifying = true
+                        pinError = null
+                        scope.launch {
+                            val ok = withContext(Dispatchers.IO) { ReportClient.verifyPin(pinCode) }
+                            verifying = false
+                            if (ok) currentStep = ScanStep.GRANT_PERMISSIONS
+                            else pinError = "PIN not accepted. It may be wrong, already used, expired, or the server is unreachable."
+                        }
+                    },
+                    enabled = pinCode.length == 6 && !verifying,
+                    modifier = Modifier.fillMaxWidth().height(50.dp)
+                ) {
+                    Text(if (verifying) "Checking..." else "Verify PIN")
+                }
+            }
+
+            ScanStep.GRANT_PERMISSIONS -> {
+                Text("Required Permissions", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                PermissionRow("Usage Access", usageOk) {
+                    context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                PermissionRow("All Files Access", filesOk) { requestAllFiles(context, storagePermLauncher) }
+                Spacer(modifier = Modifier.height(20.dp))
+
+                OutlinedButton(
+                    onClick = { treeLauncher.launch(androidDataHint()) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        if (safTree == null) "3. Select Launcher / Minecraft Folder (Android/data)"
+                        else "Folder selected: ${folderLabel(safTree!!)} (tap to change)"
+                    )
+                }
+                Text(
+                    "Optional. Pick the launcher's .minecraft folder or the com.mojang folder (Bedrock). Mods, configs, logs and " +
+                        "packs inside are checked, plus recently changed .so, .cfg, .lua and .pak files. Android 11+ may refuse " +
+                        "Android/data itself; folders under /games usually work.",
+                    fontSize = 11.sp,
+                    color = Color.LightGray
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = { currentStep = ScanStep.SCANNING },
+                    enabled = usageOk && filesOk,
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
+                ) {
+                    Text("Start Scan", color = Color.White)
+                }
+                if (!(usageOk && filesOk)) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Grant both permissions to start the scan.", fontSize = 12.sp, color = Color(0xFFEF9A9A))
+                }
+            }
+
+            ScanStep.SCANNING -> {
+                LaunchedEffect(Unit) {
+                    scanStatusText = "Scanning packages & overlays..."
+                    scanProgress = 0.35f
+                    delay(600)
+
+                    scanStatusText = "Checking recent apps, storage, trash and Minecraft folders (can take a minute)..."
+                    scanProgress = 0.70f
+                    val results = withContext(Dispatchers.IO) {
+                        CheatScanner.runFullScan(context, safTree)
+                    }
+
+                    scanStatusText = "Finalizing report..."
+                    scanProgress = 1.0f
+                    delay(400)
+
+                    scanResults = results
+                    scanStatusText = "Sending report to admin..."
+                    val sent = withContext(Dispatchers.IO) { ReportClient.submit(pinCode, results) }
+                    uploadStatus = if (sent) "Report sent to the admin."
+                    else "Could not send the report. Show this screen to the admin."
+                    currentStep = ScanStep.COMPLETED
+                }
+
+                Text(scanStatusText, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(16.dp))
+                LinearProgressIndicator(
+                    progress = { scanProgress },
+                    modifier = Modifier.fillMaxWidth().height(8.dp)
+                )
+            }
+
+            ScanStep.COMPLETED -> {
+                Text(
+                    "Scan Complete (PIN: $pinCode)",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4CAF50)
+                )
+                Text(uploadStatus, fontSize = 12.sp, color = Color.LightGray)
+                Spacer(modifier = Modifier.height(12.dp))
+
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(scanResults) { item ->
+                        val badgeColor = when (item.severity) {
+                            "HIGH" -> Color(0xFFD32F2F)
+                            "WARN" -> Color(0xFFF57C00)
+                            "CLEAN" -> Color(0xFF388E3C)
+                            else -> Color(0xFF1976D2)
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF1E1E1E), RoundedCornerShape(8.dp))
+                                .padding(12.dp)
+                        ) {
+                            Text(
+                                text = "[${item.severity}] ${item.title}",
+                                color = badgeColor,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = item.detail,
+                                color = Color.LightGray,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(
+                    onClick = {
+                        pinCode = ""
+                        pinError = null
+                        uploadStatus = ""
+                        currentStep = ScanStep.ENTER_PIN
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("New Scan")
+                }
+            }
+        }
+    }
+}
+
+fun hasUsageStatsPermission(context: Context): Boolean {
+    val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+    val mode = appOps.unsafeCheckOpNoThrow(
+        AppOpsManager.OPSTR_GET_USAGE_STATS,
+        Process.myUid(),
+        context.packageName
+    )
+    return mode == AppOpsManager.MODE_ALLOWED
+}
+
+fun hasAllFilesPermission(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        Environment.isExternalStorageManager()
+    } else {
+        ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+    }
+}
+
+fun requestAllFiles(context: Context, legacyLauncher: ActivityResultLauncher<String>) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        try {
+            context.startActivity(
+                Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}"))
+            )
+        } catch (e: Exception) {
+            context.startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
+        }
+    } else {
+        legacyLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+    }
+}
+
+/** Starts the folder picker at Android/data when the system allows it. */
+fun androidDataHint(): Uri? = try {
+    android.provider.DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", "primary:Android/data")
+} catch (e: Exception) {
+    null
+}
+
+fun folderLabel(uri: Uri): String = try {
+    android.provider.DocumentsContract.getTreeDocumentId(uri)
+} catch (e: Exception) {
+    "selected folder"
+}
+
+@Composable
+fun PermissionRow(label: String, granted: Boolean, onGrant: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(label, fontSize = 16.sp)
+            Spacer(modifier = Modifier.height(4.dp))
+            Surface(
+                color = if (granted) Color(0xFF1B5E20) else Color(0xFFB71C1C),
+                shape = RoundedCornerShape(6.dp)
+            ) {
+                Text(
+                    if (granted) "GRANTED" else "NOT GRANTED",
+                    color = Color.White,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                )
+            }
+        }
+        Button(onClick = onGrant, enabled = !granted) {
+            Text(if (granted) "Done" else "Grant")
+        }
+    }
+}
+
+```
+
+`app/src/main/java/com/example/mobilescanner/MinecraftScanner.kt`:
+
+```kt
+package com.example.mobilescanner
+
+import android.content.Context
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.DocumentsContract
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.RandomAccessFile
+import java.nio.file.Files
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.zip.ZipFile
+
+/** Where findings go; implemented by the storage scanner and by this module. */
+internal interface FindingSink {
+    fun flag(key: String, f: ScanFinding)
+}
+
+/** One file or folder, either a real file or a document inside a folder tree the player picked. */
+internal interface McEntry {
+    val name: String
+    val path: String
+    val isDir: Boolean
+    val modified: Long
+    val size: Long
+    fun children(): List<McEntry>?
+    fun readTail(maxBytes: Int): ByteArray?
+    fun asFile(): File?
+}
+
+private fun isLink(f: File): Boolean = try {
+    Files.isSymbolicLink(f.toPath())
+} catch (e: Exception) {
+    false
+}
+
+private class FileEntry(private val f: File) : McEntry {
+    override val name: String get() = f.name
+    override val path: String get() = f.path
+    override val isDir: Boolean get() = f.isDirectory
+    override val modified: Long get() = f.lastModified()
+    override val size: Long get() = f.length()
+
+    private var loaded = false
+    private var kids: List<McEntry>? = null
+
+    override fun children(): List<McEntry>? {
+        if (!loaded) {
+            loaded = true
+            kids = try {
+                f.listFiles()?.filter { !isLink(it) }?.map { FileEntry(it) }
+            } catch (e: SecurityException) {
+                null
+            }
+        }
+        return kids
+    }
+
+    override fun readTail(maxBytes: Int): ByteArray? = try {
+        RandomAccessFile(f, "r").use { raf ->
+            val len = raf.length()
+            val n = minOf(len, maxBytes.toLong()).toInt()
+            raf.seek(len - n)
+            val b = ByteArray(n)
+            raf.readFully(b)
+            b
+        }
+    } catch (e: Exception) {
+        null
+    }
+
+    override fun asFile(): File? = f
+}
+
+private class SafEntry(
+    private val context: Context,
+    private val tree: Uri,
+    private val docId: String,
+    override val name: String,
+    override val isDir: Boolean,
+    override val modified: Long,
+    override val size: Long,
+    override val path: String
+) : McEntry {
+    private var loaded = false
+    private var kids: List<McEntry>? = null
+
+    override fun children(): List<McEntry>? {
+        if (!loaded) {
+            loaded = true
+            kids = query()
+        }
+        return kids
+    }
+
+    private fun query(): List<McEntry>? {
+        val uri = DocumentsContract.buildChildDocumentsUriUsingTree(tree, docId)
+        val cursor = try {
+            context.contentResolver.query(
+                uri,
+                arrayOf(
+                    DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                    DocumentsContract.Document.COLUMN_MIME_TYPE,
+                    DocumentsContract.Document.COLUMN_LAST_MODIFIED,
+                    DocumentsContract.Document.COLUMN_SIZE
+                ),
+                null, null, null
+            )
+        } catch (e: Exception) {
+            null
+        }
+        if (cursor == null) return null
+        val out = ArrayList<McEntry>()
+        cursor.use { c ->
+            while (c.moveToNext()) {
+                val id = c.getString(0) ?: continue
+                val n = c.getString(1) ?: continue
+                val dir = c.getString(2) == DocumentsContract.Document.MIME_TYPE_DIR
+                val mod = if (c.isNull(3)) 0L else c.getLong(3)
+                val sz = if (c.isNull(4)) 0L else c.getLong(4)
+                out.add(SafEntry(context, tree, id, n, dir, mod, sz, "$path/$n"))
+            }
+        }
+        return out
+    }
+
+    override fun readTail(maxBytes: Int): ByteArray? = try {
+        val uri = DocumentsContract.buildDocumentUriUsingTree(tree, docId)
+        context.contentResolver.openInputStream(uri)?.use { ins ->
+            var toSkip = if (size > maxBytes) size - maxBytes else 0L
+            while (toSkip > 0) {
+                val s = ins.skip(toSkip)
+                if (s <= 0) break
+                toSkip -= s
+            }
+            val buf = ByteArrayOutputStream()
+            val tmp = ByteArray(8192)
+            while (buf.size() < 4 * 1024 * 1024) {
+                val n = ins.read(tmp)
+                if (n < 0) break
+                buf.write(tmp, 0, n)
+            }
+            val all = buf.toByteArray()
+            if (all.size > maxBytes) all.copyOfRange(all.size - maxBytes, all.size) else all
+        }
+    } catch (e: Exception) {
+        null
+    }
+
+    override fun asFile(): File? = null
+}
+
+/**
+ * Minecraft forensics for Java launchers (PojavLauncher, MojoLauncher, Zalith, FCL, anything with a
+ * .minecraft folder) and Minecraft Bedrock. Read-only. Works on real folders (All Files Access) and on a
+ * folder tree the player picks with the system folder picker, using the same rules for both.
+ *
+ * Evidence is grouped in independent families (NAME, ARTIFACT, LOG, CONFIG). One name match is only a
+ * WARN that says "name match only"; HIGH is reserved for a mod archive that contains a known cheat
+ * client's code; several independent families for the same client are reported together.
+ * Account/token files (launcher_profiles.json, accounts) are never opened, and log lines are not sent.
+ */
+object MinecraftScanner {
+    private const val MAX_FS_DEPTH = 5
+    private const val MAX_SAF_DEPTH = 4
+    private const val MAX_DIR_VISITS = 4000
+    private const val TIME_BUDGET_MS = 60_000L
+    private const val MAX_FLAGS = 150
+    private const val MAX_HIGH = 30
+    private const val LOG_LINES = 800
+    private const val LOG_BYTES = 512 * 1024
+    private const val RECENT_MS = 7L * 24 * 3600 * 1000
+    private const val MAX_RECENT_LOGS = 4
+    private const val MAX_JAR_ENTRIES = 20_000
+    private const val MAX_JAR_BYTES = 300L * 1024 * 1024
+    private const val MAX_DOWNLOAD_FLAGS = 40
+
+    private val JAVA_LAUNCHERS = linkedMapOf(
+        "net.kdt.pojavlaunch" to "PojavLauncher",
+        "net.kdt.pojavlaunch.debug" to "PojavLauncher (debug)",
+        "git.artdeell.mojo" to "MojoLauncher",
+        "com.mojo.launcher" to "MojoLauncher",
+        "com.movtery.zalithlauncher" to "Zalith Launcher",
+        "com.tungsten.fcl" to "Fold Craft Launcher (FCL)"
+    )
+    private const val BEDROCK_PKG = "com.mojang.minecraftpe"
+    private const val TOOLBOX_PKG = "io.mrarm.mctoolbox"
+    private const val PLAY_STORE = "com.android.vending"
+
+    private val ROOT_LAUNCHER_DIRS = listOf(
+        "PojavLauncher", "ZalithLauncher", "MojoLauncher", "FCL", "Amethyst", "CraftLauncher", ".minecraft", "minecraft"
+    )
+    private val GAME_SUBDIRS = setOf("mods", "config", "logs", "resourcepacks", "saves", "libraries")
+    private val DOWNLOAD_EXT = setOf("mcpack", "mcaddon", "mcworld", "jar", "so", "lua", "apk")
+
+    // ---- name rules ---------------------------------------------------------------------------
+
+    private class Hit(val key: String, val strong: Boolean, val term: String)
+
+    /** Long, distinctive names: matched inside the letters-only lowercase name. */
+    private val LONG_SUBSTR = listOf(
+        "liquidbounce" to "liquidbounce", "meteorclient" to "meteor", "bleachhack" to "bleachhack",
+        "rusherhack" to "rusherhack", "thunderhack" to "thunderhack", "aristois" to "aristois",
+        "doomsday" to "doomsday", "autoclicker" to "autoclicker", "mathax" to "mathax",
+        "wurstclient" to "wurst", "impactclient" to "impact", "futureclient" to "future", "coffeeclient" to "coffee"
+    )
+
+    /** Shorter names: matched inside a single word of the name. */
+    private val TOKEN_SUBSTR = listOf(
+        "killaura" to "killaura", "triggerbot" to "triggerbot", "chestesp" to "chestesp",
+        "baritone" to "baritone", "freecam" to "freecam", "xray" to "xray"
+    )
+
+    /** Ordinary English words that are also client names; only a weak match unless "client"/"hack" is nearby. */
+    private val WEAK = setOf(
+        "meteor", "impact", "inertia", "future", "coffee", "reach", "velocity", "hitbox", "shoreline", "nametags", "nametag"
+    )
+    private val CLIENT_WORDS = setOf("client", "clients", "hack", "hacks", "cheat", "cheats")
+
+    private fun hackMatch(name: String): Hit? {
+        val lower = name.lowercase().replace("x-ray", "xray")
+        val letters = lower.filter { it.isLetter() }
+        for ((sub, key) in LONG_SUBSTR) {
+            if (letters.contains(sub)) return Hit(key, true, sub)
+        }
+        val tokens = lower.split(Regex("[^a-z0-9]+")).filter { it.isNotEmpty() }
+        for ((sub, key) in TOKEN_SUBSTR) {
+            if (tokens.any { it.contains(sub) }) return Hit(key, true, sub)
+        }
+        if ("wurst" in tokens) return Hit("wurst", true, "wurst")
+        val weak = tokens.firstOrNull { it in WEAK }
+        if (weak != null) {
+            val key = if (weak == "nametag") "nametags" else weak
+            return Hit(key, tokens.any { it in CLIENT_WORDS }, weak)
+        }
+        return null
+    }
+
+    /** Class-path prefixes inside a jar that belong to well-known cheat clients. */
+    private val CLASS_MARKERS = listOf(
+        Triple("net/ccbluex/liquidbounce", "liquidbounce", "LiquidBounce"),
+        Triple("net/wurstclient", "wurst", "Wurst"),
+        Triple("meteordevelopment/meteorclient", "meteor", "Meteor Client"),
+        Triple("org/bleachhack", "bleachhack", "BleachHack"),
+        Triple("me/ionar/salhack", "salhack", "SalHack"),
+        Triple("org/kamiblue", "kamiblue", "KAMI Blue")
+    )
+
+    /** Text found inside a version .json that belongs to a cheat client. */
+    private val JSON_MARKERS = listOf(
+        "liquidbounce" to "liquidbounce", "net.ccbluex" to "liquidbounce", "wurstclient" to "wurst",
+        "meteordevelopment" to "meteor", "bleachhack" to "bleachhack", "rusherhack" to "rusherhack",
+        "aristois" to "aristois", "thunderhack" to "thunderhack", "mathax" to "mathax"
+    )
+
+    /** Text in a game log that names a cheat client. */
+    private val LOG_MARKERS = listOf(
+        "liquidbounce" to "liquidbounce", "wurst client" to "wurst", "wurstclient" to "wurst",
+        "meteor client" to "meteor", "meteorclient" to "meteor", "meteordevelopment" to "meteor",
+        "bleachhack" to "bleachhack", "rusherhack" to "rusherhack", "aristois" to "aristois",
+        "thunderhack" to "thunderhack", "mathax" to "mathax", "doomsday client" to "doomsday",
+        "impact client" to "impact", "future client" to "future", "baritone" to "baritone",
+        "killaura" to "killaura", "triggerbot" to "triggerbot", "freecam" to "freecam", "xray" to "xray"
+    )
+
+    /** Common allowed mods, listed separately so an admin can check them against server rules. */
+    private val KNOWN_OK = listOf(
+        "sodium", "lithium", "iris", "optifine", "optifabric", "lunar", "feather", "badlion", "labymod",
+        "fabric-api", "fabricapi", "ferritecore", "starlight", "dynamicfps", "entityculling", "modmenu",
+        "replaymod", "essential"
+    )
+
+    private fun bedrockMatch(text: String): String? {
+        val lower = text.lowercase().replace("x-ray", "xray")
+        val tokens = lower.split(Regex("[^a-z0-9]+")).filter { it.isNotEmpty() }.toSet()
+        if (tokens.any { it.contains("xray") }) return "X-Ray"
+        if (tokens.any { it.startsWith("fullbright") } || ("full" in tokens && "bright" in tokens)) return "Fullbright"
+        if ("nightvision" in tokens || ("night" in tokens && "vision" in tokens)) return "Night Vision"
+        if ("nofog" in tokens || ("no" in tokens && "fog" in tokens)) return "No-Fog"
+        if (tokens.any { it.startsWith("tracer") }) return "Tracers"
+        if (tokens.any { it.startsWith("hitbox") }) return "Hitbox"
+        if ("reach" in tokens) return "Reach"
+        if ("radar" in tokens) return "Radar"
+        if ("esp" in tokens) return "ESP"
+        return null
+    }
+
+    // ---- bookkeeping --------------------------------------------------------------------------
+
+    private class McSink : FindingSink {
+        val flags = ArrayList<ScanFinding>()
+        val high = ArrayList<ScanFinding>()
+        val seen = HashSet<String>()
+        var overflow = 0
+
+        override fun flag(key: String, f: ScanFinding) {
+            if (!seen.add(key)) return
+            if (f.severity == "HIGH") {
+                if (high.size < MAX_HIGH) high.add(f) else overflow++
+            } else {
+                if (flags.size < MAX_FLAGS) flags.add(f) else overflow++
+            }
+        }
+    }
+
+    private class Run(val sink: McSink, val deadline: Long) {
+        var visits = 0
+        var javaDirs = 0
+        var bedrockDirs = 0
+        val analyzed = LinkedHashSet<String>()
+        fun expired() = System.currentTimeMillis() > deadline || visits > MAX_DIR_VISITS
+    }
+
+    /** Which independent kinds of evidence were seen for each client in one game folder. */
+    private class Evidence {
+        val m = HashMap<String, MutableSet<String>>()
+        fun add(key: String, family: String) {
+            m.getOrPut(key) { HashSet() }.add(family)
+        }
+    }
+
+    private fun ts(ms: Long): String =
+        if (ms <= 0L) "unknown" else SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(ms))
+
+    @Suppress("DEPRECATION")
+    private fun storageBase(): File = Environment.getExternalStorageDirectory()
+
+    private fun canon(f: File): String = try {
+        f.canonicalPath
+    } catch (e: Exception) {
+        f.absolutePath
+    }
+
+    // ---- entry point --------------------------------------------------------------------------
+
+    fun scan(context: Context, storageGameDirs: List<File>, safTree: Uri?): List<ScanFinding> {
+        val sink = McSink()
+        val run = Run(sink, System.currentTimeMillis() + TIME_BUDGET_MS)
+        val installed = packageChecks(context, sink)
+
+        val fsOk = hasAllFilesPermission(context)
+        if (fsOk) {
+            val base = storageBase()
+            val candidates = LinkedHashMap<String, File>()
+            val add = { f: File -> if (f.isDirectory) candidates.putIfAbsent(canon(f), f) }
+
+            for ((pkg, label) in JAVA_LAUNCHERS) {
+                if (pkg in installed) probeData(File(base, "Android/data/$pkg/files"), pkg, label, sink, add)
+            }
+            if (BEDROCK_PKG in installed) {
+                probeData(
+                    File(base, "Android/data/$BEDROCK_PKG/files/games/com.mojang"),
+                    BEDROCK_PKG, "Minecraft Bedrock", sink, add
+                )
+            }
+            File(base, "games").listFiles()?.filter { it.isDirectory }?.forEach { add(it) }
+            add(File(base, "games/com.mojang"))
+            for (n in ROOT_LAUNCHER_DIRS) add(File(base, n))
+            for (g in storageGameDirs) add(g)
+
+            for (d in candidates.values) {
+                if (run.expired()) break
+                locate(FileEntry(d), 0, MAX_FS_DEPTH, run)
+            }
+            downloads(sink)
+        }
+
+        if (safTree != null) scanTree(context, safTree, run)
+
+        val out = ArrayList<ScanFinding>()
+        out.addAll(sink.high)
+        out.addAll(sink.flags)
+        if (sink.overflow > 0) {
+            out.add(ScanFinding("INFO", "More Minecraft findings omitted", "${sink.overflow} further matches were left out to keep the report a reasonable size."))
+        }
+        val where = run.analyzed.take(4).joinToString("; ") { it.takeLast(70) }
+        out.add(
+            ScanFinding(
+                "INFO", "Minecraft scan coverage",
+                "Analyzed ${run.javaDirs} Java game folder(s) and ${run.bedrockDirs} Bedrock folder(s)" +
+                    (if (where.isNotEmpty()) " ($where)" else "") + ". " +
+                    (if (!fsOk) "All Files Access is missing, so internal folders were skipped. " else "") +
+                    (if (run.expired()) "Stopped early (time or folder limit). " else "") +
+                    "Mod archives from a picked folder are checked by name only. Other apps' private folders stay hidden by Android unless picked."
+            )
+        )
+        return out
+    }
+
+    private fun packageChecks(context: Context, sink: FindingSink): Set<String> {
+        val installed = HashSet<String>()
+        for ((pkg, label) in JAVA_LAUNCHERS) {
+            if (isInstalled(context, pkg)) {
+                installed.add(pkg)
+                sink.flag("lp:$pkg", ScanFinding("INFO", "Minecraft launcher installed", "$label ($pkg)"))
+            }
+        }
+        if (isInstalled(context, BEDROCK_PKG)) {
+            installed.add(BEDROCK_PKG)
+            val installer = installerOf(context, BEDROCK_PKG)
+            if (installer == PLAY_STORE) {
+                sink.flag("bp", ScanFinding("INFO", "Minecraft Bedrock installed", "Installed from Google Play."))
+            } else {
+                sink.flag(
+                    "bp",
+                    ScanFinding(
+                        "WARN", "Minecraft Bedrock not installed from the Play Store",
+                        "Installer: ${installer ?: "none / APK file"}. This can be a modified or pirated APK, or a legitimate other store (for example Amazon or Samsung)."
+                    )
+                )
+            }
+        }
+        if (isInstalled(context, TOOLBOX_PKG)) {
+            sink.flag(
+                "tb",
+                ScanFinding("WARN", "Toolbox for Minecraft installed", "$TOOLBOX_PKG is a Bedrock modding tool. Installed on its own this is not proof of cheating.")
+            )
+        }
+        return installed
+    }
+
+    private fun isInstalled(context: Context, pkg: String): Boolean = try {
+        @Suppress("DEPRECATION")
+        context.packageManager.getPackageInfo(pkg, 0)
+        true
+    } catch (e: Exception) {
+        false
+    }
+
+    private fun installerOf(context: Context, pkg: String): String? = try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            context.packageManager.getInstallSourceInfo(pkg).installingPackageName
+        } else {
+            @Suppress("DEPRECATION")
+            context.packageManager.getInstallerPackageName(pkg)
+        }
+    } catch (e: Exception) {
+        null
+    }
+
+    private fun probeData(dir: File, pkg: String, label: String, sink: FindingSink, add: (File) -> Any?) {
+        val kids = try {
+            dir.listFiles()
+        } catch (e: SecurityException) {
+            null
+        }
+        if (kids != null) {
+            add(dir)
+        } else {
+            sink.flag(
+                "pd:$pkg",
+                ScanFinding(
+                    "INFO", "$label data folder not readable",
+                    "Android protects Android/data/$pkg on this device, so it was not inspected. Pick it with the folder button if Android allows it; folders under /games are still scanned."
+                )
+            )
+        }
+    }
+
+    // ---- folder discovery ---------------------------------------------------------------------
+
+    private fun locate(entry: McEntry, depth: Int, maxDepth: Int, run: Run) {
+        if (run.expired()) return
+        run.visits++
+        val kids = entry.children() ?: return
+        val dirs = kids.filter { it.isDir }
+        val names = dirs.map { it.name.lowercase() }.toSet()
+        val javaLike = entry.name.equals(".minecraft", true) || "mods" in names ||
+            ("versions" in names && names.any { it in GAME_SUBDIRS })
+        val bedrockLike = entry.name.equals("com.mojang", true) || "resource_packs" in names ||
+            "behavior_packs" in names || "minecraftpe" in names
+        if (javaLike || bedrockLike) {
+            if (run.analyzed.add(entry.path)) {
+                if (javaLike) {
+                    run.javaDirs++
+                    analyzeJava(entry, kids, run)
+                }
+                if (bedrockLike) {
+                    run.bedrockDirs++
+                    analyzeBedrock(entry, kids, run)
+                }
+            }
+            return
+        }
+        if (depth >= maxDepth) return
+        for (d in dirs) {
+            if (run.expired()) return
+            locate(d, depth + 1, maxDepth, run)
+        }
+    }
+
+    private fun scanTree(context: Context, tree: Uri, run: Run) {
+        val sink = run.sink
+        val rootId = try {
+            DocumentsContract.getTreeDocumentId(tree)
+        } catch (e: Exception) {
+            sink.flag("saf:bad", ScanFinding("INFO", "Selected Minecraft folder could not be used", "Android did not give usable access to that folder."))
+            return
+        }
+        // A folder on internal storage gets the same path as the real file system, so it is not analyzed twice.
+        val label = if (rootId.startsWith("primary:")) File(storageBase(), rootId.removePrefix("primary:")).path else rootId
+        val root = SafEntry(context, tree, rootId, label.substringAfterLast('/'), true, 0L, 0L, label)
+        val before = run.analyzed.size
+        locate(root, 0, MAX_SAF_DEPTH, run)
+        if (run.analyzed.size == before) {
+            sink.flag(
+                "saf:none",
+                ScanFinding(
+                    "INFO", "No Minecraft folder found in the selected folder",
+                    "Searched $label to a depth of $MAX_SAF_DEPTH (or it was already scanned). Pick the .minecraft folder, or the com.mojang folder for Bedrock."
+                )
+            )
+        }
+    }
+
+    // ---- Java launchers -----------------------------------------------------------------------
+
+    private fun sub(kids: List<McEntry>, name: String): McEntry? =
+        kids.firstOrNull { it.isDir && it.name.equals(name, true) }
+
+    private fun analyzeJava(game: McEntry, kids: List<McEntry>, run: Run) {
+        val sink = run.sink
+        val ev = Evidence()
+        val modKeys = HashSet<String>()
+        val now = System.currentTimeMillis()
+
+        // Mods
+        val mods = sub(kids, "mods")
+        val jars = ArrayList<McEntry>()
+        if (mods != null) collectJars(mods, 0, jars)
+        val others = ArrayList<String>()
+        val known = ArrayList<String>()
+        var newest = 0L
+        for (j in jars) {
+            if (run.expired()) break
+            newest = maxOf(newest, j.modified)
+            val hit = hackMatch(j.name)
+            if (hit != null) {
+                modKeys.add(hit.key)
+                ev.add(hit.key, "NAME")
+                if (hit.strong) {
+                    sink.flag(
+                        "mj:" + j.path,
+                        ScanFinding(
+                            "WARN", "Mod file name resembles a known cheat client",
+                            "${j.path} matched \"${hit.term}\". Modified ${ts(j.modified)}. Name match only; verify before drawing conclusions."
+                        )
+                    )
+                } else {
+                    sink.flag(
+                        "mj:" + j.path,
+                        ScanFinding(
+                            "INFO", "Mod file name contains a word some cheat clients use",
+                            "${j.path} matched \"${hit.term}\". Modified ${ts(j.modified)}. Weak match: it is also an ordinary word (for example a harmless library)."
+                        )
+                    )
+                }
+            }
+            j.asFile()?.let { inspectJar(it, sink, ev, modKeys) }
+            if (hit == null) {
+                val disp = j.name.removeSuffix(".disabled").removeSuffix(".jar")
+                if (KNOWN_OK.any { disp.lowercase().contains(it) }) known.add(disp) else others.add(disp)
+            }
+        }
+        if (mods != null) {
+            sink.flag(
+                "mf:" + game.path,
+                ScanFinding("INFO", "Minecraft mods folder", "${mods.path}: ${jars.size} mod file(s); newest modified ${ts(newest)}.")
+            )
+            emitChunks(sink, "ml:" + game.path, "Known PvP/performance mods (check the server allows them)", mods.path, known)
+            emitChunks(sink, "mo:" + game.path, "Other installed mods", mods.path, others)
+        }
+
+        // Versions
+        val versions = sub(kids, "versions")?.children()?.filter { it.isDir }
+        if (versions != null) {
+            for (v in versions.take(200)) {
+                if (run.expired()) break
+                hackMatch(v.name)?.let { h ->
+                    ev.add(h.key, "NAME")
+                    sink.flag(
+                        "vn:" + v.path,
+                        ScanFinding(
+                            if (h.strong) "WARN" else "INFO", "Game version name resembles a cheat client",
+                            "${v.path} matched \"${h.term}\". Modified ${ts(v.modified)}. Name match only."
+                        )
+                    )
+                }
+                for (f in v.children() ?: emptyList()) {
+                    if (f.isDir) continue
+                    val lowerName = f.name.lowercase()
+                    if (lowerName.endsWith(".json")) {
+                        hackMatch(f.name)?.let { h -> ev.add(h.key, "NAME") }
+                        val text = f.readTail(262_144)?.toString(Charsets.UTF_8)?.lowercase()
+                        if (text != null) {
+                            val marker = JSON_MARKERS.firstOrNull { text.contains(it.first) }
+                            if (marker != null) {
+                                ev.add(marker.second, "ARTIFACT")
+                                sink.flag(
+                                    "vj:" + f.path,
+                                    ScanFinding(
+                                        "WARN", "Version profile references cheat client code",
+                                        "${f.path} mentions \"${marker.first}\". Modified ${ts(f.modified)}. Based on the file's text, not just its name."
+                                    )
+                                )
+                            }
+                            if (text.contains("-javaagent:")) {
+                                sink.flag(
+                                    "va:" + f.path,
+                                    ScanFinding(
+                                        "WARN", "Version profile starts a Java agent",
+                                        "${f.path} contains -javaagent. Agents can be legitimate (authentication or profiling) but can also inject cheats."
+                                    )
+                                )
+                            }
+                        }
+                    } else if (lowerName.endsWith(".jar")) {
+                        f.asFile()?.let { inspectJar(it, sink, ev, modKeys) }
+                    }
+                }
+            }
+        }
+
+        // Leftover configs of deleted clients
+        sub(kids, "config")?.children()?.forEach { c ->
+            val h = hackMatch(c.name.substringBeforeLast('.', c.name)) ?: return@forEach
+            ev.add(h.key, "CONFIG")
+            if (h.key !in modKeys) {
+                sink.flag(
+                    "cf:" + c.path,
+                    ScanFinding(
+                        if (h.strong) "WARN" else "INFO", "Config for a cheat client with no matching mod file",
+                        "${c.path} matched \"${h.term}\". Modified ${ts(c.modified)}. The client may have been deleted; config files often outlast it. Name match only."
+                    )
+                )
+            }
+        }
+
+        // Resource packs
+        sub(kids, "resourcepacks")?.children()?.forEach { p ->
+            if (hackMatch(p.name)?.key == "xray" || bedrockMatch(p.name) == "X-Ray") {
+                ev.add("xray", "NAME")
+                sink.flag(
+                    "rp:" + p.path,
+                    ScanFinding("WARN", "Resource pack name suggests X-ray", "${p.path}. Modified ${ts(p.modified)}. Name match only; some servers allow X-ray packs.")
+                )
+            }
+        }
+
+        // Logs
+        val logFiles = ArrayList<McEntry>()
+        sub(kids, "logs")?.children()?.let { lk ->
+            lk.firstOrNull { !it.isDir && it.name.equals("latest.log", true) }?.let { logFiles.add(it) }
+            lk.filter {
+                !it.isDir && it.name.endsWith(".log", true) && !it.name.equals("latest.log", true) && now - it.modified <= RECENT_MS
+            }.sortedByDescending { it.modified }.take(MAX_RECENT_LOGS).forEach { logFiles.add(it) }
+        }
+        kids.firstOrNull { !it.isDir && it.name.equals("latestlog.txt", true) }?.let { logFiles.add(it) }
+        for (lf in logFiles) {
+            if (run.expired()) break
+            scanLog(lf, game.path, sink, ev)
+        }
+
+        emitCorrelation(game.path, ev, sink)
+    }
+
+    private fun collectJars(dir: McEntry, depth: Int, out: MutableList<McEntry>) {
+        val kids = dir.children() ?: return
+        for (k in kids) {
+            if (out.size >= 1000) return
+            val n = k.name.lowercase()
+            if (k.isDir) {
+                if (depth < 1) collectJars(k, depth + 1, out)
+            } else if (n.endsWith(".jar") || n.endsWith(".jar.disabled")) {
+                out.add(k)
+            }
+        }
+    }
+
+    /** Reads only the archive's file list (never inflates entries), so zip bombs cannot hurt. */
+    private fun inspectJar(jar: File, sink: FindingSink, ev: Evidence, modKeys: MutableSet<String>) {
+        if (jar.length() > MAX_JAR_BYTES) return
+        try {
+            ZipFile(jar).use { zip ->
+                var n = 0
+                val entries = zip.entries()
+                while (entries.hasMoreElements()) {
+                    if (++n > MAX_JAR_ENTRIES) return@use
+                    val entry = entries.nextElement().name.lowercase()
+                    val hit = CLASS_MARKERS.firstOrNull { entry.startsWith(it.first) }
+                    if (hit != null) {
+                        modKeys.add(hit.second)
+                        ev.add(hit.second, "ARTIFACT")
+                        sink.flag(
+                            "jh:" + jar.path,
+                            ScanFinding(
+                                "HIGH", "Archive contains a known cheat client's code",
+                                "${jar.path} (modified ${ts(jar.lastModified())}) contains classes under \"${hit.first}\" (${hit.third}). Based on the archive's contents, not just its name; an admin should confirm."
+                            )
+                        )
+                        return@use
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // not a readable archive: nothing to add
+        }
+    }
+
+    private fun scanLog(log: McEntry, gamePath: String, sink: FindingSink, ev: Evidence) {
+        val bytes = log.readTail(LOG_BYTES) ?: return
+        val lines = String(bytes, Charsets.UTF_8).split('\n').takeLast(LOG_LINES)
+        for ((i, line) in lines.withIndex()) {
+            val lower = line.lowercase()
+            val agentAt = line.indexOf("-javaagent:", ignoreCase = true)
+            if (agentAt >= 0) {
+                val rest = line.substring(agentAt + "-javaagent:".length)
+                val end = rest.indexOfFirst { it == ' ' || it == '"' || it == '=' || it == ',' || it == ']' }
+                val token = (if (end < 0) rest else rest.substring(0, end)).substringAfterLast('/').substringAfterLast('\\').take(100)
+                ev.add("javaagent", "LOG")
+                sink.flag(
+                    "la:$gamePath:$token",
+                    ScanFinding(
+                        "WARN", "Game log shows a Java agent",
+                        "${log.path} (log line ${i + 1} of the last ${lines.size}): -javaagent:$token. Agents can be legitimate (for example authentication or profiling tools) but can also inject cheats."
+                    )
+                )
+            }
+            val marker = LOG_MARKERS.firstOrNull { lower.contains(it.first) } ?: continue
+            val isMixin = lower.contains("mixin")
+            ev.add(marker.second, "LOG")
+            val kind = if (isMixin) "mixin" else "mention"
+            sink.flag(
+                "ll:$gamePath:${marker.second}:$kind",
+                ScanFinding(
+                    "WARN",
+                    if (isMixin) "Game log shows a mixin from a cheat client (${marker.second})" else "Game log mentions a cheat client (${marker.second})",
+                    "${log.path} (log line ${i + 1} of the last ${lines.size}, modified ${ts(log.modified)}). Matched \"${marker.first}\". " +
+                        "A log can name a client without it having been used; the line itself is not sent."
+                )
+            )
+        }
+    }
+
+    private fun emitCorrelation(gamePath: String, ev: Evidence, sink: FindingSink) {
+        for ((key, families) in ev.m) {
+            if (families.size >= 2) {
+                sink.flag(
+                    "ev:$gamePath:$key",
+                    ScanFinding(
+                        "WARN", "Several independent traces of \"$key\"",
+                        "Under $gamePath: ${families.sorted().joinToString(", ")}. Traces from different places together are stronger than one name match; an admin should review them."
+                    )
+                )
+            }
+        }
+    }
+
+    private fun emitChunks(sink: FindingSink, key: String, title: String, where: String, items: List<String>) {
+        if (items.isEmpty()) return
+        val groups = ArrayList<ArrayList<String>>()
+        var len = 0
+        for (item in items) {
+            if (groups.isEmpty() || len + item.length > 300) {
+                groups.add(ArrayList())
+                len = 0
+            }
+            groups.last().add(item)
+            len += item.length + 2
+        }
+        val shown = minOf(groups.size, 6)
+        for (i in 0 until shown) {
+            val t = if (shown > 1) "$title (${i + 1}/$shown)" else title
+            sink.flag("$key:$i", ScanFinding("INFO", t, "$where: ${groups[i].joinToString(", ")}"))
+        }
+        if (groups.size > shown) {
+            val more = groups.drop(shown).sumOf { it.size }
+            sink.flag("$key:more", ScanFinding("INFO", "$title (more)", "$more more not listed."))
+        }
+    }
+
+    // ---- Bedrock ------------------------------------------------------------------------------
+
+    private fun analyzeBedrock(root: McEntry, kids: List<McEntry>, run: Run) {
+        val sink = run.sink
+        val ev = Evidence()
+        val packNames = HashMap<String, String>()
+
+        for (folder in listOf("resource_packs", "behavior_packs", "development_resource_packs", "development_behavior_packs")) {
+            val packs = sub(kids, folder)?.children()?.filter { it.isDir } ?: continue
+            for (p in packs.take(300)) {
+                if (run.expired()) return
+                var pname = ""
+                var desc = ""
+                val manifest = p.children()?.firstOrNull { !it.isDir && it.name.equals("manifest.json", true) }
+                val text = manifest?.readTail(65_536)?.toString(Charsets.UTF_8)
+                if (text != null) {
+                    try {
+                        val header = JSONObject(text).optJSONObject("header")
+                        pname = header?.optString("name") ?: ""
+                        desc = header?.optString("description") ?: ""
+                        val uuid = (header?.optString("uuid") ?: "").lowercase()
+                        if (uuid.isNotEmpty()) packNames[uuid] = p.name + " " + pname
+                    } catch (e: Exception) {
+                        // unreadable manifest: fall back to the folder name
+                    }
+                }
+                val label = bedrockMatch(p.name + " " + pname + " " + desc)
+                if (label != null) {
+                    ev.add(label.lowercase(), "NAME")
+                    sink.flag(
+                        "bk:" + p.path,
+                        ScanFinding(
+                            "WARN", "Bedrock pack name suggests $label",
+                            "${p.path}${if (pname.isNotBlank()) " (named \"${pname.take(60)}\")" else ""}, modified ${ts(p.modified)}. Name match only; some servers allow packs like Night Vision or Fullbright."
+                        )
+                    )
+                }
+            }
+        }
+
+        val mc = sub(kids, "minecraftpe")?.children()
+        val globalPacks = mc?.firstOrNull { !it.isDir && it.name.equals("global_resource_packs.json", true) }
+        if (globalPacks != null) {
+            val text = globalPacks.readTail(65_536)?.toString(Charsets.UTF_8)
+            if (text != null) {
+                try {
+                    val arr = JSONArray(text)
+                    var unknown = 0
+                    for (i in 0 until arr.length()) {
+                        val id = (arr.optJSONObject(i)?.optString("pack_id") ?: "").lowercase()
+                        val nm = packNames[id]
+                        if (nm == null) {
+                            unknown++
+                            continue
+                        }
+                        val label = bedrockMatch(nm) ?: continue
+                        ev.add(label.lowercase(), "CONFIG")
+                        sink.flag(
+                            "bg:" + root.path + id,
+                            ScanFinding(
+                                "WARN", "Active global resource pack suggests $label",
+                                "${globalPacks.path} activates a pack named \"${nm.take(80)}\" for every world. Name match only."
+                            )
+                        )
+                    }
+                    sink.flag(
+                        "bgs:" + root.path,
+                        ScanFinding("INFO", "Bedrock global resource packs", "${arr.length()} active; $unknown not found in the local pack folders (may be built in). Read from ${globalPacks.path}.")
+                    )
+                } catch (e: Exception) {
+                    // not valid JSON: ignore
+                }
+            }
+        }
+        val options = mc?.firstOrNull { !it.isDir && it.name.equals("options.txt", true) }
+        if (options != null) {
+            val text = options.readTail(131_072)?.toString(Charsets.UTF_8)
+            if (text != null) {
+                val seenLabels = HashSet<String>()
+                for (line in text.split('\n')) {
+                    val key = line.substringBefore(':').trim()
+                    // Only the setting name is checked and reported: values can hold personal data such as the player name.
+                    val label = bedrockMatch(key.replace('_', ' ')) ?: continue
+                    if (!seenLabels.add(label)) continue
+                    ev.add(label.lowercase(), "CONFIG")
+                    sink.flag(
+                        "bo:" + root.path + label,
+                        ScanFinding("WARN", "Bedrock options.txt has a setting named like $label", "${options.path}: setting \"${key.take(60)}\". Name match only.")
+                    )
+                }
+            }
+        }
+        emitCorrelation(root.path, ev, sink)
+    }
+
+    // ---- Downloads ----------------------------------------------------------------------------
+
+    private fun downloads(sink: FindingSink) {
+        @Suppress("DEPRECATION")
+        val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val stack = ArrayDeque<Pair<File, Int>>()
+        stack.addLast(Pair(dir, 0))
+        var count = 0
+        var overflow = 0
+        while (stack.isNotEmpty()) {
+            val (d, depth) = stack.removeLast()
+            val kids = try {
+                d.listFiles()
+            } catch (e: SecurityException) {
+                null
+            }
+            if (kids == null) continue
+            for (f in kids) {
+                if (isLink(f)) continue
+                if (f.isDirectory) {
+                    if (depth < 3) stack.addLast(Pair(f, depth + 1))
+                    continue
+                }
+                val ext = f.name.substringAfterLast('.', "").lowercase()
+                if (ext !in DOWNLOAD_EXT) continue
+                count++
+                if (count > MAX_DOWNLOAD_FLAGS) {
+                    overflow++
+                    continue
+                }
+                val hit = hackMatch(f.name)
+                val warn = ext == "so" || ext == "lua" || (hit != null && hit.strong)
+                sink.flag(
+                    "dl:" + f.path,
+                    ScanFinding(
+                        if (warn) "WARN" else "INFO", "File in Downloads: .$ext",
+                        "${f.path} modified ${ts(f.lastModified())}, ${f.length() / 1024} KB." +
+                            (if (hit != null) " Name matched \"${hit.term}\" (name match only)." else "") +
+                            (if (ext == "so" || ext == "lua") " Native or script files here are unusual; not proof by itself." else "")
+                    )
+                )
+            }
+        }
+        if (overflow > 0) {
+            sink.flag("dl:more", ScanFinding("INFO", "More Downloads files omitted", "$overflow further Minecraft-related files were left out."))
+        }
+    }
+}
+
+```
+
+`app/src/main/java/com/example/mobilescanner/NativeBridge.kt`:
+
+```kt
+package com.example.mobilescanner
+
+object NativeBridge {
+    init {
+        System.loadLibrary("abyssnative")
+    }
+
+    external fun runNativeChecks(): String
+
+    fun getNativeFindings(): List<ScanFinding> {
+        val raw = try {
+            runNativeChecks()
+        } catch (e: Throwable) {
+            return listOf(ScanFinding("WARN", "Native Check Error", e.message ?: "JNI failed"))
+        }
+
+        if (raw == "CLEAN" || raw.isBlank()) {
+            return listOf(ScanFinding("CLEAN", "Basic native checks found nothing", "Checked common root files, mounts, hooks and debugger state. Android hides many of these paths from apps, so this is not proof of a clean device."))
+        }
+
+        return raw.split(";").mapNotNull { entry ->
+            val parts = entry.split("|")
+            if (parts.size == 3) ScanFinding(parts[0], parts[1], parts[2]) else null
+        }
+    }
+}
+
+```
+
+`app/src/main/java/com/example/mobilescanner/ReportClient.kt`:
+
+```kt
+package com.example.mobilescanner
+
+import org.json.JSONArray
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+
+object Config {
+    /** Base URL of your ABBYS server. Must be https (cleartext is disabled in the manifest). */
+    const val SERVER_URL = "https://abbys-anticheat.onrender.com"
+}
+
+/** Talks to server/server.js. Blocking: call from Dispatchers.IO. */
+object ReportClient {
+    private const val TIMEOUT_MS = 45_000 // Render free tier can take ~30-50s to wake from sleep
+
+    /** True only if the server says this PIN exists, is unused and has not expired. */
+    fun verifyPin(pin: String): Boolean {
+        if (!pin.matches(Regex("\\d{6}"))) return false
+        return try {
+            val c = open("/api/verify-pin/$pin", "GET")
+            c.responseCode == 200
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun submit(pin: String, findings: List<ScanFinding>): Boolean {
+        return try {
+            val arr = JSONArray()
+            findings.forEach {
+                arr.put(JSONObject().put("severity", it.severity).put("title", it.title).put("detail", it.detail))
+            }
+            val body = JSONObject().put("report", arr).toString().toByteArray(Charsets.UTF_8)
+            val c = open("/api/submit-report/$pin", "POST")
+            c.doOutput = true
+            c.setRequestProperty("Content-Type", "application/json")
+            c.outputStream.use { it.write(body) }
+            c.responseCode == 200
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun open(path: String, method: String): HttpURLConnection {
+        val c = URL(Config.SERVER_URL + path).openConnection() as HttpURLConnection
+        c.requestMethod = method
+        c.connectTimeout = TIMEOUT_MS
+        c.readTimeout = TIMEOUT_MS
+        return c
+    }
+}
+
+```
+
+`app/src/main/java/com/example/mobilescanner/SafFolderScanner.kt`:
+
+```kt
+package com.example.mobilescanner
+
+import android.content.Context
+import android.net.Uri
+import android.provider.DocumentsContract
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+/**
+ * Scans a folder tree the player chose themselves with the system folder picker (Storage Access
+ * Framework), for example a game's OBB or data folder. Read-only; file contents are never opened.
+ * Android may refuse to let the picker select Android/data or Android/obb on newer versions; if so
+ * nothing is scanned and the report says it was skipped.
+ */
+object SafFolderScanner {
+    private const val MAX_DOCS = 50_000
+    private const val MAX_DEPTH = 10
+    private const val TIME_BUDGET_MS = 30_000L
+    private const val MAX_FLAGS = 40
+    private const val RECENT_MS = 7L * 24 * 3600 * 1000
+
+    private val CODE_EXT = setOf("so", "lua")
+    private val DATA_EXT = setOf("cfg", "pak")
+
+    private class Item(val docId: String, val depth: Int, val path: String)
+
+    fun scan(context: Context, tree: Uri?): List<ScanFinding> {
+        if (tree == null) {
+            return listOf(
+                ScanFinding("INFO", "Game folder check skipped", "No OBB/Data folder was selected (this step is optional).")
+            )
+        }
+        val rootId = try {
+            DocumentsContract.getTreeDocumentId(tree)
+        } catch (e: Exception) {
+            return listOf(ScanFinding("INFO", "Game folder check failed", "The selected folder could not be used."))
+        }
+
+        val resolver = context.contentResolver
+        val deadline = System.currentTimeMillis() + TIME_BUDGET_MS
+        val now = System.currentTimeMillis()
+        val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        val out = ArrayList<ScanFinding>()
+        val counts = HashMap<String, Int>()
+        var docs = 0
+        var dirs = 0
+        var unreadable = 0
+        var recent = 0
+        var overflow = 0
+        var stop: String? = null
+        val label = rootId.substringAfter(':', rootId).ifEmpty { "storage root" }
+
+        val stack = ArrayDeque<Item>()
+        stack.addLast(Item(rootId, 0, label))
+        while (stack.isNotEmpty()) {
+            if (System.currentTimeMillis() > deadline) { stop = "time limit reached"; break }
+            if (docs >= MAX_DOCS) { stop = "file limit reached"; break }
+            val item = stack.removeLast()
+            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(tree, item.docId)
+            val cursor = try {
+                resolver.query(
+                    childrenUri,
+                    arrayOf(
+                        DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                        DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                        DocumentsContract.Document.COLUMN_MIME_TYPE,
+                        DocumentsContract.Document.COLUMN_LAST_MODIFIED,
+                        DocumentsContract.Document.COLUMN_SIZE
+                    ),
+                    null, null, null
+                )
+            } catch (e: Exception) {
+                null
+            }
+            if (cursor == null) { unreadable++; continue }
+            dirs++
+            cursor.use { c ->
+                while (c.moveToNext()) {
+                    val id = c.getString(0) ?: continue
+                    val name = c.getString(1) ?: continue
+                    val mime = c.getString(2) ?: ""
+                    val path = item.path + "/" + name
+                    if (mime == DocumentsContract.Document.MIME_TYPE_DIR) {
+                        if (item.depth < MAX_DEPTH) stack.addLast(Item(id, item.depth + 1, path))
+                        continue
+                    }
+                    docs++
+                    val ext = name.substringAfterLast('.', "").lowercase()
+                    val isCode = ext in CODE_EXT
+                    if (!isCode && ext !in DATA_EXT) continue
+                    counts[ext] = (counts[ext] ?: 0) + 1
+                    val modified = if (c.isNull(3)) 0L else c.getLong(3)
+                    if (modified <= 0L || now - modified > RECENT_MS) continue
+                    recent++
+                    if (out.size >= MAX_FLAGS) { overflow++; continue }
+                    val size = if (c.isNull(4)) 0L else c.getLong(4)
+                    out.add(
+                        ScanFinding(
+                            if (isCode) "WARN" else "INFO",
+                            "Recently modified .$ext file in the selected folder",
+                            "$path modified ${fmt.format(Date(modified))}, ${size / 1024} KB. Game updates also change these files; compare with the game's update time."
+                        )
+                    )
+                }
+            }
+        }
+
+        if (overflow > 0) out.add(ScanFinding("INFO", "More selected-folder matches omitted", "$overflow further recent files were left out."))
+        val kinds = listOf("so", "lua", "cfg", "pak").joinToString(", ") { ".$it: ${counts[it] ?: 0}" }
+        out.add(
+            ScanFinding(
+                "INFO", "Selected-folder coverage",
+                "Folder \"$label\": $docs files in $dirs folders ($unreadable not readable). Counts by type: $kinds. " +
+                    "$recent modified in the last 7 days.${stop?.let { " Stopped early: $it." } ?: ""}"
+            )
+        )
+        return out
+    }
+}
+
+```
+
+`app/src/main/java/com/example/mobilescanner/StorageScanner.kt`:
+
+```kt
+package com.example.mobilescanner
+
+import android.content.Context
+import android.os.Build
+import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import java.io.File
+import java.nio.file.Files
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+/**
+ * Looks through every folder the app is allowed to read (needs "All files access"), including trash
+ * folders, and finds Minecraft game folders for MinecraftScanner to analyze. Read-only: it never opens, changes or deletes user files
+ * other than reading mod archives' file lists and the tail of game logs.
+ *
+ * Limits are real and are reported in the summary finding: Android hides other apps' private data
+ * (Android/data on newer versions) and permanently deleted files cannot be recovered without root.
+ * Launcher account/token files are never opened.
+ */
+object StorageScanner {
+    private const val MAX_FILES = 300_000
+    private const val MAX_DEPTH = 14
+    private const val TIME_BUDGET_MS = 90_000L
+    private const val MAX_FLAGS = 100
+    private const val MAX_HIDDEN = 25
+    private const val MAX_APK = 15
+    private const val MAX_SO = 20
+    private const val RECENT_MS = 7L * 24 * 3600 * 1000
+    private const val MAX_HIGH = 30
+    private const val MAX_GAME_DIRS = 20
+    private const val TRASH_RETENTION_SECONDS = 30L * 24 * 3600
+
+    /** Distinctive names, matched inside the letters-only lowercase form of a file or folder name. */
+    private val DISTINCTIVE = listOf(
+        "liquidbounce", "meteorclient", "bleachhack", "salhack", "kamiblue", "aristois",
+        "futureclient", "impactclient", "rusherhack", "thunderhack", "autoclicker"
+    )
+
+    /** Short or ambiguous names, matched only as whole words. */
+    private val WHOLE_WORDS = setOf("wurst", "vape")
+
+    private val EXTENSIONS = setOf("jar", "zip", "apk", "exe", "dll", "so", "lua", "json", "mcpack", "mcaddon", "rar", "7z")
+
+    private val BENIGN_HIDDEN = setOf(".android_secure", ".thumbnails", ".cache", ".nomedia", ".estrongs", ".face", ".data", ".gs_fs0", ".dcim")
+    private val HIDDEN_CODE_EXT = setOf("apk", "so", "jar", "dex", "lua")
+    private val TRASH_NAMES = setOf(".recycle", ".recyclebin", "recyclebin", "recycle_bin", "trash", "recently deleted")
+    private val TRASHED_FILE = Regex("^\\.trashed-(\\d+)-(.+)$")
+
+    class Result(val findings: List<ScanFinding>, val gameDirs: List<File>)
+
+    private class Node(val dir: File, val depth: Int, val inTrash: Boolean, val hidden: Boolean)
+    private class Trashed(val original: String, val expirySeconds: Long)
+
+    private class State(val deadline: Long) : FindingSink {
+        var files = 0
+        var dirs = 0
+        var unreadable = 0
+        var trashItems = 0
+        var hiddenN = 0
+        var apkN = 0
+        var soN = 0
+        var stopReason: String? = null
+        var overflow = 0
+        val flags = ArrayList<ScanFinding>()
+        val high = ArrayList<ScanFinding>()
+        val seen = HashSet<String>()
+        val gameDirs = ArrayList<File>()
+
+        fun expired() = System.currentTimeMillis() > deadline
+
+        override fun flag(key: String, f: ScanFinding) {
+            if (!seen.add(key)) return
+            if (f.severity == "HIGH") {
+                if (high.size < MAX_HIGH) high.add(f) else overflow++
+            } else {
+                if (flags.size < MAX_FLAGS) flags.add(f) else overflow++
+            }
+        }
+    }
+
+    fun scan(context: Context): Result {
+        if (!hasAllFilesPermission(context)) {
+            return Result(
+                listOf(
+                    ScanFinding(
+                        "INFO", "Storage scan skipped",
+                        "All Files Access was not granted, so folders, trash and launcher data were not inspected. This part of the scan is incomplete."
+                    )
+                ),
+                emptyList()
+            )
+        }
+
+        val st = State(System.currentTimeMillis() + TIME_BUDGET_MS)
+        val roots = storageRoots(context)
+        for (root in roots) {
+            if (st.stopReason != null) break
+            walk(root, st)
+        }
+        mediaStoreTrash(context, st)
+
+        val out = ArrayList<ScanFinding>()
+        out.addAll(st.high)
+        out.addAll(st.flags)
+        if (st.overflow > 0) {
+            out.add(ScanFinding("INFO", "More storage findings omitted", "${st.overflow} further matches were left out to keep the report a reasonable size."))
+        }
+        val stopped = st.stopReason?.let { " Scan stopped early: $it." } ?: ""
+        out.add(
+            ScanFinding(
+                "INFO", "Storage scan coverage",
+                "Looked at ${st.files} files in ${st.dirs} folders on ${roots.size} storage volume(s); ${st.unreadable} folders were not readable " +
+                    "(normal for other apps' private data); ${st.trashItems} trash items seen.$stopped " +
+                    "Permanently deleted files cannot be recovered, so no findings is not proof of a clean device."
+            )
+        )
+        return Result(out, st.gameDirs)
+    }
+
+    private fun storageRoots(context: Context): List<File> {
+        val roots = LinkedHashSet<File>()
+        @Suppress("DEPRECATION")
+        roots.add(Environment.getExternalStorageDirectory())
+        for (d in context.getExternalFilesDirs(null)) {
+            val p = d?.absolutePath ?: continue
+            val i = p.indexOf("/Android/")
+            if (i > 0) roots.add(File(p.substring(0, i)))
+        }
+        return roots.toList()
+    }
+
+    private fun isSymlink(f: File): Boolean = try {
+        Files.isSymbolicLink(f.toPath())
+    } catch (e: Exception) {
+        false
+    }
+
+    private fun isTrashDirName(lower: String) = lower.startsWith(".trash") || lower in TRASH_NAMES
+
+    private fun looksLikeGameDir(dir: File): Boolean =
+        File(dir, "versions").isDirectory &&
+            (File(dir, "mods").isDirectory || File(dir, "resourcepacks").isDirectory ||
+                File(dir, "saves").isDirectory || File(dir, "logs").isDirectory)
+
+    private fun matchName(name: String): String? {
+        val lower = name.lowercase()
+        val letters = lower.filter { it.isLetter() }
+        DISTINCTIVE.firstOrNull { letters.contains(it) }?.let { return it }
+        val words = lower.split(Regex("[^a-z0-9]+")).filter { it.isNotEmpty() }.toSet()
+        return WHOLE_WORDS.firstOrNull { it in words }
+    }
+
+    private fun matchFile(name: String): String? {
+        val ext = name.substringAfterLast('.', "").lowercase()
+        return if (ext in EXTENSIONS) matchName(name) else null
+    }
+
+    private fun parseTrashed(name: String): Trashed? {
+        val m = TRASHED_FILE.matchEntire(name) ?: return null
+        val expiry = m.groupValues[1].toLongOrNull() ?: return null
+        return Trashed(m.groupValues[2], expiry)
+    }
+
+    private fun walk(root: File, st: State) {
+        val stack = ArrayDeque<Node>()
+        stack.addLast(Node(root, 0, false, false))
+        while (stack.isNotEmpty()) {
+            if (st.expired()) { st.stopReason = "time limit reached"; return }
+            if (st.files >= MAX_FILES) { st.stopReason = "file limit reached"; return }
+            val node = stack.removeLast()
+            val children = try {
+                node.dir.listFiles()
+            } catch (e: SecurityException) {
+                null
+            }
+            if (children == null) { st.unreadable++; continue }
+            st.dirs++
+            if (st.gameDirs.size < MAX_GAME_DIRS && (node.dir.name.equals(".minecraft", true) || looksLikeGameDir(node.dir))) st.gameDirs.add(node.dir)
+
+            for (child in children) {
+                if (isSymlink(child)) continue
+                if (child.isDirectory) {
+                    matchName(child.name)?.let {
+                        st.flag(
+                            "d:" + child.path,
+                            ScanFinding("WARN", "Folder name resembles a Minecraft cheat client", "${child.path} matched \"$it\". Name match only; verify before drawing conclusions.")
+                        )
+                    }
+                    val lower = child.name.lowercase()
+                    val hiddenDir = lower.startsWith(".") && !isTrashDirName(lower) && lower !in BENIGN_HIDDEN
+                    if (hiddenDir && !node.hidden && node.depth <= 3 && st.hiddenN < MAX_HIDDEN) {
+                        st.hiddenN++
+                        st.flag(
+                            "h:" + child.path,
+                            ScanFinding("INFO", "Hidden folder", "${child.path} (last modified ${ts(child)}). Hidden folders are common; this is context, not a finding by itself.")
+                        )
+                    }
+                    if (node.depth < MAX_DEPTH) {
+                        stack.addLast(Node(child, node.depth + 1, node.inTrash || isTrashDirName(lower), node.hidden || hiddenDir))
+                    }
+                } else {
+                    st.files++
+                    handleFile(child, node.inTrash, node.hidden, st)
+                }
+            }
+        }
+    }
+
+    private fun ts(f: File): String =
+        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(f.lastModified()))
+
+    private fun handleFile(f: File, inTrash: Boolean, hidden: Boolean, st: State) {
+        val trashed = parseTrashed(f.name)
+        if (trashed != null) {
+            st.trashItems++
+            checkTrashed(trashed, st)
+            return
+        }
+        if (inTrash) {
+            st.trashItems++
+            matchFile(f.name)?.let {
+                st.flag(
+                    "t:" + f.name.lowercase(),
+                    ScanFinding("WARN", "Deleted file (in a trash folder) resembles a cheat client", "${f.path} matched \"$it\". Name match only.")
+                )
+            }
+            return
+        }
+        val modified by lazy { ts(f) }
+        matchFile(f.name)?.let {
+            st.flag(
+                "f:" + f.path,
+                ScanFinding("WARN", "File name resembles a Minecraft cheat client", "${f.path} matched \"$it\". Modified $modified. Name match only; verify before drawing conclusions.")
+            )
+        }
+        val ext = f.name.substringAfterLast('.', "").lowercase()
+        val kb = f.length() / 1024
+        if (ext == "apk" && !f.path.contains("/Download/") && st.apkN < MAX_APK && System.currentTimeMillis() - f.lastModified() <= RECENT_MS) {
+            st.apkN++
+            st.flag(
+                "a:" + f.path,
+                ScanFinding("INFO", "Recently modified APK", "${f.path} modified $modified, $kb KB. Downloads and installers create these routinely; context only.")
+            )
+        }
+        if (ext == "so" && st.soN < MAX_SO && !f.path.contains("/Android/") && !f.path.contains("/Download/")) {
+            st.soN++
+            st.flag(
+                "s:" + f.path,
+                ScanFinding("WARN", "Native library (.so) in shared storage", "${f.path} modified $modified, $kb KB. Apps normally keep these in private folders; unusual here but not proof of anything.")
+            )
+        }
+        if (hidden && ext in HIDDEN_CODE_EXT) {
+            st.flag(
+                "hc:" + f.path,
+                ScanFinding("WARN", "Code or native file inside a hidden folder", "${f.path} modified $modified, $kb KB. Hidden folders can hold legitimate app data; verify before drawing conclusions.")
+            )
+        }
+    }
+
+    /** Android 11+ trash keeps files as ".trashed-<expiry epoch seconds>-<original name>". */
+    private fun checkTrashed(t: Trashed, st: State) {
+        val match = matchFile(t.original) ?: return
+        val estimate = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            .format(Date((t.expirySeconds - TRASH_RETENTION_SECONDS) * 1000))
+        st.flag(
+            "t:" + t.original.lowercase(),
+            ScanFinding(
+                "WARN", "Deleted file (in trash) resembles a cheat client",
+                "${t.original} matched \"$match\". Estimated deletion around $estimate (assumes the default 30-day trash retention, so this is an estimate). Name match only."
+            )
+        )
+    }
+
+    private fun mediaStoreTrash(context: Context, st: State) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
+        try {
+            val args = Bundle().apply { putInt(MediaStore.QUERY_ARG_MATCH_TRASHED, MediaStore.MATCH_ONLY) }
+            val cols = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
+            context.contentResolver.query(MediaStore.Files.getContentUri("external"), cols, args, null)?.use { c ->
+                val idx = c.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
+                var n = 0
+                while (c.moveToNext() && n < 50_000) {
+                    n++
+                    val name = c.getString(idx) ?: continue
+                    val t = parseTrashed(name)
+                    if (t != null) {
+                        checkTrashed(t, st)
+                    } else {
+                        matchFile(name)?.let {
+                            st.flag(
+                                "t:" + name.lowercase(),
+                                ScanFinding("WARN", "Deleted file (in trash) resembles a cheat client", "$name matched \"$it\". Name match only.")
+                            )
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // MediaStore trash is a bonus source; the file walk above already covers visible trash files.
+        }
+    }
+}
+
+```
+
+`build.gradle.kts`:
+
+```kts
+plugins {
+    id("com.android.application") version "8.2.2" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+}
+
+```
+
+`gradle.properties`:
+
+```properties
+android.useAndroidX=true
+android.nonTransitiveRClass=true
+
+```
+
+`render.yaml`:
+
+```yaml
+services:
+  - type: web
+    name: abbys-anticheat
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: TRUST_PROXY
+        value: "1"
+
+```
+
+`server/package.json`:
+
+```json
+{
+  "name": "abbys-anticheat-server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+
+```
+
+`server/public/app.js`:
+
+```js
+"use strict";
+const $ = (id) => document.getElementById(id);
+const nameEl = $("adminName"), statusEl = $("statusText");
+const pinEl = $("pinDisplay"), pinWrap = $("pinWrap"), countdownEl = $("countdown");
+const reportBox = $("reportContainer"), reportList = $("reportList"), summaryEl = $("summary");
+const SEVERITIES = ["HIGH", "WARN", "INFO", "CLEAN"];
+const TTL_MS = 30 * 60 * 1000;
+let sessionToken = null, pollTimer = null, tickTimer = null, currentPin = null, report = [], filter = "ALL";
+
+// Only the non-secret name is remembered, and only for this tab. The key is never stored.
+nameEl.value = sessionStorage.getItem("abbys_admin") || "";
+
+const headers = () => ({ "Content-Type": "application/json", "x-session-token": sessionToken || "" });
+const sevOf = (i) => (SEVERITIES.includes(i.severity) ? i.severity : "INFO");
+const stopTimers = () => { clearInterval(pollTimer); clearInterval(tickTimer); };
+
+function render() {
+  summaryEl.replaceChildren();
+  for (const s of SEVERITIES) {
+    const n = report.filter((i) => sevOf(i) === s).length;
+    const el = document.createElement("div");
+    el.className = "count " + s;
+    const b = document.createElement("b");
+    b.textContent = n;
+    el.append(b, s);
+    summaryEl.appendChild(el);
+  }
+  reportList.replaceChildren();
+  const items = report
+    .filter((i) => filter === "ALL" || sevOf(i) === filter)
+    .sort((a, b) => SEVERITIES.indexOf(sevOf(a)) - SEVERITIES.indexOf(sevOf(b)));
+  if (!items.length) {
+    const p = document.createElement("p");
+    p.className = "note";
+    p.textContent = "No findings in this category.";
+    reportList.appendChild(p);
+  }
+  for (const item of items) {
+    const sev = sevOf(item);
+    const box = document.createElement("div");
+    box.className = "finding " + sev;
+    const title = document.createElement("div");
+    title.className = "sev";
+    title.textContent = "[" + sev + "] " + item.title; // textContent: report data is never parsed as HTML
+    const detail = document.createElement("div");
+    detail.className = "detail";
+    detail.textContent = item.detail;
+    box.append(title, detail);
+    reportList.appendChild(box);
+  }
+}
+
+$("filters").addEventListener("click", (e) => {
+  const f = e.target.dataset && e.target.dataset.f;
+  if (!f) return;
+  filter = f;
+  document.querySelectorAll(".chip").forEach((c) => c.classList.toggle("active", c.dataset.f === f));
+  render();
+});
+
+async function copy(text, btn) {
+  const old = btn.textContent;
+  try { await navigator.clipboard.writeText(text); btn.textContent = "Copied"; }
+  catch (e) { btn.textContent = "Copy failed"; }
+  setTimeout(() => { btn.textContent = old; }, 1500);
+}
+$("copyPin").addEventListener("click", (e) => currentPin && copy(currentPin, e.target));
+$("copyReport").addEventListener("click", (e) => {
+  const lines = report.map((i) => "[" + sevOf(i) + "] " + i.title + " - " + i.detail);
+  copy("ABBYS scan, PIN " + currentPin + "\n" + lines.join("\n"), e.target);
+});
+
+function startCountdown(createdAt) {
+  clearInterval(tickTimer);
+  const tick = () => {
+    const left = Math.max(0, createdAt + TTL_MS - Date.now());
+    countdownEl.textContent = left ? "Expires in " + Math.floor(left / 60000) + ":" + String(Math.floor(left / 1000) % 60).padStart(2, "0") : "Expired";
+    if (!left) clearInterval(tickTimer);
+  };
+  tick();
+  tickTimer = setInterval(tick, 1000);
+}
+
+$("genBtn").addEventListener("click", async () => {
+  const btn = $("genBtn");
+  stopTimers();
+  const admin = nameEl.value.trim() || "Admin";
+  sessionStorage.setItem("abbys_admin", admin);
+  statusEl.textContent = "Generating PIN... (the first request can take up to a minute if the server was asleep)";
+  reportBox.classList.add("hidden");
+  pinWrap.classList.add("hidden");
+  btn.disabled = true;
+  try {
+    const res = await fetch("/api/create-pin", { method: "POST", headers: headers(), body: JSON.stringify({ admin }) });
+    if (res.status === 429) { statusEl.textContent = "Too many requests. Wait a minute and retry."; return; }
+    if (!res.ok) { statusEl.textContent = "Server error (" + res.status + ")."; return; }
+    const { pin, token } = await res.json();
+    sessionToken = token; // held in memory only; needed to read this PIN's report
+    currentPin = pin;
+    pinEl.textContent = pin;
+    pinWrap.classList.remove("hidden");
+    startCountdown(Date.now());
+    statusEl.textContent = "Waiting for the player to enter the PIN in the app...";
+    pollTimer = setInterval(async () => {
+      try {
+        const r = await fetch("/api/session/" + pin, { headers: headers() });
+        if (r.status === 404) { stopTimers(); statusEl.textContent = "PIN expired."; return; }
+        if (!r.ok) return;
+        const s = await r.json();
+        if (s.status === "COMPLETED" && Array.isArray(s.report)) {
+          stopTimers();
+          countdownEl.textContent = "Used";
+          statusEl.textContent = "Scan completed.";
+          $("reportPin").textContent = "PIN " + pin;
+          report = s.report;
+          filter = "ALL";
+          document.querySelectorAll(".chip").forEach((c) => c.classList.toggle("active", c.dataset.f === "ALL"));
+          render();
+          reportBox.classList.remove("hidden");
+        }
+      } catch (e) { /* transient network error: keep polling */ }
+    }, 2500);
+  } catch (e) {
+    statusEl.textContent = "Network error: " + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+```
+
+`server/public/index.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ABBYS Anti-Cheat | SS Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h2>ABBYS ANTI-CHEAT</h2>
+    <span class="badge">Self-Hosted SS Panel</span>
+  </header>
+
+  <section class="card">
+    <label for="adminName">Your name (optional)</label>
+    <input type="text" id="adminName" placeholder="e.g. Vanshu" maxlength="40" />
+    <button id="genBtn" type="button">Generate 6-digit SS PIN</button>
+
+    <div id="pinWrap" class="hidden">
+      <div id="pinDisplay" class="pin-box" aria-live="polite"></div>
+      <div class="pin-meta">
+        <span id="countdown"></span>
+        <button id="copyPin" type="button" class="ghost">Copy PIN</button>
+      </div>
+    </div>
+    <p id="statusText" class="status">Ready to generate PIN.</p>
+  </section>
+
+  <section id="reportContainer" class="card hidden">
+    <div class="report-head">
+      <h3>Scan results <span id="reportPin" class="muted"></span></h3>
+      <button id="copyReport" type="button" class="ghost">Copy report</button>
+    </div>
+    <div id="summary" class="summary"></div>
+    <div id="filters" class="filters" role="group" aria-label="Filter by severity">
+      <button type="button" data-f="ALL" class="chip active">All</button>
+      <button type="button" data-f="HIGH" class="chip">High</button>
+      <button type="button" data-f="WARN" class="chip">Warn</button>
+      <button type="button" data-f="INFO" class="chip">Info</button>
+      <button type="button" data-f="CLEAN" class="chip">Clean</button>
+    </div>
+    <p class="note">Findings are indicators for review, not proof. Name matches in particular can be wrong.</p>
+    <div id="reportList"></div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
+```
+
+`server/public/style.css`:
+
+```css
+* { box-sizing: border-box; }
+body { background: #090d16; color: #e6edf3; font-family: system-ui, sans-serif; padding: 20px; max-width: 720px; margin: auto; }
+header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1f2937; padding-bottom: 16px; margin-bottom: 24px; }
+h2 { margin: 0; color: #38bdf8; letter-spacing: 1px; }
+h3 { margin-top: 0; }
+.badge { background: #1e293b; color: #94a3b8; padding: 4px 10px; border-radius: 99px; font-size: 12px; }
+.card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+label { display: block; font-size: 13px; color: #9ca3af; margin-bottom: 6px; }
+input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #374151; background: #090d16; color: #fff; font-size: 15px; margin-bottom: 14px; }
+button { width: 100%; padding: 14px; background: #0284c7; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; }
+.pin-box { font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #38bdf8; text-align: center; padding: 18px; background: #090d16; border: 1px dashed #0284c7; border-radius: 10px; margin-top: 16px; }
+.status { text-align: center; font-size: 14px; color: #f59e0b; margin-top: 12px; word-break: break-word; }
+.note { font-size: 12px; color: #9ca3af; }
+.finding { background: #090d16; border-left: 4px solid #38bdf8; padding: 12px; border-radius: 6px; margin-bottom: 10px; }
+.finding.HIGH { border-left-color: #ef4444; }
+.finding.WARN { border-left-color: #f59e0b; }
+.finding.CLEAN { border-left-color: #10b981; }
+.sev { font-weight: 700; font-size: 12px; }
+.detail { font-size: 13px; color: #9ca3af; margin-top: 4px; word-break: break-all; }
+.hidden { display: none; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; }
+.col { flex: 1 1 220px; }
+button:disabled { opacity: .6; cursor: default; }
+button.ghost { width: auto; padding: 8px 14px; background: #1e293b; color: #cbd5e1; font-size: 13px; }
+.pin-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 13px; color: #9ca3af; }
+.report-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.muted { color: #6b7280; font-size: 14px; font-weight: 400; }
+.summary { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.count { background: #090d16; border: 1px solid #1f2937; border-radius: 8px; padding: 8px 14px; font-size: 13px; }
+.count b { font-size: 18px; margin-right: 6px; }
+.count.HIGH b { color: #ef4444; } .count.WARN b { color: #f59e0b; } .count.INFO b { color: #38bdf8; } .count.CLEAN b { color: #10b981; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.chip { width: auto; padding: 6px 14px; background: #1e293b; color: #94a3b8; font-size: 12px; border-radius: 99px; }
+.chip.active { background: #0284c7; color: #fff; }
+.finding.INFO { border-left-color: #38bdf8; }
+@media (max-width: 480px) { .pin-box { font-size: 28px; letter-spacing: 5px; } }
+
+```
+
+`server/server.js`:
+
+```js
+"use strict";
+const express = require("express");
+const crypto = require("crypto");
+const path = require("path");
+
+const SESSION_TTL_MS = 30 * 60 * 1000;
+const MAX_SESSIONS = 1000;
+const MAX_SESSIONS_PER_IP = 5;
+const MAX_FINDINGS = 200;
+const SEVERITIES = new Set(["HIGH", "WARN", "INFO", "CLEAN"]);
+
+const app = express();
+app.disable("x-powered-by");
+app.set("trust proxy", Number(process.env.TRUST_PROXY || 0));
+app.use(express.json({ limit: "256kb" }));
+
+// The dashboard is static files only and runs under a strict CSP, so even if a malicious report
+// slipped through sanitising it still could not execute script in the admin's browser.
+app.use((req, res, next) => {
+  res.set("Content-Security-Policy",
+    "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'");
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("Referrer-Policy", "no-referrer");
+  res.set("Cache-Control", "no-store");
+  next();
+});
+app.use(express.static(path.join(__dirname, "public")));
+
+/** pin -> { pin, token, ip, admin, status: PENDING|COMPLETED, report, createdAt } */
+const sessions = new Map();
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [pin, s] of sessions) {
+    if (now - s.createdAt > SESSION_TTL_MS) sessions.delete(pin);
+  }
+  for (const [k, v] of hits) {
+    if (now > v.reset) hits.delete(k);
+  }
+}, 60 * 1000).unref();
+
+// --- helpers ---------------------------------------------------------------------------------
+
+function safeEqual(a, b) {
+  const x = Buffer.from(String(a));
+  const y = Buffer.from(String(b));
+  return x.length === y.length && crypto.timingSafeEqual(x, y);
+}
+
+const hits = new Map();
+function rateLimit(name, max, windowMs) {
+  return (req, res, next) => {
+    const key = name + ":" + req.ip;
+    const now = Date.now();
+    let h = hits.get(key);
+    if (!h || now > h.reset) {
+      h = { count: 0, reset: now + windowMs };
+      hits.set(key, h);
+    }
+    if (++h.count > max) {
+      res.set("Retry-After", String(Math.ceil((h.reset - now) / 1000)));
+      return res.status(429).json({ error: "too many requests" });
+    }
+    next();
+  };
+}
+
+function liveSession(pin) {
+  if (typeof pin !== "string" || !/^\d{6}$/.test(pin)) return null;
+  const s = sessions.get(pin);
+  if (!s) return null;
+  if (Date.now() - s.createdAt > SESSION_TTL_MS) {
+    sessions.delete(pin);
+    return null;
+  }
+  return s;
+}
+
+function clean(value, max) {
+  // plain text only, no control characters; the dashboard also renders via textContent
+  return String(value == null ? "" : value).replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, max);
+}
+
+function sanitizeReport(report) {
+  if (!Array.isArray(report) || report.length > MAX_FINDINGS) return null;
+  return report.map((item) => {
+    const sev = item && typeof item.severity === "string" ? item.severity.toUpperCase() : "INFO";
+    return {
+      severity: SEVERITIES.has(sev) ? sev : "INFO",
+      title: clean(item && item.title, 120),
+      detail: clean(item && item.detail, 500),
+    };
+  });
+}
+
+// --- API -------------------------------------------------------------------------------------
+
+// 1. Anyone can create a PIN. The reply carries a secret token that only the creator's browser
+//    holds; it is required to read the report, so other people cannot read it by guessing PINs.
+app.post("/api/create-pin", rateLimit("create", 10, 60 * 1000), (req, res) => {
+  if (sessions.size >= MAX_SESSIONS) return res.status(503).json({ error: "too many open sessions" });
+  let open = 0;
+  for (const v of sessions.values()) if (v.ip === req.ip && v.status === "PENDING") open++;
+  if (open >= MAX_SESSIONS_PER_IP) return res.status(429).json({ error: "too many open PINs; use or wait for the earlier ones to expire" });
+  let pin;
+  do {
+    pin = String(crypto.randomInt(100000, 1000000));
+  } while (sessions.has(pin));
+  const token = crypto.randomBytes(24).toString("hex");
+  const admin = clean(req.body && req.body.admin, 60) || "Admin";
+  sessions.set(pin, { pin, token, ip: req.ip, admin, status: "PENDING", report: null, createdAt: Date.now() });
+  res.json({ pin, token, expiresInSeconds: SESSION_TTL_MS / 1000 });
+});
+
+// 2. Player app checks the PIN (rate limited: a 6-digit PIN must not be guessable)
+app.get("/api/verify-pin/:pin", rateLimit("verify", 10, 60 * 1000), (req, res) => {
+  const s = liveSession(req.params.pin);
+  if (!s || s.status !== "PENDING") return res.status(404).json({ valid: false });
+  res.json({ valid: true });
+});
+
+// 3. Player app uploads its report, once per PIN
+app.post("/api/submit-report/:pin", rateLimit("submit", 10, 60 * 1000), (req, res) => {
+  const s = liveSession(req.params.pin);
+  if (!s || s.status !== "PENDING") return res.status(404).json({ error: "Invalid or already used PIN" });
+  const report = sanitizeReport(req.body && req.body.report);
+  if (!report) return res.status(400).json({ error: "report must be an array of at most " + MAX_FINDINGS + " findings" });
+  s.status = "COMPLETED";
+  s.report = report;
+  res.json({ success: true });
+});
+
+// 4. The creator's dashboard polls for the result, proving itself with the session token
+app.get("/api/session/:pin", rateLimit("session", 120, 60 * 1000), (req, res) => {
+  const s = liveSession(req.params.pin);
+  if (!s || !safeEqual(req.get("x-session-token") || "", s.token)) return res.status(404).json({ error: "Not found or expired" });
+  res.json({ pin: s.pin, admin: s.admin, status: s.status, report: s.report, createdAt: s.createdAt });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("ABBYS Anti-Cheat running on port " + PORT));
+
+```
+
+`settings.gradle.kts`:
+
+```kts
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "MobileScanner"
+include(":app")
+
+```
