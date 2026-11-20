@@ -28,4 +28,4 @@ Complements attestation kits such as [[alibi]] and driver-inventory scanners suc
 
 ## Related
 
-[[alibi]] · [[windows-forensic-artifacts]] · [[driver-risk-scout]] · [[dfirtriage]] · [[easy-anti-cheat]] · [[battleye-region-walking]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[alibi]] · [[architectography]] · [[windows-forensic-artifacts]] · [[driver-risk-scout]] · [[dfirtriage]] · [[easy-anti-cheat]] · [[battleye-region-walking]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
