@@ -3442,6 +3442,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Lixense/ff-ace-anticheat-analysis [Byte-level RE post-mortem on Tencent ACE (libanogs/libanort) in Free Fire, with IDA tooling and detection catalog]
 - https://github.com/arx-oioi/-AntiCheat-Anogs-Tencent- [Reverse-engineering notes on Tencent mobile protection (libanogs): detection loops, anti-debug/inject/dump, and reaction paths]
 - https://github.com/stuffed-cat/hide-ace-kernel [KernelSU module that bind-mounts empty files over Tencent ACE kernel `/proc/inte_*` integrity nodes to hide KO/syscall-table reports from user space]
+- https://github.com/Siselea/deltaforce-cleaner [Python GUI/CLI uninstaller that removes Delta Force and leftover Tencent ACE kernel services, drivers, registry, files, and WeGame traces on Windows]
 
 > Explore AntiCheat System:G-Presto
 - https://github.com/ARandomPerson7/G-Presto-Anti-Cheat-Reverse-Engineered/blob/main/Main.cpp
@@ -4838,6 +4839,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/maximumemails-cmd/RainInjectable [Injectable Windows C++/Java runtime that rebuilds the Rain 1.8.9 client-side cheat observer for Forge and Badlion, with JNI bootstrap, detection research docs, and local-only evidence review]
 - https://github.com/YcbrYL1/YCBR-AntiCheat [Paper 1.8.9 Minecraft anti-cheat plugin with 19 combat/movement/protocol checks, auth, DDoS protection, and admin GUI]
 - https://github.com/flameteamdev/LavaGuardAC [Open-source Bukkit/Spigot Minecraft server anti-cheat plugin with movement, combat, and block-break checks, violation tracking, admin GUI, and Discord webhook alerts]
+- https://github.com/ShadowKuzey/UmbraAC [Open-source Bukkit/Spigot Minecraft plugin with fly, speed, reach, killaura, no-fall, and x-ray checks plus configurable staff alerts]
 - https://github.com/orglatis-a11y/ZyvenAntiCheat [Open-source Bukkit/Paper 1.21 server plugin with movement, combat, mining, vehicle, utility checks, and anti-ESP modules]
 - https://github.com/elijoewashacked-pixel/VyxAntiCheat [Open-source Paper 1.20+ Minecraft server anti-cheat: movement/combat/packet checks, AI monitor hooks, punish flow, and in-game configuration GUI]
 - https://github.com/phantantai73/AmberAntiCheat [Paper/Spigot Minecraft server anti-cheat plugin with async occlusion, anti-Xray, anti-block-ESP checks, and packet-based violation tracking]
