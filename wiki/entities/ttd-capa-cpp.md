@@ -26,7 +26,7 @@ Written primarily in C++ with Python wrapper scripts, it replays recorded execut
 
 Reverse engineers, malware analysts, and game security researchers who need **behavioral capability detection** from TTD traces rather than static binaries alone. Pair with [[static-runtime-evidence]] when separating static inference from trace-backed findings.
 
-Complements TTD replay tooling such as [[ttddbg]] (IDA `.run` trace replay), programmatic WinDbg/TTD stacks such as [[windbg-tool]] and [[mcp-windbg]], and TTD anti-debug stress samples such as [[ttd-anti-debugging]].
+Complements TTD replay tooling such as [[ida-ttd]] (IDA debugger sessions for `.run` and Sogen traces) and [[ttddbg]] (IDA `.run` trace replay), programmatic WinDbg/TTD stacks such as [[windbg-tool]] and [[mcp-windbg]], and TTD anti-debug stress samples such as [[ttd-anti-debugging]].
 
 ## Links
 
@@ -34,4 +34,4 @@ Complements TTD replay tooling such as [[ttddbg]] (IDA `.run` trace replay), pro
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[static-runtime-evidence]] · [[ttddbg]] · [[windbg-tool]] · [[mcp-windbg]] · [[windbg-decompile-ext]] · [[ttd-anti-debugging]] · [[tenet]] · [[execution-trace-viewer]] · [[dynamic-binary-instrumentation]]
+[[overviews/reverse-engineering]] · [[static-runtime-evidence]] · [[ida-ttd]] · [[ttddbg]] · [[windbg-tool]] · [[mcp-windbg]] · [[windbg-decompile-ext]] · [[ttd-anti-debugging]] · [[tenet]] · [[execution-trace-viewer]] · [[dynamic-binary-instrumentation]]

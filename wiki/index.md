@@ -2157,6 +2157,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-spotlight](entities/ida-spotlight.md) — IDA Pro workflow-centric function triage and prioritization plugin (large-binary RE; cheat / IDA Plugins)
 - [ida-taskr](entities/ida-taskr.md) — IDA Pro parallel computing library (Python; Qt + multiprocessing; cheat / IDA Plugins)
 - [ida-teams-docker](entities/ida-teams-docker.md) — Docker Compose self-hosted IDA Pro Teams Hexvault + Lumina servers; MySQL backend; TLS volumes; license validation and schema init (ioncodes; Cheat / RE Tools)
+- [ida-ttd](entities/ida-ttd.md) — HullaBrian IDA Pro 9.5 TTD plugin—`.run` (TTD Replay SDK) + Sogen `.sogttd` debugger sessions, reverse stepping, trace queries, decoded API logging, coverage/heatmap (Cheat / RE Tools)
 - [IdaThemer](entities/ida-themer.md) — VS Code theme JSON → IDA Pro color theme converter (Long Night/Celestial base; cheat / IDA themes; gmh5225)
 - [ida-unity-pdb-downloader](entities/ida-unity-pdb-downloader.md) — IDA Pro plugin: download PDB symbols from Unity symbol server (C++; automates matching debug-symbol retrieval; game/Unity RE; cheat / IDA Plugins; SamuelTulach)
 - [ida-vtable-explorer](entities/ida-vtable-explorer.md) — IDA Pro 9.x C++ plugin: GCC/MSVC vtable detection, class extraction, virtual-function index/offset annotation, RTTI inheritance analysis, override comparison, hierarchy visualization (K4ryuu; cheat / IDA Plugins)
