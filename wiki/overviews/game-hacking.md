@@ -1284,6 +1284,7 @@ sources:
   - wiki/sources/descriptions/kvnxiao__storytime.md
   - wiki/sources/descriptions/codingben__maple-fighters.md
   - wiki/sources/descriptions/milk-analyzer__vmpunpack.md
+  - wiki/sources/descriptions/Ahora57__import_wrapper_attack.md
   - wiki/sources/descriptions/mike1k__VMPImportFixer.md
   - wiki/sources/descriptions/rathena__rathena.md
   - wiki/sources/descriptions/un4ckn0wl3z__MemMCP.md
@@ -2371,6 +2372,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Emulation-based generic PE unpack via [[xvolkolak]] (XEmulUnpacker / XEmulator single-step to OEP; Qt GUI + CLI; 21 packer-specific unpackers incl. UPX/ASPack/MPRESS) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/horsicq__XVolkolak.md)
 - Modular Python PE/ELF packer detection + unpack pipeline via [[unpacker]] (anpa1200; section/entropy/heuristic/signature ID; UPX native + Unicorn/Unipacker for 32-bit ASPack/Themida/VMProtect + Qiling for 64-bit VMProtect; multi-layer re-detect + PE rebuild; CLI detect→unpack→validate) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/anpa1200__Unpacker.md)
 - Live-process VMP 3.x import-protection fix via [[vmpimportfixer]] (Unicorn emulation of near-call stubs in `.vmp0` → real import addresses; Zydis + pepp; x86/x64 including WoW64 fix from x64) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/mike1k__VMPImportFixer.md)
+- Research PoC import-wrapper hooking via [[import-wrapper-attack]] (Ahora57; attack VMProtect/Themida/WinLicense import wrappers—not protector VM entry—by scanning live processes, Zydis disasm of stub thunks, and Unicorn emulation of obfuscated decode to recover real APIs; jmp/call hidden-import analysis on x86/x64; MessageBoxW demo; cheat / research PoC) complements [[vmpimportfixer]] near-call stub recovery. (source: wiki/sources/descriptions/Ahora57__import_wrapper_attack.md)
 - VMP3 x64 bytecode disassembly via [[vmp-vmp3-64bit-disasm-prerelease-]] (decode custom insn set, map virtual opcode handlers, reconstruct original flow from virtualized code; gmh5225; prerelease) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/gmh5225__VMP-Vmp3_64bit_disasm-prerelease-.md)
 - Python VMP3 editor tooling via [[vmp3-utils]] (gmh5225; Fix VMP helper utilities) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/gmh5225__Vmp3_utils.md)
 - C++ VMProtect helper via [[vmp-helper]] (networking, plugin development, modding; fjqisba; cheat / Fix VMP) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/fjqisba__VmpHelper.md)
