@@ -14,7 +14,7 @@ Rooted Android **virtual camera** system that replaces live camera feeds with pr
 
 Frame delivery follows the classic `android_virtual_cam` pattern: **MediaPlayer** for preview surfaces and **MediaCodec** decoding `virtual.mp4` into NV21 buffers for callback-based apps. Multi-ABI Zygisk builds, process gating with hook-status telemetry, and one-tap enable/import via root shell.
 
-Research focus: camera spoofing, anti-cheat camera checks, and liveness/identity-verification bypass on Android. Contrasts with Xposed GPS spoof modules such as [[locusmimic]] and no-root inject paths such as [[android-virtual-inject]].
+Research focus: camera spoofing, anti-cheat camera checks, and liveness/identity-verification bypass on Android. Broader LibXposed path coverage (Camera2, WebRTC, MediaRecorder) lives in [[xcam-enhanced]]. Contrasts with Xposed GPS spoof modules such as [[locusmimic]] and no-root inject paths such as [[android-virtual-inject]].
 
 ## Links
 
@@ -22,4 +22,4 @@ Research focus: camera spoofing, anti-cheat camera checks, and liveness/identity
 
 ## Related
 
-[[magisk]] · [[zygisk]] · [[locusmimic]] · [[android-virtual-inject]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[magisk]] · [[zygisk]] · [[xcam-enhanced]] · [[locusmimic]] · [[android-virtual-inject]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]

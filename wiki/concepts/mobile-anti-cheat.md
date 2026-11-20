@@ -11,6 +11,7 @@ sources:
   - wiki/sources/descriptions/phajmvawnsix__com.sipvlib.anticheat.md
   - wiki/sources/descriptions/sonekkdev__sonekk-guard1.md
   - wiki/sources/descriptions/smithluke874__Android-VirtualCam-Manager.md
+  - wiki/sources/descriptions/Klassiqblintz__xCam-Enhanced.md
   - wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md
   - wiki/sources/descriptions/libtersafe__KPM-MemReader.md
   - wiki/sources/descriptions/gmh5225__PUBGM1.6-DeadGame.md
@@ -80,7 +81,7 @@ sources:
   - wiki/sources/descriptions/kauemurakami__flutter_tamper_detector.md
   - wiki/sources/descriptions/xunyyds__litmus.md
   - wiki/sources/descriptions/Inforaam__MobShield-Android.md
-updated: 2026-11-17
+updated: 2026-11-20
 confidence: medium
 ---
 
@@ -108,7 +109,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 | USB / ADB debugging | `UsbManager` connection state, `SystemProperties`, USB/battery broadcasts, `getprop`/`dumpsys`, sysfs paths signaling tethered or debuggable USB — often paired with root/Frida gates on research devices |
 | Hooks | PLT/GOT integrity, `/proc/self/maps` anomalies |
 | IAP / billing | Client-side Play Billing API trust; local purchase-confirmation spoofing such as [[freedom]] (Play-only billing-service hook) and multi-store LSPosed module [[com-fuck-iab]] (Google Play, Bazaar, Myket binders; embedded Frida Gum + per-package TypeScript scripts; restore purchases / bypass local checks; server receipt validation is the primary defense) (source: wiki/sources/descriptions/gmh5225__freedom.md; source: wiki/sources/descriptions/Xposed-Modules-Repo__com.fuck.iab.md) |
-| Camera / liveness | Camera1 preview/callback integrity, face/liveness SDK probes; rooted virtual-camera injection such as [[android-virtualcam-manager]] (ArtHook + NV21 frame replace; no LSPosed) (source: wiki/sources/descriptions/smithluke874__Android-VirtualCam-Manager.md) |
+| Camera / liveness | Camera1 preview/callback integrity, face/liveness SDK probes; rooted virtual-camera injection such as [[android-virtualcam-manager]] (ArtHook + NV21 frame replace; no LSPosed) (source: wiki/sources/descriptions/smithluke874__Android-VirtualCam-Manager.md); LibXposed multi-path virtual camera [[xcam-enhanced]] (Camera1/2, ImageReader, MediaRecorder, WebRTC; MediaCodec YUV/JPEG sync; LSPosed/LSPatch; optional spoof helpers) (source: wiki/sources/descriptions/Klassiqblintz__xCam-Enhanced.md) |
 | VPN / proxy | `ConnectivityManager`/`NetworkCapabilities`, `/proc/net`, ioctl/netlink routes, localhost daemon port scans (Clash/sing-box); RASP SDKs such as [[rs-native-kit-security]]; per-app hide tooling such as [[vpnhide]] (Binder + kernel/Zygisk path filtering; no target-process hooks) (source: wiki/sources/descriptions/okhsunrog__vpnhide.md) |
 | Overlay / tapjacking | `TYPE_APPLICATION_OVERLAY` windows above sensitive views; `filterTouchesWhenObscured` input blocking; callback alerts via [[android-overlay-protection]] (Java library for overlay detection on login/payment flows) (source: wiki/sources/descriptions/geeksonsecurity__android-overlay-protection.md); offensive PoC [[android-overlay-malware-example]] (foreground-app monitor + credential-phishing overlay mimicking banking/social apps) (source: wiki/sources/descriptions/geeksonsecurity__android-overlay-malware-example.md) |
 
