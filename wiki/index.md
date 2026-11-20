@@ -3279,6 +3279,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PerfectSMBios](entities/perfectsmbios.md) — Th3Spl; lightweight UEFI C library; SMBIOS 2.0/3.0 read/spoof before OS load via EFI config table; randomized string overwrite; VisualUefi/EDK2; no ntoskrnl/winload deps; Windows+Linux; pre-boot HWID / anti-cheat RE (cheat / EFI Driver + HWID)
 - [PerfMon (KelvinMsft)](entities/perfmon.md) — Windows kernel research driver; PMU/PMI flows, APIC handling, SSDT monitoring + hook-style interception; hardware-assisted monitoring on Win10-era platforms; README PMI Callback
 - [pesign](entities/pesign.md) — Linux UEFI Secure Boot PE-COFF Authenticode/PKCS#7 sign/verify (NSS)
+- [PES 21 Workbench](entities/pes21-workbench.md) — Joao-Spala source-driven CE 7.2+ suite for eFootball PES 2021 (Python/Lua/RE JSON from PES2021.exe; OVR matrices, scout handlers, AOB/RVA hooks; Master League + in-match Studio GUI; DNA-preserving OVR, scout/shortlist RAM, undo snapshots; PT-BR/EN `.CT`; Sider/BMPES; cheat / game:pes [Cheat Engine])
 - [PESignAnalyzer](entities/pesign-analyzer.md) — Windows PE embedded Authenticode signature metadata extractor (Anti Cheat → Sign Tools)
 - [perses](entities/perses.md) — x86 PE instruction-expansion obfuscator (semantic-equivalent replacement sequences; Anti Cheat → Obfuscation Engine)
 - [petoy](entities/petoy.md) — PE-focused binary packer (C/C++ + JS; Anti Cheat → Binary Packer `[PE]`)
