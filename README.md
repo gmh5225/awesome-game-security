@@ -1967,6 +1967,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/findyara-ida [Yara]
 - https://github.com/gmh5225/ida_vmware_windows_gdb [IDA+VMWARE+GDB]
 - https://github.com/gmh5225/ida_bochs_windows [IDA+BOCHS]
+- https://github.com/elgroovy/exodus-idabridge [Exodus emulator extension that bridges Gensida in IDA Pro to debug live Mega Drive games over gRPC]
 - [An integration for IDA and VS Code which connects both to easily execute and debug IDAPython scripts](https://github.com/gmh5225/idacode)
 - https://github.com/gmh5225/efiXplorer [UEFI firmware]
 - https://github.com/Accenture/protobuf-finder [Protobuf]
