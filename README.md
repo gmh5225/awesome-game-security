@@ -1228,6 +1228,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/VMP-Vmp3_64bit_disasm-prerelease-
 - https://github.com/gmh5225/Vmp3_utils
 - https://github.com/mike1k/VMPImportFixer [Resolves VMProtect 3.x import protection via emulation (x86/x64)]
+- https://github.com/Ahora57/import_wrapper_attack [Research PoC hooking VMProtect and Themida/WinLicense import wrappers (Zydis + Unicorn) instead of direct protector transitions]
 - https://github.com/archercreat/titan
 - https://github.com/NaC-L/Mergen
 - https://github.com/fjqisba/VmpHelper
@@ -1501,6 +1502,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Xposed
 - https://github.com/lm060719/io.mo.glassmic [LSPosed module that routes imported or TTS audio into target apps via AudioRecord/AAudio hooks for rooted Android audio-pipeline testing]
+- https://github.com/Klassiqblintz/xCam-Enhanced [LibXposed virtual camera module injecting video/images into Camera1/2, ImageReader, MediaRecorder, and WebRTC with optional spoofing bypass hooks]
 - https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
 - https://github.com/Ascen1ty/oslokrok [LSPosed/Vector module that hooks PayPal RASP (AppVerifier and legacy root channels) via DexKit-resolved targets to prevent anti-tamper kill-on-launch on rooted Android]
 - https://github.com/xposed-modules-repo/com.fuck.iab [LSPosed/Xposed module that hooks Google Play, Bazaar, and Myket in-app billing to bypass purchases, with per-package Frida script support]
@@ -2580,6 +2582,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Sylnar/NexusForge [Windows .NET tool to detect Artix-7 FPGA DMA boards, read device DNA, flash firmware, install CH347/FT601 drivers, and run DMA speed tests]
 - https://github.com/MewDMA/MewTools [Windows DMA setup utility for 35T/75T/100T FPGA cards: driver install, firmware flashing, DNA ID, speed tests, MAKCU/FERRUM support, and second-PC optimizer]
 - https://github.com/sercanarga/pcileechgen [Go tool to clone a real PCI/PCIe donor via VFIO and synthesize ready-to-flash PCILeech FPGA bitstreams through Vivado]
+- https://github.com/VoltCyclone/PCILeechFWGenerator [VFIO-based pipeline that profiles a real PCIe donor and generates customized PCILeech FPGA firmware (config shadow, MSI-X, Vivado build)]
 - https://github.com/sonodima/physpatch [Scanning and patching of the entire Windows Kernel using DMA]
 - https://github.com/gmh5225/DMA-PCIE-BOARD-75T [DMA-PCIE-BOARD-75T]
 - https://github.com/dom0ng/pcileech-wifi-v2 [pcileech-fpga with wireless card emulation]
