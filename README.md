@@ -4697,6 +4697,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/rockbruno/swiftshield [Swift identifier obfuscator for iOS apps against RE]
 - https://github.com/sfr-development/Lua-Obfuscator-Clyde-Protection [Luau/Lua VM-based obfuscator for Roblox script protection]
 - https://github.com/cherriesandmochi/gdmaim [Godot 4.x export plugin that obfuscates GDScript to raise reverse-engineering cost for shipped games]
+- https://github.com/soltrix-studios/syferit [Open-core build-time code hardening against AI reverse-engineering agents and automated decompilers across native, web, mobile, C#, and Python with npm CLI and CI integration]
 - https://github.com/xiaoweime/WProtect
 - https://github.com/DeDf/WProtect
 - https://github.com/jokerNi/WProtectSDK
@@ -5006,6 +5007,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/pandora-analysis/pandora
 - https://github.com/cocomelonc/peekaboo [Modular malware-behavior emulator for safe evasion testing, telemetry generation, and detection engineering]
 - https://github.com/BLCCoreStudio/BLCGameSecLab [Authorized game-security validation pipeline with BLCReverseLab intake, evidence graphs, build diffing, and incremental anti-cheat regression planning]
+- https://github.com/MeuxyVex/Snare [Agentless VM-side sandbox (early) for game developers to run cheats beside a title, baseline-diff host observations (memory, processes, drivers, network), and report game-symbol-aware cheat impact]
 - https://github.com/swimchicken777/reshield [Agent Skill and CLI scanner that scores shipped game/app builds for AI-assisted reverse-engineering exposure (source maps, symbols, keys) with SARIF and fix guidance for Unity, Unreal, Godot, and native targets]
 - https://github.com/ohmk1811/MobSentry [Evidence-first static analyzer for Android APK and iOS IPA with SSL pinning, root/jailbreak, and anti-instrumentation findings plus stack-aware bypass guidance and PDF reports]
 - https://github.com/xunyyds/litmus [Android tamper-detection benchmark with scored vectors for Frida, Xposed, Zygisk, repack, and emulator checks; reproducible JSON runs and blind-spot reporting]
