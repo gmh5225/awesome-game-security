@@ -3932,6 +3932,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [syscall-detect](entities/syscall-detect.md) — detect direct/indirect syscalls via Instrumentation Callback or stack inspection (C; AC / Windows)
 - [SyscallTables](entities/syscall-tables.md) — combined Windows NT syscall tables (ntoskrnl/win32k/IUM; Vista→Win11 x64/ARM64; Zydis extraction + scg/sstComposer; hfiref0x)
 - [syscalls-cpp](entities/syscalls-cpp.md) — C++20 header-only direct syscall invocation (AC Compile Time)
+- [Syferit](entities/syferit.md) — open-core build-time code defense (npm CLI; MBA/micro-VM/CFF/tamper attestation; multi-language + Unity/Vite/CI; anti-AI-RE hardening)
 - [System Informer](entities/systeminformer.md) — Process Hacker successor; Windows process/system explorer (kernel explorer lane)
 - [StealthAPCDispatcher](entities/stealth-apc-dispatcher.md) — stealth kernel APC dispatch with encrypted shellcode (non-standard queue paths; AC APC monitoring bypass research; gmh5225)
 - [StealthSytemThreadFinderBE](entities/stealth-sytem-thread-finder-be.md) — find hidden system threads BE misses (PspCidTable; scheduler queue; manual-map)
