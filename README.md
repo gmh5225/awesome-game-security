@@ -1955,6 +1955,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/Ponce [Symbolic Execution]
 - https://github.com/khalilammarr/ida-arsenal [IDA Pro 9.1 plugin with angr-backed find/avoid path solving, input discovery, crypto recognition, Z3 tab, and Go symbol recovery for crackme, CTF, and malware-style RE]
 - https://github.com/gmh5225/ttddbg [Time Travel Debugging]
+- https://github.com/HullaBrian/ida-ttd [IDA Pro 9.5 plugin that loads Microsoft TTD (.run) and Sogen (.sogttd) recordings as debugger sessions with reverse stepping and recording queries]
 - https://github.com/gmh5225/LazyIDA [LazyIDA]
 - https://github.com/gmh5225/HappyIDA [Hex-Rays decompiler utilities: parameter labeling, SEH, Rust strings]
 - https://github.com/nologic/idaref [IDA Pro plugin showing full x86-64/ARM/MIPS instruction reference at the cursor]
@@ -2692,6 +2693,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/N00bPrograms/net-worthless-mod-menu [Open-source Godot in-game cheat/mod menu for Net Worthless via autoload override and documented feature toggles]
 - https://github.com/misnopini1987/GTA-5-Trainer-Menu-Base [MIT C++17 DirectX 11 / ImGui scaffold (MenuForge) for building modular in-game trainer overlay menus for GTA V on Windows]
 - https://github.com/dxxxxy/Icarus [Cross-loader Minecraft mod library that builds skeet/fatality-style config menus from annotated fields, with configs, keybinds, and Jar-in-Jar packaging]
+- https://github.com/Lariya-aa/s2arm-cheat-hud [macOS non-activating floating cheat menu for S2Arm with gamepad/keyboard summon, live toggles, and one-shot pulse injections]
 
 > Vulnerable Driver 
 - https://www.loldrivers.io/drivers [Living Off The Land Drivers]
@@ -4935,6 +4937,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/mastershadow547/Advanced-Anticheat [Open-source Roblox server anti-cheat detecting movement exploits, unauthorized remotes, and environment tampering]
 - https://github.com/sorrelhub/shprotect-ac [Server-first Roblox Luau anti-cheat with movement, remote spam, fly/noclip, and client watchdog detectors]
 - https://github.com/theo926/VolcanoAC [Open-source Roblox Luau server anti-cheat with speed, fly, noclip, and seated-state movement validation plus lag-back enforcement]
+- https://github.com/Dalbonden/Anti-cheat [ACF: modular server-authoritative Roblox anti-cheat framework (Luau) with detection modules, evidence store, enforcement ladder, and offline/Studio tests]
 - https://github.com/Buck3ttcode/bloxdesk [Roblox Luau telemetry SDK for passive speed, noclip, and remote-spam detection with webhook incident reporting]
 - https://github.com/no1qq/RustBlox [Rust Roblox desktop launcher with TheWatcher client-side watchdog that scans cheat processes, suspicious memory, and injection while Roblox runs]
 - https://github.com/severrir/AntiCheat-Dashboard [Roblox server-side anti-cheat with trust scoring, honeypots, Supabase ingest, Discord alerts, and React staff dashboard]
