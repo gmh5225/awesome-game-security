@@ -109,6 +109,7 @@ sources:
   - wiki/sources/descriptions/xairy__dma-attacks.md
   - wiki/sources/descriptions/zzjjmkk__eagle-eye.md
   - wiki/sources/descriptions/RUC601__un-dma-v2.md
+  - wiki/sources/descriptions/VoltCyclone__PCILeechFWGenerator.md
 updated: 2026-11-20
 confidence: high
 ---
@@ -125,7 +126,7 @@ Structured reading for newcomers: [[dma-attacks]] (xairy; talk slides, videos, a
 |---------------|-------|
 | Initiator vs transport vs analysis site | [[memory-acquisition-path]] |
 | Certainty about firmware tiers, EPT, HVCI, containment, TPM proof | [[assurance-boundaries]] |
-| TLPs, config space, FPGA constraints, [[pcileech]], device emulation | PCIe stack below; [[pcileech-fpga]], [[pcileechgen]] |
+| TLPs, config space, FPGA constraints, [[pcileech]], device emulation | PCIe stack below; [[pcileech-fpga]], [[pcileechgen]], [[pcileechfwgenerator]] |
 | VT-d/AMD-Vi, ACS, ATS/PASID, domains, hypervisors, trust anchors | [[iommu]], [[hvci]] |
 | ACPI advertisement vs Windows policy vs live unit vs requester coverage | [[iommu-state-verification]] |
 | Fingerprinting, forensics, Thunderbolt/USB4, memory-access evidence | Layered detection pipeline below; [[irontrace]], [[drvscan]], [[aetheris]] |
@@ -176,7 +177,7 @@ Stock [[pcileech-fpga]] builds expose trivial signals (placeholder `10EE:0666`, 
 | Memory-access policy | Active remapping + available fault evidence | Permitted or denied access on the established path |
 | Platform trust | Attestation policy + supported runtime observations | Trust in measured properties; unmeasured state explicit |
 
-No label establishes guaranteed detection or a required trust anchor; reference-set absence is unknown identity, not proof a class is malicious or exhausted. (source: wiki/sources/skills/dma-attack.md) Donor-cloning generators such as [[pcileechgen]] automate scan/check/build/validate workflows: Linux VFIO donor capture → SystemVerilog/COE → Vivado bitstreams with dynamic BAR emulation, NVMe admin-queue/DMA bridge, offline MMIO trace import, and TLP latency tuning across many PCILeech-compatible boards. (source: wiki/sources/descriptions/sercanarga__PCILeechGen.md)
+No label establishes guaranteed detection or a required trust anchor; reference-set absence is unknown identity, not proof a class is malicious or exhausted. (source: wiki/sources/skills/dma-attack.md) Donor-cloning generators such as [[pcileechgen]] (Go) and [[pcileechfwgenerator]] (Python; Jinja2 SystemVerilog, MSI-X emulation, register learning, Podman builds, Textual TUI, board flash helpers) automate VFIO donor capture → Vivado bitstreams across PCILeech-class hardware—[[pcileechgen]] adds dynamic BAR emulation, NVMe admin-queue/DMA bridge, offline MMIO trace import, and TLP latency tuning. (source: wiki/sources/descriptions/sercanarga__PCILeechGen.md) (source: wiki/sources/descriptions/VoltCyclone__PCILeechFWGenerator.md)
 
 ## IOMMU and bypass surface
 
@@ -206,7 +207,7 @@ Firmware matching donor behavior on tested dimensions can evade isolated PCIe/IO
 
 ## Related concepts
 
-[[dma]] · [[memory-acquisition-path]] · [[assurance-boundaries]] · [[iommu]] · [[iommu-state-verification]] · [[helloiommupkg]] · [[dmaprotect]] · [[diedmaprotection]] · [[hvci]] · [[byovd]] · [[research-rigor]] · [[pcileech]] · [[pcie-detector]] · [[drvscan]] · [[dmaguard]] · [[dma-pe-dumper]] · [[volk-dma]] · [[strata-dma]] · [[dmalib]] · [[dmalibrary]] · [[vm]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-quantumstealth-max]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[dma-attack-firmware-customization]] · [[dma-cfw-guide]] · [[dma-fw-guide-2.0]] · [[pcileech-dma-firmware-guide]] · [[entities/dma]] · [[vgk-dma-bypass]] · [[ddma]] · [[ddma-1]] · [[diskjacker]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[nexus-forge]] · [[mewtools]] · [[memtools]] · [[aetheris]] · [[dma-pcie-board-75t]] · [[litepcie]] · [[rx25-dma-reader]] · [[cyclone-v-pcie-avmm-dma]] · [[s6-pcie-microblaze]] · [[pico-dma]] · [[xilinx-fpga-pcie-xdma-tutorial]] · [[learn-fpga-programming]] · [[pciem]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[pcileech-memprocfs-mcp]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[cheatengine-dma]] · [[cheat-engine-ceserver-pcileech]] · [[ceserver-rawmem]] · [[csgo-dma-overlay]] · [[fn-dma-cheat]] · [[meatyeftrelease]] · [[eftleecher]] · [[eft-dma-radar-1]] · [[lucid-tarkov-dma]] · [[nathans-tarkov-radar-public]] · [[cs2-dma-radar]] · [[cs2-dma-cheat]] · [[cs2-dma-extrnal]] · [[cs2-dma]] · [[faceit-dma-cs2]] · [[cs2-kvm-dma]] · [[gta5-dma-cheat]] · [[apex-dma-cheat-updated]] · [[apex-dma-kvm-pub]] · [[ape-ex-abominations]] · [[arc-raiders-radar-dma-radar]] · [[luminary-dma]] · [[rust-dma-cheat]] · [[dma-cheat-base]] · [[unispect-dma-plugin]] · [[reclass-dma]] · [[overviews/anti-cheat]]
+[[dma]] · [[memory-acquisition-path]] · [[assurance-boundaries]] · [[iommu]] · [[iommu-state-verification]] · [[helloiommupkg]] · [[dmaprotect]] · [[diedmaprotection]] · [[hvci]] · [[byovd]] · [[research-rigor]] · [[pcileech]] · [[pcie-detector]] · [[drvscan]] · [[dmaguard]] · [[dma-pe-dumper]] · [[volk-dma]] · [[strata-dma]] · [[dmalib]] · [[dmalibrary]] · [[vm]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileechfwgenerator]] · [[pcileech-dma-fullstealth]] · [[pcileech-quantumstealth-max]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[dma-attack-firmware-customization]] · [[dma-cfw-guide]] · [[dma-fw-guide-2.0]] · [[pcileech-dma-firmware-guide]] · [[entities/dma]] · [[vgk-dma-bypass]] · [[ddma]] · [[ddma-1]] · [[diskjacker]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[nexus-forge]] · [[mewtools]] · [[memtools]] · [[aetheris]] · [[dma-pcie-board-75t]] · [[litepcie]] · [[rx25-dma-reader]] · [[cyclone-v-pcie-avmm-dma]] · [[s6-pcie-microblaze]] · [[pico-dma]] · [[xilinx-fpga-pcie-xdma-tutorial]] · [[learn-fpga-programming]] · [[pciem]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[pcileech-memprocfs-mcp]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[cheatengine-dma]] · [[cheat-engine-ceserver-pcileech]] · [[ceserver-rawmem]] · [[csgo-dma-overlay]] · [[fn-dma-cheat]] · [[meatyeftrelease]] · [[eftleecher]] · [[eft-dma-radar-1]] · [[lucid-tarkov-dma]] · [[nathans-tarkov-radar-public]] · [[cs2-dma-radar]] · [[cs2-dma-cheat]] · [[cs2-dma-extrnal]] · [[cs2-dma]] · [[faceit-dma-cs2]] · [[cs2-kvm-dma]] · [[gta5-dma-cheat]] · [[apex-dma-cheat-updated]] · [[apex-dma-kvm-pub]] · [[ape-ex-abominations]] · [[arc-raiders-radar-dma-radar]] · [[luminary-dma]] · [[rust-dma-cheat]] · [[dma-cheat-base]] · [[unispect-dma-plugin]] · [[reclass-dma]] · [[overviews/anti-cheat]]
 
 ## README map
 

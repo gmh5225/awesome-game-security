@@ -3241,6 +3241,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware (Vivado; shadow config, BAR impls); firmware sophistication tiers 0–6
 - [PCILeech-FPGA-DMA-VMD](entities/pcileech-fpga-dma-vmd.md) — Artix-7 75T Intel RST VMD `9A0B` emulation (MSI-X, NVMe, BAR shadow; SystemVerilog)
 - [PCILeechGen](entities/pcileechgen.md) — Go donor-cloning firmware generator (Linux VFIO → scan/check/build/validate; SystemVerilog/COE → Vivado bitstreams; dynamic BAR, NVMe admin-queue, MMIO traces; PCILeech FPGA)
+- [PCILeechFWGenerator](entities/pcileechfwgenerator.md) — Python VFIO donor-profiling toolchain (Jinja2 SystemVerilog; MSI-X; register learning; Podman/Vivado; Textual TUI; flash helpers; VoltCyclone; PCILeech FPGA firmware)
 - [pciban](entities/pciban.md) — PCI/AHCI direct HWID collection PoC; brute-force PCI enumeration for storage-controller identifiers without OS APIs; anti-cheat Detection:HWID research (KDIo3; experimental)
 - [pcileech-memprocfs-mcp](entities/pcileech-memprocfs-mcp.md) — Linux-native MCP server for PCILeech/MemProcFS DMA R/W, RE scanning, UE/Unity SDK dumping, FPGA TLP control (Neverdecel; Game Develop / MCP)
 - [pcileech-wifi](entities/pcileech-wifi.md) — PCILeech-FPGA wireless NIC class emulation (ekknod; anti-cheat / DMA research)

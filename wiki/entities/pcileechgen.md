@@ -33,4 +33,4 @@ Aimed at security researchers studying **PCIe and DMA attack surfaces**, FPGA-ba
 
 ## Related
 
-[[dma]] · [[iommu]] · [[pcileech]] · [[pcileech-fpga]] · [[fpga-dma-multi-tool]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[dma]] · [[iommu]] · [[pcileech]] · [[pcileech-fpga]] · [[pcileechfwgenerator]] · [[fpga-dma-multi-tool]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
