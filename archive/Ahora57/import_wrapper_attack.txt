@@ -1,0 +1,4311 @@
+Project Path: arc_Ahora57_import_wrapper_attack_oboz6_q8
+
+Source Tree:
+
+```txt
+arc_Ahora57_import_wrapper_attack_oboz6_q8
+├── LICENSE
+├── README.md
+├── vmp_imp_attack
+│   ├── disassembly_util.h
+│   ├── emul_code.h
+│   ├── get_protector.h
+│   ├── import_scan.h
+│   ├── process_util.h
+│   ├── struct.h
+│   ├── unicore_util.h
+│   ├── vmp_imp_attack.cpp
+│   ├── vmp_imp_attack.vcxproj
+│   ├── vmp_imp_attack.vcxproj.filters
+│   └── vmp_imp_attack.vcxproj.user
+└── vmp_imp_attack.sln
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Ahora57
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# import_wrapper_attack
+This project demonstrates an attack on obfuscated imports protected by VMP/Themida/WinLicense. However, rather than targeting the transition from the program code to the protector code, this project focuses on attacking the import wrapper, regardless of whether a direct transition to it exists.   
+Example hook protected import MessageBoxW in Themida 3.2.4.5 ->  
+![alt text](https://github.com/Ahora57/import_wrapper_attack/blob/main/hook_themida_dll.png?raw=true) 
+Example hook protected import MessageBoxW in VMP 3.10.4 ->  
+![alt text](https://github.com/Ahora57/import_wrapper_attack/blob/main/hook_vmp_dll.png?raw=true)  
+You will need to add the Zydis and unicorn-engine libraries to this project.  
+P.S This project was written a long time ago, but I just couldn't finish it for personal reasons.  
+Thanks to everyone I spoke with while working on this project.
+
+```
+
+`vmp_imp_attack.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vmp_imp_attack", "vmp_imp_attack\vmp_imp_attack.vcxproj", "{562649B8-8F19-4B07-802F-BC78C50F461F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{562649B8-8F19-4B07-802F-BC78C50F461F}.Debug|x64.ActiveCfg = Debug|x64
+		{562649B8-8F19-4B07-802F-BC78C50F461F}.Debug|x64.Build.0 = Debug|x64
+		{562649B8-8F19-4B07-802F-BC78C50F461F}.Debug|x86.ActiveCfg = Debug|Win32
+		{562649B8-8F19-4B07-802F-BC78C50F461F}.Debug|x86.Build.0 = Debug|Win32
+		{562649B8-8F19-4B07-802F-BC78C50F461F}.Release|x64.ActiveCfg = Release|x64
+		{562649B8-8F19-4B07-802F-BC78C50F461F}.Release|x64.Build.0 = Release|x64
+		{562649B8-8F19-4B07-802F-BC78C50F461F}.Release|x86.ActiveCfg = Release|Win32
+		{562649B8-8F19-4B07-802F-BC78C50F461F}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {300D804C-A4A9-48FF-BFFE-7EC1E440E626}
+	EndGlobalSection
+EndGlobal
+
+```
+
+`vmp_imp_attack/disassembly_util.h`:
+
+```h
+#ifndef ZYDIS_DISASSEMBLY_UTIL
+#define ZYDIS_DISASSEMBLY_UTIL
+#include <Zydis/Zydis.h>
+
+#define MAX_LENGHT_INSTR 15
+
+#ifndef NO_INLINE
+#if defined(_MSC_VER)
+#define NO_INLINE __declspec(noinline)
+#elif defined(__GNUC__) && __GNUC__ > 3
+#define NO_INLINE __attribute__((noinline)) 
+#endif
+#endif
+
+#ifndef _WIN64
+#define dis_mode ZYDIS_MACHINE_MODE_LONG_COMPAT_32
+#else
+#define dis_mode ZYDIS_MACHINE_MODE_LONG_64
+#endif // !_WIN64
+
+#ifndef ELEMENT_64
+#define ELEMENT_64 0x40
+#endif 
+
+#ifndef ELEMENT_32
+#define ELEMENT_32 0x20
+#endif 
+
+#ifndef ELEMENT_16
+#define ELEMENT_16 0x10
+#endif 
+
+#ifndef ELEMENT_8
+#define ELEMENT_8 0x8
+#endif 
+
+
+namespace dis
+{
+    auto get_reg_size(ZydisRegister* reg) -> uint32_t
+    {
+        uint32_t num_reg = NULL;
+        if (*reg >= ZYDIS_REGISTER_RAX && ZYDIS_REGISTER_R15 > *reg)
+        {
+            return sizeof(PVOID);
+
+        }
+        else if (*reg >= ZYDIS_REGISTER_EAX && ZYDIS_REGISTER_R15D > *reg)
+        {
+            return sizeof(ULONG);
+
+        }
+        else if (*reg >= ZYDIS_REGISTER_AX && ZYDIS_REGISTER_R15W > *reg)
+        {
+            return sizeof(USHORT);
+        }
+        else if (*reg >= ZYDIS_REGISTER_AL && ZYDIS_REGISTER_R15B > *reg)
+        {
+            return sizeof(CHAR);
+        }
+    }
+
+    auto is_check_eflag(ZydisDisassembledInstruction* dis_instr) -> bool
+    {
+        return dis_instr->info.cpu_flags->tested != NULL;
+    }
+
+    auto is_change_eflag(ZydisDisassembledInstruction* dis_instr) -> bool
+    {
+        return dis_instr->info.cpu_flags->modified != NULL;
+    }
+    NO_INLINE auto get_pointer_size(ZydisDisassembledInstruction* dis_instr) -> uint32_t
+    {
+        uint32_t size_reg = NULL;
+        uint32_t size_point = NULL;
+        uint32_t size_element = NULL;
+        for (size_t i = NULL; i < dis_instr->info.operand_count_visible; i++)
+        {
+            if (!size_reg && dis_instr->operands[i].type == ZYDIS_OPERAND_TYPE_REGISTER)
+            {
+                size_reg = get_reg_size(&dis_instr->operands[i].reg.value);
+            }
+            if (!size_point && dis_instr->operands[i].type == ZYDIS_OPERAND_TYPE_MEMORY)
+            {
+                size_point = get_reg_size(&dis_instr->operands[i].mem.base);
+                size_element = dis_instr->operands[i].element_size;
+            }
+        }
+        if (size_reg && size_point)
+        {
+            if (size_reg == size_point)
+            {
+                return size_point;
+            }
+            else if (size_reg > size_point)
+            {
+                return size_point;
+            }
+            else //error via mov rax,qword ptr ds:[eax]
+            {
+                return NULL;
+            }
+        }
+        else if (size_point && size_element)
+        {
+            if (size_element == ELEMENT_64)
+            {
+                return sizeof(ULONG) * 2;
+            }
+            else if (size_element == ELEMENT_32)
+            {
+                return sizeof(ULONG);
+
+            }
+            else if (size_element == ELEMENT_16)
+            {
+                return sizeof(USHORT);
+
+            }
+            else if (size_element == ELEMENT_8)
+            {
+                return sizeof(CHAR);
+            }
+        }
+        return NULL;
+    }
+
+    auto get_dis(ZydisDisassembledInstruction* instruction, CHAR* runtime_address) -> ZyanStatus
+    {
+        return ZydisDisassembleIntel
+        (
+            dis_mode,
+            reinterpret_cast<ZyanU64>(runtime_address),
+            runtime_address,
+            MAX_LENGHT_INSTR,
+            instruction
+        );
+    }
+
+    auto get_dis(ZydisDisassembledInstruction* instruction, uint8_t* runtime_address) -> ZyanStatus
+    {
+        return ZydisDisassembleIntel
+        (
+            dis_mode,
+            reinterpret_cast<ZyanU64>(runtime_address),
+            runtime_address,
+            MAX_LENGHT_INSTR,
+            instruction
+        );
+    }
+
+    auto is_pos_import(ZydisDisassembledInstruction* instruction) -> bool
+    {
+        if ((instruction->info.mnemonic == ZYDIS_MNEMONIC_JMP && instruction->info.operand_count == 2) ||
+            (instruction->info.mnemonic == ZYDIS_MNEMONIC_CALL && instruction->info.operand_count == 4)
+            )
+        {
+#ifndef _WIN64
+            if (instruction->operands[0].mem.base == ZYDIS_REGISTER_NONE && instruction->operands[0].type == ZYDIS_OPERAND_TYPE_MEMORY)
+            {
+                return TRUE;
+            }
+#else
+            if (instruction->operands[0].mem.base == ZYDIS_REGISTER_RIP && instruction->operands[0].type == ZYDIS_OPERAND_TYPE_MEMORY)
+            {
+                return TRUE;
+            }
+#endif
+
+
+        }
+        return FALSE;
+    }
+
+    auto is_pos_exp(ZydisDisassembledInstruction* instruction) -> bool
+    {
+        if ((instruction->info.mnemonic == ZYDIS_MNEMONIC_JMP && instruction->info.operand_count == 2) ||
+            (instruction->info.mnemonic == ZYDIS_MNEMONIC_CALL && instruction->info.operand_count == 4)
+            )
+        {
+            if (instruction->operands[0].type == ZYDIS_OPERAND_TYPE_IMMEDIATE)
+            {
+                return TRUE;
+            }
+        }
+        return FALSE;
+    }
+    auto is_jmp(ZydisDisassembledInstruction* instr) -> bool
+    {
+        switch (instr->info.mnemonic)
+        {
+        case ZYDIS_MNEMONIC_JB:
+        case ZYDIS_MNEMONIC_JBE:
+        case ZYDIS_MNEMONIC_JCXZ:
+        case ZYDIS_MNEMONIC_JECXZ:
+        case ZYDIS_MNEMONIC_JKNZD:
+        case ZYDIS_MNEMONIC_JKZD:
+        case ZYDIS_MNEMONIC_JL:
+        case ZYDIS_MNEMONIC_JLE:
+        case ZYDIS_MNEMONIC_JNB:
+        case ZYDIS_MNEMONIC_JNBE:
+        case ZYDIS_MNEMONIC_JMP:
+        case ZYDIS_MNEMONIC_JNL:
+        case ZYDIS_MNEMONIC_JNLE:
+        case ZYDIS_MNEMONIC_JNO:
+        case ZYDIS_MNEMONIC_JNP:
+        case ZYDIS_MNEMONIC_JNS:
+        case ZYDIS_MNEMONIC_JNZ:
+        case ZYDIS_MNEMONIC_JO:
+        case ZYDIS_MNEMONIC_JP:
+        case ZYDIS_MNEMONIC_JRCXZ:
+        case ZYDIS_MNEMONIC_JS:
+        case ZYDIS_MNEMONIC_JZ:
+            return ZYAN_TRUE;
+        default:
+            break;
+        }
+        return ZYAN_FALSE;
+    }
+
+    auto is_jññ(ZydisDisassembledInstruction* instr) -> bool
+    {
+        switch (instr->info.mnemonic)
+        {
+        case ZYDIS_MNEMONIC_JB:
+        case ZYDIS_MNEMONIC_JBE:
+        case ZYDIS_MNEMONIC_JCXZ:
+        case ZYDIS_MNEMONIC_JECXZ:
+        case ZYDIS_MNEMONIC_JKNZD:
+        case ZYDIS_MNEMONIC_JKZD:
+        case ZYDIS_MNEMONIC_JL:
+        case ZYDIS_MNEMONIC_JLE:
+        case ZYDIS_MNEMONIC_JNB:
+        case ZYDIS_MNEMONIC_JNBE:
+        case ZYDIS_MNEMONIC_JNL:
+        case ZYDIS_MNEMONIC_JNLE:
+        case ZYDIS_MNEMONIC_JNO:
+        case ZYDIS_MNEMONIC_JNP:
+        case ZYDIS_MNEMONIC_JNS:
+        case ZYDIS_MNEMONIC_JNZ:
+        case ZYDIS_MNEMONIC_JO:
+        case ZYDIS_MNEMONIC_JP:
+        case ZYDIS_MNEMONIC_JRCXZ:
+        case ZYDIS_MNEMONIC_JS:
+        case ZYDIS_MNEMONIC_JZ:
+            return ZYAN_TRUE;
+        default:
+            break;
+        }
+        return ZYAN_FALSE;
+    }
+    auto is_call(ZydisDisassembledInstruction* instr) -> bool
+    {
+        switch (instr->info.mnemonic)
+        {
+        case ZYDIS_MNEMONIC_CALL:
+            return ZYAN_TRUE;
+        default:
+            break;
+        }
+        return ZYAN_FALSE;
+    }
+
+    bool is_selector(ZydisDisassembledInstruction* instr)
+    {
+        switch (instr->operands->reg.value)
+        {
+        case ZYDIS_REGISTER_SS:
+        case ZYDIS_REGISTER_GS:
+        case ZYDIS_REGISTER_FS:
+        case ZYDIS_REGISTER_DS:
+        case ZYDIS_REGISTER_ES:
+        case ZYDIS_REGISTER_CS:
+            return ZYAN_TRUE;
+        default:
+            break;
+        }
+        return ZYAN_FALSE;
+    }
+    ZyanU64 get_absolute_address(ZydisDisassembledInstruction* instruction, CHAR* runtime_address)
+    {
+
+        ZyanU64 destination = 0ULL;
+
+        for (UINT i = NULL; i < instruction->info.operand_count; i++)
+        {
+            if ((instruction->operands[i].type == ZYDIS_OPERAND_TYPE_IMMEDIATE && instruction->operands[i].imm.is_relative == TRUE) || instruction->operands[i].type == ZYDIS_OPERAND_TYPE_MEMORY)
+            {
+                ZydisCalcAbsoluteAddress(&instruction->info, &instruction->operands[i], reinterpret_cast<ZyanU64>(runtime_address), &destination);
+                break;
+            }
+
+            if (instruction->operands[i].type == ZYDIS_OPERAND_TYPE_IMMEDIATE && instruction->operands[i].imm.is_relative == FALSE)
+            {
+                destination = instruction->operands[i].imm.value.u;
+                break;
+            }
+        }
+
+        return destination;
+    }
+
+    ZyanU64 get_absolute_address(ZydisDisassembledInstruction* instruction, uint8_t* runtime_address)
+    {
+
+        ZyanU64 destination = 0ULL;
+
+        for (UINT i = NULL; i < instruction->info.operand_count; i++)
+        {
+            if ((instruction->operands[i].type == ZYDIS_OPERAND_TYPE_IMMEDIATE && instruction->operands[i].imm.is_relative == TRUE) || instruction->operands[i].type == ZYDIS_OPERAND_TYPE_MEMORY)
+            {
+                ZydisCalcAbsoluteAddress(&instruction->info, &instruction->operands[i], reinterpret_cast<ZyanU64>(runtime_address), &destination);
+                break;
+            }
+
+            if (instruction->operands[i].type == ZYDIS_OPERAND_TYPE_IMMEDIATE && instruction->operands[i].imm.is_relative == FALSE)
+            {
+                destination = instruction->operands[i].imm.value.u;
+                break;
+            }
+        }
+
+        return destination;
+    }
+
+}
+
+#endif 
+```
+
+`vmp_imp_attack/emul_code.h`:
+
+```h
+#ifndef EMUL_CODE
+#define EMUL_CODE 1
+#define EMUL_IMP_VMP 150
+#define EMUL_IMP_THEMIDA 250
+#include "struct.h"
+
+#include  "unicore_util.h"
+
+#define ALIGN_DOWN(length, alig_size) \
+    ((ULONG_PTR)(length) & ~(alig_size - 1))
+
+#define ALIGN_UP(length, alig_size) \
+    (ALIGN_DOWN(((ULONG_PTR)(length) + alig_size - 1), alig_size))
+
+
+namespace emul_code
+{
+    NO_INLINE auto prutforce_command(PIMP_EMUL_INFO emul_info, size_t crypted_value, size_t reg_rva, size_t reg_base) -> BOOLEAN
+    {
+        uint32_t id_command_xor = INT_MAX;
+        TYPE_OBF_COMMAND command_manual[] = {obf_sub, obf_xor, obf_and, obf_xor};
+        for (size_t i = NULL; i < emul_info->count_command; i++)
+        {
+            if (emul_info->command[i].type == obf_xor && (emul_info->command[i].reg_value ^ emul_info->command[i].imm) == emul_info->imm_dump[2])
+            {
+                emul_info->imm_dump[1] = emul_info->command[i].imm;
+                id_command_xor = i;
+                emul_info->imm_dump[NULL] =  (uint32_t)crypted_value - (uint32_t)emul_info->command[i].reg_value;
+                //printf("crypted_value ->\t%p\n", crypted_value);
+                //printf("xor key ->\t%p\n", emul_info->imm_dump[1]);
+                //printf("sub key ->\t%p\n", emul_info->imm_dump[NULL]);
+                //printf("1 ->\t%p\n", (((crypted_value >> 0x20) ^ emul_info->imm_dump[3]) << 0x20) == reg_base);
+                //printf("2 ->\t%p\n", (((crypted_value - emul_info->imm_dump[NULL]) ^ emul_info->imm_dump[1]) & UINT_MAX) == reg_rva);
+
+                if (
+                    (((crypted_value >> 0x20) ^ emul_info->imm_dump[3]) << 0x20) == reg_base &&
+                    (((crypted_value - emul_info->imm_dump[NULL]) ^ emul_info->imm_dump[1]) & UINT_MAX) == reg_rva
+                    )
+                { 
+
+                    emul_info->obf_imp_info->command[NULL].imm = emul_info->imm_dump[NULL];
+                    emul_info->obf_imp_info->command[NULL].type = obf_sub;
+
+                    emul_info->obf_imp_info->command[1].imm = emul_info->imm_dump[1];
+                    emul_info->obf_imp_info->command[1].type = obf_xor;
+
+                    emul_info->obf_imp_info->command[2].imm = emul_info->imm_dump[3];
+                    emul_info->obf_imp_info->command[2].type = obf_xor;
+
+                    emul_info->obf_imp_info->count_command = 3;
+                    return TRUE;
+                }
+            }
+         }
+        return FALSE;
+    }
+
+    NO_INLINE auto get_imp_name(proc_info* proc_inform, uint8_t* addr, WCHAR** mod_name, CHAR** imp_name) -> BOOLEAN
+    {
+        uint32_t api_rva = NULL;
+
+        PIMAGE_DOS_HEADER dos_head = NULL;
+        PIMAGE_NT_HEADERS nt_head = NULL;
+        PIMAGE_EXPORT_DIRECTORY export_dir = NULL;
+
+        for (size_t i = NULL; i < proc_inform->mod_list.size(); i++)
+        {
+            if (
+                proc_inform->mod_list[i].orig_addr_mem != proc_inform->orig_addr_mem &&
+                proc_inform->mod_list[i].is_any_export
+                )
+            {
+                if (
+                    addr >= proc_inform->mod_list[i].orig_addr_mem &&
+                    proc_inform->mod_list[i].orig_addr_mem + proc_inform->mod_list[i].coped_size >= addr
+                    )
+                {
+                    api_rva = addr - proc_inform->mod_list[i].orig_addr_mem;
+
+                    if (mod_name)
+                    {
+                        *mod_name = (WCHAR*)proc_inform->mod_list[i].mod_name.c_str();
+                    }
+                    dos_head = reinterpret_cast<PIMAGE_DOS_HEADER>(proc_inform->mod_list[i].coped_mem);
+                    if (dos_head->e_magic == IMAGE_DOS_SIGNATURE)
+                    {
+                        nt_head = reinterpret_cast<PIMAGE_NT_HEADERS>(proc_inform->mod_list[i].coped_mem + dos_head->e_lfanew);
+                        export_dir = reinterpret_cast<PIMAGE_EXPORT_DIRECTORY>(proc_inform->mod_list[i].coped_mem + nt_head->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+                        if (nt_head->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress && export_dir)
+                        {
+                            auto names = (PDWORD)(proc_inform->mod_list[i].coped_mem + export_dir->AddressOfNames);
+                            auto ordinals = (PWORD)(proc_inform->mod_list[i].coped_mem + export_dir->AddressOfNameOrdinals);
+                            auto functions = (PDWORD)(proc_inform->mod_list[i].coped_mem + export_dir->AddressOfFunctions);
+
+                            for (uint32_t j = NULL; j < export_dir->NumberOfFunctions; ++j)
+                            {
+                                if (functions[ordinals[j]] == api_rva)
+                                {
+                                    if (imp_name)
+                                    {
+                                        *imp_name = reinterpret_cast<CHAR*>(proc_inform->mod_list[i].coped_mem) + names[j];
+                                    }
+                                    return TRUE;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return FALSE;
+    }
+
+    NO_INLINE auto unmap_code(uc_engine* uc, std::vector<UC_MAP_CODE>& maped_code) -> VOID
+    {
+        for (size_t i = NULL; i < maped_code.size(); i++)
+        {
+            uc_mem_unmap(uc, maped_code[i].addr, maped_code[i].size_code);
+        }
+        maped_code.clear();
+
+    }
+
+    // callback for tracing instruction
+    NO_INLINE void hook_code(uc_engine* uc, uint64_t address, uint32_t size, void* user_data)
+    {
+        uc_err err;
+        uint64_t r_reg[2] = { NULL };
+        uint64_t r_rsp = NULL;
+
+        size_t vip_cur_pointer = NULL;
+        size_t imp_addr_pos = NULL;
+        size_t key_crypt = NULL;
+        size_t index_reg_value = NULL; 
+        size_t reg_value[5] = { NULL };
+        uint8_t  opcode_instr[MAX_LENGHT_INSTR];
+        PIMP_EMUL_INFO emul_info = NULL;
+        WCHAR* mod_name = NULL;
+        CHAR* imp_name = NULL;
+        ZydisDisassembledInstruction dis_instr = { NULL };
+        emul_info = reinterpret_cast<PIMP_EMUL_INFO>(user_data);
+
+        emul_info->emul_count++;
+
+
+        err = uc_reg_read(uc, REG_VIP, &vip_cur_pointer);
+        memset(&opcode_instr, NULL, sizeof(opcode_instr));
+
+        if (err == UC_ERR_OK && vip_cur_pointer && uc_mem_read(uc, vip_cur_pointer, opcode_instr, sizeof(opcode_instr)) == UC_ERR_OK)
+        {
+
+            if (ZYAN_SUCCESS(dis::get_dis(&dis_instr, opcode_instr)))
+            { 
+                if (emul_info->proc_information->prot_type == prot_vmp)
+                { 
+                    if (
+                        dis_instr.info.mnemonic == ZYDIS_MNEMONIC_LEA &&
+                        dis_instr.info.operand_count_visible == 2 &&
+                        dis_instr.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                        dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_MEMORY &&
+                        (
+                            dis_instr.operands[NULL].reg.value == dis_instr.operands[1].mem.base ||
+                            dis_instr.operands[NULL].reg.value == dis_instr.operands[1].mem.index
+                            )
+                        )
+                    {
+
+                        unicore_util::read_reg(uc, &dis_instr.operands[1].mem.base, &imp_addr_pos);
+                        //printf("reg value ->\t%p\n", imp_addr_pos);
+
+                        if (dis_instr.operands[1].mem.index != ZYDIS_REGISTER_NONE)
+                        {
+                            unicore_util::read_reg(uc, &dis_instr.operands[1].mem.index, &index_reg_value);
+                            // printf("reg value 2 ->\t%p\n", index_reg_value);
+                             //printf("scale value ->\t%p\n", dis_instr.operands[1].mem.scale);
+
+                            if (dis_instr.operands[1].mem.scale)
+                            {
+                                index_reg_value = index_reg_value * dis_instr.operands[1].mem.scale;
+                            }
+                            key_crypt = index_reg_value;
+                            imp_addr_pos = imp_addr_pos + index_reg_value;
+                        }
+                        if (dis_instr.operands[1].mem.disp.has_displacement)
+                        {
+                            key_crypt += dis_instr.operands[1].mem.disp.value;
+                            imp_addr_pos += dis_instr.operands[1].mem.disp.value;
+                        }
+                        if (get_imp_name(emul_info->proc_information, reinterpret_cast<uint8_t*>(imp_addr_pos), &mod_name, &imp_name))
+                        {
+                            emul_info->obf_imp_info->is_get_imp = TRUE;
+                            emul_info->obf_imp_info->mod_name = mod_name;
+                            emul_info->obf_imp_info->imp_name = imp_name;
+                            emul_info->obf_imp_info->count_command++;
+                            emul_info->obf_imp_info->command[NULL].type = obf_lea;
+                            emul_info->obf_imp_info->command[NULL].imm = key_crypt;
+
+                            emul_info->obf_imp_info->imp_obf_ptr_rva = emul_info->obf_imp_info->imp_obf_ptr_addr - emul_info->cur_mod_addr;
+                            uc_emu_stop(uc);
+                        }
+                    }
+                }
+
+                if (emul_info->proc_information->prot_type == prot_themida)
+                {
+#ifndef _WIN64
+                    if (
+                        (
+                            dis_instr.info.mnemonic == ZYDIS_MNEMONIC_ADD ||
+                            dis_instr.info.mnemonic == ZYDIS_MNEMONIC_SUB
+                            )
+                        &&
+                        dis_instr.info.operand_count_visible == 2 &&
+                        dis_instr.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                        (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE ||
+                            dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER
+                            )
+                        )
+                    {
+                        if (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER)
+                        {
+                            unicore_util::read_reg(uc, &dis_instr.operands[1].reg.value, &reg_value[1]);
+                        }
+                        else if (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE)
+                        {
+                            reg_value[1] = dis_instr.operands[1].imm.value.u;
+                        }
+                        if (
+                            dis_instr.operands[NULL].reg.value != ZYDIS_REGISTER_RSP &&
+                            dis_instr.operands[NULL].reg.value != ZYDIS_REGISTER_ESP
+                            )
+                        {
+                            unicore_util::read_reg(uc, &dis_instr.operands[NULL].reg.value, &reg_value[NULL]);
+
+                            emul_info->command[emul_info->count_command].imm = reg_value[1];
+                            emul_info->command[emul_info->count_command].reg_value = reg_value[NULL];
+
+                            if (dis_instr.info.mnemonic == ZYDIS_MNEMONIC_ADD)
+                            {
+                                emul_info->command[emul_info->count_command].type = obf_add;
+                            }
+                            else if (dis_instr.info.mnemonic == ZYDIS_MNEMONIC_SUB)
+                            {
+                                emul_info->command[emul_info->count_command].type = obf_sub;
+                            }
+                            emul_info->count_command++;
+                        }
+                    }
+
+                    if (
+                        dis_instr.info.mnemonic == ZYDIS_MNEMONIC_XOR &&
+                        dis_instr.info.operand_count_visible == 2 &&
+                        dis_instr.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                        (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE ||
+                            dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER
+                            )
+                        )
+                    {
+                        if (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER)
+                        {
+                            unicore_util::read_reg(uc, &dis_instr.operands[1].reg.value, &reg_value[1]);
+                        }
+                        else if (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE)
+                        {
+                            reg_value[1] = dis_instr.operands[1].imm.value.u;
+                        }
+                        unicore_util::read_reg(uc, &dis_instr.operands[NULL].reg.value, &reg_value[NULL]);
+
+                        imp_addr_pos = reg_value[NULL] ^ reg_value[1];
+
+                        if (get_imp_name(emul_info->proc_information, reinterpret_cast<uint8_t*>(imp_addr_pos), &mod_name, &imp_name))
+                        {
+                            emul_info->obf_imp_info->is_get_imp = TRUE;
+                            emul_info->obf_imp_info->mod_name = mod_name;
+                            emul_info->obf_imp_info->imp_name = imp_name;
+
+                            uc_mem_read(uc, emul_info->obf_imp_info->imp_obf_ptr_addr, &reg_value[2], sizeof(reg_value[2]));
+                            reg_value[3] = reg_value[2] - reg_value[NULL];//get lazy sub key
+
+                            emul_info->obf_imp_info->command[NULL].imm = reg_value[3];
+                            emul_info->obf_imp_info->command[NULL].type = obf_sub;
+                            emul_info->obf_imp_info->count_command++;
+
+                            emul_info->obf_imp_info->command[1].imm = reg_value[1];
+                            emul_info->obf_imp_info->command[1].type = obf_xor;
+                            emul_info->obf_imp_info->count_command++;
+
+                            emul_info->obf_imp_info->imp_obf_ptr_rva = emul_info->obf_imp_info->imp_obf_ptr_addr - emul_info->cur_mod_addr;
+                            uc_emu_stop(uc);
+                        }
+                    }
+#else
+  
+                    if (
+                        dis_instr.info.mnemonic == ZYDIS_MNEMONIC_SHR &&
+                        dis_instr.info.operand_count_visible == 2 &&
+                        dis_instr.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                        dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE &&
+                        dis_instr.operands[1].imm.value.u == 0x20 &&
+                        emul_info->imm_dump[3] == NULL
+                        )
+                    {
+                        unicore_util::read_reg(uc, &dis_instr.operands[NULL].reg.value, &reg_value[NULL]);
+                        
+                        uc_mem_read(uc, emul_info->obf_imp_info->imp_obf_ptr_addr, &reg_value[1], sizeof(reg_value[1]));
+                        if (reg_value[NULL] == reg_value[1])
+                        {
+                            emul_info->count_shr++; 
+                            //active copy xor and stop if execute shl
+                        }
+                    }
+
+                    if (
+                        dis_instr.info.mnemonic == ZYDIS_MNEMONIC_SHL &&
+                        dis_instr.info.operand_count_visible == 2 &&
+                        dis_instr.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                        dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE &&
+                        dis_instr.operands[1].imm.value.u == 0x20 &&
+                        emul_info->count_shr &&
+                        emul_info->imm_dump[3]
+                        )
+                    {
+ 
+                        emul_info->count_shl++;
+                    }
+
+                    if (
+                        (
+                            dis_instr.info.mnemonic == ZYDIS_MNEMONIC_ADD ||
+                            dis_instr.info.mnemonic == ZYDIS_MNEMONIC_SUB
+                            )
+                        &&
+                        dis_instr.info.operand_count_visible == 2 &&
+                        dis_instr.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                        (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE ||
+                            dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER
+                            )
+                        )
+                    {
+                        if (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER)
+                        {
+                            unicore_util::read_reg(uc, &dis_instr.operands[1].reg.value, &reg_value[NULL]);
+                        }
+                        else if (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE)
+                        {
+                            reg_value[NULL] = dis_instr.operands[1].imm.value.u;
+                        }
+                        if (
+                            dis_instr.operands[NULL].reg.value != ZYDIS_REGISTER_RSP &&
+                            dis_instr.operands[NULL].reg.value != ZYDIS_REGISTER_ESP
+                            )
+                        {
+                            unicore_util::read_reg(uc, &dis_instr.operands[NULL].reg.value, &reg_value[1]);
+
+                            emul_info->command[emul_info->count_command].imm = reg_value[NULL];
+                            emul_info->command[emul_info->count_command].reg_value = reg_value[1];
+
+                            if (dis_instr.info.mnemonic == ZYDIS_MNEMONIC_ADD)
+                            {
+                                emul_info->command[emul_info->count_command].type = obf_add;
+                            }
+                            else if (dis_instr.info.mnemonic == ZYDIS_MNEMONIC_SUB)
+                            {
+                                emul_info->command[emul_info->count_command].type = obf_sub;
+                            }
+                            emul_info->count_command++;
+                        }
+                    }
+                    if (
+                        dis_instr.info.mnemonic == ZYDIS_MNEMONIC_XOR &&
+                        dis_instr.info.operand_count_visible == 2 &&
+                        dis_instr.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                        (       dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE ||
+                                dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER
+                        )  
+                        )
+                    {
+                        if (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER)
+                        {
+                            unicore_util::read_reg(uc, &dis_instr.operands[1].reg.value, &reg_value[NULL]);
+                        }                       
+                        else if (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE)
+                        {
+                            reg_value[NULL] = dis_instr.operands[1].imm.value.u;
+                        }
+                        unicore_util::read_reg(uc, &dis_instr.operands[NULL].reg.value, &reg_value[1]);
+
+                         emul_info->command[emul_info->count_command].imm = reg_value[NULL];
+                         emul_info->command[emul_info->count_command].reg_value = reg_value[1];
+                         emul_info->command[emul_info->count_command].type = obf_xor;
+                         emul_info->count_command++;
+
+                        unicore_util::read_reg(uc, &dis_instr.operands[NULL].reg.value, &reg_value[1]);
+
+                        if (emul_info->obf_imp_info->imp_obf_ptr_addr)
+                        {
+                            uc_mem_read(uc, emul_info->obf_imp_info->imp_obf_ptr_addr, &reg_value[2], sizeof(reg_value[2]));
+                        }
+
+                        if (emul_info->count_shr && (reg_value[2] >> 0x20 == reg_value[1]))
+                        {
+                            emul_info->imm_dump[3] = reg_value[NULL];
+                        }
+                                    
+                    }
+
+                    if (
+                        dis_instr.info.mnemonic == ZYDIS_MNEMONIC_AND &&
+                        dis_instr.info.operand_count_visible == 2 &&
+                        dis_instr.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                        (
+                            dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE ||
+                            dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER
+                            )
+                        )
+                    {
+                        unicore_util::read_reg(uc, &dis_instr.operands[NULL].reg.value, &reg_value[NULL]);
+                        if (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER)
+                        {
+                            unicore_util::read_reg(uc, &dis_instr.operands[1].reg.value, &reg_value[1]);
+                        }
+                        else if (dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE)
+                        {
+                            reg_value[1] = dis_instr.operands[1].imm.value.u;
+                        }
+
+                        if (reg_value[1] == UINT_MAX)
+                        {
+                            emul_info->imm_dump[2] = reg_value[NULL];
+                        }
+
+                    }
+
+                    if (
+                        dis_instr.info.mnemonic == ZYDIS_MNEMONIC_OR &&
+                        dis_instr.info.operand_count_visible == 2 &&
+                        dis_instr.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                        dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER
+
+                        )
+                    {
+                        unicore_util::read_reg(uc, &dis_instr.operands[NULL].reg.value, &reg_value[NULL]);
+                        unicore_util::read_reg(uc, &dis_instr.operands[1].reg.value, &reg_value[1]);
+
+                        imp_addr_pos = reg_value[NULL] | reg_value[1];
+
+                        if (get_imp_name(emul_info->proc_information, reinterpret_cast<uint8_t*>(imp_addr_pos), &mod_name, &imp_name))
+                        {
+                            //add brutforce
+                             emul_info->obf_imp_info->is_get_imp = TRUE;
+                            emul_info->obf_imp_info->mod_name = mod_name;
+                            emul_info->obf_imp_info->imp_name = imp_name;
+
+                            uc_mem_read(uc, emul_info->obf_imp_info->imp_obf_ptr_addr, &reg_value[2], sizeof(reg_value[2]));
+
+                            //try get command (if fail -> just don't ret crypt key)
+                            if (prutforce_command(emul_info, reg_value[2], reg_value[NULL], reg_value[1]))
+                            {
+                                // printf("reg_value[2] ->\t%p\n", reg_value[2]);
+                                 //printf("reg_value[2] ->\t%p\n", reg_value[2] >> 0x20);
+                                 //printf("reg_value[2] ->\t%p\n", (reg_value[2] >> 0x20) ^ emul_info->imm_dump[3]);
+                                // printf("shr and shl res ->\t%p\n", (((reg_value[2] >> 0x20) ^ emul_info->imm_dump[3])  << 0x20));
+
+                                 //printf("decrypted imp ->\t %p %p %p\n", reg_value[NULL], reg_value[1], reg_value[NULL] | reg_value[1]);
+                                emul_info->obf_imp_info->imp_obf_ptr_rva = emul_info->obf_imp_info->imp_obf_ptr_addr - emul_info->cur_mod_addr;
+                                uc_emu_stop(uc);
+                            }
+                        }
+                    }
+
+#endif // !_WIN64
+                }
+            }
+        }
+         
+    }
+
+
+    NO_INLINE static void hook_mem64(uc_engine* uc, uc_mem_type type, uint64_t address, uint32_t size, int64_t value, void* user_data)
+    {
+        uc_err err;
+        uint64_t vip_cur_pointer = NULL;
+        uint8_t  opcode_instr[MAX_LENGHT_INSTR];
+        ZydisRegister reg_read_manual = ZYDIS_REGISTER_NONE;
+        ZydisDisassembledInstruction dis_instr = { NULL };
+        PIMP_EMUL_INFO emul_info = NULL;
+
+        emul_info = reinterpret_cast<PIMP_EMUL_INFO>(user_data);
+        
+        if (type == UC_MEM_READ)
+        {
+            if (address >= emul_info->cur_mod_addr && emul_info->cur_mod_addr + emul_info->cur_mod_size > address + size)
+            {
+
+                err = uc_reg_read(uc, REG_VIP, &vip_cur_pointer);
+                memset(&opcode_instr, NULL, sizeof(opcode_instr));
+
+                if (err == UC_ERR_OK && vip_cur_pointer && uc_mem_read(uc, vip_cur_pointer, opcode_instr, sizeof(opcode_instr)) == UC_ERR_OK)
+                {
+                    if (ZYAN_SUCCESS(dis::get_dis(&dis_instr, opcode_instr)))
+                    {
+                        if (emul_info->proc_information->prot_type == prot_vmp)
+                        {
+                            if (
+                                dis_instr.info.mnemonic == ZYDIS_MNEMONIC_MOV &&
+                                dis_instr.info.operand_count_visible == 2 &&
+                                dis_instr.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                                dis_instr.operands[1].type == ZYDIS_OPERAND_TYPE_MEMORY &&
+                                (
+                                    dis_instr.operands[NULL].reg.value == dis_instr.operands[1].mem.base ||
+                                    dis_instr.operands[NULL].reg.value == dis_instr.operands[1].mem.index
+                                    ) &&
+#ifndef _WIN64
+                                    (
+                                        dis_instr.operands[NULL].reg.value != ZYDIS_REGISTER_ESP &&
+                                        dis_instr.operands[1].mem.index != ZYDIS_REGISTER_ESP
+                                    )
+
+#else
+                                (
+                                    dis_instr.operands[NULL].reg.value != ZYDIS_REGISTER_RSP &&
+                                    dis_instr.operands[1].mem.index != ZYDIS_REGISTER_RSP
+                                    )
+#endif // !_WIN64
+                                )
+
+                            {
+#ifndef _WIN64
+                                reg_read_manual = ZYDIS_REGISTER_EIP;
+#else
+                                reg_read_manual = ZYDIS_REGISTER_RIP;
+#endif // !_WIN64
+                                emul_info->obf_imp_info->imp_obf_ptr_addr = address;
+
+                                unicore_util::read_reg(uc, &reg_read_manual, &emul_info->obf_imp_info->imp_obf_read_instr_rva);
+                                emul_info->obf_imp_info->imp_obf_read_instr_rva -= emul_info->cur_mod_addr;
+                            }
+                        }
+
+                        if (emul_info->proc_information->prot_type == prot_themida)
+                        {
+                            if (
+                                dis_instr.info.mnemonic == ZYDIS_MNEMONIC_PUSH &&
+                                dis_instr.info.operand_count_visible == 1 &&
+                                dis_instr.operands[NULL].type == ZYDIS_OPERAND_TYPE_MEMORY)
+                            {
+#ifndef _WIN64
+                                reg_read_manual = ZYDIS_REGISTER_EIP;
+#else
+                                reg_read_manual = ZYDIS_REGISTER_RIP;
+#endif // !_WIN64
+                                emul_info->obf_imp_info->imp_obf_ptr_addr = address;
+
+                                unicore_util::read_reg(uc, &reg_read_manual, &emul_info->obf_imp_info->imp_obf_read_instr_rva);
+                                emul_info->obf_imp_info->imp_obf_read_instr_rva -= emul_info->cur_mod_addr;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    static uc_err emu_start_seh(uc_engine* uc, uint64_t begin, uint64_t until,  uint64_t timeout, size_t count) {
+        __try {
+            return uc_emu_start(uc, begin, until, timeout, count);
+        }
+        __except (1) 
+        {
+            return UC_ERR_EXCEPTION;
+        }
+        return UC_ERR_OK;
+    }
+
+     
+     //re-allocates memory for each import emulation
+    //need fix for address
+    NO_INLINE auto safe_init_emu(proc_info& proc_information,protector_imp_info* obf_info, uint64_t mod_addr, uint32_t emul_count, BOOLEAN is_log = FALSE) -> BOOLEAN
+    {
+        //Add aligment
+        uint32_t prot = NULL;
+        uint32_t size_aligment = NULL;
+        uint64_t addr_emu = NULL;
+        uint64_t r_rsp_addr = ALIGN_UP(reinterpret_cast<uint64_t>(reinterpret_cast<CHAR*>(proc_information.orig_addr_mem) - (0x1000 * 20)), 0x1000);
+        uint64_t r_rsp = NULL;
+        uint64_t vip_exit = NULL;
+        PIMAGE_NT_HEADERS nt_headers = NULL;
+        PIMAGE_SECTION_HEADER sec = NULL;
+
+        uc_engine* uc;
+        uc_hook trace_read = NULL;
+        uc_hook trace_execute = NULL;
+        uc_err err;
+        IMP_EMUL_INFO emul_info = { NULL };
+        UC_MAP_CODE cur_maped_code = { NULL };
+        std::vector<UC_MAP_CODE> maped_code;
+        
+        addr_emu = obf_info->addr_wrapper_imp - (size_t)proc_information.coped_mem + (size_t)proc_information.orig_addr_mem;
+
+        err = uc_open(UC_ARCH_X86, EMU_MODE, &uc);
+        if (err)
+        {
+            if (is_log)
+            {
+                printf("Failed on uc_open() with error returned: %u\n", err);
+            }
+            return FALSE;
+        }
+
+        nt_headers = reinterpret_cast<IMAGE_NT_HEADERS*>(reinterpret_cast<CHAR*>(mod_addr) + reinterpret_cast<IMAGE_DOS_HEADER*>(mod_addr)->e_lfanew);
+
+        sec = IMAGE_FIRST_SECTION(nt_headers);
+        
+        err = uc_mem_map(uc, (size_t)proc_information.orig_addr_mem, 0x1000, UC_PROT_READ | UC_PROT_WRITE);
+        if (err)
+        {
+            if (is_log)
+            {
+                printf("Failed on uc_mem_map() with error returned: %u\n", err);
+            }
+            uc_close(uc);
+            return FALSE;
+        }
+        cur_maped_code.addr = (size_t)proc_information.orig_addr_mem;
+        cur_maped_code.size_code = ALIGN_UP(nt_headers->OptionalHeader.SizeOfHeaders, nt_headers->OptionalHeader.SectionAlignment);
+        maped_code.push_back(cur_maped_code);
+
+        err = uc_mem_write(uc, (size_t)proc_information.orig_addr_mem, reinterpret_cast<PVOID>(proc_information.coped_mem), nt_headers->OptionalHeader.SizeOfHeaders);
+        if (err != UC_ERR_OK)
+        {
+            if (is_log)
+            {
+                printf("Failed on uc_mem_write() with error returned: %u\n", err);
+
+            }
+            unmap_code(uc, maped_code);
+            uc_close(uc);
+            return FALSE;
+        }
+        
+
+        for (uint16_t i = NULL; i < nt_headers->FileHeader.NumberOfSections; i++)
+        {
+            if (sec[i].Characteristics & IMAGE_SCN_MEM_READ)
+            {
+                prot |= UC_PROT_READ;
+            }
+            if (sec[i].Characteristics & IMAGE_SCN_MEM_WRITE)
+            {
+                prot |= UC_PROT_WRITE;
+            }
+            if (sec[i].Characteristics & IMAGE_SCN_MEM_EXECUTE)
+            {
+                prot |= UC_PROT_EXEC;
+            }
+
+            size_aligment = sec[i].Misc.VirtualSize;
+
+            if (size_aligment % nt_headers->OptionalHeader.SectionAlignment != NULL)
+            {
+                size_aligment = ALIGN_UP(size_aligment, nt_headers->OptionalHeader.SectionAlignment);
+            }
+            err = uc_mem_map(uc, (size_t)proc_information.orig_addr_mem + sec[i].VirtualAddress, size_aligment, prot);
+            if (err != UC_ERR_OK)
+            {
+                if (is_log)
+                {
+                    printf("Failed on uc_mem_map() with error returned: %u\n", err);
+                }
+                unmap_code(uc, maped_code);
+                uc_close(uc);
+
+                return FALSE;
+            }
+
+            cur_maped_code.addr = (size_t)proc_information.orig_addr_mem + sec[i].VirtualAddress;
+            cur_maped_code.size_code = size_aligment;
+            maped_code.push_back(cur_maped_code);
+
+            err = uc_mem_write(uc, (size_t)proc_information.orig_addr_mem + sec[i].VirtualAddress, reinterpret_cast<PVOID>(proc_information.coped_mem + sec[i].VirtualAddress), size_aligment);
+            if (err)
+            {
+                if (is_log)
+                {
+                    printf("Failed on uc_mem_write() with error returned: %u\n", err);
+                }
+                unmap_code(uc, maped_code);
+                uc_close(uc);
+
+                return FALSE;
+            }
+            prot = NULL;
+        }
+         
+        emul_info.is_log = is_log;
+        emul_info.obf_imp_info = obf_info;
+        emul_info.addr_emul_start = addr_emu;
+        emul_info.cur_mod_addr = (size_t)proc_information.orig_addr_mem;
+        emul_info.cur_mod_size = nt_headers->OptionalHeader.SizeOfImage;
+        emul_info.proc_information =  &proc_information;
+        err = uc_hook_add(uc, &trace_read, UC_HOOK_MEM_READ, hook_mem64, &emul_info, 1, 0);
+        if (err != UC_ERR_OK)
+        {
+            if (is_log)
+            {
+                printf("UC_HOOK_MEM_READ bad ->\t%p\n", err);
+
+            }
+            unmap_code(uc, maped_code);
+            uc_close(uc);
+            return FALSE;
+        }
+
+
+        err = uc_hook_add(uc, &trace_execute, UC_HOOK_CODE, hook_code, &emul_info, 1, 0);
+        if (err != UC_ERR_OK)
+        {
+            if (is_log)
+            {
+                printf("UC_HOOK_CODE bad ->\t%p\n", err);
+            }
+            unmap_code(uc, maped_code);
+            uc_close(uc);
+            return FALSE;
+        }
+
+        //re-null emul_info
+        unicore_util::init_reg(uc, r_rsp_addr);
+
+        cur_maped_code.addr = r_rsp_addr;
+        cur_maped_code.size_code = STACK_SIZE;
+
+        maped_code.push_back(cur_maped_code);
+
+        if (obf_info->is_virtulized)
+        {
+            vip_exit = mod_addr;
+            emul_info.vip_exit = vip_exit;
+            err = uc_reg_read(uc, REG_VSP, &r_rsp);
+            if (err != UC_ERR_OK)
+            {
+                if (is_log)
+                {
+                    printf("Failed on uc_reg_read() with error returned: %u\n", err);
+                }
+                unmap_code(uc, maped_code);
+                uc_close(uc);
+                return FALSE;
+            }
+
+            err = uc_mem_write(uc, r_rsp, &vip_exit, sizeof(PVOID));
+
+            if (err != UC_ERR_OK)
+            {
+                if (is_log)
+                {
+                    printf("Failed on uc_reg_read() with error returned: %u\n", err);
+                }
+                unmap_code(uc, maped_code);
+                uc_close(uc);
+                return FALSE;
+            }
+        }
+        else
+        {
+            emul_info.vip_exit = addr_emu;
+        }
+
+        err = emu_start_seh(uc, addr_emu, /*mod_addr + nt_headers->OptionalHeader.SizeOfImage*/ NULL, NULL, emul_count);
+  
+        if (err != UC_ERR_OK)
+        {
+           
+            if (is_log)
+            {
+                printf("uc_emu_start bad ->\t%p\n", err);
+            }
+        }
+        unmap_code(uc, maped_code);
+        uc_close(uc);
+        return err == UC_ERR_OK;
+
+    }
+}
+    
+#endif // !EMUL_CODE
+
+```
+
+`vmp_imp_attack/get_protector.h`:
+
+```h
+#ifndef GET_PROTECTOR_TYPE
+#define GET_PROTECTOR_TYPE 1
+#include "struct.h"
+namespace prot_type_use
+{
+
+    //add more check
+    auto check_vmp_sec(proc_info& proc_inform) -> BOOLEAN
+    {
+        BOOLEAN is_vmp = FALSE;
+        uint32_t sec_execute_count = NULL;
+
+        //.text, .vmp0, vmp1
+        for (size_t sec_id = NULL; sec_id < proc_inform.sec_list.size(); sec_id++)
+        {
+            if (
+                (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_READ) &&
+                (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_EXECUTE)
+                )
+            {
+                sec_execute_count++;
+            }
+        }
+
+        if (sec_execute_count >= 3)
+        {
+            for (size_t sec_id = NULL; sec_id < proc_inform.sec_list.size(); sec_id++)
+            {
+                //ep addr sec is execute and read
+                if (
+                    sec_id &&
+                    (
+                        proc_inform.ep >= proc_inform.sec_list[sec_id].rva &&
+                        proc_inform.sec_list[sec_id].rva + proc_inform.sec_list[sec_id].virt_size > proc_inform.ep
+                        )
+                    &&
+                    (
+                        (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_READ) &&
+                        (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_EXECUTE)
+                        )
+                    )
+                {
+                    if (
+                        sec_id >= 1 &&
+                        (proc_inform.sec_list[sec_id - 1].characteris & IMAGE_SCN_MEM_READ) &&
+                        (proc_inform.sec_list[sec_id - 1].characteris & IMAGE_SCN_MEM_EXECUTE)
+                        )
+                    {
+                        //possible vmp 3.x - 3.5
+                        //add pattern vmp_get_proc_addree and check imp:LoadLibraryA GetModuleHandleA GetProcAddress
+                        proc_inform.sec_list[sec_id].sec_type_info = sec_type_prot;
+                        proc_inform.sec_list[sec_id - 1].sec_type_info = sec_type_prot;
+                        is_vmp = TRUE;
+                        break;
+                    }
+
+                    if (
+                        sec_id >= 2 &&
+                        (proc_inform.sec_list[sec_id - 1].characteris & IMAGE_SCN_MEM_READ) &&
+                        !(proc_inform.sec_list[sec_id - 1].characteris & IMAGE_SCN_MEM_EXECUTE) &&
+                        (proc_inform.sec_list[sec_id - 2].characteris & IMAGE_SCN_MEM_READ) &&
+                        (proc_inform.sec_list[sec_id - 2].characteris & IMAGE_SCN_MEM_EXECUTE)
+                        )
+                    {
+                        //possible vmp 3.6 - 3.10.x
+                         //add pattern anti-vm? vmp_strcmp?
+                        proc_inform.sec_list[sec_id].sec_type_info = sec_type_prot;
+                        proc_inform.sec_list[sec_id - 1].sec_type_info = sec_type_prot;
+                        proc_inform.sec_list[sec_id - 2].sec_type_info = sec_type_prot;
+
+                        is_vmp = TRUE;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (is_vmp)
+        {
+            proc_inform.prot_type = prot_vmp;
+            for (size_t sec_id = NULL; sec_id < proc_inform.sec_list.size(); sec_id++)
+            {
+                if (proc_inform.sec_list[sec_id].sec_type_info != sec_type_prot)
+                {
+                    proc_inform.sec_list[sec_id].sec_type_info = sec_type_prog;
+                }
+
+            }
+        }
+        return is_vmp;
+    }
+
+    auto check_themida_sec(proc_info& proc_inform) -> BOOLEAN
+    {
+        BOOLEAN is_themida = FALSE;
+        uint32_t sec_execute_count = NULL;
+
+        //.text, .vmp0, vmp1
+        for (size_t sec_id = NULL; sec_id < proc_inform.sec_list.size(); sec_id++)
+        {
+            if (
+                (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_READ) &&
+                (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_EXECUTE)
+                )
+            {
+                sec_execute_count++;
+            }
+        }
+
+        if (sec_execute_count >= 2)
+        {
+            for (size_t sec_id = NULL; sec_id < proc_inform.sec_list.size(); sec_id++)
+            {
+                //ep addr sec is execute and read
+                if (
+                    sec_id &&
+                    (
+                        proc_inform.ep >= proc_inform.sec_list[sec_id].rva &&
+                        proc_inform.sec_list[sec_id].rva + proc_inform.sec_list[sec_id].virt_size > proc_inform.ep
+                    )
+                    )
+                {
+                    if (
+                        sec_id >= 1 &&
+                        (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_READ) &&
+                        (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_WRITE) &&
+                        (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_EXECUTE) &&
+                        (proc_inform.sec_list[sec_id-1].characteris & IMAGE_SCN_MEM_READ)&&
+                        (proc_inform.sec_list[sec_id-1].characteris & IMAGE_SCN_MEM_WRITE)
+                        )
+                    {
+						proc_inform.sec_list[sec_id].sec_type_info = sec_type_prot;
+                        proc_inform.sec_list[sec_id - 1].sec_type_info = sec_type_prot;
+                        is_themida = TRUE;
+                    }
+                    else if (
+                        sec_id >= 2 &&
+                        (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_READ) &&
+                        !(proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_WRITE) &&
+                        (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_EXECUTE)
+                        )
+                    {
+                        if (
+                            (proc_inform.sec_list[sec_id-1].characteris & IMAGE_SCN_MEM_READ) &&
+                            (proc_inform.sec_list[sec_id-1].characteris & IMAGE_SCN_MEM_WRITE) &&
+                            (proc_inform.sec_list[sec_id-1].characteris & IMAGE_SCN_MEM_EXECUTE) &&
+                            (proc_inform.sec_list[sec_id-2].characteris & IMAGE_SCN_MEM_EXECUTE) &&
+                            !(proc_inform.sec_list[sec_id - 2].characteris & IMAGE_SCN_MEM_READ) &&
+                            (proc_inform.sec_list[sec_id - 2].characteris & IMAGE_SCN_MEM_WRITE)
+                            )
+                        {
+							proc_inform.sec_list[sec_id].sec_type_info = sec_type_prot;
+							proc_inform.sec_list[sec_id - 1].sec_type_info = sec_type_prot;
+							proc_inform.sec_list[sec_id - 2].sec_type_info = sec_type_prot;
+                            is_themida = TRUE;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (is_themida)
+        {
+            proc_inform.prot_type = prot_themida;
+            for (size_t sec_id = NULL; sec_id < proc_inform.sec_list.size(); sec_id++)
+            {
+                if (proc_inform.sec_list[sec_id].sec_type_info != sec_type_prot)
+                {
+                    proc_inform.sec_list[sec_id].sec_type_info = sec_type_prog;
+                }
+
+            }
+        }
+        return is_themida;
+    }
+}
+#endif // !GET_PROTECTOR_TYPE
+
+```
+
+`vmp_imp_attack/import_scan.h`:
+
+```h
+#ifndef IMPORT_SCAN
+#define IMPORT_SCAN 1
+#include "struct.h"
+#include "disassembly_util.h"
+#include "emul_code.h"
+#define OPCODE_NOP 0x90
+
+#define OPCODE_PUSH_IMM 0x68
+
+#define OPCODE_IMM_CALL 0xE8
+#define OPCODE_IMM_JMP 0xE9
+#define OPCODE_PTR_CALL 0x15FF
+#define OPCODE_PTR_JMP 0x25FF
+
+#define DIS_IMP_VMP_WRAPPER_OLD 50
+#define DIS_IMP_VMP_WRAPPER_NEXT_CALL 120
+#define DIS_IMP_VMP_WRAPPER_CALL 120
+#define DIS_IMP_THEMIDA_WRAPPER_CALL 350
+
+#define MAX_JCC_EXECUTE 7
+#define MAX_RECURS_EXECUTE 7
+
+namespace imp_scan
+{
+    NO_INLINE auto is_push_eflag(uint8_t* addr) -> BOOLEAN
+    {
+#ifndef _WIN64
+        return *addr == 0x9C;   //pushfd
+#else
+        return *addr == 0x9C;   //pushfq
+#endif // !_WIN64
+    }
+
+  
+    NO_INLINE auto is_vsp_change(uint8_t* addr) -> BOOLEAN
+    {
+#ifndef _WIN64
+        return
+         (
+            (*addr == 0x83 || *addr == 0x81) && *(addr + 1) == 0xEC  // sub esp, imm
+          )
+           ||
+          (
+               *addr == 0x8D && (*(addr + 1) == 0x64 || *(addr + 1) == 0xA4) && *(addr +2) == 0x24 // lea esp,[esp+imm]
+          );
+#else
+        return
+        (
+             *addr == 0x48 && (*(addr + 1) == 0x83 || *(addr + 1) == 0x81) && *(addr + 2) == 0xEC // sub rsp, imm
+         ) 
+        ||
+         (
+             *addr == 0x48 && *(addr + 1) == 0x8D && ( *(addr + 2) == 0x64 || *(addr + 2) == 0xA4) && *(addr + 3) == 0x24 // lea rsp,[rsp+imm]
+         );
+
+#endif // !_WIN64
+
+    }
+
+
+    NO_INLINE auto is_push(uint8_t* addr) -> BOOLEAN
+    {
+
+#ifndef _WIN64
+        return
+            (
+                *addr == 0x50 ||							//push eax
+                *addr == 0x53 ||							//push ebx
+                *addr == 0x51 ||							//push ecx
+                *addr == 0x52 ||							//push edx
+                *addr == 0x55 ||							//push ebp
+                *addr == 0x56 ||							//push esi
+                *addr == 0x57								//push edi
+                );
+#else
+        return
+            (
+                *addr == 0x50 ||							//push rax
+                *addr == 0x53 ||							//push rbx
+                *addr == 0x51 ||							//push rcx
+                *addr == 0x52 ||							//push rdx
+                *addr == 0x55 ||							//push rbp
+                *addr == 0x56 ||							//push rsi
+                *addr == 0x57 ||							//push rdi
+                (*addr == 0x41 && *(addr + 1) == 0x50) ||	//push r8
+                (*addr == 0x41 && *(addr + 1) == 0x51) ||	//push r9
+                (*addr == 0x41 && *(addr + 1) == 0x52) ||	//push r10
+                (*addr == 0x41 && *(addr + 1) == 0x53) ||	//push r11
+                (*addr == 0x41 && *(addr + 1) == 0x54) ||	//push r12
+                (*addr == 0x41 && *(addr + 1) == 0x55) ||	//push r13
+                (*addr == 0x41 && *(addr + 1) == 0x56) ||	//push r14
+                (*addr == 0x41 && *(addr + 1) == 0x57)		//push r15
+                );
+#endif // !_WIN64
+    }
+
+
+    NO_INLINE auto is_pop(uint8_t* addr) -> BOOLEAN
+    {
+
+#ifndef _WIN64
+        return
+            (
+                *addr == 0x58 ||							//pop eax
+                *addr == 0x5B ||							//pop ebx
+                *addr == 0x59 ||							//pop ecx
+                *addr == 0x5A ||							//pop edx
+                *addr == 0x5D ||							//pop ebp
+                *addr == 0x5E ||							//pop esi
+                *addr == 0x5F 								//pop edi
+                );
+#else
+
+        return
+            (
+                *addr == 0x58 ||							//pop rax
+                *addr == 0x5B ||							//pop rbx
+                *addr == 0x59 ||							//pop rcx
+                *addr == 0x5A ||							//pop rdx
+                *addr == 0x5D ||							//pop rbp
+                *addr == 0x5E ||							//pop rsi
+                *addr == 0x5F ||							//pop rdi
+                (*addr == 0x41 && *(addr + 1) == 0x58) ||	//pop r8
+                (*addr == 0x41 && *(addr + 1) == 0x59) ||	//pop r9
+                (*addr == 0x41 && *(addr + 1) == 0x5A) ||	//pop r10
+                (*addr == 0x41 && *(addr + 1) == 0x5B) ||	//pop r11
+                (*addr == 0x41 && *(addr + 1) == 0x5C) ||	//pop r12
+                (*addr == 0x41 && *(addr + 1) == 0x5D) ||	//pop r13
+                (*addr == 0x41 && *(addr + 1) == 0x5E) ||	//pop r14
+                (*addr == 0x41 && *(addr + 1) == 0x5F)		//pop r15
+                );
+#endif // !_WIN64
+
+    }
+
+    NO_INLINE auto is_insode_module(proc_info& proc_inform, uint8_t* addr) -> BOOLEAN
+    {
+#ifndef _WIN64
+        //reloce
+        if (
+            addr >= proc_inform.orig_addr_mem &&
+            proc_inform.orig_addr_mem + proc_inform.coped_size > addr
+            )
+        {
+            return TRUE;
+        }
+#else
+        if (
+            addr >= proc_inform.coped_mem &&
+            proc_inform.coped_mem + proc_inform.coped_size > addr
+            )
+        {
+            return TRUE;
+        }
+#endif // !_WIN64
+
+ 
+        return FALSE;
+
+    }
+
+    NO_INLINE auto is_inside_sec(uint8_t* addr,PVOID mod_addr, SEC_INFO* sections) -> BOOLEAN
+    { 
+        uint32_t rva_addr = NULL;
+        rva_addr = addr - mod_addr;
+        if (
+            sections->rva <= rva_addr &&
+            sections->rva + sections->virt_size > rva_addr
+            )
+        {
+            return TRUE;
+        }
+        return FALSE;
+    }
+
+    NO_INLINE auto inside_sec_prot(proc_info& proc_inform, uint8_t* addr) -> BOOLEAN
+    {
+        size_t addr_rva = NULL;
+        if (
+            addr >= proc_inform.coped_mem &&
+            proc_inform.coped_mem + proc_inform.coped_size > addr
+            )
+        {
+            addr_rva = addr - proc_inform.coped_mem;
+            for (size_t i = NULL; i < proc_inform.sec_list.size(); i++)
+            {
+                if (proc_inform.sec_list[i].sec_type_info == sec_type_prot)
+                {
+                    if (
+                        addr_rva >= proc_inform.sec_list[i].rva &&
+                        proc_inform.sec_list[i].rva + proc_inform.sec_list[i].virt_size > addr_rva
+                        )
+                    {
+                        return TRUE;
+                    }
+                }
+            }
+        }
+        return FALSE;
+    }
+
+   
+
+    NO_INLINE auto read_lazy(proc_info& proc_inform, uint8_t* addr) -> size_t
+    {
+        size_t read_res = NULL;
+        if (
+            addr >= proc_inform.orig_addr_mem &&
+            proc_inform.orig_addr_mem + proc_inform.coped_size > addr
+            )
+        {
+            read_res = *reinterpret_cast<size_t*>(addr - proc_inform.orig_addr_mem + proc_inform.coped_mem);
+        }
+        return read_res;
+    }
+     
+    NO_INLINE auto transform_addr_mod(proc_info& proc_inform, uint8_t* addr) -> uint8_t*
+    {
+        uint8_t* addr_res = NULL;
+        if (
+            addr >= proc_inform.orig_addr_mem &&
+            proc_inform.orig_addr_mem + proc_inform.coped_size > addr
+            )
+        {
+            addr_res = addr - proc_inform.orig_addr_mem + proc_inform.coped_mem;
+        }
+        return addr_res;
+    }
+
+    NO_INLINE auto get_imp_name(proc_info& proc_inform, uint8_t* addr, WCHAR** mod_name, CHAR** imp_name) -> BOOLEAN
+    {
+        uint32_t api_rva = NULL;
+       
+        PIMAGE_DOS_HEADER dos_head = NULL;
+        PIMAGE_NT_HEADERS nt_head = NULL;
+        PIMAGE_EXPORT_DIRECTORY export_dir = NULL;
+        
+        for (size_t i = NULL; i < proc_inform.mod_list.size(); i++)
+        {
+            if (
+                proc_inform.mod_list[i].orig_addr_mem != proc_inform.orig_addr_mem &&
+                proc_inform.mod_list[i].is_any_export
+                )
+            {
+                if (
+                    addr >=proc_inform.mod_list[i].orig_addr_mem &&
+                   proc_inform.mod_list[i].orig_addr_mem + proc_inform.mod_list[i].coped_size >= addr
+                    )
+                {
+                    api_rva = addr - proc_inform.mod_list[i].orig_addr_mem;
+
+                    if (mod_name)
+                    {
+                        *mod_name = (WCHAR *)proc_inform.mod_list[i].mod_name.c_str();
+                    }
+                    dos_head = reinterpret_cast<PIMAGE_DOS_HEADER>(proc_inform.mod_list[i].coped_mem);
+                    if (dos_head->e_magic == IMAGE_DOS_SIGNATURE)
+                    {
+                        nt_head = reinterpret_cast<PIMAGE_NT_HEADERS>(proc_inform.mod_list[i].coped_mem + dos_head->e_lfanew);
+                        export_dir = reinterpret_cast<PIMAGE_EXPORT_DIRECTORY>(proc_inform.mod_list[i].coped_mem + nt_head->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+                        if (nt_head->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress && export_dir)
+                        {
+                            auto names = (PDWORD)(proc_inform.mod_list[i].coped_mem + export_dir->AddressOfNames);
+                            auto ordinals = (PWORD)(proc_inform.mod_list[i].coped_mem + export_dir->AddressOfNameOrdinals);
+                            auto functions = (PDWORD)(proc_inform.mod_list[i].coped_mem + export_dir->AddressOfFunctions);
+
+                            for (uint32_t j = NULL; j < export_dir->NumberOfFunctions; ++j)
+                            {
+                                if (functions[ordinals[j]] == api_rva)
+                                {
+                                    if (imp_name)
+                                    {
+                                        *imp_name = reinterpret_cast<CHAR*>(proc_inform.mod_list[i].coped_mem)+ names[j];
+                                    }
+                                    return TRUE;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return FALSE;
+    }
+     
+    NO_INLINE auto is_exist_imp(std::vector<protector_imp_info>& imp_list, protector_imp_info* cur_imp) -> BOOLEAN
+    {
+        for (size_t i = NULL; i < imp_list.size(); i++)
+        {
+            if (
+                imp_list[i].imp_obf_ptr_rva == cur_imp->imp_obf_ptr_rva &&
+                !imp_list[i].imp_name.compare(cur_imp->imp_name) &&
+                !imp_list[i].mod_name.compare(cur_imp->mod_name)
+                )
+            {
+                return TRUE;
+            }
+        }
+        return FALSE;
+    }
+
+
+    //always exist_push_eflag = FALSE
+    NO_INLINE auto get_wrapper_themida(proc_info& proc_inform, uint8_t* addr, uint32_t cur_sec_id, THEMIDA_IMP_WRAPPER_DIS* wrapper_info = NULL, BOOLEAN is_virtualized = FALSE) -> BOOLEAN
+    {
+        // just ret lazy + just jcc + ret
+        BOOLEAN ignore_add_lenght = FALSE;
+        CHAR* imp_name = NULL;
+        WCHAR* mod_name = NULL;
+        uint8_t* pos_addr = NULL; 
+        THEMIDA_IMP_WRAPPER_DIS cur_next_wrapper_info = { NULL };
+        ZydisDisassembledInstruction dis_code = { NULL };
+
+
+        for (size_t dis_count = NULL; dis_count < DIS_IMP_THEMIDA_WRAPPER_CALL && wrapper_info->count_dis < DIS_IMP_THEMIDA_WRAPPER_CALL; dis_count++)
+        {
+            if (ZYAN_SUCCESS(dis::get_dis(&dis_code, addr)))
+            {
+                if (is_virtualized)
+                {
+                    if (!is_inside_sec(addr, proc_inform.coped_mem, &proc_inform.sec_list[cur_sec_id]))
+                    {
+                        return FALSE;
+                    }
+                }
+                else if (wrapper_info->count_dis >= 1) //ignore first call
+                { 
+                    if (!inside_sec_prot(proc_inform, addr))
+                    {
+                        return FALSE;
+                    }
+                }
+                  
+                //no exist push eflag
+                if ( 
+#ifndef _WIN64
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_PUSHFD
+#else
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_PUSHFQ
+#endif // !_WIN64
+                    )
+                {
+                    return FALSE;
+                }
+
+                if (
+                    dis_code.info.operand_count_visible == 1 &&
+                    dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_MEMORY &&
+                    dis_code.operands[NULL].mem.base != ZYDIS_REGISTER_NONE &&
+                    dis_code.operands[NULL].mem.segment != ZYDIS_REGISTER_NONE &&
+                    !dis_code.operands[NULL].mem.disp.has_displacement
+                    )
+                {
+                    wrapper_info->count_push_mem++;
+                }
+
+                if (
+                    dis_code.info.operand_count_visible == 2 &&
+                    dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                    (dis_code.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE ||
+                        dis_code.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER
+                        )
+                    )
+                {
+                    if (dis_code.info.mnemonic == ZYDIS_MNEMONIC_ADD)
+                    {
+                        wrapper_info->count_add++;
+                    }
+                    if (dis_code.info.mnemonic == ZYDIS_MNEMONIC_SUB)
+                    {
+                        wrapper_info->count_sub++;
+                    } 
+                    if (dis_code.info.mnemonic == ZYDIS_MNEMONIC_XOR)
+                    {
+                        wrapper_info->count_xor++;
+                    }   
+                    if (dis_code.info.mnemonic == ZYDIS_MNEMONIC_AND)
+                    {
+                        wrapper_info->count_and++;
+                    }
+                    if (
+                        dis_code.info.mnemonic == ZYDIS_MNEMONIC_OR && 
+                        dis_code.operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER
+                        )
+                    {
+                        wrapper_info->count_or++;
+                    }
+                }
+
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_RDTSC ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_CPUID ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_SYSCALL ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_SYSENTER
+                    )
+                {
+                    return FALSE;
+                }
+                 
+
+                if (dis::is_jññ(&dis_code))
+                {
+                    wrapper_info->count_jcc++;
+                    //we can ignore correct path code
+                    if (wrapper_info->count_jcc >= 6) // Themida 3.0.x.x add call with fake api and some jcc
+                    {
+                        return FALSE;
+                    }
+                 }
+ 
+
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_RET
+                    )
+                {
+
+#ifndef _WIN64
+                    if (
+                            wrapper_info->count_push_mem && //read crypted pointer
+                            (wrapper_info->count_add || wrapper_info->count_sub) && //fist decrypt crypted pointer
+                            wrapper_info->count_xor // final decrypt crypted pointer
+                        )
+                    {
+                        return TRUE;
+                    }
+#else 
+                    if (
+                        wrapper_info->count_push_mem &&
+                        (wrapper_info->count_add || wrapper_info->count_sub) && //decrypt value
+                        wrapper_info->count_xor >= 2 && //xor for decrypt rva & base
+                        wrapper_info->count_and && //and for rva
+                        wrapper_info->count_or //calc res addr
+                        )
+                    {
+                        return TRUE;
+                    }
+#endif // !_WIN64
+                    return FALSE;
+                }
+
+                //if add get rva need check rva
+                if (
+                    !wrapper_info->count_dis &&
+                    !is_virtualized &&
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_CALL &&
+                    dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_MEMORY
+                    )
+                {
+
+                    if (
+#ifndef _WIN64
+                        dis_code.operands[NULL].mem.base == ZYDIS_REGISTER_NONE &&
+                        dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_MEMORY
+#else
+                        dis_code.operands[NULL].mem.base == ZYDIS_REGISTER_RIP &&
+                        dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_MEMORY
+#endif
+                        )
+                    {
+
+                        pos_addr = reinterpret_cast<uint8_t*>(dis::get_absolute_address(&dis_code, addr));
+                        if (!is_insode_module(proc_inform, pos_addr))
+                        {
+                            return FALSE;
+                        } 
+#ifndef _WIN64
+                        pos_addr = reinterpret_cast<uint8_t*>(read_lazy(proc_inform,pos_addr));
+                        pos_addr = transform_addr_mod(proc_inform, pos_addr);
+#else
+                        pos_addr = *reinterpret_cast<uint8_t**>(pos_addr);
+                        pos_addr = transform_addr_mod(proc_inform, pos_addr);
+#endif // !_WIN64
+
+                       if (!pos_addr || !inside_sec_prot(proc_inform, pos_addr))
+                       {
+                           return FALSE;
+                       }
+                        addr = pos_addr;
+                        ignore_add_lenght = TRUE;
+                    }
+                }
+
+                if (dis_code.info.mnemonic == ZYDIS_MNEMONIC_JMP)
+                {
+                    if (dis_code.info.operand_count_visible == 1 )
+                    {
+                        if (dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_IMMEDIATE)
+                        {
+                            pos_addr = reinterpret_cast<uint8_t*>(dis::get_absolute_address(&dis_code, addr));
+                            if (!inside_sec_prot(proc_inform, pos_addr)) //address outside sec
+                            {
+                                return FALSE;
+                            }
+                            if (!wrapper_info->first_jmp_next_addr)
+                            {
+                                wrapper_info->first_jmp_next_addr = addr + dis_code.info.length;
+                            }
+                            addr = pos_addr;
+                        }
+                        else if 
+                        (
+                            !wrapper_info->count_dis &&
+                            !is_virtualized &&
+                            dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_MEMORY
+                        )
+                        {
+
+                            if (
+#ifndef _WIN64
+                                dis_code.operands[NULL].mem.base == ZYDIS_REGISTER_NONE &&
+                                dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_MEMORY
+#else
+                                dis_code.operands[NULL].mem.base == ZYDIS_REGISTER_RIP &&
+                                dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_MEMORY
+#endif
+                                )
+                            {
+
+                                pos_addr = reinterpret_cast<uint8_t*>(dis::get_absolute_address(&dis_code, addr));
+                                if (!is_insode_module(proc_inform, pos_addr))
+                                {
+                                    return FALSE;
+                                }
+
+#ifndef _WIN64
+                                pos_addr = reinterpret_cast<uint8_t*>(read_lazy(proc_inform, pos_addr));
+                                pos_addr = transform_addr_mod(proc_inform, pos_addr);
+#else
+                                pos_addr = *reinterpret_cast<uint8_t**>(pos_addr);
+                                pos_addr = transform_addr_mod(proc_inform, pos_addr);
+#endif // !_WIN64
+                                if (!pos_addr || !inside_sec_prot(proc_inform, pos_addr))
+                                {
+                                    return FALSE;
+                                }
+                                addr = pos_addr;
+                                ignore_add_lenght = TRUE;
+                            }
+                        }
+                        else
+                        {
+                            return FALSE;
+                        }
+                    }
+                    else 
+                    {
+                        return FALSE;
+                    }
+                }
+                else
+                {
+                    if (!ignore_add_lenght)
+                    {
+                        addr += dis_code.info.length;
+
+                    }
+                }
+            }
+            else
+            {
+                return FALSE;
+            }
+            wrapper_info->count_dis++;
+            ignore_add_lenght = FALSE;
+        }
+        return  FALSE;
+    }
+     
+
+    NO_INLINE auto get_dis_import_vmp_old(proc_info& proc_inform, protector_imp_info* cur_vmp_info,uint8_t* addr, uint32_t sec_rva, BOOLEAN is_virtualized) -> BOOLEAN
+    {
+        CHAR* imp_name = NULL;
+        WCHAR* mod_name = NULL;
+        size_t readed_base_addr = NULL;
+        VMP_IMP_WRAPPER_DIS_OLD wrapper_info = { NULL };
+        ZydisDisassembledInstruction dis_code = { NULL };
+
+        //cur_vmp_info->addr_wrapper_imp = reinterpret_cast<size_t>(addr);
+
+        for (size_t dis_count = NULL; dis_count < DIS_IMP_VMP_WRAPPER_OLD; dis_count++)
+        {
+            if (ZYAN_SUCCESS(dis::get_dis(&dis_code, addr)))
+            {
+                if (!is_virtualized)
+                {
+                    if (
+                        !dis_count &&
+                        dis_code.info.mnemonic != ZYDIS_MNEMONIC_CALL
+                        )
+                    {
+                        return FALSE;
+                    }
+                    if (
+                        dis_count == 1 &&
+                        dis_code.info.mnemonic != ZYDIS_MNEMONIC_NOP
+                        )
+                    {
+                        return FALSE;
+                    }
+                }
+                else
+                {
+                    if (!dis_count)
+                    {
+                        if (dis_code.info.mnemonic != ZYDIS_MNEMONIC_NOP)
+                        {
+                            return FALSE;
+                        }
+                    }
+                }
+
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_MOV &&
+                    dis_code.info.operand_count_visible == 2 &&
+                    dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                    dis_code.operands[NULL].reg.value == wrapper_info.reg_base &&
+                    dis_code.operands[1].type == ZYDIS_OPERAND_TYPE_MEMORY &&
+                    dis_code.operands[1].mem.base == wrapper_info.reg_base &&
+                    dis_code.operands[1].mem.disp.has_displacement
+                    )
+                {
+
+                    cur_vmp_info->diff_offset = dis_code.operands[1].mem.disp.value;
+                }
+
+#ifndef _WIN64
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_MOV &&
+                    dis_code.info.operand_count_visible == 2 &&
+                    dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                    dis_code.operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE &&
+                    dis_code.operands[1].imm.value.u
+                    )
+                {
+                    wrapper_info.reg_base = dis_code.operands[NULL].reg.value; 
+                    cur_vmp_info->base_obf_addr = dis_code.operands[1].imm.value.u;
+                }
+#else 
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_LEA &&
+                    dis_code.info.operand_count_visible == 2 &&
+                    dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                    dis_code.operands[1].type == ZYDIS_OPERAND_TYPE_MEMORY &&
+                    dis_code.operands[1].mem.base == ZYDIS_REGISTER_RIP &&
+                    dis_code.operands[1].mem.disp.has_displacement
+                    )
+                {
+                    wrapper_info.reg_base = dis_code.operands[NULL].reg.value;
+                    cur_vmp_info->base_obf_addr = dis::get_absolute_address(&dis_code, addr + reinterpret_cast<size_t>(proc_inform.orig_addr_mem) - reinterpret_cast<size_t>(proc_inform.coped_mem));
+                }
+#endif // !_WIN64
+
+
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_LEA &&
+                    dis_code.info.operand_count_visible == 2 &&
+                    dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                    dis_code.operands[1].type == ZYDIS_OPERAND_TYPE_MEMORY &&
+                    dis_code.operands[1].mem.base == wrapper_info.reg_base &&
+                    dis_code.operands[1].mem.disp.has_displacement &&
+                    cur_vmp_info->diff_offset
+                    )
+                {
+                    cur_vmp_info->count_command++;
+                    cur_vmp_info->command[NULL].type = obf_lea;
+                    cur_vmp_info->command[NULL].imm = dis_code.operands[1].mem.disp.value;
+
+                    readed_base_addr = read_lazy(proc_inform, reinterpret_cast<uint8_t*>(cur_vmp_info->base_obf_addr + cur_vmp_info->diff_offset));
+                    if (get_imp_name(proc_inform, reinterpret_cast<uint8_t*>(readed_base_addr) + dis_code.operands[1].mem.disp.value, &mod_name,&imp_name)) //check is import
+                    {
+                        if (mod_name)
+                        {
+                            cur_vmp_info->mod_name = mod_name;
+                        }
+                        if (imp_name)
+                        {
+                            cur_vmp_info->imp_name = imp_name;
+                        }
+                         cur_vmp_info->imp_obf_ptr_addr = cur_vmp_info->base_obf_addr + cur_vmp_info->diff_offset;
+                        cur_vmp_info->imp_obf_ptr_rva = cur_vmp_info->base_obf_addr + cur_vmp_info->diff_offset - reinterpret_cast<size_t>(proc_inform.orig_addr_mem);
+                        return TRUE;
+                    }
+                }
+ 
+
+                if (dis_code.info.mnemonic == ZYDIS_MNEMONIC_JMP ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_CALL)
+                {
+                    if (
+                        dis_code.info.operand_count_visible == 1 &&
+                        dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_IMMEDIATE
+                        )
+                    {
+                        addr = reinterpret_cast<uint8_t*>(dis::get_absolute_address(&dis_code, addr));
+                        if (!inside_sec_prot(proc_inform, addr)) //address outside sec
+                        {
+                            return FALSE;
+                        }
+                    }
+                    else
+                    {
+                        return FALSE;
+                    }
+                }
+                else
+                {
+                    addr += dis_code.info.length;
+                }
+            }
+            else
+            {
+                return FALSE;
+            }
+        }
+        return FALSE;
+
+    }
+      
+    NO_INLINE auto get_next_wrapper_vmp(proc_info& proc_inform, uint8_t* addr, uint32_t cur_sec_id, VMP_IMP_WRAPPER_DIS_NEXT* wrapper_info = NULL, BOOLEAN is_virtualized = FALSE, BOOLEAN exist_push_eflag = FALSE, uint32_t recurs = NULL, uint32_t jcc = NULL) -> BOOLEAN
+    {
+        // just ret lazy + just jcc + ret
+        CHAR* imp_name = NULL;
+        WCHAR* mod_name = NULL;
+        uint8_t* pos_addr = NULL;
+        VMP_IMP_WRAPPER_DIS_NEXT cur_next_wrapper_info = { NULL };
+        ZydisDisassembledInstruction dis_code = { NULL };
+
+
+        for (size_t dis_count = NULL; dis_count < DIS_IMP_VMP_WRAPPER_NEXT_CALL && wrapper_info->count_dis < DIS_IMP_VMP_WRAPPER_NEXT_CALL; dis_count++)
+        {
+            if (ZYAN_SUCCESS(dis::get_dis(&dis_code, addr)))
+            {
+                if (is_virtualized)
+                {
+                    if (!is_inside_sec(addr, proc_inform.coped_mem, &proc_inform.sec_list[cur_sec_id]))
+                    {
+                        return FALSE;
+                    }
+                }
+                else if (wrapper_info->count_dis >= 15)
+                {
+                    //check after call 
+                    // (in 3.10.4 .text call imp_wrapper -> 
+                    // .text command  (push)
+                    // .text next_call
+                    //.vmp command (pop)
+
+                    if (!inside_sec_prot(proc_inform, addr))
+                    {
+                        return FALSE;
+                    }
+                }
+
+                //Faster will be emulate ~150 instr
+                if (recurs >= MAX_RECURS_EXECUTE || jcc >= MAX_JCC_EXECUTE)
+                {
+                    return TRUE;
+                }
+
+                if (
+                    exist_push_eflag &&
+#ifndef _WIN64
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_PUSHFD
+#else
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_PUSHFQ
+#endif // !_WIN64
+                    )
+                {
+                    wrapper_info->count_push_eflag++;
+                }
+
+                if (exist_push_eflag && !wrapper_info->count_push_eflag)
+                {
+                    if (dis::is_change_eflag(&dis_code))
+                    {
+                        return FALSE;
+                    }
+
+                    if (dis::is_check_eflag(&dis_code))
+                    {
+                        return FALSE;
+                    }
+                }
+
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_ADC ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_ADD
+                    )
+                {
+                    wrapper_info->count_add++;
+                }
+
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_SUB ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_SBB
+                    )
+                {
+                    wrapper_info->count_sub++;
+                }
+
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_RDTSC ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_CPUID ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_SYSCALL ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_SYSENTER
+                    )
+                {
+                    return FALSE;
+                }
+
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_CALL &&
+                    dis_code.info.operand_count_visible == 1 &&
+                    dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_IMMEDIATE
+                    )
+                {
+                    wrapper_info->count_call_imm++;
+                }
+
+                if (dis::is_jññ(&dis_code))
+                {
+                    //pos_addr;
+                    memcpy(&cur_next_wrapper_info, wrapper_info, sizeof(cur_next_wrapper_info));
+                    pos_addr = reinterpret_cast<uint8_t*>(dis::get_absolute_address(&dis_code, reinterpret_cast<CHAR*>(dis_code.runtime_address)));
+                    cur_next_wrapper_info.count_dis++;
+                    if (inside_sec_prot(proc_inform,pos_addr))
+                    {
+                        recurs++;
+                        if (get_next_wrapper_vmp(proc_inform, pos_addr, cur_sec_id, &cur_next_wrapper_info, is_virtualized, exist_push_eflag, recurs, jcc))
+                        {
+                            return TRUE;
+                        }
+                    }
+                    jcc++;
+                }
+
+ 
+
+                if (dis_code.info.mnemonic == ZYDIS_MNEMONIC_RET)
+                {
+                    if (
+                            (wrapper_info->count_add || 
+                            wrapper_info->count_sub
+                            ) &&
+                        wrapper_info->count_call_imm >= 1
+                        )
+                    { 
+                        if (exist_push_eflag && wrapper_info->count_push_eflag)
+                        {
+                            return wrapper_info->count_push_eflag != NULL;
+                        }
+                        else
+                        {
+                            return !wrapper_info->count_push_eflag;
+                        }
+                    } 
+                }
+
+                if (dis_code.info.mnemonic == ZYDIS_MNEMONIC_JMP ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_CALL)
+                {
+                    if (
+                        dis_code.info.operand_count_visible == 1 &&
+                        dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_IMMEDIATE
+                        )
+                    {
+                        addr = reinterpret_cast<uint8_t*>(dis::get_absolute_address(&dis_code, addr));
+                        if (!inside_sec_prot(proc_inform, addr)) //address outside sec
+                        {
+                            return FALSE;
+                        }
+                    }
+                    else
+                    {
+                        return FALSE;
+                    }
+                }
+                else
+                {
+                    addr += dis_code.info.length;
+                }
+            }
+            else
+            {
+                return FALSE;
+            }
+            wrapper_info->count_dis++;
+        }                        
+        return  FALSE;
+    }
+
+
+    NO_INLINE auto get_wrapper_vmp(proc_info& proc_inform, uint8_t* addr, uint32_t cur_sec_id, VMP_IMP_WRAPPER_DIS* wrapper_info = NULL, BOOLEAN is_virtualized = FALSE, BOOLEAN exist_push_eflag = FALSE, uint32_t recurs = NULL, uint32_t jcc = NULL) -> BOOLEAN
+    { 
+        CHAR* imp_name = NULL;
+        WCHAR* mod_name = NULL;
+        uint8_t* pos_addr = NULL;
+        VMP_IMP_WRAPPER_DIS cur_wrapper_info = { NULL };
+        ZydisDisassembledInstruction dis_code = { NULL };
+
+
+        for (size_t dis_count = NULL; dis_count < DIS_IMP_VMP_WRAPPER_CALL && wrapper_info->count_dis < DIS_IMP_VMP_WRAPPER_CALL; dis_count++)
+        {
+            if (ZYAN_SUCCESS(dis::get_dis(&dis_code, addr)))
+            {
+                if (is_virtualized)
+                {
+                    if (!is_inside_sec(addr, proc_inform.coped_mem, &proc_inform.sec_list[cur_sec_id]))
+                    {
+                        return FALSE;
+                    }
+                }
+                else if(wrapper_info->count_dis >= 15) //check after dis first call
+                {
+                    if (!inside_sec_prot(proc_inform,addr))
+                    {
+
+                        return FALSE;
+                    }
+                }
+ 
+
+                //Faster will be emulate ~150 instr
+                if (recurs >= MAX_RECURS_EXECUTE || jcc >= MAX_JCC_EXECUTE)
+                {
+                    return TRUE;
+                }
+
+                //check exist by in logic zydis push eflag change eflag...
+                if (
+                    exist_push_eflag &&
+#ifndef _WIN64
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_PUSHFD
+#else
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_PUSHFQ
+#endif // !_WIN64
+                    )
+                {
+                    wrapper_info->count_push_eflag++;
+                }
+
+                if (exist_push_eflag && !wrapper_info->count_push_eflag)
+                {
+                    if (dis::is_change_eflag(&dis_code))
+                    {
+                        return FALSE;
+                    }
+
+                    if (dis::is_check_eflag(&dis_code))
+                    {
+                        return FALSE;
+                    }
+                }
+
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_RDTSC ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_CPUID ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_SYSCALL ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_SYSENTER
+                    )
+                {
+                    return FALSE;
+                }
+
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_CALL &&
+                    dis_code.info.operand_count_visible == 1 &&
+                    dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_IMMEDIATE
+                    )
+                {
+                    wrapper_info->count_call_imm++;
+                }
+
+                if(dis::is_jññ(&dis_code))
+                {
+                    //pos_addr;
+                    memcpy(&cur_wrapper_info, wrapper_info, sizeof(cur_wrapper_info));
+                    pos_addr = reinterpret_cast<uint8_t*>(dis::get_absolute_address(&dis_code, reinterpret_cast<CHAR*>(dis_code.runtime_address)));
+                    cur_wrapper_info.count_dis++;
+                    if (inside_sec_prot(proc_inform, pos_addr))
+                    {
+                        recurs++;
+                        if (get_wrapper_vmp(proc_inform, pos_addr,  cur_sec_id, &cur_wrapper_info,is_virtualized,exist_push_eflag , recurs,  jcc))
+                        {
+                            return TRUE;
+                        }
+                    }
+                    jcc++;
+                }
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_MOV &&
+                    dis_code.info.operand_count_visible == 2 &&
+                    dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                    dis_code.operands[1].type == ZYDIS_OPERAND_TYPE_MEMORY &&
+#ifndef _WIN64
+                    dis_code.operands[1].mem.base == ZYDIS_REGISTER_ESP
+#else
+                    dis_code.operands[1].mem.base == ZYDIS_REGISTER_RSP
+#endif // !_WIN64
+                    )
+                {
+                    wrapper_info->reg_base = dis_code.operands[NULL].reg.value;
+                }
+
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_MOV &&
+                    dis_code.info.operand_count_visible == 2 &&
+                    dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                    dis_code.operands[1].type == ZYDIS_OPERAND_TYPE_MEMORY &&
+                    (
+                        dis_code.operands[1].mem.base == wrapper_info->reg_base ||
+                        dis_code.operands[1].mem.index == wrapper_info->reg_base
+                        )
+                    )
+                {
+                    wrapper_info->count_read_obf_imp++;
+                }
+
+                if (
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_LEA &&
+                    dis_code.info.operand_count_visible == 2 &&
+                    dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+                    dis_code.operands[1].type == ZYDIS_OPERAND_TYPE_MEMORY &&
+                    dis_code.operands[1].mem.base == wrapper_info->reg_base &&
+                    dis_code.operands[1].mem.disp.has_displacement
+                    )
+                {
+                    wrapper_info->count_decrypt_imp++;
+                    if (
+                        wrapper_info->count_decrypt_imp &&
+                        wrapper_info->count_call_imm &&
+                        wrapper_info->count_read_obf_imp 
+                        )
+                    {
+                        wrapper_info->addr_decrypt_imp = reinterpret_cast<size_t>(addr);
+                        return TRUE;
+                    }
+                }
+
+                if (dis_code.info.mnemonic == ZYDIS_MNEMONIC_JMP ||
+                    dis_code.info.mnemonic == ZYDIS_MNEMONIC_CALL)
+                {
+                    if (
+                        dis_code.info.operand_count_visible == 1 &&
+                        dis_code.operands[NULL].type == ZYDIS_OPERAND_TYPE_IMMEDIATE
+                        )
+                    {
+                        addr = reinterpret_cast<uint8_t*>(dis::get_absolute_address(&dis_code, addr));
+                        if (!inside_sec_prot(proc_inform, addr)) //address outside sec
+                        {
+                            return FALSE;
+                        }
+                    }
+                    else
+                    {
+                        return FALSE;
+                    }
+                }
+                else
+                {
+                    addr += dis_code.info.length;
+                } 
+            }
+            else
+            {
+                return FALSE;
+            }
+            wrapper_info->count_dis++;
+        }
+        return  FALSE;
+    }
+
+    NO_INLINE auto scan_obf_imp(std::vector<protector_imp_info>& imp_list, proc_info& proc_inform, BOOLEAN is_disassembly_check = FALSE) -> uint32_t
+    {
+        uint32_t imp_count_get = NULL;
+        uint32_t imp_count_emul = NULL;
+        protector_imp_info cur_imp_prot = { NULL };
+        VMP_IMP_WRAPPER_DIS_NEXT cur_vmp_next_wrapper_info = { NULL };
+        VMP_IMP_WRAPPER_DIS cur_vmp_wrapper_info = { NULL };
+        THEMIDA_IMP_WRAPPER_DIS cur_themida_wrapper_info = { NULL };
+
+        if (
+            proc_inform.prot_type == prot_vmp
+            )
+        {
+            for (size_t sec_id = NULL; sec_id < proc_inform.sec_list.size(); sec_id++)
+            {
+                if (
+                    proc_inform.sec_list[sec_id].sec_type_info == sec_type_prog &&
+                    (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_READ) &&
+                    (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_EXECUTE)
+                    )
+                {
+                    for (size_t offset = NULL; offset < proc_inform.sec_list[sec_id].virt_size; offset++)
+                    {
+                        if (
+                            *reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset) == OPCODE_IMM_CALL
+                            )
+                        {
+                          
+                            cur_imp_prot.count_command = NULL;
+                            cur_imp_prot.is_virtulized = FALSE;
+                            cur_imp_prot.is_get_imp = FALSE;
+                            cur_imp_prot.addr_wrapper_imp = reinterpret_cast<size_t>(proc_inform.sec_list[sec_id].sec_addr_coped) + offset;
+                            memset(&cur_imp_prot.command[NULL], NULL, sizeof(cur_imp_prot.command));
+
+                            if (get_dis_import_vmp_old(proc_inform, &cur_imp_prot,reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset), proc_inform.sec_list[sec_id].rva, FALSE))
+                            {
+                                if (!is_exist_imp(imp_list, &cur_imp_prot))
+                                {
+                                    imp_count_get++;
+                                    imp_list.push_back(cur_imp_prot);
+                                }
+                             }
+                            else 
+                            {
+                                memset(&cur_vmp_next_wrapper_info, NULL, sizeof(cur_vmp_next_wrapper_info));
+                                memset(&cur_vmp_wrapper_info, NULL, sizeof(cur_vmp_wrapper_info));
+
+                                if (
+                                   get_next_wrapper_vmp(proc_inform, reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset), sec_id, &cur_vmp_next_wrapper_info,FALSE, TRUE, NULL, NULL) ||
+                                    get_wrapper_vmp(proc_inform, reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset), sec_id, &cur_vmp_wrapper_info, FALSE, TRUE, NULL, NULL)
+                                    )
+                                {
+                                    cur_imp_prot.count_command = NULL;
+                                    cur_imp_prot.is_virtulized = FALSE;
+                                    cur_imp_prot.is_get_imp = FALSE;
+                                    cur_imp_prot.addr_wrapper_imp = reinterpret_cast<size_t>(proc_inform.sec_list[sec_id].sec_addr_coped) + offset;
+                                    memset(&cur_imp_prot.command[NULL], NULL, sizeof(cur_imp_prot.command));
+
+                                    emul_code::safe_init_emu(proc_inform, &cur_imp_prot, reinterpret_cast<size_t>(proc_inform.coped_mem), EMUL_IMP_VMP, FALSE);
+                                    if (cur_imp_prot.is_get_imp && !is_exist_imp(imp_list, &cur_imp_prot))
+                                    {
+                                        imp_count_get++;
+                                        imp_list.push_back(cur_imp_prot);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (
+            proc_inform.prot_type == prot_themida
+            )
+        {
+            for (size_t sec_id = NULL; sec_id < proc_inform.sec_list.size(); sec_id++)
+            {
+                if (
+                    proc_inform.sec_list[sec_id].sec_type_info == sec_type_prog &&
+                    (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_READ) &&
+                    (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_EXECUTE)
+                    )
+                {
+                    for (size_t offset = NULL; offset < proc_inform.sec_list[sec_id].virt_size; offset++)
+                    {
+                        if (
+                            *reinterpret_cast<uint16_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset) == OPCODE_PTR_CALL ||
+                            *reinterpret_cast<uint16_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset) == OPCODE_PTR_JMP
+                            )
+                        {
+                            memset(&cur_themida_wrapper_info, NULL, sizeof(cur_themida_wrapper_info));
+
+
+                            if (get_wrapper_themida(proc_inform, reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset), sec_id, &cur_themida_wrapper_info, FALSE))
+                            {
+
+                                cur_imp_prot.count_command = NULL;
+                                cur_imp_prot.is_virtulized = FALSE;
+                                cur_imp_prot.is_get_imp = FALSE;
+                                cur_imp_prot.addr_wrapper_imp = reinterpret_cast<size_t>(proc_inform.sec_list[sec_id].sec_addr_coped) + offset;
+                                memset(&cur_imp_prot.command[NULL], NULL, sizeof(cur_imp_prot.command));
+
+                                emul_code::safe_init_emu(proc_inform, &cur_imp_prot, reinterpret_cast<size_t>(proc_inform.coped_mem), EMUL_IMP_THEMIDA, FALSE);
+                                if (cur_imp_prot.is_get_imp && !is_exist_imp(imp_list, &cur_imp_prot))
+                                {
+                                    imp_count_get++;
+                                    imp_list.push_back(cur_imp_prot);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+         
+        return imp_count_get;
+    }
+
+    NO_INLINE auto scan_virt_imp(std::vector<protector_imp_info>& imp_list, proc_info& proc_inform) -> uint32_t
+    {
+        uint32_t imp_count_get = NULL;
+        uint32_t imp_count_emul = NULL;
+        protector_imp_info cur_imp_prot = { NULL };
+        VMP_IMP_WRAPPER_DIS cur_wrapper_info = { NULL };
+        VMP_IMP_WRAPPER_DIS_NEXT cur_next_wrapper_info = { NULL };
+        THEMIDA_IMP_WRAPPER_DIS cur_themida_wrapper_info = { NULL };
+
+        if (
+            proc_inform.prot_type == prot_vmp
+            )
+        {
+            for (size_t sec_id = NULL; sec_id < proc_inform.sec_list.size(); sec_id++)
+            {
+                if (
+                    proc_inform.sec_list[sec_id].sec_type_info == sec_type_prot &&
+                    (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_READ) &&
+                    (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_EXECUTE)
+                    )
+                {
+                    for (size_t offset = NULL; offset < proc_inform.sec_list[sec_id].virt_size; offset++)
+                    {
+
+                        if (
+                            *reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset) == OPCODE_NOP
+                            )
+                        {
+                            cur_imp_prot.count_command = NULL;
+                            cur_imp_prot.is_virtulized = FALSE;
+                            cur_imp_prot.is_get_imp = FALSE;
+                            cur_imp_prot.addr_wrapper_imp = reinterpret_cast<size_t>(proc_inform.sec_list[sec_id].sec_addr_coped) + offset;
+                            memset(&cur_imp_prot.command[NULL], NULL, sizeof(cur_imp_prot.command));
+
+                            if (get_dis_import_vmp_old(proc_inform, &cur_imp_prot, reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset), proc_inform.sec_list[sec_id].rva, TRUE))
+                            {
+                                if (!is_exist_imp(imp_list, &cur_imp_prot))
+                                {
+                                    imp_count_get++;
+                                    imp_list.push_back(cur_imp_prot);
+                                }
+                            }
+                        }
+                
+
+                        if (
+                            *reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset) == OPCODE_IMM_CALL ||
+                            is_push(reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset)) ||
+                            is_push_eflag(reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset)) ||
+                            is_pop(reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset)) ||
+                            is_vsp_change(reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset))
+                            )
+                        {
+                            //disassembly and check                             
+                            memset(&cur_next_wrapper_info, NULL, sizeof(cur_next_wrapper_info));
+                            memset(&cur_wrapper_info, NULL, sizeof(cur_wrapper_info));
+ 
+                           if (
+                               get_next_wrapper_vmp(proc_inform, reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset), sec_id, &cur_next_wrapper_info, TRUE,TRUE, NULL, NULL) ||
+                               get_wrapper_vmp(proc_inform, reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset), sec_id,&cur_wrapper_info,TRUE, TRUE,NULL,NULL)
+                               )
+                            {
+                                //emul
+
+                               cur_imp_prot.count_command = NULL;
+                               cur_imp_prot.is_virtulized = TRUE;
+                               cur_imp_prot.is_get_imp = FALSE;
+                               cur_imp_prot.addr_wrapper_imp = reinterpret_cast<size_t>(proc_inform.sec_list[sec_id].sec_addr_coped) + offset;
+                               memset(&cur_imp_prot.command[NULL], NULL, sizeof(cur_imp_prot.command));
+                               emul_code::safe_init_emu(proc_inform, &cur_imp_prot, reinterpret_cast<size_t>(proc_inform.coped_mem), EMUL_IMP_VMP, FALSE);
+                                if (cur_imp_prot.is_get_imp && !is_exist_imp(imp_list, &cur_imp_prot))
+                                {
+                                    imp_count_get++;
+                                    imp_list.push_back(cur_imp_prot);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (
+            proc_inform.prot_type == prot_themida
+            )
+        {
+            for (size_t sec_id = NULL; sec_id < proc_inform.sec_list.size(); sec_id++)
+            {
+                if (
+                    proc_inform.sec_list[sec_id].sec_type_info == sec_type_prot &&
+                    (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_READ) &&
+                    (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_WRITE) &&
+                    (proc_inform.sec_list[sec_id].characteris & IMAGE_SCN_MEM_EXECUTE)
+                    )
+                {
+                    for (size_t offset = NULL; offset < proc_inform.sec_list[sec_id].virt_size; offset++)
+                    {  
+                        if (
+                            is_push(reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset)) ||
+                            *reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset) == OPCODE_PUSH_IMM ||
+                            is_vsp_change(reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset))
+                            )
+                        {
+                            memset(&cur_themida_wrapper_info, NULL, sizeof(cur_themida_wrapper_info));
+                             
+                            if (get_wrapper_themida(proc_inform, reinterpret_cast<uint8_t*>(proc_inform.sec_list[sec_id].sec_addr_coped + offset), sec_id, &cur_themida_wrapper_info, FALSE))
+                            {
+                                //add disassembly
+                                cur_imp_prot.count_command = NULL;
+                                cur_imp_prot.is_virtulized = FALSE;
+                                cur_imp_prot.is_get_imp = FALSE;
+                                cur_imp_prot.addr_wrapper_imp = reinterpret_cast<size_t>(proc_inform.sec_list[sec_id].sec_addr_coped) + offset;
+                                memset(&cur_imp_prot.command[NULL], NULL, sizeof(cur_imp_prot.command));
+
+                                emul_code::safe_init_emu(proc_inform, &cur_imp_prot, reinterpret_cast<size_t>(proc_inform.coped_mem), EMUL_IMP_THEMIDA, FALSE);
+                                if (cur_imp_prot.is_get_imp && !is_exist_imp(imp_list, &cur_imp_prot))
+                                {
+                                    imp_count_get++;
+                                    imp_list.push_back(cur_imp_prot);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (size_t i = NULL; i < imp_count_emul; i++)
+        {
+
+        }
+        return imp_count_get;
+    }
+
+}
+#endif // !IMPORT_SCAN
+
+```
+
+`vmp_imp_attack/process_util.h`:
+
+```h
+#ifndef PROCESS_UTIL
+#define PROCESS_UTIL 1 
+
+#include "struct.h" 
+
+
+NTSTATUS
+NTAPI
+NtQuerySystemInformation
+(
+	IN SYSTEM_INFORMATION_CLASS SystemInformationClass,
+	OUT PVOID               SystemInformation,
+	IN ULONG                SystemInformationLength,
+	OUT PULONG              ReturnLength OPTIONAL
+);
+
+namespace process_help
+{
+	PVOID nt_query_system_information = NULL; 
+	namespace crt_wrapper
+	{
+		INLINE auto malloc(size_t size) -> PVOID
+		{
+			return VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
+		}
+
+		INLINE auto free(PVOID ptr) -> VOID
+		{
+			if (ptr)
+				VirtualFree(ptr, NULL, MEM_RELEASE);
+		}
+
+		INLINE auto wtolower(INT c) -> INT
+		{
+			if (c >= L'A' && c <= L'Z') return c - L'A' + L'a';
+			return c;
+		}
+
+		INLINE auto wstricmp(CONST WCHAR* cs, CONST WCHAR* ct) -> INT
+		{
+			if (cs && ct)
+			{
+				while (wtolower(*cs) == wtolower(*ct))
+				{
+					if (*cs == NULL && *ct == NULL) return NULL;
+					if (*cs == NULL || *ct == NULL) break;
+					cs++;
+					ct++;
+				}
+				return wtolower(*cs) - wtolower(*ct);
+			}
+			return -1;
+		}
+
+	}
+
+
+
+	auto get_process_id(CONST WCHAR* process_name) -> uint32_t
+	{
+		ULONG ret_lenght = NULL;
+		uint32_t process_id = NULL;
+		NTSTATUS nt_status = STATUS_UNSUCCESSFUL;
+		HMODULE ntdll_base = NULL;
+		PVOID buffer = NULL;
+		PSYSTEM_PROCESS_INFORMATION process_info = NULL;
+
+
+		if (!nt_query_system_information)
+		{
+			ntdll_base = GetModuleHandleW(L"ntdll.dll");
+			nt_query_system_information = GetProcAddress(ntdll_base, "NtQuerySystemInformation");
+		}
+
+		nt_status = reinterpret_cast<decltype(&NtQuerySystemInformation)>(nt_query_system_information)(SystemProcessInformation, &ret_lenght, ret_lenght, &ret_lenght);
+
+		while (nt_status == STATUS_INFO_LENGTH_MISMATCH)
+		{
+			if (buffer != NULL)
+				crt_wrapper::free(buffer);
+
+			buffer = crt_wrapper::malloc(ret_lenght);
+			nt_status = reinterpret_cast<decltype(&NtQuerySystemInformation)>(nt_query_system_information)(SystemProcessInformation, buffer, ret_lenght, &ret_lenght);
+		}
+
+		if (!NT_SUCCESS(nt_status))
+		{
+			crt_wrapper::free(buffer);
+			return NULL;
+		}
+
+		process_info = reinterpret_cast<PSYSTEM_PROCESS_INFORMATION>(buffer);
+		while (process_info->NextEntryOffset)
+		{
+
+			if (crt_wrapper::wstricmp(process_info->ImageName.Buffer, process_name) == NULL)
+			{
+				process_id = reinterpret_cast<uint32_t>(process_info->UniqueProcessId);
+				break;
+			}
+			process_info = (PSYSTEM_PROCESS_INFORMATION)((LPBYTE)process_info + process_info->NextEntryOffset);
+		}
+		crt_wrapper::free(buffer);
+		return process_id;
+
+	}
+
+	auto get_module_address(uint32_t proc_id, CONST WCHAR* modName) -> uint8_t*
+	{
+		uint8_t* module_address = NULL;
+		HANDLE snap_mod = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, proc_id);
+
+		if (snap_mod != INVALID_HANDLE_VALUE)
+		{
+			MODULEENTRY32W mod_entry = { NULL };
+			mod_entry.dwSize = sizeof(mod_entry);
+			if (Module32FirstW(snap_mod, &mod_entry))
+			{
+				do
+				{
+					if (crt_wrapper::wstricmp(mod_entry.szModule, modName) == NULL)
+					{
+						module_address = mod_entry.modBaseAddr;
+						break;
+					}
+				} while (Module32NextW(snap_mod, &mod_entry));
+			}
+		}
+		CloseHandle(snap_mod);
+		return module_address;
+	}
+
+	auto get_module_size(uint32_t proc_id, CONST WCHAR* modName) -> uint32_t
+	{
+		uint32_t module_size = NULL;
+		HANDLE snap_mod = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, proc_id);
+
+		if (snap_mod != INVALID_HANDLE_VALUE)
+		{
+			MODULEENTRY32W mod_entry = { NULL };
+			mod_entry.dwSize = sizeof(mod_entry);
+			if (Module32FirstW(snap_mod, &mod_entry))
+			{
+				do
+				{
+					if (crt_wrapper::wstricmp(mod_entry.szModule, modName) == NULL)
+					{
+						module_size = mod_entry.modBaseSize;
+						break;
+					}
+				} while (Module32NextW(snap_mod, &mod_entry));
+			}
+		}
+		CloseHandle(snap_mod);
+		return module_size;
+	}
+
+	NO_INLINE auto get_module_list_proc(uint32_t proc_id, std::vector< MODULE_INFO>& mod_list) -> BOOLEAN
+	{
+		uint32_t count_mod = NULL;
+		MODULE_INFO cur_mod = { NULL };
+		HANDLE access = NULL;
+		HANDLE snap_mod = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, proc_id);
+		PIMAGE_NT_HEADERS nt_headers = NULL;
+		PIMAGE_SECTION_HEADER sec = NULL;
+
+		if (snap_mod != INVALID_HANDLE_VALUE)
+		{
+			MODULEENTRY32W mod_entry = { NULL };
+			mod_entry.dwSize = sizeof(mod_entry);
+			access = OpenProcess(PROCESS_ALL_ACCESS, FALSE, proc_id);
+			if (access != INVALID_HANDLE_VALUE)
+			{
+				if (Module32FirstW(snap_mod, &mod_entry))
+				{
+					do
+					{
+						cur_mod.orig_addr_mem = mod_entry.modBaseAddr;
+						cur_mod.coped_size = mod_entry.modBaseSize;
+						cur_mod.mod_name = mod_entry.szModule;
+						cur_mod.coped_mem = reinterpret_cast<uint8_t*>(crt_wrapper::malloc(cur_mod.coped_size + 0x1000));
+						if (cur_mod.coped_mem && ReadProcessMemory(access, cur_mod.orig_addr_mem, cur_mod.coped_mem, cur_mod.coped_size, NULL))
+						{
+							nt_headers = reinterpret_cast<IMAGE_NT_HEADERS*>(reinterpret_cast<uint8_t*>(cur_mod.coped_mem) + reinterpret_cast<IMAGE_DOS_HEADER*>(cur_mod.coped_mem)->e_lfanew);
+							if (nt_headers->Signature == IMAGE_NT_SIGNATURE)
+							{
+								if (nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress && nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size)
+								{
+									cur_mod.is_any_export = TRUE;
+								}
+							}
+						}
+						else
+						{
+							//lazy fix PE + resurved  mem + .text
+							if (GetLastError() == ERROR_PARTIAL_COPY)
+							{
+								//if addr exist in process, don't copy with reserve
+								if (reinterpret_cast<uint8_t*>( GetModuleHandleW(cur_mod.mod_name.c_str())) == cur_mod.orig_addr_mem)
+								{
+									cur_mod.coped_mem = cur_mod.orig_addr_mem;
+									nt_headers = reinterpret_cast<IMAGE_NT_HEADERS*>(reinterpret_cast<uint8_t*>(cur_mod.coped_mem) + reinterpret_cast<IMAGE_DOS_HEADER*>(cur_mod.coped_mem)->e_lfanew);
+									if (nt_headers->Signature == IMAGE_NT_SIGNATURE)
+									{
+										if (nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress && nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size)
+										{
+											cur_mod.is_any_export = TRUE;
+										}
+									}
+								} 
+								else
+								{
+									printf("need fix!\n");
+									__debugbreak();
+								}
+							}
+ 
+						}
+						mod_list.push_back(cur_mod);
+						count_mod++;
+					} while (Module32NextW(snap_mod, &mod_entry));
+				}
+				CloseHandle(access);
+			}
+	}
+		CloseHandle(snap_mod);
+		return count_mod;
+	}
+	auto get_process_inform(proc_info& proc_inform, CONST WCHAR* proc_name, CONST WCHAR* mod_name) -> BOOLEAN
+	{
+		BOOLEAN is_get_sec = FALSE;
+		PIMAGE_NT_HEADERS nt_headers = NULL;
+		PIMAGE_SECTION_HEADER sec = NULL;
+		HANDLE access = INVALID_HANDLE_VALUE;
+		SEC_INFO cur_sec_info = { NULL };
+		proc_inform.sec_list.clear();
+
+		proc_inform.proc_id = process_help::get_process_id(proc_name);
+ 		if (proc_inform.proc_id)
+		{
+			proc_inform.orig_addr_mem = process_help::get_module_address(proc_inform.proc_id, mod_name);
+			if (proc_inform.orig_addr_mem)
+			{
+				proc_inform.coped_size = process_help::get_module_size(proc_inform.proc_id, mod_name);
+
+				access = OpenProcess(PROCESS_ALL_ACCESS, FALSE, proc_inform.proc_id);
+				if (access)
+				{ 
+					proc_inform.coped_mem = reinterpret_cast<uint8_t*>(crt_wrapper::malloc(proc_inform.coped_size + 0x1000));
+					if (proc_inform.coped_mem && ReadProcessMemory(access, proc_inform.orig_addr_mem, proc_inform.coped_mem, proc_inform.coped_size, NULL))
+					{
+						nt_headers = reinterpret_cast<IMAGE_NT_HEADERS*>(reinterpret_cast<uint8_t*>(proc_inform.coped_mem) + reinterpret_cast<IMAGE_DOS_HEADER*>(proc_inform.coped_mem)->e_lfanew);
+						if (nt_headers->Signature == IMAGE_NT_SIGNATURE)
+						{
+							sec = IMAGE_FIRST_SECTION(nt_headers);
+
+							for (size_t sec_id = NULL; sec_id < nt_headers->FileHeader.NumberOfSections; sec_id++)
+							{
+								cur_sec_info.sec_type_info = sec_type_unk;
+								cur_sec_info.raw = sec[sec_id].PointerToRawData;
+								cur_sec_info.raw_size = sec[sec_id].SizeOfRawData;
+								cur_sec_info.rva = sec[sec_id].VirtualAddress;
+								cur_sec_info.virt_size = sec[sec_id].Misc.VirtualSize;
+								cur_sec_info.sec_addr_coped = reinterpret_cast<uint8_t*>(proc_inform.coped_mem) + sec[sec_id].VirtualAddress;
+								cur_sec_info.characteris = sec[sec_id].Characteristics;
+								proc_inform.sec_list.push_back(cur_sec_info);
+							}
+							proc_inform.ep = nt_headers->OptionalHeader.AddressOfEntryPoint;
+							is_get_sec = TRUE; 
+						}
+						else
+						{
+							if (proc_inform.coped_mem)
+							{
+								crt_wrapper::free(proc_inform.coped_mem);
+							}
+						}
+					}
+					else
+					{
+						printf("last error get_process_inform ->\t%p\n", GetLastError());
+
+						if (proc_inform.coped_mem)
+						{
+							crt_wrapper::free(proc_inform.coped_mem);
+						}
+					}
+				}
+				CloseHandle(access);
+			} 
+		}		
+		return is_get_sec;
+	}
+
+}
+
+
+#endif // !PROCESS_UTIL
+```
+
+`vmp_imp_attack/struct.h`:
+
+```h
+#ifndef STRUCT_ENABLE
+
+#define STRUCT_ENABLE 1 
+
+#ifndef WIN32_NO_STATUS
+#define WIN32_NO_STATUS
+#endif
+#include <Windows.h>
+#undef WIN32_NO_STATUS
+#include <ntstatus.h>
+#include <intrin.h> 
+#include <cstdint>
+
+
+#include <TlHelp32.h>
+#include <stdio.h>  
+#include <vector>
+
+#include "disassembly_util.h"
+#include <string>
+
+#define NT_SUCCESS(Status)              ((NTSTATUS)(Status) >= 0)
+
+
+ 
+#define GDI_HANDLE_BUFFER_SIZE32    34
+#define GDI_HANDLE_BUFFER_SIZE64    60
+
+#define GDI_BATCH_BUFFER_SIZE 310
+#define RTL_MAX_DRIVE_LETTERS 32
+
+#define InitializeObjectAttributes(p,n,a,r,s) \
+     do { \
+         (p)->Length = sizeof(OBJECT_ATTRIBUTES); \
+         (p)->RootDirectory = r; \
+         (p)->Attributes = a; \
+         (p)->ObjectName = n; \
+         (p)->SecurityDescriptor = s; \
+         (p)->SecurityQualityOfService = NULL; \
+     } while (0)
+
+
+#ifndef _WIN64
+#define GDI_HANDLE_BUFFER_SIZE GDI_HANDLE_BUFFER_SIZE32
+#else
+#define GDI_HANDLE_BUFFER_SIZE GDI_HANDLE_BUFFER_SIZE64
+#endif
+
+#ifndef INLINE
+#if defined(_MSC_VER)
+#define INLINE __forceinline
+#elif defined(__GNUC__) && __GNUC__ > 3
+#define INLINE inline __attribute__((__always_inline__))
+#else
+#define INLINE inline
+#endif
+#else
+#define INLINE inline
+#endif
+
+#ifndef NO_INLINE
+#if defined(_MSC_VER)
+#define NO_INLINE __declspec(noinline)
+#elif defined(__GNUC__) && __GNUC__ > 3
+#define NO_INLINE __attribute__((noinline)) 
+#endif
+#endif 
+
+
+typedef enum _SYSTEM_INFORMATION_CLASS
+{
+    SystemBasicInformation, // q: SYSTEM_BASIC_INFORMATION
+    SystemProcessorInformation, // q: SYSTEM_PROCESSOR_INFORMATION
+    SystemPerformanceInformation, // q: SYSTEM_PERFORMANCE_INFORMATION
+    SystemTimeOfDayInformation, // q: SYSTEM_TIMEOFDAY_INFORMATION
+    SystemPathInformation, // not implemented
+    SystemProcessInformation, // q: SYSTEM_PROCESS_INFORMATION
+    SystemCallCountInformation, // q: SYSTEM_CALL_COUNT_INFORMATION
+    SystemDeviceInformation, // q: SYSTEM_DEVICE_INFORMATION
+    SystemProcessorPerformanceInformation, // q: SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION
+    SystemFlagsInformation, // q: SYSTEM_FLAGS_INFORMATION
+    SystemCallTimeInformation, // not implemented // SYSTEM_CALL_TIME_INFORMATION // 10
+    SystemModuleInformation, // q: RTL_PROCESS_MODULES
+    SystemLocksInformation, // q: RTL_PROCESS_LOCKS
+    SystemStackTraceInformation, // q: RTL_PROCESS_BACKTRACES
+    SystemPagedPoolInformation, // not implemented
+    SystemNonPagedPoolInformation, // not implemented
+    SystemHandleInformation, // q: SYSTEM_HANDLE_INFORMATION
+    SystemObjectInformation, // q: SYSTEM_OBJECTTYPE_INFORMATION mixed with SYSTEM_OBJECT_INFORMATION
+    SystemPageFileInformation, // q: SYSTEM_PAGEFILE_INFORMATION
+    SystemVdmInstemulInformation, // q
+    SystemVdmBopInformation, // not implemented // 20
+    SystemFileCacheInformation, // q: SYSTEM_FILECACHE_INFORMATION; s (requires SeIncreaseQuotaPrivilege) (info for WorkingSetTypeSystemCache)
+    SystemPoolTagInformation, // q: SYSTEM_POOLTAG_INFORMATION
+    SystemInterruptInformation, // q: SYSTEM_INTERRUPT_INFORMATION
+    SystemDpcBehaviorInformation, // q: SYSTEM_DPC_BEHAVIOR_INFORMATION; s: SYSTEM_DPC_BEHAVIOR_INFORMATION (requires SeLoadDriverPrivilege)
+    SystemFullMemoryInformation, // not implemented
+    SystemLoadGdiDriverInformation, // s (kernel-mode only)
+    SystemUnloadGdiDriverInformation, // s (kernel-mode only)
+    SystemTimeAdjustmentInformation, // q: SYSTEM_QUERY_TIME_ADJUST_INFORMATION; s: SYSTEM_SET_TIME_ADJUST_INFORMATION (requires SeSystemtimePrivilege)
+    SystemSummaryMemoryInformation, // not implemented
+    SystemMirrorMemoryInformation, // s (requires license value "Kernel-MemoryMirroringSupported") (requires SeShutdownPrivilege) // 30
+    SystemPerformanceTraceInformation, // q; s: (type depends on EVENT_TRACE_INFORMATION_CLASS)
+    SystemObsolete0, // not implemented
+    SystemExceptionInformation, // q: SYSTEM_EXCEPTION_INFORMATION
+    SystemCrashDumpStateInformation, // s (requires SeDebugPrivilege)
+    SystemKernelDebuggerInformation, // q: SYSTEM_KERNEL_DEBUGGER_INFORMATION
+    SystemContextSwitchInformation, // q: SYSTEM_CONTEXT_SWITCH_INFORMATION
+    SystemRegistryQuotaInformation, // q: SYSTEM_REGISTRY_QUOTA_INFORMATION; s (requires SeIncreaseQuotaPrivilege)
+    SystemExtendServiceTableInformation, // s (requires SeLoadDriverPrivilege) // loads win32k only
+    SystemPrioritySeperation, // s (requires SeTcbPrivilege)
+    SystemVerifierAddDriverInformation, // s (requires SeDebugPrivilege) // 40
+    SystemVerifierRemoveDriverInformation, // s (requires SeDebugPrivilege)
+    SystemProcessorIdleInformation, // q: SYSTEM_PROCESSOR_IDLE_INFORMATION
+    SystemLegacyDriverInformation, // q: SYSTEM_LEGACY_DRIVER_INFORMATION
+    SystemCurrentTimeZoneInformation, // q
+    SystemLookasideInformation, // q: SYSTEM_LOOKASIDE_INFORMATION
+    SystemTimeSlipNotification, // s (requires SeSystemtimePrivilege)
+    SystemSessionCreate, // not implemented
+    SystemSessionDetach, // not implemented
+    SystemSessionInformation, // not implemented
+    SystemRangeStartInformation, // q: SYSTEM_RANGE_START_INFORMATION // 50
+    SystemVerifierInformation, // q: SYSTEM_VERIFIER_INFORMATION; s (requires SeDebugPrivilege)
+    SystemVerifierThunkExtend, // s (kernel-mode only)
+    SystemSessionProcessInformation, // q: SYSTEM_SESSION_PROCESS_INFORMATION
+    SystemLoadGdiDriverInSystemSpace, // s (kernel-mode only) (same as SystemLoadGdiDriverInformation)
+    SystemNumaProcessorMap, // q
+    SystemPrefetcherInformation, // q: PREFETCHER_INFORMATION; s: PREFETCHER_INFORMATION // PfSnQueryPrefetcherInformation
+    SystemExtendedProcessInformation, // q: SYSTEM_PROCESS_INFORMATION
+    SystemRecommendedSharedDataAlignment, // q
+    SystemComPlusPackage, // q; s
+    SystemNumaAvailableMemory, // 60
+    SystemProcessorPowerInformation, // q: SYSTEM_PROCESSOR_POWER_INFORMATION
+    SystemEmulationBasicInformation, // q
+    SystemEmulationProcessorInformation,
+    SystemExtendedHandleInformation, // q: SYSTEM_HANDLE_INFORMATION_EX
+    SystemLostDelayedWriteInformation, // q: ULONG
+    SystemBigPoolInformation, // q: SYSTEM_BIGPOOL_INFORMATION
+    SystemSessionPoolTagInformation, // q: SYSTEM_SESSION_POOLTAG_INFORMATION
+    SystemSessionMappedViewInformation, // q: SYSTEM_SESSION_MAPPED_VIEW_INFORMATION
+    SystemHotpatchInformation, // q; s
+    SystemObjectSecurityMode, // q // 70
+    SystemWatchdogTimerHandler, // s (kernel-mode only)
+    SystemWatchdogTimerInformation, // q (kernel-mode only); s (kernel-mode only)
+    SystemLogicalProcessorInformation, // q: SYSTEM_LOGICAL_PROCESSOR_INFORMATION
+    SystemWow64SharedInformationObsolete, // not implemented
+    SystemRegisterFirmwareTableInformationHandler, // s (kernel-mode only)
+    SystemFirmwareTableInformation, // SYSTEM_FIRMWARE_TABLE_INFORMATION
+    SystemModuleInformationEx, // q: RTL_PROCESS_MODULE_INFORMATION_EX
+    SystemVerifierTriageInformation, // not implemented
+    SystemSuperfetchInformation, // q; s: SUPERFETCH_INFORMATION // PfQuerySuperfetchInformation
+    SystemMemoryListInformation, // q: SYSTEM_MEMORY_LIST_INFORMATION; s: SYSTEM_MEMORY_LIST_COMMAND (requires SeProfileSingleProcessPrivilege) // 80
+    SystemFileCacheInformationEx, // q: SYSTEM_FILECACHE_INFORMATION; s (requires SeIncreaseQuotaPrivilege) (same as SystemFileCacheInformation)
+    SystemThreadPriorityClientIdInformation, // s: SYSTEM_THREAD_CID_PRIORITY_INFORMATION (requires SeIncreaseBasePriorityPrivilege)
+    SystemProcessorIdleCycleTimeInformation, // q: SYSTEM_PROCESSOR_IDLE_CYCLE_TIME_INFORMATION[]
+    SystemVerifierCancellationInformation, // not implemented // name:wow64:whNT32QuerySystemVerifierCancellationInformation
+    SystemProcessorPowerInformationEx, // not implemented
+    SystemRefTraceInformation, // q; s: SYSTEM_REF_TRACE_INFORMATION // ObQueryRefTraceInformation
+    SystemSpecialPoolInformation, // q; s (requires SeDebugPrivilege) // MmSpecialPoolTag, then MmSpecialPoolCatchOverruns != 0
+    SystemProcessIdInformation, // q: SYSTEM_PROCESS_ID_INFORMATION
+    SystemErrorPortInformation, // s (requires SeTcbPrivilege)
+    SystemBootEnvironmentInformation, // q: SYSTEM_BOOT_ENVIRONMENT_INFORMATION // 90
+    SystemHypervisorInformation, // q; s (kernel-mode only)
+    SystemVerifierInformationEx, // q; s: SYSTEM_VERIFIER_INFORMATION_EX
+    SystemTimeZoneInformation, // s (requires SeTimeZonePrivilege)
+    SystemImageFileExecutionOptionsInformation, // s: SYSTEM_IMAGE_FILE_EXECUTION_OPTIONS_INFORMATION (requires SeTcbPrivilege)
+    SystemCoverageInformation, // q; s // name:wow64:whNT32QuerySystemCoverageInformation; ExpCovQueryInformation
+    SystemPrefetchPatchInformation, // not implemented
+    SystemVerifierFaultsInformation, // s (requires SeDebugPrivilege)
+    SystemSystemPartitionInformation, // q: SYSTEM_SYSTEM_PARTITION_INFORMATION
+    SystemSystemDiskInformation, // q: SYSTEM_SYSTEM_DISK_INFORMATION
+    SystemProcessorPerformanceDistribution, // q: SYSTEM_PROCESSOR_PERFORMANCE_DISTRIBUTION // 100
+    SystemNumaProximityNodeInformation, // q
+    SystemDynamicTimeZoneInformation, // q; s (requires SeTimeZonePrivilege)
+    SystemCodeIntegrityInformation, // q: SYSTEM_CODEINTEGRITY_INFORMATION // SeCodeIntegrityQueryInformation
+    SystemProcessorMicrocodeUpdateInformation, // s
+    SystemProcessorBrandString, // q // HaliQuerySystemInformation -> HalpGetProcessorBrandString, info class 23
+    SystemVirtualAddressInformation, // q: SYSTEM_VA_LIST_INFORMATION[]; s: SYSTEM_VA_LIST_INFORMATION[] (requires SeIncreaseQuotaPrivilege) // MmQuerySystemVaInformation
+    SystemLogicalProcessorAndGroupInformation, // q: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX // since WIN7 // KeQueryLogicalProcessorRelationship
+    SystemProcessorCycleTimeInformation, // q: SYSTEM_PROCESSOR_CYCLE_TIME_INFORMATION[]
+    SystemStoreInformation, // q; s // SmQueryStoreInformation
+    SystemRegistryAppendString, // s: SYSTEM_REGISTRY_APPEND_STRING_PARAMETERS // 110
+    SystemAitSamplingValue, // s: ULONG (requires SeProfileSingleProcessPrivilege)
+    SystemVhdBootInformation, // q: SYSTEM_VHD_BOOT_INFORMATION
+    SystemCpuQuotaInformation, // q; s // PsQueryCpuQuotaInformation
+    SystemNativeBasicInformation, // not implemented
+    SystemSpare1, // not implemented
+    SystemLowPriorityIoInformation, // q: SYSTEM_LOW_PRIORITY_IO_INFORMATION
+    SystemTpmBootEntropyInformation, // q: TPM_BOOT_ENTROPY_NT_RESULT // ExQueryTpmBootEntropyInformation
+    SystemVerifierCountersInformation, // q: SYSTEM_VERIFIER_COUNTERS_INFORMATION
+    SystemPagedPoolInformationEx, // q: SYSTEM_FILECACHE_INFORMATION; s (requires SeIncreaseQuotaPrivilege) (info for WorkingSetTypePagedPool)
+    SystemSystemPtesInformationEx, // q: SYSTEM_FILECACHE_INFORMATION; s (requires SeIncreaseQuotaPrivilege) (info for WorkingSetTypeSystemPtes) // 120
+    SystemNodeDistanceInformation, // q
+    SystemAcpiAuditInformation, // q: SYSTEM_ACPI_AUDIT_INFORMATION // HaliQuerySystemInformation -> HalpAuditQueryResults, info class 26
+    SystemBasicPerformanceInformation, // q: SYSTEM_BASIC_PERFORMANCE_INFORMATION // name:wow64:whNtQuerySystemInformation_SystemBasicPerformanceInformation
+    SystemQueryPerformanceCounterInformation, // q: SYSTEM_QUERY_PERFORMANCE_COUNTER_INFORMATION // since WIN7 SP1
+    SystemSessionBigPoolInformation, // q: SYSTEM_SESSION_POOLTAG_INFORMATION // since WIN8
+    SystemBootGraphicsInformation, // q; s: SYSTEM_BOOT_GRAPHICS_INFORMATION (kernel-mode only)
+    SystemScrubPhysicalMemoryInformation, // q; s: MEMORY_SCRUB_INFORMATION
+    SystemBadPageInformation,
+    SystemProcessorProfileControlArea, // q; s: SYSTEM_PROCESSOR_PROFILE_CONTROL_AREA
+    SystemCombinePhysicalMemoryInformation, // s: MEMORY_COMBINE_INFORMATION, MEMORY_COMBINE_INFORMATION_EX, MEMORY_COMBINE_INFORMATION_EX2 // 130
+    SystemEntropyInterruptTimingCallback,
+    SystemConsoleInformation, // q: SYSTEM_CONSOLE_INFORMATION
+    SystemPlatformBinaryInformation, // q: SYSTEM_PLATFORM_BINARY_INFORMATION
+    SystemThrottleNotificationInformation,
+    SystemHypervisorProcessorCountInformation, // q: SYSTEM_HYPERVISOR_PROCESSOR_COUNT_INFORMATION
+    SystemDeviceDataInformation, // q: SYSTEM_DEVICE_DATA_INFORMATION
+    SystemDeviceDataEnumerationInformation,
+    SystemMemoryTopologyInformation, // q: SYSTEM_MEMORY_TOPOLOGY_INFORMATION
+    SystemMemoryChannelInformation, // q: SYSTEM_MEMORY_CHANNEL_INFORMATION
+    SystemBootLogoInformation, // q: SYSTEM_BOOT_LOGO_INFORMATION // 140
+    SystemProcessorPerformanceInformationEx, // q: SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION_EX // since WINBLUE
+    SystemSpare0,
+    SystemSecureBootPolicyInformation, // q: SYSTEM_SECUREBOOT_POLICY_INFORMATION
+    SystemPageFileInformationEx, // q: SYSTEM_PAGEFILE_INFORMATION_EX
+    SystemSecureBootInformation, // q: SYSTEM_SECUREBOOT_INFORMATION
+    SystemEntropyInterruptTimingRawInformation,
+    SystemPortableWorkspaceEfiLauncherInformation, // q: SYSTEM_PORTABLE_WORKSPACE_EFI_LAUNCHER_INFORMATION
+    SystemFullProcessInformation, // q: SYSTEM_PROCESS_INFORMATION with SYSTEM_PROCESS_INFORMATION_EXTENSION (requires admin)
+    SystemKernelDebuggerInformationEx, // q: SYSTEM_KERNEL_DEBUGGER_INFORMATION_EX
+    SystemBootMetadataInformation, // 150
+    SystemSoftRebootInformation,
+    SystemElamCertificateInformation, // s: SYSTEM_ELAM_CERTIFICATE_INFORMATION
+    SystemOfflineDumpConfigInformation,
+    SystemProcessorFeaturesInformation, // q: SYSTEM_PROCESSOR_FEATURES_INFORMATION
+    SystemRegistryReconciliationInformation,
+    SystemEdidInformation,
+    SystemManufacturingInformation, // q: SYSTEM_MANUFACTURING_INFORMATION // since THRESHOLD
+    SystemEnergyEstimationConfigInformation, // q: SYSTEM_ENERGY_ESTIMATION_CONFIG_INFORMATION
+    SystemHypervisorDetailInformation, // q: SYSTEM_HYPERVISOR_DETAIL_INFORMATION
+    SystemProcessorCycleStatsInformation, // q: SYSTEM_PROCESSOR_CYCLE_STATS_INFORMATION // 160
+    SystemVmGenerationCountInformation,
+    SystemTrustedPlatformModuleInformation, // q: SYSTEM_TPM_INFORMATION
+    SystemKernelDebuggerFlags,
+    SystemCodeIntegrityPolicyInformation, // q: SYSTEM_CODEINTEGRITYPOLICY_INFORMATION
+    SystemIsolatedUserModeInformation, // q: SYSTEM_ISOLATED_USER_MODE_INFORMATION
+    SystemHardwareSecurityTestInterfaceResultsInformation,
+    SystemSingleModuleInformation, // q: SYSTEM_SINGLE_MODULE_INFORMATION
+    SystemAllowedCpuSetsInformation,
+    SystemDmaProtectionInformation, // q: SYSTEM_DMA_PROTECTION_INFORMATION
+    SystemInterruptCpuSetsInformation, // q: SYSTEM_INTERRUPT_CPU_SET_INFORMATION // 170
+    SystemSecureBootPolicyFullInformation, // q: SYSTEM_SECUREBOOT_POLICY_FULL_INFORMATION
+    SystemCodeIntegrityPolicyFullInformation,
+    SystemAffinitizedInterruptProcessorInformation,
+    SystemRootSiloInformation, // q: SYSTEM_ROOT_SILO_INFORMATION
+    SystemCpuSetInformation, // q: SYSTEM_CPU_SET_INFORMATION // since THRESHOLD2
+    SystemCpuSetTagInformation, // q: SYSTEM_CPU_SET_TAG_INFORMATION
+    SystemWin32WerStartCallout,
+    SystemSecureKernelProfileInformation, // q: SYSTEM_SECURE_KERNEL_HYPERGUARD_PROFILE_INFORMATION
+    SystemCodeIntegrityPlatformManifestInformation, // q: SYSTEM_SECUREBOOT_PLATFORM_MANIFEST_INFORMATION // since REDSTONE
+    SystemInterruptSteeringInformation, // 180
+    SystemSupportedProcessorArchitectures,
+    SystemMemoryUsageInformation, // q: SYSTEM_MEMORY_USAGE_INFORMATION
+    SystemCodeIntegrityCertificateInformation, // q: SYSTEM_CODEINTEGRITY_CERTIFICATE_INFORMATION
+    SystemPhysicalMemoryInformation, // q: SYSTEM_PHYSICAL_MEMORY_INFORMATION // since REDSTONE2
+    SystemControlFlowTransition,
+    SystemKernelDebuggingAllowed,
+    SystemActivityModerationExeState, // SYSTEM_ACTIVITY_MODERATION_EXE_STATE
+    SystemActivityModerationUserSettings, // SYSTEM_ACTIVITY_MODERATION_USER_SETTINGS
+    SystemCodeIntegrityPoliciesFullInformation,
+    SystemCodeIntegrityUnlockInformation, // SYSTEM_CODEINTEGRITY_UNLOCK_INFORMATION // 190
+    SystemIntegrityQuotaInformation,
+    SystemFlushInformation, // q: SYSTEM_FLUSH_INFORMATION
+    MaxSystemInfoClass
+} SYSTEM_INFORMATION_CLASS;
+
+
+typedef enum _KWAIT_REASON
+{
+    Executive,
+    FreePage,
+    PageIn,
+    PoolAllocation,
+    DelayExecution,
+    Suspended,
+    UserRequest,
+    WrExecutive,
+    WrFreePage,
+    WrPageIn,
+    WrPoolAllocation,
+    WrDelayExecution,
+    WrSuspended,
+    WrUserRequest,
+    WrEventPair,
+    WrQueue,
+    WrLpcReceive,
+    WrLpcReply,
+    WrVirtualMemory,
+    WrPageOut,
+    WrRendezvous,
+    WrKeyedEvent,
+    WrTerminated,
+    WrProcessInSwap,
+    WrCpuRateControl,
+    WrCalloutStack,
+    WrKernel,
+    WrResource,
+    WrPushLock,
+    WrMutex,
+    WrQuantumEnd,
+    WrDispatchInt,
+    WrPreempted,
+    WrYieldExecution,
+    WrFastMutex,
+    WrGuardedMutex,
+    WrRundown,
+    WrAlertByThreadId,
+    WrDeferredPreempt,
+    MaximumWaitReason
+} KWAIT_REASON;
+
+typedef enum _sec_type
+{
+    sec_type_unk = 0,
+    sec_type_prot = 1,
+    sec_type_prog = 2
+}sec_type;
+
+typedef enum _protector_type
+{
+    prot_unk,
+    prot_vmp = 1,
+    prot_themida = 2
+}protector_type;
+
+typedef enum _emul_type_imp
+{
+    emul_unk = 0,
+    emul_virt_imp = 1,
+    emul_obf_imp = 2
+}emul_type_imp;
+
+typedef enum _TYPE_OBF_COMMAND
+{
+    obf_unk = NULL,
+    obf_lea,
+    obf_add,
+    obf_sub,
+    obf_xor,
+    obf_and,
+    obf_or
+}TYPE_OBF_COMMAND;
+
+ 
+
+typedef struct _UNICODE_STRING
+{
+
+    USHORT Length;
+    USHORT MaximumLength;
+    PWSTR Buffer;
+} UNICODE_STRING, * PUNICODE_STRING;
+
+
+typedef struct _CLIENT_ID
+{
+    HANDLE UniqueProcess;
+    HANDLE UniqueThread;
+} CLIENT_ID, * PCLIENT_ID;
+
+
+
+typedef LONG KPRIORITY, * PKPRIORITY;
+
+typedef struct _SYSTEM_THREAD_INFORMATION
+{
+    LARGE_INTEGER KernelTime;
+    LARGE_INTEGER UserTime;
+    LARGE_INTEGER CreateTime;
+    ULONG WaitTime;
+    PVOID StartAddress;
+    CLIENT_ID ClientId;
+    KPRIORITY Priority;
+    LONG BasePriority;
+    ULONG ContextSwitches;
+    ULONG ThreadState;
+    KWAIT_REASON WaitReason;
+} SYSTEM_THREAD_INFORMATION, * PSYSTEM_THREAD_INFORMATION;
+
+typedef struct _SYSTEM_PROCESS_INFORMATION
+{
+    ULONG NextEntryOffset;
+    ULONG NumberOfThreads;
+    LARGE_INTEGER WorkingSetPrivateSize; // Since Vista
+    ULONG HardFaultCount; // Since Windows 7
+    ULONG NumberOfThreadsHighWatermark; // Since Windows 7
+    ULONGLONG CycleTime; // Since Windows 7
+    LARGE_INTEGER CreateTime;
+    LARGE_INTEGER UserTime;
+    LARGE_INTEGER KernelTime;
+    UNICODE_STRING ImageName;
+    KPRIORITY BasePriority;
+    HANDLE UniqueProcessId;
+    HANDLE InheritedFromUniqueProcessId;
+    ULONG HandleCount;
+    ULONG SessionId;
+    ULONG_PTR UniqueProcessKey; // Since Vista (requires SystemExtendedProcessInformation)
+    SIZE_T PeakVirtualSize;
+    SIZE_T VirtualSize;
+    ULONG PageFaultCount;
+    SIZE_T PeakWorkingSetSize;
+    SIZE_T WorkingSetSize;
+    SIZE_T QuotaPeakPagedPoolUsage;
+    SIZE_T QuotaPagedPoolUsage;
+    SIZE_T QuotaPeakNonPagedPoolUsage;
+    SIZE_T QuotaNonPagedPoolUsage;
+    SIZE_T PagefileUsage;
+    SIZE_T PeakPagefileUsage;
+    SIZE_T PrivatePageCount;
+    LARGE_INTEGER ReadOperationCount;
+    LARGE_INTEGER WriteOperationCount;
+    LARGE_INTEGER OtherOperationCount;
+    LARGE_INTEGER ReadTransferCount;
+    LARGE_INTEGER WriteTransferCount;
+    LARGE_INTEGER OtherTransferCount;
+    SYSTEM_THREAD_INFORMATION Threads[1];
+} SYSTEM_PROCESS_INFORMATION, * PSYSTEM_PROCESS_INFORMATION;
+
+typedef struct _UC_MAP_CODE
+{
+    uint64_t addr;
+    PVOID coped;
+    uint32_t prot;
+    uint32_t size_code;
+}UC_MAP_CODE;
+
+typedef struct _OBF_COMMAND
+{
+    TYPE_OBF_COMMAND type;
+    uint64_t imm;
+}OBF_COMMAND;
+
+typedef struct _OBF_COMMAND_INFO
+{
+    TYPE_OBF_COMMAND type;
+    uint64_t imm;
+    uint64_t reg_value;
+}OBF_COMMAND_INFO;
+
+typedef struct _SEC_INFO
+{
+    uint8_t* sec_addr_coped;
+    uint32_t rva;
+    uint32_t raw;
+    uint32_t virt_size;
+    uint32_t raw_size;
+    uint32_t characteris;
+    sec_type sec_type_info;
+}SEC_INFO;
+
+typedef struct _MODULE_INFO
+{
+    BOOLEAN is_any_export;
+    uint8_t* coped_mem;
+    uint8_t* orig_addr_mem;
+    uint32_t coped_size;
+    std::wstring mod_name;
+}MODULE_INFO;
+
+typedef struct _proc_info
+{
+    uint8_t* coped_mem;
+    uint8_t* orig_addr_mem;
+    uint32_t coped_size;
+    uint32_t proc_id;
+    uint32_t ep;
+    protector_type prot_type;
+    std::vector<SEC_INFO> sec_list;
+    std::vector< MODULE_INFO> mod_list;
+}proc_info;
+
+typedef struct _IMP_WRAPPER_DIS_OLD
+{
+    uint32_t count_get_vip; //x64 - use lea reg,[rip+offset], x32 - use reloce
+    uint32_t count_read_obf_imp;
+    uint32_t count_decrypt_imp;
+    ZydisRegister reg_base;
+}VMP_IMP_WRAPPER_DIS_OLD;
+
+typedef struct _VMP_IMP_WRAPPER_DIS_NEXT
+{
+    uint32_t count_dis;
+    uint32_t count_add;//adc
+    uint32_t count_sub;//sbb
+    uint32_t count_jcc;
+    uint32_t count_ret;
+    uint32_t count_push_eflag;
+    uint32_t count_call_imm; //hide count_get_vip
+}VMP_IMP_WRAPPER_DIS_NEXT;
+
+typedef struct _IMP_WRAPPER_DIS
+{
+    uint32_t count_dis;
+    uint32_t count_jcc;
+    uint32_t count_ret;
+    uint32_t count_push_eflag;
+    uint32_t count_call_imm; //hide count_get_vip
+    uint32_t count_read_obf_imp;
+    uint32_t count_decrypt_imp;
+    size_t addr_decrypt_imp;
+    ZydisRegister reg_base;
+}VMP_IMP_WRAPPER_DIS;
+
+
+typedef struct _THEMIDA_IMP_WRAPPER_DIS
+{
+    uint32_t count_dis;
+    uint32_t count_add;
+    uint32_t count_sub;
+    uint32_t count_push_mem;
+    uint32_t count_xor;
+    uint32_t count_and;
+    uint32_t count_or; 
+    uint32_t count_jcc;
+    uint8_t* first_jmp_next_addr;
+}THEMIDA_IMP_WRAPPER_DIS;
+
+typedef struct _protector_imp_info
+{
+    BOOLEAN is_get_imp;
+    BOOLEAN is_virtulized;
+    size_t addr_wrapper_imp;
+    size_t base_obf_addr;
+    size_t diff_offset;
+    size_t imp_obf_ptr_addr;
+    size_t imp_obf_ptr_rva;
+    size_t imp_obf_read_instr_rva;
+    size_t count_command;
+    protector_type prot_type;
+    OBF_COMMAND command[20];
+    std::string imp_name;
+    std::wstring mod_name;
+}protector_imp_info;
+
+typedef struct _EMUL_CODE_INFO
+{
+    uint32_t emul_rva;
+    emul_type_imp imp_type;
+}EMUL_CODE_INFO;
+
+typedef struct _IMP_EMUL_INFO
+{
+    BOOLEAN is_log;
+    protector_imp_info* obf_imp_info;
+    uint32_t count_shl;
+    uint32_t count_shr; 
+    size_t imm_dump[4];
+    uint32_t count_command;
+    OBF_COMMAND_INFO command[256];
+    size_t addr_emul_start;
+    size_t cur_mod_addr;
+    uint32_t cur_mod_size;
+    size_t vip_exit;
+    size_t emul_count; //add for debug 
+    proc_info* proc_information;
+}IMP_EMUL_INFO, * PIMP_EMUL_INFO;
+ #endif // STRUCT_ENABLE
+```
+
+`vmp_imp_attack/unicore_util.h`:
+
+```h
+#ifndef UNICORE_UTIL
+#define UNICORE_UTIL 1
+#include "struct.h"
+#include "disassembly_util.h"
+#include <unicorn/unicorn.h>
+
+
+#ifndef STACK_SIZE
+#define STACK_SIZE 10 * 0x1000
+#endif // !STACK_SIZE
+
+
+#ifndef EMU_MODE
+#ifndef _WIN64
+#define EMU_MODE UC_MODE_32
+#define REG_VSP UC_X86_REG_ESP
+#define REG_VIP UC_X86_REG_EIP
+#define REG_RAX UC_X86_REG_EAX
+#define REG_RCX UC_X86_REG_ECX
+#define REG_RDX UC_X86_REG_EDX
+#define REG_RBX UC_X86_REG_EBX
+#define REG_RBP UC_X86_REG_EBP
+#define REG_RSI UC_X86_REG_ESI
+#define REG_RDI UC_X86_REG_EDI
+#else
+#define EMU_MODE UC_MODE_64
+#define REG_VSP UC_X86_REG_RSP
+#define REG_VIP UC_X86_REG_RIP
+#define REG_RAX UC_X86_REG_RAX
+#define REG_RCX UC_X86_REG_RCX
+#define REG_RDX UC_X86_REG_RDX
+#define REG_RBX UC_X86_REG_RBX
+#define REG_RBP UC_X86_REG_RBP
+#define REG_RSI UC_X86_REG_RSI
+#define REG_RDI UC_X86_REG_RDI
+
+#define REG_R8 UC_X86_REG_R8
+#define REG_R9 UC_X86_REG_R9
+#define REG_R10 UC_X86_REG_R10
+#define REG_R11 UC_X86_REG_R11
+#define REG_R12 UC_X86_REG_R12
+#define REG_R13 UC_X86_REG_R13
+#define REG_R14 UC_X86_REG_R14
+#define REG_R15 UC_X86_REG_R15 
+#endif // !_WIN64 
+#endif // !EMU_MODE
+
+namespace unicore_util
+{
+ 
+    //sorry for the code, but FUCK wrong order and "magic" +old +2
+   // 
+   //ZYDIS_REGISTER_RAX,
+   //ZYDIS_REGISTER_RCX,
+   //ZYDIS_REGISTER_RDX,
+   //ZYDIS_REGISTER_RBX,
+   //ZYDIS_REGISTER_RSP,
+   //ZYDIS_REGISTER_RBP,
+   //ZYDIS_REGISTER_RSI,
+   //ZYDIS_REGISTER_RDI,
+   //ZYDIS_REGISTER_R8,
+   //ZYDIS_REGISTER_R9,
+   //ZYDIS_REGISTER_R10,
+   //ZYDIS_REGISTER_R11,
+   //ZYDIS_REGISTER_R12,
+   //ZYDIS_REGISTER_R13,
+   //ZYDIS_REGISTER_R14,
+   //ZYDIS_REGISTER_R15,
+   //
+   //UC_X86_REG_RAX,
+   //UC_X86_REG_RBP,
+   //UC_X86_REG_RBX,
+   //UC_X86_REG_RCX,
+   //UC_X86_REG_RDI,
+   //UC_X86_REG_RDX,
+   //UC_X86_REG_RIP,
+   //UC_X86_REG_RSI = UC_X86_REG_RIP + 2,
+   //UC_X86_REG_RSP,
+
+    auto reg_conv(ZydisRegister* reg) -> uint32_t
+    {  
+        ZydisRegister zydis_reg[] =
+        {
+            ZYDIS_REGISTER_RAX, ZYDIS_REGISTER_RCX, ZYDIS_REGISTER_RDX,
+            ZYDIS_REGISTER_RBX, ZYDIS_REGISTER_RSP, ZYDIS_REGISTER_RBP,
+            ZYDIS_REGISTER_RSI, ZYDIS_REGISTER_RDI, ZYDIS_REGISTER_R8,
+            ZYDIS_REGISTER_R9,  ZYDIS_REGISTER_R10, ZYDIS_REGISTER_R11,
+            ZYDIS_REGISTER_R12, ZYDIS_REGISTER_R13, ZYDIS_REGISTER_R14,
+            ZYDIS_REGISTER_R15, ZYDIS_REGISTER_EAX, ZYDIS_REGISTER_ECX,
+            ZYDIS_REGISTER_EDX, ZYDIS_REGISTER_EBX, ZYDIS_REGISTER_ESP,
+            ZYDIS_REGISTER_EBP, ZYDIS_REGISTER_ESI, ZYDIS_REGISTER_EDI,
+            ZYDIS_REGISTER_R8D, ZYDIS_REGISTER_R9D, ZYDIS_REGISTER_R10D,
+            ZYDIS_REGISTER_R11D,ZYDIS_REGISTER_R12D, ZYDIS_REGISTER_R13D,
+            ZYDIS_REGISTER_R14D, ZYDIS_REGISTER_R15D, ZYDIS_REGISTER_AX,
+            ZYDIS_REGISTER_CX,  ZYDIS_REGISTER_DX,  ZYDIS_REGISTER_BX,
+            ZYDIS_REGISTER_SP,  ZYDIS_REGISTER_BP,  ZYDIS_REGISTER_SI,
+            ZYDIS_REGISTER_DI,  ZYDIS_REGISTER_R8W, ZYDIS_REGISTER_R9W,
+            ZYDIS_REGISTER_R10W, ZYDIS_REGISTER_R11W, ZYDIS_REGISTER_R12W,
+            ZYDIS_REGISTER_R13W, ZYDIS_REGISTER_R14W, ZYDIS_REGISTER_R15W,
+            ZYDIS_REGISTER_AL,  ZYDIS_REGISTER_CL,  ZYDIS_REGISTER_DL,
+            ZYDIS_REGISTER_BL,  ZYDIS_REGISTER_AH,  ZYDIS_REGISTER_CH,
+            ZYDIS_REGISTER_DH,  ZYDIS_REGISTER_BH,  ZYDIS_REGISTER_SPL,
+            ZYDIS_REGISTER_BPL, ZYDIS_REGISTER_SIL, ZYDIS_REGISTER_DIL,
+            ZYDIS_REGISTER_R8B, ZYDIS_REGISTER_R9B, ZYDIS_REGISTER_R10B,
+            ZYDIS_REGISTER_R11B, ZYDIS_REGISTER_R12B, ZYDIS_REGISTER_R13B,
+            ZYDIS_REGISTER_R14B, ZYDIS_REGISTER_R15B,
+            ZYDIS_REGISTER_RIP, ZYDIS_REGISTER_EIP
+        };
+
+        uint32_t  uc_reg[] =
+      {
+            UC_X86_REG_RAX, UC_X86_REG_RCX, UC_X86_REG_RDX,
+            UC_X86_REG_RBX, UC_X86_REG_RSP, UC_X86_REG_RBP,
+            UC_X86_REG_RSI, UC_X86_REG_RDI, UC_X86_REG_R8,
+            UC_X86_REG_R9,  UC_X86_REG_R10, UC_X86_REG_R11,
+            UC_X86_REG_R12, UC_X86_REG_R13, UC_X86_REG_R14,
+            UC_X86_REG_R15, UC_X86_REG_EAX, UC_X86_REG_ECX,
+            UC_X86_REG_EDX, UC_X86_REG_EBX, UC_X86_REG_ESP,
+            UC_X86_REG_EBP, UC_X86_REG_ESI, UC_X86_REG_EDI,
+            UC_X86_REG_R8D, UC_X86_REG_R9D, UC_X86_REG_R10D,
+            UC_X86_REG_R11D, UC_X86_REG_R12D, UC_X86_REG_R13D,
+            UC_X86_REG_R14D, UC_X86_REG_R15D, UC_X86_REG_AX,
+            UC_X86_REG_CX,  UC_X86_REG_DX,  UC_X86_REG_BX,
+            UC_X86_REG_SP,  UC_X86_REG_BP,  UC_X86_REG_SI,
+            UC_X86_REG_DI,  UC_X86_REG_R8W, UC_X86_REG_R9W,
+            UC_X86_REG_R10W, UC_X86_REG_R11W, UC_X86_REG_R12W,
+            UC_X86_REG_R13W, UC_X86_REG_R14W, UC_X86_REG_R15W,
+            UC_X86_REG_AL,  UC_X86_REG_CL,  UC_X86_REG_DL,
+            UC_X86_REG_BL,  UC_X86_REG_AH,  UC_X86_REG_CH,
+            UC_X86_REG_DH,  UC_X86_REG_BH,  UC_X86_REG_SPL,
+            UC_X86_REG_BPL, UC_X86_REG_SIL, UC_X86_REG_DIL,
+            UC_X86_REG_R8B, UC_X86_REG_R9B, UC_X86_REG_R10B,
+            UC_X86_REG_R11B, UC_X86_REG_R12B, UC_X86_REG_R13B,
+            UC_X86_REG_R14B, UC_X86_REG_R15B,
+            UC_X86_REG_RIP, UC_X86_REG_EIP
+        };
+
+        for (size_t i = NULL; i < _countof(zydis_reg); i++) 
+        {
+            if (zydis_reg[i] == *reg) 
+            {
+                return uc_reg[i];
+            }
+        } 
+        return UC_X86_REG_INVALID;
+    }
+
+    auto read_reg(uc_engine* uc, ZydisRegister* reg, size_t* value) -> BOOLEAN
+    {
+        size_t cur_reg = NULL;
+
+
+        cur_reg = reg_conv(reg);
+
+        if (cur_reg != UC_X86_REG_INVALID)
+        {
+            return uc_reg_read(uc, cur_reg, value) == UC_ERR_OK;
+        }
+        return FALSE;
+    }
+
+    auto write_reg(uc_engine* uc, ZydisRegister* reg, uint64_t* value) -> BOOLEAN
+    {
+#ifndef _WIN64
+        uint32_t cur_reg = NULL;
+#else
+        uint64_t cur_reg = NULL;
+#endif // !_WIN64
+
+        cur_reg = reg_conv(reg);
+
+        if (cur_reg != UC_X86_REG_INVALID)
+        {
+            return uc_reg_write(uc, cur_reg, value) == UC_ERR_OK;
+        }
+        return FALSE;
+    }
+
+
+    /*
+    DWORD64 Rax;
+    DWORD64 Rcx;
+    DWORD64 Rdx;
+    DWORD64 Rbx;
+    DWORD64 Rsp;
+    DWORD64 Rbp;
+    DWORD64 Rsi;
+    DWORD64 Rdi;
+    DWORD64 R8;
+    DWORD64 R9;
+    DWORD64 R10;
+    DWORD64 R11;
+    DWORD64 R12;
+    DWORD64 R13;
+    DWORD64 R14;
+    DWORD64 R15;
+
+*/
+    NO_INLINE  auto init_reg(uc_engine* uc, uint64_t r_rsp_addr) -> VOID
+    {
+        uint64_t reg = NULL;
+        uc_err err;
+        uint8_t stack_null[sizeof(PVOID) * 5] = { NULL };
+
+        err = uc_mem_map(uc, r_rsp_addr, STACK_SIZE, UC_PROT_READ | UC_PROT_WRITE);
+        if (err)
+        {
+            printf("Failed stack alloce uc_mem_map() with error returned: %u\n", err);
+        }
+
+        r_rsp_addr = reinterpret_cast<uint64_t>(reinterpret_cast<uint8_t*>(r_rsp_addr) + 0x1000 * 5);
+        err = uc_reg_write(uc, REG_VSP, &r_rsp_addr);
+        if (err)
+        {
+            printf("Failed VSP write uc_mem_write() with error returned: %u\n", err);
+        }
+        err = uc_mem_write(uc, r_rsp_addr, stack_null, sizeof(stack_null));
+        if (err)
+        {
+            printf("Failed stack NULL 1 uc_mem_write() with error returned: %u\n", err);
+        }
+
+        err = uc_mem_write(uc, reinterpret_cast<uint64_t>(reinterpret_cast<uint8_t*>(r_rsp_addr) - 20), stack_null, sizeof(stack_null));
+        if (err)
+        {
+            printf("Failed stack NULL 2 uc_mem_write() with error returned: %u\n", err);
+        }
+        err = uc_mem_write(uc, reinterpret_cast<uint64_t>(reinterpret_cast<uint8_t*>(r_rsp_addr) + 20), stack_null, sizeof(stack_null));
+        if (err)
+        {
+            printf("Failed stack NULL 3 uc_mem_write() with error returned: %u\n", err);
+        }
+        uc_reg_write(uc, REG_RAX, &reg);
+        uc_reg_write(uc, REG_RCX, &reg);
+        uc_reg_write(uc, REG_RDX, &reg);
+        uc_reg_write(uc, REG_RBX, &reg);
+        uc_reg_write(uc, REG_RBP, &reg);
+        uc_reg_write(uc, REG_RSI, &reg);
+        uc_reg_write(uc, REG_RDI, &reg);
+
+
+#ifdef _WIN64
+        uc_reg_write(uc, REG_R8, &reg);
+        uc_reg_write(uc, REG_R9, &reg);
+        uc_reg_write(uc, REG_R10, &reg);
+        uc_reg_write(uc, REG_R11, &reg);
+        uc_reg_write(uc, REG_R12, &reg);
+        uc_reg_write(uc, REG_R13, &reg);
+        uc_reg_write(uc, REG_R14, &reg);
+        uc_reg_write(uc, REG_R15, &reg);
+#endif // _WIN64  
+    }
+
+    
+
+}
+#endif // !UNICORE_UTIL
+
+```
+
+`vmp_imp_attack/vmp_imp_attack.cpp`:
+
+```cpp
+#include "process_util.h" 
+#include "get_protector.h"
+#include "import_scan.h"
+ 
+auto hook_imp_vmp(uint8_t* module_addr, uint32_t rva_pointer, uint32_t crypte_key_add, size_t hook) -> BOOLEAN
+{
+    BOOLEAN is_set_hook = FALSE;
+    DWORD old_prot = NULL;
+    HANDLE access = NULL;
+    uint8_t* addr_hook = NULL;
+    size_t crypted_hook = NULL;
+
+    addr_hook = module_addr + rva_pointer;
+    access = OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId());
+    if (access)
+    {
+        if (VirtualProtectEx(access, addr_hook, sizeof(PVOID), PAGE_EXECUTE_READWRITE, &old_prot))
+        {
+            crypted_hook = hook - crypte_key_add;
+            *reinterpret_cast<size_t*>(addr_hook) = crypted_hook;
+            is_set_hook = TRUE;
+            VirtualProtectEx(access, addr_hook, sizeof(PVOID), old_prot, &old_prot);
+            //MessageBoxW(NULL, L"Hook set!\n", L"Hook set!\n", MB_OK);
+        }
+        CloseHandle(access);
+    }
+    return is_set_hook;
+}
+
+//The protector sections have RWX permissions, so there is no need to modify page protections.
+NO_INLINE auto hook_imp_themida_x32(uint8_t* module_addr, uint32_t rva_pointer, uint32_t crypte_key_xor, uint32_t crypte_key_sub, size_t hook)
+{
+    BOOLEAN is_set_hook = FALSE;
+    DWORD old_prot = NULL;
+    HANDLE access = NULL;
+    uint8_t* addr_hook = NULL;
+    size_t crypted_hook = NULL;
+
+    addr_hook = module_addr + rva_pointer;
+    access = OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId());
+    if (access)
+    {
+        if (VirtualProtectEx(access, addr_hook, sizeof(PVOID), PAGE_EXECUTE_READWRITE, &old_prot))
+        {
+            crypted_hook = (hook ^ crypte_key_xor) + crypte_key_sub;
+            *reinterpret_cast<size_t*>(addr_hook) = crypted_hook;
+            is_set_hook = TRUE;
+            VirtualProtectEx(access, addr_hook, sizeof(PVOID), old_prot, &old_prot);
+            //MessageBoxW(NULL, L"Hook set!\n", L"Hook set!\n", MB_OK);
+        }
+        CloseHandle(access);
+    }
+    return is_set_hook;
+}
+
+//The protector sections have RWX permissions, so there is no need to modify page protections.
+NO_INLINE auto hook_imp_themida_x64(uint8_t* module_addr, uint32_t rva_pointer, uint32_t crypte_key_sub, uint32_t crypte_key_xor_1, uint32_t crypte_key_xor_2, size_t hook)
+{
+    BOOLEAN is_set_hook = FALSE;
+    DWORD old_prot = NULL;
+    HANDLE access = NULL;
+    uint8_t* addr_hook = NULL;
+    size_t crypted_hook = NULL;
+
+    addr_hook = module_addr + rva_pointer;
+    access = OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId());
+    if (access)
+    {
+        if (VirtualProtectEx(access, addr_hook, sizeof(PVOID), PAGE_EXECUTE_READWRITE, &old_prot))
+        {
+            crypted_hook = (((hook >> 0x20) ^ crypte_key_xor_2) << 0x20);
+            crypted_hook |= (((hook & UINT_MAX) ^ crypte_key_xor_1) + crypte_key_sub);
+            *reinterpret_cast<size_t*>(addr_hook) = crypted_hook;
+            is_set_hook = TRUE;
+            VirtualProtectEx(access, addr_hook, sizeof(PVOID), old_prot, &old_prot);
+            //MessageBoxW(NULL, L"Hook set!\n", L"Hook set!\n", MB_OK);
+        }
+        CloseHandle(access);
+    }
+    return is_set_hook;
+}
+int main()
+{
+    BOOLEAN is_get_proc_info = FALSE;
+    uint32_t obf_imp_count = NULL;
+    uint32_t virt_imp_count = NULL; 
+    proc_info proc_inform;
+    std::vector<protector_imp_info> imp_list_obf;
+    std::vector<protector_imp_info> imp_list_virt;
+
+    SetConsoleTitleW(L"IMPORT");
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+
+    is_get_proc_info =  process_help::get_process_inform(proc_inform,L"themida_test_x64_protected.exe", L"themida_test_x64_protected.exe");
+    if (is_get_proc_info)
+    {
+        if (prot_type_use::check_vmp_sec(proc_inform) || prot_type_use::check_themida_sec(proc_inform))
+        {
+            if (process_help::get_module_list_proc(proc_inform.proc_id, proc_inform.mod_list))
+            { 
+                obf_imp_count = imp_scan::scan_obf_imp(imp_list_obf, proc_inform);
+                virt_imp_count = imp_scan::scan_virt_imp(imp_list_virt, proc_inform);
+                 
+                printf("\n--------------------[OBFUSCATED]--------------------\n\n");
+                printf("[IMP COUNT ->\t%p\n", imp_list_obf.size());
+
+                for (size_t i = NULL; i < imp_list_obf.size(); i++)
+                {
+                    printf("[OBF MOD NAME] ->\t%ls\n", imp_list_obf[i].mod_name.c_str());
+                    printf("[OBF API NAME] ->\t%s\n", imp_list_obf[i].imp_name.c_str());
+                    printf("[API RVA CRYPTED PTR] ->\t%x\n", imp_list_obf[i].imp_obf_ptr_rva);
+
+                    for (size_t j = NULL; j < imp_list_obf[i].count_command; j++)
+                    {
+                        switch (imp_list_obf[i].command[j].type)
+                        {
+                        case obf_lea:
+                        case obf_add:
+                        {
+                            printf("[KEY] command add\t");
+                            break;
+                        }
+                        case obf_sub:
+                        {
+                            printf("[KEY] command sub\t");
+                            break;
+                        }
+                        case obf_xor:
+                        {
+                            printf("[KEY] command xor\t");
+                            break;
+                        }
+                        case obf_and:
+                        {
+                            printf("[KEY] command and\t");
+                            break;
+                        }
+                        case obf_or:
+                        {
+                            printf("[KEY] command or\t");
+                            break;
+                        }
+                        default:
+                            break;
+                        }
+                       if (imp_list_obf[i].command[j].type != obf_unk)
+                       {
+                           printf(" with crypt_key ->\t%x\n", imp_list_obf[i].command[j].imm);
+                       }
+                    }
+
+                }
+
+                printf("\n--------------------[VIRTUALIZED]--------------------\n\n");
+                printf("[IMP COUNT ->\t%p\n", imp_list_virt.size());
+                for (size_t i = NULL; i < imp_list_virt.size(); i++)
+                {
+                    printf("[OBF MOD NAME] ->\t%ls\n", imp_list_virt[i].mod_name.c_str());
+                    printf("[OBF API NAME] ->\t%s\n", imp_list_virt[i].imp_name.c_str());
+                    printf("[API RVA CRYPTED PTR] ->\t%x\n", imp_list_virt[i].imp_obf_ptr_rva);
+
+                    for (size_t j = NULL; j < imp_list_virt[i].count_command; j++)
+                    {
+                        switch (imp_list_virt[i].command[j].type)
+                        {
+                        case obf_lea:
+                        case obf_add:
+                        {
+                            printf("[KEY] command add\t");
+                            break;
+                        }
+                        case obf_sub:
+                        {
+                            printf("[KEY] command sub\t");
+                            break;
+                        }
+                        case obf_xor:
+                        {
+                            printf("[KEY] command xor\t");
+                            break;
+                        }
+                        case obf_and:
+                        {
+                            printf("[KEY] command and\t");
+                            break;
+                        }
+                        case obf_or:
+                        {
+                            printf("[KEY] command or\t");
+                            break;
+                        }
+                        default:
+                            break;
+                        }
+                        if (imp_list_virt[i].command[j].type != obf_unk)
+                        {
+                            printf(" with crypt_key ->\t%x\n", imp_list_virt[i].command[j].imm);
+                        }
+                    }
+                }
+            }
+        }
+         
+    }
+     
+    getchar();
+    return EXIT_SUCCESS;
+}
+
+```
+
+`vmp_imp_attack/vmp_imp_attack.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{562649b8-8f19-4b07-802f-bc78c50f461f}</ProjectGuid>
+    <RootNamespace>vmpimpattack</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>D:\Zydis;D:\unicorn_engine;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Zydis;D:\unicorn_engine;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>D:\Zydis;D:\unicorn_engine;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Zydis;D:\unicorn_engine;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>unicorn.lib;Zydis.lib;Zycore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <ControlFlowGuard>false</ControlFlowGuard>
+      <AdditionalOptions>/GUARD:NO %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>unicorn.lib;Zydis.lib;Zycore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <HeapReserveSize>
+      </HeapReserveSize>
+      <StackReserveSize>
+      </StackReserveSize>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="vmp_imp_attack.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="disassembly_util.h" />
+    <ClInclude Include="emul_code.h" />
+    <ClInclude Include="get_protector.h" />
+    <ClInclude Include="import_scan.h" />
+    <ClInclude Include="process_util.h" />
+    <ClInclude Include="struct.h" />
+    <ClInclude Include="unicore_util.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`vmp_imp_attack/vmp_imp_attack.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Исходные файлы">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Файлы заголовков">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Файлы ресурсов">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="vmp_imp_attack.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="process_util.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="struct.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="import_scan.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="get_protector.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="unicore_util.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="emul_code.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="disassembly_util.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
+```
+
+`vmp_imp_attack/vmp_imp_attack.vcxproj.user`:
+
+```user
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
+</Project>
+```
