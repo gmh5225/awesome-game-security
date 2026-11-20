@@ -1,0 +1,1316 @@
+Project Path: arc_Siselea_deltaforce-cleaner_w0bp45bi
+
+Source Tree:
+
+```txt
+arc_Siselea_deltaforce-cleaner_w0bp45bi
+├── CONTRIBUTING.md
+├── DESIGN.md
+├── LICENSE
+├── README.md
+├── README.zh-CN.md
+├── app
+│   ├── cli.py
+│   ├── engine.py
+│   └── gui.py
+├── main.py
+├── start.bat
+├── tests
+│   └── test_engine.py
+└── 启动.bat
+
+```
+
+`CONTRIBUTING.md`:
+
+```md
+# Contributing
+
+## Ground rules for detection rules
+
+Every new deletion target must satisfy all three:
+
+1. **It is provably Tencent/ACE owned.** No guessing from a filename substring alone —
+   `ace` matches Windows `spaceparser.sys`. Verify the owning path or registry key.
+2. **It has a test.** `tests/test_engine.py` must cover both the positive case and any
+   exclusion that protects system or third-party data.
+3. **It is reversible in judgment.** Anything that could belong to another application
+   (WeChat, QQ, other games) must be excluded explicitly, not by omission.
+
+## Local checks
+
+```bash
+python -m py_compile main.py app/*.py tests/*.py
+python tests/test_engine.py
+python main.py --cli --dry-run     # must never modify the system
+```
+
+CI runs the same commands on Windows.
+
+## Style
+
+- Standard library only; no new dependencies without discussion.
+- Keep `engine.py` free of Tk imports so it stays testable headless.
+- Chinese and English docs are both maintained; update both.
+```
+
+`DESIGN.md`:
+
+```md
+# How detection works
+
+This document records *why* each rule exists, based on a real cleanup performed on
+Windows 11 (26300) with Delta Force installed via WeGame.
+
+## 1. Services and drivers
+
+ACE registers up to a dozen kernel/service entries. Names are versioned
+(`ACE-CORE102706` — the suffix tracks the ACE build), so the scanner matches on the
+`ACE-*` family plus the two long-form names:
+
+```
+AntiCheatExpert Service, AntiCheatExpert Protection,
+ACE-ADVT, ACE-BOOT, ACE-CORE*, ACE-GAME, ACE-SSC-DRV64
+```
+
+**Trap:** `sc query` also returns `filetrace`, `spaceparser`, `spaceport` on some
+systems because `sc` does substring matching. Those are Windows in-box storage
+drivers. They are listed in `PROTECTED_SERVICE_NAMES` and filtered out before any
+other logic runs. Deleting `spaceport` takes the filesystem offline.
+
+## 2. Files
+
+| Path | Note |
+|---|---|
+| `C:\Program Files\AntiCheatExpert` | Contains `ACE-BASE.sys`, `ACE-BOOT.sys`, `ACE-CORE*.sys`, `ACE-Service64.exe`, `ACE-Tray.exe`, `Uninstaller.exe` |
+| `C:\ProgramData\AntiCheatExpert` | `ACE-Tray.dat`, `ace-drc.dat`, `sldh.dat` |
+| `<drive>:\Delta Force` | Game root; can exceed 19 GB |
+| `<drive>:\rail_user_data` | Empty engine cache; usually missed by manual cleanup |
+
+The official `Uninstaller.exe` is respected when present — it removes its own files
+and registry keys more reliably than deleting them by hand.
+
+## 3. Registry
+
+```
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\AntiCheatExpert
+HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\三角洲行动
+HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\delta_force_launcher
+HKLM\SOFTWARE\WOW6432Node\Tencent\WeGame          <- WeGame remnant
+```
+
+`UninstallString` values frequently point at a drive letter (`U:\`) that no longer
+exists. That is the signal that a manual removal is required.
+
+## 4. WeGame data
+
+WeGame stores per-title caches beside its own login state under
+`%APPDATA%\Tencent`. The tool removes only the WeGame-specific folder names.
+
+`Logs` is special-cased: it belongs to WeGame, but is only deleted when it actually
+contains Delta Force traces (`delta_force_launcher.tlg*`). Otherwise WeGame may still
+be installed for other titles and those logs are not ours to take.
+
+## 5. What is deliberately excluded
+
+`%APPDATA%\Tencent\xwechat` (WeChat), `qimei` (shared mini-program database), and all
+QQ folders share the `Tencent` parent. Deleting the parent to "clean up" would
+destroy the user's messenger installation. The tool never recurses into `Tencent`
+as a whole.
+
+## 6. Verification
+
+After a run the tool reports item counts; a clean re-scan should return zero items
+(plus the admin note if unelevated). A reboot is recommended so that the kernel
+module, already unlinked from disk, is also released from memory.
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Siselea
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+`README.md`:
+
+```md
+# Delta Force Cleaner
+
+[中文说明](README.zh-CN.md) · [License: MIT](LICENSE) · [Contributing](CONTRIBUTING.md)
+
+A clean uninstaller for **Delta Force** (三角洲行动) on Windows. It removes the game
+itself **and** every trace of Tencent's **ACE (AntiCheatExpert)** anti-cheat drivers,
+services, and leftover files.
+
+[中文说明](README.zh-CN.md) · [License: MIT](LICENSE)
+
+## Why this exists
+
+Uninstalling Delta Force normally leaves behind a kernel-level anti-cheat driver that
+stays on the system indefinitely. ACE registers 12+ services and drivers, writes to
+`System32\drivers`, `Program Files`, `ProgramData`, and several registry hives. This
+tool encodes the full cleanup, item by item, into something that can be reviewed,
+tested, and re-run.
+
+## What it removes
+
+| Category | Contents |
+|---|---|
+| Game | `Delta Force` / `DeltaForce` / `rail_user_data` folders on every drive |
+| ACE services | `AntiCheatExpert Service/Protection`, `ACE-ADVT`, `ACE-BOOT`, `ACE-CORE*`, `ACE-GAME`, `ACE-SSC-DRV64` |
+| ACE files | `C:\Program Files\AntiCheatExpert`, `C:\ProgramData\AntiCheatExpert` |
+| Registry | ACE and game uninstall entries, `Tencent\WeGame` |
+| Launcher | `deltaforceminiloader`, `delta_force_launcher`, Start Menu shortcuts |
+| WeGame | WeGame-only folders under `%APPDATA%\Tencent` |
+
+## What it never touches
+
+- `filetrace.sys`, `spaceparser.sys`, `spaceport.sys` — Windows in-box **storage drivers** that merely match the string `ace`
+- `%APPDATA%\Tencent\xwechat` (WeChat), `qimei` (shared mini-program data), QQ data
+
+Removing those would damage the OS or your WeChat/QQ installation. Both rules are
+enforced in code and covered by tests.
+
+## Usage
+
+Requires Python 3.9+ (uses only the standard library and Tk).
+
+```
+start.bat               # GUI (no console window)
+python main.py          # same
+```
+
+Flow: **Scan → review the list (untick anything you want to keep) → Uninstall → read the log.**
+
+### Command line
+
+```bash
+python main.py --cli --dry-run     # report only, changes nothing
+python main.py --cli --yes         # scan and execute
+python main.py --cli --no-wegame   # game + ACE only
+```
+
+## Administrator rights
+
+ACE is a kernel-mode driver; deleting its services and system folders requires
+elevation. When launched without it, the GUI shows a warning banner with a
+**Relaunch as administrator** button.
+
+**Reboot once afterwards** — the driver files are gone, but the loaded kernel module
+only fully leaves memory after a restart.
+
+## Safety design
+
+- **Item-level consent** — every target is listed and individually toggleable; nothing is a black box.
+- **Dry run** — simulate the whole plan without touching disk.
+- **Per-item fault isolation** — one failure is logged and the rest continue.
+- **Bounded probing** — directory sizing carries a 1.5 s budget so a 100k-file game folder never stalls the UI.
+- **Long-path fallback** — `shutil.rmtree` falls back to `SHFileOperationW`.
+
+## Layout
+
+```
+app/engine.py     scan, delete, elevate  (pure data in/out, unit-tested)
+app/gui.py        Tk interface, worker threads keep the UI responsive
+app/cli.py        command-line wrapper
+main.py           entry point + single-instance mutex
+tests/            smoke tests, run: python tests/test_engine.py
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Ideas for detection rules specific to other
+ACE-protected Tencent titles are welcome, provided they include a test that proves
+system drivers and messenger data stay untouched.
+
+## License
+
+MIT. Not affiliated with Tencent or the Delta Force developers. Use at your own risk.
+```
+
+`README.zh-CN.md`:
+
+```md
+# 三角洲行动 卸载工具 (Delta Force Cleaner)
+
+[English](README.md) · [License: MIT](LICENSE) · [Contributing](CONTRIBUTING.md)
+
+一键彻底清除 **《三角洲行动》** 及其腾讯 **ACE 反作弊 (AntiCheatExpert)** 的完整残留。
+本工具的逻辑来自一次真实的、手工完成的完整卸载，把当时逐项排查出的痕迹固化成了可重复执行的程序。
+
+## 它会清理什么
+
+| 类别 | 具体内容 |
+|---|---|
+| **游戏本体** | 各盘符下的 `Delta Force` / `DeltaForce` / `rail_user_data` 目录（含 19G 级 UE5 缓存） |
+| **ACE 反作弊** | `AntiCheatExpert Service/Protection`、`ACE-ADVT`、`ACE-BOOT`、`ACE-CORE*`、`ACE-GAME`、`ACE-SSC-DRV64` 等服务/驱动 |
+| **ACE 文件** | `C:\Program Files\AntiCheatExpert`、`C:\ProgramData\AntiCheatExpert` |
+| **注册表** | ACE 卸载项、游戏卸载项、WeGame 主键 |
+| **启动器** | `deltaforceminiloader`、`delta_force_launcher` 数据目录、开始菜单快捷方式 |
+| **WeGame** | `%APPDATA%\Tencent` 下 WeGame 专属目录（缓存/登录/日志） |
+
+## 它绝不会碰什么
+
+- `filetrace.sys` / `spaceparser.sys` / `spaceport.sys` —— 名字里带 ace 的 **Windows 自带存储驱动**
+- `%APPDATA%\Tencent\xwechat`（微信）、`qimei`（微信小程序公共数据）
+- QQ 的注册表与 ProgramData 数据
+
+这些误删会直接损坏系统或你正在用的微信/QQ。
+
+## 使用
+
+```
+双击  启动.bat          # 图形界面
+python main.py          # 等价
+```
+
+界面流程：**扫描 → 核对列表（可逐项取消勾选）→ 开始卸载 → 查看日志**。
+删除前会弹确认框，且不可撤销。
+
+### 命令行
+
+```bash
+python main.py --cli --dry-run     # 只扫描、打印报告，不做任何修改
+python main.py --cli --yes         # 扫描并直接执行
+python main.py --cli --no-wegame   # 只处理游戏 + ACE
+```
+
+## 权限
+
+ACE 是**内核级驱动**，删除服务和系统目录需要管理员权限。
+未提权时界面顶部会出现黄色提示条和「以管理员身份重启」按钮。
+
+**卸载完建议重启一次**：驱动文件已删除，但内核模块要到重启后才彻底从内存卸载。
+
+## 安全设计
+
+- **逐项可见可控**：每项都在表格里列出，可单独取消勾选，不存在黑盒全删。
+- **试运行**：勾选后执行只模拟、不落盘，方便先看报告。
+- **逐项容错**：任何一项失败只记日志，不中断其余项目。
+- **探测超时**：全盘目录大小统计带 1.5 秒预算，扫描始终十几秒内返回。
+
+## 结构
+
+```
+deltaforce-uninstaller/
+├── main.py              入口（GUI / CLI 分发）
+├── 启动.bat             双击启动（pythonw 无控制台）
+├── app/
+│   ├── engine.py        核心：扫描、删除、提权（纯数据进出，可测试）
+│   ├── gui.py           Tk 图形界面
+│   └── cli.py           命令行封装
+└── tests/test_engine.py 冒烟测试
+```
+
+## 测试
+
+```bash
+python tests/test_engine.py
+```
+
+```
+
+`app/cli.py`:
+
+```py
+"""Headless CLI: python main.py --cli [--dry-run]
+
+Useful for scripting / CI, and lets the same engine be tested without a display.
+"""
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "app"))
+
+import engine  # noqa: E402
+
+
+def _setup_output() -> None:
+    """Make console output safe on every code page.
+
+    Windows consoles default to GBK, CI runners to cp1252; neither can encode all of
+    this tool's messages. Prefer UTF-8 and fall back to replace-on-error so printing
+    never aborts a cleanup half-way.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            try:
+                stream.reconfigure(errors="replace")
+            except Exception:
+                pass
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="三角洲行动 卸载工具（命令行）")
+    ap.add_argument("--cli", action="store_true", help="命令行模式")
+    ap.add_argument("--dry-run", action="store_true", help="只扫描不删除")
+    ap.add_argument("--no-game", action="store_true", help="跳过游戏本体")
+    ap.add_argument("--no-ace", action="store_true", help="跳过 ACE 反作弊")
+    ap.add_argument("--no-wegame", action="store_true", help="跳过 WeGame")
+    ap.add_argument("--yes", action="store_true", help="跳过确认")
+    args = ap.parse_args(argv)
+    _setup_output()
+
+    cfg = {
+        "include": {
+            "game": not args.no_game,
+            "ace": not args.no_ace,
+            "wegame": not args.no_wegame,
+        }
+    }
+    admin_text = "是" if engine.is_admin() else "否"
+    print(f"管理员权限: {admin_text}")
+    res = engine.scan(cfg)
+    if not res.items:
+        for n in res.notes:
+            print("·", n)
+        return 0
+
+    print(f"\n发现 {len(res.items)} 项，预计释放 {engine.human_size(res.total_bytes)}：")
+    for item in res.items:
+        size = engine.human_size(item.size) if item.size else "-"
+        print(f"  [{item.kind:<8}] {item.label}  ({size})")
+
+    for n in res.notes:
+        print("·", n)
+
+    if args.dry_run:
+        print("\n(dry-run，未做修改)")
+        return 0
+    if not args.yes:
+        if not engine.is_admin():
+            print("\n警告：非管理员运行，ACE 相关操作可能失败。")
+        try:
+            answer = input("\n确认永久删除以上全部内容？输入 yes 继续：").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            # No usable stdin (piped, CI, or Ctrl+C): never promise to continue.
+            print("\n没有可用的交互终端，已安全中止。无人值守执行请加 --yes。")
+            return 2
+        if answer != "yes":
+            print("已取消。")
+            return 1
+
+    engine.execute(res.items, lambda m: print(" ", m))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+```
+
+`app/engine.py`:
+
+```py
+"""Delta Force Cleaner - core engine.
+
+Everything that touches the machine lives here. The GUI only calls scan() and
+execute(); both are pure data in / data out so they can be unit-tested.
+"""
+from __future__ import annotations
+
+import ctypes
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+from dataclasses import dataclass, field
+from typing import Callable, Iterable
+
+# --------------------------------------------------------------------------
+# Constants: the ACE (AntiCheatExpert) surface, learned from a real machine.
+# --------------------------------------------------------------------------
+
+ACE_SERVICES = [
+    "AntiCheatExpert Service",
+    "AntiCheatExpert Protection",
+    "ACE-ADVT",
+    "ACE-BOOT",
+    "ACE-CORE102706",
+    "ACE-CORE202706",
+    "ACE-CORE302706",
+    "ACE-CORE302706",
+    "ACE-GAME",
+    "ACE-SSC-DRV64",
+]
+
+# Never touch these: they are Windows in-box storage drivers that merely match "ace".
+PROTECTED_SERVICE_NAMES = {"filetrace", "spaceparser", "spaceport", "spacedump", "pacer"}
+
+# Game / launcher directories found relative to a drive root.
+GAME_DIR_NAMES = ["Delta Force", "DeltaForce", "rail_user_data"]
+
+# WeGame-only subdirectories under %APPDATA%\Tencent. xwechat (WeChat) and
+# qimei (shared mini-program data) are deliberately absent.
+WEGAME_DIRS = ["WeGame", "WGLogin", "TenioDL", "DeskUpdate", "CTLogin", "TXSSO", "Logs", "libsdk"]
+
+ACE_UNINSTALL_SUBKEYS = [r"AntiCheatExpert"]
+
+WEGAME_REGKEY = r"SOFTWARE\WOW6432Node\Tencent\WeGame"
+
+
+@dataclass
+class Item:
+    """One discrete thing that can be removed."""
+
+    kind: str          # service | dir | regkey | regvalue | file
+    label: str         # human readable, shown in the UI
+    target: str        # path or registry path
+    size: int = 0
+    delete_children_only: bool = False
+
+
+@dataclass
+class ScanResult:
+    items: list[Item] = field(default_factory=list)
+    notes: list[str] = field(default_factory=list)
+
+    @property
+    def total_bytes(self) -> int:
+        return sum(i.size for i in self.items)
+
+
+def human_size(n: int) -> str:
+    for unit in ("B", "KB", "MB", "GB", "TB"):
+        if n < 1024 or unit == "TB":
+            return f"{n:,.1f} {unit}" if unit != "B" else f"{n} B"
+        n /= 1024.0
+    return f"{n:,.1f} TB"
+
+
+def is_admin() -> bool:
+    try:
+        return bool(ctypes.windll.shell32.IsUserAnAdmin())
+    except Exception:
+        return False
+
+
+def drive_roots() -> list[str]:
+    roots = []
+    for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+        root = f"{letter}:\\"
+        if os.path.exists(root):
+            roots.append(root)
+    return roots
+
+
+def dir_size(path: str, budget: int = 300_000, seconds: float = 1.5) -> int:
+    """Sum file sizes, bailing out early for enormous trees.
+
+    The game folder can hold 100k+ files; measuring it must never stall the UI,
+    so both a file-count and a wall-clock budget apply.
+    """
+    total = 0
+    seen = 0
+    deadline = time.time() + seconds
+    for base, _dirs, files in os.walk(path, onerror=lambda e: None):
+        for name in files:
+            try:
+                total += os.path.getsize(os.path.join(base, name))
+            except OSError:
+                pass
+            seen += 1
+            if seen > budget or (seen % 512 == 0 and time.time() > deadline):
+                return total
+    return total
+
+
+def _run(args: list[str], timeout: int = 20) -> str:
+    try:
+        proc = subprocess.run(
+            args,
+            capture_output=True,
+            timeout=timeout,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        return (proc.stdout or b"").decode("mbcs", "replace")
+    except Exception:
+        return ""
+
+
+# --------------------------------------------------------------------------
+# Registry helpers
+# --------------------------------------------------------------------------
+
+def reg_enum_services() -> list[str]:
+    out = _run(["reg", "query", r"HKLM\SYSTEM\CurrentControlSet\Services"])
+    names = []
+    for line in out.splitlines():
+        line = line.strip()
+        if line.startswith("HKEY_LOCAL_MACHINE"):
+            names.append(line.rsplit("\\", 1)[-1])
+    return names
+
+
+def reg_key_exists(path: str) -> bool:
+    return bool(_run(["reg", "query", path]).strip()) and "ERROR" not in _run(["reg", "query", path]).upper()
+
+
+def reg_read_values(path: str) -> dict[str, str]:
+    out = _run(["reg", "query", path])
+    values: dict[str, str] = {}
+    for line in out.splitlines():
+        m = re.match(r"\s{2,}(\S+)\s{2,}(\S+)\s{2,}(.*)$", line)
+        if m:
+            values[m.group(1)] = m.group(3).strip()
+    return values
+
+
+def reg_enum_subkeys(path: str) -> list[str]:
+    out = _run(["reg", "query", path])
+    subs = []
+    for line in out.splitlines():
+        line = line.strip()
+        if line.upper().startswith("HKEY_") and line.upper() != path.upper():
+            subs.append(line)
+    return subs
+
+
+# --------------------------------------------------------------------------
+# Scanning
+# --------------------------------------------------------------------------
+
+def _add(res: ScanResult, label: str, fn, progress=None):
+    """Run one probe; a single broken probe must never abort the whole scan."""
+    try:
+        fn(res)
+        if progress:
+            progress(label)
+    except Exception as exc:  # noqa: BLE001
+        res.notes.append(f"{label} 检查失败：{exc}")
+
+
+def scan(cfg: dict | None = None, progress: Callable[[str], None] | None = None) -> ScanResult:
+    cfg = cfg or {}
+    res = ScanResult()
+    want = cfg.get("include", {})
+    do_game = want.get("game", True)
+    do_ace = want.get("ace", True)
+    do_wegame = want.get("wegame", True)
+    nosize = bool(cfg.get("no_size", False))
+
+    def size_of(path: str) -> int:
+        return 0 if nosize else dir_size(path)
+
+    env = os.environ
+    appdata = env.get("APPDATA", "")
+    localappdata = env.get("LOCALAPPDATA", "")
+    programdata = env.get("ProgramData", r"C:\ProgramData")
+
+    # ---- 1. ACE services -------------------------------------------------
+    if do_ace:
+        live = {n.lower() for n in reg_enum_services()}
+        for name in dict.fromkeys(ACE_SERVICES):
+            if name.lower() in PROTECTED_SERVICE_NAMES:
+                continue
+            state = _run(["sc", "query", name])
+            if "SERVICE_NAME" in state or name.lower() in live:
+                running = "RUNNING" in state.upper()
+                res.items.append(
+                    Item("service", f"{name}{'  (运行中)' if running else ''}", name)
+                )
+
+        for key in ACE_UNINSTALL_SUBKEYS:
+            for hive in (
+                r"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+                r"HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall",
+            ):
+                path = hive + "\\" + key
+                if reg_read_values(path):
+                    res.items.append(Item("regkey", f"卸载项 {key}", path))
+
+        for ace_dir in (
+            os.path.join(r"C:\Program Files", "AntiCheatExpert"),
+            os.path.join(r"C:\Program Files (x86)", "AntiCheatExpert"),
+            os.path.join(programdata, "AntiCheatExpert"),
+        ):
+            if os.path.isdir(ace_dir):
+                res.items.append(Item("dir", f"ACE 程序目录 {ace_dir}", ace_dir, size_of(ace_dir)))
+
+    # ---- 2. Game directories --------------------------------------------
+    if do_game:
+        for root in drive_roots():
+            for name in GAME_DIR_NAMES:
+                p = os.path.join(root, name)
+                if os.path.isdir(p):
+                    res.items.append(Item("dir", f"游戏目录 {p}", p, size_of(p)))
+
+        for rel in (
+            os.path.join(appdata, "deltaforceminiloader"),
+            os.path.join(appdata, "delta_force_launcher"),
+            os.path.join(localappdata, "deltaforceminiloader"),
+            os.path.join(localappdata, "delta_force_launcher"),
+        ):
+            if os.path.isdir(rel):
+                res.items.append(Item("dir", f"启动器数据 {rel}", rel, size_of(rel)))
+
+        # Uninstall entries naming the game.
+        for hive in (
+            r"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+            r"HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall",
+            r"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+        ):
+            for sub in reg_enum_subkeys(hive):
+                vals = reg_read_values(sub)
+                blob = json.dumps(vals, ensure_ascii=False).lower()
+                leaf = sub.rsplit("\\", 1)[-1].lower()
+                if "delta force" in blob or "三角洲" in blob or "delta_force" in leaf:
+                    if "anticheatexpert" in leaf:
+                        continue
+                    leaf = sub.rsplit("\\", 1)[-1]
+                    res.items.append(Item("regkey", f"游戏卸载项 {leaf}", sub))
+
+        # Start-menu folders / desktop shortcuts.
+        for menu in (
+            os.path.join(programdata, r"Microsoft\Windows\Start Menu\Programs"),
+            os.path.join(appdata, r"Microsoft\Windows\Start Menu\Programs"),
+        ):
+            if os.path.isdir(menu):
+                for name in os.listdir(menu):
+                    low = name.lower()
+                    if "delta force" in low or "三角洲" in name:
+                        p = os.path.join(menu, name)
+                        res.items.append(Item("dir", f"开始菜单 {name}", p, size_of(p)))
+
+    # ---- 3. WeGame leftovers --------------------------------------------
+    if do_wegame:
+        wgkey = "HKLM\\" + WEGAME_REGKEY
+        if reg_read_values(wgkey) or reg_enum_subkeys(wgkey) or reg_key_exists(wgkey):
+            res.items.append(Item("regkey", "WeGame 注册表", wgkey))
+
+        for sub in WEGAME_DIRS:
+            p = os.path.join(appdata, "Tencent", sub)
+            if os.path.isdir(p):
+                # "Logs" only belongs to us when it holds Delta Force traces.
+                if sub == "Logs" and not _has_delta_trace(p):
+                    continue
+                res.items.append(Item("dir", f"WeGame 数据 {p}", p, size_of(p)))
+
+    if not res.items:
+        res.notes.append("未发现《三角洲行动》、ACE 反作弊或 WeGame 残留。系统已经是干净状态。")
+    if not is_admin():
+        res.notes.append("当前未以管理员身份运行：ACE 服务/驱动删除与部分系统目录可能需要提权。")
+    return res
+
+
+def _has_delta_trace(folder: str) -> bool:
+    try:
+        return any("delta" in n.lower() for n in os.listdir(folder))
+    except OSError:
+        return False
+
+
+# --------------------------------------------------------------------------
+# Execution
+# --------------------------------------------------------------------------
+
+def _stop_and_delete_service(name: str, log: Callable[[str], None]) -> bool:
+    state = _run(["sc", "stop", name])
+    log(f"    stop  → {state.strip().splitlines()[-1] if state.strip() else 'ok'}")
+    time.sleep(0.4)
+    out = _run(["sc", "delete", name])
+    ok = "SUCCESS" in out.upper()
+    log(f"    delete→ {'OK' if ok else 'FAIL: ' + out.strip()[:120]}")
+    return ok
+
+
+def _delete_regkey(path: str, log: Callable[[str], None]) -> bool:
+    out = _run(["reg", "delete", path, "/f"])
+    ok = "成功" in out or "SUCCESS" in out.upper() or not out.strip()
+    log(f"    regdel→ {'OK' if ok else 'FAIL: ' + out.strip()[:120]}")
+    return ok
+
+
+def _delete_dir(path: str, log: Callable[[str], None]) -> bool:
+    """Delete a tree; fall back to shell32 for long paths / odd ACLs."""
+    try:
+        import shutil
+
+        shutil.rmtree(path)
+        return not os.path.exists(path)
+    except Exception as exc:
+        log(f"    rmtree 失败（{exc}），尝试 SHFileOperation…")
+        try:
+            res = ctypes.windll.shell32.SHFileOperationW
+            # FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_ALLOWUNDO=0
+            class SHFILEOPSTRUCTW(ctypes.Structure):
+                _fields_ = [
+                    ("hwnd", ctypes.c_void_p),
+                    ("wFunc", ctypes.c_uint),
+                    ("pFrom", ctypes.c_wchar_p),
+                    ("pTo", ctypes.c_wchar_p),
+                    ("fFlags", ctypes.c_ushort),
+                    ("fAnyOperationsAborted", ctypes.c_int),
+                    ("hNameMappings", ctypes.c_void_p),
+                    ("lpszProgressTitle", ctypes.c_wchar_p),
+                ]
+
+            op = SHFILEOPSTRUCTW(
+                None, 3, path + "\0\0", None, 0x0004 | 0x0010 | 0x0400, 0, None, None
+            )
+            rc = res(ctypes.byref(op))
+            return rc == 0 and not os.path.exists(path)
+        except Exception as exc2:
+            log(f"    SHFileOperation 也失败：{exc2}")
+            return False
+
+
+def execute(items: Iterable[Item], log: Callable[[str], None], dry_run: bool = False) -> dict:
+    items = list(items)
+    done, failed = 0, 0
+    freed = 0
+    log(f"开始{'（试运行，不做任何修改）' if dry_run else ''}，共 {len(items)} 项")
+
+    for idx, item in enumerate(items, 1):
+        log(f"[{idx}/{len(items)}] {item.label}")
+        if dry_run:
+            log("    跳过（dry-run）")
+            done += 1
+            freed += item.size
+            continue
+
+        if item.kind == "service":
+            ok = _stop_and_delete_service(item.target, log)
+        elif item.kind == "regkey":
+            ok = _delete_regkey(item.target, log)
+        elif item.kind == "dir":
+            ok = _delete_dir(item.target, log)
+        else:
+            log(f"    未知类型 {item.kind}")
+            ok = False
+
+        if ok:
+            done += 1
+            freed += item.size
+        else:
+            failed += 1
+
+    log(f"完成：成功 {done} 项，失败 {failed} 项，释放约 {human_size(freed)}")
+    if not dry_run and any(i.kind == "service" for i in items):
+        log("提示：ACE 是内核级驱动，建议重启一次让驱动模块彻底从内存卸载。")
+    return {"ok": done, "failed": failed, "freed": freed}
+
+
+def relaunch_as_admin(argv: list[str]) -> bool:
+    """Re-launch this process elevated. Returns True if the shell accepted it."""
+    try:
+        params = " ".join(sys.argv[1:])
+        rc = ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, params, None, 1)
+        return rc > 32
+    except Exception:
+        return False
+
+```
+
+`app/gui.py`:
+
+```py
+"""Delta Force Cleaner - Tk GUI (Tk 8.6, no third-party deps)."""
+from __future__ import annotations
+
+import queue
+import threading
+import tkinter as tk
+from datetime import datetime
+from tkinter import filedialog, messagebox, ttk
+
+import engine
+
+APP_TITLE = "三角洲行动 卸载工具"
+FONT = ("Microsoft YaHei UI", 10)
+MONO = ("Consolas", 9)
+
+
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title(APP_TITLE)
+        self.geometry("1000x720")
+        self.minsize(860, 600)
+
+        self.scan_result: engine.ScanResult | None = None
+        self.ui_queue: queue.Queue = queue.Queue()
+
+        self._build()
+
+    # ---------------- layout ----------------
+    def _build(self):
+        style = ttk.Style(self)
+        try:
+            style.theme_use("vista")
+        except tk.TclError:
+            pass
+        style.configure(".", font=FONT)
+        style.configure("Head.TLabel", font=("Microsoft YaHei UI", 15, "bold"))
+        style.configure("Sub.TLabel", foreground="#555")
+        style.configure("Danger.TButton", font=("Microsoft YaHei UI", 10, "bold"))
+
+        outer = ttk.Frame(self, padding=14)
+        outer.pack(fill="both", expand=True)
+
+        ttk.Label(outer, text=APP_TITLE, style="Head.TLabel").pack(anchor="w")
+        ttk.Label(
+            outer,
+            text="彻底卸载《三角洲行动》本体、腾讯 ACE 反作弊驱动/服务，以及 WeGame 与启动器残留。",
+            style="Sub.TLabel",
+        ).pack(anchor="w", pady=(2, 10))
+
+        # admin banner
+        self.admin_var = tk.StringVar()
+        self.banner = tk.Label(outer, textvariable=self.admin_var, anchor="w", padx=10, pady=6, justify="left", wraplength=900)
+        self.banner.pack(fill="x", pady=(0, 10))
+        if engine.is_admin():
+            self.banner.configure(bg="#e7f6e7", fg="#1d6b1d")
+            self.admin_var.set("✔ 已获得管理员权限：可完整清除 ACE 服务与系统目录。")
+        else:
+            self.banner.configure(bg="#fff3cd", fg="#8a6d00")
+            self.admin_var.set(
+                "⚠ 未以管理员身份运行：ACE 服务/驱动可能删不掉。点右侧按钮提权重启。"
+            )
+            ttk.Button(outer, text="以管理员身份重启", command=self._elevate).pack(anchor="e", pady=(0, 8))
+
+        # options
+        opts = ttk.LabelFrame(outer, text="清理范围", padding=10)
+        opts.pack(fill="x")
+        self.var_game = tk.BooleanVar(value=True)
+        self.var_ace = tk.BooleanVar(value=True)
+        self.var_wg = tk.BooleanVar(value=True)
+        self.var_dry = tk.BooleanVar(value=False)
+        ttk.Checkbutton(opts, text="游戏本体与启动器数据", variable=self.var_game).grid(row=0, column=0, sticky="w", padx=(0, 18))
+        ttk.Checkbutton(opts, text="ACE 反作弊服务/驱动/卸载项", variable=self.var_ace).grid(row=0, column=1, sticky="w", padx=(0, 18))
+        ttk.Checkbutton(opts, text="WeGame 残留", variable=self.var_wg).grid(row=0, column=2, sticky="w", padx=(0, 18))
+        ttk.Separator(opts, orient="vertical").grid(row=0, column=3, sticky="ns", padx=10)
+        ttk.Checkbutton(opts, text="试运行（只扫描不删除）", variable=self.var_dry).grid(row=0, column=4, sticky="w")
+
+        # actions
+        bar = ttk.Frame(outer)
+        bar.pack(fill="x", pady=10)
+        self.btn_scan = ttk.Button(bar, text="① 扫描", command=self.on_scan)
+        self.btn_scan.pack(side="left")
+        self.btn_run = ttk.Button(bar, text="② 开始卸载", style="Danger.TButton", command=self.on_run, state="disabled")
+        self.btn_run.pack(side="left", padx=8)
+        self.btn_save = ttk.Button(bar, text="导出报告", command=self.on_save, state="disabled")
+        self.btn_save.pack(side="left")
+        self.progress = ttk.Progressbar(bar, mode="determinate", length=220)
+        self.progress.pack(side="right")
+
+        # summary
+        self.summary_var = tk.StringVar(value="点击「扫描」查看将要从本机清除的内容。")
+        ttk.Label(outer, textvariable=self.summary_var, font=("Microsoft YaHei UI", 10, "bold")).pack(anchor="w", pady=(0, 6), fill="x")
+
+        # table
+        table_wrap = ttk.Frame(outer)
+        table_wrap.pack(fill="both", expand=True)
+        cols = ("sel", "kind", "label", "size")
+        self.tree = ttk.Treeview(table_wrap, columns=cols, show="headings", selectmode="none")
+        self.tree.heading("sel", text="✓")
+        self.tree.heading("kind", text="类型")
+        self.tree.heading("label", text="项目")
+        self.tree.heading("size", text="大小")
+        self.tree.column("sel", width=36, anchor="center", stretch=False)
+        self.tree.column("kind", width=90, anchor="center", stretch=False)
+        self.tree.column("label", width=640)
+        self.tree.column("size", width=110, anchor="e", stretch=False)
+        vsb = ttk.Scrollbar(table_wrap, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=vsb.set)
+        self.tree.pack(side="left", fill="both", expand=True)
+        vsb.pack(side="right", fill="y")
+        self.tree.bind("<Button-1>", self._toggle_row)
+
+        # log
+        logf = ttk.LabelFrame(outer, text="执行日志", padding=6)
+        logf.pack(fill="both", expand=False, pady=(10, 0))
+        self.log = tk.Text(logf, height=9, font=MONO, bg="#111", fg="#d8d8d8", insertbackground="#fff", wrap="word")
+        lvsb = ttk.Scrollbar(logf, orient="vertical", command=self.log.yview)
+        self.log.configure(yscrollcommand=lvsb.set, state="disabled")
+        self.log.pack(side="left", fill="both", expand=True)
+        lvsb.pack(side="right", fill="y")
+
+        self.after(80, self._drain)
+
+    # ---------------- helpers ----------------
+    def _toggle_row(self, event):
+        if not self.tree.identify_column(event.x) == "#1":
+            return
+        item = self.tree.identify_row(event.y)
+        if not item:
+            return
+        vals = list(self.tree.item(item, "values"))
+        vals[0] = "" if vals[0] else "☑"
+        self.tree.item(item, values=vals)
+        self._refresh_summary()
+
+    def _checked(self):
+        out = []
+        for iid in self.tree.get_children():
+            if self.tree.item(iid, "values")[0]:
+                out.append(self.scan_result.items[self.tree.index(iid)])
+        return out
+
+    def _write_log(self, msg: str):
+        self.log.configure(state="normal")
+        self.log.insert("end", f"[{datetime.now():%H:%M:%S}] {msg}\n")
+        self.log.see("end")
+        self.log.configure(state="disabled")
+
+    def _drain(self):
+        try:
+            while True:
+                kind, payload = self.ui_queue.get_nowait()
+                if kind == "log":
+                    self._write_log(payload)
+                elif kind == "progress":
+                    self.progress["value"] = payload
+                elif kind == "scan_done":
+                    self._render_scan(payload)
+                elif kind == "run_done":
+                    self._finish_run(payload)
+        except queue.Empty:
+            pass
+        self.after(80, self._drain)
+
+    # ---------------- scan ----------------
+    def _opts(self):
+        return {
+            "include": {
+                "game": self.var_game.get(),
+                "ace": self.var_ace.get(),
+                "wegame": self.var_wg.get(),
+            }
+        }
+
+    def on_scan(self):
+        self.btn_scan.configure(state="disabled")
+        self.btn_run.configure(state="disabled")
+        for iid in self.tree.get_children():
+            self.tree.delete(iid)
+        self._write_log("开始扫描…")
+        self.progress["value"] = 0
+        threading.Thread(target=self._scan_worker, daemon=True).start()
+
+    def _scan_worker(self):
+        try:
+            def step(label):
+                self.ui_queue.put(("log", "  检查 " + label + " …"))
+
+            res = engine.scan(self._opts(), progress=step)
+        except Exception as exc:  # noqa: BLE001
+            self.ui_queue.put(("log", f"扫描出错：{exc}"))
+            self.ui_queue.put(("scan_done", None))
+            return
+        self.ui_queue.put(("scan_done", res))
+
+    def _render_scan(self, res):
+        self.scan_result = res
+        self.btn_scan.configure(state="normal")
+        if res is None:
+            self.summary_var.set("扫描失败，请查看日志。")
+            return
+        kind_cn = {"service": "服务/驱动", "dir": "目录", "regkey": "注册表", "file": "文件"}
+        for idx, item in enumerate(res.items):
+            self.tree.insert(
+                "",
+                "end",
+                iid=str(idx),
+                values=("☑", kind_cn.get(item.kind, item.kind), item.label, engine.human_size(item.size) if item.size else "—"),
+            )
+        for note in res.notes:
+            self._write_log("· " + note)
+        if res.items:
+            self._write_log(f"扫描完成：共 {len(res.items)} 项，可释放约 {engine.human_size(res.total_bytes)}")
+        self.btn_run.configure(state="normal" if res.items else "disabled")
+        self.btn_save.configure(state="normal")
+        self._refresh_summary()
+
+    def _refresh_summary(self):
+        if not self.scan_result:
+            return
+        checked = self._checked()
+        total = sum(i.size for i in checked)
+        if not self.scan_result.items:
+            self.summary_var.set("未发现残留，系统已是干净状态。")
+        else:
+            self.summary_var.set(
+                f"已勾选 {len(checked)}/{len(self.scan_result.items)} 项，预计释放约 {engine.human_size(total)}"
+            )
+
+    # ---------------- run ----------------
+    def on_run(self):
+        items = self._checked()
+        if not items:
+            messagebox.showinfo(APP_TITLE, "请至少勾选一项。")
+            return
+
+        dry = self.var_dry.get()
+        freed = engine.human_size(sum(i.size for i in items))
+        if not dry:
+            has_service = any(i.kind == "service" for i in items)
+            detail = f"将永久删除 {len(items)} 项，预计释放 {freed}。"
+            if has_service:
+                detail += "\n\n其中包含 ACE 内核服务/驱动，删除后需要重启才能彻底生效。"
+            if not engine.is_admin():
+                detail += "\n\n你当前没有管理员权限，ACE 相关操作很可能失败。"
+            detail += "\n\n此操作不可撤销，确定继续？"
+            if not messagebox.askyesno(APP_TITLE + " - 确认卸载", detail, icon="warning"):
+                return
+
+        self.btn_run.configure(state="disabled")
+        self.btn_scan.configure(state="disabled")
+        self.progress["value"] = 0
+        threading.Thread(target=self._run_worker, args=(items, dry), daemon=True).start()
+
+    def _run_worker(self, items, dry):
+        def log(msg):
+            self.ui_queue.put(("log", str(msg)))
+
+        try:
+            steps = len(items)
+            for n, item in enumerate(items, 1):
+                self.ui_queue.put(("progress", (n - 1) / steps * 100))
+            result = engine.execute(items, log, dry_run=dry)
+        except Exception as exc:  # noqa: BLE001
+            log(f"执行出错：{exc}")
+            result = {"ok": 0, "failed": len(items), "freed": 0}
+        self.ui_queue.put(("progress", 100))
+        self.ui_queue.put(("run_done", result))
+
+    def _finish_run(self, result):
+        self.btn_scan.configure(state="normal")
+        self.btn_run.configure(state="normal")
+        if self.var_dry.get():
+            messagebox.showinfo(APP_TITLE, "试运行完成，未做任何更改。\n取消勾选「试运行」后再执行即可真正卸载。")
+            return
+        msg = f"卸载完成。\n\n成功：{result['ok']} 项\n失败：{result['failed']} 项\n释放：{engine.human_size(result['freed'])}"
+        if result["ok"]:
+            msg += "\n\n建议重启一次，让 ACE 内核驱动彻底退出内存。"
+        messagebox.showinfo(APP_TITLE, msg)
+
+    # ---------------- misc ----------------
+    def on_save(self):
+        if not self.scan_result:
+            return
+        path = filedialog.asksaveasfilename(
+            defaultextension=".txt",
+            filetypes=[("文本", "*.txt"), ("所有文件", "*.*")],
+            initialfile=f"deltaforce-scan-{datetime.now():%Y%m%d-%H%M%S}.txt",
+        )
+        if not path:
+            return
+        lines = [
+            f"三角洲行动 卸载工具 - 扫描报告",
+            f"时间：{datetime.now():%Y-%m-%d %H:%M:%S}",
+            f"管理员：{engine.is_admin()}",
+            f"项目数：{len(self.scan_result.items)}  预计释放：{engine.human_size(self.scan_result.total_bytes)}",
+            "",
+        ]
+        for item in self.scan_result.items:
+            lines.append(f"[{item.kind}] {item.label}  ({engine.human_size(item.size) if item.size else '-'})")
+        lines += ["", "备注："] + ["  " + n for n in self.scan_result.notes]
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(lines))
+        self._write_log(f"报告已保存：{path}")
+
+    def _elevate(self):
+        if engine.relaunch_as_admin([]):
+            self.destroy()
+        else:
+            messagebox.showerror(APP_TITLE, "提权被取消或失败。")
+
+
+def main():
+    App().mainloop()
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`main.py`:
+
+```py
+"""Entry point: python main.py  (or double-click 启动.bat)"""
+import ctypes
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "app"))
+
+MUTEX_NAME = "Global\\DeltaForceCleaner_SingleInstance"
+
+
+def _acquire_single_instance() -> bool:
+    """Refuse to open a second window; focus is better handled by the OS."""
+    try:
+        handle = ctypes.windll.kernel32.CreateMutexW(None, True, MUTEX_NAME)
+        if not handle:
+            return True
+        if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
+            return False
+        return True
+    except Exception:
+        return True
+
+
+def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] == "--cli":
+        from cli import main as cli_main
+
+        return cli_main(sys.argv[2:])
+
+    if not _acquire_single_instance():
+        try:
+            ctypes.windll.user32.MessageBoxW(
+                None, "三角洲行动 卸载工具已经在运行了。", "三角洲行动 卸载工具", 0x40
+            )
+        except Exception:
+            pass
+        return 0
+
+    from gui import main as gui_main
+
+    gui_main()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+```
+
+`start.bat`:
+
+```bat
+@echo off
+chcp 65001 >nul
+cd /d "%~dp0"
+where pythonw >nul 2>nul
+if errorlevel 1 (
+  echo Python 3.9+ (with Tkinter) is required. https://www.python.org/downloads/
+  pause
+  exit /b 1
+)
+start "" pythonw "%~dp0main.py"
+```
+
+`tests/test_engine.py`:
+
+```py
+"""Smoke tests: run with  python -m pytest -q  or  python tests/test_engine.py"""
+from __future__ import annotations
+
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app"))
+
+import engine  # noqa: E402
+
+
+def test_human_size():
+    assert engine.human_size(0) == "0 B"
+    assert engine.human_size(1024) == "1.0 KB"
+    assert engine.human_size(1024 ** 3).startswith("1.0 GB")
+
+
+def test_protected_services_never_scanned():
+    names = {n.lower() for n in engine.ACE_SERVICES}
+    assert not (names & engine.PROTECTED_SERVICE_NAMES), "系统存储驱动不能被当成 ACE"
+
+
+def test_wegame_list_excludes_wechat_data():
+    lowered = {d.lower() for d in engine.WEGAME_DIRS}
+    assert "xwechat" not in lowered
+    assert "qimei" not in lowered
+
+
+def test_drive_roots_are_absolute():
+    for root in engine.drive_roots():
+        assert len(root) == 3 and root[1] == ":" and root[2] == "\\"
+
+
+def test_scan_returns_scanresult():
+    res = engine.scan({"include": {"game": True, "ace": True, "wegame": True}})
+    assert isinstance(res, engine.ScanResult)
+    assert isinstance(res.total_bytes, int)
+
+
+def test_dir_size_of_missing_path_is_zero():
+    assert engine.dir_size("Z:\\does-not-exist\\nope") == 0
+
+def test_cli_aborts_without_tty_instead_of_hanging():
+    """CI and piped runs have no stdin; asking for confirmation must not crash or wait."""
+    import subprocess
+    import sys as _sys
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    proc = subprocess.run(
+        [_sys.executable, os.path.join(root, "main.py"), "--cli"],
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        timeout=180,
+    )
+    assert proc.returncode in (0, 2), proc.stderr.decode("utf-8", "replace")
+
+def test_cli_survives_non_utf8_console():
+    # GBK consoles and CP1252 CI runners must not crash on Chinese output.
+    import subprocess
+    import sys as _sys
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    env = dict(os.environ)
+    env['PYTHONIOENCODING'] = 'cp1252'
+    cmd = [_sys.executable, os.path.join(root, 'main.py'), '--cli', '--dry-run']
+    proc = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, timeout=240, env=env)
+    assert proc.returncode == 0, proc.stderr.decode('utf-8', 'replace')
+
+
+
+if __name__ == "__main__":
+    for name, fn in list(globals().items()):
+        if name.startswith("test_") and callable(fn):
+            fn()
+            print("PASS", name)
+
+```
+
+`启动.bat`:
+
+```bat
+@echo off
+chcp 65001 >nul
+cd /d "%~dp0"
+where pythonw >nul 2>nul
+if errorlevel 1 (
+  echo 未找到 pythonw.exe，请先安装 Python 3.9+
+  pause
+  exit /b 1
+)
+start "" pythonw "%~dp0main.py"
+
+```

@@ -1,0 +1,1067 @@
+Project Path: arc_ShadowKuzey_UmbraAC_13mpa7bm
+
+Source Tree:
+
+```txt
+arc_ShadowKuzey_UmbraAC_13mpa7bm
+├── AlertManager.java
+├── FlyListener.java
+├── FlyManager.java
+├── KillAuraListener.java
+├── KillAuraManager.java
+├── LICENSE
+├── NoFallListener.java
+├── NoFallManager.java
+├── PlayerData.java
+├── README.md
+├── ReachListener.java
+├── ReachManager.java
+├── SpeedListener.java
+├── SpeedManager.java
+├── UmbraAC.java
+├── XRayListener.java
+├── XRayManager.java
+├── build.gradle.kts
+├── config.yml
+├── gradle-wrapper.properties
+├── gradle.properties
+├── plugin.yml
+└── settings.gradle.kts
+
+```
+
+`AlertManager.java`:
+
+```java
+package dev.umbra.ac;
+
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+public class AlertManager {
+
+    private final UmbraAC plugin;
+
+    public AlertManager(UmbraAC plugin) {
+        this.plugin = plugin;
+    }
+
+    public void sendAlert(Player suspect, String checkName, String details) {
+        // Konsola da yazalım (loglar için önemli)
+        plugin.getLogger().warning("[UmbraAC] " + suspect.getName() + " | " + checkName + " | " + details);
+
+        // Sunucudaki tüm yetkililere (OP) mesaj gönder
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            if (onlinePlayer.hasPermission("umbra.admin")) {
+
+                // Mesajı oluştur
+                TextComponent mainMessage = new TextComponent("§8[§cUmbraAC§8] §e" + suspect.getName() + " §7adli oyuncuda §c" + checkName + " §7suphesi!");
+                TextComponent detailMessage = new TextComponent("\n§8» §7Detay: §f" + details);
+
+                // Ban komutu için tıklanabilir buton
+                TextComponent banButton = new TextComponent("\n§8[§cBANLA§8] §7(Yetkiye sahipseniz banlamak icin tiklayin)");
+                banButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ban " + suspect.getName() + " " + checkName + " hilesi"));
+                banButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("§c" + suspect.getName() + " adli oyuncuyu banla").create()));
+
+                // Mesajları birleştir ve gönder
+                mainMessage.addExtra(detailMessage);
+                mainMessage.addExtra(banButton);
+
+                onlinePlayer.spigot().sendMessage(mainMessage);
+            }
+        }
+    }
+}
+```
+
+`FlyListener.java`:
+
+```java
+package dev.umbra.ac.checks.fly;
+
+import dev.umbra.ac.UmbraAC;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class FlyListener implements Listener {
+
+    private final UmbraAC plugin;
+    private final FlyManager manager;
+    private final Map<UUID, Integer> violationLevels = new HashMap<>();
+
+    public FlyListener(UmbraAC plugin, FlyManager manager) {
+        this.plugin = plugin;
+        this.manager = manager;
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent event) {
+        if (!manager.isFlyEnabled()) return;
+
+        Player player = event.getPlayer();
+        if (manager.isExempt(player)) return;
+
+        if (player.isOnGround()) {
+            UUID uuid = player.getUniqueId();
+            int level = violationLevels.getOrDefault(uuid, 0);
+            if (level > 0) violationLevels.put(uuid, level - 1);
+            return;
+        }
+
+        double deltaY = event.getTo().getY() - event.getFrom().getY();
+
+        if (deltaY > 0.5) {
+            UUID uuid = player.getUniqueId();
+            int level = violationLevels.getOrDefault(uuid, 0) + 1;
+            violationLevels.put(uuid, level);
+
+            if (level >= 3) {
+                plugin.getAlertManager().sendAlert(player, "Fly", "Havada yukselme (DeltaY: " + String.format("%.2f", deltaY) + ")");
+                violationLevels.put(uuid, 0);
+            }
+        }
+    }
+}
+```
+
+`FlyManager.java`:
+
+```java
+package dev.umbra.ac.checks.fly;
+
+import dev.umbra.ac.UmbraAC;
+import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
+
+public class FlyManager {
+
+    private final UmbraAC plugin;
+
+    public FlyManager(UmbraAC plugin) {
+        this.plugin = plugin;
+    }
+
+    public boolean isFlyEnabled() {
+        return plugin.getConfig().getBoolean("fly.enabled", true);
+    }
+
+    // Oyuncunun uçmasına izin verilen durumlar (Yaratıcı mod, izleyici modu, uçma izni vb.)
+    public boolean isExempt(Player player) {
+        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
+            return true;
+        }
+        if (player.getAllowFlight()) {
+            return true;
+        }
+        if (player.isGliding() || player.isSwimming() || player.isInsideVehicle()) {
+            return true;
+        }
+        return false;
+    }
+
+    public void alert(String playerName, String reason) {
+        plugin.getLogger().warning("[Fly Suphesi] " + playerName + " | Sebep: " + reason);
+    }
+}
+```
+
+`KillAuraListener.java`:
+
+```java
+package dev.umbra.ac.checks.killaura;
+
+import dev.umbra.ac.UmbraAC;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class KillAuraListener implements Listener {
+
+    private final UmbraAC plugin;
+    private final KillAuraManager manager;
+    private final Map<UUID, Deque<Long>> clickHistory = new HashMap<>();
+
+    public KillAuraListener(UmbraAC plugin, KillAuraManager manager) {
+        this.plugin = plugin;
+        this.manager = manager;
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageByEntityEvent event) {
+        if (!manager.isKillAuraEnabled()) return;
+        if (!(event.getDamager() instanceof Player player)) return;
+
+        Entity target = event.getEntity();
+        UUID uuid = player.getUniqueId();
+        long now = System.currentTimeMillis();
+
+        Deque<Long> history = clickHistory.computeIfAbsent(uuid, k -> new ArrayDeque<>());
+        history.addLast(now);
+
+        while (!history.isEmpty() && now - history.peekFirst() > 1000) {
+            history.pollFirst();
+        }
+
+        if (history.size() > manager.getMaxCps()) {
+            plugin.getAlertManager().sendAlert(player, "KillAura", "Cok yuksek CPS (Saniyede " + history.size() + " vurus)");
+            history.clear();
+            return;
+        }
+
+        org.bukkit.util.Vector lookDir = player.getEyeLocation().getDirection().normalize();
+        org.bukkit.util.Vector toTarget = target.getLocation().add(0, target.getHeight() / 2, 0)
+                .subtract(player.getEyeLocation()).toVector().normalize();
+
+        double dot = lookDir.dot(toTarget);
+        dot = Math.max(-1.0, Math.min(1.0, dot));
+        double angle = Math.toDegrees(Math.acos(dot));
+
+        if (angle > manager.getMaxAngle()) {
+            plugin.getAlertManager().sendAlert(player, "KillAura", "Arkasina bakarak vurdu (Aci: " + String.format("%.1f", angle) + " derece)");
+        }
+    }
+}
+```
+
+`KillAuraManager.java`:
+
+```java
+package dev.umbra.ac.checks.killaura;
+
+import dev.umbra.ac.UmbraAC;
+
+public class KillAuraManager {
+
+    private final UmbraAC plugin;
+
+    public KillAuraManager(UmbraAC plugin) {
+        this.plugin = plugin;
+    }
+
+    public boolean isKillAuraEnabled() {
+        return plugin.getConfig().getBoolean("killaura.enabled", true);
+    }
+
+    // Maksimum tıklama hızı (saniyede)
+    public int getMaxCps() {
+        return plugin.getConfig().getInt("killaura.max-cps", 16);
+    }
+
+    // Maksimum vuruş açısı (derece cinsinden)
+    public double getMaxAngle() {
+        return plugin.getConfig().getDouble("killaura.max-angle", 90.0);
+    }
+
+    public void alert(String playerName, String reason) {
+        plugin.getLogger().warning("[KillAura Suphesi] " + playerName + " | Sebep: " + reason);
+    }
+}
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 ShadowKuzeyBBS
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`NoFallListener.java`:
+
+```java
+package dev.umbra.ac.checks.nofall;
+
+import dev.umbra.ac.UmbraAC;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
+
+public class NoFallListener implements Listener {
+
+    private final UmbraAC plugin;
+    private final NoFallManager manager;
+
+    public NoFallListener(UmbraAC plugin, NoFallManager manager) {
+        this.plugin = plugin;
+        this.manager = manager;
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageEvent event) {
+        if (!manager.isNoFallEnabled()) return;
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
+
+        double fallDistance = player.getFallDistance();
+
+        if (fallDistance >= manager.getMinFallDistance() && event.getDamage() <= 0.5) {
+            plugin.getAlertManager().sendAlert(player, "NoFall", "Dusus Mesafesi: " + String.format("%.2f", fallDistance) + " blok | Alinan Hasar: " + event.getDamage());
+        }
+    }
+}
+```
+
+`NoFallManager.java`:
+
+```java
+package dev.umbra.ac.checks.nofall;
+
+import dev.umbra.ac.UmbraAC;
+
+public class NoFallManager {
+
+    private final UmbraAC plugin;
+
+    public NoFallManager(UmbraAC plugin) {
+        this.plugin = plugin;
+    }
+
+    public boolean isNoFallEnabled() {
+        return plugin.getConfig().getBoolean("nofall.enabled", true);
+    }
+
+    // Hasar alınmamasına rağmen şüphe çekecek minimum düşüş mesafesi (blok)
+    public double getMinFallDistance() {
+        return plugin.getConfig().getDouble("nofall.min-fall-distance", 5.0);
+    }
+
+    public void alert(String playerName, double fallDistance) {
+        plugin.getLogger().warning("[NoFall Suphesi] " + playerName
+                + " | Dusus Mesafesi: " + String.format("%.2f", fallDistance) + " blok (Hasar Alinmadi)");
+    }
+}
+```
+
+`PlayerData.java`:
+
+```java
+package dev.umbra.ac.checks.xray;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+
+public class PlayerData {
+
+    private int suspicionPoints = 0;
+    private int stoneMined = 0;
+    private final Map<String, Integer> oreMined = new HashMap<>();
+    private final Deque<AngleEvent> angleEvents = new ArrayDeque<>();
+    private float lastYaw = 0f;
+
+    public int getSuspicionPoints() { return suspicionPoints; }
+    public void addSuspicionPoints(int points) { this.suspicionPoints += points; }
+    public void clearSuspicionPoints() {
+        this.suspicionPoints = 0;
+    }
+    public int getStoneMined() { return stoneMined; }
+    public void incrementStone() { this.stoneMined++; }
+
+    public Map<String, Integer> getOreMined() { return oreMined; }
+    public void incrementOre(String type) {
+        oreMined.merge(type, 1, Integer::sum);
+    }
+
+    public Deque<AngleEvent> getAngleEvents() { return angleEvents; }
+
+    public void addAngleEvent(double angle, String oreType) {
+        angleEvents.addLast(new AngleEvent(System.currentTimeMillis(), angle, oreType));
+        pruneOldEvents();
+    }
+
+    private void pruneOldEvents() {
+        long cutoff = System.currentTimeMillis() - 10 * 60 * 1000L;
+        while (!angleEvents.isEmpty() && angleEvents.peekFirst().timestamp < cutoff) {
+            angleEvents.pollFirst();
+        }
+    }
+
+    public float getLastYaw() { return lastYaw; }
+    public void setLastYaw(float lastYaw) { this.lastYaw = lastYaw; }
+
+    public static class AngleEvent {
+        public final long timestamp;
+        public final double angle;
+        public final String oreType;
+
+        public AngleEvent(long timestamp, double angle, String oreType) {
+            this.timestamp = timestamp;
+            this.angle = angle;
+            this.oreType = oreType;
+        }
+    }
+}
+```
+
+`README.md`:
+
+```md
+# UmbraAC
+
+**UmbraAC** is a lightweight, modern, and modular anti-cheat plugin for Minecraft servers. It focuses on detecting the most common cheats without causing unnecessary lag, making it perfect for small to medium-sized communities.
+
+## ✨ Features
+- **X-Ray Detection:** Uses statistical and behavioral analysis to find players mining ores abnormally.
+- **Fly Check:** Detects hovering and unauthorized vertical movement.
+- **Reach Check:** Prevents players from attacking entities from impossible distances.
+- **Speed Check:** Catches players moving faster than vanilla limits.
+- **KillAura Check:** Detects multi-aura (attacking multiple targets), high CPS (Clicks Per Second), and impossible attack angles.
+- **NoFall Check:** Identifies players who take no fall damage from high altitudes.
+- **Interactive Alerts:** Staff members (with OP/admin permissions) receive a clickable `[BAN]` button in chat when a player is flagged. No need to constantly watch the console!
+
+## 📥 Installation
+1. Download the latest `.jar` file from the [Releases](https://github.com/yourusername/UmbraAC/releases) page.
+2. Drop the `.jar` file into your server's `plugins/` folder.
+3. Start or restart your server.
+4. Configure the checks and thresholds in `plugins/UmbraAC/config.yml`.
+
+## ⚙️ Configuration
+UmbraAC comes with a fully customizable `config.yml`. You can enable/disable specific checks and adjust the sensitivity for each one.
+
+## 🌍 Language Support
+UmbraAC now supports multiple languages! You can change the plugin's language in the `config.yml` file (Default: Turkish).
+Currently supported languages: English (`en`), Turkish (`tr`).
+
+Thats All!
+
+```
+
+`ReachListener.java`:
+
+```java
+package dev.umbra.ac.checks.reach;
+
+import dev.umbra.ac.UmbraAC;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class ReachListener implements Listener {
+
+    private final UmbraAC plugin;
+    private final ReachManager manager;
+    private final Map<UUID, Integer> violationLevels = new HashMap<>();
+
+    public ReachListener(UmbraAC plugin, ReachManager manager) {
+        this.plugin = plugin;
+        this.manager = manager;
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageByEntityEvent event) {
+        if (!manager.isReachEnabled()) return;
+        if (!(event.getDamager() instanceof Player player)) return;
+
+        Entity target = event.getEntity();
+        double distance = player.getEyeLocation().distance(target.getLocation().add(0, target.getHeight() / 2, 0));
+
+        if (distance > manager.getMaxReach()) {
+            UUID uuid = player.getUniqueId();
+            int level = violationLevels.getOrDefault(uuid, 0) + 1;
+            violationLevels.put(uuid, level);
+
+            if (level >= manager.getAlertThreshold()) {
+                plugin.getAlertManager().sendAlert(player, "Reach", "Mesafe: " + String.format("%.2f", distance) + " blok | Hedef: " + target.getType().name());
+                violationLevels.put(uuid, 0);
+            }
+        } else {
+            UUID uuid = player.getUniqueId();
+            int level = violationLevels.getOrDefault(uuid, 0);
+            if (level > 0) violationLevels.put(uuid, level - 1);
+        }
+    }
+}
+```
+
+`ReachManager.java`:
+
+```java
+package dev.umbra.ac.checks.reach;
+
+import dev.umbra.ac.UmbraAC;
+
+public class ReachManager {
+
+    private final UmbraAC plugin;
+
+    public ReachManager(UmbraAC plugin) {
+        this.plugin = plugin;
+    }
+
+    public boolean isReachEnabled() {
+        return plugin.getConfig().getBoolean("reach.enabled", true);
+    }
+
+    public double getMaxReach() {
+        return plugin.getConfig().getDouble("reach.max-distance", 3.5);
+    }
+
+    public int getAlertThreshold() {
+        return plugin.getConfig().getInt("reach.alert-threshold", 3);
+    }
+
+    public void alert(String playerName, double distance, String targetName) {
+        plugin.getLogger().warning("[Reach Suphesi] " + playerName
+                + " | Mesafe: " + String.format("%.2f", distance) + " blok"
+                + " | Hedef: " + targetName);
+    }
+}
+```
+
+`SpeedListener.java`:
+
+```java
+package dev.umbra.ac.checks.speed;
+
+import dev.umbra.ac.UmbraAC;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class SpeedListener implements Listener {
+
+    private final UmbraAC plugin;
+    private final SpeedManager manager;
+    private final Map<UUID, Integer> violationLevels = new HashMap<>();
+
+    public SpeedListener(UmbraAC plugin, SpeedManager manager) {
+        this.plugin = plugin;
+        this.manager = manager;
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent event) {
+        if (!manager.isSpeedEnabled()) return;
+
+        Player player = event.getPlayer();
+        if (manager.isExempt(player)) return;
+
+        Location from = event.getFrom();
+        Location to = event.getTo();
+
+        double distance = Math.sqrt(Math.pow(to.getX() - from.getX(), 2) + Math.pow(to.getZ() - from.getZ(), 2));
+
+        if (distance > 10.0) return;
+
+        double maxSpeed = manager.getMaxSpeed(player);
+
+        if (distance > maxSpeed) {
+            UUID uuid = player.getUniqueId();
+            int level = violationLevels.getOrDefault(uuid, 0) + 1;
+            violationLevels.put(uuid, level);
+
+            if (level >= 3) {
+                plugin.getAlertManager().sendAlert(player, "Speed", "Hiz: " + String.format("%.2f", distance) + " blok/tick");
+                violationLevels.put(uuid, 0);
+            }
+        } else {
+            UUID uuid = player.getUniqueId();
+            int level = violationLevels.getOrDefault(uuid, 0);
+            if (level > 0) violationLevels.put(uuid, level - 1);
+        }
+    }
+}
+```
+
+`SpeedManager.java`:
+
+```java
+package dev.umbra.ac.checks.speed;
+
+import dev.umbra.ac.UmbraAC;
+import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
+
+public class SpeedManager {
+
+    private final UmbraAC plugin;
+
+    public SpeedManager(UmbraAC plugin) {
+        this.plugin = plugin;
+    }
+
+    public boolean isSpeedEnabled() {
+        return plugin.getConfig().getBoolean("speed.enabled", true);
+    }
+
+    // Oyuncunun hızlı olmasına izin verilen durumlar
+    public boolean isExempt(Player player) {
+        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) return true;
+        if (player.isFlying() || player.isGliding() || player.isInsideVehicle()) return true;
+        // Buz, ruh kumu gibi hızlandıran bloklarda veya suda yüzerken kontrolü esnet
+        if (player.getLocation().getBlock().isLiquid()) return true;
+
+        return false;
+    }
+
+    // Oyuncunun sahip olduğu hız iksiri seviyesine göre limiti ayarla
+    public double getMaxSpeed(Player player) {
+        double baseSpeed = plugin.getConfig().getDouble("speed.max-speed", 0.45); // Saniyedeki blok cinsinden limit
+
+        // Hız iksiri varsa limiti arttır (Seviye 1 = %20, Seviye 2 = %40 vb.)
+        if (player.hasPotionEffect(org.bukkit.potion.PotionEffectType.SPEED)) {
+            int amplifier = player.getPotionEffect(org.bukkit.potion.PotionEffectType.SPEED).getAmplifier();
+            baseSpeed += (baseSpeed * 0.2 * (amplifier + 1));
+        }
+
+        return baseSpeed;
+    }
+
+    public void alert(String playerName, double distance) {
+        plugin.getLogger().warning("[Speed Suphesi] " + playerName
+                + " | Hiz: " + String.format("%.2f", distance) + " blok/tick");
+    }
+}
+```
+
+`UmbraAC.java`:
+
+```java
+package dev.umbra.ac;
+
+import dev.umbra.ac.checks.xray.XRayListener;
+import dev.umbra.ac.checks.xray.XRayManager;
+import dev.umbra.ac.checks.reach.ReachListener;
+import dev.umbra.ac.checks.reach.ReachManager;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.java.JavaPlugin;
+import dev.umbra.ac.checks.fly.FlyListener;
+import dev.umbra.ac.checks.fly.FlyManager;
+import dev.umbra.ac.checks.killaura.KillAuraListener;
+import dev.umbra.ac.checks.killaura.KillAuraManager;
+import dev.umbra.ac.checks.nofall.NoFallListener;
+import dev.umbra.ac.checks.nofall.NoFallManager;
+import dev.umbra.ac.checks.speed.SpeedListener;
+import dev.umbra.ac.checks.speed.SpeedManager;
+
+public class UmbraAC extends JavaPlugin {
+
+    private XRayManager xrayManager;
+    private ReachManager reachManager;
+    private FlyManager flyManager;
+    private KillAuraManager killAuraManager;
+    private NoFallManager noFallManager;
+    private SpeedManager speedManager;
+    private AlertManager alertManager;
+
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+        // Speed Modulu
+        speedManager = new SpeedManager(this);
+        getServer().getPluginManager().registerEvents(new SpeedListener(this, speedManager), this);
+        // NoFall Modulu
+        noFallManager = new NoFallManager(this);
+        getServer().getPluginManager().registerEvents(new NoFallListener(this, noFallManager), this);
+        // Kill Aura Modulu
+        killAuraManager = new KillAuraManager(this);
+        getServer().getPluginManager().registerEvents(new KillAuraListener(this, killAuraManager), this);
+        // Fly Modulu
+        flyManager = new FlyManager(this);
+        getServer().getPluginManager().registerEvents(new FlyListener(this, flyManager), this);
+        // X-Ray Modulu
+        xrayManager = new XRayManager(this);
+        getServer().getPluginManager().registerEvents(new XRayListener(this, xrayManager), this);
+        // Reach Modulu
+        reachManager = new ReachManager(this);
+        getServer().getPluginManager().registerEvents(new ReachListener(this, reachManager), this);
+        // Mesaj Modulu
+        alertManager = new AlertManager(this);
+        getLogger().info("UmbraAC basariyla aktif edildi!");
+    }
+
+    @Override
+    public void onDisable() {
+        if (xrayManager != null) {
+            xrayManager.saveData();
+        }
+        getLogger().info("UmbraAC devre disi birakildi.");
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (command.getName().equalsIgnoreCase("umbra")) {
+            if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+                reloadConfig();
+                sender.sendMessage("§a[UmbraAC] Konfigurasyon yeniden yuklendi.");
+                return true;
+            }
+            sender.sendMessage("§6[UmbraAC] Kullanim: /umbra reload");
+            return true;
+        }
+        return false;
+    }
+    public AlertManager getAlertManager() {
+        return alertManager;
+    }
+    public XRayManager getXrayManager() {
+        return xrayManager;
+    }
+
+    public ReachManager getReachManager() {
+        return reachManager;
+        }
+    }
+
+
+
+```
+
+`XRayListener.java`:
+
+```java
+package dev.umbra.ac.checks.xray;
+
+import dev.umbra.ac.UmbraAC;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+
+public class XRayListener implements Listener {
+
+    private final UmbraAC plugin;
+    private final XRayManager manager;
+
+    public XRayListener(UmbraAC plugin, XRayManager manager) {
+        this.plugin = plugin;
+        this.manager = manager;
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent event) {
+        if (!manager.isXRayEnabled()) return;
+        Player player = event.getPlayer();
+        PlayerData data = manager.getPlayerData(player.getUniqueId());
+        data.setLastYaw(player.getLocation().getYaw());
+    }
+
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event) {
+        if (!manager.isXRayEnabled()) return;
+
+        Player player = event.getPlayer();
+        Material type = event.getBlock().getType();
+        PlayerData data = manager.getPlayerData(player.getUniqueId());
+
+        if (isStone(type)) {
+            data.incrementStone();
+            return;
+        }
+
+        if (!isOre(type)) return;
+
+        String oreName = type.name();
+        data.incrementOre(oreName);
+
+        // 1. Temel Puan
+        int basePoints = manager.getOrePoints(oreName);
+        data.addSuspicionPoints(basePoints);
+
+        // 2. Yön Sapması Puanı
+        double angle = calculateAngle(player, event.getBlock().getLocation());
+        if (angle > manager.getAngleThreshold()) {
+            data.addAngleEvent(angle, oreName);
+            data.addSuspicionPoints(manager.getAngleBonus());
+        }
+
+        // 3. Oran Kontrolü
+        checkRatio(data);
+
+        // 4. Alarm Kontrolü (Merkezi AlertManager kullanarak)
+        if (data.getSuspicionPoints() >= manager.getAlertThreshold()) {
+            plugin.getAlertManager().sendAlert(player, "X-Ray",
+                    "Puan: " + data.getSuspicionPoints() +
+                            " | Elmas: " + data.getOreMined().getOrDefault("DIAMOND_ORE", 0) +
+                            " | Tas: " + data.getStoneMined());
+
+            // Aynı oyuncu için sürekli spam atmaması için puanı sıfırlayalım
+            data.clearSuspicionPoints(); // Bunu PlayerData'ya ekleyeceğiz
+        }
+    }
+
+    private void checkRatio(PlayerData data) {
+        int totalOre = 0;
+        for (int count : data.getOreMined().values()) {
+            totalOre += count;
+        }
+
+        int totalStone = data.getStoneMined();
+        if (totalStone < 20) return;
+
+        double ratio = (double) totalOre / totalStone;
+        if (ratio > manager.getRatioThreshold()) {
+            data.addSuspicionPoints(manager.getRatioBonus());
+        }
+    }
+
+    private double calculateAngle(Player player, Location oreLocation) {
+        Location eye = player.getEyeLocation();
+        org.bukkit.util.Vector lookDir = eye.getDirection().normalize();
+        org.bukkit.util.Vector toOre = oreLocation.clone().add(0.5, 0.5, 0.5)
+                .subtract(eye).toVector().normalize();
+        double dot = lookDir.dot(toOre);
+        dot = Math.max(-1.0, Math.min(1.0, dot));
+        return Math.toDegrees(Math.acos(dot));
+    }
+
+    private boolean isStone(Material type) {
+        return type == Material.STONE || type == Material.DEEPSLATE
+                || type == Material.NETHERRACK || type == Material.TUFF;
+    }
+
+    private boolean isOre(Material type) {
+        return type.name().endsWith("_ORE") || type == Material.ANCIENT_DEBRIS;
+    }
+}
+```
+
+`XRayManager.java`:
+
+```java
+package dev.umbra.ac.checks.xray;
+
+import dev.umbra.ac.UmbraAC;
+import org.bukkit.configuration.ConfigurationSection;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class XRayManager {
+
+    private final UmbraAC plugin;
+    private final Map<UUID, PlayerData> playerDataMap = new ConcurrentHashMap<>();
+
+    public XRayManager(UmbraAC plugin) {
+        this.plugin = plugin;
+    }
+
+    public PlayerData getPlayerData(UUID uuid) {
+        return playerDataMap.computeIfAbsent(uuid, k -> new PlayerData());
+    }
+
+    public boolean isXRayEnabled() {
+        return plugin.getConfig().getBoolean("xray.enabled", true);
+    }
+
+    public double getAngleThreshold() {
+        return plugin.getConfig().getDouble("xray.angle-threshold", 47.0);
+    }
+
+    public int getAlertThreshold() {
+        return plugin.getConfig().getInt("xray.alert-threshold", 50);
+    }
+
+    public int getAngleBonus() {
+        return plugin.getConfig().getInt("xray.angle-bonus", 3);
+    }
+
+    public int getRatioBonus() {
+        return plugin.getConfig().getInt("xray.ratio-bonus", 10);
+    }
+
+    public double getRatioThreshold() {
+        return plugin.getConfig().getDouble("xray.ratio-threshold", 0.15);
+    }
+
+    public int getOrePoints(String materialName) {
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection("xray.ore-points");
+        if (section != null && section.contains(materialName)) {
+            return section.getInt(materialName);
+        }
+        return 0;
+    }
+
+    public void saveData() {
+        // İleride verileri diske kaydetmek için kullanılacak (şu an hafızada tutuyoruz)
+    }
+}
+```
+
+`build.gradle.kts`:
+
+```kts
+plugins {
+    id("java-library")
+}
+
+repositories {
+    mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
+}
+
+dependencies {
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+```
+
+`config.yml`:
+
+```yml
+# X-Ray Tespit Ayarları
+xray:
+  enabled: true
+  # Yön sapması açı eşiği (derece)
+  angle-threshold: 47.0
+  # Puan birikim süresi (dakika)
+  accumulation-minutes: 10
+  # Şüphe puanı eşiği (bu puanı aşınca personel uyarısı tetiklenir)
+  alert-threshold: 50
+  # Cevher türlerine göre temel puanlar
+  ore-points:
+    DIAMOND_ORE: 5
+    DEEPSLATE_DIAMOND_ORE: 5
+    GOLD_ORE: 3
+    DEEPSLATE_GOLD_ORE: 3
+    IRON_ORE: 2
+    DEEPSLATE_IRON_ORE: 2
+    COAL_ORE: 1
+    DEEPSLATE_COAL_ORE: 1
+    REDSTONE_ORE: 1
+    DEEPSLATE_REDSTONE_ORE: 1
+    LAPIS_ORE: 1
+    DEEPSLATE_LAPIS_ORE: 1
+    EMERALD_ORE: 5
+    DEEPSLATE_EMERALD_ORE: 5
+  # Yön sapması bonus puanı
+  angle-bonus: 3
+  # Oran kontrolü: son X dakikada elmas/taş oranı bu yüzdeyi aşarsa ekstra puan
+  ratio-threshold: 0.15
+  ratio-bonus: 10
+  # Reach (Menzil) Tespit Ayarları
+  reach:
+    enabled: true
+    # Maksimum vurus mesafesi (blok cinsinden)
+    max-distance: 3.5
+    # Uyari vermek icin gereken ust uste ihlal sayisi
+    alert-threshold: 3
+    # Fly (Ucus) Tespit Ayarları
+    fly:
+      enabled: true
+    # KillAura (Savas Hilesi) Tespit Ayarları
+      killaura:
+        enabled: true
+        # Saniyede izin verilen maksimum vurus sayisi
+        max-cps: 16
+        # Maksimum vurus acisi (derece cinsinden, 90 ideal)
+        max-angle: 90.0
+        # NoFall (Dusme Hasarini Engelleme) Ayarlari
+      nofall:
+        enabled: true
+        # Bu mesafeden yuksek dususlerde hasar alinmamasi supheli sayilir
+        min-fall-distance: 5.0
+        # Speed (Hiz) Tespit Ayarlari
+        speed:
+          enabled: true
+          # Maksimum izin verilen yatay hiz (blok basina tick)
+          max-speed: 0.45
+```
+
+`gradle-wrapper.properties`:
+
+```properties
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.4.0-bin.zip
+
+```
+
+`gradle.properties`:
+
+```properties
+group=dev.umbra.ac
+version=1.0-SNAPSHOT
+description=A lightweight and modern Anti-Cheat plugin for Minecraft.
+org.gradle.configuration-cache=true
+org.gradle.parallel=true
+org.gradle.caching=true
+
+```
+
+`plugin.yml`:
+
+```yml
+name: UmbraAC
+version: 1.0.0
+main: dev.umbra.ac.UmbraAC
+api-version: '1.21'
+description: Modern, hafif ve modüler bir hile koruma eklentisi.
+author: ShadowKuzeyBBS
+website: https://github.com/kullaniciadin/UmbraAC
+commands:
+  umbra:
+    description: UmbraAC ana komutu
+    usage: /umbra reload
+    permission: umbra.admin
+    aliases: [ac, anticheat]
+permissions:
+  umbra.admin:
+    description: UmbraAC yonetici komutlarini kullanma izni
+    default: op
+```
+
+`settings.gradle.kts`:
+
+```kts
+rootProject.name = "UmbraAC"
+
+```
