@@ -1083,6 +1083,7 @@ sources:
   - wiki/sources/descriptions/phantantai73__AmberAntiCheat.md
   - wiki/sources/descriptions/optic-fyi__windows-driver.md
   - wiki/sources/descriptions/Werta1z__Avgar-AntiCheats.md
+  - wiki/sources/descriptions/Siselea__deltaforce-cleaner.md
 updated: 2026-11-20
 confidence: high
 ---
@@ -1240,6 +1241,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 - [[fuck-ace]] — Windows console utility throttling Tencent ACE SGuard processes via idle priority, last-CPU affinity, and EcoQoS; admin + SeDebugPrivilege; auto-retry on self-protection blocks; no network or disk writes (moeskia; Cheat / Explore AntiCheat System:ACE resource-consumption mitigation) (source: wiki/sources/descriptions/moeskia__fuckAce.md)
 - [[ff-ace-anticheat-analysis]] — Tencent ACE (libanogs/libanort) Free Fire byte-level RE post-mortem (Lixense; Python/JS IDA automation + SQLite detection index; APK hash, cert parsing, inline-hook scans, self-integrity checksum catalog; Explore AntiCheat System:ACE defensive research) (source: wiki/sources/descriptions/Lixense__ff-ace-anticheat-analysis.md)
 - [[anticheattoggle]] — WinForms utility to temporarily stop/disable Tencent ACE, Perfect World Arena, and Reason CyberSecurity kernel drivers that block VirtualBox VM spawn (`supR3HardenedWinReSpawn` VERR_INVALID_NAME -104); backs up service start types; CLI `--off`/`--on`/`--status`; research-host virtualization troubleshooting (lsxll666; Cheat / QEMU/KVM/PVE/VBOX) (source: wiki/sources/descriptions/lsxll666__AntiCheatToggle.md)
+- [[deltaforce-cleaner]] — Python 3.9+ stdlib GUI/CLI uninstaller that fully removes Delta Force (三角洲行动) and leftover Tencent ACE kernel services, drivers, registry, files, and WeGame traces; documented detection rules, protected Tencent/Windows paths, dry-run + unit-tested headless engine (Siselea; Anti Cheat / host cleanup after persistent kernel AC) (source: wiki/sources/descriptions/Siselea__deltaforce-cleaner.md)
 - [[battlefn-cheat-analysis]] — detected Fortnite cheat post-mortem (0dayatday0; written analysis + sample modules + manual-map / privileged-memory PoCs; batch + C++ usermode→kernel paths; real-world tradecraft and mistake catalog for defensive researchers) (source: wiki/sources/descriptions/0dayatday0__BattleFN-cheat-analysis.md)
 - [[meme-rw]] — C++/CMake protected-process memory access PoC; vulnerable-driver mapping framework with driver-load helpers, process/module utilities, and memory R/W control; end-to-end target-process open + memory ops for anti-cheat bypass experimentation and defensive protected-memory research (SamuelTulach; cheat / kdmapper) (source: wiki/sources/descriptions/SamuelTulach__meme-rw.md)
 - [[remap]] — Windows kernel page-remapping PoC; copies protected-process pages into another process VA space for memory R/W and dump workflows after setup; documents Windows 10 range limits, operational caveats, and cleanup crash risks; anti-cheat bypass and low-level process-memory research (EBalloon; cheat / Clone process) (source: wiki/sources/descriptions/EBalloon__Remap.md)

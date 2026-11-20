@@ -1081,6 +1081,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [demumble](entities/demumble.md) — Itanium/MSVC (+ D/Rust/Swift) demangler; c++filt/undname replacement (RE tools)
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
 - [delete-self-poc](entities/delete-self-poc.md) — C PoC; delete locked or running executable from disk via primary-stream rename + SetFileInformationByHandle disposition (LloydLabs; handle sequencing / locked-file removal; anti-forensics / secure cleanup / defensive detection engineering)
+- [deltaforce-cleaner](entities/deltaforce-cleaner.md) — Python 3.9+ GUI/CLI clean uninstaller for Delta Force (三角洲行动) + leftover Tencent ACE kernel drivers/services, registry, files, and WeGame traces; dry-run, documented rules, protected paths (Siselea; Anti Cheat / persistent kernel AC purge)
 - [dezlock-dump](entities/dezlock-dump.md) — runtime schema + RTTI extraction for Source 2 (Deadlock, CS2, Dota 2); live-process dump; WebSocket bridge + schema browser; no source2gen required
 - [decryption-dumper](entities/decryption-dumper.md) — Windows C++ runtime encrypted-pointer decrypt routine dumper (Nuxar1; debugger single-step + Zydis; register/stack dependency trace; pattern scan + context restore; cheat / [Dump])
 - [digital-sdk](entities/digital-sdk.md)
