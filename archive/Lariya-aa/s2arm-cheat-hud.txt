@@ -1,0 +1,2567 @@
+Project Path: arc_Lariya-aa_s2arm-cheat-hud_p_fixc1x
+
+Source Tree:
+
+```txt
+arc_Lariya-aa_s2arm-cheat-hud_p_fixc1x
+├── Package.swift
+├── README.ja.md
+├── README.md
+├── README.zh-CN.md
+├── Sources
+│   └── S2ArmCheatHUD
+│       ├── CheatStore.swift
+│       ├── HUDView.swift
+│       ├── InputMonitor.swift
+│       ├── Models.swift
+│       └── main.swift
+├── build.sh
+└── tools
+    └── normalize_cheats.py
+
+```
+
+`Package.swift`:
+
+```swift
+// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "S2ArmCheatHUD",
+    platforms: [
+        .macOS(.v14)
+    ],
+    products: [
+        .executable(name: "S2ArmCheatHUD", targets: ["S2ArmCheatHUD"])
+    ],
+    targets: [
+        .executableTarget(
+            name: "S2ArmCheatHUD",
+            path: "Sources/S2ArmCheatHUD",
+            linkerSettings: [
+                .linkedFramework("AppKit"),
+                .linkedFramework("SwiftUI"),
+                .linkedFramework("GameController"),
+                .linkedFramework("Carbon")
+            ]
+        )
+    ],
+    swiftLanguageVersions: [.v5]
+)
+
+```
+
+`README.ja.md`:
+
+```md
+# S2ArmCheatHUD
+
+<p align="center">
+  <b>macOS 版 S2Arm 向けに設計された軽量かつ非侵入型のゲーム内チートオーバーレイパネル。</b><br>
+  PSP の CWCheat / TempAR、PS Vita の VitaCheat、Switch の EdiZon Overlay の操作感を再現。
+</p>
+
+<p align="center">
+  <a href="README.md">English</a> •
+  <a href="README.zh-CN.md">简体中文</a> •
+  <a href="README.ja.md">日本語</a>
+</p>
+
+---
+
+## 1. プロジェクト概要
+
+**S2ArmCheatHUD** は、macOS 版 **S2Arm**（Apple Silicon 上で動作する Switch ARM64→Metal ネイティブトランスレータ）向けに設計された、軽量かつ非侵入型のゲーム内チートオーバーレイパネルです。
+
+レトロ携帯ゲーム機のチートプラグイン（PSP の `CWCheat` / `TempAR`、PS Vita の `VitaCheat`、Nintendo Switch の `EdiZon Overlay`）の操作感を、macOS 上の S2Arm ゲームプレイで再現します。
+
+* **非アクティブ型オーバーレイ**：ゲーム画面最前面に常時表示され、ゲームのフォーカスを奪いません。
+* **デュアル呼び出し**：コントローラーの `L3 + R3` 長押し、またはキーボードショートカット `⌥Z` で瞬時に呼び出し可能。
+* **ワンショット注入（パルス注入）**：メモリの常時上書きによるフリーズやセーブデータの破損を防ぎ、ルピーや弾薬などの数値を安全に一度だけ補充。
+* **完全非侵入型**：S2Arm の実行ファイルや署名を変更・改ざんすることなく、外部から安全に連携。
+
+---
+
+## 2. 主な機能
+
+* **フォーカスを奪わないフルスクリーンオーバーレイ**
+  AppKit の `NSPanel`（`.nonactivatingPanel`）を採用。フルスクリーン表示の Metal ゲーム（`S2ArmGame.app`）の上に自然に浮遊し、クリックしてもゲームが一時停止したりデスクトップが切り替わったりしません。
+
+* **コントローラー＆キーボードによる自在な呼び出し**
+  - **コントローラー**：左右のアナログスティック押し込み **`L3 + R3`**、または **`Share(-) + R3`** を約 0.15 秒長押し。
+  - **キーボード**：グローバルホットキー **`⌥Z` (`Option + Z`)**（アクセシビリティ権限不要の Carbon API を採用）。
+  - **メニューバー常駐**：macOS 上部のメニューバーにある `🎮` アイコンからいつでもアクセス可能。
+
+* **リアルタイム双方向ファイル同期**
+  S2Arm のチート管理モジュール（`Cheats.cs`）と直接連携。パネルでチートを切り替えると `cheats/enabled.txt` に即座に反映され、ゲーム再起動なしで効果が適用されます。
+
+* **ワンショット注入（安全な単発書き込み）**
+  常時メモリ書き込みによるショップ購入時のフリーズや進行不能を回避するため、書き込み完了後にチート指示を即座に破棄するフィードバックループを実装しています。
+
+* **『ゼルダの伝説 時のオカリナ』専用インジェクター**
+  `GameDataMgr` 動的ポインタチェーンを解析し、ルピーの所持上限に応じた段階切り替え（99 / 200 / 500 / 9999）や、デクの棒、デクの実、パチンコの弾、バクダンなどの各種アイテムのワンタッチ補充に対応。
+
+* **競合防止（ミューテックス保護）**
+  同じアセンブリフック位置（例：`0x0049DCF0` の無敵化とハート全回復）を共有するチート同士の競合を自動的に検出し、クラッシュを未然に防止します。
+
+---
+
+## 3. 操作方法
+
+> **ヒント**：ゲーム内で `+`（ポーズ）を押してから `L3 + R3` でパネルを呼び出すと、十字キー操作によるキャラクターの誤操作を防ぐことができます。
+
+| 操作内容 | コントローラー | キーボード / マウス |
+| :--- | :--- | :--- |
+| **パネルの表示 / 非表示** | `L3 + R3` を長押し (~0.15秒) | `⌥Z` (`Option + Z`) |
+| **項目の選択** | 十字キー `↑` / `↓` | マウスホバー / クリック |
+| **数値微調整 / プリセット** | 十字キー `←` / `→` · `L1` / `R1` | 画面内ボタンをクリック |
+| **適用 / スイッチ切り替え** | `×` ボタン（DualSense）/ `B`（Switch） | マウス左クリック |
+| **パネルを閉じる** | `○` ボタン（DualSense）/ `A`（Switch） | 閉じるボタン / `Esc` キー |
+
+---
+
+## 4. ビルドと起動
+
+### 動作要件
+* macOS Sonoma 14.0 以降（Apple Silicon M1/M2/M3/M4）
+* Xcode Command Line Tools（`xcode-select --install`）
+* S2Arm が導入されたゲーム環境
+
+### ビルド手順
+```bash
+# リポジトリのクローン
+git clone https://github.com/Lariya-aa/s2arm-cheat-hud.git
+cd s2arm-cheat-hud
+
+# アプリバンドルの一括ビルド
+chmod +x build.sh
+./build.sh
+
+# アプリの起動
+open dist/S2ArmCheatHUD.app
+```
+
+---
+
+## 参考文献・関連プロジェクト
+
+本プロジェクトは、以下のオープンソースプロジェクト、ハンドヘルド自作コミュニティ、エミュレーション技術の知見に深く敬意を表します：
+
+1. **[S2Arm](https://github.com/jhaizhou-ops/S2Arm)** (`jhaizhou-ops/S2Arm`)
+   iOS、iPadOS、macOS 向けネイティブ ARM64 Switch ランタイム。その動的 `Cheats.cs` ファイル監視サービスが、本 HUD の外部連携の基盤となっています。
+2. **[Atmosphere](https://github.com/Atmosphere-NX/Atmosphere)** (`Atmosphere-NX/Atmosphere`)
+   Nintendo Switch の標準的なカスタムファームウェア。`dmnt:cht` チート仮想マシンのコード仕様は、本ツールのチートパーサーの基盤となっています。
+3. **CWCheat & TempAR (PlayStation Portable)**
+   PSP カスタムファームウェア（`3.XX` - `6.XX`）時代を代表するゲーム内チートプラグイン。`L + Select` で呼び出すオーバーレイ HUD の設計思想は、本プロジェクトに直接受け継がれています。
+4. **[VitaCheat](https://github.com/r0ah/vitacheat)** (`r0ah/vitacheat`, PlayStation Vita)
+   PS Vita (`taiHEN`) 向けのリアルタイムメモリ検索およびオーバーレイチートプラグイン。
+5. **[EdiZon](https://github.com/WerWolv/EdiZon)** & **[Tesla-Menu](https://github.com/WerWolv/Tesla-Menu)** (Nintendo Switch)
+   Nintendo Switch におけるオーバーレイチート管理の金字塔。
+6. **MeloNX & [S2Arm PR #134](https://github.com/jhaizhou-ops/S2Arm/pull/134)**
+   iOS 向け Switch 仮想ゲームパッドおよびギアメニュー（[@neexuan](https://github.com/neexuan) 氏により S2Arm PR #134 で移植）。そのゲーム内チート切替の着想が、本デスクトップ向け HUD の基盤となりました。
+
+---
+
+## Topics / トピックス
+
+`s2arm` • `macos` • `swift` • `appkit` • `gamecontroller` • `hud-overlay` • `cheat-engine` • `atmosphere-cheats` • `apple-silicon` • `nintendo-switch` • `zelda-ocarina-of-time` • `retro-gaming` • `cwcheat` • `overlay-menu`
+
+```
+
+`README.md`:
+
+```md
+# S2ArmCheatHUD
+
+<p align="center">
+  <b>A lightweight, non-intrusive in-game cheat overlay panel for S2Arm on macOS.</b><br>
+  Inspired by retro handheld in-game cheat menus (PSP CWCheat / TempAR, PS Vita VitaCheat, Switch EdiZon Overlay).
+</p>
+
+<p align="center">
+  <a href="#english">English</a> •
+  <a href="#简体中文">简体中文</a> •
+  <a href="#日本語">日本語</a>
+</p>
+
+---
+
+<a name="english"></a>
+## English
+
+### 1. Overview
+
+**S2ArmCheatHUD** is a standalone, non-activating floating HUD application designed specifically for **S2Arm** (the native Switch ARM64-to-Metal runtime on Apple Silicon macOS). 
+
+While S2Arm provides an in-game gear menu on iOS, on macOS cheats can normally only be toggled via the desktop launcher prior to game launch or refreshed via `⌘R`. **S2ArmCheatHUD** bridges this gap:
+* It floats on top of native macOS full-screen games without stealing keyboard or controller focus (`.nonactivatingPanel`).
+* It can be summoned instantly during gameplay using gamepad stick clicks (`L3 + R3`) or a global hotkey (`⌥Z`).
+* It supports both persistent cheat toggles and **one-shot pulse injection** (e.g. adding rupees, ammo, or items once without infinite background memory loop freezing).
+* It remains 100% decoupled from S2Arm binaries—no reverse engineering, process injection, or code signature tampering required.
+
+---
+
+### 2. Key Features
+
+* **Non-Activating Full-Screen Overlay**
+  Built with AppKit's `NSPanel` (`.nonactivatingPanel` + `.canJoinAllSpaces` + `.fullScreenAuxiliary`). The HUD floats directly over native fullscreen Metal game windows (`S2ArmGame.app`). Clicking buttons or interacting with the HUD **never steals focus**, preventing game pauses, window minimization, or desktop switching.
+
+* **Dual Invocation (Gamepad & Global Keyboard Shortcut)**
+  - **Gamepad**: Hold **`L3 + R3`** (both analog stick clicks) or **`Share(-) + R3`** for ~0.15 seconds (monitored via Apple `GameController` framework).
+  - **Keyboard**: Press **`⌥Z` (`Option + Z`)** globally (registered via Carbon `RegisterEventHotKey`, requiring **no** macOS Accessibility permissions).
+  - **Menu Bar Status Item**: Persistent `🎮` icon in the macOS status bar for direct mouse access and library path configuration.
+
+* **Live Dynamic File Synchronization**
+  Seamlessly interfaces with S2Arm's built-in cheat engine (`Cheats.cs`), which watches `cheats/enabled.txt` and `status.txt` at 1-second intervals. Changes made in the HUD take effect in real time during gameplay.
+
+* **One-Shot Pulse Injection (Zero Background Loop Freezing)**
+  Continuous background cheat loops can freeze values, causing wallet overflow, store transaction animation hangs, or save corruption. S2ArmCheatHUD implements closed-loop pulse injection:
+  1. Writes a temporary dynamic cheat specification (`_oneshot.txt`).
+  2. Polls S2Arm's `status.txt` until it reports `Applied` (`生效中`).
+  3. Immediately deletes the temporary cheat file upon confirmation.
+  4. Keeps memory free from perpetual writes.
+
+* **Zelda: Ocarina of Time Injector**
+  Includes specialized support for *The Legend of Zelda: Ocarina of Time* (`0400486024DEC000` / `BID=E0F3CCFAF50065AE`):
+  - **`GameDataMgr` Pointer Chain**: Double-buffer writes (`+0x1C` current & `+0x20` max capacity) for Rupees with preset wallet tiers (`99`, `200`, `500`, `9999`) and fine-tuning (`±10`, `±50`).
+  - **Item Refills**: One-shot replenishment for Deku Sticks, Deku Nuts, Slingshot Seeds, Bombs, Arrows, Bombchus, and Magic Beans.
+
+* **Conflict Detection & Mutex Protection**
+  Parses Atmosphere `.txt` hook addresses. When two cheats share the same `.text` modification point (e.g., `No damage` and `Refill hearts` at `0x0049DCF0`), toggling one automatically deactivates the conflicting entry to prevent crashes.
+
+---
+
+### 3. Controls & Navigation
+
+> **Tip**: In-game, press `+` to pause game logic before pressing `L3 + R3` to open the HUD. This ensures D-Pad navigation does not move your in-game character.
+
+| Action | Gamepad | Keyboard / Mouse |
+| :--- | :--- | :--- |
+| **Summon / Dismiss HUD** | Hold `L3 + R3` (~0.15s) | Press `⌥Z` (`Option + Z`) |
+| **Navigate Items** | D-Pad `↑` / `↓` | Mouse Hover / Click |
+| **Adjust Value / Preset** | D-Pad `←` / `→` (Fine) · `L1` / `R1` (Tiers) | UI Buttons (`-10`, `+50`, etc.) |
+| **Confirm / Toggle** | `Cross (×)` (DualSense) / `B` (Switch) | Mouse Left Click |
+| **Close HUD** | `Circle (○)` (DualSense) / `A` (Switch) | Close Button / `Escape` |
+
+---
+
+### 4. Build & Installation
+
+#### Requirements
+* macOS Sonoma 14.0 or later (Apple Silicon M1/M2/M3/M4)
+* Xcode Command Line Tools (`xcode-select --install`)
+* S2Arm installed with a prepared game library
+
+#### Build from Source
+```bash
+# Clone the repository
+git clone https://github.com/Lariya-aa/s2arm-cheat-hud.git
+cd s2arm-cheat-hud
+
+# Build standalone Application Bundle
+chmod +x build.sh
+./build.sh
+
+# Launch the app
+open dist/S2ArmCheatHUD.app
+```
+
+---
+
+<a name="简体中文"></a>
+## 简体中文
+
+### 1. 项目简介
+
+**S2ArmCheatHUD** 是一款专为 macOS 版 **S2Arm**（运行在 Apple Silicon 上的原生 Switch ARM64-to-Metal 运行层）量身打造的轻量级、无侵入式游戏内悬浮金手指面板。
+
+S2Arm 在 iOS 端提供了便捷的虚拟手柄“齿轮菜单”，而在 macOS 端官方目前仅在桌面启动器中提供出包前的勾选列表，局内仅能通过 `⌘R` 刷新。**S2ArmCheatHUD 完美填补了这一空白**：
+* 采用 `.nonactivatingPanel` 悬浮层架构，全屏游戏状态下不夺取窗口焦点、不中断游戏逻辑；
+* 支持手柄摇杆双击（`L3 + R3`）与键盘全局快捷键（`⌥Z`）随时呼出与收起；
+* 支持常驻功能开关与**单次脉冲式内存注入**（如补满卢比、弹药、道具，写完即止，不持续后台循环覆写）；
+* 纯外部协同工作，不注入进程、不反编译、不破坏 S2Arm 官方二进制与签名。
+
+---
+
+### 2. 核心特性
+
+* **全屏置顶且不抢占焦点**
+  基于 AppKit `NSPanel`（`.nonactivatingPanel` + `.canJoinAllSpaces` + `.fullScreenAuxiliary`）构建。悬浮面板直接呈现在全屏游戏画面最上方，鼠标点击面板**不会夺走 `S2ArmGame.app` 的键盘与手柄焦点**，避免任何失焦暂停或全屏切屏。
+
+* **手柄与键盘全局热键双呼出**
+  - **手柄呼出/收起**：同时按下左右摇杆 **`L3 + R3`** 或 **`Share(-) + R3`** 约 0.15 秒（基于系统 `GameController` 框架边缘检测）。
+  - **键盘呼出/收起**：全局快捷键 **`⌥Z` (`Option + Z`)**（基于 Carbon `RegisterEventHotKey`，**无需授予任何辅助功能隐私权限**）。
+  - **状态栏常驻**：顶部菜单栏常驻 `🎮` 图标，支持一键呼出、切换游戏目录与退出。
+
+* **内核级动态文件热重载**
+  直接对接 S2Arm 内部每秒轮询一次的 `Cheats.cs` 文件监听服务。面板修改 `cheats/enabled.txt` 后，S2Arm 局内立即重载生效，无需重启游戏。
+
+* **单次脉冲式注入（防死循环覆写）**
+  避免传统金手指每秒 60 次持续锁死内存导致的商店扣费卡死、存档切换异常或数值回滚：
+  1. 生成临时脉冲指令文件 `_oneshot.txt`；
+  2. 实时轮询 S2Arm 的 `status.txt` 状态，确认返回 `生效中`；
+  3. 确认写入成功后，**立即删除临时文件**，断开内存注入链路。
+
+* **《塞尔达传说：时之笛》动态指针注入器**
+  内置针对《塞尔达传说：时之笛》（`0400486024DEC000` / `BID=E0F3CCFAF50065AE`）的指针链解析：
+  - **`GameDataMgr` 动态指针**：对齐主副双缓冲（`+0x1C` 当前与 `+0x20` 上限），支持钱包档位（`99`、`200`、`500`、`9999`）与步进调节（`±10`、`±50`）。
+  - **消耗品补给**：德库木棍、坚果、弹弓种子、炸弹、弓箭、炸弹鼠、魔法豆一键补满。
+
+* **代码挂钩冲突互斥保护**
+  解析 Atmosphere 格式的汇编修改地址。当两个条目共用相同 hook 点时（例如 `No damage` 与 `Refill hearts` 共用 `0x0049DCF0`），开启其一时自动关闭冲突项，防止汇编覆写冲突引发崩溃。
+
+---
+
+### 3. 操作与按键指南
+
+> **使用技巧**：在游戏中建议先按手柄 `+` 键暂停游戏，再按 `L3 + R3` 呼出面板，这样使用十字键选行时林克不会在背景中移动。使用鼠标时则随时可直接点按。
+
+| 操作目标 | 手柄按键 | 键盘 / 鼠标 |
+| :--- | :--- | :--- |
+| **呼出 / 收起面板** | 长按 `L3 + R3` (约 0.15s) | 按下 `⌥Z` (`Option + Z`) |
+| **移动选中项目** | 十字键 `↑` / `↓` | 鼠标悬停 / 点击 |
+| **微调数值 / 切换档位** | 十字键 `←` / `→`（微调）· `L1` / `R1`（预设） | 点击界面按钮（`±10` / `预设`） |
+| **确认注入 / 切换开关** | `×`（DualSense）/ `B`（Switch） | 鼠标左键点击 |
+| **关闭悬浮窗** | `○`（DualSense）/ `A`（Switch） | 点击右上角关闭 / 按 `Esc` |
+
+---
+
+### 4. 编译与运行
+
+#### 环境要求
+* macOS Sonoma 14.0 或更高版本（Apple Silicon M1/M2/M3/M4 芯片）
+* Xcode Command Line Tools（执行 `xcode-select --install` 安装）
+* 已安装 S2Arm 并导入了游戏运行环境
+
+#### 源码构建
+```bash
+# 获取源码
+git clone https://github.com/Lariya-aa/s2arm-cheat-hud.git
+cd s2arm-cheat-hud
+
+# 一键打包编译独立 macOS App
+chmod +x build.sh
+./build.sh
+
+# 启动面板
+open dist/S2ArmCheatHUD.app
+```
+
+---
+
+<a name="日本語"></a>
+## 日本語
+
+### 1. プロジェクト概要
+
+**S2ArmCheatHUD** は、macOS 版 **S2Arm**（Apple Silicon 上で動作する Switch ARM64→Metal ネイティブトランスレータ）向けに設計された、軽量かつ非侵入型のゲーム内チートオーバーレイパネルです。
+
+レトロ携帯ゲーム機のチートプラグイン（PSP の `CWCheat` / `TempAR`、PS Vita の `VitaCheat`、Nintendo Switch の `EdiZon Overlay`）の操作感を、macOS 上の S2Arm ゲームプレイで再現します。
+
+* **非アクティブ型オーバーレイ**：ゲーム画面最前面に常時表示され、ゲームのフォーカスを奪いません。
+* **デュアル呼び出し**：コントローラーの `L3 + R3` 長押し、またはキーボードショートカット `⌥Z` で瞬時に呼び出し可能。
+* **ワンショット注入（パルス注入）**：メモリの常時上書きによるフリーズやセーブデータの破損を防ぎ、ルピーや弾薬などの数値を安全に一度だけ補充。
+* **完全非侵入型**：S2Arm の実行ファイルや署名を変更・改ざんすることなく、外部から安全に連携。
+
+---
+
+### 2. 主な機能
+
+* **フォーカスを奪わないフルスクリーンオーバーレイ**
+  AppKit の `NSPanel`（`.nonactivatingPanel`）を採用。フルスクリーン表示の Metal ゲーム（`S2ArmGame.app`）の上に自然に浮遊し、クリックしてもゲームが一時停止したりデスクトップが切り替わったりしません。
+
+* **コントローラー＆キーボードによる自在な呼び出し**
+  - **コントローラー**：左右のアナログスティック押し込み **`L3 + R3`**、または **`Share(-) + R3`** を約 0.15 秒長押し。
+  - **キーボード**：グローバルホットキー **`⌥Z` (`Option + Z`)**（アクセシビリティ権限不要の Carbon API を採用）。
+  - **メニューバー常駐**：macOS 上部のメニューバーにある `🎮` アイコンからいつでもアクセス可能。
+
+* **リアルタイム双方向ファイル同期**
+  S2Arm のチート管理モジュール（`Cheats.cs`）と直接連携。パネルでチートを切り替えると `cheats/enabled.txt` に即座に反映され、ゲーム再起動なしで効果が適用されます。
+
+* **ワンショット注入（安全な単発書き込み）**
+  常時メモリ書き込みによるショップ購入时的フリーズや進行不能を回避するため、書き込み完了後にチート指示を即座に破棄するフィードバックループを実装しています。
+
+* **『ゼルダの伝説 時のオカリナ』専用インジェクター**
+  `GameDataMgr` 動的ポインタチェーンを解析し、ルピーの所持上限に応じた段階切り替え（99 / 200 / 500 / 9999）や、デクの棒、デクの実、パチンコの弾、バクダンなどの各種アイテムのワンタッチ補充に対応。
+
+* **競合防止（ミューテックス保護）**
+  同じアセンブリフック位置（例：`0x0049DCF0` の無敵化とハート全回復）を共有するチート同士の競合を自動的に検出し、クラッシュを未然に防止します。
+
+---
+
+### 3. 操作方法
+
+> **ヒント**：ゲーム内で `+`（ポーズ）を押してから `L3 + R3` でパネルを呼び出すと、十字キー操作によるキャラクターの誤操作を防ぐことができます。
+
+| 操作内容 | コントローラー | キーボード / マウス |
+| :--- | :--- | :--- |
+| **パネルの表示 / 非表示** | `L3 + R3` を長押し (~0.15秒) | `⌥Z` (`Option + Z`) |
+| **項目の選択** | 十字キー `↑` / `↓` | マウスホバー / クリック |
+| **数値微調整 / プリセット** | 十字キー `←` / `→` · `L1` / `R1` | 画面内ボタンをクリック |
+| **適用 / スイッチ切り替え** | `×` ボタン（DualSense）/ `B`（Switch） | マウス左クリック |
+| **パネルを閉じる** | `○` ボタン（DualSense）/ `A`（Switch） | 閉じるボタン / `Esc` キー |
+
+---
+
+### 4. ビルドと起動
+
+#### 動作要件
+* macOS Sonoma 14.0 以降（Apple Silicon M1/M2/M3/M4）
+* Xcode Command Line Tools（`xcode-select --install`）
+* S2Arm が導入されたゲーム環境
+
+#### ビルド手順
+```bash
+# リポジトリのクローン
+git clone https://github.com/Lariya-aa/s2arm-cheat-hud.git
+cd s2arm-cheat-hud
+
+# アプリバンドルの一括ビルド
+chmod +x build.sh
+./build.sh
+
+# アプリの起動
+open dist/S2ArmCheatHUD.app
+```
+
+---
+
+<a name="references-and-related-projects"></a>
+## References & Related Projects / 参考文献与相关项目 / 参考文献・関連プロジェクト
+
+This project is built with deep gratitude towards the following open-source projects, handheld homebrew communities, and emulation platforms (all URLs verified):
+
+1. **[S2Arm](https://github.com/jhaizhou-ops/S2Arm)** (`jhaizhou-ops/S2Arm`)
+   The native ARM64 Switch runtime for iOS, iPadOS, and macOS. S2Arm's core architecture and its dynamic `Cheats.cs` file-watching service provide the foundation for this HUD overlay.
+
+2. **[Atmosphere](https://github.com/Atmosphere-NX/Atmosphere)** (`Atmosphere-NX/Atmosphere`)
+   The definitive custom firmware for Nintendo Switch. The `dmnt:cht` cheat virtual machine format and specification used across Atmosphere-compatible cheat files form the syntactic backbone of our parser.
+
+3. **CWCheat & TempAR (PlayStation Portable)**
+   The legendary in-game cheat plugins developed for PSP custom firmware (`3.XX` - `6.XX`). They pioneered the non-intrusive overlay HUD paradigm that directly inspired the design of S2ArmCheatHUD.
+
+4. **[VitaCheat](https://github.com/r0ah/vitacheat)** (`r0ah/vitacheat`, PlayStation Vita)
+   A real-time memory search and cheat overlay plugin for PS Vita (`taiHEN`), demonstrating the power of hardware-accelerated translucent in-game panels on modern handhelds.
+
+5. **[EdiZon](https://github.com/WerWolv/EdiZon)** & **[Tesla-Menu](https://github.com/WerWolv/Tesla-Menu)** (Nintendo Switch)
+   The gold standard for Nintendo Switch overlay cheat management, providing real-time cheat toggles and memory manipulation in handheld and docked modes.
+
+6. **MeloNX & [S2Arm PR #134](https://github.com/jhaizhou-ops/S2Arm/pull/134)**
+   The iOS Switch virtual pad and in-game gear menu interaction ported by [@neexuan](https://github.com/neexuan) in S2Arm PR #134, whose mobile in-game cheat toggles directly inspired our desktop macOS HUD overlay solution.
+
+---
+
+<a name="topics"></a>
+## Topics / 标签
+
+`s2arm` • `macos` • `swift` • `appkit` • `gamecontroller` • `hud-overlay` • `cheat-engine` • `atmosphere-cheats` • `apple-silicon` • `nintendo-switch` • `zelda-ocarina-of-time` • `retro-gaming` • `cwcheat` • `overlay-menu`
+
+```
+
+`README.zh-CN.md`:
+
+```md
+# S2ArmCheatHUD
+
+<p align="center">
+  <b>专为 macOS 版 S2Arm 打造的轻量无侵入游戏内悬浮金手指面板。</b><br>
+  致敬 PSP CWCheat / TempAR、PSV VitaCheat 与 Switch EdiZon Overlay 的掌机即时金手指体验。
+</p>
+
+<p align="center">
+  <a href="README.md">English</a> •
+  <a href="README.zh-CN.md">简体中文</a> •
+  <a href="README.ja.md">日本語</a>
+</p>
+
+---
+
+## 1. 项目简介
+
+**S2ArmCheatHUD** 是一款专为 macOS 版 **S2Arm**（运行在 Apple Silicon 上的原生 Switch ARM64-to-Metal 运行层）量身打造的轻量级、无侵入式游戏内悬浮金手指面板。
+
+S2Arm 在 iOS 端提供了便捷的虚拟手柄“齿轮菜单”，而在 macOS 端官方目前仅在桌面启动器中提供出包前的勾选列表，局内仅能通过 `⌘R` 刷新。**S2ArmCheatHUD 完美填补了这一空白**：
+* 采用 `.nonactivatingPanel` 悬浮层架构，全屏游戏状态下不夺取窗口焦点、不中断游戏逻辑；
+* 支持手柄摇杆双击（`L3 + R3`）与键盘全局快捷键（`⌥Z`）随时呼出与收起；
+* 支持常驻功能开关与**单次脉冲式内存注入**（如补满卢比、弹药、道具，写完即止，不持续后台循环覆写）；
+* 纯外部协同工作，不注入进程、不反编译、不破坏 S2Arm 官方二进制与签名。
+
+---
+
+## 2. 核心特性
+
+* **全屏置顶且不抢占焦点**
+  基于 AppKit `NSPanel`（`.nonactivatingPanel` + `.canJoinAllSpaces` + `.fullScreenAuxiliary`）构建。悬浮面板直接呈现在全屏游戏画面最上方，鼠标点击面板**不会夺走 `S2ArmGame.app` 的键盘与手柄焦点**，避免任何失焦暂停或全屏切屏。
+
+* **手柄与键盘全局热键双呼出**
+  - **手柄呼出/收起**：同时按下左右摇杆 **`L3 + R3`** 或 **`Share(-) + R3`** 约 0.15 秒（基于系统 `GameController` 框架边缘检测）。
+  - **键盘呼出/收起**：全局快捷键 **`⌥Z` (`Option + Z`)**（基于 Carbon `RegisterEventHotKey`，**无需授予任何辅助功能隐私权限**）。
+  - **状态栏常驻**：顶部菜单栏常驻 `🎮` 图标，支持一键呼出、切换游戏目录与退出。
+
+* **内核级动态文件热重载**
+  直接对接 S2Arm 内部每秒轮询一次的 `Cheats.cs` 文件监听服务。面板修改 `cheats/enabled.txt` 后，S2Arm 局内立即重载生效，无需重启游戏。
+
+* **单次脉冲式注入（防死循环覆写）**
+  避免传统金手指每秒 60 次持续锁死内存导致的商店扣费卡死、存档切换异常或数值回滚：
+  1. 生成临时脉冲指令文件 `_oneshot.txt`；
+  2. 实时轮询 S2Arm 的 `status.txt` 状态，确认返回 `生效中`；
+  3. 确认写入成功后，**立即删除临时文件**，断开内存注入链路。
+
+* **《塞尔达传说：时之笛》动态指针注入器**
+  内置针对《塞尔达传说：时之笛》（`0400486024DEC000` / `BID=E0F3CCFAF50065AE`）的指针链解析：
+  - **`GameDataMgr` 动态指针**：对齐主副双缓冲（`+0x1C` 当前与 `+0x20` 上限），支持钱包档位（`99`、`200`、`500`、`9999`）与步进调节（`±10`、`±50`）。
+  - **消耗品补给**：德库木棍、坚果、弹弓种子、炸弹、弓箭、炸弹鼠、魔法豆一键补满。
+
+* **代码挂钩冲突互斥保护**
+  解析 Atmosphere 格式的汇编修改地址。当两个条目共用相同 hook 点时（例如 `No damage` 与 `Refill hearts` 共用 `0x0049DCF0`），开启其一时自动关闭冲突项，防止汇编覆写冲突引发崩溃。
+
+---
+
+## 3. 操作与按键指南
+
+> **使用技巧**：在游戏中建议先按手柄 `+` 键暂停游戏，再按 `L3 + R3` 呼出面板，这样使用十字键选行时林克不会在背景中移动。使用鼠标时则随时可直接点按。
+
+| 操作目标 | 手柄按键 | 键盘 / 鼠标 |
+| :--- | :--- | :--- |
+| **呼出 / 收起面板** | 长按 `L3 + R3` (约 0.15s) | 按下 `⌥Z` (`Option + Z`) |
+| **移动选中项目** | 十字键 `↑` / `↓` | 鼠标悬停 / 点击 |
+| **微调数值 / 切换档位** | 十字键 `←` / `→`（微调）· `L1` / `R1`（预设） | 点击界面按钮（`±10` / `预设`） |
+| **确认注入 / 切换开关** | `×`（DualSense）/ `B`（Switch） | 鼠标左键点击 |
+| **关闭悬浮窗** | `○`（DualSense）/ `A`（Switch） | 点击右上角关闭 / 按 `Esc` |
+
+---
+
+## 4. 编译与运行
+
+### 环境要求
+* macOS Sonoma 14.0 或更高版本（Apple Silicon M1/M2/M3/M4 芯片）
+* Xcode Command Line Tools（执行 `xcode-select --install` 安装）
+* 已安装 S2Arm 并导入了游戏运行环境
+
+### 源码构建
+```bash
+# 获取源码
+git clone https://github.com/Lariya-aa/s2arm-cheat-hud.git
+cd s2arm-cheat-hud
+
+# 一键打包编译独立 macOS App
+chmod +x build.sh
+./build.sh
+
+# 启动面板
+open dist/S2ArmCheatHUD.app
+```
+
+---
+
+## 参考文献与相关项目
+
+本项目在设计与实现过程中深受以下开源项目、掌机自制社区与模拟器工程的启发：
+
+1. **[S2Arm](https://github.com/jhaizhou-ops/S2Arm)** (`jhaizhou-ops/S2Arm`)
+   运行在 iOS、iPadOS 与 macOS 上的原生 ARM64 Switch 运行时。其动态 `Cheats.cs` 文件监听服务为本项目的外部无缝协同提供了基础。
+2. **[Atmosphere](https://github.com/Atmosphere-NX/Atmosphere)** (`Atmosphere-NX/Atmosphere`)
+   Nintendo Switch 事实上的开源定制系统。其 `dmnt:cht` 金手指虚拟机代码规范构成了本工具金手指解析器的语法基石。
+3. **CWCheat & TempAR (PlayStation Portable)**
+   PSP 自制系统（`3.XX` - `6.XX`）时代开创性的游戏内金手指插件。其通过 `L + Select` 唤起半透明浮层面板的交互范式，直接启发了 S2ArmCheatHUD 的全屏悬浮设计。
+4. **[VitaCheat](https://github.com/r0ah/vitacheat)** (`r0ah/vitacheat`, PlayStation Vita)
+   PS Vita (`taiHEN`) 平台的实时内存搜索与金手指覆层插件，展示了现代移动设备上硬件加速半透明面板的高效交互。
+5. **[EdiZon](https://github.com/WerWolv/EdiZon)** 与 **[Tesla-Menu](https://github.com/WerWolv/Tesla-Menu)** (Nintendo Switch)
+   Nintendo Switch 上覆层金手指管理的行业标杆，为底座与掌机模式下的即时内存操作提供了绝佳的设计参考。
+6. **MeloNX 与 [S2Arm PR #134](https://github.com/jhaizhou-ops/S2Arm/pull/134)**
+   iOS Switch 虚拟手柄与齿轮悬浮菜单交互（由 [@neexuan](https://github.com/neexuan) 在 S2Arm PR #134 中合并移植），其移动端内置金手指切换直接启发了本项目在 macOS 桌面端的悬浮 HUD 方案。
+
+---
+
+## Topics / 标签
+
+`s2arm` • `macos` • `swift` • `appkit` • `gamecontroller` • `hud-overlay` • `cheat-engine` • `atmosphere-cheats` • `apple-silicon` • `nintendo-switch` • `zelda-ocarina-of-time` • `retro-gaming` • `cwcheat` • `overlay-menu`
+
+```
+
+`Sources/S2ArmCheatHUD/CheatStore.swift`:
+
+```swift
+import Foundation
+import Combine
+import AppKit
+
+enum ToastKind {
+    case success
+    case warning
+    case info
+}
+
+struct ToastMessage: Equatable {
+    let text: String
+    let kind: ToastKind
+}
+
+enum NavItem: Equatable, Identifiable {
+    case ootRupeeInjector
+    case ootAmmo(OoTQuickItem)
+    case cheatToggle(CheatItem)
+
+    var id: String {
+        switch self {
+        case .ootRupeeInjector: return "oot.rupees"
+        case .ootAmmo(let item): return "oot.ammo.\(item.id)"
+        case .cheatToggle(let c): return "cheat.\(c.key)"
+        }
+    }
+}
+
+final class CheatStore: ObservableObject {
+    static let oneShotFileName = "_oneshot.txt"
+    static let oneShotEntryName = "HUD_ONESHOT"
+    static let oneShotKey = "_oneshot.txt/HUD_ONESHOT"
+    static let rewriteSuffix = "-s2arm.txt"
+
+    @Published var libraryURL: URL
+    @Published var games: [GameEntry] = []
+    @Published var selectedGameID: String = "" {
+        didSet {
+            if oldValue != selectedGameID {
+                cleanupLeftoverOneShot(forGameID: oldValue)
+                reloadCurrentGameCheats()
+            }
+        }
+    }
+
+    @Published var cheatItems: [CheatItem] = []
+    @Published var collapsedFiles: Set<String> = []
+    @Published var enabledKeys: Set<String> = []
+    @Published var statusMap: [String: String] = [:]
+
+    // OoT Custom Rupee Injector state (defaults to 200 for Adult's Wallet)
+    @Published var rupeeTarget: Int = 200
+    @Published var showAmmoSection: Bool = true
+    @Published var isFiringOneShot: Bool = false
+    @Published var toast: ToastMessage? = nil
+
+    // Gamepad / Keyboard navigation index
+    @Published var selectedNavIndex: Int = 0
+    @Published var isPanelVisible: Bool = false
+
+    private var statusPollTimer: Timer?
+    private var oneShotWorkItem: DispatchWorkItem?
+    private var toastClearWorkItem: DispatchWorkItem?
+
+    var currentGame: GameEntry? {
+        games.first(where: { $0.id == selectedGameID })
+    }
+
+    var navItems: [NavItem] {
+        var items: [NavItem] = []
+        if let game = currentGame, game.isOcarinaOfTimeRemake {
+            items.append(.ootRupeeInjector)
+            if showAmmoSection {
+                for ammo in OoTRemakePresets.ammoItems {
+                    items.append(.ootAmmo(ammo))
+                }
+            }
+        }
+        for c in cheatItems where !collapsedFiles.contains(c.file) {
+            items.append(.cheatToggle(c))
+        }
+        return items
+    }
+
+    /// Cheat entries grouped by source file, in file order.
+    var cheatSections: [(file: String, items: [CheatItem])] {
+        var out: [(file: String, items: [CheatItem])] = []
+        for c in cheatItems {
+            if out.last?.file == c.file { out[out.count - 1].items.append(c) } else { out.append((c.file, [c])) }
+        }
+        return out
+    }
+
+    func toggleFileCollapsed(_ file: String) {
+        if collapsedFiles.contains(file) { collapsedFiles.remove(file) } else { collapsedFiles.insert(file) }
+        UserDefaults.standard.set(collapsedFiles.sorted(), forKey: "s2arm.collapsed.\(selectedGameID)")
+        selectedNavIndex = min(selectedNavIndex, max(0, navItems.count - 1))
+    }
+
+    init() {
+        let fm = FileManager.default
+        let envLib = ProcessInfo.processInfo.environment["S2ARM_LIBRARY"]
+        let savedLib = UserDefaults.standard.string(forKey: "s2arm.libraryPath")
+        let candidates = [
+            envLib,
+            savedLib,
+            "/Volumes/MBP-SSD/Games/Nintendo/S2Arm",
+            NSHomeDirectory() + "/Volumes/MBP-SSD/Games/Nintendo/S2Arm"
+        ].compactMap { $0 }
+
+        let chosen = candidates.first(where: { fm.fileExists(atPath: $0 + "/games") })
+            ?? "/Volumes/MBP-SSD/Games/Nintendo/S2Arm"
+        self.libraryURL = URL(fileURLWithPath: chosen, isDirectory: true)
+
+        reloadGames()
+        startStatusPolling()
+    }
+
+    deinit {
+        statusPollTimer?.invalidate()
+        cleanupAllOneShots()
+    }
+
+    func chooseLibraryFolder() {
+        let panel = NSOpenPanel()
+        panel.title = "选择 S2Arm 游戏库根目录（含 games 文件夹）"
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        panel.directoryURL = libraryURL
+        if panel.runModal() == .OK, let url = panel.url {
+            let adjusted = url.lastPathComponent == "games" ? url.deletingLastPathComponent() : url
+            libraryURL = adjusted
+            UserDefaults.standard.set(adjusted.path, forKey: "s2arm.libraryPath")
+            reloadGames()
+        }
+    }
+
+    func reloadGames() {
+        let fm = FileManager.default
+        let gamesDir = libraryURL.appendingPathComponent("games", isDirectory: true)
+        guard let folders = try? fm.contentsOfDirectory(
+            at: gamesDir,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            games = []
+            return
+        }
+
+        var discovered: [GameEntry] = []
+        for folder in folders {
+            var isDir: ObjCBool = false
+            guard fm.fileExists(atPath: folder.path, isDirectory: &isDir), isDir.boolValue else { continue }
+            let gameJsonURL = folder.appendingPathComponent("game.json")
+            guard let data = try? Data(contentsOf: gameJsonURL),
+                  let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let gid = (obj["id"] as? String)?.uppercased(), !gid.isEmpty else {
+                continue
+            }
+            let cheatsDir = folder.appendingPathComponent("cheats", isDirectory: true)
+            let bid = Self.detectMainBuildID(gameFolder: folder, cheatsFolder: cheatsDir)
+            let lastActive = Self.detectLastActive(gameFolder: folder, cheatsFolder: cheatsDir)
+            discovered.append(GameEntry(
+                id: gid,
+                name: folder.lastPathComponent,
+                folderURL: folder,
+                cheatsURL: cheatsDir,
+                buildID: bid,
+                lastActive: lastActive,
+                codeEnd: Self.detectCodeEnd(gameFolder: folder),
+                packedKeys: Self.readPackedKeys(gameFolder: folder)
+            ))
+        }
+
+        discovered.sort { $0.lastActive > $1.lastActive }
+        games = discovered
+
+        if !discovered.contains(where: { $0.id == selectedGameID }) {
+            selectedGameID = discovered.first?.id ?? ""
+        } else {
+            reloadCurrentGameCheats()
+        }
+
+        cleanupAllOneShots()
+    }
+
+    func reloadCurrentGameCheats() {
+        guard let game = currentGame else {
+            cheatItems = []
+            enabledKeys = []
+            statusMap = [:]
+            return
+        }
+
+        let fm = FileManager.default
+        try? fm.createDirectory(at: game.cheatsURL, withIntermediateDirectories: true)
+
+        let files = ((try? fm.contentsOfDirectory(atPath: game.cheatsURL.path))?.sorted() ?? []).filter {
+            $0.lowercased().hasSuffix(".txt") && !$0.hasPrefix("._") && !$0.hasPrefix("_")
+                && $0 != "enabled.txt" && $0 != "status.txt"
+        }
+        // "<stem>-s2arm.txt" is tools/normalize_cheats.py's S2Arm-ready rewrite of "<stem>.txt": show it instead of the original.
+        let rewritten = Set(files.filter { $0.hasSuffix(Self.rewriteSuffix) }.map { String($0.dropLast(Self.rewriteSuffix.count)) + ".txt" })
+        var parsedItems: [CheatItem] = []
+
+        for file in files where !rewritten.contains(file) {
+            let url = game.cheatsURL.appendingPathComponent(file)
+            guard let content = try? String(contentsOf: url, encoding: .utf8) else { continue }
+            parsedItems.append(contentsOf: Self.parseAtmosphereCheats(
+                fileName: file, text: content, codeEnd: game.codeEnd, packed: game.packedKeys
+            ))
+        }
+
+        cheatItems = parsedItems
+        collapsedFiles = Set(UserDefaults.standard.stringArray(forKey: "s2arm.collapsed.\(game.id)") ?? [])
+        enabledKeys = readEnabledSet(in: game.cheatsURL)
+        refreshStatusOnly()
+
+        let maxIdx = max(0, navItems.count - 1)
+        if selectedNavIndex > maxIdx {
+            selectedNavIndex = maxIdx
+        }
+    }
+
+    func refreshStatusOnly() {
+        guard let game = currentGame else { return }
+        let statusURL = game.cheatsURL.appendingPathComponent("status.txt")
+        guard let text = try? String(contentsOf: statusURL, encoding: .utf8) else {
+            if !statusMap.isEmpty { statusMap = [:] }
+            return
+        }
+        var next: [String: String] = [:]
+        for line in text.split(whereSeparator: \.isNewline) {
+            let parts = line.split(separator: "\t", maxSplits: 1).map(String.init)
+            if parts.count == 2 {
+                next[parts[0]] = parts[1]
+            }
+        }
+        if next != statusMap {
+            statusMap = next
+        }
+        // Keep enabledKeys in sync if modified externally by S2Arm launcher
+        if !isFiringOneShot {
+            let diskEnabled = readEnabledSet(in: game.cheatsURL).subtracting([Self.oneShotKey])
+            if diskEnabled != enabledKeys {
+                enabledKeys = diskEnabled
+            }
+        }
+    }
+
+    // MARK: - Persistent Toggle
+
+    func isEnabled(_ item: CheatItem) -> Bool {
+        enabledKeys.contains(item.key)
+    }
+
+    func toggleCheat(_ item: CheatItem) {
+        guard let game = currentGame else { return }
+        var next = readEnabledSet(in: game.cheatsURL)
+        let turningOn = !next.contains(item.key)
+        if turningOn && !item.isUsable {
+            showToast("「\(item.name)」要改游戏代码，但没编进这个游戏包，开了也不生效", kind: .warning, duration: 4.0)
+            return
+        }
+
+        var turnedOff: [String] = []
+        if turningOn {
+            next.insert(item.key)
+            // Alternatives of the same cheat (x2 / x5 / x10 tiers, two patches on one hook) cannot be on together.
+            for other in item.exclusiveWith where next.remove("\(item.file)/\(other)") != nil {
+                turnedOff.append(other)
+            }
+        } else {
+            next.remove(item.key)
+        }
+
+        if writeEnabledSet(next, in: game.cheatsURL) {
+            enabledKeys = next.subtracting([Self.oneShotKey])
+            if !turnedOff.isEmpty {
+                showToast("已开启「\(item.name)」，并关闭同组的「\(turnedOff.joined(separator: "」「"))」", kind: .info)
+            } else {
+                showToast(turningOn ? "已开启常驻：\(item.name)" : "已关闭：\(item.name)", kind: .info)
+            }
+        } else {
+            showToast("写入 enabled.txt 失败，请检查磁盘权限", kind: .warning)
+        }
+    }
+
+    // MARK: - One-Shot Manual Trigger (Write Once -> Verify via status.txt -> Auto Disconnect)
+
+    func adjustRupeeTarget(delta: Int) {
+        rupeeTarget = max(0, min(9999, rupeeTarget + delta))
+    }
+
+    func cycleRupeePreset(forward: Bool) {
+        let tiers = OoTRemakePresets.rupeeWalletTiers.map(\.value)
+        if let idx = tiers.firstIndex(of: rupeeTarget) {
+            let nextIdx = forward ? min(tiers.count - 1, idx + 1) : max(0, idx - 1)
+            rupeeTarget = tiers[nextIdx]
+        } else {
+            rupeeTarget = forward ? (tiers.first(where: { $0 > rupeeTarget }) ?? 9999)
+                                  : (tiers.last(where: { $0 < rupeeTarget }) ?? 99)
+        }
+    }
+
+    func fireOoTRupeeOneShot() {
+        guard let game = currentGame else { return }
+        let bid = game.buildID.isEmpty ? OoTRemakePresets.buildID : game.buildID
+        let content = OoTRemakePresets.buildOneShotFileContent(
+            bid: bid,
+            entryName: Self.oneShotEntryName,
+            offset: OoTRemakePresets.rupeeOffset,
+            value: UInt32(clamping: rupeeTarget)
+        )
+        executeOneShotFile(in: game, content: content, label: "卢比 → \(rupeeTarget)")
+    }
+
+    func fireOoTAmmoOneShot(_ item: OoTQuickItem) {
+        guard let game = currentGame else { return }
+        let bid = game.buildID.isEmpty ? OoTRemakePresets.buildID : game.buildID
+        let content = OoTRemakePresets.buildOneShotFileContent(
+            bid: bid,
+            entryName: Self.oneShotEntryName,
+            offset: item.gdIntOffset,
+            value: item.defaultAmount
+        )
+        executeOneShotFile(in: game, content: content, label: "\(item.title) → \(item.defaultAmount)")
+    }
+
+    func fireCheatItemPulse(_ item: CheatItem) {
+        guard let game = currentGame, item.supportsOneShotPulse else { return }
+        let bidHeader = game.buildID.isEmpty ? "[HUD OneShot]" : "[HUD OneShot BID=\(game.buildID)]"
+        let body = ([bidHeader, "", "[\(Self.oneShotEntryName)]"] + item.lines).joined(separator: "\n") + "\n"
+        executeOneShotFile(in: game, content: body, label: item.name)
+    }
+
+    private func executeOneShotFile(in game: GameEntry, content: String, label: String) {
+        oneShotWorkItem?.cancel()
+        isFiringOneShot = true
+
+        let cheatsDir = game.cheatsURL
+        let oneShotURL = cheatsDir.appendingPathComponent(Self.oneShotFileName)
+        let statusURL = cheatsDir.appendingPathComponent("status.txt")
+        let startTime = Date()
+        let prevMtime = Self.fileMtime(statusURL)
+
+        do {
+            try FileManager.default.createDirectory(at: cheatsDir, withIntermediateDirectories: true)
+            try Self.atomicWrite(content, to: oneShotURL)
+            var enabled = readEnabledSet(in: cheatsDir)
+            enabled.insert(Self.oneShotKey)
+            guard writeEnabledSet(enabled, in: cheatsDir) else {
+                isFiringOneShot = false
+                showToast("无法写入 enabled.txt", kind: .warning)
+                return
+            }
+        } catch {
+            isFiringOneShot = false
+            showToast("创建临时触发文件失败：\(error.localizedDescription)", kind: .warning)
+            return
+        }
+
+        showToast("⚡ 正在单次注入：\(label)…", kind: .info, duration: 3.0)
+        pollOneShotCompletion(
+            cheatsDir: cheatsDir,
+            statusURL: statusURL,
+            prevMtime: prevMtime,
+            startTime: startTime,
+            seenReloadAt: nil,
+            label: label
+        )
+    }
+
+    private func pollOneShotCompletion(
+        cheatsDir: URL,
+        statusURL: URL,
+        prevMtime: Date?,
+        startTime: Date,
+        seenReloadAt: Date?,
+        label: String
+    ) {
+        let work = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            let now = Date()
+            let elapsed = now.timeIntervalSince(startTime)
+
+            let currentMtime = Self.fileMtime(statusURL)
+            let statusText = (try? String(contentsOf: statusURL, encoding: .utf8)) ?? ""
+            var oneShotStatus: String? = nil
+            for line in statusText.split(whereSeparator: \.isNewline) {
+                let parts = line.split(separator: "\t", maxSplits: 1).map(String.init)
+                if parts.count == 2, parts[0] == Self.oneShotKey {
+                    oneShotStatus = parts[1]
+                    break
+                }
+            }
+
+            let mtimeAdvanced = (currentMtime != nil && currentMtime != prevMtime)
+            // "关" = the loader reloaded between our _oneshot.txt and enabled.txt writes; its next reload enables the entry, keep waiting.
+            if let st = oneShotStatus, st != "关", mtimeAdvanced || seenReloadAt != nil {
+                let firstSeen = seenReloadAt ?? now
+                // Wait 180 ms after Cheats.cs reloads _oneshot.txt so at least 2 ticks (83 ms each) execute
+                // and any unmapped-address fallback to "地址未就绪" has already flushed to status.txt.
+                if now.timeIntervalSince(firstSeen) >= 0.18 {
+                    self.cleanupOneShotFiles(in: cheatsDir)
+                    self.isFiringOneShot = false
+                    self.refreshStatusOnly()
+                    if st == "生效中" {
+                        self.showToast("✅ 已写入 \(label)（单次触发完成，已自动断开）", kind: .success, duration: 3.5)
+                    } else if st == "地址未就绪" {
+                        self.showToast("⚠️ 存档数据未就绪，请进入游戏画面后再触发", kind: .warning, duration: 4.0)
+                    } else {
+                        self.showToast("⚠️ 触发返回状态：\(st)", kind: .warning, duration: 4.0)
+                    }
+                    return
+                } else {
+                    self.pollOneShotCompletion(
+                        cheatsDir: cheatsDir,
+                        statusURL: statusURL,
+                        prevMtime: prevMtime,
+                        startTime: startTime,
+                        seenReloadAt: firstSeen,
+                        label: label
+                    )
+                    return
+                }
+            }
+
+            if elapsed >= 2.3 {
+                self.cleanupOneShotFiles(in: cheatsDir)
+                self.isFiringOneShot = false
+                self.showToast("ℹ️ 未检测到游戏响应（请确认游戏正在运行且未卡在冻结态）", kind: .warning, duration: 4.0)
+                return
+            }
+
+            self.pollOneShotCompletion(
+                cheatsDir: cheatsDir,
+                statusURL: statusURL,
+                prevMtime: prevMtime,
+                startTime: startTime,
+                seenReloadAt: nil,
+                label: label
+            )
+        }
+        oneShotWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.09, execute: work)
+    }
+
+    // MARK: - Gamepad Navigation Actions
+
+    func moveSelection(delta: Int) {
+        let items = navItems
+        guard !items.isEmpty else { return }
+        selectedNavIndex = (selectedNavIndex + delta + items.count) % items.count
+    }
+
+    func adjustSelectedHorizontal(forward: Bool) {
+        let items = navItems
+        guard items.indices.contains(selectedNavIndex) else { return }
+        if case .ootRupeeInjector = items[selectedNavIndex] {
+            adjustRupeeTarget(delta: forward ? 10 : -10)
+        }
+    }
+
+    func cycleSelectedPreset(forward: Bool) {
+        let items = navItems
+        guard items.indices.contains(selectedNavIndex) else { return }
+        if case .ootRupeeInjector = items[selectedNavIndex] {
+            cycleRupeePreset(forward: forward)
+        }
+    }
+
+    func activateSelected() {
+        let items = navItems
+        guard items.indices.contains(selectedNavIndex) else { return }
+        switch items[selectedNavIndex] {
+        case .ootRupeeInjector:
+            fireOoTRupeeOneShot()
+        case .ootAmmo(let ammo):
+            fireOoTAmmoOneShot(ammo)
+        case .cheatToggle(let cheat):
+            toggleCheat(cheat)
+        }
+    }
+
+    // MARK: - Cleanup & File Helpers
+
+    func showToast(_ text: String, kind: ToastKind, duration: TimeInterval = 2.8) {
+        toastClearWorkItem?.cancel()
+        toast = ToastMessage(text: text, kind: kind)
+        let clear = DispatchWorkItem { [weak self] in
+            if self?.toast?.text == text {
+                self?.toast = nil
+            }
+        }
+        toastClearWorkItem = clear
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: clear)
+    }
+
+    private func startStatusPolling() {
+        statusPollTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            guard let self, self.isPanelVisible else { return }
+            self.refreshStatusOnly()
+        }
+    }
+
+    private func cleanupLeftoverOneShot(forGameID gid: String) {
+        guard let g = games.first(where: { $0.id == gid }) else { return }
+        cleanupOneShotFiles(in: g.cheatsURL)
+    }
+
+    func cleanupAllOneShots() {
+        oneShotWorkItem?.cancel()
+        // The cancelled poll never runs its completion, so release the buttons here.
+        if isFiringOneShot { isFiringOneShot = false }
+        for g in games {
+            cleanupOneShotFiles(in: g.cheatsURL)
+        }
+    }
+
+    private func cleanupOneShotFiles(in cheatsDir: URL) {
+        let oneShotURL = cheatsDir.appendingPathComponent(Self.oneShotFileName)
+        try? FileManager.default.removeItem(at: oneShotURL)
+        var enabled = readEnabledSet(in: cheatsDir)
+        if enabled.contains(Self.oneShotKey) {
+            enabled.remove(Self.oneShotKey)
+            _ = writeEnabledSet(enabled, in: cheatsDir)
+        }
+    }
+
+    private func readEnabledSet(in cheatsDir: URL) -> Set<String> {
+        let url = cheatsDir.appendingPathComponent("enabled.txt")
+        guard let text = try? String(contentsOf: url, encoding: .utf8) else { return [] }
+        return Set(text.split(whereSeparator: \.isNewline).map { String($0).trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty })
+    }
+
+    private func writeEnabledSet(_ set: Set<String>, in cheatsDir: URL) -> Bool {
+        let url = cheatsDir.appendingPathComponent("enabled.txt")
+        let body = set.sorted().joined(separator: "\n") + (set.isEmpty ? "" : "\n")
+        do {
+            try Self.atomicWrite(body, to: url)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    private static func atomicWrite(_ text: String, to url: URL) throws {
+        try text.write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    private static func fileMtime(_ url: URL) -> Date? {
+        (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
+    }
+
+    private static func detectLastActive(gameFolder: URL, cheatsFolder: URL) -> Date {
+        let candidates = [
+            cheatsFolder.appendingPathComponent("status.txt"),
+            gameFolder.appendingPathComponent("playtime.json"),
+            gameFolder.appendingPathComponent("game.json")
+        ]
+        return candidates.compactMap { fileMtime($0) }.max() ?? .distantPast
+    }
+
+    private static func detectMainBuildID(gameFolder: URL, cheatsFolder: URL) -> String {
+        // 1. Read NSO header +0x40 (8 bytes -> 16 uppercase hex chars), matching S2Arm pack/jobs/cheats.py
+        let mainNSO = gameFolder.appendingPathComponent("image/mac/exefs/main")
+        if let fh = try? FileHandle(forReadingFrom: mainNSO) {
+            defer { try? fh.close() }
+            if (try? fh.seek(toOffset: 0x40)) != nil,
+               let bytes = try? fh.read(upToCount: 8), bytes.count == 8 {
+                return bytes.map { String(format: "%02X", $0) }.joined()
+            }
+        }
+        // 2. Fallback to 16-hex cheat filename in cheats/
+        if let files = try? FileManager.default.contentsOfDirectory(atPath: cheatsFolder.path) {
+            for f in files where f.lowercased().hasSuffix(".txt") {
+                let stem = (f as NSString).deletingPathExtension.uppercased()
+                if stem.count == 16, stem.allSatisfy(\.isHexDigit) {
+                    return stem
+                }
+            }
+        }
+        return ""
+    }
+
+    /// Main NSO header +0x24 = `.rodata` memory offset; everything below is code plus the padding cheats use as code caves.
+    private static func detectCodeEnd(gameFolder: URL) -> UInt64? {
+        guard let fh = try? FileHandle(forReadingFrom: gameFolder.appendingPathComponent("image/mac/exefs/main")) else { return nil }
+        defer { try? fh.close() }
+        guard let head = try? fh.read(upToCount: 0x28), head.count == 0x28, head.prefix(4) == Data("NSO0".utf8) else { return nil }
+        return UInt64(head[0x24]) | UInt64(head[0x25]) << 8 | UInt64(head[0x26]) << 16 | UInt64(head[0x27]) << 24
+    }
+
+    /// What S2Arm compiled into the package. image/mac/cpatch.tsv: column 0 id ("cheat:<file hash>:<n>"), 4 entry name,
+    /// 6 source file. image/mac/cpatch_rows.tsv: one row per patched word, "p" = a patch inside real game code.
+    /// A file with no "p" row got only its code caves compiled and nothing jumps into them, so none of it counts.
+    private static func readPackedKeys(gameFolder: URL) -> Set<String>? {
+        let dir = gameFolder.appendingPathComponent("image/mac")
+        guard let table = try? String(contentsOf: dir.appendingPathComponent("cpatch.tsv"), encoding: .utf8) else { return nil }
+        func fileHash(_ id: Substring) -> String { id.split(separator: ":").prefix(2).joined(separator: ":") }
+        var hooked: Set<String> = []
+        for line in ((try? String(contentsOf: dir.appendingPathComponent("cpatch_rows.tsv"), encoding: .utf8)) ?? "").split(whereSeparator: \.isNewline)
+        where line.hasPrefix("p\t") {
+            if let id = line.range(of: "# cheat:").map({ line[$0.lowerBound...].dropFirst(2) }) { hooked.insert(fileHash(id)) }
+        }
+        var keys: Set<String> = []
+        for line in table.split(whereSeparator: \.isNewline) {
+            let cols = line.split(separator: "\t", omittingEmptySubsequences: false)
+            if cols.count > 6, cols[0].hasPrefix("cheat:"), hooked.contains(fileHash(cols[0])) { keys.insert("\(cols[6])/\(cols[4])") }
+        }
+        return keys
+    }
+
+    private static func isHex8(_ w: String) -> Bool { w.count == 8 && w.allSatisfy(\.isHexDigit) }
+
+    /// "0TMR00AA AAAAAAAA VVVVVVVV…" with M = 0: a plain store into the main module. Returns its offset and value.
+    private static func mainStore(_ words: [String]) -> (addr: UInt64, value: String)? {
+        guard words.count >= 3, let op = words.first.map(Array.init), op.count == 8, isHex8(words[0]), isHex8(words[1]),
+              op[0] == "0", "1248".contains(op[1]), op[2] == "0", op[4] == "0", op[5] == "0",
+              let addr = UInt64(String(op[6...7]) + words[1], radix: 16) else { return nil }
+        return (addr, words[2...].joined())
+    }
+
+    static func parseAtmosphereCheats(fileName: String, text: String, codeEnd: UInt64?, packed: Set<String>?) -> [CheatItem] {
+        struct Raw {
+            var name: String
+            var master: Bool
+            var lines: [String] = []
+            var folder: String? = nil
+        }
+
+        var raws: [Raw] = []
+        for rawLine in text.components(separatedBy: .newlines) {
+            let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
+            if line.isEmpty || line.hasPrefix("//") || line.hasPrefix("#") { continue }
+            if (line.hasPrefix("[") && line.hasSuffix("]")) || (line.hasPrefix("{") && line.hasSuffix("}")) {
+                let isMaster = line.hasPrefix("{")
+                let inner = String(line.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
+                raws.append(Raw(name: inner.isEmpty ? (isMaster ? "主代码" : "未命名") : inner, master: isMaster))
+            } else {
+                if raws.isEmpty { raws.append(Raw(name: "未命名", master: false)) }
+                raws[raws.count - 1].lines.append(line.split(whereSeparator: \.isWhitespace).map { $0.uppercased() }.joined(separator: " "))
+            }
+        }
+
+        // Breeze folders: "[Battle]" holding only 20000000 opens one, "[Battle end]" closes it. They are headings, not cheats.
+        var folders: [String] = []
+        var order: [String] = []
+        var byName: [String: Raw] = [:]
+        for var entry in raws where !entry.master {
+            let isMarker = entry.lines.allSatisfy { $0.hasPrefix("20") && isHex8($0) }
+            if isMarker {
+                if entry.name.hasSuffix(" end") {
+                    if let idx = folders.lastIndex(of: String(entry.name.dropLast(4))) { folders.removeSubrange(idx...) }
+                } else if !entry.lines.isEmpty {
+                    folders.append(entry.name)
+                }
+                continue
+            }
+            // The same name twice = two halves of one cheat (hook + cave, or code + pointer part); S2Arm switches them together.
+            if byName[entry.name] != nil {
+                byName[entry.name]!.lines.append(contentsOf: entry.lines)
+            } else {
+                entry.folder = folders.isEmpty ? nil : folders.joined(separator: " › ")
+                byName[entry.name] = entry
+                order.append(entry.name)
+            }
+        }
+        // "[X (off)]" only restores the original instruction when X is unticked on a console.
+        order.removeAll { $0.hasSuffix(" (off)") && byName[String($0.dropLast(6))] != nil }
+
+        struct Facts {
+            var shape: String
+            var hasStore = false
+            var codeStores: [UInt64: String] = [:]
+            var keypress = false
+        }
+        var facts: [String: Facts] = [:]
+        for name in order {
+            var f = Facts(shape: "")
+            var shape: [String] = []
+            for line in byName[name]!.lines {
+                let words = line.split(separator: " ").map(String.init)
+                if let store = mainStore(words) {
+                    f.hasStore = true
+                    shape.append(words[0] + words[1])
+                    if let end = codeEnd, store.addr < end { f.codeStores[store.addr] = store.value }
+                } else if words[0].hasPrefix("6"), isHex8(words[0]) {
+                    f.hasStore = true
+                    shape.append(words[0])
+                } else {
+                    shape.append(line)
+                    if words[0].hasPrefix("8"), isHex8(words[0]) { f.keypress = true }
+                }
+            }
+            f.shape = shape.joined(separator: "|")
+            facts[name] = f
+        }
+
+        return order.map { name in
+            let mine = facts[name]!
+            // Alternatives: same instructions with other values (tiers), or two patches fighting over one code word.
+            let rivals = order.filter { other in
+                guard other != name, let theirs = facts[other] else { return false }
+                if mine.hasStore && mine.shape == theirs.shape { return true }
+                return mine.codeStores.contains { theirs.codeStores[$0.key] != nil && theirs.codeStores[$0.key] != $0.value }
+            }
+            return CheatItem(
+                file: fileName,
+                name: name,
+                lines: byName[name]!.lines,
+                folder: byName[name]!.folder,
+                isCodePatch: !mine.codeStores.isEmpty,
+                needsKeypress: mine.keypress,
+                isPacked: packed?.contains("\(fileName)/\(name)") ?? true,
+                exclusiveWith: rivals
+            )
+        }
+    }
+}
+
+```
+
+`Sources/S2ArmCheatHUD/HUDView.swift`:
+
+```swift
+import SwiftUI
+import AppKit
+
+struct VisualEffectBlur: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = .hudWindow
+        view.blendingMode = .behindWindow
+        view.state = .active
+        view.appearance = NSAppearance(named: .vibrantDark)
+        return view
+    }
+
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+        nsView.state = .active
+    }
+}
+
+struct HUDView: View {
+    @ObservedObject var store: CheatStore
+    var onClose: () -> Void
+
+    var body: some View {
+        ZStack {
+            VisualEffectBlur()
+            Color.black.opacity(0.42)
+
+            VStack(spacing: 0) {
+                headerBar
+                Divider().overlay(Color.white.opacity(0.12))
+
+                if let toast = store.toast {
+                    toastBanner(toast)
+                        .padding(.horizontal, 14)
+                        .padding(.top, 10)
+                }
+
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 14) {
+                            if let game = store.currentGame {
+                                if game.isOcarinaOfTimeRemake {
+                                    ootOneShotSection(proxy: proxy)
+                                }
+                                persistentCheatsSection
+                            } else {
+                                emptyLibraryState
+                            }
+                        }
+                        .padding(14)
+                    }
+                    .onChange(of: store.selectedNavIndex) { _, newIdx in
+                        let items = store.navItems
+                        if items.indices.contains(newIdx) {
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                proxy.scrollTo(items[newIdx].id, anchor: .center)
+                            }
+                        }
+                    }
+                }
+
+                Divider().overlay(Color.white.opacity(0.12))
+                footerBar
+            }
+        }
+        .frame(width: 450, height: 600)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.18), lineWidth: 1)
+        )
+        .environment(\.colorScheme, .dark)
+    }
+
+    // MARK: - Header
+
+    private var headerBar: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: "gamecontroller.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.cyan)
+
+                Text("S2Arm 游戏内金手指面板")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.white)
+
+                Text("L3+R3 / ⌥Z")
+                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.cyan)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.cyan.opacity(0.16), in: Capsule())
+
+                Spacer()
+
+                Button {
+                    store.reloadGames()
+                    store.showToast("已重新扫描金手指目录", kind: .info, duration: 1.8)
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.8))
+                        .frame(width: 24, height: 24)
+                        .background(Color.white.opacity(0.08), in: Circle())
+                }
+                .buttonStyle(.plain)
+                .help("刷新金手指列表")
+
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.white.opacity(0.8))
+                        .frame(width: 24, height: 24)
+                        .background(Color.white.opacity(0.08), in: Circle())
+                }
+                .buttonStyle(.plain)
+                .help("收起面板（不中断游戏焦点）")
+            }
+
+            if store.games.count > 1 {
+                Picker("当前游戏", selection: $store.selectedGameID) {
+                    ForEach(store.games) { g in
+                        Text("\(g.name) (\(g.id))").tag(g.id)
+                    }
+                }
+                .labelsHidden()
+                .controlSize(.small)
+            } else if let game = store.currentGame {
+                HStack(spacing: 6) {
+                    Text(game.name)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .lineLimit(1)
+                    Spacer()
+                    if !game.buildID.isEmpty {
+                        Text("BID: \(game.buildID)")
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundStyle(.white.opacity(0.55))
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .background(Color.white.opacity(0.04))
+    }
+
+    // MARK: - Toast
+
+    private func toastBanner(_ toast: ToastMessage) -> some View {
+        let tint: Color = {
+            switch toast.kind {
+            case .success: return .green
+            case .warning: return .orange
+            case .info: return .cyan
+            }
+        }()
+
+        return HStack(spacing: 8) {
+            Circle()
+                .fill(tint)
+                .frame(width: 7, height: 7)
+            Text(toast.text)
+                .font(.system(size: 11.5, weight: .medium))
+                .foregroundStyle(.white)
+                .lineLimit(2)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(tint.opacity(0.38), lineWidth: 0.8)
+        )
+    }
+
+    // MARK: - OoT Remake Dedicated One-Shot Section
+
+    private func ootOneShotSection(proxy: ScrollViewProxy) -> some View {
+        let isRupeeSelected = isNavSelected(.ootRupeeInjector)
+
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Label("单次手动触发（写入一次即自动断开，零后台刷写）", systemImage: "bolt.fill")
+                    .font(.system(size: 11.5, weight: .semibold))
+                    .foregroundStyle(.yellow)
+                Spacer()
+            }
+
+            // Rupee Injector Card
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 8) {
+                    Image(systemName: "diamond.fill")
+                        .foregroundStyle(.green)
+                        .font(.system(size: 13))
+                    Text("卢比单次修改")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Spacer()
+
+                    HStack(spacing: 4) {
+                        stepButton("-50") { store.adjustRupeeTarget(delta: -50) }
+                        stepButton("-10") { store.adjustRupeeTarget(delta: -10) }
+
+                        Text("\(store.rupeeTarget)")
+                            .font(.system(size: 15, weight: .bold, design: .monospaced))
+                            .foregroundStyle(.green)
+                            .frame(minWidth: 50)
+                            .padding(.vertical, 2)
+                            .background(Color.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 6))
+
+                        stepButton("+10") { store.adjustRupeeTarget(delta: 10) }
+                        stepButton("+50") { store.adjustRupeeTarget(delta: 50) }
+                    }
+                }
+
+                // Wallet Preset Pills
+                HStack(spacing: 6) {
+                    ForEach(OoTRemakePresets.rupeeWalletTiers, id: \.value) { tier in
+                        let active = store.rupeeTarget == tier.value
+                        Button {
+                            store.rupeeTarget = tier.value
+                        } label: {
+                            Text(tier.label)
+                                .font(.system(size: 10.5, weight: active ? .bold : .medium))
+                                .foregroundStyle(active ? .black : .white.opacity(0.85))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 5)
+                                .background(
+                                    active ? Color.green : Color.white.opacity(0.08),
+                                    in: RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+
+                Button {
+                    selectNav(.ootRupeeInjector)
+                    store.fireOoTRupeeOneShot()
+                } label: {
+                    HStack(spacing: 6) {
+                        if store.isFiringOneShot {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Image(systemName: "bolt.circle.fill")
+                                .font(.system(size: 14, weight: .bold))
+                        }
+                        Text(store.isFiringOneShot ? "正在同步到游戏内存…" : "立即写入 \(store.rupeeTarget) 卢比（仅触发一次）")
+                            .font(.system(size: 12.5, weight: .bold))
+                    }
+                    .foregroundStyle(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 7)
+                    .background(
+                        store.isFiringOneShot ? Color.gray : Color.cyan,
+                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(store.isFiringOneShot)
+            }
+            .padding(11)
+            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(isRupeeSelected ? Color.cyan : Color.white.opacity(0.1), lineWidth: isRupeeSelected ? 1.6 : 0.8)
+            )
+            .id(NavItem.ootRupeeInjector.id)
+
+            // Consumables One-Shot Section
+            VStack(alignment: .leading, spacing: 6) {
+                Button {
+                    store.showAmmoSection.toggle()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: store.showAmmoSection ? "chevron.down" : "chevron.right")
+                            .font(.system(size: 10, weight: .bold))
+                        Text("已解锁消耗品单次补满（点按即补，不留后台循环）")
+                            .font(.system(size: 11, weight: .semibold))
+                        Spacer()
+                    }
+                    .foregroundStyle(.white.opacity(0.75))
+                }
+                .buttonStyle(.plain)
+
+                if store.showAmmoSection {
+                    VStack(spacing: 5) {
+                        ForEach(OoTRemakePresets.ammoItems) { item in
+                            let nav = NavItem.ootAmmo(item)
+                            let selected = isNavSelected(nav)
+                            HStack(spacing: 8) {
+                                Image(systemName: item.icon)
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.cyan)
+                                    .frame(width: 18)
+
+                                Text(item.title)
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(.white)
+
+                                Text("(\(item.subtitle))")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(.white.opacity(0.55))
+
+                                Spacer()
+
+                                Button {
+                                    selectNav(nav)
+                                    store.fireOoTAmmoOneShot(item)
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "bolt.fill")
+                                            .font(.system(size: 10))
+                                        Text("单次补满")
+                                            .font(.system(size: 11, weight: .semibold))
+                                    }
+                                    .foregroundStyle(.cyan)
+                                    .padding(.horizontal, 9)
+                                    .padding(.vertical, 4)
+                                    .background(Color.cyan.opacity(0.16), in: RoundedRectangle(cornerRadius: 6))
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(store.isFiringOneShot)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(selected ? Color.cyan : Color.clear, lineWidth: 1.4)
+                            )
+                            .id(nav.id)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Persistent Cheats Section
+
+    private var persistentCheatsSection: some View {
+        let visible = Set(store.cheatItems.map(\.key))
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Label("金手指常驻列表（同步 cheats/enabled.txt）", systemImage: "slider.horizontal.3")
+                    .font(.system(size: 11.5, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.85))
+                Spacer()
+                Text("\(store.enabledKeys.intersection(visible).count) 项开启")
+                    .font(.system(size: 10.5))
+                    .foregroundStyle(.white.opacity(0.5))
+            }
+
+            if store.cheatItems.isEmpty {
+                Text("当前游戏 cheats/ 目录下暂无金手指条目。")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.white.opacity(0.5))
+                    .padding(.vertical, 12)
+            } else {
+                ForEach(store.cheatSections, id: \.file) { section in
+                    cheatFileSection(file: section.file, items: section.items)
+                }
+            }
+        }
+    }
+
+    private func cheatFileSection(file: String, items: [CheatItem]) -> some View {
+        let collapsed = store.collapsedFiles.contains(file)
+        let usable = items.filter(\.isUsable).count
+        return VStack(alignment: .leading, spacing: 6) {
+            Button {
+                store.toggleFileCollapsed(file)
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: collapsed ? "chevron.right" : "chevron.down")
+                        .font(.system(size: 10, weight: .bold))
+                    Text(fileTitle(file))
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .lineLimit(1)
+                    Spacer()
+                    Text(usable == items.count ? "\(items.count) 条" : "\(usable) / \(items.count) 条可用")
+                        .font(.system(size: 10))
+                        .foregroundStyle(usable == 0 ? Color.orange.opacity(0.85) : Color.white.opacity(0.5))
+                }
+                .foregroundStyle(.white.opacity(0.75))
+                .padding(.vertical, 3)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            if !collapsed {
+                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                    if let folder = item.folder, index == 0 || items[index - 1].folder != folder {
+                        Text(folder)
+                            .font(.system(size: 10.5, weight: .semibold))
+                            .foregroundStyle(.cyan.opacity(0.8))
+                            .padding(.top, index == 0 ? 0 : 4)
+                    }
+                    cheatRow(item)
+                }
+            }
+        }
+    }
+
+    private func cheatRow(_ item: CheatItem) -> some View {
+        let nav = NavItem.cheatToggle(item)
+        let selected = isNavSelected(nav)
+        let on = store.isEnabled(item)
+        let rawStatus = store.statusMap[item.key]
+
+        return HStack(spacing: 8) {
+            Circle()
+                .fill(statusColor(on: on, status: rawStatus))
+                .frame(width: 7, height: 7)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.name)
+                    .font(.system(size: 12, weight: on ? .semibold : .regular))
+                    .foregroundStyle(.white.opacity(item.isUsable ? 1 : 0.45))
+                    .lineLimit(1)
+
+                HStack(spacing: 6) {
+                    if item.isUsable || on {
+                        Text(statusDescription(on: on, status: rawStatus))
+                            .font(.system(size: 10))
+                            .foregroundStyle(statusColor(on: on, status: rawStatus))
+                    }
+                    if !item.isUsable {
+                        Text("改代码 · 未编进游戏包，开了不生效")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.orange.opacity(0.8))
+                    } else if item.isCodePatch {
+                        Text("· 已编进游戏")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.white.opacity(0.4))
+                    }
+                    if !item.exclusiveWith.isEmpty {
+                        Text("· \(item.exclusiveWith.count + 1) 选 1")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.orange.opacity(0.85))
+                    }
+                }
+            }
+
+            Spacer()
+
+            if item.supportsOneShotPulse {
+                Button {
+                    selectNav(nav)
+                    store.fireCheatItemPulse(item)
+                } label: {
+                    Text("⚡单次")
+                        .font(.system(size: 10.5, weight: .semibold))
+                        .foregroundStyle(.yellow)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3.5)
+                        .background(Color.yellow.opacity(0.14), in: RoundedRectangle(cornerRadius: 5))
+                }
+                .buttonStyle(.plain)
+                .disabled(store.isFiringOneShot)
+                .help("将该指针条目触发写入一次后自动关闭")
+            }
+
+            Button {
+                selectNav(nav)
+                store.toggleCheat(item)
+            } label: {
+                Text(on ? "常驻开" : "已关")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(on ? .black : .white.opacity(0.75))
+                    .frame(width: 52)
+                    .padding(.vertical, 4)
+                    .background(
+                        on ? Color.green : Color.white.opacity(0.1),
+                        in: RoundedRectangle(cornerRadius: 6)
+                    )
+            }
+            .buttonStyle(.plain)
+            .disabled(!item.isUsable && !on)   // still lets a stale switch be turned off
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(Color.white.opacity(on ? 0.08 : 0.04), in: RoundedRectangle(cornerRadius: 8))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(selected ? Color.cyan : Color.white.opacity(0.06), lineWidth: selected ? 1.5 : 0.6)
+        )
+        .id(nav.id)
+    }
+
+    /// "84E182F72EE1DA4F.tomvita.txt" -> "tomvita"; a bare build-id or custom name is shown as is.
+    private func fileTitle(_ file: String) -> String {
+        var parts = (file as NSString).deletingPathExtension.split(separator: ".").map(String.init)
+        if parts.count > 1, parts[0].count == 16, parts[0].allSatisfy(\.isHexDigit) { parts.removeFirst() }
+        return parts.joined(separator: ".")
+    }
+
+    private var emptyLibraryState: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "folder.badge.questionmark")
+                .font(.system(size: 28))
+                .foregroundStyle(.white.opacity(0.5))
+            Text("未找到 S2Arm 游戏库目录")
+                .font(.system(size: 13, weight: .semibold))
+            Text(store.libraryURL.path)
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundStyle(.white.opacity(0.5))
+            Button("选择 S2Arm 目录…") {
+                store.chooseLibraryFolder()
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 36)
+    }
+
+    // MARK: - Footer
+
+    private var footerBar: some View {
+        HStack(spacing: 6) {
+            Text("手柄：↑↓选行 · ←→调卢比 · L1/R1换档 · ×确认 · ○收起（建议游戏内先按 + 暂停）")
+                .font(.system(size: 10))
+                .foregroundStyle(.white.opacity(0.58))
+                .lineLimit(1)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(Color.white.opacity(0.03))
+    }
+
+    // MARK: - Helpers
+
+    private func stepButton(_ title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
+                .foregroundStyle(.white.opacity(0.9))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 5))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func isNavSelected(_ item: NavItem) -> Bool {
+        let items = store.navItems
+        guard items.indices.contains(store.selectedNavIndex) else { return false }
+        return items[store.selectedNavIndex] == item
+    }
+
+    private func selectNav(_ item: NavItem) {
+        if let idx = store.navItems.firstIndex(of: item) {
+            store.selectedNavIndex = idx
+        }
+    }
+
+    private func statusColor(on: Bool, status: String?) -> Color {
+        guard on else { return .white.opacity(0.32) }
+        guard let st = status else { return .yellow }
+        if st.hasPrefix("生效中") { return .green }
+        if st == "地址未就绪" || st == "关" { return .yellow }
+        return .orange
+    }
+
+    private func statusDescription(on: Bool, status: String?) -> String {
+        guard on else { return "未开启" }
+        guard let st = status, st != "关" else { return "等待重载…" }
+        return st
+    }
+}
+
+```
+
+`Sources/S2ArmCheatHUD/InputMonitor.swift`:
+
+```swift
+import Cocoa
+import Carbon.HIToolbox
+import GameController
+
+final class InputMonitor {
+    var onTogglePanel: (() -> Void)?
+    var onMoveSelection: ((Int) -> Void)?
+    var onAdjustHorizontal: ((Bool) -> Void)?
+    var onCyclePreset: ((Bool) -> Void)?
+    var onConfirm: (() -> Void)?
+    var onCancel: (() -> Void)?
+    var isPanelVisible: (() -> Bool)?
+
+    private var hotKeyRef: EventHotKeyRef?
+    private var eventHandlerRef: EventHandlerRef?
+    private var padTimer: Timer?
+
+    // Edge-detection state for DualSense / Extended Gamepad
+    private var comboHoldTicks: Int = 0
+    private var comboTriggeredThisHold: Bool = false
+    private var prevUp = false
+    private var prevDown = false
+    private var prevLeft = false
+    private var prevRight = false
+    private var prevL1 = false
+    private var prevR1 = false
+    private var prevConfirm = false
+    private var prevCancel = false
+
+    private static weak var sharedInstance: InputMonitor?
+
+    init() {
+        Self.sharedInstance = self
+    }
+
+    func start() {
+        registerGlobalHotKey()
+        startGamepadPolling()
+    }
+
+    func stop() {
+        if let ref = hotKeyRef {
+            UnregisterEventHotKey(ref)
+            hotKeyRef = nil
+        }
+        if let handler = eventHandlerRef {
+            RemoveEventHandler(handler)
+            eventHandlerRef = nil
+        }
+        padTimer?.invalidate()
+        padTimer = nil
+    }
+
+    /// Registers Option + Z (⌥Z) via Carbon RegisterEventHotKey (works over fullscreen games without TCC Accessibility prompts).
+    private func registerGlobalHotKey() {
+        var eventType = EventTypeSpec(
+            eventClass: OSType(kEventClassKeyboard),
+            eventKind: UInt32(kEventHotKeyPressed)
+        )
+
+        let callback: EventHandlerUPP = { _, _, _ in
+            DispatchQueue.main.async {
+                InputMonitor.sharedInstance?.onTogglePanel?()
+            }
+            return noErr
+        }
+
+        InstallEventHandler(
+            GetApplicationEventTarget(),
+            callback,
+            1,
+            &eventType,
+            nil,
+            &eventHandlerRef
+        )
+
+        let hotKeyID = EventHotKeyID(signature: OSType(0x5332_4143), id: 1) // "S2AC"
+        RegisterEventHotKey(
+            UInt32(kVK_ANSI_Z),
+            UInt32(optionKey),
+            hotKeyID,
+            GetApplicationEventTarget(),
+            0,
+            &hotKeyRef
+        )
+    }
+
+    private func startGamepadPolling() {
+        if #available(macOS 11.3, *) {
+            GCController.shouldMonitorBackgroundEvents = true
+        }
+
+        padTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+            self?.pollControllers()
+        }
+    }
+
+    private func pollControllers() {
+        guard let pad = activeExtendedGamepad() else {
+            resetPadState()
+            return
+        }
+
+        let l3 = pad.leftThumbstickButton?.isPressed ?? false
+        let r3 = pad.rightThumbstickButton?.isPressed ?? false
+        let shareOrMinus = pad.buttonOptions?.isPressed ?? false
+
+        // Summon / dismiss combo: Hold L3 + R3 (or Share/Minus + R3) for ~0.15s (9 ticks @ 60Hz)
+        let comboPressed = (l3 && r3) || (shareOrMinus && r3)
+        if comboPressed {
+            comboHoldTicks += 1
+            if comboHoldTicks >= 9 && !comboTriggeredThisHold {
+                comboTriggeredThisHold = true
+                onTogglePanel?()
+            }
+            return
+        } else {
+            comboHoldTicks = 0
+            comboTriggeredThisHold = false
+        }
+
+        guard isPanelVisible?() == true else {
+            prevUp = pad.dpad.up.isPressed
+            prevDown = pad.dpad.down.isPressed
+            prevLeft = pad.dpad.left.isPressed
+            prevRight = pad.dpad.right.isPressed
+            prevL1 = pad.leftShoulder.isPressed
+            prevR1 = pad.rightShoulder.isPressed
+            prevConfirm = pad.buttonA.isPressed
+            prevCancel = pad.buttonB.isPressed
+            return
+        }
+
+        let up = pad.dpad.up.isPressed
+        let down = pad.dpad.down.isPressed
+        let left = pad.dpad.left.isPressed
+        let right = pad.dpad.right.isPressed
+        let l1 = pad.leftShoulder.isPressed
+        let r1 = pad.rightShoulder.isPressed
+        let confirm = pad.buttonA.isPressed
+        let cancel = pad.buttonB.isPressed
+
+        if up && !prevUp { onMoveSelection?(-1) }
+        if down && !prevDown { onMoveSelection?(1) }
+        if left && !prevLeft { onAdjustHorizontal?(false) }
+        if right && !prevRight { onAdjustHorizontal?(true) }
+        if l1 && !prevL1 { onCyclePreset?(false) }
+        if r1 && !prevR1 { onCyclePreset?(true) }
+        if confirm && !prevConfirm { onConfirm?() }
+        if cancel && !prevCancel { onCancel?() }
+
+        prevUp = up
+        prevDown = down
+        prevLeft = left
+        prevRight = right
+        prevL1 = l1
+        prevR1 = r1
+        prevConfirm = confirm
+        prevCancel = cancel
+    }
+
+    private func activeExtendedGamepad() -> GCExtendedGamepad? {
+        var best: GCExtendedGamepad? = nil
+        for controller in GCController.controllers() {
+            if let ext = controller.extendedGamepad {
+                if best == nil || ext.lastEventTimestamp > (best?.lastEventTimestamp ?? 0) {
+                    best = ext
+                }
+            }
+        }
+        return best
+    }
+
+    private func resetPadState() {
+        comboHoldTicks = 0
+        comboTriggeredThisHold = false
+        prevUp = false
+        prevDown = false
+        prevLeft = false
+        prevRight = false
+        prevL1 = false
+        prevR1 = false
+        prevConfirm = false
+        prevCancel = false
+    }
+}
+
+```
+
+`Sources/S2ArmCheatHUD/Models.swift`:
+
+```swift
+import Foundation
+
+struct GameEntry: Identifiable, Hashable {
+    let id: String          // Title ID (e.g. 0400486024DEC000)
+    let name: String        // Folder / display name
+    let folderURL: URL
+    let cheatsURL: URL
+    let buildID: String     // 16-char uppercase main BID if detected
+    let lastActive: Date
+    /// Main NSO `.rodata` start. Stores below it patch code, which S2Arm can only apply when it builds the package.
+    let codeEnd: UInt64?
+    /// "file/name" of the cheat entries S2Arm compiled into this package (image/mac/cpatch.tsv); nil = unknown.
+    let packedKeys: Set<String>?
+
+    var isOcarinaOfTimeRemake: Bool {
+        id.uppercased() == "0400486024DEC000" || buildID.uppercased().hasPrefix(OoTRemakePresets.buildID)
+    }
+}
+
+struct CheatItem: Identifiable, Hashable {
+    let file: String
+    let name: String
+    let lines: [String]
+    let folder: String?           // Breeze-style folder path the entry sits in
+    let isCodePatch: Bool         // writes game code: only works when compiled into the package
+    let needsKeypress: Bool       // has a keypress conditional: cannot be pulsed from the panel
+    let isPacked: Bool            // S2Arm compiled it into the package (true when unknown)
+    let exclusiveWith: [String]   // other entries of the same file that are alternatives to this one
+
+    var key: String { "\(file)/\(name)" }
+    var id: String { key }
+
+    /// Runtime-only entries (pointer / data writes) can be fired once and disconnected.
+    var supportsOneShotPulse: Bool { !isCodePatch && !needsKeypress }
+    /// A code patch that is not in the package can never take effect in this build of the game.
+    var isUsable: Bool { !isCodePatch || isPacked }
+}
+
+struct OoTQuickItem: Identifiable, Hashable {
+    let id: String
+    let title: String
+    let subtitle: String
+    let icon: String
+    let gdIntOffset: UInt32
+    let defaultAmount: UInt32
+}
+
+enum OoTRemakePresets {
+    static let buildID = "E0F3CCFAF50065AE"
+    // GD_INT record offsets: index in romfs GameData/GameDataList.Product.110.byml `Int` list × 0x28 + 0x1C
+    // (record = 0x28 bytes, live value at +0x1C, shadow copy at +0x20).
+    // Rupees = PlayerStatus.CurrentRupee (Int[962]); ammo = <actor>.StockNum, e.g. Item_DekuStick (Int[1021]).
+    static let rupeeOffset: UInt32 = 0x0000966C
+    static let rupeeWalletTiers: [(label: String, value: Int)] = [
+        ("99 · 初始钱包", 99),
+        ("200 · 成年钱包", 200),
+        ("500 · 巨人钱包", 500),
+        ("9999 · 突破上限", 9999)
+    ]
+
+    static let ammoItems: [OoTQuickItem] = [
+        OoTQuickItem(id: "sticks", title: "德库木棍", subtitle: "补满 30", icon: "wand.and.rays", gdIntOffset: 0x00009FA4, defaultAmount: 30),       // Item_DekuStick
+        OoTQuickItem(id: "nuts", title: "德库坚果", subtitle: "补满 40", icon: "sparkles", gdIntOffset: 0x00009F54, defaultAmount: 40),              // Item_DekuNut
+        OoTQuickItem(id: "seeds", title: "弹弓种子", subtitle: "补满 50", icon: "scope", gdIntOffset: 0x00009F7C, defaultAmount: 50),                // Item_DekuSeed
+        OoTQuickItem(id: "bombs", title: "炸弹袋", subtitle: "补满 40", icon: "flame.fill", gdIntOffset: 0x00009D74, defaultAmount: 40),             // Item_Bomb
+        OoTQuickItem(id: "arrows", title: "弓箭袋", subtitle: "补满 50", icon: "location.north.line.fill", gdIntOffset: 0x00009D4C, defaultAmount: 50), // Item_Arrow_Normal
+        OoTQuickItem(id: "bombchus", title: "炸弹鼠", subtitle: "补满 50", icon: "bolt.horizontal.circle.fill", gdIntOffset: 0x00009E14, defaultAmount: 50), // Item_Bombchu
+        OoTQuickItem(id: "beans", title: "魔法豆", subtitle: "补满 10", icon: "leaf.fill", gdIntOffset: 0x0000A15C, defaultAmount: 10)               // Item_MagicBean
+    ]
+
+    /// Generates an Atmosphere dynamic pointer cheat targeting GameDataMgr -> GD_INT objects[i] (writing both v[0] and shadow copy v[1]).
+    /// Intentionally omits C0 null-guards so S2Arm's Cheats.cs accurately reports "地址未就绪" if no save is loaded yet,
+    /// and "生效中" only when both v[0] (+0x1C) and v[1] (+0x20) were genuinely written to guest memory.
+    static func buildOneShotFileContent(bid: String, entryName: String, offset: UInt32, value: UInt32) -> String {
+        let offHex = String(format: "%08X", offset)
+        let valHex = String(format: "%08X", value)
+        return """
+        [HUD OneShot BID=\(bid)]
+
+        [\(entryName)]
+        580F0000 04E842A8
+        580F1000 000000D8
+        780F0000 \(offHex)
+        640F1000 00000000 \(valHex)
+        640F0000 00000000 \(valHex)
+        """ + "\n"
+    }
+}
+
+```
+
+`Sources/S2ArmCheatHUD/main.swift`:
+
+```swift
+import Cocoa
+import SwiftUI
+
+final class FirstMouseHostingView<Content: View>: NSHostingView<Content> {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
+        true
+    }
+}
+
+final class CheatHUDPanel: NSPanel {
+    override var canBecomeKey: Bool { false }
+    override var canBecomeMain: Bool { false }
+}
+
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    private var statusItem: NSStatusItem!
+    private var panel: CheatHUDPanel!
+    private let store = CheatStore()
+    private let inputMonitor = InputMonitor()
+    private var hasPlacedPanel = false
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApp.setActivationPolicy(.accessory)
+        setupPanel()
+        setupStatusBarMenu()
+        setupInputMonitor()
+
+        // Show panel once on launch so the user immediately sees it is ready
+        showPanel()
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        inputMonitor.stop()
+        store.cleanupAllOneShots()
+    }
+
+    private func setupPanel() {
+        let rect = NSRect(x: 0, y: 0, width: 450, height: 600)
+        panel = CheatHUDPanel(
+            contentRect: rect,
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered,
+            defer: false
+        )
+        panel.level = .statusBar
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
+        panel.isFloatingPanel = true
+        panel.hidesOnDeactivate = false
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.hasShadow = true
+        panel.isMovableByWindowBackground = true
+
+        let rootView = HUDView(store: store) { [weak self] in
+            self?.hidePanel()
+        }
+        panel.contentView = FirstMouseHostingView(rootView: rootView)
+    }
+
+    private func setupStatusBarMenu() {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        if let btn = statusItem.button {
+            btn.image = NSImage(systemSymbolName: "gamecontroller.fill", accessibilityDescription: "S2Arm 金手指面板")
+            btn.title = " 金手指"
+            btn.imagePosition = .imageLeading
+        }
+
+        let menu = NSMenu()
+        let toggleItem = NSMenuItem(title: "显示 / 隐藏悬浮金手指面板 (⌥Z / L3+R3)", action: #selector(togglePanelAction), keyEquivalent: "")
+        toggleItem.target = self
+        menu.addItem(toggleItem)
+
+        let reloadItem = NSMenuItem(title: "重新扫描 S2Arm 游戏库", action: #selector(reloadGamesAction), keyEquivalent: "r")
+        reloadItem.target = self
+        menu.addItem(reloadItem)
+
+        let pickFolderItem = NSMenuItem(title: "更改 S2Arm 游戏库路径…", action: #selector(pickLibraryAction), keyEquivalent: "")
+        pickFolderItem.target = self
+        menu.addItem(pickFolderItem)
+
+        menu.addItem(.separator())
+
+        let quitItem = NSMenuItem(title: "退出金手指悬浮面板", action: #selector(quitAction), keyEquivalent: "q")
+        quitItem.target = self
+        menu.addItem(quitItem)
+
+        statusItem.menu = menu
+    }
+
+    private func setupInputMonitor() {
+        inputMonitor.isPanelVisible = { [weak self] in
+            self?.panel.isVisible ?? false
+        }
+        inputMonitor.onTogglePanel = { [weak self] in
+            self?.togglePanel()
+        }
+        inputMonitor.onMoveSelection = { [weak self] delta in
+            self?.store.moveSelection(delta: delta)
+        }
+        inputMonitor.onAdjustHorizontal = { [weak self] forward in
+            self?.store.adjustSelectedHorizontal(forward: forward)
+        }
+        inputMonitor.onCyclePreset = { [weak self] forward in
+            self?.store.cycleSelectedPreset(forward: forward)
+        }
+        inputMonitor.onConfirm = { [weak self] in
+            self?.store.activateSelected()
+        }
+        inputMonitor.onCancel = { [weak self] in
+            self?.hidePanel()
+        }
+        inputMonitor.start()
+    }
+
+    @objc private func togglePanelAction() {
+        togglePanel()
+    }
+
+    @objc private func reloadGamesAction() {
+        store.reloadGames()
+        showPanel()
+    }
+
+    @objc private func pickLibraryAction() {
+        NSApp.activate(ignoringOtherApps: true)
+        store.chooseLibraryFolder()
+        showPanel()
+    }
+
+    @objc private func quitAction() {
+        store.cleanupAllOneShots()
+        NSApplication.shared.terminate(nil)
+    }
+
+    func togglePanel() {
+        if panel.isVisible {
+            hidePanel()
+        } else {
+            showPanel()
+        }
+    }
+
+    func showPanel() {
+        store.refreshStatusOnly()
+        if !hasPlacedPanel {
+            let mouseLoc = NSEvent.mouseLocation
+            let screen = NSScreen.screens.first(where: { NSMouseInRect(mouseLoc, $0.frame, false) }) ?? NSScreen.main
+            if let vf = screen?.visibleFrame {
+                let origin = NSPoint(
+                    x: vf.maxX - panel.frame.width - 24,
+                    y: vf.maxY - panel.frame.height - 20
+                )
+                panel.setFrameOrigin(origin)
+            }
+            hasPlacedPanel = true
+        }
+        panel.orderFrontRegardless()
+        store.isPanelVisible = true
+    }
+
+    func hidePanel() {
+        panel.orderOut(nil)
+        store.isPanelVisible = false
+    }
+}
+
+let app = NSApplication.shared
+let delegate = AppDelegate()
+app.delegate = delegate
+app.run()
+
+```
+
+`build.sh`:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_NAME="S2ArmCheatHUD"
+APP_BUNDLE="${ROOT_DIR}/dist/${APP_NAME}.app"
+MACOS_DIR="${APP_BUNDLE}/Contents/MacOS"
+PLIST_PATH="${APP_BUNDLE}/Contents/Info.plist"
+
+echo "==> 编译 ${APP_NAME}.app (arm64-apple-macosx14.0)..."
+mkdir -p "${MACOS_DIR}"
+
+xcrun swiftc \
+  -O \
+  -swift-version 5 \
+  -target arm64-apple-macosx14.0 \
+  -framework AppKit \
+  -framework SwiftUI \
+  -framework GameController \
+  -framework Carbon \
+  "${ROOT_DIR}"/Sources/S2ArmCheatHUD/*.swift \
+  -o "${MACOS_DIR}/${APP_NAME}"
+
+cat > "${PLIST_PATH}" <<'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>S2ArmCheatHUD</string>
+    <key>CFBundleIdentifier</key>
+    <string>local.s2arm.cheat-hud</string>
+    <key>CFBundleName</key>
+    <string>S2Arm 金手指面板</string>
+    <key>CFBundleDisplayName</key>
+    <string>S2Arm 金手指面板</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>监听手柄组合键以在游戏内呼出和操控金手指悬浮面板。</string>
+</dict>
+</plist>
+EOF
+
+codesign --force --sign - "${APP_BUNDLE}"
+echo "==> 构建完成：${APP_BUNDLE}"
+
+```
+
+`tools/normalize_cheats.py`:
+
+```py
+#!/usr/bin/env python3
+"""Rewrite community Atmosphere cheat files into a shape S2Arm can compile into a game package.
+
+S2Arm cannot patch code pages while a game runs: code cheats only work when its packer compiles them in,
+and the packer only takes entries made purely of plain "store to main" lines. Three common community
+layouts defeat that, and this tool rewrites them WITHOUT changing any instruction or address:
+
+  1. offset register that is never written (e.g. `080E0000 ...`)        -> register 0
+  2. Breeze layout: `[X]` = guard + hook write, `[X]` again under "[code cave]" = cave body,
+     `[X (off)]` = restore                                              -> one `[X]` = cave body + hook write
+  3. one entry mixing code writes with pointer/conditional lines        -> two same-named entries
+
+usage: normalize_cheats.py <game folder> [file.txt ...]
+       reads <game>/cheats/*.txt (or only the named files) and writes <stem>-s2arm.txt next to them.
+       Two authors' files usually reuse the same code-cave space, so rewrite only the one you want compiled in.
+"""
+import os, re, struct, sys
+
+SUFFIX = "-s2arm"
+T0 = re.compile(r"^0([1248])([0-9A-Fa-f])([0-9A-Fa-f])00([0-9A-Fa-f]{2})$")
+FOLD = re.compile(r"^20[0-9A-Fa-f]{6}$")
+HEX8 = re.compile(r"^[0-9A-Fa-f]{8}$")
+
+
+def ro_start(game):
+    with open(os.path.join(game, "image/mac/exefs/main"), "rb") as f:
+        h = f.read(0x40)
+    if h[:4] != b"NSO0": raise SystemExit("exefs/main is not an NSO")
+    return struct.unpack_from("<I", h, 0x24)[0]          # .rodata memory offset: everything below is code + padding
+
+
+def parse(text):
+    entries, cur = [], None
+    for raw in text.splitlines():
+        s = raw.strip()
+        if not s or s.startswith("//") or s.startswith("#"): continue
+        if s[0] in "[{" and s[-1] == ("]" if s[0] == "[" else "}"):
+            cur = {"master": s[0] == "{", "name": s[1:-1].strip(), "lines": []}; entries.append(cur)
+        elif cur is not None:
+            cur["lines"].append(" ".join(s.split()))
+    return entries
+
+
+def store(line):
+    """plain store line -> (width, region, register, address, value words) or None"""
+    w = line.split(); m = T0.match(w[0]) if len(w) in (3, 4) and all(HEX8.match(x) for x in w) else None
+    if not m or len(w) != (4 if m.group(1) == "8" else 3): return None
+    return int(m.group(1)), int(m.group(2), 16), int(m.group(3), 16), int(m.group(4) + w[1], 16), w[2:]
+
+
+def registers_written(entries):
+    out = set()
+    for e in entries:
+        for l in e["lines"]:
+            op = l.split()[0].upper()
+            if store(l) or FOLD.match(op) or op[0] in "0128F": continue
+            if not HEX8.match(op): return set(range(16))
+            if op[0] in "34579": out.add(int(op[3], 16))
+            elif op[0] in "6A": out |= {int(op[3], 16)} if op[4] != "0" else set()
+            elif op[:2] == "C0": pass                     # register compare: reads only
+            else: return set(range(16))
+    return out
+
+
+def is_code(line, ro):
+    s = store(line); return bool(s and s[1] == 0 and s[2] == 0 and s[3] < ro)
+
+
+def normalize(entries, ro, notes):
+    written = registers_written(entries)
+    for e in entries:                                     # 1. dead offset register
+        for i, l in enumerate(e["lines"]):
+            s = store(l)
+            if s and s[2] and s[2] not in written:
+                w = l.split(); e["lines"][i] = " ".join([w[0][:3] + "0" + w[0][4:]] + w[1:]); notes["reg"] += 1
+
+    by_name = {}
+    for e in entries: by_name.setdefault(e["name"], []).append(e)
+    drop = set()
+    for e in entries:                                     # 2. Breeze guard + cave + (off)
+        L = e["lines"]
+        if e["master"] or len(L) < 3 or L[0][0] != "1" or not FOLD.match(L[-1]) or not all(is_code(x, ro) for x in L[1:-1]): continue
+        g = L[0].split()
+        if len(g) != 3 or g[0][1] != "4" or g[0][2] != "0" or g[0][3] != "5": continue          # 4-byte "== value" on main
+        gaddr, gval = int(g[0][6:8] + g[1], 16), g[2].upper()
+        caves = [c for c in by_name[e["name"]] if c is not e and c["lines"] and all(is_code(x, ro) for x in c["lines"])]
+        if len(caves) != 1 or not any(store(x)[3] == gaddr and store(x)[4] == [gval] for x in caves[0]["lines"]): continue
+        hooks = L[1:-1]
+        e["lines"] = caves[0]["lines"] + hooks; drop.add(id(caves[0])); notes["merged"] += 1
+        sites = {store(x)[3] for x in hooks}
+        for o in by_name.get(e["name"] + " (off)", []):
+            if o["lines"] and all(is_code(x, ro) and store(x)[3] in sites for x in o["lines"]): drop.add(id(o)); notes["off"] += 1
+    entries = [e for e in entries if id(e) not in drop]
+
+    out = []
+    for e in entries:                                     # 3. code writes + other lines in one entry
+        L = e["lines"]; depth = 0; code, rest = [], []
+        for l in L:
+            op = l.split()[0].upper()
+            if depth == 0 and is_code(l, ro): code.append(l); continue
+            rest.append(l)
+            if FOLD.match(op): depth = max(0, depth - 1)
+            elif not store(l) and (op[0] in "18" or op[:2] == "C0"): depth += 1
+        real_rest = [l for l in rest if not FOLD.match(l.split()[0])]
+        if e["master"] or not code or not real_rest: out.append(e); continue
+        out.append(dict(e, lines=code)); out.append(dict(e, lines=rest)); notes["split"] += 1
+
+    # folders that lost every member (Breeze "[code cave]" ... "[code cave end]")
+    keep = []
+    for e in out:
+        marker = e["lines"] and all(FOLD.match(l) for l in e["lines"])
+        if marker and e["name"].endswith(" end") and keep and keep[-1]["name"] == e["name"][:-4] \
+                and all(FOLD.match(l) for l in keep[-1]["lines"]):
+            keep.pop(); continue
+        keep.append(e)
+    return keep
+
+
+def main(game, only=()):
+    ro = ro_start(game); cheats = os.path.join(game, "cheats"); made = []
+    for f in sorted(os.listdir(cheats)):
+        if only and f not in only: continue
+        stem, ext = os.path.splitext(f)
+        if ext.lower() != ".txt" or f.startswith(("._", "_")) or f in ("enabled.txt", "status.txt") or stem.endswith(SUFFIX): continue
+        text = open(os.path.join(cheats, f), encoding="utf-8", errors="replace").read()
+        bid = re.search(r"BID\s*[=:]\s*([0-9A-Fa-f]{16})", text) or re.match(r"^([0-9A-Fa-f]{16})", stem)
+        if not bid: print(f"skip {f}: no build id"); continue
+        notes = dict(reg=0, merged=0, off=0, split=0)
+        entries = normalize(parse(text), ro, notes)
+        if not any(notes.values()): print(f"{f}: nothing to rewrite"); continue
+        body = [f"[S2Arm-ready rewrite of {f} BID={bid.group(1).upper()}]", ""]
+        for e in entries:
+            if not e["lines"]: continue
+            body.append(("{%s}" if e["master"] else "[%s]") % e["name"]); body += e["lines"] + [""]
+        dst = os.path.join(cheats, stem + SUFFIX + ".txt"); tmp = dst + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as o: o.write("\n".join(body))
+        os.replace(tmp, dst); made.append(dst)
+        print(f"{f} -> {os.path.basename(dst)}: offset register cleared on {notes['reg']} lines, "
+              f"{notes['merged']} hook+cave pairs merged, {notes['off']} '(off)' entries dropped, {notes['split']} entries split")
+    return made
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2: sys.exit(__doc__)
+    main(sys.argv[1], sys.argv[2:])
+
+```
