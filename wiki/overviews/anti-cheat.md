@@ -1094,6 +1094,7 @@ sources:
   - wiki/sources/descriptions/Siselea__deltaforce-cleaner.md
   - wiki/sources/descriptions/smoothjazzchazz__game-integrity-code.md
   - wiki/sources/descriptions/DMN-Software__dmn_minigame.md
+  - wiki/sources/descriptions/mioolio__AntiCheatExpert.md
 updated: 2026-11-21
 confidence: high
 ---
@@ -1250,6 +1251,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 - [[sguard-limit]] — Windows ACE-Guard client restriction/patch toolkit (H3d9; user-mode C++ controller + kernel C/asm module; virtual memory ops, VAD traversal, suspend/resume, detour hooks; Visual Studio solution; anti-cheat RE / bypass experimentation) (source: wiki/sources/descriptions/H3d9__sguard_limit.md)
 - [[fuck-ace]] — Windows console utility throttling Tencent ACE SGuard processes via idle priority, last-CPU affinity, and EcoQoS; admin + SeDebugPrivilege; auto-retry on self-protection blocks; no network or disk writes (moeskia; Cheat / Explore AntiCheat System:ACE resource-consumption mitigation) (source: wiki/sources/descriptions/moeskia__fuckAce.md)
 - [[ff-ace-anticheat-analysis]] — Tencent ACE (libanogs/libanort) Free Fire byte-level RE post-mortem (Lixense; Python/JS IDA automation + SQLite detection index; APK hash, cert parsing, inline-hook scans, self-integrity checksum catalog; Explore AntiCheat System:ACE defensive research) (source: wiki/sources/descriptions/Lixense__ff-ace-anticheat-analysis.md)
+- [[anticheatexpert]] — mioolio; full Tencent **AntiCheatExpert** Windows suite RE archive (18 PE/kernel components: drivers, SGuard, plugins, UEFI); Python PE/Capstone/IOCTL/log-crypto tooling + MASM/ml64 byte-faithful COFF rebuild pipeline; per-component reports and Chinese deep dives; text artifacts only—no signed binaries (Reverse-engineering / Explore AntiCheat System:ACE) (source: wiki/sources/descriptions/mioolio__AntiCheatExpert.md)
 - [[anticheattoggle]] — WinForms utility to temporarily stop/disable Tencent ACE, Perfect World Arena, and Reason CyberSecurity kernel drivers that block VirtualBox VM spawn (`supR3HardenedWinReSpawn` VERR_INVALID_NAME -104); backs up service start types; CLI `--off`/`--on`/`--status`; research-host virtualization troubleshooting (lsxll666; Cheat / QEMU/KVM/PVE/VBOX) (source: wiki/sources/descriptions/lsxll666__AntiCheatToggle.md)
 - [[deltaforce-cleaner]] — Python 3.9+ stdlib GUI/CLI uninstaller that fully removes Delta Force (三角洲行动) and leftover Tencent ACE kernel services, drivers, registry, files, and WeGame traces; documented detection rules, protected Tencent/Windows paths, dry-run + unit-tested headless engine (Siselea; Anti Cheat / host cleanup after persistent kernel AC) (source: wiki/sources/descriptions/Siselea__deltaforce-cleaner.md)
 - [[battlefn-cheat-analysis]] — detected Fortnite cheat post-mortem (0dayatday0; written analysis + sample modules + manual-map / privileged-memory PoCs; batch + C++ usermode→kernel paths; real-world tradecraft and mistake catalog for defensive researchers) (source: wiki/sources/descriptions/0dayatday0__BattleFN-cheat-analysis.md)
