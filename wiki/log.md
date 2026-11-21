@@ -1,3 +1,5 @@
+- **2026-11-21** — ingest `description:Null993/LX-SaveEditor`: entity [[lx-save-editor]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
 - **2026-11-21** — ingest `description:Null993/LX-SaveManager`: entity [[lx-save-manager]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-11-21** — ingest `readme:categories` (projection `wiki/sources/README-categories.md`): **Cheat** **3138** (+2 vs wiki **3136**; projection `link_count` resync) / other major anchors unchanged (**Anti Cheat** **931**, **Game Engine** **160**, **Game Develop** **205**, **DirectX** **51**, **Vulkan** **15**, **Game Network** **36**, **Game Testing** **23**, **Game Tools** **9**, console lanes **PlayStation** **17** / **Switch** **11** / **Xbox** **13**); 41 README `##` headings (incl. empty **NeverC & NeverD**); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[concepts/compiled-wiki]], [[concepts/resource-selection]]; light `index.md` section notes (Cheat **~3138**, RE **~3138**); no per-category pages.

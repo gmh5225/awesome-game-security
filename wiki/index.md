@@ -2596,6 +2596,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [LSPFRIDA](entities/lspfrida.md) — LSPosed module embedding Frida GumJS/QuickJS + LSPlant hooks for on-device frida-java-bridge scripting without frida-server or PC (wzxwhxcz; Cheat / Frida)
 - [LocusMimic](entities/locusmimic.md) — LSPosed/Xposed Android GPS spoof (map picker, saved locations, app/system/mock-provider modes; Kotlin/Compose)
 - [LockFile-Poc](entities/lockfile-poc.md) — C++ Windows file-lock PoC (AC Stress Testing / Some Tricks Ring3)
+- [LX Save Editor](entities/lx-save-editor.md) — Root-gated Android APK to read/edit/back up offline role JSON and related local.lx.offline.game saves (schema validation, hash-checked atomic replace, ZIP manifests; Null993)
 - [LX Save Manager](entities/lx-save-manager.md) — Root-gated Android save library for local.lx.offline.game (multi-slot backup/restore, schema-checked ZIP, SHA-256 manifests, transactional restore; Unity offline progress; Null993)
 - [LocalAnticheat 1.8.9](entities/local-anticheat-1-8-9.md) — Forge 1.8.9 client mod; passive packet-flow checks (11 modules); local-chat flags; no server reports (freezato; Anti Cheat / game:minecraft)
 - [localroot-all-cve](entities/localroot-all-cve.md) — historical CVE/year-indexed LPE PoC archive (Snoopy-Sec; C/shell/Python; exploit-dev study; README [Root CVE])
