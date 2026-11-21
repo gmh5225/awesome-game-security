@@ -1088,7 +1088,8 @@ sources:
   - wiki/sources/descriptions/optic-fyi__windows-driver.md
   - wiki/sources/descriptions/Werta1z__Avgar-AntiCheats.md
   - wiki/sources/descriptions/Siselea__deltaforce-cleaner.md
-updated: 2026-11-20
+  - wiki/sources/descriptions/smoothjazzchazz__game-integrity-code.md
+updated: 2026-11-21
 confidence: high
 ---
 
@@ -1456,6 +1457,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Paper ClientTickEnd movement replay AC:** [[astral-anticheat]] (tahad4492-svg; Java 21 Maven Paper **1.21.11** plugin; rebuilds vanilla movement physics from per-tick client data and **ClientTickEndEvent**; packet-order checks for silent rotations/swaps; lag-compensated reach/aura/aim combat; movement/world/packet/macro coverage; configurable block mode with setbacks vs watch-only alerts; staff GUI/logs; minigame FP reduction; simulation tests against known cheat clients; Anti Cheat / game:minecraft) beside open-source simulators such as [[grim]] and alert-first Paper plugins such as [[aegis-ac]]. (source: wiki/sources/descriptions/tahad4492-svg__Astral-AntiCheat.md)
 
 **Version-neutral AC foundation:** [[inertia]] (InertiaOrg; Java; version-neutral player-behavior engine; movement/packet/world/collision contracts, evidence accumulation with confidence/decay and false-positive context; version profiles + movement-prediction skeleton; `inertia-api`/`inertia-core`/`inertia-testkit`; scenario tests without live server; Anti Cheat / game:minecraft). (source: wiki/sources/descriptions/InertiaOrg__Inertia.md)
+
+**Formal legal-history semantics (research):** [[game-integrity-code]] (smoothjazzchazz; Lean 4 + paper draft; finite deterministic games with state-dependent admissibility, Option-valued partial transitions, inductive legal histories/reachability; Tic-Tac-Toe case study; outcome classes + finite-play termination; exploratory—no full implementation-level security theorem yet; Anti Cheat foundations). (source: wiki/sources/descriptions/smoothjazzchazz__game-integrity-code.md)
 
 **Fabric mod/resource-pack whitelist AC:** [[faircount]] (XuJun05; Java Fabric mod; join-time client mod inventory incl. nested jar-in-jar; SHA-256 hash verification against server whitelists; disconnects clients missing FairCount or carrying unauthorized mods; external resource-pack whitelist/hash checks; auto-permits Fabric API modules; admin commands + localized kick messages; Anti Cheat / game:minecraft) for competitive PvP and vanilla-fair hosts beside hash-tier mods such as [[seiun-ac]]. (source: wiki/sources/descriptions/XuJun05__FairCount.md)
 

@@ -17,7 +17,8 @@ sources:
   - wiki/sources/descriptions/0111-0222__uc-mcp.md
   - wiki/sources/descriptions/JoasASantos__REA-Prompts.md
   - wiki/sources/descriptions/ANTI-CHEAT-OBSERVATORY__ANTI-CHEAT-OBSERVATORY.github.io.md
-updated: 2026-10-27
+  - wiki/sources/descriptions/smoothjazzchazz__game-integrity-code.md
+updated: 2026-11-21
 confidence: high
 ---
 
@@ -50,6 +51,8 @@ Cross-cutting evidence discipline for factual synthesis, detector assessment, an
 | Linux kernel AC architecture feasibility | [[overviews/anti-cheat]] + [[ac-compat-research]] |
 
 Architecture feasibility studies such as [[ac-compat-research]] (IZxMD; vendor-agnostic Linux kernel AC hosting without virtualization as the primary approach) subject non-virtualized design options to **rigorous falsification** and document LSM/signing/isolation/ABI constraints from public sources—pair with [[research-rigor]] when elevating such dossiers into platform conclusions. (source: wiki/sources/descriptions/IZxMD__ac-compat-research.md)
+
+Early formal game-semantics work such as [[game-integrity-code]] (smoothjazzchazz; Lean 4 manuscript mirror) models how an authoritative implementation might accept only histories matching an abstract legal state-transition spec under adversarial conditions—pair with [[research-rigor]] before treating exploratory definitions as deployment or security theorems. (source: wiki/sources/descriptions/smoothjazzchazz__game-integrity-code.md)
 
 Curated AC catalogs such as [[anti-cheat-observatory]] keep **version-scoped claims**, evidence origins, and dispute state explicit in Git-backed JSON rather than treating RSS or GitHub discovery hits as verified findings—use as a reference map, not as standalone proof of live product behavior. (source: wiki/sources/descriptions/ANTI-CHEAT-OBSERVATORY__ANTI-CHEAT-OBSERVATORY.github.io.md)
 
