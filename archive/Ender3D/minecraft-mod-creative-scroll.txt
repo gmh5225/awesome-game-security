@@ -1,0 +1,1300 @@
+Project Path: arc_Ender3D_minecraft-mod-creative-scroll_pmh17o9l
+
+Source Tree:
+
+```txt
+arc_Ender3D_minecraft-mod-creative-scroll_pmh17o9l
+├── LICENSE
+├── README.md
+├── build.gradle
+├── gradle
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── settings.gradle
+└── src
+    ├── client
+    │   ├── java
+    │   │   └── com
+    │   │       └── ndrsbox
+    │   │           └── creativescroll
+    │   │               └── client
+    │   │                   ├── CreativescrollClient.java
+    │   │                   └── mixin
+    │   │                       └── ExampleClientMixin.java
+    │   └── resources
+    │       └── creativescroll.client.mixins.json
+    └── main
+        ├── java
+        │   └── com
+        │       └── ndrsbox
+        │           └── creativescroll
+        │               ├── Creativescroll.java
+        │               ├── config
+        │               │   └── ScrollConfig.java
+        │               ├── item
+        │               │   └── CreativeScrollItem.java
+        │               ├── mixin
+        │               │   ├── ExampleMixin.java
+        │               │   └── ServerGamePacketListenerImplMixin.java
+        │               └── state
+        │                   ├── ScrollSessionData.java
+        │                   └── ScrollSessionManager.java
+        └── resources
+            ├── assets
+            │   └── creativescroll
+            │       ├── items
+            │       │   └── creative_scroll.json
+            │       ├── lang
+            │       │   └── en_us.json
+            │       ├── models
+            │       │   └── item
+            │       │       └── creative_scroll.json
+            │       └── textures
+            │           └── item
+            ├── creativescroll.mixins.json
+            └── fabric.mod.json
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 ndrsbox
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Scroll of Creative Mode (Timed & Sandboxed Admin Rewards)
+
+Giving non-admin players temporary Creative Mode for large-scale building projects or event rewards is normally a massive security risk. 
+Standard **/gamemode commands** lack built-in timers, leave players vulnerable to fatal fall damage when flight suddenly cuts out, and allow unrestricted spawning and hoarding of bedrock, command blocks, or endless stacks of rare resources.
+
+**Scroll of Creative Mode** introduces a completely independent, admin-issued consumable item that isolates temporary Creative access into timed, sandboxed sessions. 
+It empowers server moderators to grant risk-free Creative building privileges without compromising server economy or world integrity.
+
+## Features
+
+- **Admin-Exclusive Custom Item:** Independent item registration name (creativescroll:creative_scroll). Excluded from all survival crafting recipes and Creative tabs so it can only be spawned and distributed by authorized moderators.
+
+- **Persistent Session Countdown:** Tracks remaining session time via server-side entity data attachments, complete with a live action bar timer (MM:SS). Timers persist seamlessly across player disconnects and server restarts before automatically reverting the player to the server's global default gamemode.
+
+- **Inventory Sandboxing:** Captures and stores a player's original Survival inventory upon activation, wipes all Creative-spawned items when the timer expires, and restores their exact pre-session inventory intact.
+
+- **Packet-Level Item Blocklist:** Intercepts ServerboundSetCreativeModeSlotPacket transmissions directly on the server to reject restricted blocks and items before they can ever be spawned—protecting your server even against modified clients.
+
+- **Container & Drop Isolation:** Actively blocks players from opening chests, barrels, shulker boxes, furnaces, hoppers, item frames, or dropping items (Q or drag-out) while a scroll session is active, preventing item smuggling into permanent storage.
+
+- **Safe-Landing Expiration Safeguard:** Automatically applies a configurable Slow Falling status effect the moment the scroll expires, protecting players who are mid-flight high above their builds when Creative flight disables.
+
+- **Live Admin Management:** Includes built-in operator commands to reload configuration rules on the fly or terminate an active session early without requiring a server restart.
+
+## How It Works
+
+Traditional gamemode-switching setups rely on external permission plugins or fragile command block loops that leave wide gaps for item duplication and storage exploits. **Scroll of Creative Mode** enforces strict state isolation directly at the server tick and network packet layers.
+
+When a player right-clicks with the scroll, the server consumes the item, serializes their current inventory into a persistent attachment record, switches their gamemode to Creative, and initiates a tick-accurate countdown.
+
+While active, server-side Mixins and Fabric interaction callbacks inspect incoming slot packets, player drop actions, and container interactions—blocking forbidden item IDs and storage access in real time.  
+
+Once the countdown reaches zero (or an admin forces expiration), the player's Creative inventory is purged, their original Survival gear is restored, their gamemode reverts to the server default, and Slow Falling engages for a safe descent.
+
+# Instructions for Use
+
+## Installation
+
+Ensure your server and client environments are running the Fabric Loader for Minecraft 26.3 alongside Fabric API.
+Drop the creativescroll-*.jar file into both your server and client mods/ directories.
+Launch the game once to auto-generate your custom server parameters profile.
+
+## Obtaining & Using the Scroll
+
+Because the Scroll of Creative Mode is restricted to administrative distribution, it has no survival crafting recipe.
+
+**Spawn the Item (Admins / Operators):**\
+/give <player> creativescroll:creative_scroll
+
+### Activate:
+Hold the scroll and Right-Click at any time to consume the item and begin your timed Creative Mode session.
+Admin Commands:
+
+**Operators (Gamemaster / OP Level 2+) can manage configurations and active sessions live in-game:**\
+**/CreativeScroll reload** — Reloads config/creativescroll.json immediately without restarting the server.\
+**/CreativeScroll expire** <player> — Immediately terminates a target player's active scroll session, restores their Survival inventory, reverts their gamemode, and applies Slow Falling.
+
+## Configuration Profile Tuning:
+
+Navigate to your instance directory path at /config/creativescroll.json to fine-tune your session durations, anti-cheat protections, and blocked item list:
+
+```jason
+{
+  "defaultDurationSeconds": 1800,
+  "slowFallingSeconds": 10,
+  "sandboxInventory": true,
+  "blockContainersAndDrops": true,
+  "blockedItems": [
+    "minecraft:bedrock",
+    "minecraft:command_block",
+    "minecraft:repeating_command_block",
+    "minecraft:chain_command_block",
+    "minecraft:structure_block",
+    "minecraft:barrier",
+    "minecraft:light",
+    "minecraft:spawner",
+    "minecraft:end_portal_frame",
+    "minecraft:netherite_block",
+    "minecraft:diamond_block"
+  ]
+}
+```
+
+- **defaultDurationSeconds:** Total duration of a single scroll session in seconds (default 1800 = 30 minutes).
+- **slowFallingSeconds:** Duration in seconds of the Slow Falling safety effect applied when a session expires (set to 0 to disable).
+- **sandboxInventory:** Set to true to back up the player's Survival inventory on activation and wipe Creative-spawned items upon expiration.
+- **blockContainersAndDrops:** Set to true to prevent players from opening storage containers, interacting with item frames/armor stands, or dropping items while a scroll is active.
+- **blockedItems:** A customizable list of namespaced item IDs (e.g., "minecraft:gold_block", "minecraft:chest") that players are prohibited from spawning from the Creative menu.
+
+## License
+
+This mod is licensed under the [MIT License](LICENSE).
+```
+
+`build.gradle`:
+
+```gradle
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	id 'maven-publish'
+}
+
+repositories {
+	// Add repositories to retrieve artifacts from in here.
+	// You should only use this when depending on other mods because
+	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
+	// for more information about repositories.
+}
+
+loom {
+	splitEnvironmentSourceSets()
+
+	mods {
+		"creativescroll" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+}
+
+dependencies {
+	// To change the versions see the gradle.properties file
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	// Fabric API. This is technically optional, but you probably want it anyway.
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+}
+
+java {
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+	// if it is present.
+	// If you remove this line, sources will not be generated.
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+	def projectName = project.name
+	inputs.property "projectName", projectName
+
+	from("LICENSE") {
+		rename { "${it}_$projectName"}
+	}
+}
+
+// configure the maven publication
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			from components.java
+		}
+	}
+
+	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+	repositories {
+		// Add repositories to publish to here.
+		// Notice: This block does NOT have the same function as the block in the top level.
+		// The repositories here will be used for publishing your artifact, not for
+		// retrieving dependencies.
+	}
+}
+
+```
+
+`gradle.properties`:
+
+```properties
+# Done to increase the memory available to gradle.
+org.gradle.jvmargs=-Xmx1G
+org.gradle.parallel=true
+org.gradle.configuration-cache=true
+
+# Fabric Properties
+# check these on https://fabricmc.net/develop
+minecraft_version=26.3
+loader_version=0.20.1
+loom_version=1.19-SNAPSHOT
+
+# Mod Properties
+version=1.0.2
+group=com.ndrsbox.creativescroll
+
+# Dependencies
+fabric_api_version=0.166.2+26.3
+
+```
+
+`gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.8.2-bin.zip
+networkTimeout=10000
+retries=0
+retryBackOffMs=500
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`gradlew`:
+
+```
+#!/bin/sh
+
+#
+# Copyright © 2015 the original authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+##############################################################################
+#
+#   gradlew start up script for POSIX generated by Gradle.
+#
+#   Important for running:
+#
+#   (1) You need a POSIX-compliant shell to run this script. If your /bin/sh is
+#       noncompliant, but you have some other compliant shell such as ksh or
+#       bash, then to run this script, type that shell name before the whole
+#       command line, like:
+#
+#           ksh gradlew
+#
+#       Busybox and similar reduced shells will NOT work, because this script
+#       requires all of these POSIX shell features:
+#         * functions;
+#         * expansions «$var», «${var}», «${var:-default}», «${var+SET}»,
+#           «${var#prefix}», «${var%suffix}», and «$( cmd )»;
+#         * compound commands having a testable exit status, especially «case»;
+#         * various built-in commands including «command», «set», and «ulimit».
+#
+#   Important for patching:
+#
+#   (2) This script targets any POSIX shell, so it avoids extensions provided
+#       by Bash, Ksh, etc; in particular arrays are avoided.
+#
+#       The "traditional" practice of packing multiple parameters into a
+#       space-separated string is a well documented source of bugs and security
+#       problems, so this is (mostly) avoided, by progressively accumulating
+#       options in "$@", and eventually passing that to Java.
+#
+#       Where the inherited environment variables (DEFAULT_JVM_OPTS, JAVA_OPTS,
+#       and GRADLE_OPTS) rely on word-splitting, this is performed explicitly;
+#       see the in-line comments for details.
+#
+#       There are tweaks for specific operating systems such as AIX, CygWin,
+#       Darwin, MinGW, and NonStop.
+#
+#   (3) This script is generated from the Groovy template
+#       https://github.com/gradle/gradle/blob/3d91ce3b8caaf77ad09f381f43615b715b53f72c/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       within the Gradle project.
+#
+#       You can find Gradle at https://github.com/gradle/gradle/.
+#
+##############################################################################
+
+# Attempt to set APP_HOME
+
+# Resolve links: $0 may be a link
+app_path=$0
+
+# Need this for daisy-chained symlinks.
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+# This is normally unused
+# shellcheck disable=SC2034
+APP_BASE_NAME=${0##*/}
+# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
+APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s\n' "$PWD" ) || exit
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD=maximum
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD=$JAVA_HOME/jre/sh/java
+    else
+        JAVACMD=$JAVA_HOME/bin/java
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD=java
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+fi
+
+# Increase the maximum file descriptors if we can.
+if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
+    case $MAX_FD in #(
+      max*)
+        # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        MAX_FD=$( ulimit -H -n ) ||
+            warn "Could not query maximum file descriptor limit"
+    esac
+    case $MAX_FD in  #(
+      '' | soft) :;; #(
+      *)
+        # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        ulimit -n "$MAX_FD" ||
+            warn "Could not set maximum file descriptor limit to $MAX_FD"
+    esac
+fi
+
+# Collect all arguments for the java command, stacking in reverse order:
+#   * args from the command line
+#   * the main class name
+#   * -classpath
+#   * -D...appname settings
+#   * --module-path (only if needed)
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
+
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
+
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
+
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
+        fi
+        # Roll the args list around exactly as many times as the number of
+        # args, so each arg winds up back in the position where it started, but
+        # possibly modified.
+        #
+        # NB: a `for` loop captures its iteration list before it begins, so
+        # changing the positional parameters here affects neither the number of
+        # iterations, nor the values presented in `arg`.
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
+    done
+fi
+
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Collect all arguments for the java command:
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
+#     and any embedded shellness will be escaped.
+#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
+#     treated as '${Hostname}' itself on the command line.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -jar "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" \
+        "$@"
+
+# Stop when "xargs" is not available.
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
+
+# Use "xargs" to parse quoted args.
+#
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# In Bash we could simply go:
+#
+#   readarray ARGS < <( xargs -n1 <<<"$var" ) &&
+#   set -- "${ARGS[@]}" "$@"
+#
+# but POSIX shell has neither arrays nor command substitution, so instead we
+# post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+#
+# This will of course break if any of these variables contains a newline or
+# an unmatched quote.
+#
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
+
+```
+
+`gradlew.bat`:
+
+```bat
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+@rem SPDX-License-Identifier: Apache-2.0
+@rem
+
+@if "%DEBUG%"=="" @echo off
+@rem ##########################################################################
+@rem
+@rem  gradlew startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables, and ensure extensions are enabled
+setlocal EnableExtensions
+
+@rem Catch executions from older scripts and ensure they exit cleanly.
+@rem This can be removed once we can be reasonably confident that few people
+@rem will be migrating directly to this new wrapper.
+goto afterSafetyNet
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+goto exitWithErrorLevel
+:afterSafetyNet
+
+set DIRNAME=%~dp0
+if "%DIRNAME%"=="" set DIRNAME=.
+@rem This is normally unused
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+
+1>&2 echo.
+1>&2 echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+1>&2 echo.
+1>&2 echo Please set the JAVA_HOME variable in your environment to match the
+1>&2 echo location of your Java installation.
+
+"%COMSPEC%" /c exit 1
+goto exitWithErrorLevel
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+1>&2 echo.
+1>&2 echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
+1>&2 echo.
+1>&2 echo Please set the JAVA_HOME variable in your environment to match the
+1>&2 echo location of your Java installation.
+
+"%COMSPEC%" /c exit 1
+goto exitWithErrorLevel
+
+:execute
+@rem Setup the command line
+
+
+
+@rem Execute gradlew
+@rem endlocal doesn't take effect until after the line is parsed and variables are expanded
+@rem which allows us to clear the local environment before executing the java command
+endlocal & "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %* & call :exitWithErrorLevel & goto exitWithErrorLevel
+
+@rem This label must not be changed. We rely on old scripts being able to jump to this point.
+:exitWithErrorLevel
+@rem Use "%COMSPEC%" /c exit to allow operators to work properly in scripts
+"%COMSPEC%" /c exit %ERRORLEVEL%
+
+```
+
+`settings.gradle`:
+
+```gradle
+pluginManagement {
+	repositories {
+		maven {
+			name = 'Fabric'
+			url = 'https://maven.fabricmc.net/'
+		}
+		mavenCentral()
+		gradlePluginPortal()
+	}
+}
+
+// Should match your modid
+rootProject.name = 'creativescroll'
+
+```
+
+`src/client/java/com/ndrsbox/creativescroll/client/CreativescrollClient.java`:
+
+```java
+package com.ndrsbox.creativescroll.client;
+
+import net.fabricmc.api.ClientModInitializer;
+
+public class CreativescrollClient implements ClientModInitializer {
+	@Override
+	public void onInitializeClient() {
+		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
+	}
+}
+```
+
+`src/client/java/com/ndrsbox/creativescroll/client/mixin/ExampleClientMixin.java`:
+
+```java
+package com.ndrsbox.creativescroll.client.mixin;
+
+import net.minecraft.client.Minecraft;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(Minecraft.class)
+public class ExampleClientMixin {
+	@Inject(at = @At("HEAD"), method = "run")
+	private void init(CallbackInfo info) {
+		// This code is injected into the start of Minecraft.run()V
+	}
+}
+```
+
+`src/client/resources/creativescroll.client.mixins.json`:
+
+```json
+{
+	"required": true,
+	"package": "com.ndrsbox.creativescroll.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"ExampleClientMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
+```
+
+`src/main/java/com/ndrsbox/creativescroll/Creativescroll.java`:
+
+```java
+package com.ndrsbox.creativescroll;
+
+import com.ndrsbox.creativescroll.config.ScrollConfig;
+import com.ndrsbox.creativescroll.item.CreativeScrollItem;
+import com.ndrsbox.creativescroll.state.ScrollSessionData;
+import com.ndrsbox.creativescroll.state.ScrollSessionManager;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.world.Container;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class Creativescroll implements ModInitializer {
+	public static final String MOD_ID = "creativescroll";
+	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+	public static ScrollConfig CONFIG;
+
+	public static final AttachmentType<ScrollSessionData> SCROLL_SESSION = AttachmentRegistry.create(
+			Identifier.fromNamespaceAndPath(MOD_ID, "scroll_session"),
+			builder -> builder
+					.persistent(ScrollSessionData.CODEC)
+					.copyOnDeath()
+	);
+
+	public static final ResourceKey<Item> SCROLL_KEY = ResourceKey.create(
+			Registries.ITEM,
+			Identifier.fromNamespaceAndPath(MOD_ID, "creative_scroll")
+	);
+
+	public static final Item CREATIVE_SCROLL = Registry.register(
+			BuiltInRegistries.ITEM,
+			SCROLL_KEY,
+			new CreativeScrollItem(new Item.Properties().setId(SCROLL_KEY))
+	);
+
+	@Override
+	public void onInitialize() {
+		CONFIG = ScrollConfig.load();
+
+		// Tick active scroll timers every server tick
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				ScrollSessionManager.tickPlayer(player, server);
+			}
+		});
+
+		// Prevent opening chests, barrels, shulkers, etc. while scroll is active
+		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
+			if (!world.isClientSide() && player instanceof ServerPlayer serverPlayer
+					&& CONFIG.blockContainersAndDrops
+					&& ScrollSessionManager.hasActiveScroll(serverPlayer)) {
+				BlockEntity be = world.getBlockEntity(hitResult.getBlockPos());
+				if (be instanceof MenuProvider || be instanceof Container) {
+					serverPlayer.sendSystemMessage(Component.literal("§cYou cannot open storage containers during Creative Scroll use!"));
+					return InteractionResult.FAIL;
+				}
+			}
+			return InteractionResult.PASS;
+		});
+
+		// Prevent stashing items in minecart chests, item frames, or armor stands
+		UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+			if (!world.isClientSide() && player instanceof ServerPlayer serverPlayer
+					&& CONFIG.blockContainersAndDrops
+					&& ScrollSessionManager.hasActiveScroll(serverPlayer)) {
+				if (entity instanceof Container || entity instanceof ItemFrame || entity instanceof ArmorStand) {
+					serverPlayer.sendSystemMessage(Component.literal("§cYou cannot store items in entities during Creative Scroll use!"));
+					return InteractionResult.FAIL;
+				}
+			}
+			return InteractionResult.PASS;
+		});
+
+		// Register /scroll admin commands (requires Gamemaster / OP level 2)
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+			dispatcher.register(Commands.literal("CreativeScroll")
+					.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
+					.then(Commands.literal("reload")
+							.executes(context -> {
+								CONFIG = ScrollConfig.load();
+								context.getSource().sendSuccess(
+										() -> Component.literal("§aCreative Scroll config reloaded!"), true);
+								return 1;
+							})
+					)
+					.then(Commands.literal("expire")
+							.then(Commands.argument("target", EntityArgument.player())
+									.executes(context -> {
+										ServerPlayer target = EntityArgument.getPlayer(context, "target");
+										ScrollSessionData data = target.getAttached(SCROLL_SESSION);
+										if (data == null) {
+											context.getSource().sendFailure(
+													Component.literal("§cThat player does not have an active scroll."));
+											return 0;
+										}
+										ScrollSessionManager.endSession(target, context.getSource().getServer(), data);
+										context.getSource().sendSuccess(
+												() -> Component.literal("§eExpired Creative Scroll for " + target.getName().getString()), true);
+										return 1;
+									})
+							)
+					)
+			);
+		});
+
+		LOGGER.info("Scroll of Creative Mode initialized!");
+	}
+}
+
+```
+
+`src/main/java/com/ndrsbox/creativescroll/config/ScrollConfig.java`:
+
+```java
+package com.ndrsbox.creativescroll.config;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import net.fabricmc.loader.api.FabricLoader;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
+public class ScrollConfig {
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Path CONFIG_PATH = FabricLoader.getInstance()
+            .getConfigDir().resolve("creativescroll.json");
+
+    public int defaultDurationSeconds = 1800; // 30 minutes
+    public int slowFallingSeconds = 10;
+    public boolean sandboxInventory = true; // Saves survival inv & wipes creative inv on expire
+    public boolean blockContainersAndDrops = true; // Stops storing/dropping items while active
+    public List<String> blockedItems = List.of(
+            "minecraft:bedrock",
+            "minecraft:command_block",
+            "minecraft:repeating_command_block",
+            "minecraft:chain_command_block",
+            "minecraft:structure_block",
+            "minecraft:barrier",
+            "minecraft:light",
+            "minecraft:spawner",
+            "minecraft:end_portal_frame",
+            "minecraft:netherite_block",
+            "minecraft:diamond_block"
+    );
+
+    public static ScrollConfig load() {
+        if (Files.exists(CONFIG_PATH)) {
+            try {
+                return GSON.fromJson(Files.readString(CONFIG_PATH), ScrollConfig.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        ScrollConfig defaults = new ScrollConfig();
+        defaults.save();
+        return defaults;
+    }
+
+    public void save() {
+        try {
+            Files.writeString(CONFIG_PATH, GSON.toJson(this));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+```
+
+`src/main/java/com/ndrsbox/creativescroll/item/CreativeScrollItem.java`:
+
+```java
+package com.ndrsbox.creativescroll.item;
+
+import com.ndrsbox.creativescroll.Creativescroll;
+import com.ndrsbox.creativescroll.state.ScrollSessionManager;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+
+public class CreativeScrollItem extends Item {
+    public CreativeScrollItem(Properties properties) {
+        super(properties.stacksTo(1));
+    }
+
+    @Override
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+
+        if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+            if (serverPlayer.gameMode.getGameModeForPlayer() == GameType.CREATIVE) {
+                serverPlayer.sendSystemMessage(Component.literal("§cYou are already in Creative Mode!"));
+                return InteractionResult.FAIL;
+            }
+
+            // Consume 1 scroll
+            if (!serverPlayer.getAbilities().instabuild) {
+                stack.shrink(1);
+            }
+
+            int ticks = Creativescroll.CONFIG.defaultDurationSeconds * 20;
+            ScrollSessionManager.startSession(serverPlayer, ticks);
+
+            level.playSound(null, serverPlayer.blockPosition(),
+                    SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.0F);
+        }
+
+        return InteractionResult.SUCCESS;
+    }
+
+    public boolean isFoil(ItemStack stack) {
+        return true;
+    }
+}
+
+```
+
+`src/main/java/com/ndrsbox/creativescroll/mixin/ExampleMixin.java`:
+
+```java
+package com.ndrsbox.creativescroll.mixin;
+
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(MinecraftServer.class)
+public class ExampleMixin {
+	@Inject(at = @At("HEAD"), method = "loadLevel")
+	private void init(CallbackInfo info) {
+		// This code is injected into the start of MinecraftServer.loadLevel()V
+	}
+}
+```
+
+`src/main/java/com/ndrsbox/creativescroll/mixin/ServerGamePacketListenerImplMixin.java`:
+
+```java
+package com.ndrsbox.creativescroll.mixin;
+
+import com.ndrsbox.creativescroll.Creativescroll;
+import com.ndrsbox.creativescroll.state.ScrollSessionManager;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.item.ItemStack;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(ServerGamePacketListenerImpl.class)
+public abstract class ServerGamePacketListenerImplMixin {
+
+    @Shadow
+    public ServerPlayer player;
+
+    @Inject(method = "handleSetCreativeModeSlot", at = @At("HEAD"), cancellable = true)
+    private void onCreativeSlotClick(ServerboundSetCreativeModeSlotPacket packet, CallbackInfo ci) {
+        if (!ScrollSessionManager.hasActiveScroll(this.player)) return;
+
+        // Block throwing items out of the Creative inventory window (slot < 0)
+        if (Creativescroll.CONFIG.blockContainersAndDrops && packet.slotNum() < 0 && !packet.itemStack().isEmpty()) {
+            this.player.sendSystemMessage(Component.literal("§cYou cannot drop items during Creative Scroll use!"));
+            this.player.containerMenu.broadcastFullState();
+            ci.cancel();
+            return;
+        }
+
+        // Block spawning items on the blocklist
+        ItemStack clicked = packet.itemStack();
+        Identifier itemId = BuiltInRegistries.ITEM.getKey(clicked.getItem());
+
+        if (Creativescroll.CONFIG.blockedItems.contains(itemId.toString())) {
+            this.player.sendSystemMessage(Component.literal("§cThat item is blocked during Creative Scroll use!"));
+            this.player.containerMenu.broadcastFullState();
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "handlePlayerAction", at = @At("HEAD"), cancellable = true)
+    private void onPlayerAction(ServerboundPlayerActionPacket packet, CallbackInfo ci) {
+        if (!Creativescroll.CONFIG.blockContainersAndDrops || !ScrollSessionManager.hasActiveScroll(this.player)) return;
+
+        ServerboundPlayerActionPacket.Action action = packet.getAction();
+        if (action == ServerboundPlayerActionPacket.Action.DROP_ITEM
+                || action == ServerboundPlayerActionPacket.Action.DROP_ALL_ITEMS) {
+            this.player.sendSystemMessage(Component.literal("§cYou cannot drop items during Creative Scroll use!"));
+            this.player.containerMenu.broadcastFullState();
+            ci.cancel();
+        }
+    }
+}
+
+```
+
+`src/main/java/com/ndrsbox/creativescroll/state/ScrollSessionData.java`:
+
+```java
+package com.ndrsbox.creativescroll.state;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
+
+public record ScrollSessionData(int remainingTicks, List<ItemStack> savedInventory) {
+    public static final Codec<ScrollSessionData> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    Codec.INT.fieldOf("remaining_ticks").forGetter(ScrollSessionData::remainingTicks),
+                    ItemStack.OPTIONAL_CODEC.listOf().fieldOf("saved_inventory").forGetter(ScrollSessionData::savedInventory)
+            ).apply(instance, ScrollSessionData::new)
+    );
+}
+
+```
+
+`src/main/java/com/ndrsbox/creativescroll/state/ScrollSessionManager.java`:
+
+```java
+package com.ndrsbox.creativescroll.state;
+
+import com.ndrsbox.creativescroll.Creativescroll;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ScrollSessionManager {
+
+    public static void startSession(ServerPlayer player, int durationTicks) {
+        List<ItemStack> savedItems = new ArrayList<>();
+        if (Creativescroll.CONFIG.sandboxInventory) {
+            for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                savedItems.add(player.getInventory().getItem(i).copy());
+            }
+            player.getInventory().clearContent();
+        }
+
+        ScrollSessionData data = new ScrollSessionData(durationTicks, savedItems);
+        player.setAttached(Creativescroll.SCROLL_SESSION, data);
+        player.setGameMode(GameType.CREATIVE);
+        player.sendSystemMessage(Component.literal("§aScroll of Creative Mode activated!"));
+    }
+
+    public static void tickPlayer(ServerPlayer player, MinecraftServer server) {
+        ScrollSessionData data = player.getAttached(Creativescroll.SCROLL_SESSION);
+        if (data == null) return;
+
+        int remaining = data.remainingTicks() - 1;
+
+        // Actionbar countdown every second
+        if (remaining % 20 == 0 && remaining > 0) {
+            int mins = remaining / 1200;
+            int secs = (remaining % 1200) / 20;
+            player.sendSystemMessage(
+                    Component.literal(String.format("§eCreative Scroll: §f%02d:%02d", mins, secs)), true);
+        }
+
+        if (remaining <= 0) {
+            endSession(player, server, data);
+        } else {
+            player.setAttached(Creativescroll.SCROLL_SESSION,
+                    new ScrollSessionData(remaining, data.savedInventory()));
+        }
+    }
+
+    public static void endSession(ServerPlayer player, MinecraftServer server, ScrollSessionData data) {
+        player.removeAttached(Creativescroll.SCROLL_SESSION);
+
+        // Wipe Creative items and restore original Survival inventory
+        if (Creativescroll.CONFIG.sandboxInventory) {
+            player.getInventory().clearContent();
+            List<ItemStack> saved = data.savedInventory();
+            for (int i = 0; i < Math.min(saved.size(), player.getInventory().getContainerSize()); i++) {
+                player.getInventory().setItem(i, saved.get(i));
+            }
+        }
+
+        // Revert to server's global default gamemode
+        player.setGameMode(server.getDefaultGameType());
+
+        // Apply Slow Falling safeguard
+        int slowFallTicks = Creativescroll.CONFIG.slowFallingSeconds * 20;
+        if (slowFallTicks > 0) {
+            player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, slowFallTicks, 0, false, true));
+        }
+
+        player.sendSystemMessage(Component.literal("§6Your Scroll of Creative Mode has expired!"));
+    }
+
+    public static boolean hasActiveScroll(ServerPlayer player) {
+        return player.hasAttached(Creativescroll.SCROLL_SESSION);
+    }
+}
+
+```
+
+`src/main/resources/assets/creativescroll/items/creative_scroll.json`:
+
+```json
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "creativescroll:item/creative_scroll"
+  }
+}
+
+```
+
+`src/main/resources/assets/creativescroll/lang/en_us.json`:
+
+```json
+{
+  "item.creativescroll.creative_scroll": "Scroll of Creative Mode"
+}
+
+```
+
+`src/main/resources/assets/creativescroll/models/item/creative_scroll.json`:
+
+```json
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "creativescroll:item/creative_scroll"
+  }
+}
+
+```
+
+`src/main/resources/creativescroll.mixins.json`:
+
+```json
+{
+	"required": true,
+	"package": "com.ndrsbox.creativescroll.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"ExampleMixin",
+		"ServerGamePacketListenerImplMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
+```
+
+`src/main/resources/fabric.mod.json`:
+
+```json
+{
+	"schemaVersion": 1,
+	"id": "creativescroll",
+	"version": "${version}",
+	"name": "creativescroll",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Ender3D / Ndrsbox"
+	],
+	"contact": {
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/scroll-of-creative-mode-timed-sandboxed-admin",
+		"sources": "https://github.com/Ender3D/minecraft-mod-creative-scroll.git",
+		"issues": "https://github.com/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/creativescroll/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.ndrsbox.creativescroll.Creativescroll"
+		],
+		"client": [
+			"com.ndrsbox.creativescroll.client.CreativescrollClient"
+		]
+	},
+	"mixins": [
+		"creativescroll.mixins.json",
+		{
+			"config": "creativescroll.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
+```
