@@ -371,6 +371,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Qihoo360/evpp
 - https://github.com/ValveSoftware/GameNetworkingSockets [Steam]
 - https://github.com/mas-bandwidth/yojimbo [C++ network library for client/server games]
+- https://github.com/mas-bandwidth/schema [Schema language and compiler generating bit-packed serializers for game packets, saves, and cooked assets across many languages]
 - https://github.com/pond3r/ggpo [Rollback networking SDK using input prediction and speculative execution; includes the Vector War sample]
 - https://github.com/gschup/ggrs [Safe Rust reimagining of GGPO with a request-based API; includes P2P, spectator, and sync-test examples]
 - https://github.com/HeatXD/GekkoNet [C/C++ P2P rollback networking SDK inspired by GGPO and GGRS, with input prediction and speculative execution]
@@ -626,7 +627,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/htdt/godogen [Autonomous game development for Godot, Bevy, and Babylon.js with Claude Code and Codex; plans, generates assets, screenshot-guided self-repair]
 - https://github.com/MRCalderon3D/everything-game-dev-code [Multi-engine AI agent scaffold for Unity/Unreal/Godot/HTML with Claude, Codex, Cursor, OpenCode, and Kiro harnesses]
 - https://github.com/gamedev-skills/awesome-gamedev-agent-skills [66 version-pinned game-dev Agent Skills plus router for Godot/Unity/Unreal and other engines across Cursor/Claude/Codex]
-
+- https://github.com/m4bwav/modwright [Claude Code plugin and Python CLI that scans PC games for engine/loader, blocks risky anti-cheat contexts, backs up files with hashes, and proves mod load via BepInEx/MelonLoader logs]
 
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
@@ -759,6 +760,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/SeanPesce/Direct3D9-Overlay
 - https://github.com/dantebuilds/swapchain-bottleneck [Architecture analysis of DXGI swapchain/MPO overlay injection, Present-hook collisions, TDR cascades, and anti-cheat whitelist friction]
 - https://github.com/TheBlackSide243/perfoverlay-supreme [Single-exe Windows 10/11 in-game performance overlay (FPS, frame time, 1% low, CPU/GPU/RAM/VRAM) via ETW Present events—no DLL injection; D3D11 overlay window with RTSS-style layout editor]
+- https://github.com/justsomesnake/ACP-Reloaded [Unofficial Assassin's Creed Origins DirectX 11 in-game overlay (dinput8 proxy) rebuilding the Animus Control Panel with live parameter editing]
 
 ## OpenGL
 > Guide
@@ -3449,6 +3451,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/arx-oioi/-AntiCheat-Anogs-Tencent- [Reverse-engineering notes on Tencent mobile protection (libanogs): detection loops, anti-debug/inject/dump, and reaction paths]
 - https://github.com/stuffed-cat/hide-ace-kernel [KernelSU module that bind-mounts empty files over Tencent ACE kernel `/proc/inte_*` integrity nodes to hide KO/syscall-table reports from user space]
 - https://github.com/Siselea/deltaforce-cleaner [Python GUI/CLI uninstaller that removes Delta Force and leftover Tencent ACE kernel services, drivers, registry, files, and WeGame traces on Windows]
+- https://github.com/mioolio/AntiCheatExpert [Reverse-engineering and byte-faithful rebuild documentation for Tencent AntiCheatExpert (18 PE/kernel components: drivers, SGuard, plugins, UEFI)]
 
 > Explore AntiCheat System:G-Presto
 - https://github.com/ARandomPerson7/G-Presto-Anti-Cheat-Reverse-Engineered/blob/main/Main.cpp
@@ -4842,6 +4845,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/redsignalofficial/RedSignalAntiCheat [Open-source AGPL Spigot/Paper/Folia Minecraft anti-cheat (RSAC) with movement, combat, interaction, and packet checks plus RSInjector hooks]
 - https://github.com/mrKozy/KozyAntiCheat [Server-side anti-cheat for Paper, Purpur, Folia, and Fabric Minecraft Java networks]
 - https://github.com/Fi3w0/Fiw-Anticheat [Shared-engine Minecraft server modpack verification, anti-cheat support, and admin enforcement across Fabric, Forge, and NeoForge]
+- https://github.com/Ender3D/minecraft-mod-creative-scroll [Fabric server mod granting timed admin-issued Creative sessions with inventory sandboxing, packet-level spawn blocklist, and container/drop isolation]
 - https://github.com/InertiaOrg/Inertia [Open-source Minecraft anti-cheat foundation with version-neutral movement/packet modeling, evidence accumulation, and testable detection core]
 - https://github.com/freezato/LocalAnticheat-1.8.9 [Client-side Forge 1.8.9 mod that passively flags local/remote cheat signals from observed packet flow in local chat without server reports]
 - https://github.com/ThoriaDevelopment/Iustitia [Fabric 1.21.11 client-side Minecraft anti-cheat that passively models other players from inbound packets, runs 36 detection checks, clip replay, and local-only staff alerts without server enforcement]
