@@ -1,0 +1,1880 @@
+Project Path: arc_Null993_LX-SaveManager_p4r1_ntw
+
+Source Tree:
+
+```txt
+arc_Null993_LX-SaveManager_p4r1_ntw
+├── README.md
+├── SOURCE-LOCAL-COMMIT.txt
+├── app
+│   ├── AndroidManifest.xml
+│   ├── assets
+│   │   ├── new-roles.json
+│   │   └── profile.json
+│   ├── res
+│   │   ├── drawable
+│   │   │   └── icon.xml
+│   │   └── values
+│   │       └── styles.xml
+│   └── src
+│       └── local
+│           └── lx
+│               ├── common
+│               │   └── ProgressData.java
+│               ├── savemanager
+│               │   ├── AndroidGame.java
+│               │   ├── Archives.java
+│               │   ├── FilesEx.java
+│               │   ├── GameProfile.java
+│               │   ├── GameStore.java
+│               │   ├── Library.java
+│               │   ├── MainActivity.java
+│               │   ├── RootAccess.java
+│               │   └── Snapshot.java
+│               └── updates
+│                   ├── ReleaseInfo.java
+│                   └── ReleaseUpdater.java
+├── docs
+│   ├── compatibility-387.md
+│   └── compatibility-603.md
+├── tests
+│   ├── device
+│   │   └── local
+│   │       └── lx
+│   │           └── savemanager
+│   │               ├── DeviceSelfTest.java
+│   │               └── PreviewActivity.java
+│   └── host
+│       └── CoreTests.java
+└── tools
+    ├── build.py
+    ├── test.py
+    ├── ui_check.py
+    └── verify_release.py
+
+```
+
+`README.md`:
+
+```md
+# 流星存档管理器
+
+`local.lx.offline.game`（Unity + 内置 Python 服务器的单机测试版）的独立安卓存档工具，作者 **Null993**。
+管理范围是游戏私有目录下 `files/server/work/local_server/` 的整组进度文件；游戏程序、运行环境、设备激活信息不参与迁移。
+
+## 功能
+
+- **当前存档**：读取正在使用的游戏进度，显示角色资料（等级、经验、元宝、银两、体力、生涯点、兵器谱星数、背包、通关数），一键创建完整备份。
+- **存档库**：每份备份有独立 ID 与名称／备注，可改名、删除、查看完整文件清单和还原。
+- **新建存档**：先自动备份当前全部进度，再切换到初始角色。新角色不继承旧档装备、技能、关卡和兑换记录。
+- **导入导出**：多选存档打包为一个 ZIP；导入只加入存档库，同名并存，不覆盖当前游戏档。
+- **Root 门禁**：启动时只读检测设备是否已 Root、用的是哪个管理器（Magisk／KernelSU／ReSukiSU／APatch／SuperSU 等）。已 Root 但未授权时，页面会给出“请求 Root 授权”按钮并自动发起一次请求，Root 管理器弹窗里允许后自动继续；未 Root 的设备不提供任何功能。
+
+## 存档范围与兼容策略
+
+已核对最新游戏包 `.603`：角色模板、六个进度文件和关键格式保持兼容，v0.2.0 补充修炼与实例数据校验、预览及官方转移保护。详见 [兼容性核对](docs/compatibility-603.md)。
+
+- 范围由 `app/assets/profile.json` 声明，写入前核对游戏当前的进度文件清单。出现新增、改名或无法识别的进度文件时，备份照常保存全部字节，但**阻止切换**并说明原因。
+- 每份备份记录完整文件清单、缺失项（`○ 文件原本不存在`）、格式标识和 SHA-256。还原前先完整备份当前进度，写入失败或进程中断会回滚整组旧文件。
+- 兼容性按存档结构校验（`schema`、字段类型、数值范围），不绑定游戏版本号；版本升级只要格式兼容即可继续使用。
+- 兵器谱星数为存档 `weapon_bonds` 各级别之和，与游戏“武库 → 兵器谱 → 总星数”一致。
+
+## v0.2.0
+
+- 适配 `.603` 的内功、化神、心法、饰品和随从原生数据，预览新增修炼概况；完整备份、还原和新建仍处理全部进度。
+- 排除运行环境覆盖层内已知程序／配置，仍保留并阻止自动切换未知新增进度。
+- 官方 `no_backup/save-move.json` 或 `.bak` 存在时阻止交叉读取、切换和恢复；不迁移激活信息和官方转移令牌。
+- 关于页新增“检查更新”，读取 [最新正式 Release](https://github.com/Null993/LX-SaveManager/releases/latest)，验证包名、版本及原签名后通过 Root 覆盖安装，保留本机存档库。
+- 工具 ZIP 不是官方 `.lxsave`，不替代游戏的换机验证；联网帮派状态仍由游戏服务器维护。
+
+发布仓库：[Null993/LX-SaveManager](https://github.com/Null993/LX-SaveManager)。作者 **Null993**。
+
+## 构建
+
+需要 JDK 17、Android SDK（build-tools 36.0.0、platform android-35）；不使用 Gradle 联网下载。
+
+```bash
+python tools/build.py            # dist/LX-SaveManager-v0.2.0.apk（正式签名）
+python tools/build.py --debug    # 附带 DeviceSelfTest / PreviewActivity 的调试包
+python tools/test.py             # 主机回归测试（真实 POSIX 文件事务）
+python tools/verify_release.py   # 校验签名、版本、资源一致性
+python tools/ui_check.py <serial># 真机界面审计：6 个页面 × 3 档字号
+```
+
+## 签名
+
+正式包使用 `.keys/savemanager-release.p12`（PKCS12，RSA 3072，自签名 `CN=Null993 LX Save Manager`）。
+签名密钥与 `build/`、`dist/` 均在 `.gitignore` 中，**不进入版本库**；换机或重装系统前请另行备份该文件，否则后续版本无法覆盖安装。
+
+## 注意
+
+卸载管理器会删除本机存档库（含自动备份）。重要存档请导出 ZIP 到文档目录后再卸载。
+
+```
+
+`SOURCE-LOCAL-COMMIT.txt`:
+
+```txt
+e0f1fec1ecc152bc57f6eea34cf9167f2e414469
+
+```
+
+`app/AndroidManifest.xml`:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="local.lx.savemanager">
+    <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="35" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <queries>
+        <package android:name="local.lx.offline.game" />
+        <package android:name="com.resukisu.resukisu" />
+        <package android:name="me.weishu.kernelsu" />
+        <package android:name="com.rifsxd.ksunext" />
+        <package android:name="com.suki.sukisu" />
+        <package android:name="io.github.vvb2060.magisk" />
+        <package android:name="com.topjohnwu.magisk" />
+        <package android:name="me.bmax.apatch" />
+        <package android:name="eu.chainfire.supersu" />
+        <package android:name="com.kingroot.kinguser" />
+    </queries>
+    <application android:label="流星存档管理器" android:theme="@style/AppTheme" android:icon="@drawable/icon" android:allowBackup="false" android:supportsRtl="true">
+        <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTask" android:windowSoftInputMode="adjustPan" android:configChanges="orientation|screenSize|keyboardHidden">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity>
+    </application>
+</manifest>
+
+```
+
+`app/assets/new-roles.json`:
+
+```json
+{
+  "male": {
+    "schema": 1,
+    "player_id": "LOCAL-PLAYER-1",
+    "rig": 9999991,
+    "male": true,
+    "server_id": 1,
+    "level": 1,
+    "experience": 0,
+    "coin": 1000,
+    "money": 0,
+    "physical": 50,
+    "physical_updated_at": 0,
+    "fame": 0,
+    "owned_weapons": [
+      3010101
+    ],
+    "cleared_quests": [],
+    "practice_completions": {},
+    "guide_steps": {},
+    "onboarding": "new",
+    "physical_recovery_limit": 100
+  },
+  "female": {
+    "schema": 1,
+    "player_id": "LOCAL-PLAYER-1",
+    "rig": 9999992,
+    "male": false,
+    "server_id": 1,
+    "level": 1,
+    "experience": 0,
+    "coin": 1000,
+    "money": 0,
+    "physical": 50,
+    "physical_updated_at": 0,
+    "fame": 0,
+    "owned_weapons": [
+      3010101
+    ],
+    "cleared_quests": [],
+    "practice_completions": {},
+    "guide_steps": {},
+    "onboarding": "new",
+    "physical_recovery_limit": 100
+  }
+}
+
+```
+
+`app/assets/profile.json`:
+
+```json
+{
+  "id": "lx-local-progress-v1",
+  "package": "local.lx.offline.game",
+  "root": "/data/user/0/local.lx.offline.game/files/server/work/local_server",
+  "files": ["local-role.json", "local-loadout.json", "local-skills.json", "local-aoyi.json", "local-spirit-martial.json", "newgame-profile.json"],
+  "transaction_file": "local-build-plan-transaction.json",
+  "ignored_files": ["capture.jsonl"],
+  "ignored_directories": ["__pycache__", "save-editor-backups", ".lx-manager-transaction"]
+}
+
+```
+
+`app/res/drawable/icon.xml`:
+
+```xml
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
+    <path android:fillColor="#173D50" android:pathData="M0,0h48v48h-48z" />
+    <path android:fillColor="#E7C88F" android:pathData="M32,7l-7,18l-18,7l13,-13z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M31,23l2.5,5.5l6,0.8l-4.4,4.2l1.1,6l-5.2,-2.8l-5.3,2.8l1.1,-6l-4.4,-4.2l6,-0.8z" />
+</vector>
+
+```
+
+`app/res/values/styles.xml`:
+
+```xml
+<resources>
+    <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#24677A</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">#F2F5F7</item>
+        <item name="android:navigationBarColor">#F2F5F7</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowBackground">#F2F5F7</item>
+    </style>
+</resources>
+
+```
+
+`app/src/local/lx/common/ProgressData.java`:
+
+```java
+package local.lx.common;
+
+import org.json.*;
+import java.io.IOException;
+import java.util.*;
+
+/** Optional persisted systems. Unknown keys survive; never synthesize absent state. */
+public final class ProgressData {
+    private ProgressData() {}
+    private static void fail(String path) throws IOException {throw new IOException("修炼存档结构不兼容："+path);}
+    public static int integer(Object value,int min,int max,String path) throws Exception {
+        if(!(value instanceof Integer)&&!(value instanceof Long))fail(path+"须为整数");
+        long n=((Number)value).longValue();if(n<min||n>max)fail(path+"超出范围");return (int)n;
+    }
+    private static JSONObject object(JSONObject role,String key) throws Exception {if(!role.has(key))return null;if(!(role.get(key) instanceof JSONObject))fail(key+"须为对象");return role.getJSONObject(key);}
+    private static void id(String key) throws Exception {try{if(!key.matches("[1-9][0-9]*"))fail(key);integer(Long.parseLong(key),1,Integer.MAX_VALUE,key);}catch(NumberFormatException e){fail(key);}}
+    public static boolean element(int n){return n>=1&&n<=5||n/10>=1&&n/10<=5&&n%10>=1&&n%10<=5&&n/10!=n%10;}
+    public static void validate(JSONObject role) throws Exception {
+        JSONObject nodes=object(role,"inner_power_nodes");if(nodes!=null){Iterator<String> it=nodes.keys();while(it.hasNext()){String key=it.next();id(key);Object v=nodes.get(key);if(!(v instanceof JSONArray)||((JSONArray)v).length()!=2)fail("inner_power_nodes."+key);JSONArray pair=(JSONArray)v;integer(pair.get(0),1,32767,key+"等级");if(!element(integer(pair.get(1),1,55,key+"五行")))fail(key+"五行编码");}}
+        object(role,"inner_power_rerolls");JSONObject plans=object(role,"inner_power_plans");if(plans!=null){Iterator<String> it=plans.keys();while(it.hasNext()){String key=it.next();JSONObject plan=plans.getJSONObject(key);if(!(plan.opt("name") instanceof String))fail("内功方案名称");JSONObject values=plan.getJSONObject("elements");Iterator<String> ids=values.keys();while(ids.hasNext()){String k=ids.next();id(k);if(!element(integer(values.get(k),1,55,"方案五行")))fail("方案五行编码");}}}
+        if(role.has("inner_power_plan")&&!(role.get("inner_power_plan") instanceof String))fail("当前内功方案");
+        if(role.has("sprite_meridian_unlocked")&&!(role.get("sprite_meridian_unlocked") instanceof Boolean))fail("化神解锁标记");
+        if(role.has("meridian_active_sprite"))integer(role.get("meridian_active_sprite"),0,Integer.MAX_VALUE,"当前化神");
+        JSONObject sprites=object(role,"meridian_sprites");if(sprites!=null){Iterator<String> it=sprites.keys();while(it.hasNext()){String key=it.next();id(key);JSONArray slots=sprites.getJSONArray(key);if(slots.length()>128)fail("化神气穴数量");for(int i=0;i<slots.length();i++)integer(slots.get(i),0,Integer.MAX_VALUE,"气劲 ID");}}
+        JSONObject ranks=object(role,"meridian_sprite_ji_ranks");if(ranks!=null){Iterator<String> it=ranks.keys();while(it.hasNext()){String key=it.next();id(key);JSONObject values=ranks.getJSONObject(key);Iterator<String> ids=values.keys();while(ids.hasNext()){String k=ids.next();id(k);integer(values.get(k),1,32767,"极境等级");}}}
+        for(String key:new String[]{"accessories","wuhun_inventory"}){JSONObject data=object(role,key);if(data!=null){Iterator<String> it=data.keys();while(it.hasNext())if(!(data.get(it.next()) instanceof JSONObject))fail(key+"条目须为对象");}}
+        for(String key:new String[]{"followers","martial_levels"})object(role,key);
+        for(String key:new String[]{"owned_followers","learned_martial"})if(role.has(key)&&!(role.get(key) instanceof JSONArray))fail(key+"须为数组");
+        object(role,"wuhun_open_slots");if(role.has("wuhun_exp"))integer(role.get("wuhun_exp"),0,Integer.MAX_VALUE,"心法通用经验");
+    }
+    public static JSONObject summary(JSONObject role) throws Exception {
+        JSONObject out=new JSONObject();JSONObject nodes=role.optJSONObject("inner_power_nodes");long level=0;if(nodes!=null){Iterator<String> it=nodes.keys();while(it.hasNext()){JSONArray pair=nodes.optJSONArray(it.next());if(pair!=null)level+=pair.optInt(0);}}
+        JSONObject sprites=role.optJSONObject("meridian_sprites");int count=sprites==null?0:sprites.length();boolean unlocked=role.optBoolean("sprite_meridian_unlocked");if(unlocked&&(sprites==null||!sprites.has("2920001")))count++;
+        return out.put("followers",role.optJSONObject("followers")!=null?role.getJSONObject("followers").length():role.optJSONArray("owned_followers")==null?0:role.getJSONArray("owned_followers").length()).put("inner_nodes",nodes==null?0:nodes.length()).put("inner_levels",level).put("sprite_unlocked",unlocked).put("sprites",count).put("active_sprite",role.optInt("meridian_active_sprite")).put("wuhun",role.optJSONObject("wuhun_inventory")==null?0:role.getJSONObject("wuhun_inventory").length()).put("accessories",role.optJSONObject("accessories")==null?0:role.getJSONObject("accessories").length());
+    }
+}
+
+```
+
+`app/src/local/lx/savemanager/AndroidGame.java`:
+
+```java
+package local.lx.savemanager;
+
+import android.content.Context;
+import android.content.pm.*;
+import java.io.*;
+import java.util.*;
+import java.util.zip.*;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.*;
+
+public final class AndroidGame {
+    public final RootAccess root;public final GameProfile profile;public final GameStore store;public final String version;
+    public AndroidGame(Context context,RootAccess root,GameProfile profile) throws Exception {
+        this.root=root;this.profile=profile;PackageInfo info=context.getPackageManager().getPackageInfo(profile.gamePackage,0);version=info.versionName;
+        ApplicationInfo app=context.getPackageManager().getApplicationInfo(profile.gamePackage,0);Set<String> bundled=new HashSet<>(),bundledNames=new HashSet<>(),references=new TreeSet<>();
+        if(app.uid>=100000)throw new IOException("当前版本仅支持手机主用户的游戏数据。");
+        Pattern stateNames=Pattern.compile("[\"'](local-[A-Za-z0-9_.-]+\\.(?:json|db|dat|sav)|newgame-profile\\.json)[\"']");
+        // Runtime-shipped config/code is excluded from progress discovery. New generated
+        // files not present in the APK are retained in opaque backups and block switching.
+        try(ZipFile apk=new ZipFile(app.sourceDir)){
+            ZipEntry runtime=apk.getEntry("assets/runtime.zip");if(runtime==null)throw new IOException("该游戏包缺少已支持的本地运行环境，停止自动适配。");
+            try(ZipInputStream zip=new ZipInputStream(apk.getInputStream(runtime))){ZipEntry e;int entries=0;while((e=zip.getNextEntry())!=null){
+                if(++entries>30000)throw new IOException("游戏资源清单过大。");String prefix="work/local_server/";if(!e.isDirectory())bundledNames.add(e.getName().substring(e.getName().lastIndexOf('/')+1));if(!e.isDirectory()&&e.getName().startsWith(prefix))bundled.add(e.getName().substring(prefix.length()));
+                if(e.getName().endsWith(".py")){ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] b=new byte[8192];int n;while((n=zip.read(b))!=-1){if(out.size()+n>4*1024*1024)throw new IOException("运行环境源文件超过适配上限。");out.write(b,0,n);}Matcher matcher=stateNames.matcher(new String(out.toByteArray(),StandardCharsets.UTF_8));while(matcher.find())references.add(matcher.group(1));}
+            }}
+        }
+        if(bundled.isEmpty())throw new IOException("游戏数据目录布局未知，不能安全切换存档。");
+        GameStore.Stop stop=()->{root.require();root.run("set -e\nam force-stop --user 0 "+profile.gamePackage+"\nif pidof "+profile.gamePackage+" >/dev/null 2>&1; then echo '游戏进程仍在运行' >&2; exit 1; fi\n");};
+        bundled.addAll(bundledNames);
+        store=new GameStore(root,stop,profile,profile.root,new File(context.getFilesDir(),"staging"),app.uid,bundled);
+        references.removeAll(bundledNames);references.addAll(profile.files);references.remove(profile.journal);store.storageHints(references);
+    }
+}
+
+```
+
+`app/src/local/lx/savemanager/Archives.java`:
+
+```java
+package local.lx.savemanager;
+
+import org.json.*;
+import java.io.*;
+import java.util.*;
+import java.util.zip.*;
+import java.nio.charset.StandardCharsets;
+
+/** Portable multi-save ZIP; hashes and complete scope are checked before publication. */
+public final class Archives {
+    private Archives() {}
+    public static void exportZip(Library library,Collection<String> ids,OutputStream output,String gamePackage) throws Exception {
+        if(ids.isEmpty())throw new IOException("请先选择要导出的存档。");if(ids.size()>1024)throw new IOException("每个 ZIP 最多 1024 份存档，请分批导出。");JSONArray rows=new JSONArray();Map<String,Snapshot> snapshots=new LinkedHashMap<>();
+        long bytes=0;for(String id:ids){Snapshot s=library.read(id);for(byte[] b:s.data.values())bytes+=b.length;if(bytes>FilesEx.TOTAL_LIMIT)throw new IOException("单个 ZIP 的原始数据最多 256 MiB，请分批导出。");JSONObject metadata=library.metadata(id);rows.put(metadata);snapshots.put(id,s);}
+        JSONObject manifest=new JSONObject().put("format","lx-save-manager").put("version",1).put("game_package",gamePackage).put("exported_at",System.currentTimeMillis()).put("saves",rows);
+        byte[] manifestBytes=FilesEx.bytes(manifest);int entries=1;for(Snapshot s:snapshots.values())entries+=s.data.size();if(manifestBytes.length>8*1024*1024||bytes+manifestBytes.length>FilesEx.TOTAL_LIMIT||entries>20000)throw new IOException("导出清单或总数据过大，请分批导出。");
+        try(ZipOutputStream zip=new ZipOutputStream(output,StandardCharsets.UTF_8)){
+            put(zip,"manifest.json",manifestBytes);for(Map.Entry<String,Snapshot> row:snapshots.entrySet())for(Map.Entry<String,byte[]> f:row.getValue().data.entrySet())put(zip,"saves/"+row.getKey()+"/files/"+f.getKey(),f.getValue());
+        }
+    }
+    private static void put(ZipOutputStream zip,String name,byte[] data) throws Exception {zip.putNextEntry(new ZipEntry(name));zip.write(data);zip.closeEntry();}
+    public static List<JSONObject> importZip(Library library,InputStream input,File cache,String gamePackage) throws Exception {
+        File temp=new File(cache,"import-"+Library.id());if(!temp.mkdirs())throw new IOException("无法建立导入临时目录。");
+        try{
+            Set<String> seen=new HashSet<>();long total=0;
+            try(ZipInputStream zip=new ZipInputStream(input,StandardCharsets.UTF_8)){
+                ZipEntry entry;while((entry=zip.getNextEntry())!=null){
+                    String name=entry.getName();if(entry.isDirectory()){String path=name.endsWith("/")?name.substring(0,name.length()-1):name;if(!FilesEx.path(path))throw new IOException("ZIP 含不安全路径。");continue;}
+                    if(!FilesEx.path(name)||!seen.add(name)||seen.size()>20000)throw new IOException("ZIP 含非法路径、重复文件或过多条目。");
+                    if(!name.equals("manifest.json")&&!name.matches("saves/[a-f0-9-]{36}/files/.+"))throw new IOException("ZIP 包含清单外的文件。");
+                    int limit=name.equals("manifest.json")?8*1024*1024:FilesEx.FILE_LIMIT;
+                    File file=FilesEx.child(temp,name);File parent=file.getParentFile();if(!parent.isDirectory()&&!parent.mkdirs())throw new IOException("无法建立导入目录。");
+                    try(FileOutputStream out=new FileOutputStream(file)){byte[] b=new byte[8192];int n,size=0;while((n=zip.read(b))!=-1){size+=n;total+=n;if(size>limit||total>FilesEx.TOTAL_LIMIT)throw new IOException("ZIP 解压数据超过上限。");out.write(b,0,n);}out.getFD().sync();}zip.closeEntry();
+                }
+            }
+            JSONObject manifest=FilesEx.json(FilesEx.read(new File(temp,"manifest.json")));
+            if(!"lx-save-manager".equals(manifest.optString("format")))throw new IOException("不是流星存档管理器的 ZIP 包。");
+            FilesEx.integer(manifest.opt("version"),"ZIP 格式版本",1,1);if(!gamePackage.equals(manifest.getString("game_package")))throw new IOException("该 ZIP 属于其他游戏。");
+            JSONArray rows=manifest.getJSONArray("saves");if(rows.length()<1||rows.length()>1024)throw new IOException("ZIP 存档数量不合理。");
+            List<Library.Incoming> incoming=new ArrayList<>();Set<String> expected=new HashSet<>(),ids=new HashSet<>();expected.add("manifest.json");
+            for(int i=0;i<rows.length();i++){
+                JSONObject m=rows.getJSONObject(i);String id=m.getString("id");if(!Library.validId(id)||!ids.add(id))throw new IOException("ZIP 存档标识无效或重复。");JSONObject hashes=m.getJSONObject("snapshot").getJSONObject("files");Map<String,byte[]> data=new TreeMap<>();Iterator<String> keys=hashes.keys();
+                while(keys.hasNext()){String name=keys.next();if(!FilesEx.path(name))throw new IOException("存档文件路径无效。");String archivePath="saves/"+id+"/files/"+name;expected.add(archivePath);data.put(name,FilesEx.read(FilesEx.child(temp,archivePath)));}
+                incoming.add(new Library.Incoming(m,Snapshot.fromManifest(m.getJSONObject("snapshot"),data)));
+            }
+            if(!seen.equals(expected))throw new IOException("ZIP 实际文件与存档清单不一致。");
+            return library.importBatch(incoming,true);
+        }finally{FilesEx.remove(cache,temp);}
+    }
+}
+
+```
+
+`app/src/local/lx/savemanager/FilesEx.java`:
+
+```java
+package local.lx.savemanager;
+
+import java.io.*;
+import java.nio.*;
+import java.nio.charset.*;
+import java.nio.file.*;
+import java.security.*;
+import org.json.*;
+
+public final class FilesEx {
+    public static final int FILE_LIMIT=32*1024*1024, TOTAL_LIMIT=256*1024*1024;
+    private FilesEx() {}
+    public static byte[] read(InputStream input,int limit) throws IOException {
+        try(InputStream in=input;ByteArrayOutputStream out=new ByteArrayOutputStream()){
+            byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1){if(out.size()>limit-n)throw new IOException("文件超过安全读取上限。");out.write(b,0,n);}return out.toByteArray();
+        }
+    }
+    public static byte[] read(File f) throws IOException {return read(new FileInputStream(f),FILE_LIMIT);}
+    public static String utf8(byte[] b) throws Exception {return StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(b)).toString();}
+    public static JSONObject json(byte[] b) throws Exception {
+        JSONTokener t=new JSONTokener(utf8(b));Object v=t.nextValue();if(!(v instanceof JSONObject)||t.nextClean()!=0)throw new IOException("必须是单个 UTF-8 JSON 对象。");return (JSONObject)v;
+    }
+    public static byte[] bytes(JSONObject value) throws Exception {return (value.toString(2)+"\n").getBytes(StandardCharsets.UTF_8);}
+    public static String hash(byte[] b) throws Exception {byte[] digest=MessageDigest.getInstance("SHA-256").digest(b);StringBuilder out=new StringBuilder();for(byte v:digest)out.append(String.format(java.util.Locale.ROOT,"%02x",v&255));return out.toString();}
+    public static void write(File f,byte[] b) throws Exception {File p=f.getParentFile();if(!p.isDirectory()&&!p.mkdirs())throw new IOException("无法创建存档目录。");try(FileOutputStream out=new FileOutputStream(f)){out.write(b);out.getFD().sync();}}
+    public static void atomic(File f,byte[] b) throws Exception {
+        File tmp=new File(f.getParentFile(),".write-"+java.util.UUID.randomUUID());
+        try{write(tmp,b);Files.move(tmp.toPath(),f.toPath(),StandardCopyOption.ATOMIC_MOVE,StandardCopyOption.REPLACE_EXISTING);}finally{tmp.delete();}
+    }
+    public static boolean path(String name){
+        if(name==null||name.length()>240||!name.matches("[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*"))return false;
+        for(String p:name.split("/"))if(p.equals(".")||p.equals(".."))return false;return true;
+    }
+    public static File child(File base,String name) throws Exception {
+        if(!path(name))throw new IOException("不安全的存档文件路径。");File f=new File(base,name);
+        if(!f.getCanonicalPath().startsWith(base.getCanonicalPath()+File.separator))throw new IOException("文件超出存档目录。");return f;
+    }
+    public static void remove(File allowedBase,File target) throws Exception {
+        String base=allowedBase.getCanonicalPath(),path=target.getCanonicalPath();
+        if(!path.startsWith(base+File.separator))throw new IOException("拒绝清理工作目录外的文件。");
+        if(Files.isSymbolicLink(target.toPath())){Files.delete(target.toPath());return;}
+        File[] children=target.listFiles();if(children!=null)for(File f:children)remove(allowedBase,f);
+        if(target.exists()&&!target.delete())throw new IOException("无法清理临时文件。");
+    }
+    public static int integer(Object raw,String label,int min,int max) throws Exception {
+        if(!(raw instanceof Integer)&&!(raw instanceof Long))throw new IOException(label+"必须为整数。");long n=((Number)raw).longValue();if(n<min||n>max)throw new IOException(label+"超出范围。");return (int)n;
+    }
+}
+
+```
+
+`app/src/local/lx/savemanager/GameProfile.java`:
+
+```java
+package local.lx.savemanager;
+
+import org.json.*;
+import java.util.*;
+import java.io.*;
+
+/** Declarative storage adapter. Unknown files are archived, never silently discarded. */
+public final class GameProfile {
+    public final String id,gamePackage,root,journal;
+    public final SortedSet<String> files=new TreeSet<>(),ignoredFiles=new TreeSet<>(),ignoredDirs=new TreeSet<>();
+    public GameProfile(JSONObject config) throws Exception {
+        id=config.getString("id");gamePackage=config.getString("package");root=config.getString("root");journal=config.getString("transaction_file");
+        strings(config.getJSONArray("files"),files);strings(config.getJSONArray("ignored_files"),ignoredFiles);strings(config.getJSONArray("ignored_directories"),ignoredDirs);
+        for(String f:files)if(!FilesEx.path(f))throw new IOException("存档适配配置无效。");
+    }
+    private static void strings(JSONArray a,Set<String> out) throws Exception {for(int i=0;i<a.length();i++)out.add(a.getString(i));}
+    public boolean ignored(String path){if(ignoredFiles.contains(path))return true;for(String p:path.split("/"))if(ignoredDirs.contains(p))return true;return path.endsWith(".pyc")||path.endsWith(".tmp")||path.endsWith(".installing");}
+    public String compatibility(Snapshot s){
+        try{
+            if(!id.equals(s.profileId))return "存档格式适配器尚未支持："+s.profileId;
+            if(!s.scope.equals(files))return "发现未适配的进度文件："+difference(s.scope,files)+"。完整原始文件已保留，需更新格式适配后切换。";
+            if(!s.data.containsKey("newgame-profile.json"))return "缺少游戏初始化标记，请先在游戏中完成初始化。";
+            FilesEx.integer(FilesEx.json(s.data.get("newgame-profile.json")).opt("schema"),"初始化格式",1,1);
+            if(!s.data.containsKey("local-role.json")){
+                for(String p:files)if(!p.equals("newgame-profile.json")&&s.data.containsKey(p))return "角色不存在但仍残留其他进度文件。";
+                return "";
+            }
+            validateRole(FilesEx.json(s.data.get("local-role.json")));
+            for(String name:files)if(s.data.containsKey(name))FilesEx.json(s.data.get(name));
+            if(!s.data.containsKey("local-loadout.json")||!s.data.containsKey("local-skills.json"))return "缺少角色对应的装备或技能文件。";
+            JSONObject loadout=FilesEx.json(s.data.get("local-loadout.json"));FilesEx.integer(loadout.opt("main"),"主武器",1,Integer.MAX_VALUE);
+            for(String key:new String[]{"secondary","armor","cuff"})if(loadout.has(key))FilesEx.integer(loadout.get(key),key,0,Integer.MAX_VALUE);
+            if(s.data.containsKey("local-spirit-martial.json")){
+                JSONObject m=FilesEx.json(s.data.get("local-spirit-martial.json"));int schema=FilesEx.integer(m.opt("schema"),"武学格式",1,2);
+                if(!(m.opt("levels") instanceof JSONObject)||!(m.opt("choices") instanceof JSONObject)||(schema==2&&!(m.opt("economy") instanceof JSONObject)))return "武学存档结构不兼容。";
+            }
+            return "";
+        }catch(Exception e){return "存档结构不兼容："+e.getMessage();}
+    }
+    private static String difference(Set<String> a,Set<String> b){TreeSet<String> extra=new TreeSet<>(a);extra.removeAll(b);TreeSet<String> missing=new TreeSet<>(b);missing.removeAll(a);return extra+(!missing.isEmpty()?"；清单缺少 "+missing:"");}
+    public static void validateRole(JSONObject r) throws Exception {
+        local.lx.common.ProgressData.validate(r);
+        FilesEx.integer(r.opt("schema"),"角色格式",1,1);if(!"LOCAL-PLAYER-1".equals(r.opt("player_id")))throw new IOException("不是本地测试角色。");
+        for(String key:new String[]{"rig","level"})FilesEx.integer(r.opt(key),key,1,Integer.MAX_VALUE);
+        for(String key:new String[]{"experience","physical"})FilesEx.integer(r.opt(key),key,0,Integer.MAX_VALUE);
+        for(String key:new String[]{"coin","money","fame","honor","friend_coin","recycle_soul","blue_sand","purple_sand","golden_sand","guess_point","sprite_coin","achieve_point"})if(r.has(key))FilesEx.integer(r.get(key),key,0,Integer.MAX_VALUE);
+        for(String key:new String[]{"mastery_levels","weapon_stars","armor_stars"})if(r.has(key)&&!(r.get(key) instanceof JSONObject))throw new IOException(key+"应为对象。");
+        for(String key:new String[]{"owned_weapons","owned_armor","redeemed_gift_codes","item_inventory"})if(r.has(key)&&!(r.get(key) instanceof JSONArray))throw new IOException(key+"应为数组。");
+        JSONArray items=r.optJSONArray("item_inventory");if(items!=null){Set<Integer> grids=new HashSet<>(),ids=new HashSet<>();for(int i=0;i<items.length();i++){
+            JSONObject item=items.getJSONObject(i);int g=FilesEx.integer(item.opt("grid_id"),"道具格子",1,Integer.MAX_VALUE),tid=FilesEx.integer(item.opt("item_id"),"道具 ID",1,Integer.MAX_VALUE);FilesEx.integer(item.opt("count"),"道具数量",0,Integer.MAX_VALUE);if(!grids.add(g)||!ids.add(tid))throw new IOException("背包有重复格子或道具。");
+        }}
+    }
+    public Snapshot fresh(JSONObject templates,boolean male,byte[] marker) throws Exception {
+        JSONObject role=new JSONObject(templates.getJSONObject(male?"male":"female").toString());role.put("physical_updated_at",System.currentTimeMillis()/1000);
+        Map<String,byte[]> data=new TreeMap<>();data.put("local-role.json",FilesEx.bytes(role));data.put("local-loadout.json",FilesEx.bytes(new JSONObject().put("main",role.getJSONArray("owned_weapons").getInt(0)).put("secondary",0)));data.put("local-skills.json",FilesEx.bytes(new JSONObject()));data.put("newgame-profile.json",marker.clone());
+        Snapshot s=new Snapshot(id,files,data,new JSONObject());String reason=compatibility(s);if(!reason.isEmpty())throw new IOException(reason);return s;
+    }
+}
+
+```
+
+`app/src/local/lx/savemanager/GameStore.java`:
+
+```java
+package local.lx.savemanager;
+
+import org.json.*;
+import java.io.*;
+import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.channels.*;
+
+/** Full-scope switching with durable undo data. Game executables are never replaced. */
+public final class GameStore {
+    public interface Shell {byte[] run(String script) throws Exception;}
+    public interface Stop {void run() throws Exception;}
+    private final Shell shell;private final Stop stop;private final GameProfile profile;
+    private final String root,transaction;private final File staging;private final int uid;
+    private final Set<String> bundled;
+    private final Set<String> hints=new TreeSet<>();private FileChannel lockChannel;private FileLock operationLock;private int lockDepth;
+    public GameStore(Shell shell,Stop stop,GameProfile profile,String root,File staging,int uid,Set<String> bundled) throws Exception {
+        this.shell=shell;this.stop=stop;this.profile=profile;this.root=root.replace('\\','/');this.staging=staging;this.uid=uid;this.bundled=new HashSet<>(bundled);
+        if(!this.root.startsWith("/")&&!this.root.matches("[A-Za-z]:/.*"))throw new IOException("游戏数据目录必须是绝对路径。");
+        transaction=this.root+"/.lx-manager-transaction";if(!staging.isDirectory()&&!staging.mkdirs())throw new IOException("无法创建写入暂存目录。");
+    }
+    static String q(String s){return "'"+s.replace("'","'\"'\"'")+"'";}
+    public synchronized void storageHints(Collection<String> names) throws Exception {for(String name:names){path(name);if(!name.equals(profile.journal))hints.add(name);}}
+    private void enter() throws Exception {
+        if(lockDepth>0){lockDepth++;return;}lockChannel=new RandomAccessFile(new File(staging,"operation.lock"),"rw").getChannel();
+        try{operationLock=lockChannel.tryLock();if(operationLock==null)throw new IOException("另一个存档操作正在进行，请稍后重试。");lockDepth=1;}
+        catch(Exception e){lockChannel.close();throw e;}
+    }
+    private void leave() throws Exception {if(--lockDepth==0){try{operationLock.release();}finally{lockChannel.close();}}}
+    private String path(String name) throws Exception {if(!FilesEx.path(name)||name.startsWith(".lx-manager-transaction"))throw new IOException("非法进度路径。");return root+"/"+name;}
+    private String exists(String p){return "[ -e "+q(p)+" ] || [ -L "+q(p)+" ]";}
+    private String transferGuard(){String suffix="/files/server/work/local_server",move=root.endsWith(suffix)?root.substring(0,root.length()-suffix.length())+"/no_backup/save-move.json":root+"/.test-save-move.json";return "if [ -e "+q(move)+" ] || [ -e "+q(move+".bak")+" ]; then echo '游戏存档转移尚未完成，请先在游戏内完成导出或恢复。' >&2; exit 1; fi\n";}
+    private boolean transactionExists() throws Exception {return new String(shell.run("if [ -e "+q(transaction)+" ] || [ -L "+q(transaction)+" ]; then printf yes; fi"),StandardCharsets.UTF_8).equals("yes");}
+    public synchronized boolean recoverIfNeeded() throws Exception {enter();try{return transactionExists()&&recover();}finally{leave();}}
+    public synchronized boolean recover() throws Exception {
+        enter();try{return recoverLocked();}finally{leave();}
+    }
+    private boolean recoverLocked() throws Exception {
+        shell.run(transferGuard());
+        stop.run();if(!transactionExists())return false;
+        String state=new String(shell.run("set -e\ntest -d "+q(transaction)+"\ntest ! -L "+q(transaction)+"\nif [ -f "+q(transaction+"/state")+" ]; then cat "+q(transaction+"/state")+"; fi"),StandardCharsets.UTF_8).trim();
+        if(state.equals("applying")){
+            JSONObject plan=FilesEx.json(shell.run("cat "+q(transaction+"/old-manifest.json")));shell.run("set -e\n"+rollback(plan));
+        }else if(state.isEmpty()||state.equals("preparing")||state.equals("committed"))shell.run(cleanup());
+        else throw new IOException("发现未知的切档事务状态；已停止游戏，请保留数据并联系作者。");
+        return true;
+    }
+    private String cleanup(){return "test ! -L "+q(transaction)+"\nrm -rf "+q(transaction)+"\nsync\n";}
+    private SortedSet<String> discovery() throws Exception {
+        String script="set -e\ntest -d "+q(root)+"\ntest ! -L "+q(root)+"\nfind "+q(root)+" \\( -name '__pycache__' -o -name 'save-editor-backups' -o -name '.lx-manager-transaction' \\) -prune -o \\( -type f -o -type l \\) -print0\n";
+        byte[] raw=shell.run(script);SortedSet<String> names=new TreeSet<>(profile.files);names.addAll(hints);
+        for(String absolute:FilesEx.utf8(raw).split(String.valueOf((char)0))){
+            if(absolute.isEmpty())continue;if(!absolute.startsWith(root+"/"))throw new IOException("文件清单超出游戏存档目录。");String name=absolute.substring(root.length()+1);
+            if(profile.ignored(name))continue;if(bundled.contains(name)&&!profile.files.contains(name)&&!name.equals(profile.journal))continue;
+            path(name);names.add(name);if(names.size()>2048)throw new IOException("发现过多未识别的数据文件，拒绝不完整备份。");
+        }
+        return names;
+    }
+    public synchronized Snapshot capture() throws Exception {
+        enter();try{return captureLocked();}finally{leave();}
+    }
+    private Snapshot captureLocked() throws Exception {
+        shell.run(transferGuard());
+        stop.run();if(transactionExists())recover();SortedSet<String> names=discovery();StringBuilder s=new StringBuilder("set -e\n");
+        for(String name:names){String p=path(name);s.append("if ").append(exists(p)).append("; then\ntest -f ").append(q(p)).append("\ntest ! -L ").append(q(p)).append("\n")
+            .append("test \"$(stat -c '%s' ").append(q(p)).append(")\" -le ").append(FilesEx.FILE_LIMIT).append("\nprintf ").append(q("F\t"+name+"\t")).append("\nstat -c '%Y' ").append(q(p)).append(" | tr -d '\\n'\nprintf '\\t'\nbase64 ").append(q(p)).append(" | tr -d '\\n'\nprintf '\\n'\nelse\nprintf ").append(q("A\t"+name+"\n")).append("\nfi\n");}
+        Map<String,byte[]> data=new TreeMap<>();JSONObject mtimes=new JSONObject();Set<String> seen=new HashSet<>();long total=0;
+        for(String line:FilesEx.utf8(shell.run(s.toString())).split("\n")){
+            if(line.isEmpty())continue;String[] parts=line.split("\t",-1);if(parts.length<2||!names.contains(parts[1])||!seen.add(parts[1]))throw new IOException("Root 返回的文件清单无效。");
+            if(parts[0].equals("F")&&parts.length==4){byte[] b=Base64.getDecoder().decode(parts[3]);total+=b.length;if(total>FilesEx.TOTAL_LIMIT)throw new IOException("当前存档数据超过 256 MiB，备份已停止。");data.put(parts[1],b);mtimes.put(parts[1],Long.parseLong(parts[2])*1000);}
+            else if(!parts[0].equals("A")||parts.length!=2)throw new IOException("Root 返回的存档内容无效。");
+        }
+        if(!seen.equals(names))throw new IOException("存档读取不完整。");Snapshot snapshot=new Snapshot(profile.id,names,data,mtimes);shell.run("set -e\n"+verify(snapshot,root));return snapshot;
+    }
+    private String verify(Snapshot snapshot,String directory) throws Exception {
+        StringBuilder s=new StringBuilder();for(String name:snapshot.scope){String p=directory+"/"+name;byte[] b=snapshot.data.get(name);
+            if(b==null)s.append("if ").append(exists(p)).append("; then echo '存档文件状态发生变化' >&2; exit 41; fi\n");
+            else s.append("test -f ").append(q(p)).append("\ntest ! -L ").append(q(p)).append("\ntest \"$(sha256sum ").append(q(p)).append(" | cut -d ' ' -f 1)\" = ").append(q(FilesEx.hash(b))).append("\n");
+        }return s.toString();
+    }
+    private String rollback(JSONObject manifest) throws Exception {
+        JSONArray a=manifest.getJSONArray("scope");JSONObject files=manifest.getJSONObject("files");StringBuilder checks=new StringBuilder(),restore=new StringBuilder();Set<String> names=new HashSet<>();
+        for(int i=0;i<a.length();i++){
+            String name=a.getString(i),target=path(name),old=transaction+"/old/"+name;if(!names.add(name))throw new IOException("事务进度路径重复。");
+            if(files.has(name)){
+                String hash=files.getJSONObject(name).getString("sha256");if(!hash.matches("[a-f0-9]{64}"))throw new IOException("事务校验无效。");
+                checks.append("test -f ").append(q(old)).append("\ntest ! -L ").append(q(old)).append("\ntest \"$(sha256sum ").append(q(old)).append(" | cut -d ' ' -f 1)\" = ").append(q(hash)).append("\n");
+                restore.append("mkdir -p ").append(q(target.substring(0,target.lastIndexOf('/')))).append("\ncp -p ").append(q(old)).append(" ").append(q(target+".lx-rollback")).append("\nmv -f ").append(q(target+".lx-rollback")).append(" ").append(q(target)).append("\n");
+                if(uid>=0)restore.append("restorecon ").append(q(target)).append("\n");
+            }else restore.append("rm -f ").append(q(target)).append("\n");
+        }
+        if(names.isEmpty()||names.size()>2048)throw new IOException("事务清单无效。");return checks+restore.toString()+"sync\n"+cleanup();
+    }
+    public synchronized void apply(Snapshot expected,Snapshot replacement) throws Exception {
+        enter();try{applyLocked(expected,replacement);}finally{leave();}
+    }
+    private void applyLocked(Snapshot expected,Snapshot replacement) throws Exception {
+        String reason=profile.compatibility(replacement);if(!reason.isEmpty())throw new IOException(reason);reason=profile.compatibility(expected);if(!reason.isEmpty())throw new IOException("当前存档不兼容，未切换："+reason);
+        Snapshot current=capture();if(!current.digest().equals(expected.digest()))throw new IOException("当前进度在备份后发生变化，未覆盖；请重新操作。");
+        File stage=new File(staging,"switch-"+Library.id());if(!stage.mkdir())throw new IOException("无法暂存新存档。");
+        try{
+            for(Map.Entry<String,byte[]> f:replacement.data.entrySet())FilesEx.write(FilesEx.child(stage,f.getKey()),f.getValue());
+            File plan=new File(stage,"old-manifest.json");FilesEx.write(plan,FilesEx.bytes(expected.manifest()));
+            StringBuilder s=new StringBuilder("set -e\n");s.append(transferGuard()).append(verify(expected,root)).append("test ! -e ").append(q(transaction)).append("\nmkdir ").append(q(transaction)).append("\nprintf preparing > ").append(q(transaction+"/state")).append("\nmkdir ").append(q(transaction+"/old")).append(" ").append(q(transaction+"/new")).append("\ncp ").append(q(plan.getAbsolutePath().replace('\\','/'))).append(" ").append(q(transaction+"/old-manifest.json")).append("\n");
+            for(String name:profile.files){String old=path(name),backup=transaction+"/old/"+name,destination=transaction+"/new/"+name;
+                if(expected.data.containsKey(name))s.append("mkdir -p ").append(q(backup.substring(0,backup.lastIndexOf('/')))).append("\ncp -p ").append(q(old)).append(" ").append(q(backup)).append("\n");
+                if(replacement.data.containsKey(name)){
+                    s.append("mkdir -p ").append(q(destination.substring(0,destination.lastIndexOf('/')))).append("\ncp ").append(q(FilesEx.child(stage,name).getAbsolutePath().replace('\\','/'))).append(" ").append(q(destination)).append("\n");
+                    if(uid>=0)s.append("chown ").append(uid).append(':').append(uid).append(" ").append(q(destination)).append("\nchmod 600 ").append(q(destination)).append("\n");
+                }
+            }
+            s.append(verify(expected,transaction+"/old")).append(verify(replacement,transaction+"/new")).append("sync\nprintf applying > ").append(q(transaction+"/state.next")).append("\nmv -f ").append(q(transaction+"/state.next")).append(" ").append(q(transaction+"/state")).append("\nsync\n");
+            s.append("rollback_manager() {\n").append(rollback(expected.manifest())).append("}\ntrap 'code=$?; trap - EXIT; if [ \"$code\" -ne 0 ]; then rollback_manager || echo ROLLBACK_PENDING >&2; fi; exit \"$code\"' EXIT\n");
+            int i=0;for(String name:profile.files){String target=path(name);s.append("# INSTALL_BOUNDARY_").append(i++).append("\n");
+                if(replacement.data.containsKey(name)){s.append("mkdir -p ").append(q(target.substring(0,target.lastIndexOf('/')))).append("\nmv -f ").append(q(transaction+"/new/"+name)).append(" ").append(q(target)).append("\n");if(uid>=0)s.append("restorecon ").append(q(target)).append("\n");}
+                else s.append("rm -f ").append(q(target)).append("\n");
+            }
+            s.append(verify(replacement,root)).append("sync\nprintf committed > ").append(q(transaction+"/state.next")).append("\nmv -f ").append(q(transaction+"/state.next")).append(" ").append(q(transaction+"/state")).append("\nsync\ntrap - EXIT\n").append(cleanup());
+            try{shell.run(s.toString());}catch(Exception e){try{recover();}catch(Exception recovery){throw new IOException("切换中断，自动恢复尚未完成。请勿启动游戏；重新打开管理器恢复。自动备份仍在存档库。",recovery);}throw new IOException("切换失败，已恢复切换前的整组进度。",e);}
+        }finally{FilesEx.remove(staging,stage);}
+    }
+}
+
+```
+
+`app/src/local/lx/savemanager/Library.java`:
+
+```java
+package local.lx.savemanager;
+
+import org.json.*;
+import java.io.*;
+import java.util.*;
+
+/** Index publication is atomic; imports never replace existing records or game files. */
+public final class Library {
+    final File root,records,index;
+    private JSONObject state;
+    public Library(File root) throws Exception {
+        this.root=root;records=new File(root,"records");index=new File(root,"library.json");
+        if(!records.isDirectory()&&!records.mkdirs())throw new IOException("无法创建存档库。");
+        state=index.exists()?FilesEx.json(FilesEx.read(index)):new JSONObject().put("version",1).put("device",UUID.randomUUID().toString()).put("ids",new JSONArray());
+        FilesEx.integer(state.opt("version"),"存档库版本",1,1);if(!index.exists())publish(state);
+    }
+    private void publish(JSONObject next) throws Exception {FilesEx.atomic(index,FilesEx.bytes(next));state=next;}
+    static String id(){return UUID.randomUUID().toString();}
+    static boolean validId(String id){return id!=null&&id.matches("[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}");}
+    File directory(String id) throws Exception {if(!validId(id))throw new IOException("存档标识无效。");return FilesEx.child(records,id);}
+    public synchronized List<JSONObject> list() throws Exception {
+        List<JSONObject> result=new ArrayList<>();JSONArray ids=state.getJSONArray("ids");for(int i=ids.length()-1;i>=0;i--)result.add(metadata(ids.getString(i)));return result;
+    }
+    public synchronized JSONObject metadata(String id) throws Exception {
+        boolean found=false;JSONArray ids=state.getJSONArray("ids");for(int i=0;i<ids.length();i++)if(id.equals(ids.getString(i)))found=true;if(!found)throw new IOException("存档条目不存在。");
+        JSONObject m=FilesEx.json(FilesEx.read(new File(directory(id),"metadata.json")));if(!id.equals(m.optString("id")))throw new IOException("存档元数据损坏。");return m;
+    }
+    public synchronized Snapshot read(String id) throws Exception {
+        JSONObject m=metadata(id),manifest=m.getJSONObject("snapshot");Map<String,byte[]> files=new TreeMap<>();JSONObject f=manifest.getJSONObject("files");Iterator<String> keys=f.keys();File dir=new File(directory(id),"files");
+        while(keys.hasNext()){String name=keys.next();files.put(name,FilesEx.read(FilesEx.child(dir,name)));}return Snapshot.fromManifest(manifest,files);
+    }
+    static void labels(String name,String note) throws Exception {
+        if(name==null||name.trim().isEmpty()||name.length()>80||name.matches("(?s).*[\\p{Cntrl}].*"))throw new IOException("存档名称须为 1～80 个有效字符。");
+        if(note==null||note.length()>2000)throw new IOException("备注最多 2000 个字符。");
+    }
+    public synchronized JSONObject add(Snapshot snapshot,String name,String note,String kind,String gameVersion) throws Exception {
+        JSONObject source=new JSONObject().put("name",name).put("note",note).put("kind",kind).put("game_version",gameVersion).put("created_at",System.currentTimeMillis()).put("captured_at",System.currentTimeMillis()).put("origin_device",state.getString("device"));
+        return importBatch(Collections.singletonList(new Incoming(source,snapshot)),false).get(0);
+    }
+    public static final class Incoming {
+        public final JSONObject metadata;public final Snapshot snapshot;
+        public Incoming(JSONObject metadata,Snapshot snapshot){this.metadata=metadata;this.snapshot=snapshot;}
+    }
+    public synchronized List<JSONObject> importBatch(List<Incoming> incoming,boolean imported) throws Exception {
+        if(incoming.isEmpty())throw new IOException("导入包没有存档。");
+        JSONObject next=new JSONObject(state.toString());JSONArray ids=next.getJSONArray("ids");List<JSONObject> added=new ArrayList<>();List<File> newDirs=new ArrayList<>();
+        try{
+            for(Incoming entry:incoming){
+                JSONObject source=entry.metadata;String name=source.getString("name"),note=source.optString("note","");labels(name,note);
+                String id=id();File dir=directory(id);if(!dir.mkdir())throw new IOException("无法建立新存档条目。");newDirs.add(dir);
+                JSONObject m=new JSONObject().put("id",id).put("name",name.trim()).put("note",note).put("kind",imported?"imported":source.optString("kind","backup"))
+                    .put("created_at",time(source,"created_at")).put("captured_at",time(source,"captured_at")).put("imported_at",imported?System.currentTimeMillis():0)
+                    .put("origin_device",source.optString("origin_device",state.getString("device"))).put("game_version",source.optString("game_version","未知"))
+                    .put("source_id",source.optString("id",source.optString("source_id",id))).put("snapshot",entry.snapshot.manifest()).put("summary",entry.snapshot.summary());
+                for(Map.Entry<String,byte[]> f:entry.snapshot.data.entrySet())FilesEx.write(FilesEx.child(new File(dir,"files"),f.getKey()),f.getValue());
+                FilesEx.write(new File(dir,"metadata.json"),FilesEx.bytes(m));ids.put(id);added.add(m);
+            }
+            publish(next);return added;
+        }catch(Exception e){for(File dir:newDirs)try{FilesEx.remove(records,dir);}catch(Exception ignored){}throw e;}
+    }
+    private static long time(JSONObject object,String key) throws Exception {
+        Object raw=object.opt(key);if(raw==null)return System.currentTimeMillis();if(!(raw instanceof Integer)&&!(raw instanceof Long))throw new IOException("存档时间必须是整数。");long value=((Number)raw).longValue();if(value<0||value>32503680000000L)throw new IOException("存档时间无效。");return value;
+    }
+    public synchronized void rename(String id,String name,String note) throws Exception {labels(name,note);JSONObject m=metadata(id);m.put("name",name.trim()).put("note",note);FilesEx.atomic(new File(directory(id),"metadata.json"),FilesEx.bytes(m));}
+    public synchronized void delete(Collection<String> remove) throws Exception {
+        for(String id:remove)metadata(id);JSONObject next=new JSONObject(state.toString());JSONArray old=state.getJSONArray("ids"),ids=new JSONArray();for(int i=0;i<old.length();i++)if(!remove.contains(old.getString(i)))ids.put(old.getString(i));next.put("ids",ids);publish(next);
+        for(String id:remove)FilesEx.remove(records,directory(id));
+    }
+}
+
+```
+
+`app/src/local/lx/savemanager/MainActivity.java`:
+
+```java
+package local.lx.savemanager;
+
+import android.app.*;
+import android.os.*;
+import android.content.*;
+import android.graphics.*;
+import android.graphics.drawable.GradientDrawable;
+import android.view.*;
+import android.widget.*;
+import android.util.TypedValue;
+import android.text.InputFilter;
+import android.text.TextWatcher;
+import android.text.Editable;
+import org.json.*;
+import java.io.*;
+import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.concurrent.*;
+
+public class MainActivity extends Activity {
+    private static final int INK=Color.rgb(25,47,63),ACCENT=Color.rgb(36,103,122),MUTED=Color.rgb(101,118,130),BG=Color.rgb(242,245,247);
+    private final ExecutorService worker=Executors.newSingleThreadExecutor();
+    private RootAccess root;private RootAccess.Device device;private boolean authorized,busy,autoRequested,needManager;private int tab;
+    private GameProfile profile;private JSONObject templates;private Library library;private AndroidGame game;
+    private Snapshot current;private String gameError="",message="";private LinearLayout page;private TextView status;
+    private List<JSONObject> rows=new ArrayList<>();private final Set<String> selected=new LinkedHashSet<>();
+    private List<String> exporting;
+    private boolean managing;private final Set<String> transferSelection=new LinkedHashSet<>();
+    private String newName="",newNote="",openedId;private boolean draftMale=true;
+    private JSONObject openedMetadata;private Snapshot openedSnapshot;private ListView libraryList;
+    @Override public void onCreate(Bundle state){super.onCreate(state);root=new RootAccess(this);render();boot();local.lx.updates.ReleaseUpdater.reportInstallation(this);}
+    protected void boot(){initialize();}
+    private int dp(float n){return Math.round(getResources().getDisplayMetrics().density*n);}
+    private LinearLayout column(){LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);return l;}
+    private TextView text(String value,float size,int color){TextView t=new TextView(this);t.setText(value);t.setTextSize(size);t.setTextColor(color);t.setPadding(0,dp(5),0,dp(5));return t;}
+    /** 页头与底部导航用固定视觉尺寸，避免大字号把内容区挤空。 */
+    /** 未授权状态下也能点的按钮。 */
+    private Button plain(String label,Runnable action){Button b=new Button(this);b.setText(label);b.setTextSize(13);b.setAllCaps(false);b.setMinHeight(dp(48));b.setOnClickListener(v->{if(!busy)action.run();});return b;}
+    private TextView chrome(String value,float size,int color){TextView t=text(value,size,color);t.setTextSize(TypedValue.COMPLEX_UNIT_DIP,size);return t;}
+    private TextView fit(TextView t,float min,float max){t.setSingleLine(true);t.setAutoSizeTextTypeUniformWithConfiguration(Math.round(min),Math.round(max),1,TypedValue.COMPLEX_UNIT_DIP);return t;}
+    private GradientDrawable background(int color){GradientDrawable b=new GradientDrawable();b.setColor(color);b.setCornerRadius(dp(15));return b;}
+    private TextView heading(String value){TextView t=text(value,21,INK);t.setTypeface(null,Typeface.BOLD);return t;}
+    private Button button(String label,Runnable action){Button b=new Button(this);b.setText(label);b.setTextSize(13);b.setTextColor(ACCENT);b.setAllCaps(false);b.setMinHeight(dp(48));b.setOnClickListener(v->{if(!busy&&authorized)action.run();});return b;}
+    private void buttons(LinearLayout parent,String[] labels,Runnable[] actions){LinearLayout r=new LinearLayout(this);r.setGravity(Gravity.CENTER_VERTICAL);for(int i=0;i<labels.length;i++)r.addView(button(labels[i],actions[i]),new LinearLayout.LayoutParams(0,-2,1));parent.addView(r);}
+    private void render(){
+        page=column();page.setBackgroundColor(BG);page.setPadding(dp(18),dp(10),dp(18),dp(10));
+        page.setOnApplyWindowInsetsListener((v,insets)->{if(Build.VERSION.SDK_INT>=30){Insets b=insets.getInsets(WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout());v.setPadding(dp(18)+b.left,dp(10)+b.top,dp(18)+b.right,dp(10)+b.bottom);}else v.setPadding(dp(18)+insets.getSystemWindowInsetLeft(),dp(10)+insets.getSystemWindowInsetTop(),dp(18)+insets.getSystemWindowInsetRight(),dp(10)+insets.getStableInsetBottom());return insets.consumeSystemWindowInsets();});setContentView(page);page.requestApplyInsets();
+        TextView brand=fit(chrome("LIU XING  /  SAVE LIBRARY",10,ACCENT),8,10);brand.setLetterSpacing(.14f);page.addView(brand);TextView title=fit(chrome("流星存档管理器",22,INK),15,22);title.setTypeface(null,Typeface.BOLD);page.addView(title);
+        status=text(busy?"正在处理，请稍候…":message.isEmpty()?(authorized?"Root 已验证 · 完整进度快照":"需要 Root 权限"):message,12,MUTED);status.setMaxLines(2);status.setEllipsize(android.text.TextUtils.TruncateAt.END);page.addView(status);
+        if(!authorized||library==null){
+            boolean rooted=device!=null&&device.rooted;
+            LinearLayout gate=column();gate.setPadding(dp(18),dp(22),dp(18),dp(20));gate.setBackground(background(Color.WHITE));
+            gate.addView(heading(device==null?"Root 授权后使用":rooted?"已检测到 Root":"未检测到 Root"));
+            gate.addView(text(device==null?"本应用需要超级用户权限，以完整备份和切换游戏进度。未获得 Root 权限时，所有存档功能均不可用。":device.detail,15,INK));
+            if(rooted)gate.addView(text(needManager?"设备已 Root，但 "+device.managerName()+" 对普通应用隐藏了 su，需要你手动允许一次：点“打开 "+device.managerName()+"”，在应用列表里打开“流星存档管理器”的超级用户开关，再回来点“重新检测”。":"设备已 Root，但本应用还没有获得授权。点“请求 Root 授权”会调用 "+device.managerName()+" 的授权窗口，请在弹窗里选择“允许”。",13,MUTED));
+            else if(device!=null)gate.addView(text("本应用的全部功能都依赖超级用户权限，请先在设备上完成 Root 后再使用。",13,MUTED));
+            if(!message.isEmpty())gate.addView(text(message,12,Color.rgb(163,76,50)));
+            if(rooted)gate.addView(plain("请求 Root 授权",this::requestRoot));
+            if(rooted&&needManager&&device.pkg!=null)gate.addView(plain("打开 "+managerName(),this::openManager));
+            gate.addView(plain(device==null?"验证 Root 权限":"重新检测",()->{message="";initialize();}));
+            gate.addView(plain("退出",()->finish()));
+            ScrollView gateScroll=new ScrollView(this);gateScroll.addView(gate);page.addView(gateScroll,new LinearLayout.LayoutParams(-1,0,1));return;
+        }
+        if(tab==1)libraryPage();else{
+            ScrollView scroll=new ScrollView(this);LinearLayout body=column();body.setPadding(0,dp(12),0,dp(18));scroll.addView(body);page.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+            if(tab==0)currentPage(body);else if(tab==2)newPage(body);else if(tab==3)transferPage(body);else if(tab==5)detailPage(body);else aboutPage(body);
+        }
+        navigation();
+        if(busy)enabled(page,false);
+    }
+    private void navigation(){
+        String[] labels={"当前存档","存档库","新建","导入导出","关于"},icons={"◉","▤","＋","⇄","i"};LinearLayout bar=new LinearLayout(this);bar.setGravity(Gravity.BOTTOM);bar.setPadding(0,dp(5),0,0);
+        for(int i=0;i<labels.length;i++){final int pageId=i;boolean active=tab==i||(tab==5&&i==1);LinearLayout item=column();item.setGravity(Gravity.CENTER);item.setMinimumHeight(dp(64));item.setPadding(0,dp(7),0,dp(7));if(active)item.setBackground(background(Color.rgb(224,235,240)));TextView icon=fit(chrome(icons[i],19,active?ACCENT:MUTED),13,19);icon.setPadding(0,0,0,0);icon.setIncludeFontPadding(false);icon.setGravity(Gravity.CENTER);item.addView(icon);TextView label=fit(chrome(labels[i],11,active?ACCENT:MUTED),8,11);label.setPadding(dp(2),dp(5),dp(2),0);label.setIncludeFontPadding(false);label.setGravity(Gravity.CENTER);item.addView(label);item.setContentDescription("导航："+labels[i]);item.setOnClickListener(v->{if(!busy){tab=pageId;render();}});bar.addView(item,new LinearLayout.LayoutParams(0,-2,1));}page.addView(bar);
+    }
+    private LinearLayout card(LinearLayout parent){LinearLayout box=column();box.setPadding(dp(18),dp(15),dp(18),dp(15));box.setBackground(background(Color.WHITE));LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(10);p.bottomMargin=dp(8);parent.addView(box,p);return box;}
+    private void preserveLibraryScroll(){int first=libraryList==null?0:libraryList.getFirstVisiblePosition(),top=libraryList==null||libraryList.getChildAt(0)==null?0:libraryList.getChildAt(0).getTop();render();if(libraryList!=null)libraryList.setSelectionFromTop(first,top);}
+    private boolean manualCollapsed,autoCollapsed;
+    private void libraryPage(){
+        LinearLayout title=new LinearLayout(this);title.setGravity(Gravity.CENTER_VERTICAL);title.addView(heading("存档库"),new LinearLayout.LayoutParams(0,-2,1));title.addView(button(managing?"完成":"管理",()->{managing=!managing;selected.clear();render();}),new LinearLayout.LayoutParams(dp(88),-2));page.addView(title);
+        if(managing)buttons(page,new String[]{"删除已选 ("+selected.size()+")",selected.size()==rows.size()?"取消全选":"全选"},new Runnable[]{()->{if(!selected.isEmpty())deleteSelected();},()->{if(selected.size()==rows.size())selected.clear();else for(JSONObject r:rows)selected.add(r.optString("id"));render();}});
+        page.addView(text(rows.isEmpty()?"暂无存档。可在“当前存档”备份，或在“导入导出”导入 ZIP。":"共 "+rows.size()+" 份存档 · 点击查看角色资料和还原",12,MUTED));
+        final List<JSONObject> manual=new ArrayList<>(),automatic=new ArrayList<>();
+        for(JSONObject m:rows)("automatic".equals(m.optString("kind"))?automatic:manual).add(m);
+        final List<Object> items=new ArrayList<>();
+        if(!manual.isEmpty()){items.add("_manual_");if(!manualCollapsed)items.addAll(manual);}
+        if(!automatic.isEmpty()){items.add("_auto_");if(!autoCollapsed)items.addAll(automatic);}
+        ListView list=new ListView(this);libraryList=list;list.setDivider(null);list.setClipToPadding(false);list.setPadding(0,dp(4),0,dp(12));page.addView(list,new LinearLayout.LayoutParams(-1,0,1));
+        list.setAdapter(new BaseAdapter(){
+            public int getCount(){return items.size();}public Object getItem(int p){return items.get(p);}public long getItemId(int p){return p;}
+            public int getViewTypeCount(){return 2;}public int getItemViewType(int p){return items.get(p) instanceof String?0:1;}
+            public boolean areAllItemsEnabled(){return false;}public boolean isEnabled(int p){return items.get(p) instanceof JSONObject;}
+            public View getView(int pos,View convert,ViewGroup parent){
+                Object item=items.get(pos);
+                if(item instanceof String){
+                    boolean auto="_auto_".equals(item),collapsed=auto?autoCollapsed:manualCollapsed;List<JSONObject> group=auto?automatic:manual;
+                    LinearLayout head=new LinearLayout(MainActivity.this);head.setGravity(Gravity.CENTER_VERTICAL);head.setPadding(dp(4),dp(16),dp(6),dp(6));
+                    TextView chevron=text(collapsed?"▸":"▾",15,ACCENT);chevron.setPadding(0,0,dp(8),0);head.addView(chevron);
+                    TextView label=text(auto?"自动备份":"手动备份",15,INK);label.setTypeface(null,Typeface.BOLD);head.addView(label);
+                    TextView count=text(group.size()+" 份"+(auto?" · 自动生成":" · 备份、新建、导入"),12,MUTED);count.setPadding(dp(10),dp(2),0,0);count.setSingleLine(true);count.setEllipsize(android.text.TextUtils.TruncateAt.END);head.addView(count,new LinearLayout.LayoutParams(0,-2,1));
+                    String name=auto?"自动备份":"手动备份";head.setContentDescription("分类："+name);
+                    head.setOnClickListener(v->{if(auto)autoCollapsed=!autoCollapsed;else manualCollapsed=!manualCollapsed;preserveLibraryScroll();});
+                    return head;
+                }
+                LinearLayout outer=column();outer.setPadding(0,dp(4),0,dp(5));LinearLayout card=new LinearLayout(MainActivity.this);card.setGravity(Gravity.CENTER_VERTICAL);card.setPadding(dp(12),dp(10),dp(14),dp(10));card.setBackground(background(Color.WHITE));outer.addView(card);
+                JSONObject m=(JSONObject)item;String id=m.optString("id");if(managing){CheckBox check=new CheckBox(MainActivity.this);check.setContentDescription("选择存档 "+m.optString("name"));check.setChecked(selected.contains(id));check.setOnCheckedChangeListener((v,on)->{if(on)selected.add(id);else selected.remove(id);preserveLibraryScroll();});card.addView(check,new LinearLayout.LayoutParams(dp(46),dp(54)));}
+                LinearLayout labels=column();TextView name=text(m.optString("name"),17,INK);name.setTypeface(null,Typeface.BOLD);name.setMaxLines(2);name.setEllipsize(android.text.TextUtils.TruncateAt.END);labels.addView(name);labels.addView(text(shortRole(m.optJSONObject("summary")),13,ACCENT));labels.addView(text("存档时间  "+time(m.optLong("captured_at")),12,MUTED));String note=m.optString("note");if(!note.isEmpty()){TextView n=text(note,12,MUTED);n.setMaxLines(2);labels.addView(n);}card.addView(labels,new LinearLayout.LayoutParams(0,-2,1));if(!managing){TextView arrow=text("›",24,MUTED);arrow.setPadding(dp(8),0,0,0);card.addView(arrow);card.setOnClickListener(v->details(id));}return outer;
+            }});
+    }
+    private String shortRole(JSONObject r){if(r==null)return "角色资料未知";return r.optString("name","本地角色")+" · Lv."+r.optInt("level",1)+" · 元宝 "+r.optLong("money",0);}
+    private void currentPage(LinearLayout body){
+        body.addView(heading("当前存档"));body.addView(text("查看和备份这台设备正在使用的游戏进度。",13,MUTED));
+        if(game==null&&current==null){body.addView(text("游戏尚未就绪："+gameError,14,INK));return;}
+        LinearLayout summary=card(body);if(current==null){summary.addView(text("尚未读取游戏存档",19,INK));summary.addView(text("读取后显示角色、货币和进度概况。",13,MUTED));}else{summary.addView(text(shortRole(current.summary()),19,ACCENT));summary.addView(text(roleDetails(current.summary()),15,INK));String reason=profile.compatibility(current);summary.addView(text(reason.isEmpty()?"完整进度已读取 · "+current.data.size()+" 个数据文件":reason,12,reason.isEmpty()?ACCENT:Color.rgb(163,76,50)));summary.addView(button("查看进度文件清单",()->showFiles(current)));}
+        if(game!=null)summary.addView(button(current==null?"读取当前存档":"重新读取",()->job("读取当前进度",()->{current=game.store.capture();return "已读取，游戏已停止。";})));
+        LinearLayout backup=card(body);backup.addView(text("备份当前进度",18,INK));backup.addView(text("将全部进度保存为存档库中的一份独立快照，可添加名称和备注。",13,MUTED));backup.addView(button("创建完整备份",this::backupDialog));body.addView(text("读取和备份前会停止游戏。完成后重新打开游戏即可继续。",12,MUTED));
+    }
+    private void watch(EditText edit,java.util.function.Consumer<String> change){edit.addTextChangedListener(new TextWatcher(){public void beforeTextChanged(CharSequence s,int a,int c,int f){}public void onTextChanged(CharSequence s,int a,int b,int c){change.accept(s.toString());}public void afterTextChanged(Editable e){}});}
+    private void newPage(LinearLayout body){
+        body.addView(heading("新建存档"));body.addView(text("创建一个从初始状态开始的独立角色，并切换为当前游戏档。",13,MUTED));LinearLayout form=card(body);
+        form.addView(text("存档名称",13,MUTED));EditText name=new EditText(this);name.setSingleLine(true);name.setHint("例如：第一周目");name.setContentDescription("新建存档名称");name.setText(newName);name.setFilters(new InputFilter[]{new InputFilter.LengthFilter(80)});watch(name,s->newName=s);form.addView(name);
+        form.addView(text("备注（可选）",13,MUTED));EditText note=new EditText(this);note.setMinLines(2);note.setMaxLines(4);note.setHint("记录这份存档的用途");note.setContentDescription("新建存档备注");note.setText(newNote);note.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2000)});watch(note,s->newNote=s);form.addView(note);
+        form.addView(text("角色性别",13,MUTED));RadioGroup group=new RadioGroup(this);group.setOrientation(LinearLayout.HORIZONTAL);RadioButton male=new RadioButton(this);male.setId(7001);male.setText("男性");RadioButton female=new RadioButton(this);female.setId(7002);female.setText("女性");group.addView(male);group.addView(female);group.check(draftMale?7001:7002);group.setOnCheckedChangeListener((v,id)->draftMale=id==7001);form.addView(group);
+        LinearLayout noteCard=card(body);noteCard.addView(text("旧进度会自动备份",17,ACCENT));noteCard.addView(text("新建前会停止游戏并归档当前全部进度。新角色不会继承旧档的装备、技能、关卡或兑换记录；角色名字在游戏中按原流程设置。",13,MUTED));body.addView(button("备份当前并新建",()->{
+            if(!ready())return;try{Library.labels(newName,newNote);}catch(Exception e){show("请检查名称",e.getMessage());return;}
+            new AlertDialog.Builder(this).setTitle("启用这份新存档？").setMessage("当前全部进度会先自动备份，再切换到全新角色。").setNegativeButton("取消",null).setPositiveButton("新建并切换",(d,w)->createSave(newName.trim(),newNote,draftMale)).show();
+        }));
+    }
+    private void transferPage(LinearLayout body){
+        body.addView(heading("导入导出"));body.addView(text("在设备之间传递一份或多份完整存档。",13,MUTED));
+        LinearLayout out=card(body);out.addView(text("导出为一个 ZIP",18,INK));out.addView(text(transferSelection.isEmpty()?"尚未选择存档":"已选择 "+transferSelection.size()+" 份存档",14,ACCENT));out.addView(button("选择要导出的存档",this::exportPicker));out.addView(button("导出所选存档",()->chooseExport(new ArrayList<>(transferSelection))));
+        LinearLayout in=card(body);in.addView(text("从 ZIP 导入",18,INK));in.addView(text("导入后加入存档库，同名条目也会并存。不会覆盖当前游戏档或已有备份。",13,MUTED));in.addView(button("选择 ZIP 并导入",this::chooseImport));
+    }
+    private void exportPicker(){if(rows.isEmpty()){show("暂无存档","请先备份当前进度或导入存档。");return;}String[] labels=new String[rows.size()];boolean[] checked=new boolean[rows.size()];Set<String> chosen=new LinkedHashSet<>(transferSelection);for(int i=0;i<rows.size();i++){JSONObject m=rows.get(i);labels[i]=m.optString("name")+"\n"+time(m.optLong("captured_at"));checked[i]=chosen.contains(m.optString("id"));}
+        AlertDialog dialog=new AlertDialog.Builder(this).setTitle("选择导出的存档").setMultiChoiceItems(labels,checked,(d,w,on)->{String id=rows.get(w).optString("id");if(on)chosen.add(id);else chosen.remove(id);}).setNegativeButton("取消",null).setNeutralButton("全选／清空",null).setPositiveButton("确定",(d,w)->{transferSelection.clear();transferSelection.addAll(chosen);render();}).create();dialog.setOnShowListener(d->dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v->{boolean all=chosen.size()!=rows.size();chosen.clear();for(int i=0;i<rows.size();i++){dialog.getListView().setItemChecked(i,all);if(all)chosen.add(rows.get(i).optString("id"));}}));dialog.show();
+        ListView list=dialog.getListView();list.setDivider(new android.graphics.drawable.ColorDrawable(Color.rgb(223,230,234)));list.setDividerHeight(dp(1));list.setClipToPadding(false);list.setPadding(0,dp(4),0,dp(4));
+    }
+    private String roleDetails(JSONObject r){
+        String bag=r.optInt("bag_types",-1)<0?"初始背包尚未落盘":r.optInt("bag_types")+" 种道具";
+        return r.optString("name","本地角色")+"\n等级 "+r.optInt("level",1)+" · 经验 "+r.optLong("experience")+"\n"+(r.has("male")?(r.optBoolean("male")?"男性":"女性")+" · ":"")+"角色配置 "+r.optInt("rig")+"\n元宝 "+r.optLong("money")+" · 银两 "+r.optLong("coin")+"\n体力 "+r.optInt("physical")+" · 生涯点 "+r.optLong("achieve_point")+"\n"+bag+" · 已通关 "+r.optInt("cleared_quests")+"\n武器 "+r.optInt("weapons")+" · 护具 "+r.optInt("armor")+" · 兵器谱 "+r.optLong("stars")+" 星\n内功 "+r.optInt("inner_nodes")+" 穴 · 总等级 "+r.optInt("inner_levels")+"\n化神 "+r.optInt("sprites")+" 种 · 心法 "+r.optInt("wuhun")+" · 饰品 "+r.optInt("accessories")+" · 随从 "+r.optInt("followers");
+    }
+    private local.lx.updates.ReleaseUpdater updater;
+    private void aboutPage(LinearLayout body){
+        if(updater==null)updater=new local.lx.updates.ReleaseUpdater(this,"LX-SaveManager","LX-SaveManager",Runnable::run);body.addView(button("检查更新",updater::check));
+        body.addView(heading("关于流星存档管理器"));body.addView(text("作者  Null993",20,ACCENT));body.addView(text("版本  "+versionName()+"\n独立 Root 存档工具 · Android 8.0+",14,INK));body.addView(text("新建、整组进度备份与还原、存档名称和备注、单个／多个存档 ZIP 导入导出。",14,INK));
+        body.addView(heading("格式与后续更新"));body.addView(text("依据存档适配配置和完整文件清单检查兼容性，不按游戏版本号限制。新增或改名的数据文件会被保留在原始备份中；未知文件或结构会阻止切换，待适配后再恢复。",13,MUTED));
+        body.addView(text("导入只添加存档库条目；同名并存，不会自动替换当前游戏进度。仅在主动还原或新建切换时写入游戏数据。",13,MUTED));body.addView(text("设备激活信息、密钥和游戏程序不参与存档迁移。新设备须先按游戏自身要求激活并初始化。",13,MUTED));body.addView(text("重要存档请导出到文档目录。卸载管理器会删除本机存档库；ZIP 可再次导入。",13,MUTED));
+        body.addView(text("目标："+profile.gamePackage+"\n适配器："+profile.id+"\n已安装游戏："+(game==null?"未就绪":game.version),12,MUTED));
+    }
+    private String versionName(){try{return getPackageManager().getPackageInfo(getPackageName(),0).versionName;}catch(Exception e){return "未知";}}
+    private String time(long value){return value<=0?"未知":new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.CHINA).format(new Date(value));}
+    private void initialize(){
+        if(busy)return;busy=true;message="";needManager=false;render();worker.submit(()->{
+            try{root.require();profile=new GameProfile(FilesEx.json(FilesEx.read(getAssets().open("profile.json"),1024*1024)));templates=FilesEx.json(FilesEx.read(getAssets().open("new-roles.json"),1024*1024));library=new Library(new File(getFilesDir(),"library"));authorized=true;device=null;
+                try{game=new AndroidGame(this,root,profile);boolean recovered=game.store.recoverIfNeeded();if(recovered)message="已恢复上次中断的存档操作。";}catch(Exception e){gameError=e.getMessage();game=null;}
+                rows=library.list();
+            }catch(Exception e){authorized=false;message=e.getMessage();try{device=root.detect();}catch(Exception ignored){}}
+            finally{runOnUiThread(()->{busy=false;render();if(!authorized&&device!=null&&device.rooted&&!autoRequested){autoRequested=true;requestRoot();}});}
+        });
+    }
+    private String managerName(){return device==null?"Root 管理器":device.managerName();}
+    /** 打开 Root 管理器，让用户手动把本应用加入允许列表。 */
+    private void openManager(){
+        Intent intent=device==null||device.pkg==null?null:getPackageManager().getLaunchIntentForPackage(device.pkg);
+        if(intent==null){show("请手动打开管理器","请打开 "+managerName()+"，把“流星存档管理器”（local.lx.savemanager）加入超级用户允许列表，然后回到本页点“重新检测”。");return;}
+        try{startActivity(intent);}catch(Exception e){show("无法打开管理器","请手动打开 "+managerName()+" 完成授权，然后回到本页点“重新检测”。");}
+    }
+    /** 触发 Root 管理器的授权弹窗；用户点“允许”后自动重新初始化。 */
+    private void requestRoot(){
+        if(busy)return;busy=true;message="正在等待 "+managerName()+" 的授权弹窗，请在弹窗中选择“允许”。";render();
+        worker.submit(()->{
+            String failure=null;boolean hidden=false;
+            try{root.request();}catch(Exception e){failure=e.getMessage();hidden=e instanceof RootAccess.Hidden;}
+            final String error=failure;final boolean manual=hidden;
+            runOnUiThread(()->{busy=false;if(error==null){message="已获得授权。";initialize();}else{needManager=manual;message=error;render();}});
+        });
+    }
+    private interface Work {String run() throws Exception;}
+    private void job(String label,Work work){
+        if(busy)return;busy=true;status.setText(label+"，请稍候…");enabled(page,false);
+        worker.submit(()->{String result=null;Exception failure=null;try{root.require();result=work.run();rows=library.list();}catch(Exception e){failure=e;if(e instanceof RootAccess.Denied)authorized=false;}
+            final String done=result;final Exception error=failure;runOnUiThread(()->{busy=false;render();if(error!=null){if(authorized)show("操作未完成",error.getMessage());else{message=error.getMessage();render();}}else if(done!=null&&!done.isEmpty())show("操作完成",done);});});
+    }
+    private void enabled(View v,boolean value){v.setEnabled(value);if(v instanceof ViewGroup){ViewGroup g=(ViewGroup)v;for(int i=0;i<g.getChildCount();i++)enabled(g.getChildAt(i),value);}}
+    private void show(String title,String value){new AlertDialog.Builder(this).setTitle(title).setMessage(value).setPositiveButton("知道了",null).show();}
+    private boolean ready(){if(game!=null)return true;show("游戏未就绪",gameError.isEmpty()?"请先安装并打开游戏完成初始化。":gameError);return false;}
+    private interface Labels {void run(String name,String note);}
+    private void labelsDialog(String title,String name,String note,boolean gender,Labels action){
+        LinearLayout content=column();content.setPadding(dp(24),dp(10),dp(24),0);EditText n=new EditText(this);n.setSingleLine(true);n.setHint("存档名称");n.setContentDescription("存档名称");n.setFilters(new InputFilter[]{new InputFilter.LengthFilter(80)});n.setText(name);content.addView(n);
+        EditText memo=new EditText(this);memo.setHint("备注（可选）");memo.setContentDescription("存档备注");memo.setMinLines(2);memo.setMaxLines(4);memo.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2000)});memo.setText(note);content.addView(memo);
+        RadioGroup genders=new RadioGroup(this);genders.setOrientation(LinearLayout.HORIZONTAL);if(gender){RadioButton male=new RadioButton(this);male.setId(7001);male.setText("男性");RadioButton female=new RadioButton(this);female.setId(7002);female.setText("女性");genders.addView(male);genders.addView(female);genders.check(7001);content.addView(genders);content.addView(text("新建前自动备份当前全部进度。新角色从初始状态开始，可在游戏中按原流程命名。",13,MUTED));}
+        TextView error=text("",12,Color.rgb(163,76,50));content.addView(error);ScrollView scroll=new ScrollView(this);scroll.addView(content);AlertDialog dialog=new AlertDialog.Builder(this).setTitle(title).setView(scroll).setNegativeButton("取消",null).setPositiveButton(gender?"备份当前并新建":"保存",null).create();
+        dialog.setOnShowListener(d->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{try{Library.labels(n.getText().toString(),memo.getText().toString());newMale=genders.getCheckedRadioButtonId()!=7002;dialog.dismiss();action.run(n.getText().toString().trim(),memo.getText().toString());}catch(Exception e){error.setText(e.getMessage());}}));dialog.show();
+    }
+    private boolean newMale=true;
+    private void backupDialog(){if(!ready())return;labelsDialog("备份当前完整进度","当前进度 · "+time(System.currentTimeMillis()),"",false,(name,note)->job("备份完整进度",()->{current=game.store.capture();JSONObject entry=library.add(current,name,note,"backup",game.version);String reason=profile.compatibility(current);return "已归档全部进度文件。\n"+entry.getString("name")+(reason.isEmpty()?"":"\n此备份仅可归档／导出："+reason);}));}
+    private void createSave(String name,String note,boolean male){job("新建并切换完整进度",()->{
+        Snapshot before=game.store.capture();JSONObject backup=library.add(before,"自动备份 · 新建前 · "+time(System.currentTimeMillis()),"新建存档前的全部进度","automatic",game.version);String reason=profile.compatibility(before);if(!reason.isEmpty())throw new IOException("当前进度已完整归档，但不能安全新建："+reason);
+        Snapshot next=profile.fresh(templates,male,before.data.get("newgame-profile.json"));library.add(next,name,note,"new",game.version);game.store.apply(before,next);current=next;tab=0;newName="";newNote="";return "新存档已启用，请重新打开游戏。\n旧进度已保留："+backup.getString("name");});}
+    private void details(String id){job("校验存档",()->{openedMetadata=library.metadata(id);openedSnapshot=library.read(id);openedId=id;tab=5;return null;});}
+    private void detailPage(LinearLayout body){
+        if(openedMetadata==null||openedSnapshot==null){tab=1;return;}JSONObject m=openedMetadata;Snapshot s=openedSnapshot;String reason=profile.compatibility(s),id=openedId;
+        body.addView(button("‹ 返回存档库",()->{tab=1;render();}));body.addView(heading(m.optString("name")));if(!m.optString("note").isEmpty())body.addView(text(m.optString("note"),14,MUTED));
+        LinearLayout role=card(body);role.addView(text("角色资料",17,ACCENT));role.addView(text(roleDetails(s.summary()),15,INK));
+        LinearLayout info=card(body);info.addView(text("存档时间  "+time(m.optLong("captured_at"))+"\n条目创建  "+time(m.optLong("created_at"))+(m.optLong("imported_at")>0?"\n导入时间  "+time(m.optLong("imported_at")):"")+"\n来源游戏  "+m.optString("game_version")+"\n"+(reason.isEmpty()?"格式兼容 · "+s.data.size()+" 个数据文件":reason),12,MUTED));
+        info.addView(button("查看完整文件清单",()->showFiles(s)));
+        body.addView(button("修改名称和备注",()->{
+            labelsDialog("修改名称和备注",m.optString("name"),m.optString("note"),false,(name,note)->{
+                job("保存名称备注",()->{library.rename(id,name,note);openedMetadata=library.metadata(id);return "名称和备注已保存。";});
+            });
+        }));
+        if(reason.isEmpty())body.addView(button("还原这份完整存档",()->confirmRestore(id,m.optString("name"))));else body.addView(text("此格式暂不能安全还原，可在“导入导出”中原样导出。",13,MUTED));
+    }
+    private void showFiles(Snapshot snapshot){
+        StringBuilder list=new StringBuilder("● 文件存在，备份内含原始数据\n○ 文件原本不存在：游戏尚未生成该文件，还原时会移除同名旧文件\n\n");
+        for(String name:snapshot.scope){byte[] b=snapshot.data.get(name);list.append(b==null?"○ ":"● ").append(name);if(b!=null)list.append("  ").append(size(b.length));list.append('\n');}
+        list.append("\n○ 表示读取时游戏目录里没有这个文件。奥义、专属武学等文件只在用到对应功能后才会生成，缺失属正常状态，不影响备份完整性。");
+        show("进度文件清单",list.toString());
+    }
+    private String size(int bytes){return bytes<1024?bytes+" B":String.format(Locale.CHINA,"%.1f KB",bytes/1024.0);}
+    private void confirmRestore(String id,String name){if(!ready())return;new AlertDialog.Builder(this).setTitle("还原“"+name+"”？").setMessage("会停止游戏，先完整备份当前进度，再还原所选存档的全部进度文件。备份中不存在的旧技能、装备等文件也会按缺失状态还原。").setNegativeButton("取消",null).setPositiveButton("备份当前并还原",(d,w)->job("还原全部进度",()->{
+        Snapshot replacement=library.read(id),before=game.store.capture();JSONObject backup=library.add(before,"自动备份 · 还原前 · "+time(System.currentTimeMillis()),"还原“"+name+"”之前的全部进度","automatic",game.version);game.store.apply(before,replacement);current=replacement;tab=0;return "完整存档已还原，请重新打开游戏。\n原进度："+backup.getString("name");})).show();}
+    private void chooseImport(){Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*");startActivityForResult(intent,41);}
+    private void chooseExport(List<String> ids){if(ids.isEmpty()){show("尚未选择存档","请勾选一个或多个存档。");return;}exporting=new ArrayList<>(ids);startActivityForResult(new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("application/zip").putExtra(Intent.EXTRA_TITLE,"流星存档-"+new SimpleDateFormat("yyyyMMdd-HHmmss",Locale.ROOT).format(new Date())+".zip"),42);}
+    @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(result!=RESULT_OK||data==null||data.getData()==null){exporting=null;return;}final android.net.Uri uri=data.getData();
+        if(request==41)job("导入存档 ZIP",()->{InputStream in=getContentResolver().openInputStream(uri);if(in==null)throw new IOException("无法打开导入文件。");List<JSONObject> imported=Archives.importZip(library,in,getCacheDir(),profile.gamePackage);return "已添加 "+imported.size()+" 份存档。已有条目和当前游戏进度均未覆盖。";});
+        else if(request==42){final List<String> ids=exporting;exporting=null;if(ids==null){show("请重新导出","系统已重建界面，请重新选择要导出的存档。");return;}job("导出所选存档",()->{OutputStream out=getContentResolver().openOutputStream(uri);if(out==null)throw new IOException("无法打开导出位置。");Archives.exportZip(library,ids,out,profile.gamePackage);return "已将 "+ids.size()+" 份存档导出为一个 ZIP。";});}
+    }
+    private void deleteSelected(){List<String> ids=new ArrayList<>(selected);new AlertDialog.Builder(this).setTitle("删除 "+ids.size()+" 份库内存档？").setMessage("只删除管理器中的这些备份，不修改当前游戏档。重要存档请先导出 ZIP。").setNegativeButton("取消",null).setPositiveButton("删除",(d,w)->job("删除已选条目",()->{library.delete(ids);transferSelection.removeAll(ids);selected.clear();return "已删除选中的库内条目。";})).show();}
+    @Override public void onBackPressed(){if(busy)return;if(tab==5){tab=1;render();}else if(tab!=0){tab=0;render();}else super.onBackPressed();}
+    @Override protected void onDestroy(){super.onDestroy();worker.shutdown();}
+}
+
+```
+
+`app/src/local/lx/savemanager/RootAccess.java`:
+
+```java
+package local.lx.savemanager;
+
+import android.content.Context;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.*;
+
+public final class RootAccess implements GameStore.Shell {
+    public static class Denied extends IOException {Denied(String message,Throwable cause){super(message,cause);}}
+    /** su 对普通应用不可见：管理器隐藏了 su，只能由用户手动放行。 */
+    public static final class Hidden extends Denied {Hidden(String message,Throwable cause){super(message,cause);}}
+    /** 只读探测结果；detect() 本身不会触发授权弹窗。 */
+    public static final class Device {
+        public final boolean rooted;public final String manager,pkg,detail;
+        Device(boolean rooted,String manager,String pkg,String detail){this.rooted=rooted;this.manager=manager;this.pkg=pkg;this.detail=detail;}
+        public String managerName(){return manager==null?"Root 管理器":manager;}
+    }
+    private static final String[][] MANAGERS={
+        {"com.resukisu.resukisu","ReSukiSU"},{"me.weishu.kernelsu","KernelSU"},{"com.rifsxd.ksunext","KernelSU Next"},
+        {"com.suki.sukisu","SukiSU Ultra"},{"io.github.vvb2060.magisk","Magisk Alpha"},{"com.topjohnwu.magisk","Magisk"},
+        {"me.bmax.apatch","APatch"},{"eu.chainfire.supersu","SuperSU"},{"com.kingroot.kinguser","KingRoot"}};
+    private static final String[] SU_PATHS={"/system/bin/su","/system/xbin/su","/sbin/su","/su/bin/su","/debug_ramdisk/su"};
+    private final Context context;
+    public RootAccess(Context context){this.context=context.getApplicationContext();}
+    public byte[] run(String script) throws Exception {return exec(new String[]{"su","--mount-master","-c",script},60000);}
+    private byte[] exec(String[] command,int timeout) throws IOException {
+        Process process;
+        try{process=new ProcessBuilder(command).start();}
+        catch(IOException e){throw new Denied("需要 Root 权限才能使用流星存档管理器。请在 Root 管理器中允许本应用。",e);}
+        ExecutorService readers=Executors.newFixedThreadPool(2);
+        Future<byte[]> out=readers.submit(()->FilesEx.read(process.getInputStream(),384*1024*1024));
+        Future<byte[]> err=readers.submit(()->FilesEx.read(process.getErrorStream(),1024*1024));
+        try{
+            if(!process.waitFor(timeout,TimeUnit.MILLISECONDS)){process.destroyForcibly();throw new IOException("Root 操作超时，请确认授权状态。");}
+            byte[] stdout=out.get(5,TimeUnit.SECONDS),stderr=err.get(5,TimeUnit.SECONDS);
+            if(process.exitValue()!=0)throw new IOException("Root 操作失败："+new String(stderr,StandardCharsets.UTF_8).trim());return stdout;
+        }catch(InterruptedException|ExecutionException|TimeoutException e){throw new IOException("读取 Root 输出失败。",e);}
+        finally{process.destroy();readers.shutdownNow();}
+    }
+    /** 只读判断设备是否已 Root、用的是哪个管理器；不调用 su，不会弹窗。 */
+    public Device detect(){
+        String su=null;for(String path:SU_PATHS)if(new File(path).exists()){su=path;break;}
+        String manager=null,pkg=null;for(String[] row:MANAGERS)try{context.getPackageManager().getPackageInfo(row[0],0);manager=row[1];pkg=row[0];break;}catch(Exception ignored){}
+        if(su==null&&manager==null)try{String found=new String(exec(new String[]{"sh","-c","command -v su"},8000),StandardCharsets.UTF_8).trim();if(found.startsWith("/"))su=found;}catch(Exception ignored){}
+        boolean rooted=su!=null||manager!=null;
+        String detail=!rooted?"未检测到 su 命令或 Root 管理器，这台设备看起来没有 Root。"
+            :(manager==null?"已检测到 su 命令（"+su+"），但没识别出 Root 管理器。":"已检测到 "+manager+"，设备已 Root。");
+        return last=new Device(rooted,manager,pkg,detail);
+    }
+    /** 发起一次授权请求：su 进程会让 Root 管理器弹出授权窗口。 */
+    public String managerName(){return last==null?"Root 管理器":last.managerName();}
+    public Device last;
+    public void request() throws IOException {
+        byte[] out;
+        try{out=exec(new String[]{"su","-c","id -u"},120000);}
+        catch(Denied e){throw new Hidden(managerName()+" 对普通应用隐藏了 su，应用无法自己弹出授权窗口。请在 "+managerName()+" 里把“流星存档管理器”加入超级用户允许列表，然后点“重新检测”。",e);}
+        catch(IOException e){throw new Denied("授权请求没有完成："+e.getMessage()+" 请在 Root 管理器中为“流星存档管理器”（local.lx.savemanager）开启超级用户后重试。",e);}
+        if(!new String(out,StandardCharsets.UTF_8).trim().equals("0"))throw new Denied("没有取得超级用户权限。请在 Root 管理器中允许“流星存档管理器”（local.lx.savemanager）。",null);
+    }
+    public void require() throws Denied {
+        try{if(!new String(run("id -u"),StandardCharsets.UTF_8).trim().equals("0"))throw new IOException("未取得超级用户权限。");}
+        catch(Exception e){throw new Denied("没有 Root 权限，无法使用本应用。请在 Root 管理器为“流星存档管理器”（local.lx.savemanager）授权。",e);}
+    }
+}
+
+```
+
+`app/src/local/lx/savemanager/Snapshot.java`:
+
+```java
+package local.lx.savemanager;
+
+import org.json.*;
+import java.util.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+
+/** A complete storage scope, including explicit absence of optional state files. */
+public final class Snapshot {
+    public final String profileId;
+    public final SortedSet<String> scope=new TreeSet<>();
+    public final SortedMap<String,byte[]> data=new TreeMap<>();
+    public final JSONObject mtimes;
+    public Snapshot(String profile,Collection<String> names,Map<String,byte[]> bytes,JSONObject mtimes) throws Exception {
+        profileId=profile;if(profile.length()>120)throw new IOException("适配器标识过长。");scope.addAll(names);
+        if(scope.isEmpty()||scope.size()>2048)throw new IOException("存档文件清单数量不合理。");
+        long total=0;for(String n:scope)if(!FilesEx.path(n))throw new IOException("不安全的存档路径："+n);
+        for(Map.Entry<String,byte[]> e:bytes.entrySet()){
+            if(!scope.contains(e.getKey()))throw new IOException("文件不在存档清单中。");total+=e.getValue().length;
+            if(e.getValue().length>FilesEx.FILE_LIMIT||total>FilesEx.TOTAL_LIMIT)throw new IOException("存档数据超过上限。");data.put(e.getKey(),e.getValue().clone());
+        }
+        this.mtimes=new JSONObject(mtimes.toString());
+    }
+    public String digest() throws Exception {
+        ByteArrayOutputStream b=new ByteArrayOutputStream();try(DataOutputStream out=new DataOutputStream(b)){out.writeUTF(profileId);for(String name:scope){byte[] value=data.get(name);out.writeUTF(name);out.writeInt(value==null?-1:value.length);if(value!=null)out.write(FilesEx.hash(value).getBytes(StandardCharsets.US_ASCII));}}return FilesEx.hash(b.toByteArray());
+    }
+    public JSONObject manifest() throws Exception {
+        JSONObject index=new JSONObject();JSONArray absent=new JSONArray();for(String name:scope){byte[] b=data.get(name);if(b==null)absent.put(name);else index.put(name,new JSONObject().put("size",b.length).put("sha256",FilesEx.hash(b)));}
+        return new JSONObject().put("profile",profileId).put("files",index).put("missing",absent).put("scope",new JSONArray(scope)).put("content_sha256",digest()).put("source_mtimes",mtimes);
+    }
+    public static Snapshot fromManifest(JSONObject index,Map<String,byte[]> files) throws Exception {
+        SortedSet<String> scope=new TreeSet<>();JSONArray a=index.getJSONArray("scope");for(int i=0;i<a.length();i++)if(!scope.add(a.getString(i)))throw new IOException("清单含重复路径。");
+        JSONObject hashes=index.getJSONObject("files");Set<String> expected=new TreeSet<>();Iterator<String> keys=hashes.keys();while(keys.hasNext())expected.add(keys.next());
+        if(!expected.equals(files.keySet()))throw new IOException("存档文件数量或名称与清单不符。");
+        Set<String> missing=new TreeSet<>();a=index.getJSONArray("missing");for(int i=0;i<a.length();i++)if(!missing.add(a.getString(i))||expected.contains(a.getString(i)))throw new IOException("缺失文件声明冲突。");
+        Set<String> all=new TreeSet<>(expected);all.addAll(missing);if(!all.equals(scope))throw new IOException("存档范围不完整。");
+        for(String name:expected){JSONObject h=hashes.getJSONObject(name);if(FilesEx.integer(h.opt("size"),"文件大小",0,FilesEx.FILE_LIMIT)!=files.get(name).length||!FilesEx.hash(files.get(name)).equals(h.getString("sha256")))throw new IOException("存档校验失败："+name);}
+        Snapshot s=new Snapshot(index.getString("profile"),scope,files,index.optJSONObject("source_mtimes")==null?new JSONObject():index.getJSONObject("source_mtimes"));if(!s.digest().equals(index.getString("content_sha256")))throw new IOException("存档整体校验失败。");return s;
+    }
+    /** 兵器谱总星数：武库“兵器谱”页各套组等级的合计（与游戏界面显示一致）。 */
+    private static long totalStars(JSONObject role){
+        JSONObject bonds=role.optJSONObject("weapon_bonds");if(bonds==null)return 0;
+        long total=0;Iterator<String> keys=bonds.keys();while(keys.hasNext()){Object value=bonds.opt(keys.next());if(value instanceof Number)total+=((Number)value).longValue();}
+        return total;
+    }
+    public JSONObject summary(){
+        JSONObject out=new JSONObject();try{byte[] b=data.get("local-role.json");if(b==null)return out.put("name","尚未创建角色");JSONObject r=FilesEx.json(b);out=local.lx.common.ProgressData.summary(r);
+            for(String k:new String[]{"name","level","experience","coin","money","physical","achieve_point","male","rig"})if(r.has(k))out.put(k,r.get(k));
+            out.put("stars",totalStars(r));
+            out.put("bag_types",r.optJSONArray("item_inventory")==null?-1:r.getJSONArray("item_inventory").length());out.put("cleared_quests",r.optJSONArray("cleared_quests")==null?0:r.getJSONArray("cleared_quests").length());
+            out.put("weapons",r.optJSONArray("owned_weapons")==null?0:r.getJSONArray("owned_weapons").length());out.put("armor",r.optJSONArray("owned_armor")==null?0:r.getJSONArray("owned_armor").length());
+            boolean claimed=false;JSONArray codes=r.optJSONArray("redeemed_gift_codes");if(codes!=null)for(int i=0;i<codes.length();i++)if("SPAKE666".equals(codes.optString(i)))claimed=true;out.put("gift_claimed",claimed);
+        }catch(Exception ignored){}return out;
+    }
+}
+
+```
+
+`app/src/local/lx/updates/ReleaseInfo.java`:
+
+```java
+package local.lx.updates;
+
+import org.json.*;
+import java.io.IOException;
+
+/** Public stable GitHub releases only; repositories do not share update channels. */
+public final class ReleaseInfo {
+    public final String version,url,digest,notes;public final long size;
+    private ReleaseInfo(String version,String url,String digest,String notes,long size){this.version=version;this.url=url;this.digest=digest;this.notes=notes;this.size=size;}
+    public static int compare(String a,String b) throws Exception {
+        if(!a.matches("v?[0-9]+\\.[0-9]+\\.[0-9]+")||!b.matches("v?[0-9]+\\.[0-9]+\\.[0-9]+"))throw new IOException("版本号须为 v主版本.次版本.修订版本。");
+        String[] x=a.replaceFirst("^v","").split("\\."),y=b.replaceFirst("^v","").split("\\.");for(int i=0;i<3;i++){int c=Long.compare(Long.parseLong(x[i]),Long.parseLong(y[i]));if(c!=0)return c;}return 0;
+    }
+    public static ReleaseInfo parse(JSONObject release,String repository,String assetPrefix,String installed) throws Exception {
+        if(release.optBoolean("draft")||release.optBoolean("prerelease"))return null;
+        String version=release.getString("tag_name");if(compare(version,installed)<=0)return null;
+        JSONArray assets=release.getJSONArray("assets");JSONObject selected=null;
+        String expected=assetPrefix+"-v"+version.replaceFirst("^v","")+".apk";
+        for(int i=0;i<assets.length();i++){JSONObject a=assets.getJSONObject(i);if(expected.equals(a.optString("name"))){if(selected!=null)throw new IOException("Release 存在重复安装包。");selected=a;}}
+        if(selected==null)throw new IOException("最新 Release 尚未附带 "+expected+"。");
+        String url=selected.getString("browser_download_url"),prefix="https://github.com/"+repository+"/releases/download/";
+        if(!url.startsWith(prefix)||url.contains("/../")||url.contains("\\"))throw new IOException("更新包下载地址不属于指定仓库。");
+        long size=selected.getLong("size");if(size<=0||size>64*1024*1024)throw new IOException("更新包大小不合理。");
+        String digest=selected.isNull("digest")?"":selected.optString("digest","");if(!digest.isEmpty()&&!digest.matches("sha256:[a-fA-F0-9]{64}"))throw new IOException("更新包摘要格式不支持。");
+        return new ReleaseInfo(version,url,digest.isEmpty()?"":digest.substring(7).toLowerCase(java.util.Locale.ROOT),release.optString("body",""),size);
+    }
+    public static void validatePackage(String installedPackage,String installedVersion,long installedCode,java.util.Set<String> installedSigners,String nextPackage,String nextVersion,long nextCode,java.util.Set<String> nextSigners,String releaseVersion) throws Exception {
+        if(!installedPackage.equals(nextPackage))throw new IOException("更新包包名不匹配。");
+        if(nextCode<=installedCode||compare(nextVersion,installedVersion)<=0||compare(nextVersion,releaseVersion)!=0)throw new IOException("更新包版本不匹配或不能覆盖当前版本。");
+        if(installedSigners.isEmpty()||!installedSigners.equals(nextSigners))throw new IOException("更新包签名与本机正式版不同，已拒绝安装。");
+    }
+}
+
+```
+
+`app/src/local/lx/updates/ReleaseUpdater.java`:
+
+```java
+package local.lx.updates;
+
+import android.app.*;
+import android.content.pm.*;
+import android.os.*;
+import org.json.*;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
+
+/** Explicit check/download; verified root replacement preserves the app's private data. */
+public final class ReleaseUpdater {
+    private final Activity activity;private final String repository,assetPrefix;private final Consumer<Runnable> beforeInstall;
+    private final ExecutorService worker=Executors.newSingleThreadExecutor();private ProgressDialog progress;private boolean running;
+    public ReleaseUpdater(Activity activity,String repo,String assetPrefix,Consumer<Runnable> beforeInstall){this.activity=activity;this.repository="Null993/"+repo;this.assetPrefix=assetPrefix;this.beforeInstall=beforeInstall;}
+    public void check(){if(running)return;running=true;progress=ProgressDialog.show(activity,"检查更新","正在查询 GitHub 正式 Release…",true,false);worker.submit(()->{
+        try{JSONObject release;try(InputStream in=connection("https://api.github.com/repos/"+repository+"/releases/latest").getInputStream()){release=new JSONObject(new String(read(in,2*1024*1024),StandardCharsets.UTF_8));}
+            String installed=activity.getPackageManager().getPackageInfo(activity.getPackageName(),0).versionName;ReleaseInfo info=ReleaseInfo.parse(release,repository,assetPrefix,installed);
+            activity.runOnUiThread(()->{dismiss();if(info==null){message("已经是最新正式版","当前版本 "+installed+"\n更新源："+repository);return;}new AlertDialog.Builder(activity).setTitle("发现更新 "+info.version).setMessage("当前版本 "+installed+"\n更新源："+repository+"\n\n"+(info.notes.length()>4000?info.notes.substring(0,4000)+"…":info.notes)+"\n\n下载后核对包名、版本与签名，通过 Root 覆盖安装并重新打开。应用数据将保留。").setNegativeButton("暂不更新",null).setPositiveButton("下载并安装",(d,w)->beforeInstall.accept(()->download(info))).show();});
+        }catch(Exception e){fail(e);}
+    });}
+    private void download(ReleaseInfo info){if(running)return;running=true;progress=ProgressDialog.show(activity,"下载更新","正在下载并校验安装包…",true,false);worker.submit(()->{
+        File apk=new File(activity.getFilesDir(),"pending-update.apk");
+        try{
+            MessageDigest hash=MessageDigest.getInstance("SHA-256");long count=0;try(InputStream in=connection(info.url).getInputStream();FileOutputStream out=new FileOutputStream(apk)){byte[] b=new byte[32768];int n;while((n=in.read(b))!=-1){count+=n;if(count>info.size||count>64*1024*1024)throw new IOException("下载数据超过 Release 声明大小。");hash.update(b,0,n);out.write(b,0,n);}out.getFD().sync();}
+            if(count!=info.size)throw new IOException("更新包下载不完整。");if(!info.digest.isEmpty()&&!hex(hash.digest()).equals(info.digest))throw new IOException("GitHub SHA-256 校验失败。");
+            PackageManager pm=activity.getPackageManager();int flags=Build.VERSION.SDK_INT>=28?PackageManager.GET_SIGNING_CERTIFICATES:PackageManager.GET_SIGNATURES;
+            PackageInfo current=pm.getPackageInfo(activity.getPackageName(),flags),next=pm.getPackageArchiveInfo(apk.getAbsolutePath(),flags);
+            if(next==null||!current.packageName.equals(next.packageName))throw new IOException("更新包包名不匹配。");
+            long oldCode=Build.VERSION.SDK_INT>=28?current.getLongVersionCode():current.versionCode,newCode=Build.VERSION.SDK_INT>=28?next.getLongVersionCode():next.versionCode;
+            ReleaseInfo.validatePackage(current.packageName,current.versionName,oldCode,signers(current),next.packageName,next.versionName,newCode,signers(next),info.version);
+            install(apk);activity.runOnUiThread(()->{if(progress!=null)progress.setMessage("校验通过，正在覆盖安装，完成后将自动重新打开…");});
+        }catch(Exception e){apk.delete();fail(e);}
+    });}
+    private static Set<String> signers(PackageInfo info) throws Exception {
+        Signature[] values=Build.VERSION.SDK_INT>=28?(info.signingInfo==null?null:info.signingInfo.getApkContentsSigners()):info.signatures;
+        if(values==null||values.length==0)throw new IOException("无法读取 APK 签名。");Set<String> out=new TreeSet<>();for(Signature signature:values)out.add(hex(MessageDigest.getInstance("SHA-256").digest(signature.toByteArray())));return out;
+    }
+    private void install(File apk) throws Exception {
+        String uid=""+android.os.Process.myUid(),temp="/data/local/tmp/lx-tool-update-"+UUID.randomUUID()+".apk",result=new File(activity.getFilesDir(),"update-result.txt").getAbsolutePath();
+        String script="#!/system/bin/sh\numask 077\nif ! cp "+q(apk.getAbsolutePath())+" "+q(temp)+"; then printf 'FAIL: 无法暂存更新包' > "+q(result)+"; else\nchmod 644 "+q(temp)+"\nsleep 2\npm install -r --user 0 "+q(temp)+" > "+q(result)+" 2>&1\nrm -f "+q(temp)+"\nfi\nchown "+uid+":"+uid+" "+q(result)+"\nchmod 600 "+q(result)+"\nrm -f "+q(apk.getAbsolutePath())+"\nam force-stop --user 0 "+q(activity.getPackageName())+"\nam start --user 0 -n "+q(activity.getPackageName()+"/.MainActivity")+"\n";
+        File helper=new File(activity.getFilesDir(),"install-update.sh");Files.write(helper.toPath(),script.getBytes(StandardCharsets.UTF_8));
+        java.lang.Process process=new ProcessBuilder("su","--mount-master","-c","test \"$(id -u)\" = 0 || exit 1; printf 0; nohup sh "+q(helper.getAbsolutePath())+" >/dev/null 2>&1 </dev/null &").redirectErrorStream(true).start();
+        ExecutorService reader=Executors.newSingleThreadExecutor();try{Future<byte[]> output=reader.submit(()->read(process.getInputStream(),65536));if(!process.waitFor(30,TimeUnit.SECONDS)){process.destroyForcibly();throw new IOException("Root 安装请求超时。");}String text=new String(output.get(5,TimeUnit.SECONDS),StandardCharsets.UTF_8).trim();if(process.exitValue()!=0||!text.equals("0"))throw new IOException("无法取得 Root 安装权限："+text);}finally{reader.shutdownNow();process.destroy();}
+    }
+    private static String q(String s){return "'"+s.replace("'","'\"'\"'")+"'";}
+    private static String hex(byte[] b){StringBuilder out=new StringBuilder();for(byte n:b)out.append(String.format(Locale.ROOT,"%02x",n&255));return out.toString();}
+    private static byte[] read(InputStream input,int limit) throws Exception {try(InputStream in=input;ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1){if(out.size()+n>limit)throw new IOException("更新响应超过上限。");out.write(b,0,n);}return out.toByteArray();}}
+    private static HttpURLConnection connection(String address) throws Exception {
+        for(int i=0;i<6;i++){
+            URL url=new URL(address);String host=url.getHost();if(!url.getProtocol().equals("https")||!Arrays.asList("api.github.com","github.com","objects.githubusercontent.com","release-assets.githubusercontent.com","github-releases.githubusercontent.com").contains(host))throw new IOException("更新请求跳转到不受支持的地址。");
+            HttpURLConnection connection=(HttpURLConnection)url.openConnection();connection.setConnectTimeout(20000);connection.setReadTimeout(30000);connection.setInstanceFollowRedirects(false);connection.setRequestProperty("User-Agent","LX-Tools-ReleaseUpdater");connection.setRequestProperty("Accept","application/vnd.github+json");int status=connection.getResponseCode();
+            if(status>=300&&status<400){String location=connection.getHeaderField("Location");connection.disconnect();if(location==null)throw new IOException("更新服务器返回空跳转。");address=new URL(url,location).toString();continue;}
+            if(status==404){connection.disconnect();throw new IOException("尚未发布正式 Release，请稍后重试。");}if(status!=200){connection.disconnect();throw new IOException(status==403||status==429?"GitHub 请求额度暂时用尽，请稍后重试。":"更新请求失败（HTTP "+status+"）。");}return connection;
+        }throw new IOException("更新下载跳转次数过多。");
+    }
+    private void dismiss(){running=false;if(progress!=null){progress.dismiss();progress=null;}}
+    private void fail(Exception e){activity.runOnUiThread(()->{dismiss();message("更新未完成",e.getMessage()==null?e.toString():e.getMessage());});}
+    private void message(String title,String text){if(!activity.isFinishing())new AlertDialog.Builder(activity).setTitle(title).setMessage(text).setPositiveButton("知道了",null).show();}
+    public static void reportInstallation(Activity activity){File result=new File(activity.getFilesDir(),"update-result.txt");if(!result.isFile())return;try{String text=new String(Files.readAllBytes(result.toPath()),StandardCharsets.UTF_8);result.delete();new File(activity.getFilesDir(),"install-update.sh").delete();new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(()->{if(!activity.isFinishing())new AlertDialog.Builder(activity).setTitle(text.trim().equals("Success")?"工具更新完成":"工具更新未完成").setMessage(text.trim().equals("Success")?"已覆盖安装，应用数据和备份库保持不变。":text).setPositiveButton("知道了",null).show();},500);}catch(Exception ignored){}}
+}
+
+```
+
+`docs/compatibility-387.md`:
+
+```md
+# v142-offline-test.387 兼容性核对
+
+2026-11-12 基于最新游戏包核对，本管理器代码基线为 WorkBuddy 的 `2ddd687`（v0.1.4）。未覆盖 WorkBuddy 的本地未提交文件。
+
+内置 runtime SHA-256：`eb6f07577f256d0d08fc71e3ad317ca560d3be6d196f8a8f79d0647e9090475b`。
+
+已核对：
+
+- 原始新建角色函数和初始配置不变，打包的男女初始角色模板与 `.387` 配置一致。
+- 六个进度文件的名称与范围不变；仍有同名流派录恢复事务文件。
+- 角色 `schema: 1`、背包字段、成长和强化配置不变。
+- 源码中的新增存档候选文件引用检查未发现超出当前适配范围的新文件。
+
+因此 v0.1.4 无需仅因游戏版本号升级而改动存档适配逻辑。已有的库分组折叠、Root 状态检测、授权请求、导出列表分隔线等更新全部保留。不更换正式签名密钥。
+
+兼容核对不意味着能推断未来任意版本的存档语义；未知文件或结构仍按当前策略完整归档并禁止不兼容切换。此轮没有实体手机连接，验证范围为原包静态核对和隔离回归。
+
+```
+
+`docs/compatibility-603.md`:
+
+```md
+# offline-test.603 适配记录
+
+核对对象：`LX-v142-offline-test603.apk.1`。只更新两个工具，未修改游戏 APK、服务端或游戏存档结构。
+
+运行环境 SHA-256：`c2c198d96fea3c524b10246de827a39f25f2cddc2055b7ab53daba0184079fc1`。
+
+## 实际保存位置
+
+| 内容 | 原生存档字段或文件 | 本轮处理 |
+|---|---|---|
+| 内功穴位及五行 | 角色中的 `inner_power_nodes`，值为 `[等级, 五行编码]` | 按原配置编辑，并同步当前已存在的内功方案 |
+| 内功多方案 | `inner_power_plans`、`inner_power_plan` | 保留其他方案和未知字段 |
+| 化神与真元 | `sprite_meridian_unlocked`、`meridian_active_sprite`、`meridian_sprites` | 解锁、出战、气穴装配；检查任督前置、真元持有和类型 |
+| 化神极境 | `meridian_sprite_ji_ranks` | 按原极境配置及真元总等级限制编辑 |
+| 心法 | `wuhun_inventory` | 已有实例的等级、经验、锁定与已有属性数值 |
+| 饰品 | `accessories`，词条为 `[属性码, 数值, 品级]` | 依据饰品部位、品质、等级的原词条池与范围修改；保留其他实例状态 |
+| 随从 | `followers`、`owned_followers` | 添加或修改等级、好感、牵绊和技能；同步原生派生统计与词条 |
+| 武学等级、特性 | `local-spirit-martial.json` 的 `levels`、`choices` | 保留原 schema、经济钱包；同步已存在的角色 `martial_levels` 覆盖项 |
+| 绝学槽位 | `local-skills.json` | 每武器两个槽位，检查性别、武器类型、来源、解锁和重复组 |
+| 奥义 | `local-aoyi.json` | 选择满足前置条件的原生奥义；等级仍由前置武学条件计算 |
+| 装备自身五行及固定词条 | 原配置、强化次数与内功投影 | 没有独立持久化字段；不生成伪造存档字段，不提供独立改写 |
+
+六个主要进度文件仍为 `local-role.json`、`local-loadout.json`、`local-skills.json`、`local-aoyi.json`、`local-spirit-martial.json`、`newgame-profile.json`。后两个武学相关文件是按需生成，缺失不是漏备份。
+
+## 写入和更新边界
+
+编辑器读取时停止游戏，取得整组一致进度。保存比较整组原始哈希，先备份，再使用与管理器相同的事务实现写入；失败恢复整组旧文件。中断后的事务可以恢复，不将技能修改混入只替换角色文件的流程。未修改文件保留原始字节。新版编辑器备份记录完整范围，可整组还原；旧版未记录范围的备份仍只恢复角色。
+
+管理器仍保留未知数据的原始字节，遇到新的文件范围或格式则阻止切换。已将运行环境内所有已知资源名称加入排除集合，避免把覆盖层提供的程序或配置误判为新增进度；已知六个进度文件始终参加管理。
+
+`.603` 的官方导入导出事务位于游戏私有目录 `no_backup/save-move.json`（及 AtomicFile 的 `.bak`）。两个工具检测到它时停止读取／写入或切换，提示先在游戏中完成官方转移。激活信息、转移令牌和该事务文件均不进入工具备份，不清除、不修改。工具 ZIP 不是游戏的 `.lxsave`，不替代官方跨设备卡密验证。联网帮派及激活绑定状态仍由游戏自己的服务维护。
+
+## 工具更新
+
+编辑器使用 `Null993/LX-SaveEditor`，管理器使用 `Null993/LX-SaveManager`。关于页可主动检查最新正式 Release；不选择草稿或预发布。下载核对 Release 文件大小和提供的 SHA-256，再通过 Android 包管理器读取 APK 包名、版本号和证书。只接受同包名、相同签名、更高版本的 APK，随后以 Root 覆盖安装并重新打开，不卸载或清空应用数据。
+
+网络仅用于用户主动检查和下载工具更新，不上传存档或激活信息。未打包 GitHub Token、Root 凭据或签名私钥；后续发布须继续使用各工具原有正式证书。
+
+## 验证
+
+- 98 项模型与格式回归、44 次隔离的原存档函数检查，包含连接手机当前 `.603` 存档的只读副本；单项编辑保留其余字段。
+- 41 项备份／事务检查，覆盖多文件冲突、失败回滚及官方转移状态拦截。
+- 26 项修炼、心法、饰品、随从、武学和更新策略检查。
+- 8 项 `.603` 原包读取函数检查：内功投影、化神编码、心法、饰品、随从、武学存储读取和绝学选择；依赖的封包外壳和装备评分在隔离环境中替代，不启动游戏或服务器。
+- 管理器 54 项完整进度回归；320dp 模拟器六页、三档字号共 18 组界面检查。
+- 编辑器在 1.0／1.5／2.0 字号下检查五类新增表单；实际操作只改变应用私有测试草稿，测试源文件不变。
+
+签名、包名、版本、调试入口和资源一致性另由两个正式包校验脚本检查。真实游戏进度未被写入。
+
+真机更新验证：两个工具分别从各自 GitHub 正式 Release 完成下载、校验及 Root 覆盖安装，安装后的 APK SHA-256 与发布附件一致。管理器既有 46 个存档库文件逐一校验一致，编辑器缓存索引仍可读取。验证未写入真实游戏进度。
+
+```
+
+`tests/device/local/lx/savemanager/DeviceSelfTest.java`:
+
+```java
+package local.lx.savemanager;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.widget.TextView;
+import org.json.*;
+import java.io.*;
+import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+/** Debug only: every write targets an isolated directory owned by this app. */
+public final class DeviceSelfTest extends Activity {
+    private int passed;private final JSONArray checks=new JSONArray();private RootAccess root;
+    private interface Action {void run() throws Exception;}
+    private void yes(boolean value){if(!value)throw new AssertionError();}
+    private void test(String label,Action action) throws Exception {action.run();checks.put(label);passed++;}
+    private void rejected(Action action) throws Exception {boolean bad=false;try{action.run();}catch(Exception e){bad=true;}yes(bad);}
+    @Override public void onCreate(Bundle state){super.onCreate(state);root=new RootAccess(this);TextView view=new TextView(this);view.setText("正在检查独立副本，真实存档仅只读核验…");setContentView(view);new Thread(()->{
+        JSONObject report=new JSONObject();try{runTests();report.put("result","pass");}catch(Throwable e){try{report.put("result","fail").put("error",e.toString());}catch(Exception ignored){}}
+        try{report.put("passed",passed).put("checks",checks).put("live_save_write_operations",0);FilesEx.write(new File(getFilesDir(),"device-test-report.json"),FilesEx.bytes(report));}catch(Exception ignored){}
+        final String result=report.toString();runOnUiThread(()->view.setText(result));
+    }).start();}
+    private void runTests() throws Exception {
+        root.require();RootAccess.Device detected=root.detect();test("root manager detected without an extra prompt",()->{yes(detected.rooted);yes(detected.manager!=null);});
+        GameProfile profile=new GameProfile(FilesEx.json(FilesEx.read(getAssets().open("profile.json"),1024*1024)));JSONObject templates=FilesEx.json(FilesEx.read(getAssets().open("new-roles.json"),1024*1024));
+        Map<String,byte[]> live=new TreeMap<>();for(String name:profile.files){String path=profile.root+"/"+name;String present=new String(root.run("if [ -f "+GameStore.q(path)+" ]; then printf yes; fi"),StandardCharsets.UTF_8);if(present.equals("yes"))live.put(name,root.run("cat "+GameStore.q(path)));}
+        Snapshot original=new Snapshot(profile.id,profile.files,live,new JSONObject());test("phone current role format compatible",()->yes(profile.compatibility(original).isEmpty()));
+        File suite=new File(getFilesDir(),"device-fixture-"+Library.id());yes(suite.mkdir());
+        try{
+            File game=new File(suite,"game");yes(game.mkdir());for(Map.Entry<String,byte[]> row:live.entrySet())FilesEx.write(FilesEx.child(game,row.getKey()),row.getValue());
+            FilesEx.write(new File(game,"server.py"),"test executable sentinel".getBytes(StandardCharsets.UTF_8));File stage=new File(suite,"stage");
+            GameStore store=new GameStore(root,root::require,profile,game.getAbsolutePath(),stage,android.os.Process.myUid(),Collections.singleton("server.py"));
+            test("actual toybox capture matches all source fixture files",()->yes(store.capture().digest().equals(original.digest())));
+            Snapshot fresh=profile.fresh(templates,false,live.get("newgame-profile.json"));
+            test("fresh profile does not inherit receipts or progression",()->{JSONObject r=FilesEx.json(fresh.data.get("local-role.json"));yes(!r.has("redeemed_gift_codes")&&r.getInt("level")==1&&!r.getBoolean("male"));});
+            test("root full-scope install on isolated fixture",()->{store.apply(original,fresh);yes(store.capture().digest().equals(fresh.digest()));});
+            test("fixture file ownership preserved for target app",()->{String owner=new String(root.run("stat -c '%u:%g %a' "+GameStore.q(game+"/local-role.json")),StandardCharsets.UTF_8).trim();yes(owner.equals(android.os.Process.myUid()+":"+android.os.Process.myUid()+" 600"));});
+            test("all original fixture progress restores byte for byte",()->{store.apply(store.capture(),original);yes(store.capture().digest().equals(original.digest()));});
+            Map<String,byte[]> rich=new TreeMap<>(live);rich.put("local-aoyi.json",FilesEx.bytes(new JSONObject()));rich.put("local-spirit-martial.json",FilesEx.bytes(new JSONObject().put("schema",1).put("levels",new JSONObject()).put("choices",new JSONObject())));Snapshot all=new Snapshot(profile.id,profile.files,rich,new JSONObject());
+            test("optional independent state files included in full restore",()->{store.apply(store.capture(),all);yes(new File(game,"local-aoyi.json").exists()&&new File(game,"local-spirit-martial.json").exists());});
+            test("new snapshot removes all absent optional old progress",()->{store.apply(store.capture(),fresh);yes(!new File(game,"local-aoyi.json").exists()&&!new File(game,"local-spirit-martial.json").exists());});
+            GameStore.Shell fault=script->root.run(script.contains("# INSTALL_BOUNDARY_3")?script.replace("# INSTALL_BOUNDARY_3","false\n# INSTALL_BOUNDARY_3"):script);GameStore failing=new GameStore(fault,root::require,profile,game.getAbsolutePath(),stage,android.os.Process.myUid(),Collections.singleton("server.py"));
+            test("actual Android shell failure rolls back all six file states",()->{rejected(()->failing.apply(fresh,all));yes(store.capture().digest().equals(fresh.digest()));});
+            test("unknown future file archived and blocks restore",()->{File unknown=new File(game,"future-progress.dat");FilesEx.write(unknown,new byte[]{4,3,2,1});Snapshot raw=store.capture();yes(raw.data.containsKey("future-progress.dat")&&!profile.compatibility(raw).isEmpty());rejected(()->store.apply(raw,fresh));yes(unknown.delete());});
+            Library from=new Library(new File(suite,"library-a")),to=new Library(new File(suite,"library-b"));JSONObject one=from.add(original,"真机测试副本","不修改实际角色","backup",".314"),two=from.add(fresh,"新建测试副本","测试备注","new",".314");ByteArrayOutputStream archive=new ByteArrayOutputStream();
+            test("multi-save portable ZIP on Android",()->Archives.exportZip(from,Arrays.asList(one.getString("id"),two.getString("id")),archive,profile.gamePackage));
+            JSONObject existing=to.add(all,"目标已有存档","必须保留","backup",".314");
+            test("Android ZIP import keeps target records and exact source bytes",()->{List<JSONObject> added=Archives.importZip(to,new ByteArrayInputStream(archive.toByteArray()),getCacheDir(),profile.gamePackage);yes(to.list().size()==3&&to.read(existing.getString("id")).digest().equals(all.digest())&&to.read(added.get(0).getString("id")).digest().equals(original.digest()));});
+            test("fixture program sentinel never changed",()->yes(new String(FilesEx.read(new File(game,"server.py")),StandardCharsets.UTF_8).equals("test executable sentinel")));
+            test("live phone save files remain byte identical",()->{for(Map.Entry<String,byte[]> row:live.entrySet())yes(FilesEx.hash(root.run("cat "+GameStore.q(profile.root+"/"+row.getKey()))).equals(FilesEx.hash(row.getValue())));});
+        }finally{FilesEx.remove(getFilesDir(),suite);}
+    }
+}
+
+```
+
+`tests/device/local/lx/savemanager/PreviewActivity.java`:
+
+```java
+package local.lx.savemanager;
+
+import org.json.*;
+import java.io.*;
+import java.lang.reflect.*;
+import java.util.*;
+import android.os.Bundle;
+import android.content.res.Configuration;
+import android.view.*;
+import android.widget.*;
+import android.text.Layout;
+import android.content.Context;
+
+/** Debug-only UI fixtures. No AndroidGame instance: these pages cannot write game data. */
+public final class PreviewActivity extends MainActivity {
+    @Override protected void attachBaseContext(Context base){
+        try{Configuration conf=new Configuration(base.getResources().getConfiguration());conf.fontScale=Float.parseFloat(FilesEx.utf8(FilesEx.read(new File(base.getFilesDir(),"preview-font.txt"))).trim());super.attachBaseContext(base.createConfigurationContext(conf));}
+        catch(Exception e){super.attachBaseContext(base);}
+    }
+    private void set(String name,Object value) throws Exception {Field f=MainActivity.class.getDeclaredField(name);f.setAccessible(true);f.set(this,value);}
+    @Override protected void boot(){new Thread(()->{
+        try{
+            if(!getIntent().getBooleanExtra("sandbox_preview",false))new RootAccess(this).require();GameProfile profile=new GameProfile(FilesEx.json(FilesEx.read(getAssets().open("profile.json"),1024*1024)));JSONObject templates=FilesEx.json(FilesEx.read(getAssets().open("new-roles.json"),1024*1024));Library library=new Library(new File(getFilesDir(),"ui-fixture-library"));
+            Snapshot male=profile.fresh(templates,true,FilesEx.bytes(new JSONObject().put("schema",1).put("mode","new-player")));
+            JSONObject fixtureRole=FilesEx.json(male.data.get("local-role.json"));fixtureRole.put("achieve_point",1290).put("weapon_bonds",new JSONObject().put("3860005",5).put("3860006",5).put("3860012",2));
+            Map<String,byte[]> fixtureFiles=new TreeMap<>(male.data);fixtureFiles.put("local-role.json",FilesEx.bytes(fixtureRole));
+            Snapshot seeded=new Snapshot(male.profileId,male.scope,fixtureFiles,male.mtimes);
+            if(library.list().isEmpty()){
+                library.add(seeded,"第一周目 · 主线推进","准备进入新的关卡，保留角色成长和全部装备进度。","backup",".314");
+                library.add(profile.fresh(templates,false,seeded.data.get("newgame-profile.json")),"第二周目 · 女性角色","用于测试独立角色与多设备存档迁移。","new",".314");
+                library.add(seeded,"长名称布局测试：完整保留角色、背包、技能与所有进度的独立存档","这是一段用于检查长备注换行的文字。详情页应完整显示；列表仅预览。\n第二行用于确认编辑输入框不会跳动。","backup",".314");
+                library.add(seeded,"自动备份 · 还原前 · 2026-11-10 19:40:05","还原“第二周目 · 女性角色”之前的全部进度","automatic",".314");
+                library.add(seeded,"自动备份 · 新建前 · 2026-11-10 19:12:33","新建存档前的全部进度","automatic",".314");
+            }
+            set("profile",profile);set("templates",templates);set("library",library);set("authorized",true);set("rows",library.list());set("current",seeded);set("message","界面测试副本 · 不连接游戏");set("tab",getIntent().getIntExtra("page",0));
+            String gate=getIntent().getStringExtra("gate");
+            if(gate!=null){boolean rooted="rooted".equals(gate);set("authorized",false);set("message","");
+                set("device",new RootAccess.Device(rooted,rooted?"ReSukiSU":null,rooted?"com.resukisu.resukisu":null,rooted?"已检测到 ReSukiSU，设备已 Root。":"未检测到 su 命令或 Root 管理器，这台设备看起来没有 Root。"));}
+            if(getIntent().getIntExtra("page",0)==5){JSONObject m=library.list().get(0);set("openedId",m.getString("id"));set("openedMetadata",m);set("openedSnapshot",library.read(m.getString("id")));}
+            runOnUiThread(()->{try{Method render=MainActivity.class.getDeclaredMethod("render");render.setAccessible(true);render.invoke(this);getWindow().getDecorView().getViewTreeObserver().addOnGlobalLayoutListener(()->audit());}catch(Exception e){throw new RuntimeException(e);}});
+        }catch(Exception e){runOnUiThread(()->super.boot());}
+    }).start();}
+    private void audit(){try{JSONArray issues=new JSONArray();inspect(getWindow().getDecorView(),issues);FilesEx.write(new File(getFilesDir(),"layout-audit.json"),FilesEx.bytes(new JSONObject().put("issues",issues).put("font_scale",getResources().getConfiguration().fontScale)));}catch(Exception ignored){}}
+    private void inspect(View view,JSONArray issues) throws Exception {
+        if(view.getVisibility()!=View.VISIBLE)return;
+        if(view instanceof TextView&&!(view instanceof EditText)){
+            TextView text=(TextView)view;Layout l=text.getLayout();if(l!=null&&l.getLineCount()>0&&text.getMaxLines()>=l.getLineCount()){
+                int height=text.getHeight()-text.getCompoundPaddingTop()-text.getCompoundPaddingBottom();if(l.getLineBottom(l.getLineCount()-1)>height+1)issues.put(new JSONObject().put("kind","text-height").put("text",text.getText()).put("height",height).put("needed",l.getLineBottom(l.getLineCount()-1)));
+            }
+            if(view.getParent() instanceof LinearLayout){View parent=(View)view.getParent();if(view.getBottom()>parent.getHeight()-parent.getPaddingBottom()+1)issues.put(new JSONObject().put("kind","parent-clipping").put("text",text.getText()));}
+        }
+        if(view instanceof ViewGroup){ViewGroup group=(ViewGroup)view;for(int i=0;i<group.getChildCount();i++)inspect(group.getChildAt(i),issues);}
+    }
+}
+
+```
+
+`tests/host/CoreTests.java`:
+
+```java
+package local.lx.savemanager;
+
+import org.json.*;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.nio.charset.StandardCharsets;
+import java.util.zip.*;
+
+/** Production archive, storage adapter and transaction code; actual POSIX fixture I/O. */
+public final class CoreTests {
+    static int count;static File work;static GameProfile profile;static JSONObject templates;
+    interface Check {void run() throws Exception;}
+    static void test(String label,Check check) throws Exception {check.run();count++;System.out.println("PASS "+label);}
+    static void yes(boolean value){if(!value)throw new AssertionError();}
+    static void rejects(Check action) throws Exception {boolean failed=false;try{action.run();}catch(Exception e){failed=true;}yes(failed);}
+    static File folder(String name) throws Exception {File f=new File(work,name);yes(f.mkdirs());return f;}
+    static byte[] json(JSONObject value) throws Exception {return FilesEx.bytes(value);}
+    static class Death extends Error {}
+    static final class Shell implements GameStore.Shell {
+        String inject="";boolean death;String last;
+        public byte[] run(String script) throws Exception {
+            last=script;boolean fail=!inject.isEmpty()&&script.contains("# INSTALL_BOUNDARY_3");if(fail)script=script.replace("# INSTALL_BOUNDARY_3",inject+"\n# INSTALL_BOUNDARY_3");
+            Process p=new ProcessBuilder(System.getProperty("lx.bash","F:/Git/bin/bash.exe"),"--noprofile","--norc","-s").start();ExecutorService readers=Executors.newFixedThreadPool(2);
+            Future<byte[]> out=readers.submit(()->FilesEx.read(p.getInputStream(),64*1024*1024)),err=readers.submit(()->FilesEx.read(p.getErrorStream(),1024*1024));
+            try{p.getOutputStream().write(script.getBytes(StandardCharsets.UTF_8));p.getOutputStream().close();if(!p.waitFor(30,TimeUnit.SECONDS))throw new IOException("fixture shell timeout");byte[] bytes=out.get(),errors=err.get();if(p.exitValue()!=0){if(fail&&death)throw new Death();throw new IOException(new String(errors,StandardCharsets.UTF_8)+" [exit "+p.exitValue()+"]");}return bytes;}
+            finally{p.destroy();readers.shutdownNow();}
+        }
+    }
+    static GameStore store(Shell shell,File root,String stage) throws Exception {return new GameStore(shell,()->{},profile,root.getAbsolutePath().replace('\\','/'),folder(stage),-1,new HashSet<>(Arrays.asList("server.py","config.json")));}
+    static Snapshot fresh(boolean male) throws Exception {return profile.fresh(templates,male,json(new JSONObject().put("schema",1).put("mode","new-player").put("previous_profile","/source/profiles/archive")));}
+    static Snapshot rich() throws Exception {
+        Snapshot fresh=fresh(true);Map<String,byte[]> files=new TreeMap<>(fresh.data);JSONObject role=FilesEx.json(files.get("local-role.json"));
+        role.put("name","独立测试角色").put("level",32).put("money",230000).put("redeemed_gift_codes",new JSONArray().put("SPAKE666")).put("future_role_value",new JSONObject().put("a",true));files.put("local-role.json",json(role));
+        files.put("local-aoyi.json",json(new JSONObject().put("weapon:3010101",123)));files.put("local-spirit-martial.json",json(new JSONObject().put("schema",2).put("levels",new JSONObject().put("123",5)).put("choices",new JSONObject()).put("economy",new JSONObject())));return new Snapshot(profile.id,profile.files,files,new JSONObject());
+    }
+    static void seed(File root,Snapshot snapshot) throws Exception {for(Map.Entry<String,byte[]> f:snapshot.data.entrySet())FilesEx.write(FilesEx.child(root,f.getKey()),f.getValue());}
+    static byte[] export(Library lib,List<String> ids) throws Exception {ByteArrayOutputStream b=new ByteArrayOutputStream();Archives.exportZip(lib,ids,b,profile.gamePackage);return b.toByteArray();}
+    static List<JSONObject> imports(Library lib,byte[] zip) throws Exception {return Archives.importZip(lib,new ByteArrayInputStream(zip),work,profile.gamePackage);}
+    static byte[] rewrite(byte[] original,String match,byte[] replacement,boolean drop) throws Exception {
+        ByteArrayOutputStream out=new ByteArrayOutputStream();try(ZipInputStream in=new ZipInputStream(new ByteArrayInputStream(original));ZipOutputStream zip=new ZipOutputStream(out)){ZipEntry entry;while((entry=in.getNextEntry())!=null){ByteArrayOutputStream b=new ByteArrayOutputStream();byte[] buffer=new byte[8192];int n;while((n=in.read(buffer))!=-1)b.write(buffer,0,n);if(entry.getName().equals(match)&&drop)continue;zip.putNextEntry(new ZipEntry(entry.getName()));zip.write(entry.getName().equals(match)?replacement:b.toByteArray());zip.closeEntry();}}return out.toByteArray();
+    }
+    public static void main(String[] args) throws Exception {
+        work=new File(args[0]);profile=new GameProfile(FilesEx.json(FilesEx.read(new File(args[1]))));templates=FilesEx.json(FilesEx.read(new File(args[2])));
+        Snapshot initial=fresh(true),female=fresh(false),complete=rich();
+        test("male and female templates accepted",()->{yes(profile.compatibility(initial).isEmpty());yes(profile.compatibility(female).isEmpty());yes(!FilesEx.json(female.data.get("local-role.json")).getBoolean("male"));});
+        test("new role has no old gift, martial, armor or story state",()->{JSONObject r=FilesEx.json(initial.data.get("local-role.json"));yes(!r.has("redeemed_gift_codes")&&!r.has("mastery_levels")&&!initial.data.containsKey("local-aoyi.json")&&!initial.data.containsKey("local-spirit-martial.json"));yes(r.getInt("money")==0&&r.getJSONArray("cleared_quests").length()==0);});
+        test("summary shows career points and weapon codex stars",()->{Map<String,byte[]> files=new TreeMap<>(initial.data);JSONObject role=FilesEx.json(files.get("local-role.json"));
+            role.put("achieve_point",1290).put("weapon_bonds",new JSONObject().put("3860005",5).put("3860006",5).put("3860012",2).put("3880001",0));
+            files.put("local-role.json",json(role));JSONObject summary=new Snapshot(profile.id,initial.scope,files,new JSONObject()).summary();
+            yes(summary.getInt("achieve_point")==1290);yes(summary.getLong("stars")==12);yes(!summary.has("fame"));});
+        test("all optional missing files declared",()->yes(initial.manifest().getJSONArray("missing").length()==2&&initial.scope.size()==6));
+        test("rich multi-file snapshot accepted",()->yes(profile.compatibility(complete).isEmpty()));
+        test("603 cultivation follower and instance records survive complete snapshots",()->{Map<String,byte[]> files=new TreeMap<>(complete.data);JSONObject r=FilesEx.json(files.get("local-role.json"));r.put("inner_power_nodes",new JSONObject().put("2720001",new JSONArray().put(20).put(12))).put("sprite_meridian_unlocked",true).put("meridian_sprites",new JSONObject().put("2920002",new JSONArray().put(0))).put("wuhun_inventory",new JSONObject().put("manual",new JSONObject().put("future",true))).put("accessories",new JSONObject().put("ring",new JSONObject().put("future",true))).put("followers",new JSONObject());files.put("local-role.json",json(r));Snapshot rich=new Snapshot(profile.id,profile.files,files,new JSONObject());yes(profile.compatibility(rich).isEmpty());yes(rich.summary().getInt("inner_levels")==20&&rich.summary().getInt("sprites")==2&&rich.summary().getInt("wuhun")==1);yes(Snapshot.fromManifest(rich.manifest(),rich.data).digest().equals(rich.digest()));});
+        test("file hashes round trip",()->yes(Snapshot.fromManifest(complete.manifest(),complete.data).digest().equals(complete.digest())));
+        test("unknown nested role metadata preserved",()->yes(FilesEx.json(complete.data.get("local-role.json")).getJSONObject("future_role_value").getBoolean("a")));
+        test("file scope removal detected",()->{Set<String> scope=new TreeSet<>(initial.scope);scope.remove("local-aoyi.json");Snapshot s=new Snapshot(profile.id,scope,initial.data,new JSONObject());yes(!profile.compatibility(s).isEmpty());});
+        test("future renamed progress retained but cannot be restored",()->{Set<String> scope=new TreeSet<>(initial.scope);scope.add("new-state/player.bin");Map<String,byte[]> data=new TreeMap<>(initial.data);data.put("new-state/player.bin",new byte[]{1,2,3});Snapshot s=new Snapshot(profile.id,scope,data,new JSONObject());yes(!profile.compatibility(s).isEmpty());yes(Snapshot.fromManifest(s.manifest(),s.data).data.containsKey("new-state/player.bin"));});
+        test("future role schema preserved in raw snapshot but switching blocked",()->{Map<String,byte[]> data=new TreeMap<>(initial.data);JSONObject r=FilesEx.json(data.get("local-role.json")).put("schema",2);data.put("local-role.json",json(r));Snapshot s=new Snapshot(profile.id,initial.scope,data,new JSONObject());yes(!profile.compatibility(s).isEmpty());yes(FilesEx.json(s.data.get("local-role.json")).getInt("schema")==2);});
+        test("future profile ID can archive but cannot restore",()->yes(!profile.compatibility(new Snapshot("future-profile",initial.scope,initial.data,new JSONObject())).isEmpty()));
+        test("non-object skill file blocked",()->{Map<String,byte[]> data=new TreeMap<>(initial.data);data.put("local-skills.json","[]".getBytes(StandardCharsets.UTF_8));yes(!profile.compatibility(new Snapshot(profile.id,initial.scope,data,new JSONObject())).isEmpty());});
+        test("missing initialization marker blocked",()->{Map<String,byte[]> data=new TreeMap<>(initial.data);data.remove("newgame-profile.json");yes(!profile.compatibility(new Snapshot(profile.id,initial.scope,data,new JSONObject())).isEmpty());});
+        test("snapshot tampering rejected",()->{Map<String,byte[]> data=new TreeMap<>(initial.data);data.put("local-skills.json","{\"x\":1}".getBytes(StandardCharsets.UTF_8));rejects(()->Snapshot.fromManifest(initial.manifest(),data));});
+        test("incomplete missing declarations rejected",()->{JSONObject index=initial.manifest();index.getJSONArray("missing").put("local-role.json");rejects(()->Snapshot.fromManifest(index,initial.data));});
+        for(String path:new String[]{"../outside","/absolute","a/../../x","a\\b","C:/escape","./a","a/./b","a\nb"})test("unsafe path rejected: "+path.replace('\n',' '),()->rejects(()->new Snapshot(profile.id,Collections.singleton(path),new TreeMap<>(),new JSONObject())));
+        Library lib=new Library(folder("library-a"));JSONObject one=lib.add(complete,"同名存档","原始备注","backup",".287"),two=lib.add(initial,"同名存档","第二份","new",".287");String id1=one.getString("id"),id2=two.getString("id");
+        test("same names have independent IDs",()->yes(!id1.equals(id2)&&lib.list().size()==2));
+        test("metadata edit changes no game bytes",()->{String digest=lib.read(id1).digest();lib.rename(id1,"改名测试","新备注\n第二行");yes(lib.read(id1).digest().equals(digest)&&lib.metadata(id1).getString("note").contains("第二行"));});
+        test("blank labels and control names rejected",()->{rejects(()->lib.rename(id1," ",""));rejects(()->lib.rename(id1,"a\nb",""));});
+        byte[] zip=export(lib,Arrays.asList(id1,id2));Library destination=new Library(folder("library-b"));JSONObject existing=destination.add(female,"改名测试","目标设备已有","backup",".266");String existingId=existing.getString("id"),existingDigest=destination.read(existingId).digest();List<JSONObject> imported=imports(destination,zip);
+        test("multi-save ZIP adds both snapshots",()->yes(imported.size()==2&&destination.list().size()==3));
+        test("target device existing save never overwritten",()->yes(destination.read(existingId).digest().equals(existingDigest)&&destination.metadata(existingId).getString("note").equals("目标设备已有")));
+        test("capture time preserved and import time separate",()->yes(imported.get(0).getLong("captured_at")==one.getLong("captured_at")&&imported.get(0).getLong("imported_at")>0));
+        test("original source ID retained with new local ID",()->yes(imported.get(0).getString("source_id").equals(id1)&&!imported.get(0).getString("id").equals(id1)));
+        test("entire multi-file data survives migration",()->yes(destination.read(imported.get(0).getString("id")).digest().equals(complete.digest())));
+        test("import same source IDs again never overwrites",()->{imports(destination,zip);yes(destination.list().size()==5&&destination.read(existingId).digest().equals(existingDigest));});
+        test("import into original device also adds independent records",()->{imports(lib,zip);yes(lib.list().size()==4&&lib.read(id1).digest().equals(complete.digest()));});
+        test("single save ZIP supported",()->yes(imports(destination,export(lib,Collections.singletonList(id2))).size()==1));
+        int before=destination.list().size();String file="saves/"+id1+"/files/local-role.json";
+        test("corrupt ZIP rejected without partial import",()->{rejects(()->imports(destination,rewrite(zip,file,"{}".getBytes(StandardCharsets.UTF_8),false)));yes(destination.list().size()==before);});
+        test("missing ZIP file rejected without partial import",()->{rejects(()->imports(destination,rewrite(zip,file,new byte[0],true)));yes(destination.list().size()==before);});
+        test("unsafe ZIP paths rejected before publication",()->{ByteArrayOutputStream b=new ByteArrayOutputStream();try(ZipOutputStream z=new ZipOutputStream(b)){z.putNextEntry(new ZipEntry("../escape"));z.write(1);z.closeEntry();}rejects(()->imports(destination,b.toByteArray()));yes(!new File(work,"escape").exists()&&destination.list().size()==before);});
+        test("wrong game archive rejected",()->{JSONObject m;try(ZipInputStream in=new ZipInputStream(new ByteArrayInputStream(zip))){in.getNextEntry();ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);m=FilesEx.json(out.toByteArray());}m.put("game_package","other.game");final byte[] bad=rewrite(zip,"manifest.json",json(m),false);rejects(()->imports(destination,bad));yes(destination.list().size()==before);});
+        test("library survives reopening",()->yes(new Library(lib.root).read(id1).digest().equals(complete.digest())));
+        test("deleted record does not delete another snapshot",()->{lib.delete(Collections.singleton(id2));yes(lib.read(id1).digest().equals(complete.digest()));rejects(()->lib.metadata(id2));});
+        File game=folder("game");seed(game,complete);FilesEx.write(new File(game,"server.py"),"program".getBytes(StandardCharsets.UTF_8));FilesEx.write(new File(game,"config.json"),"{}".getBytes(StandardCharsets.UTF_8));FilesEx.write(new File(game,"capture.jsonl"),"log".getBytes(StandardCharsets.UTF_8));Shell shell=new Shell();GameStore store=store(shell,game,"stage-a");
+        test("root capture scans complete scope excluding programs and known logs",()->yes(store.capture().digest().equals(complete.digest())));
+        test("restore replaces all files and removes absent optional progress",()->{store.apply(store.capture(),initial);yes(store.capture().digest().equals(initial.digest()));yes(!new File(game,"local-aoyi.json").exists()&&!new File(game,"local-spirit-martial.json").exists());});
+        test("program and config bytes untouched",()->yes(new String(FilesEx.read(new File(game,"server.py")),StandardCharsets.UTF_8).equals("program")&&new File(game,"config.json").exists()));
+        test("restoring old snapshot restores gift and all martial data",()->{store.apply(store.capture(),complete);yes(store.capture().digest().equals(complete.digest()));yes(FilesEx.json(FilesEx.read(new File(game,"local-role.json"))).getJSONArray("redeemed_gift_codes").getString(0).equals("SPAKE666"));});
+        test("stale expected snapshot blocked before mutation",()->{rejects(()->store.apply(initial,female));yes(store.capture().digest().equals(complete.digest()));});
+        test("failure midway through switch rolls back complete old scope",()->{shell.inject="exit 77";rejects(()->store.apply(store.capture(),female));shell.inject="";yes(store.capture().digest().equals(complete.digest()));});
+        test("abrupt process death leaves recoverable journal",()->{shell.inject="trap - EXIT\nexit 98";shell.death=true;boolean died=false;try{store.apply(store.capture(),female);}catch(Death d){died=true;}shell.inject="";shell.death=false;yes(died&&new File(game,".lx-manager-transaction/state").exists());});
+        test("next app session recovers every file from durable undo data",()->{GameStore reopened=store(new Shell(),game,"stage-b");yes(reopened.recoverIfNeeded());yes(reopened.capture().digest().equals(complete.digest()));});
+        test("unknown new data file is captured and prevents unsafe switching",()->{File unknown=new File(game,"new-progress.bin");FilesEx.write(unknown,new byte[]{4,5});Snapshot opaque=store.capture();yes(opaque.data.containsKey("new-progress.bin")&&!profile.compatibility(opaque).isEmpty());rejects(()->store.apply(opaque,initial));yes(Arrays.equals(FilesEx.read(unknown),new byte[]{4,5}));yes(unknown.delete());});
+        test("pending game transaction preserved and switching blocked",()->{File journal=new File(game,profile.journal);FilesEx.write(journal,"{\"version\":1}".getBytes(StandardCharsets.UTF_8));Snapshot opaque=store.capture();yes(opaque.data.containsKey(profile.journal));rejects(()->store.apply(opaque,initial));yes(journal.exists());yes(journal.delete());});
+        test("official export restore journal blocks capture and switching",()->{for(String name:new String[]{".test-save-move.json",".test-save-move.json.bak"}){File journal=new File(game,name);FilesEx.write(journal,"{}".getBytes(StandardCharsets.UTF_8));rejects(store::capture);rejects(()->store.apply(complete,initial));yes(journal.delete());}yes(store.capture().digest().equals(complete.digest()));});
+        test("unknown snapshots export and import losslessly without enabling restore",()->{Map<String,byte[]> data=new TreeMap<>(initial.data);data.put("future/state.dat",new byte[]{0,1,2});Set<String> scope=new TreeSet<>(initial.scope);scope.add("future/state.dat");Snapshot opaque=new Snapshot("future-v2",scope,data,new JSONObject());JSONObject m=lib.add(opaque,"未来格式","仅归档","backup","future");List<JSONObject> importedFuture=imports(destination,export(lib,Collections.singletonList(m.getString("id"))));Snapshot recovered=destination.read(importedFuture.get(0).getString("id"));yes(recovered.digest().equals(opaque.digest())&&!profile.compatibility(recovered).isEmpty());});
+        test("all fixture operations leave complete original state valid",()->yes(store.capture().digest().equals(complete.digest())));
+        System.out.println("SUCCESS: "+count+" checks");
+    }
+}
+
+```
+
+`tools/build.py`:
+
+```py
+"""Build the standalone APK using local Android SDK tools, without Gradle downloads."""
+from pathlib import Path
+import argparse
+import os
+import shutil
+import subprocess
+import zipfile
+import re
+
+ROOT = Path(__file__).resolve().parents[1]
+VERSION = '0.2.0'
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--debug', action='store_true')
+    parser.add_argument('--version',default=VERSION)
+    parser.add_argument('--version-code',type=int,default=6)
+    args = parser.parse_args()
+    if not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+',args.version) or args.version_code<1:
+        parser.error('A numeric version and positive version code are required')
+    sdk = Path(os.environ.get('ANDROID_HOME', Path.home() / 'AppData/Local/Android/Sdk'))
+    jdk = Path(os.environ.get('LX_MANAGER_JDK', Path.home() / '.jdks/microsoft-jdk-17.0.16'))
+    if not (jdk / 'bin/javac.exe').exists():
+        jdk = next(jdk.glob('jdk-*'))
+    bt = sdk / 'build-tools/36.0.0'
+    android = sdk / 'platforms/android-35/android.jar'
+    build = ROOT / 'build' / ('debug' if args.debug else 'release')
+    build.mkdir(parents=True, exist_ok=True)
+    classes = build / 'classes'
+    assert classes.resolve().is_relative_to((ROOT / 'build').resolve())
+    if classes.exists():
+        shutil.rmtree(classes)
+    classes.mkdir()
+    generated = build / 'generated'
+    generated.mkdir(exist_ok=True)
+    env = dict(os.environ, JAVA_HOME=str(jdk))
+    env['PATH'] = str(jdk / 'bin') + os.pathsep + env.get('PATH', '')
+    def run(*cmd):
+        subprocess.run(list(map(str, cmd)), check=True, cwd=ROOT, env=env)
+    run(bt / 'aapt2.exe', 'compile', '--dir', ROOT / 'app/res', '-o', build / 'resources.zip')
+    manifest = (ROOT / 'app/AndroidManifest.xml').read_text('utf8')
+    if args.debug:
+        manifest = manifest.replace('<application ', '<application android:debuggable="true" ')
+        manifest = manifest.replace('</application>', '<activity android:name=".PreviewActivity" android:exported="true" /><activity android:name=".DeviceSelfTest" android:exported="true" /></application>')
+    (build / 'AndroidManifest.xml').write_text(manifest, 'utf8')
+    run(bt / 'aapt2.exe', 'link', '-I', android, '--manifest', build / 'AndroidManifest.xml', '-A', ROOT / 'app/assets',
+        '--java', generated, '--version-code', args.version_code, '--version-name', args.version, '-o', build / 'unsigned.apk', build / 'resources.zip')
+    sources = list((ROOT / 'app/src').rglob('*.java')) + list(generated.rglob('*.java'))
+    if args.debug:
+        sources += list((ROOT / 'tests/device').rglob('*.java'))
+    run(jdk / 'bin/javac.exe', '-encoding', 'UTF-8', '--release', '8', '-classpath', android, '-d', classes, *sources)
+    with zipfile.ZipFile(build / 'classes.jar', 'w') as jar:
+        for file in classes.rglob('*.class'):
+            jar.write(file, file.relative_to(classes).as_posix())
+    run(jdk / 'bin/java.exe', '-cp', bt / 'lib/d8.jar', 'com.android.tools.r8.D8', '--lib', android,
+        '--min-api', '26', '--output', build, build / 'classes.jar')
+    with zipfile.ZipFile(build / 'unsigned.apk', 'a', compression=zipfile.ZIP_DEFLATED) as apk:
+        apk.write(build / 'classes.dex', 'classes.dex')
+    run(bt / 'zipalign.exe', '-f', '4', build / 'unsigned.apk', build / 'aligned.apk')
+    key = ROOT / '.keys/savemanager-release.p12'
+    key.parent.mkdir(exist_ok=True)
+    if not key.exists():
+        run(jdk / 'bin/keytool.exe', '-genkeypair', '-keystore', key, '-storetype', 'PKCS12',
+            '-storepass', 'lx-manager-local-build', '-keypass', 'lx-manager-local-build', '-alias', 'lx-manager',
+            '-keyalg', 'RSA', '-keysize', '3072', '-validity', '3650', '-dname', 'CN=Null993 LX Save Manager')
+    output = ROOT / 'dist' / ('LX-SaveManager-debug.apk' if args.debug else f'LX-SaveManager-v{args.version}.apk')
+    output.parent.mkdir(exist_ok=True)
+    run(jdk / 'bin/java.exe', '-jar', bt / 'lib/apksigner.jar', 'sign', '--ks', key,
+        '--ks-pass', 'pass:lx-manager-local-build', '--out', output, build / 'aligned.apk')
+    run(jdk / 'bin/java.exe', '-jar', bt / 'lib/apksigner.jar', 'verify', '--verbose', output)
+    print(f'Built {output} ({output.stat().st_size:,} bytes)')
+
+
+if __name__ == '__main__':
+    main()
+
+```
+
+`tools/test.py`:
+
+```py
+"""Host regression using Android org.json and actual POSIX file transactions."""
+from pathlib import Path
+import os
+import shutil
+import subprocess
+import tempfile
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def main():
+    jdk = Path(os.environ.get('LX_MANAGER_JDK', Path.home() / '.jdks/microsoft-jdk-17.0.16'))
+    if not (jdk / 'bin/javac.exe').exists():
+        jdk = next(jdk.glob('jdk-*'))
+    dependency = ROOT / 'build/test-deps/android-json.jar'
+    if not dependency.exists():
+        raise RuntimeError('Download com.vaadin.external.google:android-json:0.0.20131108.vaadin1 to build/test-deps/android-json.jar')
+    bash = os.environ.get('LX_MANAGER_BASH', shutil.which('bash'))
+    if not bash:
+        raise RuntimeError('POSIX bash required for transaction tests')
+    classes = ROOT / 'build/host-tests'
+    classes.mkdir(parents=True, exist_ok=True)
+    sources = ROOT / 'app/src/local/lx/savemanager'
+    names = ['FilesEx', 'Snapshot', 'GameProfile', 'Library', 'Archives', 'GameStore']
+    subprocess.run([str(jdk / 'bin/javac.exe'), '-encoding', 'UTF-8', '--release', '8', '-classpath', str(dependency),
+                    '-d', str(classes), *[str(sources / (n + '.java')) for n in names], str(sources.parent / 'common/ProgressData.java'), str(ROOT / 'tests/host/CoreTests.java')], check=True)
+    output = ROOT / 'dist/verification'
+    output.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='fixtures-', dir=ROOT / 'build') as work:
+        result = subprocess.run([str(jdk / 'bin/java.exe'), '-Dfile.encoding=UTF-8', '-Dlx.bash=' + str(bash),
+                                 '-cp', str(classes) + os.pathsep + str(dependency), 'local.lx.savemanager.CoreTests',
+                                 work, str(ROOT / 'app/assets/profile.json'), str(ROOT / 'app/assets/new-roles.json')],
+                                capture_output=True, encoding='utf8')
+        (output / 'host-tests.txt').write_text(result.stdout + result.stderr, 'utf8')
+        print(result.stdout)
+        if result.returncode:
+            print(result.stderr)
+        result.check_returncode()
+
+
+if __name__ == '__main__':
+    main()
+
+```
+
+`tools/ui_check.py`:
+
+```py
+"""Debug fixture UI audit; never connects the preview activity to the live game."""
+from pathlib import Path
+import argparse
+import json
+import re
+import subprocess
+import time
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parents[1]
+PACKAGE = 'local.lx.savemanager'
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('device')
+    parser.add_argument('--scales', default='1.0,1.5,2.0')
+    args = parser.parse_args()
+    output = ROOT / 'dist/verification/ui' / args.device
+    output.mkdir(parents=True, exist_ok=True)
+
+    def adb(*cmd, check=True):
+        return subprocess.run(['adb', '-s', args.device, *map(str, cmd)], check=check, capture_output=True).stdout
+
+    def screen():
+        value = adb('shell', 'wm', 'size').decode().strip().splitlines()
+        width, height = map(int, re.findall(r'(\d+)x(\d+)', value[-1])[0])
+        return width, height
+
+    def nodes():
+        adb('shell', 'uiautomator', 'dump', '/sdcard/lx-manager-check.xml')
+        data = adb('exec-out', 'cat', '/sdcard/lx-manager-check.xml')
+        return list(ET.fromstring(data).iter('node')), data
+
+    def box(node):
+        return tuple(map(int, re.findall(r'\d+', node.get('bounds'))))
+
+    def tap(node):
+        x1, y1, x2, y2 = box(node)
+        adb('shell', 'input', 'tap', (x1 + x2) // 2, (y1 + y2) // 2)
+
+    def scroll_to(match, tries=8):
+        """Scroll the page body until the wanted node is on screen and tappable."""
+        width, height = screen()
+        for _ in range(tries):
+            ns, _ = nodes()
+            for n in ns:
+                if match(n) and n.get('enabled') == 'true':
+                    x1, y1, x2, y2 = box(n)
+                    if y1 >= 0 and y2 <= height:
+                        return n
+            adb('shell', 'input', 'swipe', width // 2, int(height * .62), width // 2, int(height * .38), 320)
+            time.sleep(.3)
+        raise AssertionError('target node is not reachable by scrolling')
+
+    def by_text(value):
+        return lambda n: n.get('text') == value
+
+    def by_desc(value):
+        return lambda n: n.get('content-desc') == value
+
+    def screenshot(name):
+        b = adb('exec-out', 'screencap', '-p')
+        start = b.find(b'\x89PNG\r\n\x1a\n')
+        assert start >= 0
+        (output / (name + '.png')).write_bytes(b[start:])
+
+    def boot(page, scale, gate=None):
+        adb('shell', 'run-as', PACKAGE, 'mkdir', '-p', 'files')
+        subprocess.run(['adb', '-s', args.device, 'shell', 'run-as', PACKAGE, 'tee', 'files/preview-font.txt'],
+                       input=scale.encode(), capture_output=True, check=True)
+        adb('shell', 'run-as', PACKAGE, 'rm', '-f', 'files/layout-audit.json')
+        extra = ['--es', 'gate', gate] if gate else []
+        adb('shell', 'am', 'start', '-W', '-S', '-n', PACKAGE + '/.PreviewActivity', '--ei', 'page', page,
+            '--ef', 'font_scale', scale, '--ez', 'sandbox_preview', 'true', *extra)
+        for _ in range(40):
+            raw = adb('shell', 'run-as', PACKAGE, 'cat', 'files/layout-audit.json', check=False)
+            try:
+                result = json.loads(raw)
+                if abs(result['font_scale'] - float(scale)) < .01:
+                    return result
+            except (ValueError, KeyError):
+                pass
+            time.sleep(.15)
+        raise AssertionError('preview did not produce layout audit')
+
+    def check_navigation():
+        width, height = screen()
+        ns, _ = nodes()
+        nav = [n for n in ns if n.get('content-desc', '').startswith('导航：')]
+        assert len(nav) == 5, [n.get('content-desc') for n in nav]
+        for item in nav:
+            x1, y1, x2, y2 = box(item)
+            assert item.get('enabled') == 'true'
+            assert y2 <= height, ('navigation cut by screen bottom', item.get('content-desc'), y2, height)
+            labels = [n for n in ns if n.get('text') and box(n)[0] >= x1 and box(n)[2] <= x2]
+            texts = [n.get('text') for n in labels]
+            assert texts, ('navigation item has no visible label', item.get('content-desc'))
+            for n in labels:
+                assert box(n)[3] <= y2, ('navigation label clipped', n.get('text'), box(n), y2)
+
+    checks = []
+    adb('shell', 'run-as', PACKAGE, 'rm', '-rf', 'files/ui-fixture-library')  # 每次用最新的界面样本重建存档库
+    for scale in args.scales.split(','):
+        for page in range(6):
+            result = boot(page, scale)
+            ns, xml = nodes()
+            texts = [n.get('text', '') for n in ns]
+            assert not result['issues'], result
+            assert not any('SPAKE666' in s or '已领取' in s or '未领取' in s for s in texts)
+            check_navigation()
+            if page == 4:
+                assert any('Null993' in s for s in texts)
+            name = f'page-{page}-font-{scale}'
+            screenshot(name)
+            (output / (name + '.xml')).write_bytes(xml)
+            checks.append({'page': page, 'font_scale': float(scale), 'layout_issues': []})
+
+    # 进度文件清单：小屏需先滚动到按钮，再确认图例和末行都完整显示
+    boot(0, '1.0')
+    tap(scroll_to(by_text('查看进度文件清单')))
+    ns, _ = nodes()
+    text = '\n'.join(n.get('text', '') for n in ns)
+    assert '● 文件存在' in text and '○ 文件原本不存在' in text
+    assert '不影响备份完整性' in text
+    assert ' KB' in text or ' B' in text
+    screenshot('file-list-legend')
+
+    # Root 门禁：已 Root 未授权时应给出请求授权入口；未 Root 时不显示该入口
+    boot(0, '1.0', gate='rooted')
+    ns, _ = nodes()
+    texts = [n.get('text', '') for n in ns]
+    assert any(s == '已检测到 Root' for s in texts), texts
+    assert '请求 Root 授权' in texts
+    assert any('ReSukiSU' in s for s in texts)
+    assert not any(n.get('content-desc', '').startswith('导航：') for n in ns)
+    screenshot('gate-rooted')
+    boot(0, '1.0', gate='none')
+    ns, _ = nodes()
+    texts = [n.get('text', '') for n in ns]
+    assert any(s == '未检测到 Root' for s in texts), texts
+    assert '请求 Root 授权' not in texts
+    assert '重新检测' in texts
+    screenshot('gate-none')
+
+    # 存档库分类：手动／自动两组，可分别折叠
+    boot(1, '1.0')
+    tap(scroll_to(by_text('手动备份')))
+    ns, _ = nodes()
+    texts = [n.get('text', '') for n in ns]
+    assert not any('第一周目' in s or '长名称布局测试' in s for s in texts), texts
+    assert any(s == '自动备份' for s in texts)
+    tap(next(n for n in ns if n.get('text') == '自动备份'))
+    ns, _ = nodes()
+    assert not any(s.startswith('自动备份 ·') for s in (n.get('text') or '' for n in ns))
+    tap(next(n for n in ns if n.get('text') == '手动备份'))
+    ns, _ = nodes()
+    texts = [n.get('text', '') for n in ns]
+    assert any('长名称布局测试' in s for s in texts)
+    screenshot('library-sections')
+
+    # 备注输入：只应在备注框获得焦点并显示输入内容
+    boot(2, '1.0')
+    tap(scroll_to(by_desc('新建存档备注')))
+    adb('shell', 'input', 'text', 'layout_test')
+    ns, _ = nodes()
+    fields = [n for n in ns if n.get('class') == 'android.widget.EditText']
+    assert any(n.get('content-desc') == '新建存档备注' and n.get('text') == 'layout_test' for n in fields)
+    assert not any(n.get('content-desc') == '新建存档名称' and n.get('text') == 'layout_test' for n in fields)
+    screenshot('new-save-keyboard-focus')
+    adb('shell', 'input', 'keyevent', 'BACK')
+
+    # 多选导出：勾选两份后回到传输页显示选择数量
+    boot(3, '1.0')
+    tap(scroll_to(by_text('选择要导出的存档')))
+    time.sleep(.8)
+    screenshot('export-picker')
+    for _ in range(2):
+        ns, _ = nodes()
+        choices = [n for n in ns if n.get('class') == 'android.widget.CheckedTextView' and n.get('checked') == 'false']
+        assert choices, 'no unchecked save entry in export picker'
+        tap(choices[0])
+        time.sleep(.4)
+    ns, _ = nodes()
+    assert sum(1 for n in ns if n.get('class') == 'android.widget.CheckedTextView' and n.get('checked') == 'true') == 2
+    tap(next(n for n in ns if n.get('text') == '确定'))
+    ns, _ = nodes()
+    assert any(n.get('text') == '已选择 2 份存档' for n in ns)
+    screenshot('export-two-selected')
+
+    result = {'result': 'pass', 'device': args.device, 'screen': screen(), 'pages_and_scales': checks,
+              'file_legend': 'pass', 'library_sections': 'pass', 'root_gate': 'pass', 'keyboard_focus': 'pass', 'multi_export_selection': 'pass',
+              'navigation_fits_screen': 'pass', 'live_game_connected': False}
+    (output / 'result.json').write_text(json.dumps(result, indent=2, ensure_ascii=False), 'utf8')
+    print(json.dumps({'result': 'pass', 'device': args.device, 'page_scale_checks': len(checks),
+                      'screen': result['screen']}))
+
+
+if __name__ == '__main__':
+    main()
+
+```
+
+`tools/verify_release.py`:
+
+```py
+"""Release APK checks: signature, packaging and that the signing key stays out of git."""
+from pathlib import Path
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import zipfile
+
+ROOT = Path(__file__).resolve().parents[1]
+APK = ROOT / 'dist' / 'LX-SaveManager-v0.2.0.apk'
+EXPECTED_DN = 'CN=Null993 LX Save Manager'
+
+
+def main():
+    sdk = Path(os.environ.get('ANDROID_HOME', Path.home() / 'AppData/Local/Android/Sdk'))
+    bt = sdk / 'build-tools/36.0.0'
+    jdk = Path(os.environ.get('LX_MANAGER_JDK', Path.home() / '.jdks/microsoft-jdk-17.0.16'))
+    if not (jdk / 'bin/javac.exe').exists():
+        jdk = next(jdk.glob('jdk-*'))
+    verify = subprocess.run([str(jdk / 'bin/java.exe'), '-jar', str(bt / 'lib/apksigner.jar'), 'verify',
+                             '--print-certs', '-v', str(APK)], capture_output=True, text=True, check=True).stdout
+    badging = subprocess.run([str(bt / 'aapt2.exe'), 'dump', 'badging', str(APK)],
+                             capture_output=True, text=True, encoding='utf8', check=True).stdout
+    old_verify=subprocess.check_output([str(jdk/'bin/java.exe'),'-jar',str(bt/'lib/apksigner.jar'),'verify','--print-certs',str(ROOT/'dist/LX-SaveManager-v0.1.4.apk')],text=True)
+    cert_sha=lambda text:next(line.split(': ',1)[1] for line in text.splitlines() if 'certificate SHA-256 digest:' in line)
+    assert cert_sha(verify)==cert_sha(old_verify)
+    assert "versionCode='6'" in badging and "versionName='0.2.0'" in badging and 'application-debuggable' not in badging
+    assert 'Verifies' in verify
+    assert 'APK Signature Scheme v2): true' in verify and 'APK Signature Scheme v3): true' in verify
+    certificate = next(line.split(': ', 1)[1] for line in verify.splitlines() if 'certificate DN:' in line)
+    assert certificate == EXPECTED_DN, certificate
+    version = next(line for line in badging.splitlines() if line.startswith('package:'))
+    with zipfile.ZipFile(APK) as apk:
+        names = apk.namelist()
+        dex = apk.read('classes.dex')
+        for asset in ('profile.json', 'new-roles.json'):
+            assert apk.read('assets/' + asset) == (ROOT / 'app/assets' / asset).read_bytes(), asset
+    for debug_only in (b'DeviceSelfTest', b'PreviewActivity'):
+        assert debug_only not in dex, debug_only
+    assert 'assets/catalog.json' not in names
+    tracked = subprocess.run(['git', 'ls-files', '.keys'], capture_output=True, text=True, check=True).stdout.strip()
+    assert not tracked, tracked
+    report = {'result': 'pass', 'apk': APK.name, 'sha256': hashlib.sha256(APK.read_bytes()).hexdigest(),
+              'size': APK.stat().st_size, 'package_line': version, 'signer_dn': certificate,'same_certificate_as_0_1_4':True,'signer_sha256':cert_sha(verify),
+              'signature_schemes': ['v2', 'v3'], 'debug_only_classes_in_release': False,
+              'assets_match_source': True, 'signing_key_tracked_by_git': bool(tracked)}
+    output = ROOT / 'dist/verification/release-check.json'
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(report, indent=2, ensure_ascii=False), 'utf8')
+    print(json.dumps(report, indent=2, ensure_ascii=False))
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+```
