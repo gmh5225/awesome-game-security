@@ -1756,6 +1756,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/wuying2021/mibox3s-utgard-lpe [Documented Mali-400 GPU write-back chain from adb shell to root with SELinux permissive on Xiaomi Mi Box 3S (Utgard / kernel 3.14)]
 - https://github.com/0xCD4/SSL-bypass [Root Detection & SSL Bypass Script]
 - https://github.com/Nai64/Nai64Patches [Curated Morphe patch source for Android games — root/integrity bypass, license checks, Play Integrity spoof, and SSL pinning]
+- https://github.com/Null993/LX-SaveEditor [Root-gated Android APK to read, edit, back up, and atomically replace local-role.json and related LX offline test-game server save files with integrity checks]
+- https://github.com/Null993/LX-SaveManager [Root-gated Android save library for local.lx.offline.game: full progress backup/restore, multi-slot library, ZIP import/export, and schema-checked switching]
 - https://github.com/quarkslab/android-hardware-attestation-demo [Bypass backend hardware Key Attestation on rooted/unlocked-bootloader devices by Frida-relaying the backend challenge to a clean attestation oracle — genuine TEE/StrongBox chain, no forgery]
 - https://github.com/eltavine/Duck-Detector-Refactoring [DuckDetector refactor: Android local device-integrity inspector for root tampering, runtime hooking, mount anomalies, attestation trust, and virtualization evidence]
 - https://github.com/systemnb/RootSocketKit [Root privilege IPC via Unix Socket — Magisk/KernelSU/APatch compatible JNI client, reinforcement-proof, low-latency root ops (OpenProcess, ReadMemory)]
