@@ -5255,6 +5255,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/talsec/Free-RASP-Flutter [Flutter freeRASP plugin for mobile root/jailbreak, Frida, hook, emulator, tamper, and integrity detection]
 - https://github.com/kauemurakami/flutter_tamper_detector [Flutter plugin for root, Frida/Xposed/Cydia hooks, emulator, debug, and non-store install detection with optional process exit or native onCreate checks]
 - https://github.com/talsec/Free-RASP-iOS [Native iOS freeRASP SDK for jailbreak, Frida, hook, emulator, tamper, and repackaging detection]
+- https://github.com/0xdhanesh/Kaisel [Open iOS RASP reference (Swift + C) with jailbreak, Frida, injection, and app-integrity checks, demo apps, App Attest sealing, and a Python attestation server for lab assessments (iOS 15–27)]
 - https://github.com/talsec/Free-RASP-KMP [Kotlin Multiplatform freeRASP SDK for mobile root/jailbreak, Frida, hook, emulator, tamper, and integrity detection]
 - https://github.com/AfanasievN/react-native-device-risk-signals [React Native device-intel TurboModule: root/jailbreak, emulator, Frida, and tamper signals without vendor backend]
 - https://github.com/Binuka97/cordova-plugin-rootguard [Cordova plugin detecting Android root (Magisk/KernelSU/APatch), Frida, and iOS jailbreak/Frida]
