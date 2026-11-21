@@ -3349,6 +3349,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/EasyAntiCheat-Reversing
 - https://github.com/BishopTopG/all-about-eac [Memflow-based external VM reverse-engineering dossier on a captured EasyAntiCheat_EOS.sys build, documenting kernel callbacks, minifilter policy, and device IPC with reproducible evidence]
 - https://github.com/jhon2f/fortnite-ac-reversal [Late-2026 Fortnite/EAC stack reversal: driver IOCTLs, rules.bin, HWID/fingerprint catalog, telemetry, trust-score model, and compilable EAC user-mode stub PoC]
+- https://github.com/AIN-sch/outlast-trials-cheat [The Outlast Trials UE4.27 SDK dump plus verified Easy Anti-Cheat kernel VM analysis and documented injection workflow notes]
 - https://github.com/19h/eac-analysis [eac.elf VM reconstruction: dlopen/trace harness, dispatch & VMTAIL probes, bytecode recover/IR/CFG, handler ISA, static path replay, MBA reducers; Linux ELF]
 - https://github.com/unicbda-droid/cachyos-eac-secure-boot [CachyOS dual UEFI boot paths: daily Secure Boot GRUB plus CachyOS-signed EAC kernel (lockdown=integrity, module.sig_enforce) for Easy Anti-Cheat Linux v2]
 - https://github.com/Sinclairq/hiearchy-eac [Integrity Checks]
@@ -4606,11 +4607,13 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/abczsl520/game-quality-gates [OpenClaw agent skill with wiki-documented server-side anti-cheat patterns for browser/H5 games (raid tokens, duration/score sanity, atomic purchases)]
 - https://github.com/kodeni-am/leaderboard [Open-source multi-tenant leaderboard API (Go/Redis) with durable ingest, scalable ranking, and optional per-app HMAC-signed score submits with replay protection]
 - https://github.com/AtakanKeser/BlastScale [Server-authoritative mobile puzzle backend with move-replay anti-cheat, exactly-once rewards, and LiveOps tooling]
+- https://github.com/DMN-Software/dmn_minigame [Embeddable browser minigames whose leaderboard scores come only from server-side input replay, not client-submitted totals]
 - https://github.com/StanislawGolec/Ultimo [Java 21 authoritative multiplayer card-game server with fog-of-war hand hiding, virtual threads, and WebSockets]
 - https://github.com/Ogonx/anticheat-lab [Six-month self-study lab attacking and defending deliberately vulnerable own-game builds, with ASM/C++ memory exercises, devlog, and VM-only scope]
 - https://github.com/senolbasyigit/anticheat-lab [Claude Code skill plus Python scripts to memory-scan your own dev builds (devbuild.json guard), report exposed client values, and suggest server-side validation fixes; optional pywinauto RPA mode]
 - https://github.com/Ibrahim9876Q/roblox-exploit-auditor [Roblox Studio plugin that scans Luau for insecure remotes, backdoors, movement gaps, and client-trusted logic, with live Studio cheat trials and Markdown reports]
 - https://github.com/jshdcn/anti-cheating-assistant [AI agent skill with anti-cheat playbooks, underground-slang lexicon sync, three-flow risk modeling, and Python workflows for business security consulting]
+- https://github.com/smoothjazzchazz/game-integrity-code [Lean 4 formalization and paper draft on adversarially resilient game state transitions and legal-history enforcement]
 
 > Compile Time
 - https://github.com/ManulMap/malstring [Using c++23 compile-time magic to produce obfuscated PIC strings and arrays]
@@ -4937,6 +4940,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/hckerelauk-git/amongusanticheat [Among Us client-side BepInEx 6 / IL2CPP anti-cheat (ACE) with rule-based detections, in-game settings UI, AI review, and RPC flood protection]
 - https://github.com/xav0dev/AU-Anticheat [Among Us BepInEx IL2CPP host-side anti-cheat and lobby moderation with evidence-based RPC checks and configurable host tools]
 - https://github.com/Jolynes-Mods/Among-Us-3D-VR-AntiCheat [MelonLoader C# host-side anti-cheat for Among Us 3D/VR with Harmony module verifications, configurable checks, and player whitelist]
+- https://github.com/AmongShieldServer/AmongShield [Free Among Us community-server anti-cheat: ESP deception for role cheats, cheat kick/announce, and host lobby commands without client mods]
 - https://github.com/DoomSalat/PEAK-mode-AntiCheat-Sentinel [BepInEx host-side anti-cheat for PEAK that attributes suspicious item spawns to Photon senders and blocks illegal grants on the host]
 - https://github.com/swheettaos/crewtools [Host-only BepInEx 6 IL2CPP plugin for Moon Sweepers crew games: permissions, spending caps, protected bases, and cheat catching]
 - https://github.com/uamo11/y0x1Server [Piqueserver Ace of Spades dedicated server fork with persistent HWID bans and server-side speed/fly/teleport, reach, rapid-fire, and snap-aim checks]
