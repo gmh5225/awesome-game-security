@@ -5,6 +5,7 @@ topics: [anti-cheat]
 sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/README-categories.md
+  - wiki/sources/descriptions/gamespice-platform__anticheat.md
   - wiki/sources/descriptions/grimh3xx__dmaguard.md
   - wiki/sources/descriptions/Tobias1205__AntiCheat.md
   - wiki/sources/descriptions/LiteLDev__LeviAntiCheat.md
@@ -1385,6 +1386,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 - [[r6-siege-battleye-launch-bug]] — R6 Siege Y11S3 BattlEye/Sentinel handshake failure on standard launch paths with BEDaisy telemetry, checksum evidence, and working bypass via RainbowSixHelper.exe (brandenbailey23; Explore AntiCheat System:BE launch regression report) (source: wiki/sources/descriptions/brandenbailey23__r6-siege-battleye-launch-bug.md)
 - [[void-engine]] — Godot 4.x editor plugin with WhiteVoid AntiCheat autoload (debugger/process/window detection, honeypot integrity checks, HWID ban enforcement); GDScript; VoidNet ENet/Firebase WebRTC multiplayer stack; lannden1245; Open Source Anti Cheat System) (source: wiki/sources/descriptions/lannden1245__Void-Engine.md)
 - [[dot-server-security]] — Godot 4 dedicated-server security addon (GDScript rule engine; movement re-simulation + shot validation; sliding-window rate limits; warn/gag/mute/kick/ban escalation; external ban feeds; dry-run default; modcommunity; Open Source Anti Cheat System) (source: wiki/sources/descriptions/modcommunity__dot-server-security.md)
+- [[gamespice-anticheat]] — Godot 4.7+ GameSpice addon (GDScript; DotCommandSanity movement/look/command-rate checks; DotSuspicionWatch decaying per-player suspicion from speed/teleport/aim-snap reports; configurable warn/kick/ban escalation hooks without in-addon enforcement; layers on GameSpice Server Security; YAML/env config; headless dedicated-server friendly; gamespice-platform; Open Source Anti Cheat System) (source: wiki/sources/descriptions/gamespice-platform__anticheat.md)
 - [[guard-game]] — Node.js engine-agnostic server-side AC (Parko-Developer; clients report movement/actions; server validates against configurable world profiles; speed/jump/teleport/fly/hover, packet flood, timestamp/sequence spoofing, item/quest abuse; strike warnings + auto-ban; TCP JSON lines + HTTP ingest; optional HMAC frame signing; Unity/Godot/Roblox/JS SDKs; Docker; Open Source Anti Cheat System) (source: wiki/sources/descriptions/Parko-Developer__guard-game.md)
 - [[y0x1-server]] — Ace of Spades 0.75 piqueserver/pyspades dedicated host (uamo11; Python 3.10+ + Cython/C++; persistent HWID bans; server-side speed/fly/teleport, reach, rapid-fire, snap-aim checks; optional anticheat/aimbot-heuristic scripts; Docker, ban pub/sub, votekick; Open Source Anti Cheat System) (source: wiki/sources/descriptions/uamo11__y0x1Server.md)
 - [[ricochet-deobfuscator]] — C/C++ Ricochet deobfuscator (driver / memory analysis; explore anticheat:ricochet) (source: wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md)
