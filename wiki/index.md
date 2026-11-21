@@ -2368,6 +2368,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KACE](entities/kace.md) — RING3 kernel anti-cheat/driver emulator (PE mapping, memory tracking, anti-debug/anti-emulation; self context / Unicorn; waryas + Qfrost911)
 - [KUBERA](entities/kubera.md) — platform-independent x86 Windows user+kernel emulator (research; cheat / DBI; binsnake)
 - [Kagura](entities/kagura.md) — LLVM pass plugin: CFG/string obfuscation, anti-tamper, anti-debug (mobile/desktop/Wasm)
+- [Kaisel](entities/kaisel.md) — Open iOS RASP reference (Swift + C; jailbreak/Frida/injection/integrity checks, demo apps, App Attest sealing, Python attestation server; iOS 15–27 lab baseline)
 - [Karlann](entities/karlann.md) — KM keyboard injection + WSK socket PoC (Kbd.c / Wsk.c; libwsk; cheat / Keyboard)
 - [Kasumi](entities/kasumi.md) — Anatdx Android GKI LKM root-hide framework (ftrace/tracepoint syscall/VFS/procfs hooks; mount/SELinux/file-attribute spoof; kernel-level path manipulation; cheat / Kernel-level path manipulation and hiding framework for Android GKI/Linux)
 - [Katapult AntiCheat](entities/katapult-anticheat.md) — NeoForge **1.21.1** client/server mod integrity AC (SHA-256 checksums on client mods and resource packs; server whitelists; join/reload pack monitoring; hot-reload config; Gitex68; Anti Cheat / game:minecraft)
