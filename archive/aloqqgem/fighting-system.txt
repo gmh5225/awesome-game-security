@@ -1,0 +1,5387 @@
+Project Path: arc_aloqqgem_fighting-system_v7cao2ul
+
+Source Tree:
+
+```txt
+arc_aloqqgem_fighting-system_v7cao2ul
+├── README.md
+└── src
+    ├── ReplicatedStorage
+    │   └── Combat
+    │       ├── Anim.luau
+    │       ├── Config.luau
+    │       └── Hitbox.luau
+    ├── ServerScriptService
+    │   ├── Combat
+    │   │   ├── Abilities.luau
+    │   │   ├── AntiCheat.luau
+    │   │   ├── CombatService.luau
+    │   │   ├── Dummy.luau
+    │   │   ├── Fighters.luau
+    │   │   ├── History.luau
+    │   │   ├── Main.server.luau
+    │   │   └── Ragdoll.luau
+    │   └── Tests
+    │       ├── RunTests.server.luau
+    │       ├── Specs
+    │       │   ├── AntiCheatSpec.luau
+    │       │   ├── ConfigSpec.luau
+    │       │   ├── HistorySpec.luau
+    │       │   ├── HitPipelineSpec.luau
+    │       │   └── HitboxSpec.luau
+    │       └── TestKit.luau
+    └── StarterPlayer
+        ├── StarterCharacterScripts
+        │   ├── Animate.client.luau
+        │   └── Health.server.luau
+        └── StarterPlayerScripts
+            └── CombatClient
+                ├── Fx.luau
+                ├── HUD.luau
+                ├── LockOn.luau
+                ├── Sfx.luau
+                └── init.client.luau
+
+```
+
+`README.md`:
+
+```md
+# Fighting System (Roblox / Luau)
+
+A melee combat system with lag compensation, client-side prediction and a server-side anti-cheat:
+M1 combos, block / parry / guard break, dashes with i-frames, a four-ability kit, ragdolls and training dummies.
+
+- **~5,100 lines of Luau**, no external libraries
+- **Lag compensation:** the server rewinds targets to what the attacker actually saw
+- **Prediction:** the client plays hits immediately, the server confirms or rejects them
+- **42 automated tests** in 5 specs, including an integration test of the real hit pipeline
+
+<!-- Gameplay video: add link here -->
+
+## Controls
+
+| Key | Action |
+|---|---|
+| **M1** | Combo, the 4th hit launches |
+| **F** | Block; tap right before a hit to parry |
+| **Q** | Dash; sideways or back = dodge with i-frames |
+| **1 / 2 / 3 / 4** | Rush Grab, Ground Slam, Barrage, Uppercut |
+| **T** | Lock on to a target |
+| **Shift** | Lock camera |
+| **B** | Training dummy mode: idle / block / fight |
+
+Hits chain: M1 ×4 → dash → M1 ×4 → ability → M1… (any landed non-M1 hit cancels the M1 end lag).
+
+## The interesting parts
+
+### Lag compensation
+[`History`](src/ServerScriptService/Combat/History.luau) stores every fighter's root CFrame with the server time on each Heartbeat.
+Each request carries the client's `GetServerTimeNow()` stamp; [`CombatService`](src/ServerScriptService/Combat/CombatService.luau) trusts it only within
+`MaxRewind` (0.3 s), rewinds targets to that moment and runs the hit test there. The attacker's reported position is
+accepted only within a tolerance that grows with speed and latency, otherwise the server's own copy is used.
+
+### Shared hit test = prediction that agrees
+[`Hitbox`](src/ReplicatedStorage/Combat/Hitbox.luau) is the same code on both sides: the server runs it against rewound positions,
+the client against what it sees. The client acts immediately (animation, lunge, predicted hit effects), and predicted
+hits are matched to the server's results by sequence number, so nothing plays twice.
+
+### Anti-cheat that doesn't punish lag
+[`AntiCheat`](src/ServerScriptService/Combat/AntiCheat.luau) splits responses by how sure it can be:
+- **Requests** must match a schema (known action and keys, right types, finite numbers) before any handler sees them.
+  Only requests an honest client can't produce earn strikes; strikes decay; too many is a kick.
+- **Movement** is judged over a sliding window: actual travel vs walk speed plus credit for every burst the server approved
+  (dash, rush, knockback). Too far means a snap back, never a kick, because lag can look exactly like cheating.
+  A speed hacker just keeps getting pulled back and gains nothing.
+
+### One hit pipeline
+Players, abilities and dummies all go through `CombatService.ApplyHit`: block and parry from the front, posture and guard
+break, hitstun, hitstop, knockback, ragdoll on launchers. An interrupted fighter's token is bumped, so pending attacks
+from before the interruption are dropped.
+
+### Procedural animation
+[`Anim`](src/ReplicatedStorage/Combat/Anim.luau) builds each pose from three layers (locomotion, held states like block or stun,
+one-shot moves) and drives every joint through a damped spring: shoulders and waist overshoot slightly for follow-through,
+wrists and head lag behind. Hitstop freezes a rig's animation clock so a move resumes exactly where it stopped.
+
+## Tests
+
+| Spec | Tests | Covers |
+|---|---:|---|
+| HitPipeline | 14 | The real `ApplyHit` on two real rigs: damage, i-frames at the attacker's time, block, parry, guard break, armor, ragdoll |
+| Config | 10 | Tuning values that must agree with each other |
+| AntiCheat | 7 | Request validation and the punishment policy |
+| Hitbox | 7 | The shared hit test |
+| History | 4 | Lag compensation buffer |
+
+Tests run on every Studio playtest (never on a live server).
+
+## Structure
+
+| Module | Role |
+|---|---|
+| [`Config`](src/ReplicatedStorage/Combat/Config.luau) | Every combat number, read by both server and client |
+| [`Main`](src/ServerScriptService/Combat/Main.server.luau) | Players → fighters, request routing and rate limit, Heartbeat |
+| [`CombatService`](src/ServerScriptService/Combat/CombatService.luau) | M1 chain, block / parry, dash, the hit pipeline |
+| [`Abilities`](src/ServerScriptService/Combat/Abilities.luau) | Rush Grab, Ground Slam, Barrage, Uppercut |
+| [`Fighters`](src/ServerScriptService/Combat/Fighters.luau) | Server-side fighter state |
+| [`History`](src/ServerScriptService/Combat/History.luau) | Position history for rewinding |
+| [`AntiCheat`](src/ServerScriptService/Combat/AntiCheat.luau) | Request schemas, movement checks, strikes |
+| [`Ragdoll`](src/ServerScriptService/Combat/Ragdoll.luau) | Launch and death ragdolls |
+| [`Dummy`](src/ServerScriptService/Combat/Dummy.luau) | Training dummies with a small AI |
+| [`CombatClient`](src/StarterPlayer/StarterPlayerScripts/CombatClient) | Input, prediction, lock-on, HUD, effects, sound |
+
+The scripts expect the remotes under `ReplicatedStorage.Combat.Remotes` and the arena from the place.
+Sounds come from the Pro Sound Effects library licensed by Roblox.
+
+## Contact
+
+Discord: **aloqq69**
+
+```
+
+`src/ReplicatedStorage/Combat/Anim.luau`:
+
+```luau
+-- Procedural R15 animation (no uploaded animations).
+-- Every frame each rig's pose is built from 3 layers and written to Motor6D.Transform:
+--   1. locomotion: guard stance, walk / strafe / run, air, landing dip
+--   2. hold: long poses driven by state (block, stunned, grabbed, ...)
+--   3. shot: one-shot keyframed moves (punches, kick, dashes, abilities, hurt)
+-- Each joint follows its target through a damped spring (rotation + offset): a little overshoot on
+-- shoulders / waist / neck gives follow-through, wrists and head lag behind (overlap), legs stay stiff.
+-- Hitstop freezes a rig's clock, so the pose holds and the shot resumes exactly where it stopped.
+local Anim = {}
+
+local rad = math.rad
+local I = CFrame.identity
+
+-- joint helper: rotations in degrees, applied Z (roll) -> X (pitch) -> Y (yaw); optional offset
+local function J(x: number?, y: number?, z: number?, px: number?, py: number?, pz: number?): CFrame
+	local cf = CFrame.fromEulerAnglesYXZ(rad(x or 0), rad(y or 0), rad(z or 0))
+	if px or py or pz then
+		cf = CFrame.new(px or 0, py or 0, pz or 0) * cf
+	end
+	return cf
+end
+Anim.J = J
+
+local JOINTS = {
+	Root = { "LowerTorso", "Root" },
+	Waist = { "UpperTorso", "Waist" },
+	Neck = { "Head", "Neck" },
+	RShoulder = { "RightUpperArm", "RightShoulder" },
+	RElbow = { "RightLowerArm", "RightElbow" },
+	RWrist = { "RightHand", "RightWrist" },
+	LShoulder = { "LeftUpperArm", "LeftShoulder" },
+	LElbow = { "LeftLowerArm", "LeftElbow" },
+	LWrist = { "LeftHand", "LeftWrist" },
+	RHip = { "RightUpperLeg", "RightHip" },
+	RKnee = { "RightLowerLeg", "RightKnee" },
+	RAnkle = { "RightFoot", "RightAnkle" },
+	LHip = { "LeftUpperLeg", "LeftHip" },
+	LKnee = { "LeftLowerLeg", "LeftKnee" },
+	LAnkle = { "LeftFoot", "LeftAnkle" },
+}
+local NAMES = {}
+for name in JOINTS do
+	table.insert(NAMES, name)
+end
+
+-- joint springs: { stiffness (rad/s), damping ratio }. Ratio < 1 overshoots a little (follow-through);
+-- legs near 1 so feet don't slide; wrists and neck softer so they trail the arm / torso (overlap)
+local SPRING = {
+	Root = { 30, 0.72 }, Waist = { 26, 0.5 }, Neck = { 18, 0.45 },
+	RShoulder = { 28, 0.45 }, RElbow = { 30, 0.7 }, RWrist = { 20, 0.45 },
+	LShoulder = { 28, 0.45 }, LElbow = { 30, 0.7 }, LWrist = { 20, 0.45 },
+	RHip = { 36, 0.95 }, RKnee = { 36, 0.95 }, RAnkle = { 30, 0.9 },
+	LHip = { 36, 0.95 }, LKnee = { 36, 0.95 }, LAnkle = { 30, 0.9 },
+}
+local SUBSTEP = 1 / 120 -- spring integration step (stable at low fps)
+
+local UPPER = { Waist = true, Neck = true, RShoulder = true, RElbow = true, RWrist = true, LShoulder = true, LElbow = true, LWrist = true }
+local UPPER_ROOT = table.clone(UPPER)
+UPPER_ROOT.Root = true
+local FULL = {}
+for _, n in NAMES do
+	FULL[n] = true
+end
+local LEGS = { Root = true, RHip = true, RKnee = true, RAnkle = true, LHip = true, LKnee = true, LAnkle = true }
+-- strikes: whole upper body + hips, legs at 75% so the step reads but walking still shows through
+local STRIKE: { [string]: any } = table.clone(UPPER_ROOT)
+for n in LEGS do
+	if n ~= "Root" then
+		STRIKE[n] = 0.75
+	end
+end
+Anim.Masks = { Upper = UPPER, UpperRoot = UPPER_ROOT, Full = FULL, Legs = LEGS, Strike = STRIKE }
+
+type Pose = { [string]: CFrame }
+
+-- mask value: true = full weight, number = partial weight, nil = joint untouched
+local function blend(a: Pose, b: Pose, w: number, mask: { [string]: any }?): Pose
+	local out = table.clone(a)
+	for _, n in NAMES do
+		local mw = if mask then mask[n] else true
+		if mw then
+			local k = if mw == true then w else w * mw
+			out[n] = (a[n] or I):Lerp(b[n] or I, k)
+		end
+	end
+	return out
+end
+
+local EASE = {
+	smooth = function(a) return a * a * (3 - 2 * a) end,
+	out = function(a) return 1 - (1 - a) * (1 - a) * (1 - a) end, -- snaps in fast: strikes
+	linear = function(a) return a end,
+}
+
+-- frames = { {time 0..1, pose, ease?}, ... }
+local function sample(frames, p: number): Pose
+	if p <= frames[1][1] then
+		return frames[1][2]
+	end
+	for i = 2, #frames do
+		local f1 = frames[i]
+		if p <= f1[1] then
+			local f0 = frames[i - 1]
+			local a = (p - f0[1]) / math.max(1e-4, f1[1] - f0[1])
+			return blend(f0[2], f1[2], EASE[f1[3] or "smooth"](a))
+		end
+	end
+	return frames[#frames][2]
+end
+
+---------------------------------------------------------------- base stance
+
+-- relaxed boxing guard, left side forward
+local function stanceUpper(breath: number): Pose
+	return {
+		Waist = J(-4 + breath, -12, 0),
+		Neck = J(2, 10, 0),
+		LShoulder = J(46 + breath * 2, -12, -6),
+		LElbow = J(108),
+		LWrist = J(-10),
+		RShoulder = J(38 + breath * 2, 14, 6),
+		RElbow = J(120),
+		RWrist = J(-10),
+	}
+end
+local STANCE = stanceUpper(0)
+
+local function with(base: Pose, over: Pose): Pose
+	local p = table.clone(base)
+	for k, v in over do
+		p[k] = v
+	end
+	return p
+end
+
+---------------------------------------------------------------- one-shots
+
+local SHOTS = {}
+
+-- legs of the idle stance, so strikes start and end where locomotion is
+local IDLE_LEGS = { Root = J(0, 0, 0, 0, -0.12, 0), RHip = J(-6, 8, 4), RKnee = J(-14), LHip = J(12, -8, -4), LKnee = J(-12) }
+local function stanceWith(over: Pose): Pose
+	return with(with(STANCE, IDLE_LEGS), over)
+end
+
+-- Strikes use the whole body: hips turn, front foot steps, back heel lifts, torso drives through.
+-- Active frame of every M1 is at ~0.3 of the shot (0.1 s windup / 0.32 s), so the impact pose sits there.
+-- After it a short "overdrive" key pushes past the target, then the pose eases back (follow-through).
+
+-- M1 1: left jab
+SHOTS.M1_1 = { dur = 0.32, mask = STRIKE, frames = {
+	{ 0, stanceWith({}) },
+	-- anticipation: sink, hips open, fist cocks back
+	{ 0.14, stanceWith({ Root = J(8, 12, 0, 0, -0.34, 0.28), Waist = J(4, 12, 0), Neck = J(-4, -10, 0), LShoulder = J(18, -26, -22), LElbow = J(140), RKnee = J(-34), LKnee = J(-34) }) },
+	{ 0.3, stanceWith({ Root = J(-18, -10, 0, 0, -0.3, -0.75), Waist = J(-14, -26, 0), Neck = J(12, 34, 0), LShoulder = J(106, 24, 6), LElbow = J(0), LWrist = J(0), RShoulder = J(50, 22, 8), RElbow = J(128), RHip = J(-30, 10, 4), RKnee = J(-4), RAnkle = J(26), LHip = J(42, -8, -4), LKnee = J(-36) }), "out" },
+	{ 0.4, stanceWith({ Root = J(-21, -12, 0, 0, -0.32, -0.88), Waist = J(-16, -30, 0), Neck = J(12, 38, 0), LShoulder = J(108, 26, 6), LElbow = J(0), LWrist = J(0), RShoulder = J(50, 22, 8), RElbow = J(128), RHip = J(-32, 10, 4), RKnee = J(-2), RAnkle = J(28), LHip = J(44, -8, -4), LKnee = J(-38) }) },
+	{ 0.62, stanceWith({ Root = J(-10, -6, 0, 0, -0.24, -0.4), Waist = J(-8, -20, 0), Neck = J(6, 24, 0), LShoulder = J(84, 14, 0), LElbow = J(40), RHip = J(-18, 10, 4), RKnee = J(-10), RAnkle = J(14), LHip = J(28, -8, -4), LKnee = J(-26) }) },
+	{ 1, stanceWith({}) },
+} }
+
+-- M1 2: right cross (biggest rotation of the punches)
+SHOTS.M1_2 = { dur = 0.32, mask = STRIKE, frames = {
+	{ 0, stanceWith({}) },
+	{ 0.14, stanceWith({ Root = J(8, -16, 0, 0, -0.36, 0.3), Waist = J(4, -32, 0), Neck = J(-4, 38, 0), RShoulder = J(16, 34, 22), RElbow = J(142), RKnee = J(-36), LKnee = J(-30) }) },
+	{ 0.3, stanceWith({ Root = J(-20, 14, 0, 0, -0.32, -0.8), Waist = J(-16, 32, 0), Neck = J(12, -44, 0), RShoulder = J(108, -24, -8), RElbow = J(0), RWrist = J(0), LShoulder = J(40, -24, -16), LElbow = J(132), RHip = J(-38, 14, 4), RKnee = J(-2), RAnkle = J(36), LHip = J(38, -10, -4), LKnee = J(-40) }), "out" },
+	{ 0.4, stanceWith({ Root = J(-23, 15, 0, 0, -0.34, -0.92), Waist = J(-18, 35, 0), Neck = J(12, -48, 0), RShoulder = J(110, -26, -8), RElbow = J(0), RWrist = J(0), LShoulder = J(40, -24, -16), LElbow = J(132), RHip = J(-40, 14, 4), RKnee = J(0), RAnkle = J(38), LHip = J(40, -10, -4), LKnee = J(-42) }) },
+	{ 0.62, stanceWith({ Root = J(-10, 8, 0, 0, -0.24, -0.4), Waist = J(-8, 22, 0), Neck = J(6, -28, 0), RShoulder = J(82, -12, 0), RElbow = J(46), RHip = J(-20, 12, 4), RKnee = J(-10), RAnkle = J(16), LHip = J(24, -10, -4), LKnee = J(-28) }) },
+	{ 1, stanceWith({}) },
+} }
+
+-- M1 3: left hook (load to the left, whip the torso through to the right)
+SHOTS.M1_3 = { dur = 0.34, mask = STRIKE, frames = {
+	{ 0, stanceWith({}) },
+	{ 0.14, stanceWith({ Root = J(8, 20, 0, 0, -0.36, 0.2), Waist = J(2, 30, 0), Neck = J(-4, -36, 0), LShoulder = J(36, -46, -76), LElbow = J(98), RKnee = J(-36), LKnee = J(-40) }) },
+	{ 0.3, stanceWith({ Root = J(-16, -16, 0, 0, -0.3, -0.55), Waist = J(-12, -32, 0), Neck = J(10, 46, 0), LShoulder = J(10, -6, -90), LElbow = J(92), LWrist = J(0), RShoulder = J(48, 22, 8), RElbow = J(128), RHip = J(-18, 10, 4), RKnee = J(-10), RAnkle = J(16), LHip = J(22, -20, -4), LKnee = J(-30), LAnkle = J(0, -20, 0) }), "out" },
+	{ 0.4, stanceWith({ Root = J(-18, -18, 0, 0, -0.32, -0.62), Waist = J(-14, -36, 0), Neck = J(10, 50, 0), LShoulder = J(10, 4, -90), LElbow = J(94), LWrist = J(0), RShoulder = J(48, 22, 8), RElbow = J(128), RHip = J(-20, 10, 4), RKnee = J(-10), RAnkle = J(18), LHip = J(22, -22, -4), LKnee = J(-30), LAnkle = J(0, -22, 0) }) },
+	{ 0.64, stanceWith({ Root = J(-6, -14, 0, 0, -0.2, -0.15), Waist = J(-6, -30, 0), Neck = J(2, 36, 0), LShoulder = J(30, -14, -60), LElbow = J(100), RHip = J(-12, 10, 4), RKnee = J(-12), LHip = J(16, -14, -4), LKnee = J(-22) }) },
+	{ 1, stanceWith({}) },
+} }
+
+-- M1 4: front kick (the launcher): chamber high, lean back, snap the leg out, arms swing for balance
+SHOTS.M1_4 = { dur = 0.44, mask = FULL, frames = {
+	{ 0, stanceWith({}) },
+	{ 0.1, stanceWith({ Root = J(6, 0, 0, 0, -0.3, 0.1), Waist = J(-6, 0, 0), RHip = J(20), RKnee = J(-50), LKnee = J(-34), LHip = J(16) }) },
+	{ 0.18, stanceWith({ Root = J(14, 0, 0, 0, -0.06, 0.05), Waist = J(10, 0, 0), RHip = J(116), RKnee = J(-128), LKnee = J(-20), LHip = J(-6), LShoulder = J(50, -10, -36), RShoulder = J(16, 0, 36) }) },
+	{ 0.27, stanceWith({ Root = J(32, 0, 0, 0, 0.05, 0.3), Waist = J(10, -18, 0), Neck = J(-24, 0, 0), RHip = J(120), RKnee = J(0), RAnkle = J(-30), LKnee = J(-8), LHip = J(-8), LShoulder = J(20, -10, -66), LElbow = J(50), RShoulder = J(-50, 0, 52), RElbow = J(24) }), "out" },
+	{ 0.55, stanceWith({ Root = J(26, 0, 0, 0, 0.03, 0.24), Waist = J(8, -14, 0), Neck = J(-18, 0, 0), RHip = J(110), RKnee = J(-8), RAnkle = J(-24), LKnee = J(-12), LHip = J(-6), LShoulder = J(22, -10, -58), LElbow = J(56), RShoulder = J(-42, 0, 46), RElbow = J(30) }) },
+	{ 0.8, stanceWith({ Root = J(2, 0, 0, 0, -0.2, 0), RHip = J(34), RKnee = J(-50), LKnee = J(-24) }) },
+	{ 1, stanceWith({}) },
+} }
+
+-- getting hit: head snaps, torso folds away from the hit side, arms fly loose, then rebound
+local function hurt(side: number)
+	return { dur = 0.42, mask = UPPER_ROOT, frames = {
+		{ 0, STANCE },
+		{ 0.12, { Root = J(22, side * 16, side * 7, 0, -0.1, 0.8), Waist = J(40, side * 30, side * 14), Neck = J(50, -side * 34, side * 16), LShoulder = J(44, 0, -58), LElbow = J(40), RShoulder = J(44, 0, 58), RElbow = J(40) }, "out" },
+		{ 0.45, { Root = J(10, side * 8, 0, 0, -0.06, 0.35), Waist = J(18, side * 12, side * 5), Neck = J(18, -side * 12, 0), LShoulder = J(40, -8, -26), LElbow = J(80), RShoulder = J(38, 8, 26), RElbow = J(80) } },
+		{ 1, with(STANCE, { Root = I }) },
+	} }
+end
+SHOTS.HurtL = hurt(1)
+SHOTS.HurtR = hurt(-1)
+
+local LAUNCHED = { Root = J(40, 0, 0), Waist = J(26), Neck = J(34), LShoulder = J(140, 0, -55), LElbow = J(24), RShoulder = J(140, 0, 55), RElbow = J(24), RHip = J(-30), LHip = J(16), RKnee = J(-50), LKnee = J(-14) }
+SHOTS.Launched = { dur = 0.9, mask = FULL, frames = {
+	{ 0, STANCE },
+	{ 0.1, LAUNCHED, "out" },
+	{ 0.7, with(LAUNCHED, { Root = J(20, 0, 0) }) },
+	{ 1, with(STANCE, { Root = I, RHip = I, LHip = I, RKnee = I, LKnee = I }) },
+} }
+
+local STAGGER = { Root = J(6, 0, 0, 0, -0.1, 0.2), Waist = J(18), Neck = J(15), LShoulder = J(150, 0, -30), LElbow = J(30), RShoulder = J(150, 0, 30), RElbow = J(30) }
+SHOTS.Stagger = { dur = 0.9, mask = UPPER_ROOT, frames = {
+	{ 0, STANCE },
+	{ 0.12, STAGGER, "out" },
+	{ 0.75, with(STAGGER, { Waist = J(12), Neck = J(8) }) },
+	{ 1, with(STANCE, { Root = I }) },
+} }
+
+local function dash(pose: Pose, dur: number)
+	return { dur = dur, mask = FULL, frames = {
+		{ 0, STANCE },
+		{ 0.15, pose, "out" },
+		{ 0.75, pose },
+		{ 1, with(STANCE, { Root = I, RHip = I, LHip = I, RKnee = I, LKnee = I }) },
+	} }
+end
+SHOTS.DashF = dash({ Root = J(-34, 0, 0, 0, -0.35, 0), Waist = J(-14), Neck = J(18), LShoulder = J(-58, 0, -18), LElbow = J(28), RShoulder = J(-58, 0, 18), RElbow = J(28), RHip = J(-38), LHip = J(52), RKnee = J(-44), LKnee = J(-74) }, 0.34)
+SHOTS.DashL = dash(with(STANCE, { Root = J(0, 10, 28, 0, -0.4, 0), Waist = J(0, 0, 10), Neck = J(0, 0, -14), LHip = J(0, 0, -34), RHip = J(0, 0, -6), RKnee = J(-40), LKnee = J(-18) }), 0.3)
+SHOTS.DashR = dash(with(STANCE, { Root = J(0, -10, -28, 0, -0.4, 0), Waist = J(0, 0, -10), Neck = J(0, 0, 14), RHip = J(0, 0, 34), LHip = J(0, 0, 6), LKnee = J(-40), RKnee = J(-18) }), 0.3)
+SHOTS.DashB = dash(with(STANCE, { Root = J(22, 0, 0, 0, -0.3, 0), Waist = J(12), Neck = J(-10), RHip = J(40), LHip = J(14), RKnee = J(-56), LKnee = J(-28) }), 0.3)
+
+local REACH = { Root = J(-24, 0, 0, 0, -0.2, 0), Waist = J(-10), Neck = J(14), LShoulder = J(88, -12, 0), LElbow = J(12), RShoulder = J(88, 12, 0), RElbow = J(12), RHip = J(-20), LHip = J(30), RKnee = J(-30), LKnee = J(-40) }
+SHOTS.GrabRush = { dur = 0.5, mask = FULL, frames = {
+	{ 0, STANCE },
+	{ 0.25, { Root = J(-14, 0, 0, 0, -0.35, 0), Waist = J(-6), LShoulder = J(-30, 0, -20), LElbow = J(40), RShoulder = J(-30, 0, 20), RElbow = J(40), RHip = J(30), LHip = J(20), RKnee = J(-50), LKnee = J(-40) } },
+	{ 0.4, REACH, "out" },
+	{ 1, REACH },
+} }
+
+SHOTS.GrabSlam = { dur = 0.55, mask = UPPER_ROOT, frames = {
+	{ 0, { Waist = J(-6), LShoulder = J(70, -18, 0), LElbow = J(50), RShoulder = J(70, 18, 0), RElbow = J(50) } },
+	{ 0.18, { Root = J(10), Waist = J(18), LShoulder = J(165, -10, 0), LElbow = J(20), RShoulder = J(165, 10, 0), RElbow = J(20) } },
+	{ 0.36, { Root = J(-20, 0, 0, 0, -0.4, 0), Waist = J(-35), Neck = J(-10), LShoulder = J(40, -10, 0), LElbow = J(10), RShoulder = J(40, 10, 0), RElbow = J(10) }, "out" },
+	{ 0.7, { Root = J(-14, 0, 0, 0, -0.3, 0), Waist = J(-25), LShoulder = J(40, -10, 0), LElbow = J(20), RShoulder = J(40, 10, 0), RElbow = J(20) } },
+	{ 1, with(STANCE, { Root = I }) },
+} }
+
+local SLAM_UP = { Root = J(14, 0, 0, 0, 0.6, 0), Waist = J(16), Neck = J(10), LShoulder = J(170, 0, -15), LElbow = J(30), RShoulder = J(170, 0, 15), RElbow = J(30), RHip = J(40), LHip = J(30), RKnee = J(-60), LKnee = J(-50) }
+local SLAM_DOWN = { Root = J(-30, 0, 0, 0, -1.1, 0), Waist = J(-35), Neck = J(-6), LShoulder = J(45, 0, -10), LElbow = J(0), RShoulder = J(45, 0, 10), RElbow = J(0), RHip = J(75), RKnee = J(-100), LHip = J(10), LKnee = J(-95) }
+SHOTS.Slam = { dur = 0.75, mask = FULL, frames = {
+	{ 0, STANCE },
+	-- anticipation: crouch and drop the arms before jumping up
+	{ 0.14, with(STANCE, { Root = J(-10, 0, 0, 0, -0.5, 0), Waist = J(-14), LShoulder = J(-20, 0, -14), LElbow = J(30), RShoulder = J(-20, 0, 14), RElbow = J(30), RHip = J(50), LHip = J(40), RKnee = J(-80), LKnee = J(-70) }) },
+	{ 0.45, SLAM_UP },
+	{ 0.54, SLAM_DOWN, "out" },
+	{ 0.8, SLAM_DOWN },
+	{ 1, with(STANCE, { Root = I, RHip = I, LHip = I, RKnee = I, LKnee = I }) },
+} }
+
+-- Barrage: 5 straight punches L R L R + a big right cross. Hits land at 0.15 + 0.11 * i s of a 0.8 s shot.
+local BAR_LEGS = { RHip = J(-24, 10, 4), RKnee = J(-8), RAnkle = J(18), LHip = J(34, -8, -4), LKnee = J(-32) }
+local function barragePose(over: Pose): Pose
+	return stanceWith(with(BAR_LEGS, over))
+end
+local BAR_L = barragePose({ Root = J(-12, -8, 0, 0, -0.28, -0.4), Waist = J(-10, -18, 0), Neck = J(8, 22, 0), LShoulder = J(102, 18, 4), LElbow = J(0), LWrist = J(0), RShoulder = J(46, 22, 8), RElbow = J(126) })
+local BAR_R = barragePose({ Root = J(-12, 10, 0, 0, -0.28, -0.4), Waist = J(-10, 22, 0), Neck = J(8, -28, 0), RShoulder = J(102, -18, -6), RElbow = J(0), RWrist = J(0), LShoulder = J(40, -24, -16), LElbow = J(130) })
+local BAR_MID = barragePose({ Root = J(-8, 0, 0, 0, -0.28, -0.25), Waist = J(-6, 0, 0), LShoulder = J(60, -6, -6), LElbow = J(100), RShoulder = J(60, 6, 6), RElbow = J(100) })
+local BAR_FINAL = barragePose({ Root = J(-22, 15, 0, 0, -0.34, -0.95), Waist = J(-18, 34, 0), Neck = J(12, -46, 0), RShoulder = J(110, -26, -8), RElbow = J(0), RWrist = J(0), LShoulder = J(40, -24, -16), LElbow = J(132), RHip = J(-40, 14, 4), RKnee = J(0), RAnkle = J(36), LHip = J(40, -10, -4), LKnee = J(-42) })
+SHOTS.Barrage = { dur = 0.8, mask = STRIKE, frames = {
+	{ 0, stanceWith({}) },
+	{ 0.12, barragePose({ Root = J(6, 0, 0, 0, -0.34, 0.2), Waist = J(4, 0, 0), LShoulder = J(30, -10, -10), LElbow = J(130), RShoulder = J(30, 10, 10), RElbow = J(130) }) },
+	{ 0.19, BAR_L, "out" },
+	{ 0.255, BAR_MID },
+	{ 0.325, BAR_R, "out" },
+	{ 0.39, BAR_MID },
+	{ 0.46, BAR_L, "out" },
+	{ 0.53, BAR_MID },
+	{ 0.6, BAR_R, "out" },
+	{ 0.665, barragePose({ Root = J(4, -10, 0, 0, -0.32, 0.1), Waist = J(2, -24, 0), RShoulder = J(20, 30, 20), RElbow = J(140), LShoulder = J(50, -10, -8), LElbow = J(110) }) },
+	{ 0.74, BAR_FINAL, "out" },
+	{ 0.85, BAR_FINAL },
+	{ 1, stanceWith({}) },
+} }
+
+-- Uppercut: dip low with the right fist dropped, then drive up through the legs; the fist lands centred
+-- at chin height ~2.2 studs ahead (measured), forearm vertical.
+-- Hit at 0.18 s of a 0.6 s shot (0.3).
+SHOTS.Uppercut = { dur = 0.6, mask = FULL, frames = {
+	{ 0, stanceWith({}) },
+	{ 0.2, stanceWith({ Root = J(-8, -14, 0, 0, -0.7, 0.1), Waist = J(-6, -24, 0), Neck = J(-6, 20, 0), RShoulder = J(-14, 10, 22), RElbow = J(100), LShoulder = J(50, -12, -10), LElbow = J(120), RHip = J(46, 10, 4), RKnee = J(-74), LHip = J(52, -8, -4), LKnee = J(-74) }) },
+	{ 0.3, stanceWith({ Root = J(-6, 18, 0, 0, 0.2, -0.6), Waist = J(-6, 30, 0), Neck = J(-18, -30, 0), RShoulder = J(70, 32, 0), RElbow = J(110), RWrist = J(0), LShoulder = J(30, -24, -20), LElbow = J(130), RHip = J(-14, 12, 4), RKnee = J(-4), RAnkle = J(30), LHip = J(22, -10, -4), LKnee = J(-12) }), "out" },
+	{ 0.42, stanceWith({ Root = J(-8, 22, 0, 0, 0.3, -0.7), Waist = J(-8, 34, 0), Neck = J(-24, -34, 0), RShoulder = J(85, 32, 0), RElbow = J(95), RWrist = J(0), LShoulder = J(26, -24, -22), LElbow = J(130), RHip = J(-16, 12, 4), RKnee = J(-2), RAnkle = J(34), LHip = J(20, -10, -4), LKnee = J(-10) }) },
+	{ 0.7, stanceWith({ Root = J(4, 8, 0, 0, -0.05, -0.2), Waist = J(4, 12, 0), RShoulder = J(90, -10, 0), RElbow = J(80) }) },
+	{ 1, stanceWith({}) },
+} }
+
+Anim.Shots = SHOTS
+
+---------------------------------------------------------------- holds
+
+local HOLDS = {}
+
+HOLDS.Block = { mask = UPPER_ROOT, pose = function()
+	return { Root = J(0, 0, 0, 0, -0.2, 0), Waist = J(-8), Neck = J(-12), RShoulder = J(78, 22, 0), RElbow = J(108), RWrist = J(0), LShoulder = J(78, -22, 0), LElbow = J(108), LWrist = J(0) }
+end }
+
+HOLDS.Stunned = { mask = UPPER_ROOT, pose = function(t)
+	local sway = math.sin(t * 3)
+	return { Root = J(6, 0, 0, 0, -0.15, 0), Waist = J(-14, 0, 6 * sway), Neck = J(-18, 0, -4 * sway), LShoulder = J(10, 0, -10), LElbow = J(25), RShoulder = J(10, 0, 10), RElbow = J(25) }
+end }
+
+HOLDS.Grabbed = { mask = FULL, pose = function(t)
+	local sway = math.sin(t * 9) * 6
+	return { Root = J(-10, 0, 0), Neck = J(25), Waist = J(8), LShoulder = J(30 + sway, 0, -50), LElbow = J(20), RShoulder = J(30 - sway, 0, 50), RElbow = J(20), RHip = J(10 + sway), LHip = J(25 - sway), RKnee = J(-30), LKnee = J(-45) }
+end }
+
+HOLDS.GrabHold = { mask = UPPER_ROOT, pose = function()
+	return { Root = J(-6), Waist = J(-6), LShoulder = J(70, -18, 0), LElbow = J(50), RShoulder = J(70, 18, 0), RElbow = J(50) }
+end }
+
+Anim.Holds = HOLDS
+
+---------------------------------------------------------------- rigs
+
+type Rig = {
+	model: Model,
+	humanoid: Humanoid,
+	root: BasePart,
+	motors: { [string]: any }, -- Motor6D or AnimationConstraint
+	cur: Pose, -- current joint CFrames (spring position)
+	w: { [string]: Vector3 }, -- angular velocity per joint (parent space)
+	v: { [string]: Vector3 }, -- offset velocity per joint
+	lastFlat: Vector3,
+	leanF: number,
+	leanS: number,
+	clock: number,
+	freezeUntil: number,
+	shake: number,
+	phase: number,
+	speed: number,
+	wasAir: boolean,
+	landAt: number,
+	shot: { name: string, def: any, t0: number, speed: number }?,
+	hold: string?,
+	holdW: number,
+	lastHold: string?,
+}
+
+local rigs: { [Model]: Rig } = {}
+
+local function findMotors(rig: Rig)
+	for name, path in JOINTS do
+		if not rig.motors[name] or not rig.motors[name].Parent then
+			local part = rig.model:FindFirstChild(path[1])
+			local m = part and part:FindFirstChild(path[2])
+			-- avatar joint upgrade turns joints into kinematic AnimationConstraints; both have .Transform
+			if m and (m:IsA("Motor6D") or m:IsA("AnimationConstraint")) then
+				rig.motors[name] = m :: any
+			end
+		end
+	end
+end
+
+function Anim.Register(model: Model)
+	if rigs[model] then
+		return
+	end
+	local humanoid = model:FindFirstChildOfClass("Humanoid")
+	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not humanoid or not root then
+		return
+	end
+	-- the Animator would reset the joints every frame
+	local animator = humanoid:FindFirstChildOfClass("Animator")
+	if animator then
+		animator:Destroy()
+	end
+	local rig: Rig = {
+		model = model, humanoid = humanoid, root = root, motors = {},
+		cur = {}, w = {}, v = {}, lastFlat = Vector3.zero, leanF = 0, leanS = 0,
+		clock = 0, freezeUntil = 0, shake = 0,
+		phase = 0, speed = 0, wasAir = false, landAt = -10,
+		shot = nil, hold = nil, holdW = 0, lastHold = nil,
+	}
+	findMotors(rig)
+	rigs[model] = rig
+end
+
+function Anim.Unregister(model: Model)
+	rigs[model] = nil
+end
+
+function Anim.Has(model: Model): boolean
+	return rigs[model] ~= nil
+end
+
+function Anim.Play(model: Model?, name: string, speed: number?)
+	local rig = model and rigs[model]
+	local def = SHOTS[name]
+	if rig and def then
+		rig.shot = { name = name, def = def, t0 = rig.clock, speed = speed or 1 }
+	end
+end
+
+function Anim.Stop(model: Model?)
+	local rig = model and rigs[model]
+	if rig then
+		rig.shot = nil
+	end
+end
+
+function Anim.Hold(model: Model?, name: string?)
+	local rig = model and rigs[model]
+	if rig then
+		rig.hold = name
+	end
+end
+
+-- hitstop: pose freezes for `duration`; shake = small jitter on the victim
+function Anim.Freeze(model: Model?, duration: number, shake: number?)
+	local rig = model and rigs[model]
+	if rig then
+		rig.freezeUntil = math.max(rig.freezeUntil, os.clock() + duration)
+		rig.shake = shake or 0
+	end
+end
+
+function Anim.IsFrozen(model: Model?): boolean
+	local rig = model and rigs[model]
+	return rig ~= nil and os.clock() < rig.freezeUntil
+end
+
+---------------------------------------------------------------- locomotion
+
+local function locomotion(rig: Rig, dt: number): Pose
+	local root = rig.root
+	local vel = root.AssemblyLinearVelocity
+	local flat = Vector3.new(vel.X, 0, vel.Z)
+	local speed = flat.Magnitude
+	-- lean into acceleration (start running = tip forward, stop = rock back)
+	local acc = root.CFrame:VectorToObjectSpace((flat - rig.lastFlat) / math.max(dt, 1e-3))
+	rig.lastFlat = flat
+	local la = math.min(1, dt * 8)
+	rig.leanF += (math.clamp(-acc.Z * 0.12, -10, 10) - rig.leanF) * la
+	rig.leanS += (math.clamp(acc.X * 0.08, -7, 7) - rig.leanS) * la
+	rig.speed += (speed - rig.speed) * math.min(1, dt * 10)
+	local k = math.clamp(rig.speed / 18, 0, 1.4)
+
+	local fwd, side = 0, 0
+	if speed > 0.5 then
+		local lv = root.CFrame:VectorToObjectSpace(flat) / speed
+		fwd, side = -lv.Z, lv.X
+	end
+	if speed > 0.5 then
+		rig.phase += dt * (4 + rig.speed * 0.42)
+	end
+	local s, c = math.sin(rig.phase), math.cos(rig.phase)
+	local t = rig.clock
+	local breath = math.sin(t * 2.2)
+
+	local air = rig.humanoid.FloorMaterial == Enum.Material.Air
+	if rig.wasAir and not air then
+		rig.landAt = t
+	end
+	rig.wasAir = air
+
+	local pose = stanceUpper(breath)
+	if air then
+		pose.Root = I
+		pose.RHip, pose.RKnee = J(30), J(-55)
+		pose.LHip, pose.LKnee = J(-6), J(-24)
+		pose.LShoulder = J(56, -12, -18)
+		pose.RShoulder = J(50, 14, 18)
+		return pose
+	end
+
+	-- idle legs: staggered stance with a light boxer bounce (knees pump with it)
+	local bounce = (math.sin(t * 6.4) + 1) * 0.5
+	local idle = {
+		Root = J(0, 0, 0, 0, -0.12 - bounce * 0.07, 0),
+		RHip = J(-6 + bounce * 3, 8, 4), RKnee = J(-14 - bounce * 7),
+		LHip = J(12 + bounce * 3, -8, -4), LKnee = J(-12 - bounce * 7),
+	}
+	-- walk / strafe cycle
+	local A = 38 * k
+	local fx, sx = fwd * s * A, side * s * A * 0.6
+	local walk = {
+		Root = J(-9 * k * fwd, 8 * k * s * fwd, -5 * k * side, 0, -0.08 * k * math.abs(c), 0),
+		RHip = J(fx, 0, sx), RKnee = J(-(8 + 48 * k * math.max(0, c))),
+		LHip = J(-fx, 0, -sx), LKnee = J(-(8 + 48 * k * math.max(0, -c))),
+	}
+	local legs = blend(idle, walk, math.min(1, k * 4), LEGS)
+	for kname in LEGS do
+		pose[kname] = legs[kname] or I
+	end
+	-- arms swing against the legs, torso counter-twists, body bobs on each step
+	pose.LShoulder *= J(22 * k * s * fwd)
+	pose.RShoulder *= J(-22 * k * s * fwd)
+	pose.Waist *= J(-4 * k * math.abs(fwd), -10 * k * s * fwd, 0)
+	pose.Neck *= J(0, 8 * k * s * fwd, 0)
+	pose.Root *= J(-rig.leanF, 0, -rig.leanS)
+
+	-- landing dip
+	local sinceLand = t - rig.landAt
+	if sinceLand < 0.3 then
+		local d = (1 - sinceLand / 0.3) ^ 2
+		pose.Root = pose.Root * J(-6 * d, 0, 0, 0, -0.45 * d, 0)
+		pose.RKnee *= J(-25 * d)
+		pose.LKnee *= J(-25 * d)
+		pose.RHip *= J(15 * d)
+		pose.LHip *= J(15 * d)
+	end
+	return pose
+end
+
+---------------------------------------------------------------- step
+
+-- damped spring toward target: rotation via axis-angle error, offset via plain vector spring
+local function springJoint(rig: Rig, name: string, target: CFrame, dt: number, boost: number): CFrame
+	local cur = rig.cur[name]
+	if not cur then
+		rig.cur[name], rig.w[name], rig.v[name] = target, Vector3.zero, Vector3.zero
+		return target
+	end
+	local s = SPRING[name]
+	local omega = s[1] * boost
+	local k, d = omega * omega, 2 * s[2] * omega
+	local w, v = rig.w[name], rig.v[name]
+	local rot, pos = cur.Rotation, cur.Position
+	local tRot, tPos = target.Rotation, target.Position
+	local n = math.max(1, math.ceil(dt / SUBSTEP))
+	local h = dt / n
+	for _ = 1, n do
+		local axis, angle = (tRot * rot:Inverse()):ToAxisAngle()
+		if angle > math.pi then
+			angle -= 2 * math.pi
+		end
+		w += (axis * (angle * k) - w * d) * h
+		local mag = w.Magnitude
+		if mag > 1e-5 then
+			rot = CFrame.fromAxisAngle(w / mag, mag * h) * rot
+		end
+		v += ((tPos - pos) * k - v * d) * h
+		pos += v * h
+	end
+	local out = (CFrame.new(pos) * rot):Orthonormalize()
+	rig.cur[name], rig.w[name], rig.v[name] = out, w, v
+	return out
+end
+
+local function stepRig(rig: Rig, dt: number, now: number)
+	if not rig.model.Parent then
+		return
+	end
+	findMotors(rig)
+
+	-- ragdoll: physics owns the limbs. Keep the root joint neutral and restart the springs from the
+	-- target pose when the body gets up (no shot left over from before)
+	if rig.model:GetAttribute("Ragdoll") then
+		for _, m in rig.motors do
+			m.Transform = I
+		end
+		rig.cur, rig.w, rig.v = {}, {}, {}
+		rig.shot = nil
+		return
+	end
+
+	local frozen = now < rig.freezeUntil
+	if frozen then
+		-- hitstop: hold the pose, jitter the root if this rig is the victim
+		local jitter = if rig.shake > 0 then CFrame.new((math.random() - 0.5) * rig.shake, 0, (math.random() - 0.5) * rig.shake) else I
+		for name, m in rig.motors do
+			local o = rig.cur[name] or I
+			m.Transform = if name == "Root" then jitter * o else o
+		end
+		return
+	end
+
+	dt = math.min(dt, 0.1)
+	rig.clock += dt
+	local pose = locomotion(rig, dt)
+
+	-- hold layer
+	local holdDef = rig.hold and HOLDS[rig.hold]
+	if holdDef then
+		rig.lastHold = rig.hold
+	end
+	rig.holdW += ((if holdDef then 1 else 0) - rig.holdW) * math.min(1, dt * 16)
+	local shownHold = HOLDS[rig.lastHold or ""]
+	if shownHold and rig.holdW > 0.01 then
+		pose = blend(pose, shownHold.pose(rig.clock), rig.holdW, shownHold.mask)
+	end
+
+	-- one-shot layer
+	local shot = rig.shot
+	local shotW = 0
+	if shot then
+		local def = shot.def
+		local e = (rig.clock - shot.t0) * shot.speed
+		if e >= def.dur then
+			rig.shot = nil
+		else
+			shotW = math.min(1, e / 0.04, (def.dur - e) / 0.12)
+			shotW = shotW * shotW * (3 - 2 * shotW)
+			pose = blend(pose, sample(def.frames, e / def.dur), shotW, def.mask)
+		end
+	end
+
+	-- springs; strikes stiffen them so the hit snaps, recovery is softer
+	local boost = 1 + shotW * 1.5
+	for name, m in rig.motors do
+		m.Transform = springJoint(rig, name, pose[name] or I, dt, boost)
+	end
+end
+
+function Anim.Step(dt: number)
+	local now = os.clock()
+	for model, rig in rigs do
+		if model.Parent then
+			stepRig(rig, dt, now)
+		end
+	end
+end
+
+return Anim
+
+```
+
+`src/ReplicatedStorage/Combat/Config.luau`:
+
+```luau
+-- All combat numbers live here. Server and client both read this, so prediction uses the same values.
+local Config = {}
+
+-- Lag compensation
+Config.Net = {
+	MaxRewind = 0.3, -- never rewind targets further back than this (s)
+	InterpDelay = 0.06, -- Roblox interpolation buffer for remote characters (s)
+	HistoryLength = 1.0, -- how much position history the server keeps (s)
+	CFTolerance = 6, -- client-reported attacker position may differ from the server copy by this + speed * latency
+	TimingSlack = 0.08, -- cooldown tolerance for latency jitter (s)
+	MaxRequestsPerSecond = 30,
+}
+
+-- Anti-cheat (server only reads it). Movement is judged over a sliding window so network bursts
+-- don't look like speed; every burst the server approved (dash, rush, knockback) adds credit.
+-- Movement can never kick (lag looks like cheating): it only snaps back. Kicks come from strikes,
+-- and strikes only from requests an honest client can't send.
+Config.AntiCheat = {
+	CheckEvery = 0.1, -- s between checks per player
+	Window = 1.0, -- horizontal travel is measured over the last second
+	SpeedSlack = 1.25, -- allowed walk speed = WalkSpeed x this
+	DistSlack = 5, -- studs on top of that (lag jitter, M1 lunges)
+	CreditLife = 1.5, -- s an approved burst stays usable after the window
+	CreditScale = 1.4, -- safety margin on every credit
+	FlyHeight = 10, -- root further than this above the ground = airborne
+	FlyTime = 2.5, -- airborne longer than this = flying (legit max is ~1 s: jump, launchers)
+	SnapHold = 0.4, -- s the server keeps the body's physics after putting it back
+	StrikeDecay = 10, -- s to forgive one strike
+	KickAt = 20,
+	Strikes = { BadRequest = 2 }, -- only what an honest client can never do
+	LogEvery = 1, -- s between log lines of one kind per player, so a flood stays readable
+}
+
+Config.Fighter = {
+	MaxHealth = 100,
+	WalkSpeed = 18,
+	JumpPower = 50,
+	HurtRadius = 1.6, -- target is a sphere around HumanoidRootPart
+	RegenDelay = 6, -- s without damage before regen starts
+	RegenRate = 4, -- hp per second
+	StunWalkSpeed = 3,
+	ComboWindow = 1.6, -- hits closer than this count as one combo
+}
+
+Config.M1 = {
+	Steps = 4,
+	Windup = 0.1, -- press -> active frame
+	Interval = 0.32, -- min time between presses
+	ComboReset = 0.9, -- idle time that restarts the chain
+	EndLag = 0.9, -- cooldown after the 4th hit
+	WalkSpeed = 8,
+	Lunge = 10, -- forward step speed on each swing
+	Hitbox = { Kind = "Box", Size = Vector3.new(5, 5.5, 5.5), Offset = CFrame.new(0, 0, -3) },
+	Damage = { 3, 3, 3, 5 },
+	Posture = { 12, 12, 12, 25 },
+	Hitstun = 0.55,
+	FinalStun = 0.9,
+	Knockback = { Forward = 55, Up = 24 },
+	Hitstop = { 0.085, 0.085, 0.1, 0.17 },
+}
+
+Config.Block = {
+	WalkSpeed = 7,
+	ParryWindow = 0.2, -- a hit this soon after pressing block is parried
+	ParryStun = 1.1, -- attacker stun on a successful parry
+	ParryCooldown = 0.6, -- re-pressing block faster than this gives no parry window (anti-spam)
+	MaxPosture = 100,
+	PostureRegen = 18, -- per second
+	PostureRegenDelay = 1.2,
+	GuardBreakStun = 1.4,
+	FrontDot = 0.1, -- dot(victim look, dir to attacker) above this = hit from the front
+}
+
+Config.Dash = {
+	Cooldown = 1.6,
+	Front = { Speed = 74, Duration = 0.26 }, -- closes distance, no i-frames
+	Dodge = { Speed = 62, Duration = 0.22, IFrames = 0.22 }, -- side / back
+	-- front dash that runs into someone: short stun, the dash stops there. Lets you catch a launched target.
+	Hit = {
+		Hitbox = { Kind = "Box", Size = Vector3.new(4.5, 6, 4), Offset = CFrame.new(0, 0, -2.4) },
+		ReachSlack = 2.5,
+		Damage = 2,
+		Posture = 8,
+		Stun = 0.2,
+		Hitstop = 0.06,
+	},
+}
+
+-- Ragdoll: a clean hit that throws the target up at least MinUp hard ragdolls it for its stun minus
+-- GetUpLead (so it is standing again when the stun ends). Any other clean hit stands it back up.
+Config.Ragdoll = {
+	MinUp = 20, -- M1 #4 (24), Rush Grab (38), Ground Slam (34), Uppercut (36); not Barrage (10)
+	GetUpLead = 0.2,
+	LandSpeed = 12, -- a loose torso falling faster than this (studs/s) thumps when it stops on the floor
+	LandCooldown = 0.5, -- s between thumps of one body (bounces)
+	-- keep listening this long after the ragdoll ends: clients get the attribute ~0.4 s before they see
+	-- the server-moved body fly, so the visible landing often comes after "Ragdoll" is already off
+	LandGrace = 1.0,
+}
+
+-- Lock-on (T): the camera keeps the target in view, the character turns to face it
+Config.LockOn = {
+	Range = 60, -- pick a target this close
+	BreakRange = 90, -- lock drops further than this
+	CamTurnRate = 10, -- how fast the camera swings onto the target (1/s)
+	BodyTurnRate = 20, -- how fast the character turns to it (1/s)
+	Pitch = -16, -- camera looks this many degrees below the line to the target
+	Shoulder = 2.2, -- camera sits this far right of the character, so our own body doesn't hide the target
+}
+
+-- Combo extension: any landed hit that isn't an M1 (dash hit, abilities) cancels the M1 end lag and
+-- restarts the chain, so M1 x4 -> dash -> M1 x4 -> skill -> M1 ... works.
+
+-- Character kit
+Config.Abilities = {
+	GrabRush = {
+		Order = 1,
+		Key = Enum.KeyCode.One,
+		Name = "Rush Grab",
+		Cooldown = 9,
+		Windup = 0.14,
+		RushSpeed = 82,
+		RushTime = 0.32,
+		Hitbox = { Kind = "Box", Size = Vector3.new(4.5, 6, 4), Offset = CFrame.new(0, 0, -2.4) },
+		ReachSlack = 2.5, -- extra server tolerance on the contact check
+		Hold = 0.6, -- grabbed before the slam
+		Damage = 12,
+		Stun = 1.0,
+		Knockback = { Forward = 22, Up = 38 }, -- low enough to follow up
+		Hitstop = 0.18,
+		Unblockable = true, -- grabs beat block
+		-- M1s don't stop the rush or the hold (damage still lands); see CombatService.ApplyHit
+		Armor = true,
+	},
+	GroundSlam = {
+		Order = 2,
+		Key = Enum.KeyCode.Two,
+		Name = "Ground Slam",
+		Cooldown = 8,
+		Windup = 0.4,
+		Hitbox = { Kind = "Radius", Radius = 12, Height = 6 },
+		Damage = 10,
+		Posture = 45,
+		Stun = 0.9,
+		Knockback = { Out = 22, Up = 34 },
+		Hitstop = 0.14,
+	},
+	Barrage = {
+		Order = 3,
+		Key = Enum.KeyCode.Three,
+		Name = "Barrage",
+		Cooldown = 7,
+		Windup = 0.15,
+		Hits = 5,
+		Interval = 0.11, -- between hits
+		Hitbox = { Kind = "Box", Size = Vector3.new(5, 5.5, 5.5), Offset = CFrame.new(0, 0, -3) },
+		Damage = 2, -- per hit
+		Posture = 7,
+		Hitstun = 0.45,
+		FinalStun = 0.7,
+		Knockback = { Forward = 18, Up = 10 }, -- last hit only; short so M1 can follow
+		Hitstop = 0.04,
+		FinalHitstop = 0.12,
+	},
+	Uppercut = {
+		Order = 4,
+		Key = Enum.KeyCode.Four,
+		Name = "Uppercut",
+		Cooldown = 9,
+		Windup = 0.18,
+		Lunge = 14,
+		Hitbox = { Kind = "Box", Size = Vector3.new(5, 7, 5.5), Offset = CFrame.new(0, 0, -3) },
+		Damage = 7,
+		Posture = 30,
+		Stun = 0.9,
+		Knockback = { Forward = 6, Up = 36 }, -- ~7.5 studs up, ~0.6 s in the air, lands still stunned
+		Hitstop = 0.15,
+	},
+}
+
+Config.Dummy = {
+	MaxHealth = 300,
+	HealDelay = 3, -- full heal after this long without damage
+	RespawnDelay = 2,
+	Modes = { "Idle", "Block", "Fight" },
+	FightRange = 5,
+	-- Fight mode is a sparring partner, not a wall: slower than you, reacts late, hits soft
+	WalkSpeed = 11, -- players walk 18, so you can always back off
+	Reaction = 0.45, -- s from "you're in reach" (or its stun ending) to the first swing
+	SwingGap = 0.15, -- extra pause between its M1s on top of M1.Interval
+	FightCooldown = 1.8, -- after a full chain
+	DamageScale = 0.6,
+}
+
+return Config
+
+```
+
+`src/ReplicatedStorage/Combat/Hitbox.luau`:
+
+```luau
+-- Shared hit test. The server runs it against rewound positions, the client runs it against what it sees.
+-- Same math on both sides = the client's prediction agrees with the server almost always.
+local Hitbox = {}
+
+export type Shape = {
+	Kind: string, -- "Box" | "Radius"
+	Size: Vector3?,
+	Offset: CFrame?,
+	Radius: number?,
+	Height: number?,
+}
+
+export type Target = { model: Model, pos: Vector3 }
+
+-- does a sphere touch an oriented box
+function Hitbox.BoxSphere(boxCF: CFrame, size: Vector3, pos: Vector3, r: number): boolean
+	local p = boxCF:PointToObjectSpace(pos)
+	local h = size * 0.5
+	local closest = Vector3.new(math.clamp(p.X, -h.X, h.X), math.clamp(p.Y, -h.Y, h.Y), math.clamp(p.Z, -h.Z, h.Z))
+	return (p - closest).Magnitude <= r
+end
+
+-- flat cylinder around a point (area attacks)
+function Hitbox.Cylinder(center: Vector3, radius: number, height: number, pos: Vector3, r: number): boolean
+	local d = pos - center
+	if math.abs(d.Y) > height * 0.5 + r then
+		return false
+	end
+	return Vector3.new(d.X, 0, d.Z).Magnitude <= radius + r
+end
+
+-- origin = attacker root CFrame (flat). Returns targets inside the shape, closest first.
+function Hitbox.Find(shape: Shape, origin: CFrame, targets: { Target }, hurtRadius: number, slack: number?): { Target }
+	local extra = slack or 0
+	local hits = {}
+	if shape.Kind == "Box" then
+		local boxCF = origin * (shape.Offset or CFrame.identity)
+		local size = (shape.Size :: Vector3) + Vector3.new(extra, extra, extra) * 2
+		for _, t in targets do
+			if Hitbox.BoxSphere(boxCF, size, t.pos, hurtRadius) then
+				table.insert(hits, t)
+			end
+		end
+	elseif shape.Kind == "Radius" then
+		for _, t in targets do
+			if Hitbox.Cylinder(origin.Position, (shape.Radius :: number) + extra, shape.Height :: number, t.pos, hurtRadius) then
+				table.insert(hits, t)
+			end
+		end
+	end
+	local o = origin.Position
+	table.sort(hits, function(a, b)
+		return (a.pos - o).Magnitude < (b.pos - o).Magnitude
+	end)
+	return hits
+end
+
+-- yaw-only CFrame (we never want pitch on a hitbox origin)
+function Hitbox.Flat(cf: CFrame): CFrame
+	local look = cf.LookVector * Vector3.new(1, 0, 1)
+	if look.Magnitude < 1e-3 then
+		return CFrame.new(cf.Position)
+	end
+	return CFrame.lookAt(cf.Position, cf.Position + look.Unit)
+end
+
+return Hitbox
+
+```
+
+`src/ServerScriptService/Combat/Abilities.luau`:
+
+```luau
+-- Character kit: Rush Grab, Ground Slam, Barrage, Uppercut.
+-- Same rules as M1: the request is stamped, targets are rewound, the hit goes through CombatService.ApplyHit.
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Combat = ReplicatedStorage.Combat
+local Config = require(Combat.Config)
+local Hitbox = require(Combat.Hitbox)
+local Fighters = require(script.Parent.Fighters)
+local History = require(script.Parent.History)
+local CombatService = require(script.Parent.CombatService)
+local Ragdoll = require(script.Parent.Ragdoll)
+local AntiCheat = require(script.Parent.AntiCheat)
+
+type Fighter = Fighters.Fighter
+
+local Abilities = {}
+local starters = {}
+
+---------------------------------------------------------------- grab
+
+local function release(a: Fighter, v: Fighter, slam: boolean)
+	if v.grabbedBy ~= a then
+		return
+	end
+	v.grabbedBy = nil
+	a.grabbing = nil
+	v.model:SetAttribute("Grabbed", false)
+	if v.root.Parent then
+		v.root.Anchored = false
+		AntiCheat.Moved(v.model) -- the server was holding the body
+	end
+	CombatService.Broadcast("GrabEnd", { a = a.model, v = v.model, slam = slam })
+
+	if slam and Fighters.Alive(a) then
+		local cfg = Config.Abilities.GrabRush
+		local look = Hitbox.Flat(a.root.CFrame).LookVector
+		CombatService.ApplyHit(a, v, {
+			move = "GrabRush",
+			t = Fighters.Now(),
+			damage = cfg.Damage,
+			stun = cfg.Stun,
+			hitstop = cfg.Hitstop,
+			knockback = look * cfg.Knockback.Forward + Vector3.yAxis * cfg.Knockback.Up,
+			unblockable = true,
+		})
+	end
+end
+
+starters.GrabRush = function(f: Fighter, cfg, t: number)
+	f.actionUntil = t + cfg.Windup + cfg.RushTime + 0.1
+	f.rush = { id = "GrabRush", t0 = t, untilT = t + cfg.Windup + cfg.RushTime, token = f.token }
+	if cfg.Armor then
+		Fighters.SetArmor(f, f.rush.untilT + Config.Net.TimingSlack)
+	end
+	AntiCheat.Grant(f.model, cfg.RushSpeed * cfg.RushTime)
+end
+
+-- the rushing client reports contact; we re-check it against the rewound target
+-- data = { target, t, cf }
+function Abilities.GrabHit(f: Fighter, data: any)
+	local cfg = Config.Abilities.GrabRush
+	local rush = f.rush
+	if not rush or rush.token ~= f.token then
+		return
+	end
+	local now = Fighters.Now()
+	local t = CombatService.Stamp(data.t, now)
+	local slack = Config.Net.TimingSlack
+	if t < rush.t0 + cfg.Windup - slack or t > rush.untilT + slack then
+		return
+	end
+	local v = Fighters.Get(data.target)
+	if not v or v == f or not Fighters.Alive(v) or v.grabbedBy or v.grabbing then
+		return
+	end
+
+	local latency = math.clamp(now - t, 0, Config.Net.MaxRewind)
+	local origin = CombatService.Origin(f, data.cf, latency)
+	local past = History.At(v.model, History.SampleTime(t, latency, now))
+	if not past then
+		return
+	end
+	local target = { { model = v.model, pos = past.Position } }
+	if #Hitbox.Find(cfg.Hitbox, origin, target, Config.Fighter.HurtRadius, cfg.ReachSlack) == 0 then
+		return -- too far on the server's timeline: no grab
+	end
+	f.rush = nil
+
+	if t >= v.iframeStart and t <= v.iframeUntil then
+		CombatService.Broadcast("Result", { a = f.model, v = v.model, move = "GrabRush", r = "Dodged" })
+		return
+	end
+	if cfg.Armor then
+		Fighters.SetArmor(f, now + cfg.Hold) -- through the slam too
+	end
+
+	Fighters.Stun(v, cfg.Hold + 0.2, now)
+	Ragdoll.Stop(v.model) -- grabbed out of a ragdoll: stand up, the Grabbed hold takes over
+	v.grabbedBy = f
+	f.grabbing = v
+	v.model:SetAttribute("Grabbed", true)
+	v.root.Anchored = true -- the server holds the victim in front of the attacker
+	f.actionUntil = now + cfg.Hold + 0.15
+	CombatService.Broadcast("Grab", { a = f.model, v = v.model })
+
+	local token = f.token
+	task.delay(cfg.Hold, function()
+		release(f, v, f.token == token)
+	end)
+end
+
+---------------------------------------------------------------- slam
+
+starters.GroundSlam = function(f: Fighter, cfg, t: number, now: number, data: any)
+	f.actionUntil = t + cfg.Windup + 0.25
+	local latency = math.clamp(now - t, 0, Config.Net.MaxRewind)
+	local origin = CombatService.Origin(f, data.cf, latency)
+	local hitTime = t + cfg.Windup
+	local token = f.token
+	task.delay(math.max(0, hitTime - now), function()
+		if f.token ~= token or not Fighters.Alive(f) then
+			return
+		end
+		CombatService.Cosmetic(f.player, "Slam", { m = f.model, pos = origin.Position })
+		local sampleT = History.SampleTime(hitTime, latency, Fighters.Now())
+		local hits = Hitbox.Find(cfg.Hitbox, origin, CombatService.Targets(f, sampleT), Config.Fighter.HurtRadius)
+		for _, target in hits do
+			local v = Fighters.Get(target.model)
+			if v then
+				local away = (target.pos - origin.Position) * Vector3.new(1, 0, 1)
+				local dir = if away.Magnitude > 0.1 then away.Unit else origin.LookVector
+				CombatService.ApplyHit(f, v, {
+					move = "GroundSlam",
+					t = hitTime,
+					damage = cfg.Damage,
+					posture = cfg.Posture,
+					stun = cfg.Stun,
+					hitstop = cfg.Hitstop,
+					knockback = dir * cfg.Knockback.Out + Vector3.yAxis * cfg.Knockback.Up,
+					seq = data.seq,
+				})
+			end
+		end
+	end)
+end
+
+---------------------------------------------------------------- strikes
+
+-- one scheduled hitbox check at `hitTime` (attacker's timeline); `build` makes the HitInfo per victim
+local function strikeAt(f: Fighter, shape, origin: CFrame, hitTime: number, latency: number, build: (v: Fighter) -> any)
+	local token = f.token
+	task.delay(math.max(0, hitTime - Fighters.Now()), function()
+		if f.token ~= token or not Fighters.Alive(f) then
+			return -- interrupted (stunned, parried)
+		end
+		local sampleT = History.SampleTime(hitTime, latency, Fighters.Now())
+		for _, target in Hitbox.Find(shape, origin, CombatService.Targets(f, sampleT), Config.Fighter.HurtRadius) do
+			local v = Fighters.Get(target.model)
+			if v then
+				CombatService.ApplyHit(f, v, build(v))
+			end
+		end
+	end)
+end
+
+-- Barrage: rooted flurry, each hit keeps the target stunned, the last one pushes it away.
+-- Hit i is matched to the client's prediction by seq + i - 1.
+starters.Barrage = function(f: Fighter, cfg, t: number, now: number, data: any)
+	f.actionUntil = t + cfg.Windup + (cfg.Hits - 1) * cfg.Interval + 0.15
+	local latency = math.clamp(now - t, 0, Config.Net.MaxRewind)
+	local origin = CombatService.Origin(f, data.cf, latency)
+	local seq0 = if type(data.seq) == "number" then data.seq else nil
+	for i = 1, cfg.Hits do
+		local final = i == cfg.Hits
+		local hitTime = t + cfg.Windup + (i - 1) * cfg.Interval
+		strikeAt(f, cfg.Hitbox, origin, hitTime, latency, function()
+			return {
+				move = "Barrage",
+				step = i,
+				t = hitTime,
+				damage = cfg.Damage,
+				posture = cfg.Posture,
+				stun = if final then cfg.FinalStun else cfg.Hitstun,
+				hitstop = if final then cfg.FinalHitstop else cfg.Hitstop,
+				knockback = if final then origin.LookVector * cfg.Knockback.Forward + Vector3.yAxis * cfg.Knockback.Up else nil,
+				seq = seq0 and seq0 + i - 1,
+			}
+		end)
+	end
+end
+
+-- Uppercut: launcher straight up; the target lands while still stunned, so the combo goes on
+starters.Uppercut = function(f: Fighter, cfg, t: number, now: number, data: any)
+	f.actionUntil = t + cfg.Windup + 0.3
+	local latency = math.clamp(now - t, 0, Config.Net.MaxRewind)
+	local origin = CombatService.Origin(f, data.cf, latency)
+	local hitTime = t + cfg.Windup
+	strikeAt(f, cfg.Hitbox, origin, hitTime, latency, function()
+		return {
+			move = "Uppercut",
+			t = hitTime,
+			damage = cfg.Damage,
+			posture = cfg.Posture,
+			stun = cfg.Stun,
+			hitstop = cfg.Hitstop,
+			knockback = origin.LookVector * cfg.Knockback.Forward + Vector3.yAxis * cfg.Knockback.Up,
+			seq = if type(data.seq) == "number" then data.seq else nil,
+		}
+	end)
+end
+
+---------------------------------------------------------------- entry points
+
+-- data = { id, t, cf, seq }
+function Abilities.Start(f: Fighter, data: any)
+	local id = data.id
+	local cfg = type(id) == "string" and Config.Abilities[id]
+	local start = cfg and starters[id]
+	if not start then
+		return
+	end
+	local now = Fighters.Now()
+	local t = CombatService.Stamp(data.t, now)
+	if not Fighters.CanAct(f, now) or t < (f.cooldowns[id] or 0) - Config.Net.TimingSlack then
+		CombatService.Deny(f, id)
+		return
+	end
+	f.cooldowns[id] = t + cfg.Cooldown
+	Fighters.SetBlocking(f, false, t)
+	CombatService.Cosmetic(f.player, "Ability", { m = f.model, id = id })
+	start(f, cfg, t, now, data)
+end
+
+-- keep grabbed victims glued in front of the grabber
+function Abilities.Step()
+	for _, f in Fighters.All() do
+		local v = f.grabbing
+		if v and v.root.Parent and f.root.Parent then
+			v.root.CFrame = Hitbox.Flat(f.root.CFrame) * CFrame.new(0, 0.4, -3.2) * CFrame.Angles(0, math.pi, 0)
+		end
+	end
+end
+
+-- someone died / left mid-grab
+function Abilities.Cleanup(f: Fighter)
+	if f.grabbing then
+		release(f, f.grabbing, false)
+	end
+	if f.grabbedBy then
+		release(f.grabbedBy, f, false)
+	end
+	f.rush = nil
+end
+
+return Abilities
+
+```
+
+`src/ServerScriptService/Combat/AntiCheat.luau`:
+
+```luau
+-- Server-side checks for what the client controls.
+--
+-- 1. Requests: every remote call must match a schema (known action, known keys, right types, finite
+--    numbers, short strings) before any handler sees it. Game rules (cooldowns, stun, reach, rewind)
+--    are already re-checked by the handlers themselves.
+-- 2. Movement: players own their character's physics (that's what makes dashes and lunges instant),
+--    so a cheater can move it freely. Over a sliding window we compare how far the root really went
+--    (History) with what the rules allow: walk speed + credit for every burst the server approved
+--    (dash, rush, knockback). Further = speed hack / teleport -> snapped back to where it was.
+--    Hanging high above the ground too long = flying -> put back on the last grounded spot.
+--    A network stall (positions stop, then all the walking arrives at once) can still trip this. That
+--    is deliberately NOT forgiven: from the server it looks exactly like standing still and then
+--    teleporting, so forgiving it opens a teleport. The lagging player gets one rubber-band, nothing more.
+-- 3. Response, split by how sure we can be:
+--    - Flag: movement. Lag can look exactly like cheating, so it's only undone (snap back), logged and
+--      counted ("ACFlags" attribute) for a human to look at. It never kicks: a speed hacker just keeps
+--      getting pulled back and gains nothing.
+--    - Strike: requests an honest client can't produce (wrong types, NaN, unknown keys). Strikes
+--      decay over time, too many = kick. No bans: those need a human.
+--    Everything goes to AntiCheat.Recent; warn lines are throttled per kind so a flood stays readable.
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage.Combat.Config)
+local Fighters = require(script.Parent.Fighters)
+local History = require(script.Parent.History)
+
+local AntiCheat = {}
+
+type Watch = {
+	model: Model?, -- character being watched (a new one resets everything)
+	since: number, -- movement is only judged after this (respawn, server moved us, snap back)
+	credits: { { t: number, studs: number } },
+	ground: CFrame?, -- last spot standing on something
+	airSince: number?,
+	lastCheck: number,
+	strikes: number,
+	strikesAt: number,
+	flags: number,
+	loggedAt: { [string]: number },
+}
+
+local watches: { [Player]: Watch } = {}
+
+AntiCheat.Recent = {} :: { { t: number, player: string, kind: string, detail: string } }
+local RECENT_MAX = 50
+
+-- where log lines go (tests swap it out to keep the Output clean)
+AntiCheat.Log = function(line: string)
+	warn(line)
+end
+
+local rayParams = RaycastParams.new()
+rayParams.CollisionGroup = "Fighters" -- fighters don't collide with fighters, so the ray ignores bodies
+rayParams.IgnoreWater = true
+
+local function now(): number
+	return workspace:GetServerTimeNow()
+end
+
+local function watchOf(p: Player): Watch
+	local w = watches[p]
+	if not w then
+		w = {
+			model = nil,
+			since = now(),
+			credits = {},
+			ground = nil,
+			airSince = nil,
+			lastCheck = 0,
+			strikes = 0,
+			strikesAt = os.clock(),
+			flags = 0,
+			loggedAt = {},
+		}
+		watches[p] = w
+	end
+	return w
+end
+
+Players.PlayerRemoving:Connect(function(p)
+	watches[p] = nil
+end)
+
+---------------------------------------------------------------- response
+
+local function record(p: Player, w: Watch, kind: string, detail: string, tally: string)
+	table.insert(AntiCheat.Recent, { t = now(), player = p.Name, kind = kind, detail = detail })
+	if #AntiCheat.Recent > RECENT_MAX then
+		table.remove(AntiCheat.Recent, 1)
+	end
+	local t = os.clock()
+	if t - (w.loggedAt[kind] or -math.huge) >= Config.AntiCheat.LogEvery then
+		w.loggedAt[kind] = t
+		AntiCheat.Log(string.format("[AntiCheat] %s %s: %s (%s)", p.Name, kind, detail, tally))
+	end
+end
+
+-- Suspicious, but lag can look the same: logged and counted, never punished.
+function AntiCheat.Flag(p: Player, kind: string, detail: string)
+	local w = watchOf(p)
+	w.flags += 1
+	p:SetAttribute("ACFlags", w.flags)
+	record(p, w, kind, detail, "flags " .. w.flags)
+end
+
+-- Something an honest client can't do. Enough of them in a short time = kick.
+function AntiCheat.Strike(p: Player, kind: string, detail: string)
+	local cfg = Config.AntiCheat
+	local weight = cfg.Strikes[kind]
+	assert(weight, "AntiCheat.Strike: no strike weight for " .. kind .. " (use Flag for things lag can cause)")
+	local w = watchOf(p)
+	local t = os.clock()
+	w.strikes = math.max(0, w.strikes - (t - w.strikesAt) / cfg.StrikeDecay) + weight
+	w.strikesAt = t
+	p:SetAttribute("ACStrikes", math.floor(w.strikes * 10 + 0.5) / 10)
+	record(p, w, kind, detail, string.format("strikes %.1f / %d", w.strikes, cfg.KickAt))
+
+	if w.strikes >= cfg.KickAt then
+		p:Kick("Removed by the anti-cheat (" .. kind .. ").")
+	end
+end
+
+---------------------------------------------------------------- requests
+
+-- action -> allowed keys and their types. Keys may be missing (handlers fall back), never extra.
+local SCHEMAS: { [string]: { [string]: string } } = {
+	M1 = { t = "number", cf = "CFrame", seq = "number" },
+	Block = { on = "boolean", t = "number" },
+	Dash = { dir = "string", t = "number" },
+	DashHit = { target = "Instance", t = "number", cf = "CFrame", seq = "number" },
+	Ability = { id = "string", t = "number", cf = "CFrame", seq = "number" },
+	GrabHit = { target = "Instance", t = "number", cf = "CFrame" },
+	DummyMode = {},
+}
+AntiCheat.Schemas = SCHEMAS -- read-only, for tests
+local MAX_KEYS = 6
+local MAX_STRING = 32
+local MAX_NUMBER = 1e10 -- time stamps are server unix time (~1.8e9)
+local MAX_POSITION = 1e6
+
+local function badValue(kind: string, v: any): string?
+	if typeof(v) ~= kind then
+		return "expected " .. kind .. ", got " .. typeof(v)
+	elseif kind == "number" and (v ~= v or math.abs(v) > MAX_NUMBER) then
+		return "number out of range"
+	elseif kind == "string" and #v > MAX_STRING then
+		return "string too long"
+	elseif kind == "CFrame" then
+		local pos = (v :: CFrame).Position
+		if pos ~= pos or pos.Magnitude > MAX_POSITION then
+			return "CFrame out of range"
+		end
+	end
+	return nil
+end
+
+-- what is wrong with a request, nil if nothing (pure: no player, no side effects)
+function AntiCheat.Validate(action: any, data: any): string?
+	local schema = type(action) == "string" and SCHEMAS[action]
+	local problem: string? = nil
+	if not schema then
+		problem = "unknown action " .. tostring(action):sub(1, MAX_STRING)
+	elseif type(data) ~= "table" then
+		problem = "data is " .. typeof(data)
+	else
+		local n = 0
+		for k, v in data do
+			n += 1
+			local want = type(k) == "string" and schema[k]
+			if n > MAX_KEYS then
+				problem = "too many keys"
+			elseif not want then
+				problem = "unexpected key " .. tostring(k):sub(1, MAX_STRING)
+			else
+				local bad = badValue(want, v)
+				problem = bad and (k .. ": " .. bad)
+			end
+			if problem then
+				break
+			end
+		end
+	end
+	return problem
+end
+
+-- true if the request may go to its handler
+function AntiCheat.CheckRequest(p: Player, action: any, data: any): boolean
+	local problem = AntiCheat.Validate(action, data)
+	if problem then
+		AntiCheat.Strike(p, "BadRequest", tostring(action):sub(1, MAX_STRING) .. " - " .. problem)
+		return false
+	end
+	return true
+end
+
+---------------------------------------------------------------- movement
+
+-- an approved burst: this character may travel `studs` further than walking, for a while
+function AntiCheat.Grant(model: Model, studs: number)
+	local p = Players:GetPlayerFromCharacter(model)
+	if p and studs > 0 then
+		table.insert(watchOf(p).credits, { t = now(), studs = studs * Config.AntiCheat.CreditScale })
+	end
+end
+
+-- horizontal distance a knockback velocity carries a body: flight time from the upward part, plus a slide
+function AntiCheat.KnockbackStuds(kb: Vector3): number
+	local air = 2 * math.max(0, kb.Y) / workspace.Gravity
+	return Vector3.new(kb.X, 0, kb.Z).Magnitude * (air + 0.4)
+end
+
+-- the server moved this character itself (dash catch, grab release): don't judge movement across it
+function AntiCheat.Moved(model: Model)
+	local p = Players:GetPlayerFromCharacter(model)
+	if p then
+		local w = watchOf(p)
+		w.since = now()
+		w.airSince = nil
+	end
+end
+
+local function setOwner(model: Model, owner: Player?)
+	for _, part in model:GetDescendants() do
+		if part:IsA("BasePart") and not part.Anchored then
+			pcall(part.SetNetworkOwner, part, owner)
+		end
+	end
+end
+
+-- Put the character back. The client owns its physics and would just overwrite a server CFrame, so the
+-- server takes ownership for a moment, moves the body, then hands it back.
+local function snapBack(p: Player, f: Fighters.Fighter, to: CFrame)
+	local cfg = Config.AntiCheat
+	local model = f.model
+	setOwner(model, nil)
+	model:PivotTo(to)
+	f.root.AssemblyLinearVelocity = Vector3.zero
+	f.root.AssemblyAngularVelocity = Vector3.zero
+	task.delay(cfg.SnapHold, function()
+		if model.Parent and p.Parent == Players and p.Character == model then
+			setOwner(model, p)
+		end
+	end)
+end
+
+local function checkPlayer(p: Player, t: number)
+	local cfg = Config.AntiCheat
+	local char = p.Character
+	local f = Fighters.Get(char)
+	if not char or not f or not Fighters.Alive(f) then
+		return
+	end
+	local w = watchOf(p)
+	if w.model ~= char then
+		w.model, w.since, w.credits, w.ground, w.airSince = char, t, {}, nil, nil
+	end
+	if t - w.lastCheck < cfg.CheckEvery then
+		return
+	end
+	w.lastCheck = t
+
+	local root = f.root
+	local held = f.grabbedBy ~= nil or root.Anchored
+	if held then
+		w.since = t
+	end
+	if held or t < w.since then
+		-- the server holds the body (grab, snap back): it decides where it is
+		w.airSince = nil
+		return
+	end
+
+	-- credits still usable for this window
+	local credit = 0
+	for i = #w.credits, 1, -1 do
+		local c = w.credits[i]
+		if t - c.t > cfg.Window + cfg.CreditLife then
+			table.remove(w.credits, i)
+		else
+			credit += c.studs
+		end
+	end
+
+	-- speed / teleport: horizontal travel over the last window
+	local from = math.max(t - cfg.Window, w.since)
+	local span = t - from
+	if span >= cfg.Window * 0.5 then
+		local past = History.At(char, from)
+		if past then
+			local moved = ((root.Position - past.Position) * Vector3.new(1, 0, 1)).Magnitude
+			local allowed = Config.Fighter.WalkSpeed * cfg.SpeedSlack * span + cfg.DistSlack + credit
+			if moved > allowed then
+				snapBack(p, f, past)
+				w.since, w.credits, w.airSince = t + cfg.SnapHold, {}, nil
+				AntiCheat.Flag(p, "Speed", string.format("%.1f studs in %.2f s, allowed %.1f", moved, span, allowed))
+				return
+			end
+		end
+	end
+
+	-- flying: high above the ground for too long
+	local down = workspace:Raycast(root.Position, Vector3.new(0, -cfg.FlyHeight, 0), rayParams)
+	if down then
+		w.airSince = nil
+		if down.Distance < 4 then
+			w.ground = root.CFrame
+		end
+	else
+		w.airSince = w.airSince or t
+		if t - (w.airSince :: number) > cfg.FlyTime then
+			local back = w.ground or (History.At(char, w.airSince :: number) :: CFrame)
+			snapBack(p, f, back)
+			w.since, w.airSince = t + cfg.SnapHold, nil
+			AntiCheat.Flag(p, "Fly", string.format("airborne %.1f s more than %d studs up", cfg.FlyTime, cfg.FlyHeight))
+		end
+	end
+end
+
+function AntiCheat.Step(t: number)
+	for _, p in Players:GetPlayers() do
+		checkPlayer(p, t)
+	end
+end
+
+return AntiCheat
+
+```
+
+`src/ServerScriptService/Combat/CombatService.luau`:
+
+```luau
+-- Core combat rules: M1 chain, block / parry / guard break, dash / dodge, and the single hit pipeline.
+-- Every request carries the client's server-time stamp `t` (workspace:GetServerTimeNow() at the press).
+-- We trust it only within Net.MaxRewind, and use it to rewind targets to what the attacker saw.
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Combat = ReplicatedStorage.Combat
+local Config = require(Combat.Config)
+local Hitbox = require(Combat.Hitbox)
+local Fighters = require(script.Parent.Fighters)
+local History = require(script.Parent.History)
+local Ragdoll = require(script.Parent.Ragdoll)
+local AntiCheat = require(script.Parent.AntiCheat)
+
+type Fighter = Fighters.Fighter
+
+local Effect = Combat.Remotes.Effect :: RemoteEvent
+local EffectU = Combat.Remotes.EffectU :: UnreliableRemoteEvent
+
+local CombatService = {}
+
+export type HitInfo = {
+	move: string,
+	step: number?,
+	t: number, -- server time the hit happened from the attacker's point of view
+	damage: number,
+	posture: number?,
+	stun: number,
+	hitstop: number,
+	knockback: Vector3?,
+	unblockable: boolean?,
+	seq: number?,
+}
+
+---------------------------------------------------------------- helpers
+
+-- request stamp -> trusted time
+function CombatService.Stamp(t: any, now: number): number
+	if type(t) ~= "number" or t ~= t then
+		return now
+	end
+	return math.clamp(t, now - Config.Net.MaxRewind, now)
+end
+
+-- attacker CFrame reported by the client, checked against the server copy
+function CombatService.Origin(f: Fighter, cf: any, latency: number): CFrame
+	local server = f.root.CFrame
+	if typeof(cf) ~= "CFrame" or cf.Position ~= cf.Position then
+		return Hitbox.Flat(server)
+	end
+	local speed = f.root.AssemblyLinearVelocity.Magnitude
+	local allowed = Config.Net.CFTolerance + speed * latency
+	if (cf.Position - server.Position).Magnitude > allowed then
+		return Hitbox.Flat(server)
+	end
+	return Hitbox.Flat(cf)
+end
+
+-- everybody except `attacker`, at their position at server time `sampleT`
+function CombatService.Targets(attacker: Fighter, sampleT: number): { Hitbox.Target }
+	local list = {}
+	for model, f in Fighters.All() do
+		local friendly = attacker.isDummy and f.isDummy -- dummies don't hit each other
+		if f ~= attacker and not friendly and Fighters.Alive(f) and f.grabbedBy == nil then
+			local cf = History.At(model, sampleT)
+			if cf then
+				table.insert(list, { model = model, pos = cf.Position })
+			end
+		end
+	end
+	return list
+end
+
+-- unreliable cosmetic event to everyone except the player who predicted it
+function CombatService.Cosmetic(except: Player?, kind: string, data: any)
+	for _, p in Players:GetPlayers() do
+		if p ~= except then
+			EffectU:FireClient(p, kind, data)
+		end
+	end
+end
+
+function CombatService.Broadcast(kind: string, data: any)
+	Effect:FireAllClients(kind, data)
+end
+
+function CombatService.Deny(f: Fighter, action: string)
+	if f.player then
+		Effect:FireClient(f.player, "Denied", { action = action, step = f.comboStep })
+	end
+end
+
+-- push a server-owned body (dummies). Players push themselves from the Hit effect.
+function CombatService.Push(f: Fighter, vel: Vector3)
+	if f.player then
+		return
+	end
+	local root = f.root
+	local att = root:FindFirstChild("KnockbackAttachment") :: Attachment?
+	if not att then
+		local a = Instance.new("Attachment")
+		a.Name = "KnockbackAttachment"
+		a.Parent = root
+		att = a
+	end
+	local lv = Instance.new("LinearVelocity")
+	lv.Attachment0 = att
+	lv.RelativeTo = Enum.ActuatorRelativeTo.World
+	lv.MaxForce = math.huge
+	lv.VectorVelocity = vel
+	lv.Parent = root
+	task.delay(0.12, lv.Destroy, lv)
+end
+
+---------------------------------------------------------------- hit pipeline
+
+local function fromFront(v: Fighter, a: Fighter): boolean
+	local toA = (a.root.Position - v.root.Position) * Vector3.new(1, 0, 1)
+	if toA.Magnitude < 0.05 then
+		return true
+	end
+	local look = v.root.CFrame.LookVector * Vector3.new(1, 0, 1)
+	return look.Unit:Dot(toA.Unit) > Config.Block.FrontDot
+end
+
+-- one place that decides what a hit does. Returns the result name.
+function CombatService.ApplyHit(a: Fighter, v: Fighter, hit: HitInfo): string?
+	if not Fighters.Alive(a) or not Fighters.Alive(v) then
+		return nil
+	end
+	local now = Fighters.Now()
+	local base = { a = a.model, v = v.model, move = hit.move, step = hit.step, seq = hit.seq }
+
+	-- 1. dodge i-frames, judged at the moment the hit happened for the attacker
+	if hit.t >= v.iframeStart and hit.t <= v.iframeUntil then
+		base.r = "Dodged"
+		CombatService.Broadcast("Result", base)
+		return "Dodged"
+	end
+
+	-- 2. block / parry (front only)
+	if v.blocking and not hit.unblockable and fromFront(v, a) then
+		local sinceBlock = hit.t - v.blockStart
+		if v.parryEligible and sinceBlock >= -Config.Net.TimingSlack and sinceBlock <= Config.Block.ParryWindow then
+			Fighters.Stun(a, Config.Block.ParryStun, now)
+			v.parryEligible = false -- one parry per block press
+			base.r = "Parried"
+			base.stun = Config.Block.ParryStun
+			CombatService.Broadcast("Result", base)
+			return "Parried"
+		end
+
+		Fighters.SetPosture(v, v.posture - (hit.posture or hit.damage * 3))
+		v.postureHitAt = now
+		if v.posture <= 0 then
+			Fighters.Stun(v, Config.Block.GuardBreakStun, now)
+			Fighters.SetPosture(v, Config.Block.MaxPosture)
+			base.r = "GuardBreak"
+			base.stun = Config.Block.GuardBreakStun
+			CombatService.Broadcast("Result", base)
+			return "GuardBreak"
+		end
+		base.r = "Blocked"
+		CombatService.Broadcast("Result", base)
+		return "Blocked"
+	end
+
+	local damage = math.round(hit.damage * a.damageScale * 10) / 10 -- 3 x 0.6 is 1.7999...
+
+	-- 3. armor: a committed skill (Rush Grab) eats M1s, takes the damage and keeps going.
+	-- Otherwise holding M1 in front of you beats every rush. Skills still break it.
+	if hit.move == "M1" and hit.t <= v.armorUntil then
+		v.humanoid:TakeDamage(damage)
+		v.lastDamagedAt = now
+		base.r = "Armored"
+		base.dmg = damage
+		base.hp = v.humanoid.Health
+		CombatService.Broadcast("Result", base)
+		return "Armored"
+	end
+
+	-- 4. clean hit
+	v.humanoid:TakeDamage(damage)
+	v.lastDamagedAt = now
+	Fighters.Stun(v, hit.stun, now)
+
+	if now - a.lastLandedAt <= Config.Fighter.ComboWindow then
+		a.comboCount += 1
+	else
+		a.comboCount = 1
+	end
+	a.lastLandedAt = now
+
+	-- combo extension: a landed dash hit / ability cancels the M1 end lag and restarts the chain
+	if hit.move ~= "M1" then
+		a.m1ReadyAt = math.min(a.m1ReadyAt, hit.t)
+		a.comboStep = 0
+	end
+
+	-- launchers ragdoll the target for its stun; any other clean hit stands it back up (juggles, dash catch)
+	if hit.knockback and hit.knockback.Y >= Config.Ragdoll.MinUp then
+		Ragdoll.Start(v.model, math.max(0.2, hit.stun - Config.Ragdoll.GetUpLead))
+	else
+		Ragdoll.Stop(v.model)
+	end
+
+	if hit.knockback then
+		CombatService.Push(v, hit.knockback)
+		AntiCheat.Grant(v.model, AntiCheat.KnockbackStuds(hit.knockback)) -- players fly on their own client
+	end
+
+	base.r = "Hit"
+	base.dmg = damage
+	base.combo = a.comboCount
+	base.hitstop = hit.hitstop
+	base.kb = hit.knockback
+	base.stun = hit.stun
+	base.hp = v.humanoid.Health
+	CombatService.Broadcast("Result", base)
+	return "Hit"
+end
+
+---------------------------------------------------------------- M1
+
+-- data = { t, cf, seq }. Also called by the dummy with its own CFrame.
+function CombatService.M1(f: Fighter, data: any)
+	local now = Fighters.Now()
+	local t = CombatService.Stamp(data.t, now)
+	local cfg = Config.M1
+
+	if not Fighters.CanAct(f, now) or f.blocking or t < f.m1ReadyAt - Config.Net.TimingSlack then
+		CombatService.Deny(f, "M1")
+		return
+	end
+
+	local step = if (t - f.lastM1 > cfg.ComboReset or f.comboStep >= cfg.Steps) then 1 else f.comboStep + 1
+	f.comboStep = step
+	f.lastM1 = t
+	f.m1ReadyAt = t + (if step == cfg.Steps then cfg.EndLag else cfg.Interval)
+	f.actionUntil = t + cfg.Windup + 0.12
+
+	local latency = math.clamp(now - t, 0, Config.Net.MaxRewind)
+	local origin = CombatService.Origin(f, data.cf, latency)
+	local seq = if type(data.seq) == "number" then data.seq else nil
+	CombatService.Cosmetic(f.player, "Swing", { m = f.model, step = step })
+
+	local hitTime = t + cfg.Windup
+	local token = f.token
+	task.delay(math.max(0, hitTime - now), function()
+		if f.token ~= token or not Fighters.Alive(f) then
+			return -- got interrupted during the windup
+		end
+		local sampleT = History.SampleTime(hitTime, latency, Fighters.Now())
+		local hits = Hitbox.Find(cfg.Hitbox, origin, CombatService.Targets(f, sampleT), Config.Fighter.HurtRadius)
+		local final = step == cfg.Steps
+		for _, target in hits do
+			local v = Fighters.Get(target.model)
+			if v then
+				local kb = nil
+				if final then
+					kb = origin.LookVector * cfg.Knockback.Forward + Vector3.yAxis * cfg.Knockback.Up
+				end
+				CombatService.ApplyHit(f, v, {
+					move = "M1",
+					step = step,
+					t = hitTime,
+					damage = cfg.Damage[step],
+					posture = cfg.Posture[step],
+					stun = if final then cfg.FinalStun else cfg.Hitstun,
+					hitstop = cfg.Hitstop[step],
+					knockback = kb,
+					seq = seq,
+				})
+			end
+		end
+	end)
+end
+
+---------------------------------------------------------------- block
+
+-- data = { on, t }
+function CombatService.Block(f: Fighter, data: any)
+	local now = Fighters.Now()
+	local t = CombatService.Stamp(data.t, now)
+	if data.on == true then
+		if not Fighters.CanAct(f, now) then
+			CombatService.Deny(f, "Block")
+			return
+		end
+		Fighters.SetBlocking(f, true, t)
+	else
+		Fighters.SetBlocking(f, false, t)
+	end
+end
+
+---------------------------------------------------------------- dash
+
+local DASH_DIRS = { F = true, B = true, L = true, R = true }
+
+-- data = { dir, t }. The client moves its own character; the server owns cooldown and i-frames.
+function CombatService.Dash(f: Fighter, data: any)
+	local now = Fighters.Now()
+	local t = CombatService.Stamp(data.t, now)
+	local dir = data.dir
+	if not DASH_DIRS[dir] or not Fighters.CanAct(f, now) or t < f.dashReadyAt - Config.Net.TimingSlack then
+		CombatService.Deny(f, "Dash")
+		return
+	end
+	f.dashReadyAt = t + Config.Dash.Cooldown
+	Fighters.SetBlocking(f, false, t)
+	local spec = if dir == "F" then Config.Dash.Front else Config.Dash.Dodge
+	AntiCheat.Grant(f.model, spec.Speed * spec.Duration)
+	if dir ~= "F" then
+		Fighters.SetIFrames(f, t, t + Config.Dash.Dodge.IFrames)
+		f.dashHit = nil
+	else
+		f.dashHit = { t0 = t, untilT = t + Config.Dash.Front.Duration, token = f.token }
+	end
+	CombatService.Cosmetic(f.player, "Dash", { m = f.model, dir = dir })
+end
+
+-- the dashing client reports running into someone; re-checked against the rewound target
+-- data = { target, t, cf, seq }
+function CombatService.DashHit(f: Fighter, data: any)
+	local cfg = Config.Dash.Hit
+	local dash = f.dashHit
+	if not dash or dash.token ~= f.token then
+		return
+	end
+	local now = Fighters.Now()
+	local t = CombatService.Stamp(data.t, now)
+	local slack = Config.Net.TimingSlack
+	if t < dash.t0 - slack or t > dash.untilT + slack then
+		return
+	end
+	local v = Fighters.Get(data.target)
+	if not v or v == f or not Fighters.Alive(v) or v.grabbedBy then
+		return
+	end
+	local latency = math.clamp(now - t, 0, Config.Net.MaxRewind)
+	local origin = CombatService.Origin(f, data.cf, latency)
+	local past = History.At(v.model, History.SampleTime(t, latency, now))
+	if not past then
+		return
+	end
+	if #Hitbox.Find(cfg.Hitbox, origin, { { model = v.model, pos = past.Position } }, Config.Fighter.HurtRadius, cfg.ReachSlack) == 0 then
+		return
+	end
+	f.dashHit = nil -- one hit per dash
+	local result = CombatService.ApplyHit(f, v, {
+		move = "Dash",
+		t = t,
+		damage = cfg.Damage,
+		posture = cfg.Posture,
+		stun = cfg.Stun,
+		hitstop = cfg.Hitstop,
+		knockback = Vector3.zero, -- kills the target's knockback (its own client stops it for players)
+		seq = if type(data.seq) == "number" then data.seq else nil,
+	})
+	-- catch: a launched target is already further away on the server than the attacker sees it,
+	-- so put it right in front of the attacker, facing them, and stop it
+	if result == "Hit" and v.root.Parent then
+		local at = origin.Position + origin.LookVector * 3
+		at = Vector3.new(at.X, v.root.Position.Y, at.Z)
+		v.root.CFrame = CFrame.lookAt(at, Vector3.new(origin.Position.X, at.Y, origin.Position.Z))
+		v.root.AssemblyLinearVelocity = Vector3.zero
+		AntiCheat.Moved(v.model)
+	end
+end
+
+return CombatService
+
+```
+
+`src/ServerScriptService/Combat/Dummy.luau`:
+
+```luau
+-- Training dummies. Same Fighter state and same hit pipeline as players, just driven by a tiny AI.
+-- Modes: Idle (stands still), Block (holds block and faces you), Fight (walks up and throws M1 chains).
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Combat = ReplicatedStorage.Combat
+local Config = require(Combat.Config)
+local Hitbox = require(Combat.Hitbox)
+local Fighters = require(script.Parent.Fighters)
+local CombatService = require(script.Parent.CombatService)
+local Abilities = require(script.Parent.Abilities)
+local Ragdoll = require(script.Parent.Ragdoll)
+
+type Fighter = Fighters.Fighter
+
+local Dummy = {}
+Dummy.Mode = "Idle"
+
+local SPAWNS = {
+	CFrame.new(0, 3, -16) * CFrame.Angles(0, math.pi, 0),
+	CFrame.new(9, 3, -22) * CFrame.Angles(0, math.pi, 0),
+}
+
+local folder: Folder
+local slots: { [number]: Fighter? } = {}
+-- engageAt: when it may start swinging (nil = not in reach yet, the reaction delay starts on entry)
+local ai: { [Fighter]: { nextAttack: number, engageAt: number? } } = {}
+
+local function build(index: number): Model
+	local desc = Instance.new("HumanoidDescription")
+	local gray = Color3.fromRGB(120, 124, 132)
+	desc.HeadColor, desc.TorsoColor = gray, Color3.fromRGB(70, 74, 82)
+	desc.LeftArmColor, desc.RightArmColor = gray, gray
+	desc.LeftLegColor, desc.RightLegColor = Color3.fromRGB(52, 55, 62), Color3.fromRGB(52, 55, 62)
+	local model = Players:CreateHumanoidModelFromDescription(desc, Enum.HumanoidRigType.R15)
+	model.Name = "Dummy" .. index
+	for _, d in model:GetDescendants() do
+		if d:IsA("LuaSourceContainer") then
+			d:Destroy() -- default Animate etc.
+		end
+	end
+	local humanoid = model:FindFirstChildOfClass("Humanoid") :: Humanoid
+	humanoid.MaxHealth = Config.Dummy.MaxHealth
+	humanoid.Health = Config.Dummy.MaxHealth
+	-- standard Roblox overhead name + health bar (green -> red), same look as the player HP
+	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+	humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOn
+	humanoid.HealthDisplayDistance = 80
+	humanoid.NameDisplayDistance = 80
+	humanoid.WalkSpeed = 0
+	humanoid.BreakJointsOnDeath = false
+	model:PivotTo(SPAWNS[index])
+	model:SetAttribute("Dummy", true)
+	model.Parent = folder
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") then
+			d:SetNetworkOwner(nil) -- the server simulates dummies
+		end
+	end
+	return model
+end
+
+local function spawn(index: number)
+	local model = build(index)
+	local f = Fighters.Add(model, nil, true)
+	f.damageScale = Config.Dummy.DamageScale
+	slots[index] = f
+	ai[f] = { nextAttack = 0 }
+	f.humanoid.Died:Connect(function()
+		Abilities.Cleanup(f)
+		Ragdoll.Forever(model)
+		Fighters.Remove(model)
+		ai[f] = nil
+		slots[index] = nil
+		task.delay(Config.Dummy.RespawnDelay, function()
+			model:Destroy()
+			spawn(index)
+		end)
+	end)
+end
+
+function Dummy.Init()
+	folder = Instance.new("Folder")
+	folder.Name = "Dummies"
+	folder.Parent = workspace
+	workspace:SetAttribute("DummyMode", Dummy.Mode)
+	for i in SPAWNS do
+		spawn(i)
+	end
+end
+
+function Dummy.CycleMode()
+	local modes = Config.Dummy.Modes
+	local i = table.find(modes, Dummy.Mode) or 0
+	Dummy.Mode = modes[i % #modes + 1]
+	workspace:SetAttribute("DummyMode", Dummy.Mode)
+	for _, f in slots do
+		if f then
+			Fighters.SetBlocking(f, false, Fighters.Now())
+			f.humanoid:MoveTo(f.root.Position)
+		end
+	end
+end
+
+local function nearestPlayer(f: Fighter, range: number): Fighter?
+	local best, bestD = nil, range
+	for _, other in Fighters.All() do
+		if other.player and Fighters.Alive(other) then
+			local d = (other.root.Position - f.root.Position).Magnitude
+			if d < bestD then
+				best, bestD = other, d
+			end
+		end
+	end
+	return best
+end
+
+-- only the dummy closest to a player fights them, the rest wait
+local function closestDummyTo(target: Fighter): Fighter?
+	local best, bestD = nil, math.huge
+	for _, f in slots do
+		if f and Fighters.Alive(f) then
+			local d = (f.root.Position - target.root.Position).Magnitude
+			if d < bestD then
+				best, bestD = f, d
+			end
+		end
+	end
+	return best
+end
+
+local function face(f: Fighter, pos: Vector3)
+	local p = f.root.Position
+	local flat = Vector3.new(pos.X, p.Y, pos.Z)
+	if (flat - p).Magnitude > 0.1 then
+		f.root.CFrame = CFrame.lookAt(p, flat)
+	end
+end
+
+function Dummy.Step(now: number)
+	for _, f in slots do
+		if not f or not Fighters.Alive(f) then
+			continue
+		end
+		-- full heal after a short break so you can keep testing combos
+		if now - f.lastDamagedAt > Config.Dummy.HealDelay and f.humanoid.Health < f.humanoid.MaxHealth then
+			f.humanoid.Health = f.humanoid.MaxHealth
+		end
+
+		local state = ai[f]
+		local stunned = Fighters.IsStunned(f, now)
+		local target = if Dummy.Mode ~= "Idle" then nearestPlayer(f, 40) else nil
+		if stunned or not target then
+			f.humanoid.WalkSpeed = 0
+			if state then
+				state.engageAt = nil -- react again once it's free
+			end
+			continue
+		end
+
+		if Dummy.Mode == "Block" then
+			face(f, target.root.Position)
+			if not f.blocking and Fighters.CanAct(f, now) then
+				Fighters.SetBlocking(f, true, now)
+				f.parryEligible = false -- a dummy in Block mode never parries
+			end
+		elseif Dummy.Mode == "Fight" then
+			if closestDummyTo(target) ~= f then
+				f.humanoid.WalkSpeed = 0
+				continue
+			end
+			local cfg = Config.Dummy
+			local dist = (target.root.Position - f.root.Position).Magnitude
+			if dist > cfg.FightRange then
+				f.humanoid.WalkSpeed = cfg.WalkSpeed
+				f.humanoid:MoveTo(target.root.Position)
+				if state then
+					state.engageAt = nil
+				end
+			elseif state then
+				f.humanoid.WalkSpeed = 0
+				face(f, target.root.Position)
+				state.engageAt = state.engageAt or now + cfg.Reaction
+				local ready = now >= state.engageAt and now >= state.nextAttack
+				if ready and Fighters.CanAct(f, now) and now >= f.m1ReadyAt then
+					CombatService.M1(f, { t = now, cf = Hitbox.Flat(f.root.CFrame) })
+					local finished = f.comboStep >= Config.M1.Steps
+					state.nextAttack = now + (if finished then cfg.FightCooldown else Config.M1.Interval + cfg.SwingGap)
+				end
+			end
+		end
+	end
+end
+
+return Dummy
+
+```
+
+`src/ServerScriptService/Combat/Fighters.luau`:
+
+```luau
+-- Server-side state of every fighter (players and dummies).
+-- The server is the only one that changes it; clients read the replicated attributes.
+local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Config = require(ReplicatedStorage.Combat.Config)
+local History = require(script.Parent.History)
+local Ragdoll = require(script.Parent.Ragdoll)
+
+local Fighters = {}
+
+export type Fighter = {
+	model: Model,
+	humanoid: Humanoid,
+	root: BasePart,
+	player: Player?,
+	isDummy: boolean,
+
+	token: number, -- bumped when the fighter is interrupted; pending attacks with an old token are dropped
+	stunUntil: number,
+	actionUntil: number,
+
+	blocking: boolean,
+	blockStart: number,
+	blockReleasedAt: number,
+	parryEligible: boolean,
+	posture: number,
+	postureHitAt: number,
+
+	iframeStart: number,
+	iframeUntil: number,
+	armorUntil: number, -- M1s don't stun before this (committed skills like Rush Grab)
+	damageScale: number, -- outgoing damage multiplier (dummies hit softer)
+
+	comboStep: number,
+	lastM1: number,
+	m1ReadyAt: number,
+	dashReadyAt: number,
+	cooldowns: { [string]: number },
+
+	comboCount: number, -- hits landed in the current combo (for the HUD)
+	lastLandedAt: number,
+	lastDamagedAt: number,
+
+	rush: { id: string, t0: number, untilT: number, token: number }?,
+	dashHit: { t0: number, untilT: number, token: number }?, -- open front dash that can still hit
+	grabbing: any?, -- Fighter
+	grabbedBy: any?, -- Fighter
+}
+
+local byModel: { [Model]: Fighter } = {}
+
+function Fighters.Now(): number
+	return workspace:GetServerTimeNow()
+end
+
+function Fighters.Add(model: Model, player: Player?, isDummy: boolean?): Fighter
+	local humanoid = model:WaitForChild("Humanoid") :: Humanoid
+	local root = model:WaitForChild("HumanoidRootPart") :: BasePart
+	local f: Fighter = {
+		model = model,
+		humanoid = humanoid,
+		root = root,
+		player = player,
+		isDummy = isDummy == true,
+		token = 0,
+		stunUntil = 0,
+		actionUntil = 0,
+		blocking = false,
+		blockStart = 0,
+		blockReleasedAt = -math.huge,
+		parryEligible = false,
+		posture = Config.Block.MaxPosture,
+		postureHitAt = 0,
+		iframeStart = 0,
+		iframeUntil = 0,
+		armorUntil = 0,
+		damageScale = 1,
+		comboStep = 0,
+		lastM1 = 0,
+		m1ReadyAt = 0,
+		dashReadyAt = 0,
+		cooldowns = {},
+		comboCount = 0,
+		lastLandedAt = 0,
+		lastDamagedAt = 0,
+	}
+	byModel[model] = f
+
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.CollisionGroup = "Fighters"
+		end
+	end
+	model.DescendantAdded:Connect(function(d)
+		if d:IsA("BasePart") then
+			d.CollisionGroup = "Fighters"
+		end
+	end)
+
+	model:SetAttribute("StunUntil", 0)
+	model:SetAttribute("Blocking", false)
+	model:SetAttribute("Posture", f.posture)
+	model:SetAttribute("IFrameUntil", 0)
+	model:SetAttribute("ArmorUntil", 0)
+	model:SetAttribute("Grabbed", false)
+	Ragdoll.Add(model, humanoid, player)
+	CollectionService:AddTag(model, "Fighter")
+	History.Track(model, root)
+	return f
+end
+
+function Fighters.Remove(model: Model)
+	byModel[model] = nil
+	History.Untrack(model)
+	Ragdoll.Remove(model)
+end
+
+function Fighters.Get(model: Instance?): Fighter?
+	return if model then byModel[model :: Model] else nil
+end
+
+function Fighters.All(): { [Model]: Fighter }
+	return byModel
+end
+
+function Fighters.Alive(f: Fighter): boolean
+	return f.model.Parent ~= nil and f.humanoid.Health > 0
+end
+
+function Fighters.IsStunned(f: Fighter, now: number): boolean
+	return now < f.stunUntil or f.grabbedBy ~= nil
+end
+
+-- can start a new action (attack, dash, ability, block)
+function Fighters.CanAct(f: Fighter, now: number): boolean
+	return Fighters.Alive(f)
+		and not Fighters.IsStunned(f, now)
+		and f.grabbing == nil
+		and now >= f.actionUntil - Config.Net.TimingSlack
+end
+
+function Fighters.SetBlocking(f: Fighter, on: boolean, t: number)
+	if f.blocking == on then
+		return
+	end
+	f.blocking = on
+	if on then
+		f.blockStart = t
+		f.parryEligible = t - f.blockReleasedAt >= Config.Block.ParryCooldown
+	else
+		f.blockReleasedAt = t
+	end
+	f.model:SetAttribute("Blocking", on)
+end
+
+-- interrupt whatever the fighter was doing and stun until `untilT`
+function Fighters.Stun(f: Fighter, duration: number, now: number)
+	f.token += 1
+	f.rush = nil
+	f.dashHit = nil
+	f.actionUntil = 0
+	f.comboStep = 0
+	f.stunUntil = math.max(f.stunUntil, now + duration)
+	Fighters.SetArmor(f, 0) -- whatever broke through also ends the armored move
+	Fighters.SetBlocking(f, false, now)
+	f.model:SetAttribute("StunUntil", f.stunUntil)
+end
+
+function Fighters.SetPosture(f: Fighter, value: number)
+	f.posture = math.clamp(value, 0, Config.Block.MaxPosture)
+	f.model:SetAttribute("Posture", math.floor(f.posture + 0.5))
+end
+
+function Fighters.SetIFrames(f: Fighter, t0: number, t1: number)
+	f.iframeStart = t0
+	f.iframeUntil = t1
+	f.model:SetAttribute("IFrameUntil", t1)
+end
+
+-- replicated so attackers predict "Armored" instead of a stagger that never comes
+function Fighters.SetArmor(f: Fighter, untilT: number)
+	f.armorUntil = untilT
+	f.model:SetAttribute("ArmorUntil", untilT)
+end
+
+return Fighters
+
+```
+
+`src/ServerScriptService/Combat/History.luau`:
+
+```luau
+-- Position history for lag compensation.
+-- Every Heartbeat we store each fighter's root CFrame with the server time. When a hit arrives,
+-- we look up where targets were at the moment the attacker actually saw them.
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Config = require(ReplicatedStorage.Combat.Config)
+
+local History = {}
+
+local SIZE = 128 -- ring buffer slots (~2 s at 60 Hz, more than HistoryLength)
+
+type Buffer = {
+	root: BasePart,
+	times: { number },
+	cfs: { CFrame },
+	head: number, -- index of the newest sample
+	count: number,
+}
+
+local buffers: { [Model]: Buffer } = {}
+
+function History.Track(model: Model, root: BasePart)
+	buffers[model] = { root = root, times = table.create(SIZE, 0), cfs = table.create(SIZE, CFrame.identity), head = 0, count = 0 }
+end
+
+function History.Untrack(model: Model)
+	buffers[model] = nil
+end
+
+function History.Record(now: number)
+	for model, buf in buffers do
+		if not buf.root.Parent then
+			continue
+		end
+		buf.head = buf.head % SIZE + 1
+		buf.times[buf.head] = now
+		buf.cfs[buf.head] = buf.root.CFrame
+		buf.count = math.min(buf.count + 1, SIZE)
+	end
+end
+
+-- CFrame of the model's root at server time t (interpolated between samples)
+function History.At(model: Model, t: number): CFrame?
+	local buf = buffers[model]
+	if not buf or buf.count == 0 then
+		return nil
+	end
+	local i = buf.head
+	if t >= buf.times[i] then
+		return buf.root.CFrame -- newer than the last sample: use the live position
+	end
+	-- walk back until we find the sample pair around t
+	for _ = 1, buf.count - 1 do
+		local prev = (i - 2) % SIZE + 1
+		local t0, t1 = buf.times[prev], buf.times[i]
+		if t >= t0 then
+			local alpha = if t1 > t0 then (t - t0) / (t1 - t0) else 0
+			return buf.cfs[prev]:Lerp(buf.cfs[i], alpha)
+		end
+		i = prev
+	end
+	return buf.cfs[i] -- older than everything we have: oldest sample
+end
+
+-- how far back a hit may look, given the request stamp
+function History.SampleTime(hitTime: number, latency: number, now: number): number
+	local t = hitTime - latency - Config.Net.InterpDelay
+	return math.clamp(t, now - Config.Net.MaxRewind, now)
+end
+
+return History
+
+```
+
+`src/ServerScriptService/Combat/Main.server.luau`:
+
+```luau
+-- Server entry point: players -> fighters, request routing, the main Heartbeat.
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Combat = ReplicatedStorage.Combat
+local Config = require(Combat.Config)
+local Fighters = require(script.Parent.Fighters)
+local History = require(script.Parent.History)
+local CombatService = require(script.Parent.CombatService)
+local Abilities = require(script.Parent.Abilities)
+local Dummy = require(script.Parent.Dummy)
+local Ragdoll = require(script.Parent.Ragdoll)
+local AntiCheat = require(script.Parent.AntiCheat)
+
+local Request = Combat.Remotes.Request :: RemoteEvent
+
+Players.RespawnTime = 3
+
+---------------------------------------------------------------- players
+
+local function onCharacter(player: Player, character: Model)
+	local humanoid = character:WaitForChild("Humanoid") :: Humanoid
+	humanoid.MaxHealth = Config.Fighter.MaxHealth
+	humanoid.Health = Config.Fighter.MaxHealth
+	humanoid.BreakJointsOnDeath = false
+	local f = Fighters.Add(character, player)
+
+	humanoid.Died:Connect(function()
+		Abilities.Cleanup(f)
+		Ragdoll.Forever(character)
+	end)
+	character.AncestryChanged:Connect(function(_, parent)
+		if not parent then
+			Abilities.Cleanup(f)
+			Fighters.Remove(character)
+		end
+	end)
+end
+
+local function onPlayer(player: Player)
+	player.CharacterAdded:Connect(function(character)
+		onCharacter(player, character)
+	end)
+	if player.Character then
+		task.spawn(onCharacter, player, player.Character)
+	end
+end
+
+Players.PlayerAdded:Connect(onPlayer)
+for _, p in Players:GetPlayers() do
+	onPlayer(p)
+end
+
+---------------------------------------------------------------- requests
+
+-- simple token bucket per player so a spammy client can't flood the server
+local buckets: { [Player]: { tokens: number, at: number } } = {}
+Players.PlayerRemoving:Connect(function(p)
+	buckets[p] = nil
+end)
+
+local function allow(player: Player): boolean
+	local now = os.clock()
+	local rate = Config.Net.MaxRequestsPerSecond
+	local b = buckets[player]
+	if not b then
+		b = { tokens = rate, at = now }
+		buckets[player] = b
+	end
+	b.tokens = math.min(rate, b.tokens + (now - b.at) * rate)
+	b.at = now
+	if b.tokens < 1 then
+		return false
+	end
+	b.tokens -= 1
+	return true
+end
+
+local handlers = {
+	M1 = CombatService.M1,
+	Block = CombatService.Block,
+	Dash = CombatService.Dash,
+	Ability = Abilities.Start,
+	GrabHit = Abilities.GrabHit,
+	DashHit = CombatService.DashHit,
+}
+
+Request.OnServerEvent:Connect(function(player, action, data)
+	if not allow(player) then
+		-- dropped, but not punished: after a freeze the queued requests arrive in one burst
+		AntiCheat.Flag(player, "RateLimit", tostring(action):sub(1, 32))
+		return
+	end
+	if not AntiCheat.CheckRequest(player, action, data) then
+		return
+	end
+	if action == "DummyMode" then
+		Dummy.CycleMode()
+		return
+	end
+	local handler = handlers[action]
+	local f = Fighters.Get(player.Character)
+	if handler and f then
+		handler(f, data)
+	end
+end)
+
+---------------------------------------------------------------- tick
+
+Dummy.Init()
+
+RunService.Heartbeat:Connect(function(dt)
+	local now = Fighters.Now()
+	History.Record(now)
+	Abilities.Step()
+	Ragdoll.Step(now)
+	AntiCheat.Step(now)
+	Dummy.Step(now)
+
+	for _, f in Fighters.All() do
+		if not Fighters.Alive(f) then
+			continue
+		end
+		-- posture recovers when you haven't blocked a hit for a moment
+		if f.posture < Config.Block.MaxPosture and now - f.postureHitAt > Config.Block.PostureRegenDelay then
+			Fighters.SetPosture(f, f.posture + Config.Block.PostureRegen * dt)
+		end
+		-- slow out-of-combat regen for players (dummies heal themselves)
+		if f.player and now - f.lastDamagedAt > Config.Fighter.RegenDelay then
+			local h = f.humanoid
+			if h.Health < h.MaxHealth then
+				h.Health = math.min(h.MaxHealth, h.Health + Config.Fighter.RegenRate * dt)
+			end
+		end
+	end
+end)
+
+```
+
+`src/ServerScriptService/Combat/Ragdoll.luau`:
+
+```luau
+-- Ragdoll: launchers and death turn the body loose.
+-- The server swaps the rig joints for ball sockets / hinges (that replicates to everyone); whoever owns
+-- the body's physics puts its Humanoid into the Physics state: the server for dummies, the player's own
+-- client for characters (CombatClient watches the "Ragdoll" attribute).
+-- The Root joint (HumanoidRootPart -> LowerTorso) stays, so hitboxes, history and knockback keep using the root.
+local Players = game:GetService("Players")
+
+local Ragdoll = {}
+
+-- joint -> { kind, a, b }. Ball: cone angle a, twist +-b. Hinge: angle range a..b (+ swings the limb forward).
+local LIMITS = {
+	Neck = { "Ball", 35, 30 },
+	Waist = { "Ball", 25, 20 },
+	LeftShoulder = { "Ball", 85, 50 },
+	RightShoulder = { "Ball", 85, 50 },
+	LeftElbow = { "Hinge", -5, 135 },
+	RightElbow = { "Hinge", -5, 135 },
+	LeftWrist = { "Ball", 30, 10 },
+	RightWrist = { "Ball", 30, 10 },
+	LeftHip = { "Ball", 55, 25 },
+	RightHip = { "Ball", 55, 25 },
+	LeftKnee = { "Hinge", -135, 5 },
+	RightKnee = { "Hinge", -135, 5 },
+	LeftAnkle = { "Ball", 25, 10 },
+	RightAnkle = { "Ball", 25, 10 },
+}
+
+type Rig = {
+	model: Model,
+	humanoid: Humanoid,
+	player: Player?,
+	joints: { any }, -- Motor6D or AnimationConstraint
+	constraints: { Constraint },
+	parts: { [BasePart]: boolean }, -- body part -> its normal CanCollide
+	on: boolean,
+	untilT: number,
+}
+
+local rigs: { [Model]: Rig } = {}
+
+local function now(): number
+	return workspace:GetServerTimeNow()
+end
+
+-- the two parts a joint connects and the pivot in each part's space
+local function pivotOf(j: Instance): (BasePart?, BasePart?, CFrame?, CFrame?)
+	if j:IsA("AnimationConstraint") then
+		local a0, a1 = j.Attachment0, j.Attachment1
+		if a0 and a1 and a0.Parent and a1.Parent and a0.Parent:IsA("BasePart") and a1.Parent:IsA("BasePart") then
+			return a0.Parent :: BasePart, a1.Parent :: BasePart, a0.CFrame, a1.CFrame
+		end
+	elseif j:IsA("Motor6D") then
+		return j.Part0, j.Part1, j.C0, j.C1
+	end
+	return nil, nil, nil, nil
+end
+
+local function attach(part: BasePart, name: string, cf: CFrame): Attachment
+	local a = Instance.new("Attachment")
+	a.Name = name
+	a.CFrame = cf
+	a.Parent = part
+	return a
+end
+
+local function build(model: Model, humanoid: Humanoid, player: Player?): Rig
+	local rig: Rig = { model = model, humanoid = humanoid, player = player, joints = {}, constraints = {}, parts = {}, on = false, untilT = 0 }
+	for _, j in model:GetDescendants() do
+		local lim = LIMITS[j.Name]
+		if not lim or not (j:IsA("Motor6D") or j:IsA("AnimationConstraint")) then
+			continue
+		end
+		local p0, p1, c0, c1 = pivotOf(j)
+		if not (p0 and p1 and c0 and c1) then
+			continue
+		end
+		-- ball: primary axis along the hanging limb, so the rest pose is the centre of the cone
+		-- hinge: primary axis = the part's X (left-right), the limb bends around it
+		local rot = if lim[1] == "Ball" then CFrame.Angles(0, 0, -math.pi / 2) else CFrame.identity
+		local a0 = attach(p0, "Ragdoll" .. j.Name .. "0", CFrame.new(c0.Position) * rot)
+		local a1 = attach(p1, "Ragdoll" .. j.Name .. "1", CFrame.new(c1.Position) * rot)
+		local c: Constraint
+		if lim[1] == "Ball" then
+			local b = Instance.new("BallSocketConstraint")
+			b.LimitsEnabled = true
+			b.UpperAngle = lim[2]
+			b.TwistLimitsEnabled = true
+			b.TwistLowerAngle = -lim[3]
+			b.TwistUpperAngle = lim[3]
+			c = b
+		else
+			local h = Instance.new("HingeConstraint")
+			h.LimitsEnabled = true
+			h.LowerAngle = lim[2]
+			h.UpperAngle = lim[3]
+			c = h
+		end
+		c.Name = "Ragdoll" .. j.Name
+		c.Attachment0 = a0
+		c.Attachment1 = a1
+		c.Enabled = false
+		c.Parent = p1
+		table.insert(rig.joints, j)
+		table.insert(rig.constraints, c)
+	end
+	-- body parts only (accessory handles stay as they are)
+	for _, p in model:GetChildren() do
+		if p:IsA("BasePart") and p.Name ~= "HumanoidRootPart" then
+			rig.parts[p] = p.CanCollide
+		end
+	end
+	return rig
+end
+
+local function set(rig: Rig, on: boolean)
+	if rig.on == on then
+		return
+	end
+	rig.on = on
+	for _, j in rig.joints do
+		j.Enabled = not on
+	end
+	for _, c in rig.constraints do
+		c.Enabled = on
+	end
+	for p, normal in rig.parts do
+		if p.Parent then
+			p.CanCollide = if on then true else normal
+		end
+	end
+	rig.model:SetAttribute("Ragdoll", on)
+
+	-- loose limbs become their own assemblies: keep them with the body's owner
+	local owner = rig.player
+	if owner and owner.Parent ~= Players then
+		owner = nil
+	end
+	for _, p in rig.model:GetDescendants() do
+		if p:IsA("BasePart") and not p.Anchored then
+			pcall(p.SetNetworkOwner, p, owner)
+		end
+	end
+
+	local h = rig.humanoid
+	if not rig.player and h.Health > 0 then
+		h:ChangeState(if on then Enum.HumanoidStateType.Physics else Enum.HumanoidStateType.GettingUp)
+	end
+end
+
+function Ragdoll.Add(model: Model, humanoid: Humanoid, player: Player?)
+	if rigs[model] then
+		return
+	end
+	rigs[model] = build(model, humanoid, player)
+	model:SetAttribute("Ragdoll", false)
+end
+
+function Ragdoll.Remove(model: Model)
+	rigs[model] = nil
+end
+
+function Ragdoll.Is(model: Model): boolean
+	local rig = rigs[model]
+	return rig ~= nil and rig.on
+end
+
+-- loose for `duration` (extends a ragdoll that is already running)
+function Ragdoll.Start(model: Model, duration: number)
+	local rig = rigs[model]
+	if not rig then
+		return
+	end
+	rig.untilT = math.max(if rig.on then rig.untilT else 0, now() + duration)
+	set(rig, true)
+end
+
+-- stand back up right away (a non-launching hit, a grab)
+function Ragdoll.Stop(model: Model)
+	local rig = rigs[model]
+	if rig and rig.on and rig.humanoid.Health > 0 then
+		rig.untilT = 0
+		set(rig, false)
+	end
+end
+
+-- a loose body standing still stays balanced on its feet: tip it backwards.
+-- Pushes the torso, not the root: on death Roblox disables the Root joint, so the root is loose from the body.
+function Ragdoll.Topple(model: Model)
+	local torso = model:FindFirstChild("UpperTorso") :: BasePart?
+	if torso then
+		torso.AssemblyAngularVelocity += torso.CFrame.RightVector * 5
+		torso.AssemblyLinearVelocity += -torso.CFrame.LookVector * 6 + Vector3.yAxis * 4
+	end
+end
+
+-- death: loose for good (players topple themselves on their client, they own the body)
+function Ragdoll.Forever(model: Model)
+	local rig = rigs[model]
+	if rig then
+		rig.untilT = math.huge
+		set(rig, true)
+		if not rig.player then
+			Ragdoll.Topple(model)
+		end
+	end
+end
+
+function Ragdoll.Step(t: number)
+	for model, rig in rigs do
+		if not model.Parent then
+			rigs[model] = nil
+		elseif rig.on and t >= rig.untilT and rig.humanoid.Health > 0 then
+			set(rig, false)
+		end
+	end
+end
+
+return Ragdoll
+
+```
+
+`src/ServerScriptService/Tests/RunTests.server.luau`:
+
+```luau
+-- Runs every spec in Tests.Specs once per Studio playtest. Never runs on a live server.
+-- Turn it off with the attribute AutoRun = false on the Tests folder. Result: Output + "LastRun".
+local RunService = game:GetService("RunService")
+
+local folder = script.Parent
+if not RunService:IsStudio() or folder:GetAttribute("AutoRun") == false then
+	return
+end
+
+local TestKit = require(folder.TestKit)
+
+task.wait(1) -- let Combat.Main finish setting up (dummies, remotes)
+local t0 = os.clock()
+local results = TestKit.Run(folder.Specs)
+local passed, failed = TestKit.Report(results, os.clock() - t0)
+folder:SetAttribute("LastRun", string.format("%d/%d passed", passed, passed + failed))
+
+```
+
+`src/ServerScriptService/Tests/Specs/AntiCheatSpec.luau`:
+
+```luau
+-- Request validation and the punishment policy. Uses its own copy of AntiCheat (own strike table,
+-- silent log), so the live one and the Output stay clean.
+local Config = require(game:GetService("ReplicatedStorage").Combat.Config)
+local CombatFolder = game:GetService("ServerScriptService").Combat
+
+local SAMPLE: { [string]: any } = {
+	number = 1.8e9, -- a real time stamp
+	CFrame = CFrame.new(10, 3, -20),
+	string = "F",
+	boolean = true,
+	Instance = workspace,
+}
+
+-- stands in for a Player: records attributes and the kick
+local function fakePlayer(name: string)
+	local p = { Name = name, attrs = {}, kicked = nil :: string? }
+	function p:SetAttribute(k, v)
+		self.attrs[k] = v
+	end
+	function p:Kick(msg)
+		self.kicked = msg
+	end
+	return p
+end
+
+return function(t)
+	-- the module needs script.Parent (Fighters, History) while it loads
+	local copy = CombatFolder.AntiCheat:Clone()
+	copy.Name = "AntiCheatUnderTest"
+	copy.Parent = CombatFolder
+	local AC = require(copy) :: any
+	copy:Destroy()
+	AC.Log = function() end
+
+	t.test("a full valid request of every action passes", function()
+		for action, schema in AC.Schemas do
+			local data = {}
+			for key, kind in schema do
+				data[key] = SAMPLE[kind]
+			end
+			t.eq(AC.Validate(action, data), nil, action)
+		end
+	end)
+
+	t.test("missing keys are allowed (handlers fall back)", function()
+		t.eq(AC.Validate("M1", {}), nil)
+	end)
+
+	t.test("malformed requests are rejected", function()
+		local cases = {
+			{ "unknown action", "Fly", {} },
+			{ "action not a string", 5, {} },
+			{ "data not a table", "M1", 5 },
+			{ "NaN", "M1", { t = 0 / 0 } },
+			{ "infinity", "M1", { t = math.huge } },
+			{ "extra key", "M1", { t = 1, hp = 100 } },
+			{ "number key", "M1", { [1] = 5 } },
+			{ "wrong type", "Block", { on = "yes" } },
+			{ "long string", "Dash", { dir = string.rep("a", 200) } },
+			{ "CFrame far away", "M1", { cf = CFrame.new(1e7, 0, 0) } },
+			{ "CFrame NaN", "M1", { cf = CFrame.new(0 / 0, 0, 0) } },
+		}
+		for _, c in cases do
+			t.ok(AC.Validate(c[2], c[3]) ~= nil, c[1] .. " got through")
+		end
+	end)
+
+	t.test("bad requests kick only after KickAt worth of strikes", function()
+		local p = fakePlayer("Spammer")
+		local needed = math.ceil(Config.AntiCheat.KickAt / Config.AntiCheat.Strikes.BadRequest)
+		for i = 1, needed - 1 do
+			t.eq(AC.CheckRequest(p, "M1", { t = 0 / 0 }), false, "rejected")
+		end
+		t.eq(p.kicked, nil, "kicked too early")
+		-- strikes decay continuously, so the exact threshold can land a hair under KickAt: allow one more
+		AC.CheckRequest(p, "M1", { t = 0 / 0 })
+		AC.CheckRequest(p, "M1", { t = 0 / 0 })
+		t.ok(p.kicked ~= nil, "not kicked after " .. needed + 1)
+	end)
+
+	t.test("movement flags never kick", function()
+		local p = fakePlayer("Laggy")
+		for _ = 1, 100 do
+			AC.Flag(p, "Speed", "test")
+		end
+		t.eq(p.kicked, nil)
+		t.eq(p.attrs.ACFlags, 100)
+	end)
+
+	t.test("Strike refuses kinds that lag can cause", function()
+		local ok = pcall(AC.Strike, fakePlayer("X"), "Speed", "test")
+		t.eq(ok, false)
+	end)
+
+	t.test("knockback credit covers the whole flight", function()
+		local kb = Vector3.new(20, 36, 0)
+		local flight = 20 * (2 * 36 / workspace.Gravity)
+		t.ok(AC.KnockbackStuds(kb) > flight)
+		t.near(AC.KnockbackStuds(Vector3.new(0, 50, 0)), 0, 1e-6, "straight up = no horizontal credit")
+	end)
+end
+
+```
+
+`src/ServerScriptService/Tests/Specs/ConfigSpec.luau`:
+
+```luau
+-- Config is data, but a lot of it has to agree with itself. These catch a tuning change that
+-- silently breaks a rule written in a comment somewhere else.
+local Config = require(game:GetService("ReplicatedStorage").Combat.Config)
+
+local LAUNCHERS = { "GrabRush", "GroundSlam", "Uppercut" }
+
+return function(t)
+	t.test("M1 tables have one entry per step", function()
+		local m1 = Config.M1
+		t.eq(#m1.Damage, m1.Steps, "Damage")
+		t.eq(#m1.Posture, m1.Steps, "Posture")
+		t.eq(#m1.Hitstop, m1.Steps, "Hitstop")
+	end)
+
+	t.test("abilities fill slots 1..N with unique keys and valid hitboxes", function()
+		local orders, keys, n = {}, {}, 0
+		for id, a in Config.Abilities do
+			n += 1
+			t.ok(not orders[a.Order], id .. ": slot " .. a.Order .. " used twice")
+			t.ok(not keys[a.Key], id .. ": key used twice")
+			orders[a.Order], keys[a.Key] = id, id
+			t.ok(a.Cooldown > 0 and a.Damage > 0 and a.Windup >= 0, id .. ": cooldown / damage / windup")
+			local hb = a.Hitbox
+			if hb.Kind == "Box" then
+				t.eq(typeof(hb.Size), "Vector3", id .. ": box size")
+			else
+				t.eq(hb.Kind, "Radius", id .. ": hitbox kind")
+				t.ok(hb.Radius and hb.Height, id .. ": radius and height")
+			end
+		end
+		for i = 1, n do
+			t.ok(orders[i], "no ability in slot " .. i)
+		end
+	end)
+
+	-- Config.Ragdoll's comment promises exactly this split
+	t.test("launchers ragdoll, Barrage doesn't", function()
+		local min = Config.Ragdoll.MinUp
+		t.ok(Config.M1.Knockback.Up >= min, "M1 #4")
+		for _, id in LAUNCHERS do
+			t.ok(Config.Abilities[id].Knockback.Up >= min, id)
+		end
+		t.ok(Config.Abilities.Barrage.Knockback.Up < min, "Barrage must stay on its feet so M1 can follow")
+	end)
+
+	t.test("a ragdolled target gets up before its stun ends", function()
+		local lead = Config.Ragdoll.GetUpLead
+		t.ok(lead > 0, "GetUpLead")
+		t.ok(Config.M1.FinalStun - lead >= 0.2, "M1 #4")
+		for _, id in LAUNCHERS do
+			t.ok(Config.Abilities[id].Stun - lead >= 0.2, id)
+		end
+	end)
+
+	t.test("dodge i-frames fit inside the dodge", function()
+		local d = Config.Dash.Dodge
+		t.ok(d.IFrames > 0 and d.IFrames <= d.Duration, string.format("IFrames %.2f, Duration %.2f", d.IFrames, d.Duration))
+	end)
+
+	t.test("parry can't be spammed", function()
+		local b = Config.Block
+		t.ok(b.ParryCooldown > b.ParryWindow, string.format("ParryCooldown %.2f <= ParryWindow %.2f", b.ParryCooldown, b.ParryWindow))
+	end)
+
+	t.test("rewind stays inside the stored history", function()
+		local n = Config.Net
+		t.ok(n.MaxRewind + n.InterpDelay <= n.HistoryLength, string.format("%.2f + %.2f > %.2f", n.MaxRewind, n.InterpDelay, n.HistoryLength))
+	end)
+
+	t.test("legit air time stays well under the fly check", function()
+		local g = workspace.Gravity
+		local ups = { Config.M1.Knockback.Up, Config.Fighter.JumpPower }
+		for _, id in LAUNCHERS do
+			table.insert(ups, Config.Abilities[id].Knockback.Up)
+		end
+		for _, up in ups do
+			local air = 2 * up / g
+			t.ok(air * 2 < Config.AntiCheat.FlyTime, string.format("up %d: %.2f s in the air", up, air))
+		end
+	end)
+
+	t.test("Fight dummy stays beatable", function()
+		local d = Config.Dummy
+		t.ok(d.WalkSpeed < Config.Fighter.WalkSpeed, "you can walk away from it")
+		t.ok(d.DamageScale > 0 and d.DamageScale < 1, "hits softer than a player")
+		t.ok(d.Reaction > 0 and d.SwingGap >= 0 and d.FightCooldown > 0, "timings")
+	end)
+
+	-- the policy decision: lag looks like cheating, so movement may never add strikes
+	t.test("movement can never lead to a kick", function()
+		local ac = Config.AntiCheat
+		for _, kind in { "Speed", "Fly", "RateLimit" } do
+			t.eq(ac.Strikes[kind], nil, kind .. " must be a flag, not a strike")
+		end
+		t.ok(ac.KickAt / ac.Strikes.BadRequest >= 5, "one stray bad request must not kick")
+	end)
+end
+
+```
+
+`src/ServerScriptService/Tests/Specs/HistorySpec.luau`:
+
+```luau
+-- Lag compensation's memory. Runs on a fresh copy of the module (Clone -> its own buffers), so the
+-- live one that tracks the real fighters never sees these fake times.
+local Config = require(game:GetService("ReplicatedStorage").Combat.Config)
+local Source = game:GetService("ServerScriptService").Combat.History
+
+return function(t)
+	local History = require(Source:Clone()) :: any
+
+	local function body(): (Model, Part)
+		local model = Instance.new("Model")
+		local part = Instance.new("Part")
+		part.Anchored = true
+		part.Parent = model
+		return model, part
+	end
+
+	t.test("At interpolates between samples", function()
+		local model, part = body()
+		History.Track(model, part)
+		t.cleanup(function()
+			History.Untrack(model)
+		end)
+		part.CFrame = CFrame.new(0, 0, 0)
+		History.Record(100)
+		part.CFrame = CFrame.new(10, 0, 0)
+		History.Record(101)
+		part.CFrame = CFrame.new(20, 0, 0) -- live position, newer than every sample
+
+		t.near(History.At(model, 100.25).X, 2.5, 1e-3, "a quarter of the way")
+		t.near(History.At(model, 100).X, 0, 1e-3, "exactly on a sample")
+		t.near(History.At(model, 50).X, 0, 1e-3, "older than the buffer -> oldest sample")
+		t.near(History.At(model, 102).X, 20, 1e-3, "newer than the buffer -> live position")
+	end)
+
+	t.test("the ring buffer keeps the newest samples", function()
+		local model, part = body()
+		History.Track(model, part)
+		t.cleanup(function()
+			History.Untrack(model)
+		end)
+		for i = 1, 300 do
+			part.CFrame = CFrame.new(i, 0, 0)
+			History.Record(i)
+		end
+		t.near(History.At(model, 299.5).X, 299.5, 1e-3, "recent")
+		local oldest = History.At(model, 1).X
+		t.ok(oldest > 150 and oldest < 200, "oldest kept sample is ~128 back, got " .. oldest)
+	end)
+
+	t.test("Untrack forgets the model", function()
+		local model, part = body()
+		History.Track(model, part)
+		History.Record(1)
+		History.Untrack(model)
+		t.eq(History.At(model, 1), nil)
+	end)
+
+	t.test("SampleTime never rewinds past MaxRewind or into the future", function()
+		local net = Config.Net
+		t.near(History.SampleTime(1000, 5, 1000), 1000 - net.MaxRewind, 1e-6, "huge latency")
+		t.near(History.SampleTime(2000, 0, 1000), 1000, 1e-6, "stamp from the future")
+		t.near(History.SampleTime(999.95, 0.05, 1000), 999.95 - 0.05 - net.InterpDelay, 1e-6, "normal")
+	end)
+end
+
+```
+
+`src/ServerScriptService/Tests/Specs/HitPipelineSpec.luau`:
+
+```luau
+-- Integration: the real CombatService.ApplyHit on two real rigs. They stand far from the arena with
+-- anchored roots (no floor out there) and are removed at the end. Results are broadcast like any
+-- hit, clients just draw them somewhere nobody looks.
+local Players = game:GetService("Players")
+local Config = require(game:GetService("ReplicatedStorage").Combat.Config)
+local Combat = game:GetService("ServerScriptService").Combat
+local Fighters = require(Combat.Fighters)
+local CombatService = require(Combat.CombatService)
+local Ragdoll = require(Combat.Ragdoll)
+
+local SPOT = Vector3.new(4000, 200, 4000)
+
+local function rig(name: string, cf: CFrame): Model
+	local m = Players:CreateHumanoidModelFromDescription(Instance.new("HumanoidDescription"), Enum.HumanoidRigType.R15)
+	m.Name = name
+	;(m :: any).HumanoidRootPart.Anchored = true
+	m:PivotTo(cf)
+	m.Parent = workspace
+	return m
+end
+
+return function(t)
+	local aPos, vPos = SPOT, SPOT + Vector3.new(3, 0, 0)
+	local facingA = CFrame.lookAt(vPos, aPos)
+	local a = Fighters.Add(rig("TestAttacker", CFrame.lookAt(aPos, vPos)), nil, true)
+	local v = Fighters.Add(rig("TestVictim", facingA), nil, true)
+
+	t.afterAll(function()
+		for _, f in { a, v } do
+			Fighters.Remove(f.model)
+			f.model:Destroy()
+		end
+	end)
+
+	local function reset()
+		local now = Fighters.Now()
+		for _, f in { a, v } do
+			f.humanoid.Health = f.humanoid.MaxHealth
+			f.stunUntil, f.actionUntil = 0, 0
+			f.comboStep, f.comboCount, f.lastLandedAt, f.m1ReadyAt = 0, 0, 0, 0
+			Fighters.SetBlocking(f, false, now)
+			f.blockReleasedAt = -math.huge -- the next block press may parry
+			Fighters.SetPosture(f, Config.Block.MaxPosture)
+			Fighters.SetIFrames(f, 0, 0)
+			Fighters.SetArmor(f, 0)
+			f.damageScale = 1
+			Ragdoll.Stop(f.model)
+		end
+		v.model:PivotTo(facingA)
+	end
+
+	local function hit(over: { [string]: any }?): any
+		local h = { move = "M1", step = 1, t = Fighters.Now(), damage = 3, posture = 12, stun = 0.5, hitstop = 0 }
+		for k, x in over or {} do
+			h[k] = x
+		end
+		return h
+	end
+
+	t.test("clean hit: damage, stun, combo count", function()
+		reset()
+		t.eq(CombatService.ApplyHit(a, v, hit()), "Hit")
+		t.near(v.humanoid.Health, v.humanoid.MaxHealth - 3, 1e-3, "health")
+		t.ok(v.stunUntil > Fighters.Now(), "victim stunned")
+		t.eq(a.comboCount, 1)
+		CombatService.ApplyHit(a, v, hit())
+		t.eq(a.comboCount, 2, "second hit in the window")
+	end)
+
+	t.test("i-frames are judged at the attacker's time", function()
+		reset()
+		local now = Fighters.Now()
+		Fighters.SetIFrames(v, now - 1, now - 0.5)
+		t.eq(CombatService.ApplyHit(a, v, hit({ t = now - 0.7 })), "Dodged", "swing landed inside the dodge")
+		t.near(v.humanoid.Health, v.humanoid.MaxHealth, 1e-3, "no damage on a dodge")
+		t.eq(CombatService.ApplyHit(a, v, hit({ t = now })), "Hit", "after the dodge")
+	end)
+
+	t.test("front block turns damage into posture", function()
+		reset()
+		Fighters.SetBlocking(v, true, Fighters.Now() - 1) -- held long past the parry window
+		t.eq(CombatService.ApplyHit(a, v, hit({ posture = 12 })), "Blocked")
+		t.near(v.humanoid.Health, v.humanoid.MaxHealth, 1e-3, "no damage")
+		t.near(v.posture, Config.Block.MaxPosture - 12, 1e-3, "posture")
+	end)
+
+	t.test("parry: block pressed right before the hit stuns the attacker, once", function()
+		reset()
+		local now = Fighters.Now()
+		Fighters.SetBlocking(v, true, now - 0.05)
+		t.eq(CombatService.ApplyHit(a, v, hit({ t = now })), "Parried")
+		t.ok(a.stunUntil > now, "attacker stunned")
+		t.eq(CombatService.ApplyHit(a, v, hit({ t = now })), "Blocked", "one parry per block press")
+	end)
+
+	t.test("block doesn't cover the back", function()
+		reset()
+		v.model:PivotTo(CFrame.lookAt(vPos, vPos + (vPos - aPos)))
+		Fighters.SetBlocking(v, true, Fighters.Now() - 1)
+		t.eq(CombatService.ApplyHit(a, v, hit()), "Hit")
+	end)
+
+	t.test("posture break stuns and refills the guard", function()
+		reset()
+		Fighters.SetBlocking(v, true, Fighters.Now() - 1)
+		Fighters.SetPosture(v, 5)
+		t.eq(CombatService.ApplyHit(a, v, hit({ posture = 12 })), "GuardBreak")
+		t.eq(v.posture, Config.Block.MaxPosture, "guard refilled")
+		t.ok(v.stunUntil > Fighters.Now(), "stunned")
+		t.eq(v.blocking, false, "block dropped")
+	end)
+
+	t.test("unblockable goes through block", function()
+		reset()
+		Fighters.SetBlocking(v, true, Fighters.Now() - 1)
+		t.eq(CombatService.ApplyHit(a, v, hit({ unblockable = true })), "Hit")
+	end)
+
+	t.test("launchers ragdoll, a small knockback stands the target up", function()
+		reset()
+		CombatService.ApplyHit(a, v, hit({ knockback = Vector3.new(0, Config.Ragdoll.MinUp, 0), stun = 0.9 }))
+		t.eq(v.model:GetAttribute("Ragdoll"), true, "launched")
+		CombatService.ApplyHit(a, v, hit({ knockback = Vector3.new(5, 5, 0) }))
+		t.eq(v.model:GetAttribute("Ragdoll"), false, "caught by a small hit")
+	end)
+
+	t.test("a landed skill cancels M1 end lag, an M1 doesn't", function()
+		reset()
+		local now = Fighters.Now()
+		a.m1ReadyAt, a.comboStep = now + 5, 4
+		CombatService.ApplyHit(a, v, hit({ move = "M1", t = now }))
+		t.eq(a.m1ReadyAt, now + 5, "M1 keeps the end lag")
+		CombatService.ApplyHit(a, v, hit({ move = "Uppercut", t = now }))
+		t.ok(a.m1ReadyAt <= now, "skill cancels it")
+		t.eq(a.comboStep, 0, "chain restarts")
+	end)
+
+	t.test("armor: M1 deals damage but doesn't stop the rush", function()
+		reset()
+		local now = Fighters.Now()
+		Fighters.SetArmor(v, now + 0.5)
+		local token = v.token
+		t.eq(CombatService.ApplyHit(a, v, hit({ t = now, damage = 3 })), "Armored")
+		t.near(v.humanoid.Health, v.humanoid.MaxHealth - 3, 1e-3, "damage still lands")
+		t.ok(v.stunUntil <= now, "not stunned")
+		t.eq(v.token, token, "the move isn't interrupted")
+		t.eq(a.comboCount, 0, "no combo off an armored hit")
+		t.eq(CombatService.ApplyHit(a, v, hit({ t = now, step = 4, knockback = Vector3.new(0, 30, 0) })), "Armored", "M1 #4 doesn't launch it either")
+		t.ok(v.model:GetAttribute("Ragdoll") ~= true, "still standing")
+	end)
+
+	t.test("armor: skills break it, and it ends with the stun", function()
+		reset()
+		local now = Fighters.Now()
+		Fighters.SetArmor(v, now + 0.5)
+		t.eq(CombatService.ApplyHit(a, v, hit({ move = "Uppercut", t = now })), "Hit")
+		t.eq(v.armorUntil, 0, "armor gone")
+		t.eq(CombatService.ApplyHit(a, v, hit({ t = now })), "Hit", "next M1 staggers again")
+	end)
+
+	t.test("armor runs out on time", function()
+		reset()
+		local now = Fighters.Now()
+		Fighters.SetArmor(v, now - 0.1)
+		t.eq(CombatService.ApplyHit(a, v, hit({ t = now })), "Hit")
+	end)
+
+	t.test("damage scale applies to the attacker's hits", function()
+		reset()
+		a.damageScale = 0.6
+		-- catch what goes to the clients (Humanoid.Health is float32, so it is never exactly 1.8 off)
+		local sent
+		local broadcast = CombatService.Broadcast
+		CombatService.Broadcast = function(_, data)
+			sent = data
+		end
+		t.cleanup(function()
+			CombatService.Broadcast = broadcast
+		end)
+		CombatService.ApplyHit(a, v, hit({ damage = 3 }))
+		t.near(v.humanoid.MaxHealth - v.humanoid.Health, 1.8, 1e-3, "health")
+		t.eq(sent and sent.dmg, 1.8, "the number on screen is 1.8, not 1.7999...")
+	end)
+
+	-- last: a dead humanoid stays dead
+	t.test("dead targets can't be hit", function()
+		reset()
+		v.humanoid.Health = 0
+		t.eq(CombatService.ApplyHit(a, v, hit()), nil)
+	end)
+end
+
+```
+
+`src/ServerScriptService/Tests/Specs/HitboxSpec.luau`:
+
+```luau
+-- The hit test both the server and the client run. If these drift, prediction stops matching.
+local Combat = game:GetService("ReplicatedStorage").Combat
+local Config = require(Combat.Config)
+local Hitbox = require(Combat.Hitbox)
+
+return function(t)
+	local origin = CFrame.new(0, 3, 0) -- facing -Z
+	local r = Config.Fighter.HurtRadius
+
+	local function hits(shape, pos: Vector3, slack: number?): boolean
+		return #Hitbox.Find(shape, origin, { { model = nil :: any, pos = pos } }, r, slack) == 1
+	end
+
+	t.test("BoxSphere: inside, touching a face, just outside", function()
+		local size = Vector3.new(2, 2, 2)
+		t.ok(Hitbox.BoxSphere(CFrame.identity, size, Vector3.zero, 0.1), "centre")
+		t.ok(Hitbox.BoxSphere(CFrame.identity, size, Vector3.new(1.5, 0, 0), 0.5), "touching")
+		t.ok(not Hitbox.BoxSphere(CFrame.identity, size, Vector3.new(1.6, 0, 0), 0.5), "0.1 short")
+	end)
+
+	t.test("BoxSphere follows the box's rotation", function()
+		local box = CFrame.Angles(0, math.rad(45), 0)
+		local size = Vector3.new(6, 1, 1) -- long along its own X
+		local along = box.RightVector * 2.5
+		local across = box.LookVector * 2.5
+		t.ok(Hitbox.BoxSphere(box, size, along, 0.1), "along the long side")
+		t.ok(not Hitbox.BoxSphere(box, size, across, 0.1), "across it")
+	end)
+
+	t.test("M1 reaches in front, not behind or far", function()
+		local hb = Config.M1.Hitbox
+		t.ok(hits(hb, Vector3.new(0, 3, -3)), "3 studs ahead")
+		t.ok(not hits(hb, Vector3.new(0, 3, 4)), "behind")
+		t.ok(not hits(hb, Vector3.new(0, 3, -9)), "9 studs ahead")
+	end)
+
+	t.test("slack widens the box (server tolerance)", function()
+		local hb = Config.M1.Hitbox
+		local front = hb.Offset.Position.Z - hb.Size.Z / 2 -- Z of the box's far face
+		local pos = Vector3.new(0, 3, front - r - 0.5)
+		t.ok(not hits(hb, pos), "0.5 out of reach")
+		t.ok(hits(hb, pos, 1), "in reach with 1 stud of slack")
+	end)
+
+	t.test("Radius: all around the caster, limited in height", function()
+		local hb = Config.Abilities.GroundSlam.Hitbox
+		t.ok(hits(hb, Vector3.new(hb.Radius - 2, 3, 0)), "side")
+		t.ok(hits(hb, Vector3.new(0, 3, hb.Radius - 2)), "behind")
+		t.ok(not hits(hb, Vector3.new(hb.Radius + r + 1, 3, 0)), "too far")
+		t.ok(not hits(hb, Vector3.new(0, 3 + hb.Height / 2 + r + 0.5, 0)), "too high")
+	end)
+
+	t.test("Find returns the closest target first", function()
+		local list = Hitbox.Find(Config.M1.Hitbox, origin, {
+			{ model = nil :: any, pos = Vector3.new(0, 3, -5) },
+			{ model = nil :: any, pos = Vector3.new(0, 3, -2) },
+		}, r)
+		t.eq(#list, 2)
+		t.eq(list[1].pos.Z, -2)
+	end)
+
+	t.test("Flat removes pitch and survives looking straight down", function()
+		local flat = Hitbox.Flat(CFrame.lookAt(Vector3.zero, Vector3.new(0, -1, -1)))
+		t.near(flat.LookVector.Y, 0, 1e-6, "no pitch")
+		t.near(flat.LookVector.Z, -1, 1e-6, "same heading")
+		local down = Hitbox.Flat(CFrame.new(1, 2, 3) * CFrame.Angles(-math.pi / 2, 0, 0))
+		t.ok(down.LookVector == down.LookVector, "no NaN")
+		t.eq(down.Position, Vector3.new(1, 2, 3))
+	end)
+end
+
+```
+
+`src/ServerScriptService/Tests/TestKit.luau`:
+
+```luau
+-- Tiny test runner. A spec is a ModuleScript that returns function(t) and registers tests:
+--
+--   return function(t)
+--       t.test("clean hit deals damage", function()
+--           t.eq(result, "Hit")
+--           t.near(hp, 97, 0.01)
+--       end)
+--   end
+--
+-- Tests run one after another and may yield. A failing check throws; the runner catches it,
+-- records the message and line, and moves on. t.cleanup(fn) runs after the current test either way,
+-- t.afterAll(fn) once after the spec's last test (tear down shared fixtures).
+local TestKit = {}
+
+export type Result = { spec: string, name: string, ok: boolean, err: string? }
+
+local function fmt(v: any): string
+	if type(v) == "string" then
+		return string.format("%q", v)
+	end
+	return tostring(v)
+end
+
+local function newContext()
+	local t = { _tests = {}, _cleanups = {}, _afterAll = {} }
+
+	function t.test(name: string, fn: () -> ())
+		table.insert(t._tests, { name = name, fn = fn })
+	end
+
+	function t.cleanup(fn: () -> ())
+		table.insert(t._cleanups, fn)
+	end
+
+	function t.afterAll(fn: () -> ())
+		table.insert(t._afterAll, fn)
+	end
+
+	function t.ok(cond: any, msg: string?)
+		if not cond then
+			error(msg or "expected a truthy value", 2)
+		end
+	end
+
+	function t.eq(actual: any, expected: any, msg: string?)
+		if actual ~= expected then
+			error(string.format("%sexpected %s, got %s", if msg then msg .. ": " else "", fmt(expected), fmt(actual)), 2)
+		end
+	end
+
+	function t.near(actual: number, expected: number, eps: number, msg: string?)
+		if type(actual) ~= "number" or math.abs(actual - expected) > eps then
+			error(string.format("%sexpected %s +- %s, got %s", if msg then msg .. ": " else "", fmt(expected), fmt(eps), fmt(actual)), 2)
+		end
+	end
+
+	return t
+end
+
+-- runs every spec ModuleScript under `folder` (sorted by name)
+function TestKit.Run(folder: Instance): { Result }
+	local specs = {}
+	for _, m in folder:GetChildren() do
+		if m:IsA("ModuleScript") then
+			table.insert(specs, m)
+		end
+	end
+	table.sort(specs, function(a, b)
+		return a.Name < b.Name
+	end)
+
+	local results: { Result } = {}
+	for _, m in specs do
+		local t = newContext()
+		local loaded, err = pcall(function()
+			(require(m) :: any)(t)
+		end)
+		if not loaded then
+			table.insert(results, { spec = m.Name, name = "(load)", ok = false, err = tostring(err) })
+			continue
+		end
+		for _, case in t._tests do
+			local ok, e = xpcall(case.fn, function(msg)
+				return tostring(msg)
+			end)
+			for i = #t._cleanups, 1, -1 do
+				local cleaned, ce = pcall(t._cleanups[i])
+				if not cleaned and ok then
+					ok, e = false, "cleanup: " .. tostring(ce)
+				end
+			end
+			table.clear(t._cleanups)
+			table.insert(results, { spec = m.Name, name = case.name, ok = ok, err = if ok then nil else e })
+		end
+		for _, fn in t._afterAll do
+			local done, e = pcall(fn)
+			if not done then
+				table.insert(results, { spec = m.Name, name = "(afterAll)", ok = false, err = tostring(e) })
+			end
+		end
+	end
+	return results
+end
+
+-- one summary line, plus a line per failure
+function TestKit.Report(results: { Result }, seconds: number): (number, number)
+	local passed, failed = 0, 0
+	for _, r in results do
+		if r.ok then
+			passed += 1
+		else
+			failed += 1
+			warn(string.format("[Tests] FAIL %s > %s: %s", r.spec, r.name, r.err or "?"))
+		end
+	end
+	local line = string.format("[Tests] %d passed, %d failed (%.2f s)", passed, failed, seconds)
+	if failed > 0 then
+		warn(line)
+	else
+		print(line)
+	end
+	return passed, failed
+end
+
+return TestKit
+
+```
+
+`src/StarterPlayer/StarterCharacterScripts/Animate.client.luau`:
+
+```luau
+-- procedural animations live in ReplicatedStorage.Combat.Anim
+```
+
+`src/StarterPlayer/StarterCharacterScripts/Health.server.luau`:
+
+```luau
+-- regen is handled by ServerScriptService.Combat
+```
+
+`src/StarterPlayer/StarterPlayerScripts/CombatClient/Fx.luau`:
+
+```luau
+-- Visual feedback: camera shake, hit sparks, slam shockwave.
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local Fx = {}
+
+local ACCENT = Color3.fromRGB(255, 210, 60)
+local WHITE = Color3.new(1, 1, 1)
+
+local folder: Folder
+
+---------------------------------------------------------------- camera shake
+-- Applied after the camera update and removed at the very start of the next frame.
+-- If it isn't removed first, the default camera builds on the shaken CFrame and the view drifts.
+
+local trauma = 0
+local decay = 2.5
+local offset = CFrame.identity
+
+function Fx.Shake(amount: number, decayRate: number?)
+	trauma = math.min(1, trauma + amount)
+	decay = decayRate or 2.5
+end
+
+-- FOV kick: + widens (speed: swings, dashes), - narrows (impact punch). Jumps in, eases back.
+local fovKick = 0
+local fovDecay = 8
+local baseFov = 70
+
+function Fx.Kick(amount: number, decayRate: number?)
+	fovKick = math.clamp(fovKick + amount, -12, 12)
+	fovDecay = decayRate or 8
+end
+
+-- camera nudge: + jolts the camera forward along its view (our hit landing), - jolts it back (we got hit)
+local nudge = 0
+
+function Fx.Nudge(amount: number)
+	nudge = math.clamp(nudge + amount, -1.5, 1.5)
+end
+
+local function bindShake()
+	RunService:BindToRenderStep("FxShakeReset", Enum.RenderPriority.First.Value, function()
+		if offset ~= CFrame.identity then
+			local cam = workspace.CurrentCamera
+			cam.CFrame = cam.CFrame * offset:Inverse()
+			offset = CFrame.identity
+		end
+	end)
+	-- +2: after the default camera (+0) and the lock-on camera (+1)
+	RunService:BindToRenderStep("FxShakeApply", Enum.RenderPriority.Camera.Value + 2, function(dt)
+		if fovKick ~= 0 then
+			fovKick -= fovKick * math.min(1, fovDecay * dt)
+			if math.abs(fovKick) < 0.05 then
+				fovKick = 0
+			end
+			workspace.CurrentCamera.FieldOfView = baseFov + fovKick
+		end
+		if nudge ~= 0 then
+			nudge -= nudge * math.min(1, 14 * dt)
+			if math.abs(nudge) < 0.01 then
+				nudge = 0
+			end
+		end
+		if trauma <= 0 and nudge == 0 then
+			return
+		end
+		trauma = math.max(0, trauma - decay * dt)
+		local a = trauma * trauma
+		local t = os.clock() * 28
+		offset = CFrame.new(math.noise(t, 7) * a * 0.35, math.noise(t, 11) * a * 0.35, -nudge)
+			* CFrame.Angles(math.noise(t, 1) * a * 0.05, math.noise(t, 2) * a * 0.05, math.noise(t, 3) * a * 0.035)
+		local cam = workspace.CurrentCamera
+		cam.CFrame = cam.CFrame * offset
+	end)
+end
+
+---------------------------------------------------------------- impact effects
+-- Style "star + shards": a short flash, crossed light bars through the hit point and glowing shards
+-- thrown along the blow. Everything is neon parts + tweens (no uploaded textures), white with one accent.
+
+local BLOCK = Color3.fromRGB(190, 215, 255)
+local RED = Color3.fromRGB(255, 80, 70)
+
+-- debug: when set (0..1), every effect stops at that fraction of its life and stays (for screenshots)
+Fx.Hold = nil :: number?
+
+local function part(props: { [string]: any }): Part
+	local p = Instance.new("Part")
+	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+	p.Material = Enum.Material.Neon
+	for k, v in props do
+		(p :: any)[k] = v
+	end
+	p.Parent = folder
+	return p
+end
+
+local function tween(inst: Instance, time: number, goal: { [string]: any }, style: Enum.EasingStyle?)
+	local tw = TweenService:Create(inst, TweenInfo.new(time, style or Enum.EasingStyle.Quad, Enum.EasingDirection.Out), goal)
+	tw:Play()
+	if Fx.Hold then
+		task.delay(time * Fx.Hold, function()
+			tw:Pause()
+		end)
+	end
+end
+
+local function expire(inst: Instance, after: number)
+	if not Fx.Hold then
+		task.delay(after, inst.Destroy, inst)
+	end
+end
+
+-- the blow direction plus two unit vectors spanning the plane facing it
+local function basis(dir: Vector3?): (Vector3, Vector3, Vector3)
+	local d = if dir and dir.Magnitude > 0.01 then dir.Unit else Vector3.zAxis
+	local up = if math.abs(d.Y) > 0.9 then Vector3.xAxis else Vector3.yAxis
+	local u = d:Cross(up).Unit
+	local v = u:Cross(d).Unit
+	return d, u, v
+end
+
+local function flash(pos: Vector3, color: Color3, size: number, time: number)
+	local b = part({ Shape = Enum.PartType.Ball, Color = color, Transparency = 0.15, Size = Vector3.one * 0.4, CFrame = CFrame.new(pos) })
+	tween(b, time, { Size = Vector3.one * size, Transparency = 1 })
+	expire(b, time + 0.05)
+end
+
+-- star flare: crossed bars through the hit point, stretching and thinning out
+local function star(pos: Vector3, dir: Vector3?, n: number, len: number, width: number, color: Color3, time: number)
+	local d, u, v = basis(dir)
+	local twist = math.random() * math.pi
+	for i = 1, n do
+		local ang = twist + i / n * math.pi
+		local axis = u * math.cos(ang) + v * math.sin(ang)
+		local L = if i % 2 == 1 then len else len * 0.55
+		local p = part({ Color = color, Size = Vector3.new(width, width, L * 0.35), CFrame = CFrame.lookAt(pos, pos + axis, d) })
+		tween(p, time, { Size = Vector3.new(0.02, 0.02, L), Transparency = 1 }, Enum.EasingStyle.Quart)
+		expire(p, time + 0.05)
+	end
+end
+
+-- glowing shards thrown along the blow, dropping a little
+local function shards(pos: Vector3, dir: Vector3?, n: number, dist: number, color: Color3, time: number, fall: number?)
+	local d, u, v = basis(dir)
+	local drop = fall or 0.3
+	for _ = 1, n do
+		local ang = math.random() * math.pi * 2
+		local out = (u * math.cos(ang) + v * math.sin(ang) + d * (0.3 + math.random() * 0.7)).Unit
+		local s = dist * (0.6 + math.random() * 0.6)
+		local target = pos + out * s - Vector3.yAxis * s * drop
+		local p = part({ Color = color, Size = Vector3.new(0.16, 0.16, 0.8), CFrame = CFrame.lookAt(pos + out * 0.4, pos + out * 2) })
+		tween(p, time, { CFrame = CFrame.lookAt(target, target + out - Vector3.yAxis * drop), Size = Vector3.new(0.05, 0.05, 0.25), Transparency = 1 })
+		expire(p, time + 0.05)
+	end
+end
+
+-- dir = the way the blow travels (attacker -> victim)
+local STYLES = {
+	Hit = function(pos, dir)
+		flash(pos, WHITE, 1.6, 0.07)
+		star(pos, dir, 4, 3.4, 0.16, WHITE, 0.13)
+		shards(pos, dir, 6, 3.5, WHITE, 0.22)
+	end,
+	Heavy = function(pos, dir)
+		flash(pos, WHITE, 4, 0.12)
+		star(pos, dir, 6, 6.5, 0.24, WHITE, 0.18)
+		star(pos, dir, 4, 4, 0.16, ACCENT, 0.2)
+		shards(pos, dir, 14, 5.5, ACCENT, 0.3)
+	end,
+	-- the hit bounces off: shards fly back toward the attacker
+	Block = function(pos, dir)
+		flash(pos, BLOCK, 1.3, 0.06)
+		star(pos, dir, 2, 2.4, 0.12, BLOCK, 0.1)
+		shards(pos, if dir then -dir else nil, 5, 2.5, BLOCK, 0.18)
+	end,
+	Parry = function(pos, dir)
+		flash(pos, WHITE, 5, 0.14)
+		star(pos, dir, 8, 8, 0.26, ACCENT, 0.24)
+		star(pos, dir, 4, 4.5, 0.16, WHITE, 0.18)
+		shards(pos, if dir then -dir else nil, 18, 6, ACCENT, 0.34)
+	end,
+	GuardBreak = function(pos, dir)
+		flash(pos, RED, 4, 0.12)
+		star(pos, dir, 4, 5, 0.2, RED, 0.18)
+		shards(pos, dir, 16, 5, RED, 0.4, 0.8)
+	end,
+}
+
+function Fx.Spark(pos: Vector3, kind: string, dir: Vector3?)
+	local style = STYLES[kind]
+	if style then
+		style(pos, dir)
+	end
+end
+
+---------------------------------------------------------------- shockwave
+
+function Fx.Shockwave(pos: Vector3, radius: number)
+	local ring = part({ Shape = Enum.PartType.Cylinder, Color = WHITE, Transparency = 0.35, Size = Vector3.new(0.15, 2, 2), CFrame = CFrame.new(pos) * CFrame.Angles(0, 0, math.pi / 2) })
+	tween(ring, 0.32, { Size = Vector3.new(0.15, radius * 2, radius * 2), Transparency = 1 }, Enum.EasingStyle.Quart)
+	expire(ring, 0.4)
+
+	local p = Instance.new("Part")
+	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+	p.Transparency = 1
+	p.Size = Vector3.new(radius, 0.2, radius)
+	p.CFrame = CFrame.new(pos + Vector3.yAxis * 0.5)
+	p.Parent = folder
+	expire(p, 1.5)
+	local a = Instance.new("Attachment")
+	a.Parent = p
+	local e = Instance.new("ParticleEmitter")
+	e.Enabled = false
+	e.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	e.Color = ColorSequence.new(Color3.fromRGB(200, 200, 205))
+	e.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.55), NumberSequenceKeypoint.new(1, 1) })
+	e.Size = NumberSequence.new(1.5, 4)
+	e.Speed = NumberRange.new(20, 34)
+	e.Drag = 5
+	e.Lifetime = NumberRange.new(0.4, 0.7)
+	e.SpreadAngle = Vector2.new(5, 180)
+	e.EmissionDirection = Enum.NormalId.Right
+	e.Rotation = NumberRange.new(0, 360)
+	e.Parent = a
+	for i = 0, 15 do
+		a.CFrame = CFrame.Angles(0, i / 16 * math.pi * 2, 0)
+		e:Emit(2)
+	end
+	if Fx.Hold then
+		task.delay(0.1, function()
+			e.TimeScale = 0
+		end)
+	end
+
+	-- same language as the hits: a flat star on the ground and debris shards thrown up and out
+	local center = pos + Vector3.yAxis * 0.4
+	flash(center + Vector3.yAxis * 0.6, WHITE, radius * 0.5, 0.16)
+	star(center, Vector3.yAxis, 6, radius * 1.1, 0.3, WHITE, 0.22)
+	shards(center, Vector3.yAxis, 20, radius * 0.7, WHITE, 0.4, 0.6)
+	shards(center, Vector3.yAxis, 8, radius * 0.5, ACCENT, 0.32, 0.6)
+end
+
+function Fx.Init()
+	folder = Instance.new("Folder")
+	folder.Name = "FxLocal"
+	folder.Parent = workspace
+	baseFov = workspace.CurrentCamera.FieldOfView
+	bindShake()
+end
+
+return Fx
+
+```
+
+`src/StarterPlayer/StarterPlayerScripts/CombatClient/HUD.luau`:
+
+```luau
+-- HUD, built in code. Clean minimalism: BuilderSans, dark translucent blocks, one yellow accent.
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local HUD = {}
+
+local C = {
+	Surface = Color3.fromRGB(14, 15, 18),
+	SurfaceAlpha = 0.25,
+	Text = Color3.fromRGB(255, 255, 255),
+	Muted = Color3.fromRGB(150, 154, 162),
+	Accent = Color3.fromRGB(255, 210, 60),
+	Track = Color3.fromRGB(60, 63, 70),
+}
+HUD.Colors = C
+
+local BOLD = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Bold)
+local MEDIUM = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Medium)
+local HEAVY = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Heavy)
+HUD.Fonts = { Bold = BOLD, Medium = MEDIUM, Heavy = HEAVY }
+
+local gui: ScreenGui
+local postureGui: BillboardGui
+local postureFill: Frame
+local comboFrame: Frame
+local comboCount: TextLabel
+local comboDamage: TextLabel
+local comboScale: UIScale
+local dummyLabel: TextLabel
+local slots: { [string]: any } = {}
+local hotbar: Frame? = nil
+local abilityList = {}
+local comboHideAt = 0
+
+local function new(class: string, props: { [string]: any }, children: { Instance }?): any
+	local inst = Instance.new(class)
+	for k, v in props do
+		if k ~= "Parent" then
+			(inst :: any)[k] = v
+		end
+	end
+	for _, c in children or {} do
+		c.Parent = inst
+	end
+	inst.Parent = props.Parent
+	return inst
+end
+
+local function corner(r: number?)
+	return new("UICorner", { CornerRadius = UDim.new(0, r or 4) })
+end
+
+local function text(props): TextLabel
+	props.BackgroundTransparency = 1
+	props.TextColor3 = props.TextColor3 or C.Text
+	props.FontFace = props.FontFace or BOLD
+	return new("TextLabel", props)
+end
+
+---------------------------------------------------------------- hotbar
+-- Square tiles of one size, key number centred on the top edge (half outside the tile),
+-- ability name centred in the tile. Cooldown: dark fill shrinking from the top, text dims.
+local TILE = 76 -- tile side, px
+local GAP = 8 -- space between tiles
+local KEY_OVERHANG = 10 -- how far the number sticks out above the tile
+
+local function buildSlot(parent: Instance, a, order: number)
+	-- holder is not clipped so the number can sit on the edge; the tile itself clips the cooldown fill
+	local holder = new("Frame", {
+		Name = a.id,
+		LayoutOrder = order,
+		Size = UDim2.fromOffset(TILE, TILE + KEY_OVERHANG),
+		BackgroundTransparency = 1,
+		Parent = parent,
+	})
+	local tile = new("Frame", {
+		Name = "Tile",
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.fromScale(0.5, 1),
+		Size = UDim2.fromOffset(TILE, TILE),
+		BackgroundColor3 = C.Surface,
+		BackgroundTransparency = 0.3,
+		BorderSizePixel = 0,
+		ClipsDescendants = true,
+		Parent = holder,
+	}, { corner(3) })
+
+	local shade = new("Frame", {
+		BackgroundColor3 = Color3.new(0, 0, 0),
+		BackgroundTransparency = 0.45,
+		BorderSizePixel = 0,
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.fromScale(0, 1),
+		Size = UDim2.fromScale(1, 0),
+		ZIndex = 2,
+		Parent = tile,
+	})
+	local name = text({
+		Text = a.name,
+		TextSize = 15,
+		TextWrapped = true,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.new(1, -10, 1, -10),
+		ZIndex = 3,
+		Parent = tile,
+	})
+	local key = text({
+		Text = a.key,
+		TextSize = 20,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0, KEY_OVERHANG),
+		Size = UDim2.fromOffset(24, 22),
+		ZIndex = 4,
+		Parent = holder,
+	})
+	local keyStroke = new("UIStroke", { Thickness = 1.5, Transparency = 0.15, Parent = key })
+
+	local slot = { readyAt = 0, duration = 1 }
+	function slot.update(left: number, duration: number)
+		local k = math.clamp(left / math.max(duration, 0.01), 0, 1)
+		shade.Size = UDim2.fromScale(1, k)
+		local fade = if left > 0 then 0.45 else 0
+		key.TextTransparency = fade
+		keyStroke.Transparency = 0.15 + fade
+		name.TextTransparency = fade
+	end
+	return slot
+end
+
+local function buildHotbar()
+	local bar = new("Frame", {
+		Name = "Hotbar",
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, -20),
+		Size = UDim2.fromOffset(#abilityList * (TILE + GAP) - GAP, TILE + KEY_OVERHANG),
+		BackgroundTransparency = 1,
+		Parent = gui,
+	}, {
+		new("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			Padding = UDim.new(0, GAP),
+			HorizontalAlignment = Enum.HorizontalAlignment.Center,
+		}),
+	})
+	hotbar = bar
+	for i, a in abilityList do
+		slots[a.id] = buildSlot(bar, a, i)
+	end
+end
+
+---------------------------------------------------------------- build
+
+function HUD.Init(abilities: { { id: string, key: string, name: string } })
+	-- health is the default Roblox bar (top right, green -> red), we don't draw our own
+	gui = new("ScreenGui", {
+		Name = "CombatHUD",
+		ResetOnSpawn = false,
+		IgnoreGuiInset = true,
+		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+		Parent = Players.LocalPlayer:WaitForChild("PlayerGui"),
+	})
+
+	-- hotbar, bottom centre (the space above it is kept free for a future awakening bar)
+	abilityList = abilities
+	buildHotbar()
+
+	-- guard: thin bar over our own head, only while blocking or recovering
+	postureGui = new("BillboardGui", {
+		Name = "Guard",
+		Size = UDim2.fromOffset(84, 5),
+		StudsOffsetWorldSpace = Vector3.new(0, 1.8, 0),
+		AlwaysOnTop = true,
+		LightInfluence = 0,
+		Enabled = false,
+		ResetOnSpawn = false,
+		Parent = gui.Parent, -- billboards live in PlayerGui itself, not inside the ScreenGui
+	})
+	local track = new("Frame", { BackgroundColor3 = C.Track, BackgroundTransparency = 0.2, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), Parent = postureGui }, { corner(2) })
+	new("UIStroke", { Thickness = 1, Transparency = 0.5, Parent = track })
+	postureFill = new("Frame", { BackgroundColor3 = C.Muted, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), Parent = track }, { corner(2) })
+
+	-- combo counter, right of centre
+	comboFrame = new("Frame", {
+		Name = "Combo",
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -48, 0.45, 0),
+		Size = UDim2.fromOffset(180, 110),
+		BackgroundTransparency = 1,
+		Visible = false,
+		Parent = gui,
+	})
+	comboScale = new("UIScale", { Parent = comboFrame })
+	comboCount = text({ Text = "0", FontFace = HEAVY, TextSize = 64, TextXAlignment = Enum.TextXAlignment.Right, Size = UDim2.new(1, 0, 0, 60), Parent = comboFrame })
+	new("UIStroke", { Thickness = 1.5, Transparency = 0.55, Parent = comboCount })
+	local hits = text({ Text = "HITS", TextSize = 18, TextXAlignment = Enum.TextXAlignment.Right, Position = UDim2.fromOffset(0, 58), Size = UDim2.new(1, 0, 0, 20), Parent = comboFrame })
+	new("UIStroke", { Thickness = 1, Transparency = 0.6, Parent = hits })
+	comboDamage = text({ Text = "", FontFace = MEDIUM, TextColor3 = C.Muted, TextSize = 16, TextXAlignment = Enum.TextXAlignment.Right, Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 0, 18), Parent = comboFrame })
+	new("UIStroke", { Thickness = 1, Transparency = 0.6, Parent = comboDamage })
+
+	-- controls + dummy mode, bottom left, no background
+	local hint = new("Frame", { Name = "Hint", AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 24, 1, -24), Size = UDim2.fromOffset(260, 150), BackgroundTransparency = 1, Parent = gui }, {
+		new("UIListLayout", { VerticalAlignment = Enum.VerticalAlignment.Bottom, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 2) }),
+	})
+	local lines = { "M1  combo (4th launches)", "F  block, tap on hit to parry", "Q  dash, sideways = dodge", "T  lock on target", "Shift  lock camera" }
+	for i, line in lines do
+		local l = text({ LayoutOrder = i, Text = line, FontFace = MEDIUM, TextSize = 14, TextTransparency = 0.15, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, 0, 0, 18), Parent = hint })
+		new("UIStroke", { Thickness = 1, Transparency = 0.6, Parent = l })
+	end
+	dummyLabel = text({ LayoutOrder = 10, Text = "", TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, 0, 0, 22), Parent = hint })
+	new("UIStroke", { Thickness = 1, Transparency = 0.6, Parent = dummyLabel })
+end
+
+---------------------------------------------------------------- updates
+
+function HUD.SetPosture(value: number, max: number, blocking: boolean, model: Model?)
+	local head = model and model:FindFirstChild("Head")
+	if postureGui.Adornee ~= head then
+		postureGui.Adornee = head
+	end
+	local k = math.clamp(value / max, 0, 1)
+	postureGui.Enabled = head ~= nil and (blocking or k < 0.995)
+	postureFill.Size = UDim2.fromScale(k, 1)
+	postureFill.BackgroundColor3 = if blocking then C.Text else C.Muted
+end
+
+function HUD.SetCooldown(id: string, readyAt: number, duration: number)
+	local s = slots[id]
+	if s then
+		s.readyAt, s.duration = readyAt, duration
+	end
+end
+
+function HUD.SetDummyMode(mode: string)
+	dummyLabel.Text = "B  dummy: " .. string.lower(mode)
+end
+
+function HUD.Combo(count: number, damage: number, until_: number)
+	comboFrame.Visible = true
+	comboCount.Text = tostring(count)
+	comboCount.TextColor3 = if count >= 8 then C.Accent else C.Text
+	comboDamage.Text = string.format("%d dmg", damage)
+	comboHideAt = until_
+	comboScale.Scale = 1.12
+	TweenService:Create(comboScale, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+end
+
+-- floating number over a target
+function HUD.Popup(model: Model?, label: string, accent: boolean?)
+	local head = model and (model:FindFirstChild("Head") or model:FindFirstChild("HumanoidRootPart"))
+	if not head then
+		return
+	end
+	local bb = new("BillboardGui", {
+		Adornee = head,
+		Size = UDim2.fromOffset(120, 40),
+		StudsOffsetWorldSpace = Vector3.new((math.random() - 0.5) * 2, 2, 0),
+		AlwaysOnTop = true,
+		LightInfluence = 0,
+		Parent = gui.Parent,
+	})
+	local l = text({ Text = label, TextSize = if accent then 30 else 24, TextColor3 = if accent then C.Accent else C.Text, Size = UDim2.fromScale(1, 1), Parent = bb })
+	local stroke = new("UIStroke", { Thickness = 1.5, Transparency = 0.45, Parent = l })
+	local info = TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	TweenService:Create(bb, info, { StudsOffsetWorldSpace = bb.StudsOffsetWorldSpace + Vector3.new(0, 1.6, 0) }):Play()
+	TweenService:Create(l, TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0.3), { TextTransparency = 1 }):Play()
+	TweenService:Create(stroke, TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0.3), { Transparency = 1 }):Play()
+	task.delay(0.65, bb.Destroy, bb)
+end
+
+function HUD.Step(now: number)
+	for _, s in slots do
+		s.update(math.max(0, s.readyAt - now), s.duration)
+	end
+	if comboFrame.Visible and now > comboHideAt then
+		comboFrame.Visible = false
+	end
+end
+
+return HUD
+
+```
+
+`src/StarterPlayer/StarterPlayerScripts/CombatClient/LockOn.luau`:
+
+```luau
+-- Lock-on (T): the camera keeps the target in view and the character turns to face it, so strikes,
+-- dashes and abilities all go at the target. Drops on death, distance, or T again.
+-- Runs right after the default camera (Camera + 1) and before the shake (Camera + 2).
+-- Marker: a small accent diamond floating over the target's head (picked from 3 variants: diamond,
+-- corner brackets, chest reticle).
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local Config = require(ReplicatedStorage:WaitForChild("Combat"):WaitForChild("Config"))
+
+local LockOn = {}
+
+local ACCENT = Color3.fromRGB(255, 210, 60)
+local DARK = Color3.fromRGB(14, 15, 18)
+
+local player = Players.LocalPlayer
+local target: Model? = nil
+local hooks: { root: () -> BasePart?, char: () -> Model?, alive: () -> boolean, canTurn: () -> boolean }
+local gui: ScreenGui
+local marker: Frame
+local markerScale: UIScale
+local shownFor: Model? = nil
+
+---------------------------------------------------------------- targets
+
+local function usable(m: Model, from: Vector3, range: number): boolean
+	if m.Parent == nil or m == hooks.char() or not CollectionService:HasTag(m, "Fighter") then
+		return false
+	end
+	local h = m:FindFirstChildOfClass("Humanoid")
+	local r = m:FindFirstChild("HumanoidRootPart") :: BasePart?
+	return h ~= nil and h.Health > 0 and r ~= nil and (r.Position - from).Magnitude <= range
+end
+
+function LockOn.Target(): Model?
+	return target
+end
+
+-- T: drop the lock, or take the fighter closest to the middle of the screen
+function LockOn.Toggle()
+	if target then
+		target = nil
+		return
+	end
+	local root = hooks.root()
+	if not root or not hooks.alive() then
+		return
+	end
+	local cam = workspace.CurrentCamera
+	local best, bestScore = nil, math.huge
+	for _, m in CollectionService:GetTagged("Fighter") do
+		if m:IsA("Model") and usable(m, root.Position, Config.LockOn.Range) then
+			local r = m:FindFirstChild("HumanoidRootPart") :: BasePart
+			local _, onScreen = cam:WorldToViewportPoint(r.Position)
+			local to = (r.Position - cam.CFrame.Position).Unit
+			local angle = math.acos(math.clamp(cam.CFrame.LookVector:Dot(to), -1, 1))
+			local score = angle + (if onScreen then 0 else 10) + (r.Position - root.Position).Magnitude * 0.004
+			if score < bestScore then
+				best, bestScore = m, score
+			end
+		end
+	end
+	target = best
+end
+
+---------------------------------------------------------------- marker
+
+local function new(class: string, props: { [string]: any }): any
+	local inst = Instance.new(class)
+	for k, v in props do
+		if k ~= "Parent" then
+			(inst :: any)[k] = v
+		end
+	end
+	inst.Parent = props.Parent
+	return inst
+end
+
+local function buildMarker()
+	marker = new("Frame", { Name = "Marker", AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(30, 30), BackgroundTransparency = 1, Visible = false, Parent = gui })
+	markerScale = new("UIScale", { Parent = marker })
+	local d = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(13, 13), Rotation = 45, BackgroundColor3 = ACCENT, BorderSizePixel = 0, Parent = marker })
+	new("UIStroke", { Color = DARK, Thickness = 1.5, Transparency = 0.35, Parent = d })
+end
+
+local function drawMarker(m: Model)
+	local r = m:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not r then
+		marker.Visible = false
+		return
+	end
+	-- pop in when a new target is taken
+	if shownFor ~= m then
+		shownFor = m
+		markerScale.Scale = 1.8
+		TweenService:Create(markerScale, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+	end
+	local head = m:FindFirstChild("Head") :: BasePart?
+	local top = if head then head.Position else r.Position + Vector3.new(0, 1.5, 0)
+	local p = workspace.CurrentCamera:WorldToViewportPoint(top + Vector3.new(0, 1.7 + math.sin(os.clock() * 4) * 0.12, 0))
+	marker.Visible = p.Z > 0
+	marker.Position = UDim2.fromOffset(p.X, p.Y)
+end
+
+---------------------------------------------------------------- frame
+
+local function flatten(v: Vector3): Vector3
+	return Vector3.new(v.X, 0, v.Z)
+end
+
+local function step(dt: number)
+	local root = hooks.root()
+	if target and (not root or not hooks.alive() or not usable(target, root.Position, Config.LockOn.BreakRange)) then
+		target = nil
+	end
+	local m = target
+	if not m or not root then
+		shownFor = nil
+		marker.Visible = false
+		return
+	end
+	local tr = m:FindFirstChild("HumanoidRootPart") :: BasePart
+	local cfg = Config.LockOn
+
+	-- camera: swing the default camera's view onto the target, keep its zoom; over the right shoulder
+	local cam = workspace.CurrentCamera
+	local focus = cam.Focus.Position
+	local to = tr.Position - focus
+	local dist = flatten(to).Magnitude
+	if dist > 0.5 then
+		local pitch = math.clamp(math.atan2(to.Y, dist) + math.rad(cfg.Pitch), math.rad(-70), math.rad(50))
+		local want = flatten(to) / dist * math.cos(pitch) + Vector3.yAxis * math.sin(pitch)
+		local look = cam.CFrame.LookVector:Lerp(want, 1 - math.exp(-cfg.CamTurnRate * dt))
+		if look.Magnitude > 1e-3 then
+			look = look.Unit
+			-- zoom = distance from the pivot behind the shoulder (the default camera put us on the focus)
+			local right = look:Cross(Vector3.yAxis)
+			right = if right.Magnitude > 1e-3 then right.Unit else cam.CFrame.RightVector
+			local shoulder = right * cfg.Shoulder
+			local zoom = math.max(0.5, (cam.CFrame.Position - focus).Magnitude)
+			if (cam.CFrame.Position - focus):Dot(cam.CFrame.RightVector) > cfg.Shoulder * 0.5 then
+				-- last frame's shoulder offset is still in the camera: measure without it
+				zoom = math.max(0.5, (cam.CFrame.Position - cam.CFrame.RightVector * cfg.Shoulder - focus).Magnitude)
+			end
+			local pos = focus - look * zoom + shoulder
+			cam.CFrame = CFrame.lookAt(pos, pos + look)
+		end
+	end
+
+	-- body: turn to face the target (not while ragdolled, grabbed, ...)
+	if hooks.canTurn() then
+		local fwd = flatten(root.CFrame.LookVector)
+		local toT = flatten(tr.Position - root.Position)
+		if toT.Magnitude > 0.3 and fwd.Magnitude > 1e-3 then
+			local f = fwd.Unit:Lerp(toT.Unit, 1 - math.exp(-cfg.BodyTurnRate * dt))
+			if f.Magnitude > 1e-3 then
+				root.CFrame = CFrame.lookAt(root.Position, root.Position + f)
+			end
+		end
+	end
+
+	drawMarker(m)
+end
+
+function LockOn.Init(h)
+	hooks = h
+	gui = new("ScreenGui", {
+		Name = "LockOn",
+		ResetOnSpawn = false,
+		IgnoreGuiInset = true, -- viewport coordinates line up with the gui
+		Parent = player:WaitForChild("PlayerGui"),
+	})
+	buildMarker()
+	RunService:BindToRenderStep("LockOnCamera", Enum.RenderPriority.Camera.Value + 1, step)
+end
+
+return LockOn
+
+```
+
+`src/StarterPlayer/StarterPlayerScripts/CombatClient/Sfx.luau`:
+
+```luau
+-- Sounds. All from the ProSoundEffects library (licensed by Roblox for every game).
+-- Templates live under SoundService: a sound with no parent waits ~0.45 s to load on first play.
+-- `start` skips the silence at the head of the clip so the hit lands on the frame. Measured, not
+-- guessed: AudioPlayer -> AudioAnalyzer, start = first 21 ms block above 15% of the clip's peak RMS.
+-- `layers` play together with the main clip (same spot, caller's pitch multiplies theirs): one hit
+-- sound is several clips stacked, e.g. a low thump under a snap.
+local ContentProvider = game:GetService("ContentProvider")
+local SoundService = game:GetService("SoundService")
+
+local Sfx = {}
+
+export type Clip = { id: number, volume: number?, pitch: number?, start: number?, duration: number? }
+export type Def = Clip & { layers: { Clip }? }
+
+local ID = {
+	Swing = 9120972444,
+	SwingHeavy = 9120972321,
+	Hit = 9119326824,
+	HitHeavy = 9113565276,
+	Block = 9116634633,
+	GuardBreak = 9113542363,
+	Dash = 9126229267,
+	Boom = 9126082854,
+	Fall = 9113471835,
+}
+-- measured silence at the head of each clip (s)
+local START = {
+	Swing = 0.02,
+	SwingHeavy = 0.065,
+	Hit = 0.02,
+	HitHeavy = 0.02,
+	Block = 0.085,
+	GuardBreak = 0.085,
+	Dash = 0.065,
+	Boom = 0.02,
+	Fall = 0.17,
+}
+
+local LIB: { [string]: Def } = {
+	Swing = { id = ID.Swing, volume = 0.3, start = START.Swing },
+	SwingHeavy = { id = ID.SwingHeavy, volume = 0.45, start = START.SwingHeavy },
+	Hit = { id = ID.Hit, volume = 0.9, start = START.Hit, duration = 0.45 },
+	HitHeavy = {
+		id = ID.HitHeavy,
+		volume = 1.0,
+		start = START.HitHeavy,
+		layers = { { id = ID.Hit, volume = 0.9, pitch = 0.83, start = START.Hit, duration = 0.45 } },
+	},
+	Block = { id = ID.Block, volume = 0.5, start = START.Block },
+	Parry = { id = ID.Block, volume = 1.0, start = START.Block, pitch = 1.35 },
+	GuardBreak = {
+		id = ID.GuardBreak,
+		volume = 1.3,
+		start = START.GuardBreak,
+		duration = 0.6,
+		layers = { { id = ID.Block, volume = 0.5, pitch = 0.7, start = START.Block } },
+	},
+	Dash = { id = ID.Dash, volume = 0.45, start = START.Dash },
+	Boom = { id = ID.Boom, volume = 0.9, start = START.Boom, duration = 1.6 },
+	Fall = { id = ID.Fall, volume = 0.7, start = START.Fall, duration = 0.4 },
+}
+Sfx.Lib = LIB
+
+local templates: { [number]: Sound } = {} -- by asset id: layers share clips
+local lastPlayed: { [string]: number } = {}
+local anchor: Part
+
+function Sfx.Init()
+	local folder = Instance.new("Folder")
+	folder.Name = "SfxTemplates"
+	folder.Parent = SoundService
+	local list = {}
+	for name, id in ID do
+		local s = Instance.new("Sound")
+		s.Name = name
+		s.SoundId = "rbxassetid://" .. id
+		s.Parent = folder
+		templates[id] = s
+		table.insert(list, s)
+	end
+	task.spawn(ContentProvider.PreloadAsync, ContentProvider, list)
+
+	anchor = Instance.new("Part")
+	anchor.Name = "SfxAnchor"
+	anchor.Anchored, anchor.CanCollide, anchor.CanQuery, anchor.CanTouch = true, false, false, false
+	anchor.Transparency = 1
+	anchor.Size = Vector3.one
+	anchor.Parent = workspace
+end
+
+local function playClip(clip: Clip, parent: Instance, volume: number, pitch: number, positional: boolean)
+	local template = templates[clip.id]
+	if not template then
+		return
+	end
+	local s = template:Clone()
+	s.Volume = (clip.volume or 1) * volume
+	s.PlaybackSpeed = (clip.pitch or 1) * pitch
+	s.TimePosition = clip.start or 0
+	if positional then
+		s.RollOffMinDistance = 12
+		s.RollOffMaxDistance = 240
+	end
+	s.Parent = parent
+	s:Play()
+	if clip.duration then
+		task.delay(clip.duration, function()
+			if s.Parent then
+				s:Stop()
+			end
+		end)
+	end
+	if not positional then
+		task.delay(4, s.Destroy, s)
+	end
+end
+
+-- opts: at (Vector3 -> 3D), volume, pitch, layer (skip the anti-spam check)
+function Sfx.Play(name: string, opts: { at: Vector3?, volume: number?, pitch: number?, layer: boolean? }?)
+	local def = LIB[name]
+	if not def or not anchor then
+		return
+	end
+	opts = opts or {}
+	local clock = os.clock()
+	if not opts.layer and clock - (lastPlayed[name] or 0) < 0.04 then
+		return
+	end
+	lastPlayed[name] = clock
+
+	local parent: Instance = SoundService
+	if opts.at then
+		local att = Instance.new("Attachment")
+		att.WorldPosition = opts.at
+		att.Parent = anchor
+		task.delay(4, att.Destroy, att)
+		parent = att
+	end
+	-- one random detune for the whole stack, so the layers stay locked together
+	local pitch = (opts.pitch or 1) * (0.96 + math.random() * 0.08)
+	local volume = opts.volume or 1
+	playClip(def, parent, volume, pitch, opts.at ~= nil)
+	for _, layer in def.layers or {} do
+		playClip(layer, parent, volume, pitch, opts.at ~= nil)
+	end
+end
+
+return Sfx
+
+```
+
+`src/StarterPlayer/StarterPlayerScripts/CombatClient/init.client.luau`:
+
+```luau
+-- Client side of combat: input, local state, prediction, feedback.
+-- The client acts immediately (animation, lunge, predicted hit effects) and tells the server with a
+-- server-time stamp. The server re-checks everything against rewound positions and answers with
+-- Result events; predicted hits are matched to those by `seq` so nothing plays twice.
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local Combat = ReplicatedStorage:WaitForChild("Combat")
+local Config = require(Combat:WaitForChild("Config"))
+local Hitbox = require(Combat:WaitForChild("Hitbox"))
+local Anim = require(Combat:WaitForChild("Anim"))
+local Remotes = Combat:WaitForChild("Remotes")
+local Request = Remotes:WaitForChild("Request") :: RemoteEvent
+local Effect = Remotes:WaitForChild("Effect") :: RemoteEvent
+local EffectU = Remotes:WaitForChild("EffectU") :: UnreliableRemoteEvent
+
+local Fx = require(script:WaitForChild("Fx"))
+local Sfx = require(script:WaitForChild("Sfx"))
+local HUD = require(script:WaitForChild("HUD"))
+local LockOn = require(script:WaitForChild("LockOn"))
+
+local player = Players.LocalPlayer
+
+local function now(): number
+	return workspace:GetServerTimeNow()
+end
+
+---------------------------------------------------------------- state
+
+local char: Model? = nil
+local humanoid: Humanoid? = nil
+local root: BasePart? = nil
+local pushAtt: Attachment? = nil
+local pushLV: LinearVelocity? = nil
+local pushToken = 0
+
+local S = {
+	token = 0, -- bumped when we get interrupted
+	comboStep = 0,
+	lastM1 = -10,
+	m1ReadyAt = 0,
+	actionUntil = 0,
+	moveLockUntil = 0,
+	dashReadyAt = 0,
+	cds = {} :: { [string]: number },
+	seq = 0,
+	m1Held = false,
+	blockHeld = false,
+	blockSent = false,
+	blockRetryAt = 0,
+	rush = nil :: any,
+	dashHit = nil :: any, -- open front dash that can still run into someone
+	grabbing = false,
+	grabPendingUntil = 0,
+	comboShown = 0,
+	comboDamage = 0,
+	comboAt = -10,
+	lastStunUntil = 0,
+}
+
+-- predicted[seq][victim] = predicted result
+local predicted: { [number]: { [Model]: string } } = {}
+
+local ABILITY_ORDER = {}
+for id, cfg in Config.Abilities do
+	table.insert(ABILITY_ORDER, { id = id, order = cfg.Order, key = cfg.Key, name = cfg.Name })
+end
+table.sort(ABILITY_ORDER, function(a, b)
+	return a.order < b.order
+end)
+
+---------------------------------------------------------------- helpers
+
+local function flat(v: Vector3): Vector3
+	local f = v * Vector3.new(1, 0, 1)
+	return if f.Magnitude > 1e-3 then f.Unit else Vector3.new(0, 0, -1)
+end
+
+local function stunned(t: number): boolean
+	return char ~= nil and t < (char:GetAttribute("StunUntil") or 0)
+end
+
+local function grabbed(): boolean
+	return char ~= nil and char:GetAttribute("Grabbed") == true
+end
+
+local function ragdolled(): boolean
+	return char ~= nil and char:GetAttribute("Ragdoll") == true
+end
+
+local function alive(): boolean
+	return humanoid ~= nil and humanoid.Health > 0 and root ~= nil and root.Parent ~= nil
+end
+
+local function canAct(t: number): boolean
+	return alive() and not stunned(t) and not grabbed() and not S.grabbing and S.rush == nil and t >= S.actionUntil
+end
+
+-- everybody we can see that can be hit
+local function visibleTargets(): { Hitbox.Target }
+	local list = {}
+	for _, m in CollectionService:GetTagged("Fighter") do
+		if m ~= char and m:IsA("Model") and not m:GetAttribute("Grabbed") then
+			local h = m:FindFirstChildOfClass("Humanoid")
+			local r = m:FindFirstChild("HumanoidRootPart") :: BasePart?
+			if h and r and h.Health > 0 then
+				table.insert(list, { model = m, pos = r.Position })
+			end
+		end
+	end
+	return list
+end
+
+local function rootOf(m: Model?): BasePart?
+	return m and m:FindFirstChild("HumanoidRootPart") :: BasePart?
+end
+
+-- move our own character (we own its physics, so this is instant)
+local function push(vel: Vector3, duration: number, vertical: boolean?)
+	if not pushLV then
+		return
+	end
+	pushToken += 1
+	local my = pushToken
+	pushLV.MaxAxesForce = if vertical then Vector3.one * 1e6 else Vector3.new(1e6, 0, 1e6)
+	pushLV.VectorVelocity = vel
+	pushLV.Enabled = true
+	task.delay(duration, function()
+		if pushToken == my and pushLV then
+			pushLV.Enabled = false
+		end
+	end)
+end
+
+-- forward step that stops short of whoever is in front: fighters don't collide, so a full step
+-- every swing walks you through the target (and then you hit its back, past its block)
+local LUNGE_GAP = 2.6 -- closest we step to a target (studs, root to root)
+local function lunge(origin: CFrame, speed: number, duration: number)
+	local nearest = math.huge
+	for _, t in visibleTargets() do
+		local rel = origin:PointToObjectSpace(t.pos)
+		if rel.Z < 0 and math.abs(rel.X) < 3 then
+			nearest = math.min(nearest, -rel.Z)
+		end
+	end
+	local room = math.max(0, nearest - LUNGE_GAP)
+	local v = math.min(speed, room / duration)
+	if v > 0.5 then
+		push(origin.LookVector * v, duration)
+	end
+end
+
+local function stopPush()
+	pushToken += 1
+	if pushLV then
+		pushLV.Enabled = false
+	end
+end
+
+local function interrupted()
+	S.token += 1
+	S.rush = nil
+	S.dashHit = nil
+	S.actionUntil = 0
+	S.moveLockUntil = 0
+	S.comboStep = 0
+	S.blockSent = false
+	stopPush()
+end
+
+---------------------------------------------------------------- feedback
+
+local function bumpCombo(count: number?, damage: number)
+	local t = now()
+	if count then
+		S.comboShown = count
+	elseif t - S.comboAt > Config.Fighter.ComboWindow then
+		S.comboShown = 1
+		S.comboDamage = 0
+	else
+		S.comboShown += 1
+	end
+	if S.comboShown <= 1 and count then
+		S.comboDamage = 0
+	end
+	S.comboDamage += damage
+	S.comboAt = t
+	HUD.Combo(S.comboShown, S.comboDamage, t + Config.Fighter.ComboWindow)
+end
+
+local function damageFor(move: string, step: number?): number
+	if move == "M1" then
+		return Config.M1.Damage[step or 1]
+	elseif move == "Dash" then
+		return Config.Dash.Hit.Damage
+	end
+	local cfg = Config.Abilities[move]
+	return cfg and cfg.Damage or 0
+end
+
+-- big effect / launch animation: last M1, last Barrage hit, the other abilities
+local function isHeavy(move: string, step: number?): boolean
+	if move == "M1" then
+		return step == Config.M1.Steps
+	elseif move == "Barrage" then
+		return step == Config.Abilities.Barrage.Hits
+	elseif move == "Dash" then
+		return false
+	end
+	return true
+end
+
+local function hitstopFor(move: string, step: number?): number?
+	if move == "M1" then
+		return Config.M1.Hitstop[step or 1]
+	elseif move == "Dash" then
+		return Config.Dash.Hit.Hitstop
+	elseif move == "Barrage" then
+		local cfg = Config.Abilities.Barrage
+		return if step == cfg.Hits then cfg.FinalHitstop else cfg.Hitstop
+	end
+	local cfg = Config.Abilities[move]
+	return cfg and cfg.Hitstop
+end
+
+-- combo extension (same rule as the server): a landed non-M1 hit cancels M1 end lag, chain restarts
+local function landed(move: string)
+	if move ~= "M1" then
+		S.m1ReadyAt = math.min(S.m1ReadyAt, now())
+		S.comboStep = 0
+	end
+end
+
+-- one function draws every hit result, predicted or confirmed
+local function feedback(a: Model?, v: Model?, r: string, move: string, step: number?, hitstop: number?)
+	local aRoot, vRoot = rootOf(a), rootOf(v)
+	if not vRoot then
+		return
+	end
+	local mine = a == char or v == char
+	local toA = if aRoot then flat(aRoot.Position - vRoot.Position) else Vector3.zero
+	local at = vRoot.Position + toA * 1.1 + Vector3.yAxis * 0.6
+	local heavy = isHeavy(move, step)
+	local soundAt = if mine then nil else at
+
+	if r == "Hit" then
+		local stop = hitstop or (if heavy then 0.12 else 0.06)
+		Anim.Freeze(a, stop)
+		Anim.Freeze(v, stop, 0.3)
+		Anim.Play(v, if heavy then "Launched" elseif math.random() < 0.5 then "HurtL" else "HurtR")
+		Fx.Spark(at, if heavy then "Heavy" else "Hit", -toA)
+		Sfx.Play(if heavy then "HitHeavy" else "Hit", { at = soundAt, pitch = if heavy then 0.9 else 1.05 })
+		if mine then
+			Fx.Shake(if heavy then 0.7 else 0.32, if heavy then 2 else 3.6)
+			Fx.Kick(if heavy then -8 else -3.5, if heavy then 5 else 9)
+			Fx.Nudge((if heavy then 0.9 else 0.4) * (if a == char then 1 else -1))
+		end
+	elseif r == "Blocked" then
+		Anim.Freeze(a, 0.04)
+		Fx.Spark(at, "Block", -toA)
+		Sfx.Play("Block", { at = soundAt, pitch = 1.15 })
+		if mine then
+			Fx.Shake(0.12, 5)
+		end
+	elseif r == "Parried" then
+		Anim.Freeze(a, 0.1)
+		Anim.Freeze(v, 0.1)
+		Anim.Play(a, "Stagger")
+		Fx.Spark(at, "Parry", -toA)
+		Sfx.Play("Parry", { at = soundAt })
+		HUD.Popup(a, "Parried", true)
+		if mine then
+			Fx.Shake(0.4, 3)
+		end
+	elseif r == "GuardBreak" then
+		Anim.Freeze(v, 0.1, 0.3)
+		Anim.Play(v, "Stagger")
+		Fx.Spark(at, "GuardBreak", -toA)
+		Sfx.Play("GuardBreak", { at = soundAt })
+		HUD.Popup(v, "Guard break", true)
+		if mine then
+			Fx.Shake(0.45, 2.5)
+		end
+	elseif r == "Armored" then
+		-- the punch lands but doesn't stagger: short freeze on the attacker only, no hurt pose
+		Anim.Freeze(a, 0.05)
+		Fx.Spark(at, "Hit", -toA)
+		Sfx.Play("Hit", { at = soundAt, pitch = 0.8, volume = 0.7 })
+		if mine then
+			Fx.Shake(0.15, 4)
+		end
+	elseif r == "Dodged" then
+		HUD.Popup(v, "Dodge")
+	end
+end
+
+-- run the shared hitbox against what we see right now and show the results immediately
+local function predict(shape, origin: CFrame, move: string, step: number?, seq: number, only: Model?)
+	local t = now()
+	local hits = Hitbox.Find(shape, origin, visibleTargets(), Config.Fighter.HurtRadius, if only then 3 else nil)
+	if #hits == 0 then
+		return
+	end
+	predicted[seq] = {}
+	for _, target in hits do
+		local v = target.model
+		if only and v ~= only then
+			continue
+		end
+		local r = "Hit"
+		if t <= (v:GetAttribute("IFrameUntil") or 0) then
+			r = "Dodged"
+		elseif v:GetAttribute("Blocking") then
+			local vRoot = rootOf(v)
+			if vRoot and vRoot.CFrame.LookVector:Dot(flat(origin.Position - vRoot.Position)) > Config.Block.FrontDot then
+				r = "Blocked"
+			end
+		end
+		if r == "Hit" and move == "M1" and t <= (v:GetAttribute("ArmorUntil") or 0) then
+			r = "Armored" -- same order as the server: i-frames, block, armor
+		end
+		predicted[seq][v] = r
+		feedback(char, v, r, move, step, hitstopFor(move, step))
+		if r == "Hit" then
+			local dmg = damageFor(move, step)
+			HUD.Popup(v, tostring(dmg), isHeavy(move, step))
+			bumpCombo(nil, dmg)
+			landed(move)
+		elseif r == "Armored" then
+			HUD.Popup(v, tostring(damageFor(move, step))) -- damage, but no combo: it didn't stagger
+		end
+	end
+	task.delay(2, function()
+		predicted[seq] = nil
+	end)
+end
+
+---------------------------------------------------------------- actions
+
+local function sendBlock(on: boolean)
+	S.blockSent = on
+	Request:FireServer("Block", { on = on, t = now() })
+end
+
+local function tryM1()
+	local t = now()
+	local cfg = Config.M1
+	if not canAct(t) or S.blockSent or t < S.m1ReadyAt then
+		return
+	end
+	local step = if (t - S.lastM1 > cfg.ComboReset or S.comboStep >= cfg.Steps) then 1 else S.comboStep + 1
+	S.comboStep = step
+	S.lastM1 = t
+	S.m1ReadyAt = t + (if step == cfg.Steps then cfg.EndLag else cfg.Interval)
+	S.actionUntil = t + cfg.Windup + 0.12
+	S.seq += 1
+	local seq = S.seq
+	local origin = Hitbox.Flat((root :: BasePart).CFrame)
+	Request:FireServer("M1", { t = t, cf = origin, seq = seq })
+
+	Anim.Play(char, "M1_" .. step)
+	Fx.Kick(if step == cfg.Steps then 3 else 1.2, 9)
+	Sfx.Play(if step == cfg.Steps then "SwingHeavy" else "Swing", { pitch = 1 + step * 0.04 })
+	lunge(origin, cfg.Lunge, 0.12)
+
+	local token = S.token
+	task.delay(cfg.Windup, function()
+		if S.token == token and alive() then
+			predict(cfg.Hitbox, origin, "M1", step, seq)
+		end
+	end)
+end
+
+local function tryDash()
+	local t = now()
+	if not canAct(t) or t < S.dashReadyAt or not humanoid or not root then
+		return
+	end
+	local md = humanoid.MoveDirection
+	local world: Vector3
+	local dir = "F"
+	if md.Magnitude < 0.1 then
+		world = flat(root.CFrame.LookVector)
+	else
+		world = flat(md)
+		-- direction relative to the camera decides front dash vs dodge
+		local cam = CFrame.lookAt(Vector3.zero, flat(workspace.CurrentCamera.CFrame.LookVector))
+		local l = cam:VectorToObjectSpace(world)
+		if math.abs(l.X) > math.abs(l.Z) then
+			dir = if l.X > 0 then "R" else "L"
+		else
+			dir = if l.Z < 0 then "F" else "B"
+		end
+	end
+	if S.blockSent then
+		sendBlock(false)
+	end
+	S.dashReadyAt = t + Config.Dash.Cooldown
+	HUD.SetCooldown("Dash", S.dashReadyAt, Config.Dash.Cooldown)
+	Request:FireServer("Dash", { dir = dir, t = t })
+
+	local spec = if dir == "F" then Config.Dash.Front else Config.Dash.Dodge
+	push(world * spec.Speed, spec.Duration)
+	S.dashHit = if dir == "F" then { untilT = t + spec.Duration, token = S.token } else nil
+	-- animation follows where we move relative to the body, not the camera
+	local rel = root.CFrame:VectorToObjectSpace(world)
+	local animDir = if math.abs(rel.X) > math.abs(rel.Z) then (if rel.X > 0 then "R" else "L") else (if rel.Z < 0 then "F" else "B")
+	Anim.Play(char, "Dash" .. animDir)
+	Fx.Kick(if dir == "F" then 7 else 4, 6)
+	Sfx.Play("Dash")
+end
+
+-- front dash: the first fighter we run into gets a short stun and the dash stops on them
+local function stepDashHit(t: number)
+	local d = S.dashHit
+	if not d or not root then
+		return
+	end
+	if d.token ~= S.token or t > d.untilT then
+		S.dashHit = nil
+		return
+	end
+	local cfg = Config.Dash.Hit
+	local origin = Hitbox.Flat(root.CFrame)
+	local hits = Hitbox.Find(cfg.Hitbox, origin, visibleTargets(), Config.Fighter.HurtRadius)
+	local target = hits[1]
+	if not target then
+		return
+	end
+	S.dashHit = nil
+	stopPush()
+	S.seq += 1
+	Request:FireServer("DashHit", { target = target.model, t = t, cf = origin, seq = S.seq })
+	predict(cfg.Hitbox, origin, "Dash", nil, S.seq, target.model)
+end
+
+local function startRush(cfg, t: number)
+	S.actionUntil = t + cfg.Windup + cfg.RushTime + 0.1
+	S.moveLockUntil = S.actionUntil
+	S.rush = { startT = t + cfg.Windup, untilT = t + cfg.Windup + cfg.RushTime, cfg = cfg, pushing = false, token = S.token }
+	Anim.Play(char, "GrabRush")
+	Sfx.Play("SwingHeavy", { pitch = 0.85 })
+end
+
+local function stepRush(t: number)
+	local r = S.rush
+	if not r or not root then
+		return
+	end
+	if r.token ~= S.token or t > r.untilT then
+		S.rush = nil
+		stopPush()
+		return
+	end
+	if t < r.startT then
+		return
+	end
+	local origin = Hitbox.Flat(root.CFrame)
+	if not r.pushing then
+		r.pushing = true
+		push(origin.LookVector * r.cfg.RushSpeed, r.cfg.RushTime)
+		Fx.Kick(9, 5)
+		Sfx.Play("Dash", { pitch = 0.9 })
+	end
+	local hits = Hitbox.Find(r.cfg.Hitbox, origin, visibleTargets(), Config.Fighter.HurtRadius)
+	if hits[1] then
+		S.rush = nil
+		stopPush()
+		S.grabPendingUntil = t + 0.5
+		Request:FireServer("GrabHit", { target = hits[1].model, t = t, cf = origin })
+		Sfx.Play("Hit", { pitch = 0.8 })
+		Fx.Shake(0.2, 4)
+	end
+end
+
+local function startSlam(cfg, t: number, origin: CFrame, seq: number)
+	S.actionUntil = t + cfg.Windup + 0.25
+	S.moveLockUntil = S.actionUntil
+	Anim.Play(char, "Slam")
+	Sfx.Play("SwingHeavy", { pitch = 0.7 })
+	local token = S.token
+	task.delay(cfg.Windup, function()
+		if S.token ~= token or not alive() then
+			return
+		end
+		Fx.Shockwave(origin.Position - Vector3.yAxis * 2.9, cfg.Hitbox.Radius)
+		Sfx.Play("Boom")
+		Sfx.Play("HitHeavy", { pitch = 0.6, layer = true })
+		Fx.Shake(0.8, 1.8)
+		Fx.Kick(-9, 5)
+		Fx.Nudge(0.8)
+		predict(cfg.Hitbox, origin, "GroundSlam", nil, seq)
+	end)
+end
+
+-- Barrage: rooted flurry, one prediction per hit (seq, seq + 1, ...; the server numbers them the same)
+local function startBarrage(cfg, t: number, origin: CFrame, seq: number)
+	S.actionUntil = t + cfg.Windup + (cfg.Hits - 1) * cfg.Interval + 0.15
+	S.moveLockUntil = S.actionUntil
+	S.seq = seq + cfg.Hits - 1
+	Anim.Play(char, "Barrage")
+	local token = S.token
+	for i = 1, cfg.Hits do
+		task.delay(cfg.Windup + (i - 1) * cfg.Interval, function()
+			if S.token ~= token or not alive() then
+				return
+			end
+			local final = i == cfg.Hits
+			Sfx.Play(if final then "SwingHeavy" else "Swing", { pitch = 1.1 + i * 0.03 })
+			Fx.Kick(if final then 2.5 else 0.8, 10)
+			predict(cfg.Hitbox, origin, "Barrage", i, seq + i - 1)
+		end)
+	end
+end
+
+local function startUppercut(cfg, t: number, origin: CFrame, seq: number)
+	S.actionUntil = t + cfg.Windup + 0.3
+	S.moveLockUntil = S.actionUntil
+	Anim.Play(char, "Uppercut")
+	Sfx.Play("SwingHeavy", { pitch = 0.95 })
+	local token = S.token
+	task.delay(cfg.Windup - 0.08, function()
+		if S.token == token and alive() then
+			lunge(Hitbox.Flat((root :: BasePart).CFrame), cfg.Lunge, 0.12)
+		end
+	end)
+	task.delay(cfg.Windup, function()
+		if S.token ~= token or not alive() then
+			return
+		end
+		Fx.Kick(3, 7)
+		predict(cfg.Hitbox, origin, "Uppercut", nil, seq)
+	end)
+end
+
+local function tryAbility(id: string)
+	local cfg = Config.Abilities[id]
+	local t = now()
+	if not cfg or not root or not canAct(t) or t < (S.cds[id] or 0) then
+		return
+	end
+	if S.blockSent then
+		sendBlock(false)
+	end
+	S.cds[id] = t + cfg.Cooldown
+	HUD.SetCooldown(id, S.cds[id], cfg.Cooldown)
+	S.seq += 1
+	local origin = Hitbox.Flat(root.CFrame)
+	Request:FireServer("Ability", { id = id, t = t, cf = origin, seq = S.seq })
+	if id == "GrabRush" then
+		startRush(cfg, t)
+	elseif id == "GroundSlam" then
+		startSlam(cfg, t, origin, S.seq)
+	elseif id == "Barrage" then
+		startBarrage(cfg, t, origin, S.seq)
+	elseif id == "Uppercut" then
+		startUppercut(cfg, t, origin, S.seq)
+	end
+end
+
+---------------------------------------------------------------- input
+
+local KEY_TO_ABILITY = {}
+for _, a in ABILITY_ORDER do
+	KEY_TO_ABILITY[a.key] = a.id
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed then
+		return
+	end
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		S.m1Held = true
+		tryM1()
+	elseif input.KeyCode == Enum.KeyCode.F then
+		S.blockHeld = true
+	elseif input.KeyCode == Enum.KeyCode.Q then
+		tryDash()
+	elseif input.KeyCode == Enum.KeyCode.T then
+		LockOn.Toggle()
+	elseif input.KeyCode == Enum.KeyCode.B then
+		Request:FireServer("DummyMode", {})
+	elseif KEY_TO_ABILITY[input.KeyCode] then
+		tryAbility(KEY_TO_ABILITY[input.KeyCode])
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		S.m1Held = false
+	elseif input.KeyCode == Enum.KeyCode.F then
+		S.blockHeld = false
+		if S.blockSent then
+			sendBlock(false)
+		end
+	end
+end)
+
+---------------------------------------------------------------- server events
+
+Effect.OnClientEvent:Connect(function(kind: string, d: any)
+	if kind == "Result" then
+		local mineA, mineV = d.a == char, d.v == char
+		local guess = mineA and d.seq and predicted[d.seq] and predicted[d.seq][d.v]
+		if guess then
+			-- we already showed this one; only redraw if the server disagrees
+			if guess ~= d.r then
+				feedback(d.a, d.v, d.r, d.move, d.step, d.hitstop)
+			end
+			if d.r == "Hit" then
+				S.comboShown = d.combo
+				HUD.Combo(S.comboShown, S.comboDamage, now() + Config.Fighter.ComboWindow)
+			end
+		else
+			feedback(d.a, d.v, d.r, d.move, d.step, d.hitstop)
+			if mineA and d.r == "Hit" then
+				HUD.Popup(d.v, tostring(d.dmg), true)
+				bumpCombo(d.combo, d.dmg)
+				landed(d.move)
+			elseif mineA and d.r == "Armored" then
+				HUD.Popup(d.v, tostring(d.dmg))
+			end
+		end
+
+		if mineV and (d.r == "Hit" or d.r == "GuardBreak") then
+			interrupted()
+			if d.kb then
+				push(d.kb, 0.12, true)
+			end
+		end
+		if mineA and d.r == "Parried" then
+			interrupted()
+		end
+	elseif kind == "Grab" then
+		Anim.Stop(d.v) -- the Grabbed hold takes over
+		if d.a == char then
+			S.grabbing = true
+			S.grabPendingUntil = 0
+			local hold = Config.Abilities.GrabRush.Hold
+			task.delay(math.max(0, hold - 0.2), function()
+				if S.grabbing then
+					Anim.Play(char, "GrabSlam")
+					Sfx.Play("SwingHeavy", { pitch = 0.8 })
+				end
+			end)
+		else
+			task.delay(math.max(0, Config.Abilities.GrabRush.Hold - 0.2), Anim.Play, d.a, "GrabSlam")
+		end
+		Sfx.Play("Hit", { at = if d.a == char or d.v == char then nil else rootOf(d.v) and (rootOf(d.v) :: BasePart).Position, pitch = 0.8 })
+	elseif kind == "GrabEnd" then
+		if d.a == char then
+			S.grabbing = false
+			S.actionUntil = now() + 0.15
+		end
+		if d.slam then
+			local vRoot = rootOf(d.v)
+			if vRoot then
+				Fx.Shockwave(vRoot.Position - Vector3.yAxis * 2.5, 6)
+			end
+			Sfx.Play("Boom", { at = if d.a == char or d.v == char then nil else vRoot and vRoot.Position, volume = 0.7 })
+		end
+	elseif kind == "Denied" then
+		if d.action == "M1" then
+			S.comboStep = d.step or 0
+		elseif d.action == "Block" then
+			S.blockSent = false
+			S.blockRetryAt = now() + 0.15
+		elseif Config.Abilities[d.action] then
+			S.cds[d.action] = 0
+			HUD.SetCooldown(d.action, 0, 1)
+		end
+	end
+end)
+
+EffectU.OnClientEvent:Connect(function(kind: string, d: any)
+	local r = rootOf(d.m)
+	local at = r and r.Position
+	if kind == "Swing" then
+		Anim.Play(d.m, "M1_" .. d.step)
+		Sfx.Play(if d.step == Config.M1.Steps then "SwingHeavy" else "Swing", { at = at, layer = true })
+	elseif kind == "Dash" then
+		local map = { F = "DashF", B = "DashB", L = "DashL", R = "DashR" }
+		Anim.Play(d.m, map[d.dir] or "DashF")
+		Sfx.Play("Dash", { at = at, layer = true })
+	elseif kind == "Ability" then
+		Anim.Play(d.m, if d.id == "GroundSlam" then "Slam" else d.id)
+		Sfx.Play("SwingHeavy", { at = at, pitch = 0.75, layer = true })
+	elseif kind == "Slam" then
+		Fx.Shockwave(d.pos - Vector3.yAxis * 2.9, Config.Abilities.GroundSlam.Hitbox.Radius)
+		Sfx.Play("Boom", { at = d.pos, layer = true })
+		if root and (root.Position - d.pos).Magnitude < 40 then
+			Fx.Shake(0.35, 2.5)
+		end
+	end
+end)
+
+---------------------------------------------------------------- characters
+
+local tracked: { [Model]: boolean } = {}
+
+local function track(m: Instance)
+	if not m:IsA("Model") or tracked[m] then
+		return
+	end
+	task.spawn(function()
+		local h = m:WaitForChild("Humanoid", 10)
+		local r = m:WaitForChild("HumanoidRootPart", 10)
+		if not h or not r or not m.Parent then
+			return
+		end
+		tracked[m] = true
+		Anim.Register(m)
+	end)
+end
+
+-- ragdoll landings: a loose body hitting the floor thumps. Fall speed comes from the torso's own
+-- positions, so it works the same for our body, other players and dummies.
+local landRay = RaycastParams.new()
+landRay.CollisionGroup = "Fighters" -- fighters don't collide with fighters: the ray ignores bodies
+landRay.IgnoreWater = true
+local falls: { [Model]: { y: number, vy: number, quietUntil: number, armedUntil: number } } = {}
+
+local function stepLandings(dt: number, t: number)
+	if dt <= 0 then
+		return
+	end
+	local cfg = Config.Ragdoll
+	for m in tracked do
+		local torso = m:FindFirstChild("UpperTorso") :: BasePart?
+		local f = falls[m]
+		local loose = m:GetAttribute("Ragdoll") == true
+		if not torso or (not loose and (not f or t > f.armedUntil)) then
+			falls[m] = nil
+			continue
+		end
+		local y = torso.Position.Y
+		if not f then
+			falls[m] = { y = y, vy = 0, quietUntil = 0, armedUntil = t + cfg.LandGrace }
+			continue
+		end
+		if loose then
+			f.armedUntil = t + cfg.LandGrace
+		end
+		local vy = (y - f.y) / dt
+		-- a fast fall that just stopped, right above the floor
+		local stopped = f.vy < -cfg.LandSpeed and vy > f.vy * 0.4
+		if stopped and t >= f.quietUntil and workspace:Raycast(torso.Position, Vector3.new(0, -3, 0), landRay) then
+			Sfx.Play("Fall", { at = torso.Position, volume = math.clamp(-f.vy / 35, 0.5, 1.2), layer = true })
+			f.quietUntil = t + cfg.LandCooldown
+		end
+		f.y, f.vy = y, vy
+	end
+end
+
+CollectionService:GetInstanceAddedSignal("Fighter"):Connect(track)
+CollectionService:GetInstanceRemovedSignal("Fighter"):Connect(function(m)
+	tracked[m] = nil
+	falls[m] = nil
+	Anim.Unregister(m)
+end)
+
+local function onCharacter(c: Model)
+	char = c
+	humanoid = c:WaitForChild("Humanoid") :: Humanoid
+	root = c:WaitForChild("HumanoidRootPart") :: BasePart
+	local h, r = humanoid :: Humanoid, root :: BasePart
+
+	S.token += 1
+	S.comboStep, S.actionUntil, S.moveLockUntil, S.dashReadyAt = 0, 0, 0, 0
+	S.blockSent, S.rush, S.grabbing = false, nil, false
+	S.cds = {}
+
+	local att = Instance.new("Attachment")
+	att.Name = "PushAttachment"
+	att.Parent = r
+	local lv = Instance.new("LinearVelocity")
+	lv.Name = "Push"
+	lv.Attachment0 = att
+	lv.RelativeTo = Enum.ActuatorRelativeTo.World
+	lv.ForceLimitMode = Enum.ForceLimitMode.PerAxis
+	lv.MaxAxesForce = Vector3.new(1e6, 0, 1e6)
+	lv.Enabled = false
+	lv.Parent = r
+	pushAtt, pushLV = att, lv
+
+	-- death ragdoll (the server loosens the joints): tip the body over, it would stay balanced otherwise.
+	-- Push the torso: on death the Root joint is off, the root part no longer carries the body.
+	h.Died:Connect(function()
+		stopPush()
+		local torso = c:FindFirstChild("UpperTorso") :: BasePart?
+		if torso then
+			torso.AssemblyAngularVelocity += torso.CFrame.RightVector * 5
+			torso.AssemblyLinearVelocity += -torso.CFrame.LookVector * 6 + Vector3.yAxis * 4
+		end
+	end)
+
+	-- a fresh stun from the server interrupts whatever we were doing
+	c:GetAttributeChangedSignal("StunUntil"):Connect(function()
+		local v = c:GetAttribute("StunUntil") or 0
+		if v > S.lastStunUntil + 0.01 and v > now() then
+			interrupted()
+		end
+		S.lastStunUntil = v
+	end)
+	track(c)
+end
+
+---------------------------------------------------------------- frame
+
+local function stepLocal(t: number)
+	if not alive() then
+		return
+	end
+	local h = humanoid :: Humanoid
+	local c = char :: Model
+
+	-- ragdoll: the server swaps the joints, we own our humanoid so we flip its state
+	local rag = ragdolled()
+	local state = h:GetState()
+	if rag and state ~= Enum.HumanoidStateType.Physics and state ~= Enum.HumanoidStateType.Dead then
+		h:ChangeState(Enum.HumanoidStateType.Physics)
+	elseif not rag and state == Enum.HumanoidStateType.Physics then
+		h:ChangeState(Enum.HumanoidStateType.GettingUp)
+	end
+
+	if S.m1Held then
+		tryM1()
+	end
+
+	-- block follows the key, re-sent automatically after a stun ends
+	if S.blockSent and (stunned(t) or grabbed()) then
+		S.blockSent = false
+	end
+	if S.blockHeld and not S.blockSent and t >= S.blockRetryAt and canAct(t) then
+		sendBlock(true)
+	end
+
+	stepRush(t)
+	stepDashHit(t)
+	if S.grabPendingUntil > 0 and t > S.grabPendingUntil then
+		S.grabPendingUntil = 0
+	end
+
+	-- movement rules
+	local ws, jump = Config.Fighter.WalkSpeed, Config.Fighter.JumpPower
+	if rag or grabbed() or S.grabbing or S.grabPendingUntil > 0 or t < S.moveLockUntil then
+		ws, jump = 0, 0
+	elseif stunned(t) then
+		ws, jump = Config.Fighter.StunWalkSpeed, 0
+	elseif S.blockSent then
+		ws, jump = Config.Block.WalkSpeed, 0
+	elseif t < S.actionUntil + 0.1 then
+		ws, jump = Config.M1.WalkSpeed, 0
+	end
+	h.WalkSpeed = ws
+	h.JumpPower = jump
+	-- locked on: LockOn turns us to the target instead
+	h.AutoRotate = not (rag or grabbed() or S.grabbing or LockOn.Target() ~= nil)
+
+	HUD.SetPosture(c:GetAttribute("Posture") or Config.Block.MaxPosture, Config.Block.MaxPosture, S.blockSent, c)
+end
+
+-- holds come from replicated state (and our own prediction for us)
+local function stepHolds(t: number)
+	for m in tracked do
+		local hold = nil
+		local isMe = m == char
+		if m:GetAttribute("Grabbed") then
+			hold = "Grabbed"
+		elseif (isMe and S.blockSent) or (not isMe and m:GetAttribute("Blocking")) then
+			hold = "Block"
+		elseif t < (m:GetAttribute("StunUntil") or 0) then
+			hold = "Stunned"
+		elseif isMe and (S.grabbing or S.grabPendingUntil > 0) then
+			hold = "GrabHold"
+		end
+		Anim.Hold(m, hold)
+	end
+end
+
+Fx.Init()
+Sfx.Init()
+local KEY_LABEL = { One = "1", Two = "2", Three = "3", Four = "4" }
+local hudList = {}
+for _, a in ABILITY_ORDER do
+	table.insert(hudList, { id = a.id, key = KEY_LABEL[a.key.Name] or a.key.Name, name = a.name })
+end
+HUD.Init(hudList)
+LockOn.Init({
+	root = function()
+		return root
+	end,
+	char = function()
+		return char
+	end,
+	alive = alive,
+	canTurn = function()
+		return alive() and not ragdolled() and not grabbed() and not S.grabbing
+	end,
+})
+HUD.SetDummyMode(workspace:GetAttribute("DummyMode") or "Idle")
+workspace:GetAttributeChangedSignal("DummyMode"):Connect(function()
+	HUD.SetDummyMode(workspace:GetAttribute("DummyMode") or "Idle")
+end)
+
+player.CharacterAdded:Connect(onCharacter)
+if player.Character then
+	task.spawn(onCharacter, player.Character)
+end
+for _, m in CollectionService:GetTagged("Fighter") do
+	track(m)
+end
+
+RunService.PreAnimation:Connect(function(dt)
+	local t = now()
+	stepLocal(t)
+	stepHolds(t)
+	stepLandings(dt, t)
+	Anim.Step(dt)
+	HUD.Step(t)
+end)
+
+```
