@@ -2643,6 +2643,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/dayoungthugger/roblox-external-base [C++ Roblox external base: Toolhelp process/module resolution, NtRead/NtWriteVirtualMemory, and a DirectComposition-attached D3D11 flip swapchain overlay]
 - https://github.com/Nn1ff/crosshair-z [Lightweight Electron crosshair overlay for Windows: click-through topmost window, no game injection or hooks, portable offline build]
 - https://github.com/allnighter51/Iris [Rust/Tauri 2 external Win32 layered overlay for transparent HUD compositing without DLL injection or game memory reads, with WDA_EXCLUDEFROMCAPTURE stream exclusion]
+- https://github.com/Deikus-LXXVII/Scorpio-Crosshair [Rust/Tauri 2 external crosshair overlay (click-through window) with CS2 share codes, game-foreground detection, and no memory reads, hooks, or injection]
 - https://github.com/rabbanyhmm/ImOverlay-DX11 [Lightweight C++20 Win32/DirectX 11 transparent multi-window overlay framework with smart click-through and parent-child hierarchy]
 - https://github.com/husnaintariq577/kx-vision [C++ DirectX overlay for Guild Wars 2 with D3D render hooks, game offsets, and ESP-style world/player visualization]
 - https://github.com/myso-kr/hell-is-us-mod [External Hell Is Us companion (hiumod) that attaches to the running game, reads memory for minimap/quest overlays, and exposes optional single-player cheats without modifying game files]
@@ -4613,6 +4614,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Ogonx/anticheat-lab [Six-month self-study lab attacking and defending deliberately vulnerable own-game builds, with ASM/C++ memory exercises, devlog, and VM-only scope]
 - https://github.com/senolbasyigit/anticheat-lab [Claude Code skill plus Python scripts to memory-scan your own dev builds (devbuild.json guard), report exposed client values, and suggest server-side validation fixes; optional pywinauto RPA mode]
 - https://github.com/Ibrahim9876Q/roblox-exploit-auditor [Roblox Studio plugin that scans Luau for insecure remotes, backdoors, movement gaps, and client-trusted logic, with live Studio cheat trials and Markdown reports]
+- https://github.com/aloqqgem/fighting-system [Roblox Luau melee combat reference with server lag compensation, client prediction reconciliation, and server-side combat validation tests]
 - https://github.com/jshdcn/anti-cheating-assistant [AI agent skill with anti-cheat playbooks, underground-slang lexicon sync, three-flow risk modeling, and Python workflows for business security consulting]
 - https://github.com/smoothjazzchazz/game-integrity-code [Lean 4 formalization and paper draft on adversarially resilient game state transitions and legal-history enforcement]
 
