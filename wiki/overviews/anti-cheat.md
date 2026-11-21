@@ -1095,6 +1095,7 @@ sources:
   - wiki/sources/descriptions/smoothjazzchazz__game-integrity-code.md
   - wiki/sources/descriptions/DMN-Software__dmn_minigame.md
   - wiki/sources/descriptions/mioolio__AntiCheatExpert.md
+  - wiki/sources/descriptions/Ender3D__minecraft-mod-creative-scroll.md
 updated: 2026-11-21
 confidence: high
 ---
@@ -1529,6 +1530,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Bedrock behavior-pack admin + GILDEDGENS GUARD:** [[gildedgens-admin-tool-anti-cheat]] (regentdata8479; JavaScript Script API behavior pack; Realm admin dashboards, RBAC, inventory scan with dry-run, item blacklists; heuristic speed/fly/reach/killaura/nuker checks with violation decay, lag-aware sampling, warnings through kicks; persisted audits/bans via world dynamic properties; realms/BDS without packet hooks; Anti Cheat / game:minecraft) beside behavior-pack addons such as [[safeguard]] and [[blarion-anticheat]]. (source: wiki/sources/descriptions/regentdata8479__GildedGens-Admin-Tool-Anti-Cheat.md)
 
 **Fabric server-side moderation AC:** [[cheatcheck]] (EliGamer154; Java Fabric **26.1.x** mod; `/cheatcheck` spectate menu + safemode stealth watching; freeze/vanish/inventory/radar staff tools; `/report` flags plus reach/x-ray-style ore mining/speed heuristics; configurable offense presets, temp bans, pardons, persistent world storage; no client mod required; vanilla-client-compatible enforcement for Fabric server administrators; Anti Cheat / game:minecraft). (source: wiki/sources/descriptions/EliGamer154__CheatCheck.md)
+
+**Fabric controlled creative sessions:** [[minecraft-mod-creative-scroll]] (Ender3D; Java Fabric server mod; admin-only consumable scroll grants timed Creative Mode instead of open gamemode commands; server Mixins on tick and packets; persistent session countdown across disconnects/restarts; inventory sandbox with pre-session gear restore; packet-level spawn blocklist; container/drop/smuggling restrictions during active use; configurable duration, blocked items, Slow Falling on expiry; in-game reload/end commands; no client mod required; Anti Cheat / game:minecraft) for operators who need sandboxed creative building without economy duplication or client-bypass exploits beside moderation suites such as [[cheatcheck]] and offline-mode stacks such as [[bastion]]. (source: wiki/sources/descriptions/Ender3D__minecraft-mod-creative-scroll.md)
 
 **Fabric alert-only server-side AC:** [[silent-anticheat]] (danielreytalan635-tech; Java Fabric **26.2** mod; per-tick movement tracking plus attack/block-break reach checks for flight/hover, speed/teleport, and reach; styled console + online-operator alerts only—no kicks, bans, or rubberbanding; conservative tunable thresholds; Fabric API server tick/player event hooks; Gradle-built; no client mod required; Anti Cheat / game:minecraft) for Fabric server operators wanting lightweight non-punitive cheat monitoring beside moderation mods such as [[cheatcheck]] and alert-only NeoForge mods such as [[sentinel-anticheat-neoforge]]. (source: wiki/sources/descriptions/danielreytalan635-tech__silent-anticheat.md)
 
