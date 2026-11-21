@@ -4957,6 +4957,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/no1qq/RustBlox [Rust Roblox desktop launcher with TheWatcher client-side watchdog that scans cheat processes, suspicious memory, and injection while Roblox runs]
 - https://github.com/severrir/AntiCheat-Dashboard [Roblox server-side anti-cheat with trust scoring, honeypots, Supabase ingest, Discord alerts, and React staff dashboard]
 - https://github.com/pealz1/cheeto [Schema-driven Roblox networking compiler that generates typed, buffer-packed Luau client/server modules with validation, rate limits, and policy hooks to block remote abuse before handlers run]
+- https://github.com/dynex-studios/Anti-Cheat_exploiter-Ids [Community-maintained open registry of verified Roblox exploiter user IDs for developer moderation and anti-cheat blocklists]
 - https://github.com/SLAUC91/AntiCheat [Windows rootkit and cheat scanner (hooks, handles, drivers, modules)]
 - https://github.com/gmh5225/AntiCheat
 - https://github.com/ComodoSecurity/openedr [EDR]
