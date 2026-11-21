@@ -1,0 +1,1124 @@
+Project Path: arc_gamespice-platform_anticheat_i8pyf7jy
+
+Source Tree:
+
+```txt
+arc_gamespice-platform_anticheat_i8pyf7jy
+├── CLAUDE.md
+├── LICENSE
+├── README.md
+├── addons
+│   └── dot_anticheat
+│       ├── core
+│       │   ├── dot_command_sanity.gd
+│       │   ├── dot_command_sanity.gd.uid
+│       │   ├── dot_suspicion.gd
+│       │   ├── dot_suspicion.gd.uid
+│       │   ├── dot_suspicion_config.gd
+│       │   └── dot_suspicion_config.gd.uid
+│       ├── dot_anticheat_api.gd
+│       ├── dot_anticheat_api.gd.uid
+│       ├── dot_anticheat_plugin.gd
+│       ├── dot_anticheat_plugin.gd.uid
+│       ├── plugin.cfg
+│       └── runtime
+│           ├── dot_suspicion_watch.gd
+│           └── dot_suspicion_watch.gd.uid
+├── cfg
+│   └── addon
+│       └── dot_anticheat
+│           └── anticheat.yml
+├── ci
+│   └── efficiency
+│       ├── comments.tsv
+│       ├── duplication.tsv
+│       ├── frame-hazards.tsv
+│       ├── logging.tsv
+│       ├── markdown-wrap.tsv
+│       ├── size.tsv
+│       └── suite-checks.tsv
+├── docs
+├── examples
+│   ├── anticheat_selftest.gd
+│   ├── anticheat_selftest.gd.uid
+│   └── anticheat_selftest.tscn
+├── icon.svg
+├── icon.svg.import
+└── project.godot
+
+```
+
+`CLAUDE.md`:
+
+```md
+# GameSpice Anticheat
+
+Per-player suspicion scoring and command sanity checks for dedicated servers. Read the family [CLAUDE.md](../../CLAUDE.md) first. **The distributable is `addons/dot_anticheat/`**; it requires [GameSpice Core](../dot-core) only (`ln -s ../../dot-core/addons/dot_core addons/dot_core`, gitignored).
+
+| Path | What |
+| --- | --- |
+| `core/dot_suspicion_config.gd` | `DotSuspicionConfig`: every tunable, `from_files()`, `validate()` |
+| `core/dot_suspicion.gd` | `DotSuspicion`: decaying score per player, levels none/warn/kick/ban |
+| `core/dot_command_sanity.gd` | `DotCommandSanity`: pure move, look, range and command-rate checks |
+| `runtime/dot_suspicion_watch.gd` | `DotSuspicionWatch`: node that listens to a `detected` signal and emits `escalated` |
+| `examples/anticheat_selftest.tscn` | the suite |
+
+## Boundary (what it is not)
+
+- **dot-server-security already ships `DotAntiCheat`, `DotAntiCheatConfig`, `DotAntiCheatEvent`** (speed, teleport, aim-snap and more detectors, `detected` signal, escalation through `DotSecurityManager`). Do **not** re-implement detectors here. This addon consumes their detections duck-typed (`kind`, `impossible`) and scores them.
+- Our classes are `DotSuspicion*` and `DotCommandSanity` on purpose: `DotAnticheatConfig` would collide with `DotAntiCheatConfig` case-insensitively. Do not rename them to match the addon.
+- **dot-moderation** owns punishments, bans and appeals. This addon only reports a level; it never kicks or bans.
+- **dot-log** and **dot-telemetry** own logging and analytics; scores may be logged by the game, not here.
+- Nothing client-side: no driver, no scanner, nothing is trusted from the client.
+
+## Rules
+
+- Never act: the score emits a level and the game decides. `ban_at` defaults to 0 (never).
+- No hard caps: `max_players`, limits and thresholds are config, 0 is unlimited or unchecked, and evictions are counted (`evicted`), never silent.
+- Bad config and bad ids fail with a reason (`DotResult`). NaN and infinity from a client are findings, never crashes.
+- Time is passed in (`now` seconds) so a test is repeatable; `-1` means the engine clock.
+- No autoloads, no scene paths. Scripts keep `class_name` like the sibling addons, but nothing may be loaded by `uid://`.
+- **Validate**: `--import`, parse every `.gd`, run the suite through `hv` (see the hv-routing skill).
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 GameSpice contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+[![GameSpice Anticheat - GameSpice addon](docs/banner.png)](https://moddingcommunity.com/a/143-gs-anticheat)
+
+Godot 4.7+ addon for server-side anti-cheat: speed, teleport and aim-snap detectors, command and state sanity checks, a suspicion score per player, and escalation through GameSpice Server Security. Nothing is trusted from the client and no driver is installed. Part of the GameSpice addon family.
+
+The detectors that re-simulate movement and aim live in GameSpice Server Security. This addon is the layer on top: it adds up what they report into a score that decays, says when a player reaches a warning, kick or ban level, and offers pure sanity checks for the commands a client sends. It never acts by itself. Your game, or a Server Security rule, decides what a level means.
+
+For review, `history(id)` returns a player's newest detections (kind, proof or suspicion, time; bounded by `history_per_player`, 0 is unlimited), `reset(id)` clears score and history after a person looked, and `to_dict()` / `load_dict()` let GameSpice Save keep the table. The addon still never acts: it says which level a player reached.
+
+## Install
+
+1. Copy `addons/dot_anticheat/` and `addons/dot_core/` into your project.
+2. Enable GameSpice Anticheat in *Project > Project Settings > Plugins*.
+
+## Quick start
+
+```gdscript
+var watch := DotSuspicionWatch.new()
+watch.config = DotSuspicionConfig.from_files().value   # layered cfg, env and flags
+add_child(watch)
+
+# 1. Feed it from the Server Security detector (any node with a detected signal works).
+watch.attach(anticheat_node)
+
+# 2. Or report from your own checks.
+var bad := watch.sanity.check_move(last_pos, new_pos, delta)
+if bad != "":
+    watch.report(player_id, StringName(bad))
+
+# 3. Decide what a level means.
+watch.escalated.connect(func(id, level, score):
+    if level == DotSuspicion.Level.KICK:
+        kick(id))
+```
+
+`DotSuspicion` and `DotCommandSanity` are plain objects too, so a headless server can use them without the node. Pass the time in seconds to `observe` and `score` to make a run repeatable.
+
+## Settings
+
+Every number is a field on `DotSuspicionConfig`. A value of 0 means unchecked or unlimited; the inspector ranges are slider limits, not enforced caps.
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `enabled` | true | Off, nothing is scored and every check passes. |
+| `default_weight` | 1.0 | Points for a detection kind with no entry in `weights`. |
+| `impossible_weight` | 100 | Points for a detection that is proof, not suspicion. |
+| `decay_per_second` | 0.5 | Points forgiven each second; 0 never forgives. |
+| `weights` | empty | Per-kind points as `kind=weight`. |
+| `max_players` | 0 | Players tracked; 0 is unlimited. At the limit the lowest score is dropped and counted. |
+| `warn_at` | 20 | Score for the warning level; 0 turns it off. |
+| `kick_at` | 60 | Score for the kick level; 0 turns it off. |
+| `ban_at` | 0 | Score for the ban level; 0 means never. |
+| `max_speed` | 0 | Legal units per second; 0 leaves it unchecked. |
+| `max_turn_rate` | 0 | Legal degrees per second; 0 leaves it unchecked. |
+| `max_command_rate` | 0 | Commands per second per player; 0 leaves it unchecked. |
+| `world_extent` | 0 | Largest legal coordinate on any axis; 0 leaves it unchecked. |
+
+Layers, weakest first: the defaults, `cfg/addon/dot_anticheat/*.yml`, the game's files, the operator's files, `DOT_ANTICHEAT_*` environment variables, then `--anticheat-*` flags. A value that makes no sense, such as a warning level above the kick level, fails `validate()` with a reason.
+
+## What it is not
+
+- Not the detectors: re-simulating movement and spotting speed, teleport and aim-snap is GameSpice Server Security's DotAntiCheat. Use it as the source and let this addon score what it reports. The configuration class here is called `DotSuspicionConfig` so it never clashes with Server Security's.
+- Not a punishment system: bans, mutes and appeals are GameSpice Moderation. A level here is a signal for it, not a verdict.
+- Not a client-side tool: there is no driver, no scanner and no kernel hook. Nothing the client says is trusted, and nothing runs on the player's machine.
+- Not proof of cheating on its own: a high score is a reason for a human to look. The ban level is off by default for that reason.
+
+## Test
+
+```bash
+godot --headless --path . --import
+godot --headless --path . res://examples/anticheat_selftest.tscn
+```
+
+The self-test is offline and exits non-zero on any failure.
+
+## Status
+
+Built and maintained with Claude Code. The test suites pass, but little of this has been in front of real players yet. Please report rough edges by opening an issue.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE). Only the TMC back-end web infrastructure is not open source.
+
+```
+
+`addons/dot_anticheat/core/dot_command_sanity.gd`:
+
+```gd
+class_name DotCommandSanity
+extends RefCounted
+
+## Pure checks on what a client claims, run on the server. Each returns the detection kind it matched, or an empty string when the claim is possible. They keep no state except the command-rate window, and they trust nothing: a NaN, an infinity or a value out of range is a finding, not a crash. The kinds use the same strings as GameSpice Server Security's detectors so a score can mix both.
+
+const SPEED := "cheat.speed"
+const TELEPORT := "cheat.teleport"
+const TURN := "cheat.aim_snap"
+const RATE := "cheat.timing"
+const RANGE := "cheat.out_of_range"
+const MALFORMED := "cheat.malformed"
+
+var config: DotSuspicionConfig
+
+var _stamps: Dictionary = {}   # player id -> PackedFloat64Array of recent command times
+
+
+func _init(p_config: DotSuspicionConfig = null) -> void:
+	config = p_config if p_config != null else DotSuspicionConfig.new()
+
+
+## [param from] to [param to] in [param dt] seconds. A finite step longer than the speed limit allows is SPEED; a non-finite one is MALFORMED.
+func check_move(from: Vector3, to: Vector3, dt: float) -> String:
+	if not config.enabled:
+		return ""
+	if not _finite3(from) or not _finite3(to) or not is_finite(dt) or dt < 0.0:
+		return MALFORMED
+	var out := check_range(to)
+	if out != "":
+		return out
+	if config.max_speed > 0.0:
+		var d := from.distance_to(to)
+		if dt <= 0.0:
+			return SPEED if d > 0.0 else ""
+		if d / dt > config.max_speed:
+			return SPEED
+	return ""
+
+
+## A position outside the world. With `world_extent` 0 only a non-finite one is refused.
+func check_range(pos: Vector3) -> String:
+	if not _finite3(pos):
+		return MALFORMED
+	if config.world_extent > 0.0 and maxf(absf(pos.x), maxf(absf(pos.y), absf(pos.z))) > config.world_extent:
+		return RANGE
+	return ""
+
+
+## A view change of [param yaw_delta] and [param pitch_delta] degrees in [param dt] seconds.
+func check_look(yaw_delta: float, pitch_delta: float, dt: float) -> String:
+	if not config.enabled:
+		return ""
+	if not is_finite(yaw_delta) or not is_finite(pitch_delta) or not is_finite(dt) or dt < 0.0:
+		return MALFORMED
+	if config.max_turn_rate > 0.0:
+		var turn := sqrt(yaw_delta * yaw_delta + pitch_delta * pitch_delta)
+		if dt <= 0.0:
+			return TURN if turn > 0.0 else ""
+		if turn / dt > config.max_turn_rate:
+			return TURN
+	return ""
+
+
+## One command arriving from [param player_id] at [param now] seconds. Counts commands in the last second and answers RATE once the limit is passed.
+func check_command(player_id: Variant, now: float) -> String:
+	if not config.enabled or config.max_command_rate <= 0.0:
+		return ""
+	if not is_finite(now):
+		return MALFORMED
+	var id := str(player_id)
+	var stamps: PackedFloat64Array = _stamps.get(id, PackedFloat64Array())
+	var kept := PackedFloat64Array()
+	for s in stamps:
+		if now - s < 1.0:
+			kept.append(s)
+	kept.append(now)
+	_stamps[id] = kept
+	return RATE if float(kept.size()) > config.max_command_rate else ""
+
+
+func forget(player_id: Variant) -> void:
+	_stamps.erase(str(player_id))
+
+
+static func _finite3(v: Vector3) -> bool:
+	return is_finite(v.x) and is_finite(v.y) and is_finite(v.z)
+
+```
+
+`addons/dot_anticheat/core/dot_command_sanity.gd.uid`:
+
+```uid
+uid://c826nflkhxdto
+
+```
+
+`addons/dot_anticheat/core/dot_suspicion.gd`:
+
+```gd
+class_name DotSuspicion
+extends RefCounted
+
+## A decaying suspicion score per player. Detectors (GameSpice Server Security ships speed, teleport and aim-snap ones) report what they saw; this adds it up, forgives it over time, and says which level the player has reached. It never acts: the game kicks or bans, so a wrong score costs a log line, not a good player's account.
+
+enum Level { NONE, WARN, KICK, BAN }
+
+var config: DotSuspicionConfig
+## Players forgotten to stay inside `max_players`.
+var evicted: int = 0
+
+var _players: Dictionary = {}   # id -> {"score": float, "at": float, "level": int, "events": int}
+var _weights: Dictionary = {}
+
+
+func _init(p_config: DotSuspicionConfig = null) -> void:
+	config = p_config if p_config != null else DotSuspicionConfig.new()
+	_weights = config.weight_table()
+
+
+static func level_name(level: int) -> String:
+	return String(Level.keys()[level]).to_lower()
+
+
+## Adds one detection for [param player_id] at [param now] (seconds). The argument order matches the detected signal of GameSpice Server Security, so it can be connected straight to a handler. Returns a DotResult whose value is {score, level, changed}.
+func observe(player_id: Variant, kind: StringName, impossible: bool = false, now: float = -1.0) -> DotResult:
+	if not config.enabled:
+		return DotResult.success({"score": 0.0, "level": Level.NONE, "changed": false})
+	var id := str(player_id)
+	if id == "":
+		return DotResult.fail(DotError.CODE_INVALID, "suspicion needs a player id")
+	var t := _now(now)
+	var p := _entry(id, t)
+	_decay(p, t)
+	p["score"] = float(p["score"]) + _points(kind, impossible)
+	p["events"] = int(p["events"]) + 1
+	_remember(p, kind, impossible, t)
+	var before := int(p["level"])
+	var after := _level_for(float(p["score"]))
+	p["level"] = after
+	return DotResult.success({"score": p["score"], "level": after, "changed": after != before})
+
+
+## The score after decay; 0 for a player never seen.
+func score(player_id: Variant, now: float = -1.0) -> float:
+	var p: Variant = _players.get(str(player_id))
+	if p == null:
+		return 0.0
+	_decay(p, _now(now))
+	p["level"] = _level_for(float(p["score"]))
+	return float(p["score"])
+
+
+func level(player_id: Variant, now: float = -1.0) -> int:
+	score(player_id, now)
+	var p: Variant = _players.get(str(player_id))
+	return Level.NONE if p == null else int(p["level"])
+
+
+## Detections counted for a player since they were first seen.
+func events(player_id: Variant) -> int:
+	var p: Variant = _players.get(str(player_id))
+	return 0 if p == null else int(p["events"])
+
+
+## The newest detections of a player, oldest first, as [{kind, impossible, at}]: what a person reads before acting on a score. Bounded by `history_per_player`.
+func history(player_id: Variant) -> Array:
+	var p: Variant = _players.get(str(player_id))
+	return [] if p == null else (p["recent"] as Array).duplicate(true)
+
+
+## Clears a player's score and history after a person reviewed them (the detection count is kept).
+func reset(player_id: Variant) -> void:
+	var p: Variant = _players.get(str(player_id))
+	if p != null:
+		p["score"] = 0.0
+		p["level"] = Level.NONE
+		(p["recent"] as Array).clear()
+
+
+## Everything tracked, as plain data a game can store: {id: {score, at, level, events, recent}}. Times are the clock's own, so only reload it where the same clock runs.
+func to_dict() -> Dictionary:
+	return _players.duplicate(true)
+
+
+## Replaces what is tracked with [param data] from [method to_dict]. Entries with the wrong shape are skipped; the value is how many.
+func load_dict(data: Dictionary) -> DotResult:
+	_players.clear()
+	var skipped := 0
+	for id in data:
+		var e: Variant = data[id]
+		if e is Dictionary and e.has("score") and e.has("at") and e.has("level") and e.has("events") and e.get("recent") is Array:
+			_players[str(id)] = (e as Dictionary).duplicate(true)
+		else:
+			skipped += 1
+	return DotResult.success(skipped)
+
+
+func forget(player_id: Variant) -> void:
+	_players.erase(str(player_id))
+
+
+func size() -> int:
+	return _players.size()
+
+
+## The [param n] highest scores, as [{id, score, level}], worst first. [param n] of 0 returns everyone.
+func top(n: int = 10, now: float = -1.0) -> Array:
+	var t := _now(now)
+	var rows: Array = []
+	for id in _players.keys():
+		rows.append({"id": id, "score": score(id, t), "level": int(_players[id]["level"])})
+	rows.sort_custom(func(a, b): return a["score"] > b["score"])
+	if n > 0 and rows.size() > n:
+		rows.resize(n)
+	return rows
+
+
+func _remember(p: Dictionary, kind: StringName, impossible: bool, t: float) -> void:
+	var recent: Array = p["recent"]
+	recent.append({"kind": String(kind), "impossible": impossible, "at": t})
+	if config.history_per_player > 0 and recent.size() > config.history_per_player:
+		recent.pop_front()
+
+
+func _points(kind: StringName, impossible: bool) -> float:
+	var table_hit: Variant = _weights.get(String(kind))
+	if table_hit != null:
+		return float(table_hit)
+	return config.impossible_weight if impossible else config.default_weight
+
+
+func _level_for(s: float) -> int:
+	if config.ban_at > 0.0 and s >= config.ban_at:
+		return Level.BAN
+	if config.kick_at > 0.0 and s >= config.kick_at:
+		return Level.KICK
+	if config.warn_at > 0.0 and s >= config.warn_at:
+		return Level.WARN
+	return Level.NONE
+
+
+func _decay(p: Dictionary, t: float) -> void:
+	if config.decay_per_second > 0.0:
+		p["score"] = maxf(0.0, float(p["score"]) - (t - float(p["at"])) * config.decay_per_second)
+	p["at"] = t
+
+
+func _entry(id: String, t: float) -> Dictionary:
+	if _players.has(id):
+		return _players[id]
+	if config.max_players > 0 and _players.size() >= config.max_players:
+		_evict_lowest(t)
+	var p := {"score": 0.0, "at": t, "level": Level.NONE, "events": 0, "recent": []}
+	_players[id] = p
+	return p
+
+
+func _evict_lowest(t: float) -> void:
+	var worst := ""
+	var low := INF
+	for id in _players.keys():
+		var s := score(id, t)
+		if s < low:
+			low = s
+			worst = id
+	if worst != "":
+		_players.erase(worst)
+		evicted += 1
+
+
+func _now(now: float) -> float:
+	return now if now >= 0.0 else Time.get_ticks_msec() / 1000.0
+
+```
+
+`addons/dot_anticheat/core/dot_suspicion.gd.uid`:
+
+```uid
+uid://bh7vdgb4oyyy4
+
+```
+
+`addons/dot_anticheat/core/dot_suspicion_config.gd`:
+
+```gd
+class_name DotSuspicionConfig
+extends DotConfig
+
+## Every tunable of the suspicion score and the command sanity checks. Layers, weakest first: these defaults, `cfg/addon/dot_anticheat/*.yml`, the game's files, the operator's files, `DOT_ANTICHEAT_*` environment variables, then `--anticheat-*` flags. A limit of 0 is "unchecked" or "unlimited"; nothing here is a hidden cap.
+
+const ADDON := "dot-anticheat"
+
+## Master switch. Off, nothing is scored and every sanity check passes.
+@export var enabled: bool = true
+
+@export_group("Score")
+## Points added by a detection whose kind has no entry in `weights`.
+@export_range(0.0, 1000.0, 0.1) var default_weight: float = 1.0
+## Points added by a detection that is proof (the server re-simulated it) rather than suspicion.
+@export_range(0.0, 100000.0, 1.0) var impossible_weight: float = 100.0
+## Points forgiven per second; 0 means the score never decays.
+@export_range(0.0, 1000.0, 0.1) var decay_per_second: float = 0.5
+## Per-kind points as "kind=weight", for example "cheat.aim_snap=8".
+@export var weights: PackedStringArray = PackedStringArray()
+## Players tracked at once; 0 is unlimited. At the limit the lowest score is forgotten first and counted.
+@export_range(0, 1000000, 1) var max_players: int = 0
+
+## Recent detections kept per player for a person to read; 0 is unlimited.
+@export_range(0, 100000, 1) var history_per_player: int = 20
+
+@export_group("Escalation")
+## Score at which a player is flagged for a human to look at; 0 turns the level off.
+@export_range(0.0, 100000.0, 1.0) var warn_at: float = 20.0
+## Score at which the game should remove the player from the match; 0 turns the level off.
+@export_range(0.0, 100000.0, 1.0) var kick_at: float = 60.0
+## Score at which the game should ban; 0 means never, which is the safe default.
+@export_range(0.0, 100000.0, 1.0) var ban_at: float = 0.0
+
+@export_group("Command sanity")
+## Fastest legal movement, in units per second; 0 leaves it unchecked.
+@export_range(0.0, 100000.0, 1.0) var max_speed: float = 0.0
+## Fastest legal turn, in degrees per second; 0 leaves it unchecked.
+@export_range(0.0, 100000.0, 1.0) var max_turn_rate: float = 0.0
+## Most commands one player may send per second; 0 leaves it unchecked.
+@export_range(0.0, 100000.0, 1.0) var max_command_rate: float = 0.0
+## Largest legal distance from the origin on any axis; 0 leaves it unchecked.
+@export_range(0.0, 10000000.0, 1.0) var world_extent: float = 0.0
+
+
+func env_prefix() -> String:
+	return "DOT_ANTICHEAT_"
+
+
+func cli_prefix() -> String:
+	return "--anticheat-"
+
+
+func validate() -> DotResult:
+	if kick_at > 0.0 and warn_at > kick_at:
+		return DotResult.fail(DotError.CODE_INVALID, "anticheat warn_at %s is above kick_at %s" % [warn_at, kick_at])
+	if ban_at > 0.0 and kick_at > ban_at:
+		return DotResult.fail(DotError.CODE_INVALID, "anticheat kick_at %s is above ban_at %s" % [kick_at, ban_at])
+	if history_per_player < 0 or max_players < 0:
+		return DotResult.fail(DotError.CODE_INVALID, "anticheat limits cannot be negative (0 is unlimited)")
+	for entry in weights:
+		if not "=" in entry or not str(entry.get_slice("=", 1)).is_valid_float():
+			return DotResult.fail(DotError.CODE_INVALID, "anticheat weight '%s' is not kind=number" % entry)
+	return DotResult.success(self)
+
+
+## The weights table as a dictionary of kind to points.
+func weight_table() -> Dictionary:
+	var out := {}
+	for entry in weights:
+		if "=" in entry:
+			out[entry.get_slice("=", 0).strip_edges()] = float(entry.get_slice("=", 1))
+	return out
+
+
+## Defaults, then `cfg/addon/dot_anticheat/*.yml` and the game tier, then environment and command line.
+static func from_files() -> DotResult:
+	var cfg := DotSuspicionConfig.new()
+	var files := DotAddonConfig.load_dir(ADDON)
+	if not files.ok:
+		return files
+	cfg.apply_dictionary(files.value as Dictionary, "yml")
+	return cfg.load_layered()
+
+
+func describe() -> String:
+	return "anticheat %s warn %s kick %s ban %s decay %s/s" % [
+		"on" if enabled else "off", warn_at, kick_at, ban_at, decay_per_second]
+
+```
+
+`addons/dot_anticheat/core/dot_suspicion_config.gd.uid`:
+
+```uid
+uid://r8p1i6bfivd8
+
+```
+
+`addons/dot_anticheat/dot_anticheat_api.gd`:
+
+```gd
+extends RefCounted
+
+## GameSpice Anticheat's API level. The rule for bumping it is on [DotAddonApi].
+
+# 1: DotSuspicion, DotSuspicionConfig, DotCommandSanity, DotSuspicionWatch.
+# 2: per-player history, reset, to_dict/load_dict.
+const LEVEL := 2
+const OLDEST := 1
+
+```
+
+`addons/dot_anticheat/dot_anticheat_api.gd.uid`:
+
+```uid
+uid://bsrnvnmtq2hmf
+
+```
+
+`addons/dot_anticheat/dot_anticheat_plugin.gd`:
+
+```gd
+@tool
+extends EditorPlugin
+
+## Editor entry point for GameSpice Anticheat. No autoloads: the server owns its watch node.
+
+
+func _enter_tree() -> void:
+	add_custom_type("DotSuspicionWatch", "Node", load("res://addons/dot_anticheat/runtime/dot_suspicion_watch.gd"), null)
+
+
+func _exit_tree() -> void:
+	remove_custom_type("DotSuspicionWatch")
+
+```
+
+`addons/dot_anticheat/dot_anticheat_plugin.gd.uid`:
+
+```uid
+uid://beea5oc3saxqm
+
+```
+
+`addons/dot_anticheat/plugin.cfg`:
+
+```cfg
+[plugin]
+
+name="dot-anticheat"
+description="Server-side anti-cheat scoring: a decaying suspicion score per player, escalation levels and command sanity checks. Depends only on dot-core."
+author="dot"
+version="0.1.0"
+script="dot_anticheat_plugin.gd"
+
+```
+
+`addons/dot_anticheat/runtime/dot_suspicion_watch.gd`:
+
+```gd
+class_name DotSuspicionWatch
+extends Node
+
+## Listens to a detector's `detected(session, kind, impossible, detail)` signal (GameSpice Server Security's DotAntiCheat has exactly that), feeds a [DotSuspicion], and emits [signal escalated] when a player reaches a higher level. It does not kick or ban: connect [signal escalated] to whatever does, for example a DotSecurityManager report.
+
+## A player reached a higher level than before.
+signal escalated(player_id: String, level: int, score: float)
+
+@export var config: DotSuspicionConfig = null
+
+var suspicion: DotSuspicion
+var sanity: DotCommandSanity
+
+
+func _ready() -> void:
+	if config == null:
+		config = DotSuspicionConfig.new()
+	suspicion = DotSuspicion.new(config)
+	sanity = DotCommandSanity.new(config)
+
+
+## Connects to [param source]'s `detected` signal. Fails loudly when it has none.
+func attach(source: Object) -> DotResult:
+	if source == null or not source.has_signal("detected"):
+		return DotResult.fail(DotError.CODE_INVALID, "suspicion watch needs a source with a detected signal")
+	if suspicion == null:
+		_ready()
+	source.connect("detected", _on_detected)
+	return DotResult.success(true)
+
+
+## Scores one finding directly, for a check run in game code.
+func report(player_id: Variant, kind: StringName, impossible: bool = false) -> DotResult:
+	var before := suspicion.level(player_id)
+	var r := suspicion.observe(player_id, kind, impossible)
+	if r.ok and int((r.value as Dictionary)["level"]) > before:
+		escalated.emit(str(player_id), int((r.value as Dictionary)["level"]), float((r.value as Dictionary)["score"]))
+	return r
+
+
+func _on_detected(session: Variant, kind: StringName, impossible: bool, _detail: Variant = null) -> void:
+	report(id_of(session), kind, impossible)
+
+
+## A stable id for a session-like object: its player_id, session_id or id, else its string form.
+static func id_of(session: Variant) -> String:
+	if session is Object:
+		for key in ["player_id", "session_id", "id"]:
+			var v: Variant = (session as Object).get(key)
+			if v != null:
+				return str(v)
+	return str(session)
+
+```
+
+`addons/dot_anticheat/runtime/dot_suspicion_watch.gd.uid`:
+
+```uid
+uid://h141hyxda263
+
+```
+
+`cfg/addon/dot_anticheat/anticheat.yml`:
+
+```yml
+# Shipped defaults are in DotSuspicionConfig; a key here overrides one.
+# warn_at: 20
+# kick_at: 60
+# ban_at: 0
+# history_per_player: 20   # recent detections kept per player; 0 is unlimited
+
+```
+
+`ci/efficiency/comments.tsv`:
+
+```tsv
+TSV Schema (1 sample row):
+Headers: # comments
+Sample: "# Baselines only shrink: scripts/<gate> --update lowers or drops entries and refuses to add."
+
+```
+
+`ci/efficiency/duplication.tsv`:
+
+```tsv
+TSV Schema (1 sample row):
+Headers: # duplication
+Sample: "# Baselines only shrink: scripts/<gate> --update lowers or drops entries and refuses to add."
+
+```
+
+`ci/efficiency/frame-hazards.tsv`:
+
+```tsv
+TSV Schema (1 sample row):
+Headers: # frame-hazards
+Sample: "# Baselines only shrink: scripts/<gate> --update lowers or drops entries and refuses to add."
+
+```
+
+`ci/efficiency/logging.tsv`:
+
+```tsv
+TSV Schema (1 sample row):
+Headers: # logging
+Sample: "# Baselines only shrink: scripts/<gate> --update lowers or drops entries and refuses to add."
+
+```
+
+`ci/efficiency/markdown-wrap.tsv`:
+
+```tsv
+TSV Schema (1 sample row):
+Headers: # markdown-wrap
+Sample: "# Baselines only shrink: scripts/<gate> --update lowers or drops entries and refuses to add."
+
+```
+
+`ci/efficiency/size.tsv`:
+
+```tsv
+TSV Schema (1 sample row):
+Headers: # size
+Sample: "# Baselines only shrink: scripts/<gate> --update lowers or drops entries and refuses to add."
+
+```
+
+`ci/efficiency/suite-checks.tsv`:
+
+```tsv
+TSV Schema (1 sample row):
+Headers: # suite-checks
+Sample: "# Baselines only shrink: scripts/<gate> --update lowers or drops entries and refuses to add."
+
+```
+
+`examples/anticheat_selftest.gd`:
+
+```gd
+extends Node
+
+## dot-anticheat's headless suite (res://examples/anticheat_selftest.tscn).
+## Counts sections run to their last line as well as checks, because a script error
+## aborts a section and not the run.
+
+const EXPECTED_SECTIONS := 7
+const EXPECTED_CHECKS := 60
+
+var _passed := 0
+var _failed := 0
+var _sections := 0
+var _seen: Array = []
+
+
+class FakeDetector:
+	extends Node
+	signal detected(session, kind, impossible, detail)
+
+
+class FakeSession:
+	extends RefCounted
+	var player_id := "p7"
+
+
+func _ready() -> void:
+	print("dot-anticheat")
+	_config()
+	_score()
+	_levels()
+	_sanity()
+	_watch()
+	_layers()
+	_review()
+	print("")
+	_check(_sections == EXPECTED_SECTIONS, "every section ran to its last line (%d of %d)" % [_sections, EXPECTED_SECTIONS])
+	_check(_passed + _failed == EXPECTED_CHECKS, "and the suite ran all %d of its checks (%d)" % [EXPECTED_CHECKS, _passed + _failed])
+	print("%d passed, %d failed" % [_passed, _failed])
+	get_tree().quit(1 if _failed > 0 else 0)
+
+
+func _config() -> void:
+	var c := DotSuspicionConfig.new()
+	_check(c.validate().ok, "defaults validate")
+	_check(c.ban_at == 0.0, "banning is off unless an operator sets it")
+	c.warn_at = 80.0
+	_check(not c.validate().ok, "warn above kick is refused")
+	c.warn_at = 20.0
+	c.weights = PackedStringArray(["cheat.aim_snap=8", "bad"])
+	_check(not c.validate().ok, "a weight that is not kind=number is refused")
+	c.weights = PackedStringArray(["cheat.aim_snap=8"])
+	_check(c.validate().ok and c.weight_table()["cheat.aim_snap"] == 8.0, "a weight table parses")
+	_check(c.has_key("decay_per_second") and c.has_key("max_players") and c.has_key("max_speed"), "the tunables are config keys")
+	_sections += 1
+
+
+func _score() -> void:
+	var s := DotSuspicion.new()
+	_check(s.score("a", 0.0) == 0.0, "an unseen player scores 0")
+	s.observe("a", &"cheat.speed", false, 0.0)
+	s.observe("a", &"cheat.speed", false, 0.0)
+	_check(is_equal_approx(s.score("a", 0.0), 2.0), "two suspicions add up")
+	_check(is_equal_approx(s.score("a", 2.0), 1.0), "the score decays with time")
+	_check(s.score("a", 100.0) == 0.0, "and never goes below zero")
+	_check(s.events("a") == 2, "detections are counted")
+	s.observe("b", &"cheat.teleport", true, 0.0)
+	_check(is_equal_approx(s.score("b", 0.0), 100.0), "an impossible detection weighs the impossible weight")
+	var cfg := DotSuspicionConfig.new()
+	cfg.decay_per_second = 0.0
+	var nd := DotSuspicion.new(cfg)
+	nd.observe("c", &"x", false, 0.0)
+	_check(nd.score("c", 1000.0) == 1.0, "decay 0 means the score stays")
+	cfg.weights = PackedStringArray(["cheat.aim_snap=8"])
+	var w := DotSuspicion.new(cfg)
+	w.observe("d", &"cheat.aim_snap", false, 0.0)
+	_check(w.score("d", 0.0) == 8.0, "a per-kind weight wins")
+	_check(not s.observe("", &"x").ok, "an empty player id fails loudly")
+	s.forget("a")
+	_check(s.score("a", 0.0) == 0.0 and s.size() == 1, "forget drops a player")
+	var off := DotSuspicionConfig.new()
+	off.enabled = false
+	var o := DotSuspicion.new(off)
+	o.observe("e", &"x", true, 0.0)
+	_check(o.score("e", 0.0) == 0.0 and o.size() == 0, "disabled scores nothing")
+	_sections += 1
+
+
+func _levels() -> void:
+	var cfg := DotSuspicionConfig.new()
+	cfg.decay_per_second = 0.0
+	cfg.ban_at = 200.0
+	var s := DotSuspicion.new(cfg)
+	_check(s.level("a", 0.0) == DotSuspicion.Level.NONE, "starts at none")
+	var r := s.observe("a", &"x", true, 0.0)
+	_check((r.value as Dictionary)["level"] == DotSuspicion.Level.KICK and r.value["changed"], "one proof reaches kick (100 >= 60)")
+	s.observe("a", &"x", true, 0.0)
+	_check(s.level("a", 0.0) == DotSuspicion.Level.BAN, "ban at its own threshold")
+	var def := DotSuspicion.new()
+	for i in 100:
+		def.observe("z", &"x", true, 0.0)
+	_check(def.level("z", 0.0) == DotSuspicion.Level.KICK, "with ban_at 0 nothing ever reaches ban")
+	_check(DotSuspicion.level_name(DotSuspicion.Level.WARN) == "warn", "level names")
+	var d2 := DotSuspicionConfig.new()
+	d2.decay_per_second = 1.0
+	var dec := DotSuspicion.new(d2)
+	dec.observe("a", &"x", true, 0.0)
+	_check(dec.level("a", 0.0) == DotSuspicion.Level.KICK and dec.level("a", 60.0) == DotSuspicion.Level.WARN, "a level steps back down as the score decays")
+	_check(dec.level("a", 100.0) == DotSuspicion.Level.NONE, "and returns to none")
+	var lim := DotSuspicionConfig.new()
+	lim.max_players = 2
+	lim.decay_per_second = 0.0
+	var l := DotSuspicion.new(lim)
+	l.observe("p1", &"x", false, 0.0)
+	l.observe("p2", &"x", true, 0.0)
+	l.observe("p3", &"x", true, 0.0)
+	_check(l.size() == 2 and l.evicted == 1 and l.score("p1", 0.0) == 0.0, "at max_players the lowest score is evicted and counted")
+	var rows := l.top(1, 0.0)
+	_check(rows.size() == 1 and rows[0]["score"] == 100.0, "top returns the worst first")
+	var many := DotSuspicion.new(cfg)
+	for i in 300:
+		many.observe("m%d" % i, &"x", false, 0.0)
+	_check(many.size() == 300, "max_players 0 is unlimited")
+	_sections += 1
+
+
+func _sanity() -> void:
+	var cfg := DotSuspicionConfig.new()
+	cfg.max_speed = 10.0
+	cfg.max_turn_rate = 360.0
+	cfg.max_command_rate = 3.0
+	cfg.world_extent = 1000.0
+	var c := DotCommandSanity.new(cfg)
+	_check(c.check_move(Vector3.ZERO, Vector3(5, 0, 0), 1.0) == "", "a legal move passes")
+	_check(c.check_move(Vector3.ZERO, Vector3(50, 0, 0), 1.0) == DotCommandSanity.SPEED, "a move too fast is speed")
+	_check(c.check_move(Vector3.ZERO, Vector3(1, 0, 0), 0.0) == DotCommandSanity.SPEED, "distance in no time is speed")
+	_check(c.check_move(Vector3.ZERO, Vector3(NAN, 0, 0), 1.0) == DotCommandSanity.MALFORMED, "NaN is malformed, not a crash")
+	_check(c.check_move(Vector3.ZERO, Vector3(INF, 0, 0), 1.0) == DotCommandSanity.MALFORMED, "infinity is malformed")
+	_check(c.check_move(Vector3.ZERO, Vector3(5000, 0, 0), 100.0) == DotCommandSanity.RANGE, "outside the world is out of range")
+	_check(c.check_look(10.0, 5.0, 1.0) == "", "a normal turn passes")
+	_check(c.check_look(3000.0, 0.0, 1.0) == DotCommandSanity.TURN, "a snap turn is flagged")
+	_check(c.check_look(NAN, 0.0, 1.0) == DotCommandSanity.MALFORMED, "a NaN turn is malformed")
+	var hit := ""
+	for i in 4:
+		hit = c.check_command("a", 0.1 * i)
+	_check(hit == DotCommandSanity.RATE, "more than the command rate in a second is flagged")
+	_check(c.check_command("a", 5.0) == "", "and the window slides")
+	_check(c.check_command("b", 0.0) == "", "another player has their own window")
+	var open := DotCommandSanity.new()
+	_check(open.check_move(Vector3.ZERO, Vector3(1e9, 0, 0), 0.001) == "", "limits of 0 leave a check off")
+	_check(open.check_move(Vector3.ZERO, Vector3(NAN, 0, 0), 1.0) == DotCommandSanity.MALFORMED, "but NaN is still refused")
+	var off := DotSuspicionConfig.new()
+	off.enabled = false
+	_check(DotCommandSanity.new(off).check_move(Vector3.ZERO, Vector3(NAN, 0, 0), 1.0) == "", "disabled passes everything")
+	_sections += 1
+
+
+func _watch() -> void:
+	var w := DotSuspicionWatch.new()
+	add_child(w)
+	var det := FakeDetector.new()
+	_check(w.attach(det).ok, "a source with a detected signal attaches")
+	var bare := Node.new()
+	_check(not w.attach(bare).ok, "a source without one fails loudly")
+	bare.free()
+	_seen.clear()
+	w.escalated.connect(func(id, level, score): _seen.append([id, level, score]))
+	var sess := FakeSession.new()
+	det.detected.emit(sess, &"cheat.speed", false, {})
+	_check(_seen.is_empty(), "one suspicion does not escalate")
+	det.detected.emit(sess, &"cheat.teleport", true, {})
+	_check(_seen.size() == 1 and _seen[0][0] == "p7" and _seen[0][1] == DotSuspicion.Level.KICK, "proof escalates the session by its player id")
+	det.detected.emit(sess, &"cheat.teleport", true, {})
+	_check(_seen.size() == 1, "staying at the same level does not repeat it")
+	_check(DotSuspicionWatch.id_of(42) == "42", "a plain id is its string")
+	_check(w.report("q", &"x", true).ok, "game code can report directly")
+	_sections += 1
+
+
+func _layers() -> void:
+	var r := DotSuspicionConfig.from_files()
+	_check(r.ok and (r.value as DotSuspicionConfig).validate().ok, "the layered config loads and validates", str(r.code()))
+	_check(DotSuspicionConfig.new().describe().contains("warn"), "describe names the levels")
+	_sections += 1
+
+
+func _review() -> void:
+	var c := DotSuspicionConfig.new()
+	c.history_per_player = 2
+	c.decay_per_second = 0.0
+	var s := DotSuspicion.new(c)
+	s.observe("p1", &"cheat.speed", false, 1.0)
+	s.observe("p1", &"cheat.aim", true, 2.0)
+	s.observe("p1", &"cheat.speed", false, 3.0)
+	var h := s.history("p1")
+	_check(h.size() == 2 and h[0]["kind"] == "cheat.aim" and h[0]["impossible"] and h[1]["at"] == 3.0, "history keeps the newest detections, oldest first")
+	_check(s.history("nobody").is_empty(), "no history for an unknown player")
+	var snap := s.to_dict()
+	var s2 := DotSuspicion.new(c)
+	_check(s2.load_dict(snap).value == 0 and is_equal_approx(s2.score("p1", 3.0), s.score("p1", 3.0)), "to_dict and load_dict round-trip")
+	_check(s2.load_dict({"x": 5, "p2": {"score": 1.0, "at": 0.0, "level": 0, "events": 1, "recent": []}}).value == 1 and s2.size() == 1, "load_dict skips bad entries and counts them")
+	snap["p1"]["events"] = 99
+	_check(s.events("p1") == 3, "to_dict is a copy")
+	s.reset("p1")
+	_check(s.score("p1", 3.0) == 0.0 and s.level("p1", 3.0) == DotSuspicion.Level.NONE and s.history("p1").is_empty() and s.events("p1") == 3, "reset clears score and history, keeps the count")
+	c.history_per_player = 0
+	for i in 100:
+		s.observe("p3", &"k", false, float(i))
+	_check(s.history("p3").size() == 100, "history 0 is unlimited")
+	c.history_per_player = -1
+	_check(not c.validate().ok, "a negative limit is refused")
+	_sections += 1
+
+
+func _check(ok: bool, what: String, extra: String = "") -> void:
+	if ok:
+		_passed += 1
+		print("  ok    ", what)
+	else:
+		_failed += 1
+		print("  FAIL  ", what, "  ", extra)
+
+```
+
+`examples/anticheat_selftest.gd.uid`:
+
+```uid
+uid://btlnpeb52h2q4
+
+```
+
+`examples/anticheat_selftest.tscn`:
+
+```tscn
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://examples/anticheat_selftest.gd" id="1"]
+
+[node name="AnticheatSelftest" type="Node"]
+script = ExtResource("1")
+
+```
+
+`icon.svg`:
+
+```svg
+<svg height="128" width="128" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="124" height="124" rx="14" fill="#363d52" stroke="#212532" stroke-width="4"/><g transform="scale(.101) translate(122 122)"><g fill="#fff"><path d="M105 673v33q407 354 814 0v-33z"/><path fill="#478cbf" d="m105 673 152 14q12 1 15 14l4 67 132 10 8-61q2-11 15-15h162q13 4 15 15l8 61 132-10 4-67q3-13 15-14l152-14V427q30-39 56-81-35-59-83-108-43 20-82 47-40-37-88-64 7-51 8-102-59-28-123-42-26 43-46 89-49-7-98 0-20-46-46-89-64 14-123 42 1 51 8 102-48 27-88 64-39-27-82-47-48 49-83 108 26 42 56 81zm0 33v39c0 276 813 276 813 0v-39l-134 12-5 69q-2 10-14 13l-162 11q-12 0-16-11l-10-65H447l-10 65q-4 11-16 11l-162-11q-12-3-14-13l-5-69z"/><path d="M483 600c3 34 55 34 58 0v-86c-3-34-55-34-58 0z"/><circle cx="725" cy="526" r="90"/><circle cx="299" cy="526" r="90"/></g><g fill="#414042"><circle cx="307" cy="532" r="60"/><circle cx="717" cy="532" r="60"/></g></g></svg>
+
+```
+
+`icon.svg.import`:
+
+```import
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://d4ghukijk4jf5"
+path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://icon.svg"
+dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+
+[params]
+
+compress/mode=0
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=false
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false
+
+```
+
+`project.godot`:
+
+```godot
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="dot-anticheat"
+config/description="Server-side suspicion scoring and command sanity checks: a decaying per-player score with escalation levels."
+run/main_scene="res://examples/anticheat_selftest.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1600
+window/size/viewport_height=900
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/dot_anticheat/plugin.cfg")
+
+[importer_defaults]
+
+texture={
+"detect_3d/compress_to": 0
+}
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
+```
