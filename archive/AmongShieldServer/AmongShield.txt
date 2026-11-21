@@ -1,0 +1,404 @@
+Project Path: arc_AmongShieldServer_AmongShield_rfqqw2f_
+
+Source Tree:
+
+```txt
+arc_AmongShieldServer_AmongShield_rfqqw2f_
+├── Add-AmongShield.ps1
+├── README.md
+├── assets
+│   ├── banner.svg
+│   └── esp.svg
+├── google1a20cbfd208abc54.html
+├── index.html
+├── region-entry.json
+└── sitemap.xml
+
+```
+
+`Add-AmongShield.ps1`:
+
+```ps1
+# Adds the "AmongShield" server to Among Us (PC). Close Among Us first, then right-click -> Run with PowerShell.
+# It only edits Among Us's region list (regionInfo.json); a backup is saved next to it.
+$ErrorActionPreference = 'Stop'
+$file = Join-Path $env:USERPROFILE 'AppData\LocalLow\Innersloth\Among Us\regionInfo.json'
+if (-not (Test-Path $file)) { Write-Host 'Start Among Us once (to the main menu), close it, then run this again.'; Read-Host 'Press Enter'; exit 1 }
+if (Get-Process 'Among Us' -ErrorAction SilentlyContinue) { Write-Host 'Close Among Us first, then run this again.'; Read-Host 'Press Enter'; exit 1 }
+
+Copy-Item $file "$file.backup" -Force
+$json = Get-Content $file -Raw | ConvertFrom-Json
+$json.Regions = @($json.Regions | Where-Object { $_.Name -ne 'AmongShield' })
+$region = [pscustomobject]@{
+    '$type'        = 'StaticHttpRegionInfo, Assembly-CSharp'
+    Name           = 'AmongShield'
+    PingServer     = 'amongshield.duckdns.org'
+    Servers        = @([pscustomobject]@{ Name = 'http-1'; Ip = 'https://amongshield.duckdns.org'; Port = 443; UseDtls = $false; Players = 0; ConnectionFailures = 0 })
+    TargetServer   = $null
+    TranslateName  = 1003
+}
+$json.Regions += $region
+$json.CurrentRegionIdx = $json.Regions.Count - 1
+($json | ConvertTo-Json -Depth 10 -Compress) | Set-Content $file -Encoding UTF8
+Write-Host 'Done! Start Among Us; the region "AmongShield" is selected. To play on normal servers again, pick North America/Europe/Asia in the region menu.'
+Read-Host 'Press Enter'
+
+```
+
+`README.md`:
+
+```md
+<p align="center">
+  <img src="assets/banner.svg" alt="AmongShield: the anti-cheat server for Among Us" width="100%">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/mods-none%20needed-4fd1c5?style=for-the-badge" alt="No mods needed">
+  <img src="https://img.shields.io/badge/price-free-38a169?style=for-the-badge" alt="Free">
+  <img src="https://img.shields.io/badge/PC-ready-3182ce?style=for-the-badge&logo=windows&logoColor=white" alt="PC ready">
+  <img src="https://img.shields.io/badge/phone-ready-805ad5?style=for-the-badge&logo=android&logoColor=white" alt="Phone ready">
+  <a href="https://www.virustotal.com/gui/file/980d659a34a2794d8929b454e98b7e7cc36ddaaafe9916a0e7618b2429f26c9f"><img src="https://img.shields.io/badge/VirusTotal-0%2F60%20clean-2ea44f?style=for-the-badge&logo=virustotal&logoColor=white" alt="VirusTotal: 0/60 clean"></a>
+</p>
+
+<p align="center">
+  A free community server for <b>Among Us</b> where cheat menus can't see who the impostor is,<br>
+  and cheaters get kicked and called out in chat.<br><br>
+  You play the normal game. You just pick the <b>AmongShield</b> region instead of North America, Europe or Asia.<br><br>
+  <a href="https://amongshieldserver.github.io/AmongShield/"><b>👉 Quick setup page (PC and phone)</b></a>
+</p>
+
+---
+
+## ✨ What it does
+
+### 🛡️ ESP protection
+Cheat menus that show roles are fed fake impostors. Every cheater sees several impostors and can't tell which ones are real. Honest players see nothing different.
+
+<p align="center"><img src="assets/esp.svg" alt="A cheat menu shows several impostors while honest players see the normal game" width="85%"></p>
+
+### 🚨 Cheaters get caught
+The server watches every game for things that aren't possible without cheats. Cheaters get stopped, kicked from the lobby, and everyone in the lobby gets a chat message saying who it was.
+
+### 📋 Game result note
+After each game, the lobby chat shows who the impostors really were.
+
+### 🔦 Custom vision for hosts
+In the lobby, the host can type:
+
+| Command | What it does |
+|---|---|
+| `/vision crew 0.85` | Set crewmate vision (any value from 0.05 to 5) |
+| `/vision imp 1.6` | Set impostor vision |
+| `/vision crew up` or `/vision crew down` | Change it in 0.05 steps |
+| `/vision` | Show the current values |
+| `/vision reset` | Go back to the normal menu values |
+
+### 🔄 Host rotation
+After each game, the host role passes to the next player, so nobody is stuck hosting all night. It's **on** in public lobbies and **off** in private ones.
+
+| Command | What it does |
+|---|---|
+| `/rotate on` | Turn host rotation on (host only, in the lobby) |
+| `/rotate off` | Turn it off |
+| `/rotate` | Show whether it's on |
+
+If the new host doesn't come back from the end screen within 20 seconds, the next waiting player becomes host, so nobody gets stuck.
+
+---
+
+## 🚀 How to join
+
+> **Everyone in a lobby needs the AmongShield region, the host and all players.**
+
+### 💻 PC (Steam, Epic, Microsoft Store): easy way
+
+1. **Close Among Us.**
+2. Download [`Add-AmongShield.ps1`](Add-AmongShield.ps1) (open it, then click the download button ⤓).
+3. Right-click the file and choose **Run with PowerShell**. If Windows asks whether to run it, choose **Run once** or **Open**.
+4. Start Among Us. The **AmongShield** region is already selected. Create or join a game as usual.
+
+The script only edits Among Us's server list and saves a backup of it first (`regionInfo.json.backup`). It's about 20 lines, so feel free to read it before running it.
+
+### 🛠️ PC: do it yourself (no script)
+
+<details>
+<summary>Click to show the steps</summary>
+
+1. **Close Among Us.**
+2. Press `Win + R`, paste this and press Enter:
+   ```
+   notepad "%USERPROFILE%\AppData\LocalLow\Innersloth\Among Us\regionInfo.json"
+   ```
+3. The file is one long line. Find `"Regions":[` and paste the text from [`region-entry.json`](region-entry.json) right after the `[`, followed by a comma `,`. It should look like this:
+   ```
+   "Regions":[{ ...AmongShield entry... },{ ...the regions that were already there... }]
+   ```
+4. Save and close Notepad, then start Among Us and pick **AmongShield** in the region menu (the globe button on the main menu).
+
+If the game won't load the regions afterwards, a comma or bracket is missing. Delete `regionInfo.json` and Among Us will rebuild the default one.
+
+</details>
+
+### 📱 Phone (Android, iPhone)
+
+1. **Open Among Us** and wait for the main menu. Leave it running.
+2. On your phone, open **[amongshieldserver.github.io/AmongShield](https://amongshieldserver.github.io/AmongShield/)** and tap **Add AmongShield to Among Us**.
+3. Back in Among Us, tap the **region button** (globe, bottom right) and pick **AmongShield**.
+
+Not in the list? Tap the button again while the game is running. If the Play Store opens, install Among Us first.
+
+### ↩️ Going back to normal servers
+
+Pick **North America**, **Europe** or **Asia** in the region menu. AmongShield stays in the list for next time.
+
+---
+
+## ❓ FAQ
+
+**Does it work against MalumMenu, Sicko Menu and other cheat menus?**
+Yes, that's what it's built for. Role ESP from menus like MalumMenu sees fake impostors instead of the real ones. Cheats like forced sabotage, instant tasks, cameras from across the map and long-range kills get the cheater kicked, and menus that announce themselves (Sicko Menu, AmongUsMenu, KillNetwork, ModMenuCrew) are kicked on sight. No anticheat catches everything, and the shield hides roles but not positions.
+
+**Is the PC script safe?**
+It's about 20 lines of plain text that only edits Among Us's server list (`regionInfo.json`) and saves a backup first. Open it in Notepad and read it before running, or skip it and follow the manual steps instead. It's also been [scanned on VirusTotal](https://www.virustotal.com/gui/file/980d659a34a2794d8929b454e98b7e7cc36ddaaafe9916a0e7618b2429f26c9f): 0 of 60 antivirus engines flagged it.
+
+**Is this a mod? Can it get my account in trouble?**
+It's not a mod. Nothing in the game is changed. Among Us has a built-in option for custom servers (regions), and that's all this uses. Your game files stay untouched.
+
+**What does the server know about me?**
+What any Among Us server sees: your in-game name, your platform (PC, phone, etc.) and your IP address. It never sees your password or account login. Server logs are deleted automatically after 14 days and are only used to fix bugs and deal with cheaters.
+
+**Who runs this?**
+It's a small community project, run for free. No ads, no payments, no data selling.
+
+**How do I stop using it?**
+Pick North America, Europe or Asia in the region menu. To remove AmongShield completely on PC, restore `regionInfo.json.backup` (rename it to `regionInfo.json`).
+
+---
+
+## 💡 Good to know
+
+- Only games on the AmongShield region are protected. Official servers work like before.
+- The shield hides **roles**, not positions. A cheater can still see where people are, but not who the impostor is.
+- 👻 **Ghosts:** after you die, haunting a player may show the wrong role. That's the shield doing its job. The game result note after each game always shows who the impostors really were.
+- This is a small free server. If it's full or down, try again later.
+- Found a bug or got kicked by mistake? Open an [issue](../../issues) and say what happened and roughly when.
+
+## 🙏 Credits
+
+AmongShield runs on a modified version of [Impostor](https://github.com/Impostor/Impostor), the open-source Among Us server (GPL-3.0). Thanks to the Impostor team for making private servers possible.
+
+<sub>Not affiliated with Innersloth. Among Us is a trademark of Innersloth LLC.</sub>
+
+```
+
+`assets/banner.svg`:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1026"/>
+      <stop offset="1" stop-color="#1b0f3a"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4fd1c5"/>
+      <stop offset="1" stop-color="#2b6cb0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#4fd1c5" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#4fd1c5" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="400" fill="url(#sky)"/>
+  <g fill="#ffffff">
+    <circle cx="80" cy="60" r="1.6" opacity=".8"/><circle cx="190" cy="320" r="1.2" opacity=".6"/>
+    <circle cx="300" cy="110" r="2" opacity=".9"/><circle cx="420" cy="360" r="1.4" opacity=".5"/>
+    <circle cx="520" cy="40" r="1.2" opacity=".7"/><circle cx="690" cy="350" r="1.8" opacity=".6"/>
+    <circle cx="760" cy="70" r="1.3" opacity=".8"/><circle cx="880" cy="300" r="1.1" opacity=".5"/>
+    <circle cx="980" cy="50" r="1.7" opacity=".9"/><circle cx="1100" cy="340" r="1.5" opacity=".6"/>
+    <circle cx="1200" cy="90" r="1.2" opacity=".7"/><circle cx="1240" cy="250" r="2" opacity=".8"/>
+    <circle cx="140" cy="200" r="1" opacity=".5"/><circle cx="620" cy="200" r="1" opacity=".4"/>
+    <circle cx="1030" cy="190" r="1.1" opacity=".5"/><circle cx="350" cy="250" r="1.3" opacity=".6"/>
+  </g>
+  <circle cx="1060" cy="420" r="150" fill="#2a2457"/>
+  <circle cx="1010" cy="380" r="22" fill="#231d4a"/><circle cx="1110" cy="330" r="14" fill="#231d4a"/>
+  <circle cx="260" cy="200" r="150" fill="url(#glow)"/>
+  <g transform="translate(180,85)">
+    <path d="M80 0 L160 30 V105 C160 160 125 200 80 225 C35 200 0 160 0 105 V30 Z" fill="url(#shield)"/>
+    <path d="M80 18 L144 42 V105 C144 150 116 184 80 205 Z" fill="#ffffff" opacity=".12"/>
+    <path d="M45 112 L72 140 L120 88" fill="none" stroke="#ffffff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="420" y="185" font-size="88" font-weight="800" fill="#ffffff">AmongShield</text>
+  <text x="424" y="240" font-size="30" fill="#b9c3f5">The anti-cheat server for Among Us</text>
+  <text x="424" y="290" font-size="24" fill="#4fd1c5">No mods  ·  Free  ·  Cheat menus can't see the impostor</text>
+</svg>
+
+```
+
+`assets/esp.svg`:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="330" viewBox="0 0 960 330" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="960" height="330" rx="18" fill="#0f1430"/>
+  <!-- left panel -->
+  <rect x="24" y="24" width="440" height="282" rx="14" fill="#171d40"/>
+  <text x="48" y="64" font-size="22" font-weight="700" fill="#ffffff">What a cheat menu shows</text>
+  <text x="48" y="92" font-size="16" fill="#9aa3d1">Several impostors. Which ones are real? No idea.</text>
+  <g font-size="17" fill="#ffffff">
+    <g transform="translate(60,120)"><circle r="14" cx="14" cy="14" fill="#e53e3e"/><text x="40" y="20">Player A</text><text x="300" y="20" fill="#fc8181" font-weight="700">IMPOSTOR</text></g>
+    <g transform="translate(60,158)"><circle r="14" cx="14" cy="14" fill="#38a169"/><text x="40" y="20">Player B</text><text x="300" y="20" fill="#fc8181" font-weight="700">IMPOSTOR</text></g>
+    <g transform="translate(60,196)"><circle r="14" cx="14" cy="14" fill="#3182ce"/><text x="40" y="20">Player C</text><text x="300" y="20" fill="#fc8181" font-weight="700">IMPOSTOR</text></g>
+    <g transform="translate(60,234)"><circle r="14" cx="14" cy="14" fill="#d69e2e"/><text x="40" y="20">Player D</text><text x="300" y="20" fill="#9ae6b4">Crewmate</text></g>
+  </g>
+  <!-- arrow -->
+  <path d="M478 165 H500" stroke="#4fd1c5" stroke-width="4"/>
+  <path d="M496 155 L510 165 L496 175 Z" fill="#4fd1c5"/>
+  <!-- right panel -->
+  <rect x="520" y="24" width="416" height="282" rx="14" fill="#171d40"/>
+  <text x="544" y="64" font-size="22" font-weight="700" fill="#ffffff">What honest players see</text>
+  <text x="544" y="92" font-size="16" fill="#9aa3d1">The normal game. Nothing changes for you.</text>
+  <g transform="translate(660,118) scale(0.85)">
+    <path d="M80 0 L150 26 V92 C150 140 118 172 80 192 C42 172 10 140 10 92 V26 Z" fill="#2b6cb0"/>
+    <path d="M48 98 L72 122 L114 78" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
+
+```
+
+`google1a20cbfd208abc54.html`:
+
+```html
+google-site-verification: google1a20cbfd208abc54.html
+```
+
+`index.html`:
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="msvalidate.01" content="70B6AE999FE633CDA6F54219DDE15DFC">
+<title>AmongShield: anti-cheat server for Among Us</title>
+<meta name="description" content="Free Among Us anti-cheat server. Protects against MalumMenu, Sicko Menu and other cheat menus: ESP can't see the impostor, cheaters get kicked and called out. No mods needed. PC and phone.">
+<meta name="keywords" content="Among Us anticheat, Among Us anti-cheat, MalumMenu, Sicko Menu, Among Us cheats, Among Us ESP, private server, Impostor server">
+<meta property="og:title" content="AmongShield: anti-cheat server for Among Us">
+<meta property="og:description" content="Cheat menus can't see the impostor. Cheaters get kicked and called out. No mods needed.">
+<style>
+  :root { --bg:#0b1026; --card:#171d40; --text:#ffffff; --muted:#b9c3f5; --accent:#4fd1c5; --accent2:#2b6cb0; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:linear-gradient(135deg,#0b1026,#1b0f3a); color:var(--text);
+         font-family:"Segoe UI",Helvetica,Arial,sans-serif; line-height:1.55; min-height:100vh; }
+  main { max-width:760px; margin:0 auto; padding:24px 16px 48px; }
+  .banner { width:100%; border-radius:16px; display:block; }
+  h2 { margin:36px 0 12px; font-size:1.4rem; }
+  p, li { color:var(--muted); }
+  b, strong { color:var(--text); }
+  .card { background:var(--card); border-radius:16px; padding:20px 22px; margin:14px 0; }
+  .btn { display:block; text-align:center; text-decoration:none; font-weight:700; font-size:1.15rem;
+         padding:16px 20px; border-radius:12px; margin:14px 0 6px; color:#0b1026;
+         background:linear-gradient(90deg,var(--accent),#63b3ed); }
+  .btn.alt { background:transparent; color:var(--accent); border:2px solid var(--accent); }
+  .note { font-size:.9rem; }
+  .tag { display:inline-block; font-size:.75rem; font-weight:700; letter-spacing:.05em; padding:2px 8px;
+         border-radius:6px; background:#805ad5; color:#fff; vertical-align:middle; margin-left:6px; }
+  ol { padding-left:22px; }
+  code { background:#0f1430; padding:2px 6px; border-radius:6px; color:var(--text); }
+  footer { margin-top:40px; font-size:.8rem; color:#7f89bd; text-align:center; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <img class="banner" src="assets/banner.svg" alt="AmongShield: the anti-cheat server for Among Us">
+
+  <p style="text-align:center;margin-top:18px">
+    A free community server where cheat menus can't see who the impostor is, and cheaters get kicked and called out in chat.
+    <b>No mods.</b> You play the normal game on the <b>AmongShield</b> region.
+  </p>
+
+  <h2>📱 Phone <span class="tag">BETA</span></h2>
+  <div class="card">
+    <ol>
+      <li><b>Open Among Us</b> and wait for the main menu. Leave it running.</li>
+      <li>Switch to this page <b>on your phone</b> (don't close the game) and tap the button.</li>
+      <li>Back in Among Us, tap the <b>region button</b> (globe, bottom right) and pick <b>AmongShield</b>.</li>
+    </ol>
+    <a class="btn" id="phone" href="amongus://init?servername=AmongShield&amp;serverport=443&amp;serverip=https%3A%2F%2Famongshield.duckdns.org&amp;usedtls=false">Add AmongShield to Among Us</a>
+    <p class="note">AmongShield not in the list? Tap the button again while the game is running. If the Play Store opens, install Among Us first.<br>Still not working? Try the <a href="https://impostor.github.io/Impostor/#amongshield.duckdns.org:443:https:AmongShield">official Impostor setup page</a> (already filled in for AmongShield, just tap its Android or iPhone button). Still stuck? <a href="https://github.com/AmongShieldServer/AmongShield/issues">Tell us</a> your phone model.</p>
+    <script>
+      // Chrome on Android needs an intent link that names the Among Us app.
+      if (/Android/i.test(navigator.userAgent)) {
+        document.getElementById('phone').href =
+          'intent://init?servername=AmongShield&serverport=443&serverip=https%3A%2F%2Famongshield.duckdns.org&usedtls=false' +
+          '#Intent;scheme=amongus;package=com.innersloth.spacemafia;end';
+      }
+    </script>
+  </div>
+
+  <h2>💻 PC (Steam, Epic, Microsoft Store)</h2>
+  <div class="card">
+    <ol>
+      <li><b>Close Among Us.</b></li>
+      <li>Download the setup file below.</li>
+      <li>Right-click it and choose <b>Run with PowerShell</b>. If Windows asks, choose <b>Run once</b> or <b>Open</b>.</li>
+      <li>Start Among Us. <b>AmongShield</b> is already selected.</li>
+    </ol>
+    <a class="btn" href="Add-AmongShield.ps1" download>Download Add-AmongShield.ps1</a>
+    <p class="note">It only edits Among Us's server list and backs it up first. <a href="https://www.virustotal.com/gui/file/980d659a34a2794d8929b454e98b7e7cc36ddaaafe9916a0e7618b2429f26c9f">Scanned on VirusTotal</a>: 0 of 60 antivirus engines flagged it. Prefer to do it by hand? See the <a href="https://github.com/AmongShieldServer/AmongShield#-how-to-join">manual steps</a>.</p>
+  </div>
+
+  <h2>✨ What you get</h2>
+  <div class="card">
+    <ul>
+      <li><b>ESP protection.</b> Cheat menus like MalumMenu see several fake impostors and can't tell which are real.</li>
+      <li><b>Cheaters get caught.</b> They're stopped, kicked, and the whole lobby is told who it was.</li>
+      <li><b>Game result note.</b> After each game, chat shows who the impostors really were.</li>
+      <li><b>Host rotation.</b> After each game the next player becomes host (on in public lobbies, <code>/rotate on</code> or <code>/rotate off</code> to change).</li>
+      <li><b>Custom vision.</b> Hosts can type <code>/vision crew 0.85</code> in the lobby (any value 0.05 to 5).</li>
+    </ul>
+  </div>
+
+  <a class="btn alt" href="https://github.com/AmongShieldServer/AmongShield">Full guide on GitHub</a>
+
+  <footer>Everyone in a lobby needs the AmongShield region. To go back, pick North America, Europe or Asia.<br>
+  Not affiliated with Innersloth. Among Us is a trademark of Innersloth LLC.</footer>
+</main>
+</body>
+</html>
+
+```
+
+`region-entry.json`:
+
+```json
+{
+  "$type": "StaticHttpRegionInfo, Assembly-CSharp",
+  "Name": "AmongShield",
+  "PingServer": "amongshield.duckdns.org",
+  "Servers": [
+    {
+      "Name": "http-1",
+      "Ip": "https://amongshield.duckdns.org",
+      "Port": 443,
+      "UseDtls": false,
+      "Players": 0,
+      "ConnectionFailures": 0
+    }
+  ],
+  "TargetServer": null,
+  "TranslateName": 1003
+}
+
+```
+
+`sitemap.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://amongshieldserver.github.io/AmongShield/</loc><lastmod>2026-11-21</lastmod></url>
+</urlset>
+
+```
