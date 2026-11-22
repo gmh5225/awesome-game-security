@@ -1,0 +1,385 @@
+Project Path: arc_enes59255X_EnesMem_1b8jhxec
+
+Source Tree:
+
+```txt
+arc_enes59255X_EnesMem_1b8jhxec
+├── CHANGELOG.md
+├── LICENSE
+├── README.md
+├── README_EN.md
+├── SHA256SUMS.txt
+└── version.json
+
+```
+
+`CHANGELOG.md`:
+
+```md
+# Changelog
+
+## v1.2.0 - 2026-11-22
+
+### Interface
+- Redesigned the main window as a resizable three-pane workbench: scan rail,
+  results workspace, and pointer inspector.
+- Added a compact command bar with process state, attach/detach, refresh rate,
+  theme, and help controls.
+- Rebuilt the results/watchlist layout: readable counts, paging, search,
+  empty states, and non-overlapping bulk actions.
+- Removed the duplicated pointer title, clipped labels, broken emoji glyphs,
+  and fixed-width layouts.
+- Added shared dark/light design tokens, focus/hover/selected states, custom
+  dock title bars, and a styled settings dialog.
+- Kept native-aspect icons and monospace text only for addresses and values.
+
+### Packaging
+- Portable onedir build: 93.2 MB, frozen smoke OK.
+- Single-file EXE: 48.5 MB, frozen smoke OK.
+- Portable ZIP: 34.9 MB, extraction + smoke OK.
+- Version bumped to 1.2.0; native core remains 0.2.0.
+
+### Verification
+- 121 Python tests passed.
+- 20 Rust tests passed.
+- GUI smoke: attach, first scan, detach, close.
+- Dark and light layouts checked at 1440x900.
+
+## v1.1.0 - 2026-11-22
+
+### Fixed
+- Speedhack: corrected 64-bit `VirtualAllocEx` return type (address truncation).
+- Speedhack: steal instruction-aligned bytes instead of a fixed 14-byte prefix
+  that split ntdll's 8-byte `test` instruction.
+- UIV UNCHANGED: trim preallocated result buffers when a chunk disappears.
+- Cross-process tests no longer fail because of Unicode output encoding.
+
+### Performance
+- UIV UNCHANGED peak memory: ~4 GB -> ~1.70 GiB (134M hits).
+- `scanner.py`: 1707 lines -> 760 lines; first/next scan split into modules.
+- Columnar result storage and preallocated UIV buffers remain in use.
+
+### Security / integrity
+- Native module version + SHA-256 sidecar verification.
+- Existing S1-S8 hardening retained: trainer validation, least-privilege handle,
+  opt-in code injection, bounded watchlist import, handle liveness, per-user UIV
+  temp directory, INFO default logging.
+
+### Tests / packaging
+- 121 Python tests, 20 Rust tests, live HWBP and speedhack integration.
+- Portable onedir build (93.2 MB) and single-file exe (48.5 MB); both pass the
+  frozen `--smoke-test`.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2025 EnesMem
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# EnesMem v1.2.0
+
+**Windows x64 için modern bellek tarayıcısı ve düzenleyici.**  
+Python + PyQt6 · saf `ctypes` · Rust hızlandırma · koyu/açık arayüz
+
+[🇹🇷 Türkçe](README.md) · [🇬🇧 English](README_EN.md) · [İndir](https://github.com/enes59255X/EnesMem/releases/latest) · [Değişiklikler](CHANGELOG.md)
+
+[![Release](https://img.shields.io/github/v/release/enes59255X/EnesMem?label=release&color=46D7C4)](https://github.com/enes59255X/EnesMem/releases/latest)
+[![Platform](https://img.shields.io/badge/platform-Windows%20x64-0A0E13)](https://github.com/enes59255X/EnesMem/releases/latest)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/tests-121%20Python%20%7C%2020%20Rust-71D99A)](CHANGELOG.md)
+
+<p align="center">
+  <img src="UI_DARK.png" alt="EnesMem koyu tema çalışma alanı" width="100%">
+</p>
+
+## İndir
+
+| Paket | Boyut | Açıklama |
+|---|---:|---|
+| **[EnesMem-1.2.0-win64.exe](https://github.com/enes59255X/EnesMem/releases/download/v1.2.0/EnesMem-1.2.0-win64.exe)** | 48.5 MB | Tek dosya; kurulum gerekmez |
+| **[EnesMem-1.2.0-win64.zip](https://github.com/enes59255X/EnesMem/releases/download/v1.2.0/EnesMem-1.2.0-win64.zip)** | 34.9 MB | Taşınabilir klasör; daha hızlı açılış |
+| **[SHA256SUMS.txt](https://github.com/enes59255X/EnesMem/releases/download/v1.2.0/SHA256SUMS.txt)** | 180 B | İndirme doğrulama |
+
+> **Hızlı açılış istiyorsanız ZIP sürümünü kullanın.** Tek dosya EXE her açılışta
+> kendini geçici klasöre çıkarır. Zip'i açıp `EnesMem\EnesMem.exe` dosyasını
+> çalıştırın; `_internal` klasörünü exe'den ayırmayın.
+
+### Gereksinimler
+
+- Windows 10/11 **x64**
+- Python kurulumu gerekmez (paketli sürüm)
+- Yönetici izni: normal kullanıcı süreçleri için gerekmez; korumalı veya
+  yönetici olarak çalışan hedefler için önerilir.
+
+> Build imzasızdır. Windows SmartScreen ilk çalıştırmada uyarı gösterebilir:
+> **More info → Run anyway**. Bellek tarayıcıları antivirüslerde zaman zaman
+> yanlış pozitif üretebilir; release dosyaları bu repodadır.
+
+## Hızlı başlangıç
+
+1. `EnesMem\EnesMem.exe` dosyasını çalıştırın.
+2. **İşleme Bağlan** ile hedef oyunu/süreci seçin.
+3. Veri türünü ve değeri girin; **İlk Tarama** (F5) çalıştırın.
+4. Oyunda değeri değiştirin; **Sonraki Tarama** (F6) ile daraltın.
+5. Sonucu çift tıklayıp izleme listesine ekleyin; değeri düzenleyin veya dondurun.
+
+### Kısayollar
+
+| Kısayol | İşlem |
+|---|---|
+| `F5` | İlk tarama |
+| `F6` | Sonraki tarama |
+| `Ctrl+R` | Taramayı sıfırla |
+| `Ctrl+O` | Süreç seç |
+| `Ctrl+M` | Bellek görüntüleyici |
+| `Ctrl+Shift+X` | Speedhack |
+
+## Ekran görüntüleri
+
+| Koyu tema | Açık tema |
+|---|---|
+| ![Dark](UI_DARK.png) | ![Light](UI_LIGHT.png) |
+
+## Öne çıkanlar
+
+| Alan | Özellikler |
+|---|---|
+| Tarama | First/next scan, AOB + wildcard, UIV, float tolerance, between |
+| Tipler | Int8/16/32/64, UInt, Float, Double, String, Bytes |
+| Sonuçlar | Sayfalama, arama, filtre, canlı yenileme, izleme listesi |
+| Pointer | Modül + offset çözümleme, zincir tarama, canlı değer |
+| Bellek | Hex görüntüleyici, x64 assembly (Capstone), yapı çözümleyici |
+| Gelişmiş | HWBP “What writes here”, speedhack, trainer üretimi |
+| Arayüz | Koyu/açık tema, Türkçe/İngilizce, üç bölmeli esnek çalışma alanı |
+
+### Tarama modları
+
+`Exact` · `Bigger` · `Smaller` · `Between` · `Increased` · `Decreased` ·
+`Changed` · `Unchanged` · `Unknown` · `Increased By` · `Decreased By` ·
+`Float Tolerance` · `AOB`
+
+## Performans
+
+Aynı makinede, release Rust çekirdeğiyle ölçülen önce/sonra değerleri:
+
+| İşlem | Önce | Sonra |
+|---|---:|---:|
+| AOB tarama (4 MB) | 3.96 s | ~0.001 s |
+| UIV 2M dword devam taraması | 6.68 s | 0.046 s |
+| Next UNCHANGED (300k) | 1.508 s | 0.078 s |
+| Next EXACT (300k) | 1.535 s | 0.085 s |
+| Pointer tarama (4 MiB) | 0.036 s | 0.002 s |
+| Watchlist yenileme | 5.3 ms | 4.4 ms |
+
+> Ölçümler donanıma ve hedef sürecin bellek düzenine göre değişebilir.
+
+## Doğrulama
+
+- **121** Python testi
+- **20** Rust testi
+- GUI smoke: bağlan → tara → ayır → kapat
+- Frozen **onedir** ve **onefile** `--smoke-test` başarılı
+- Koyu/açık tema 1440×900’de kontrol edildi
+
+## Geliştirme
+
+Bu depo yalnızca derlenmiş sürümleri ve sürüm belgelerini barındırır. Kaynak
+kod ayrı çalışma alanında tutulur; hata/istek için
+[issue](https://github.com/enes59255X/EnesMem/issues) açabilirsiniz.
+
+## Bilinen sınırlar
+
+- UIV UNCHANGED hâlâ yüksek bellek kullanabilir (~1.70 GiB tepe, 134M sonuç).
+- 32-bit hedefler otomatik test kapsamında değildir.
+- HWBP ve speedhack hedefe/antivirüse göre değişebilir; yönetici izni gerekebilir.
+- Bu araç yalnızca sahip olduğunuz veya test etmek için izin aldığınız süreçlerde
+  kullanılmalıdır. Online oyunlarda kullanım hesap/ban riski doğurabilir.
+
+## Lisans
+
+MIT — ayrıntılar için [LICENSE](LICENSE).
+
+---
+
+**EnesMem v1.2.0** · native core **0.2.0** · [Release](https://github.com/enes59255X/EnesMem/releases/tag/v1.2.0) · [Sorun bildir](https://github.com/enes59255X/EnesMem/issues)
+
+```
+
+`README_EN.md`:
+
+```md
+# EnesMem v1.2.0
+
+**A modern memory scanner and editor for Windows x64.**  
+Python + PyQt6 · pure `ctypes` · Rust accelerator · dark/light workspace
+
+[🇹🇷 Türkçe](README.md) · [🇬🇧 English](README_EN.md) · [Download](https://github.com/enes59255X/EnesMem/releases/latest) · [Changelog](CHANGELOG.md)
+
+[![Release](https://img.shields.io/github/v/release/enes59255X/EnesMem?label=release&color=46D7C4)](https://github.com/enes59255X/EnesMem/releases/latest)
+[![Platform](https://img.shields.io/badge/platform-Windows%20x64-0A0E13)](https://github.com/enes59255X/EnesMem/releases/latest)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/tests-121%20Python%20%7C%2020%20Rust-71D99A)](CHANGELOG.md)
+
+<p align="center">
+  <img src="UI_DARK.png" alt="EnesMem dark workspace" width="100%">
+</p>
+
+## Download
+
+| Package | Size | Description |
+|---|---:|---|
+| **[EnesMem-1.2.0-win64.exe](https://github.com/enes59255X/EnesMem/releases/download/v1.2.0/EnesMem-1.2.0-win64.exe)** | 48.5 MB | Single file; no installation |
+| **[EnesMem-1.2.0-win64.zip](https://github.com/enes59255X/EnesMem/releases/download/v1.2.0/EnesMem-1.2.0-win64.zip)** | 34.9 MB | Portable folder; faster launch |
+| **[SHA256SUMS.txt](https://github.com/enes59255X/EnesMem/releases/download/v1.2.0/SHA256SUMS.txt)** | 180 B | Download verification |
+
+> **Use the ZIP if you want the fastest launch.** The single-file EXE extracts
+> itself on every start. Extract the ZIP and run `EnesMem\EnesMem.exe`; keep the
+> `_internal` folder next to the executable.
+
+### Requirements
+
+- Windows 10/11 **x64**
+- No Python installation required (packaged build)
+- Administrator: not needed for same-user targets; recommended for protected or
+  elevated processes.
+
+> The build is unsigned. Windows SmartScreen may show a warning on first launch:
+> **More info → Run anyway**. Memory scanners can occasionally trigger antivirus
+> false positives; the release assets live in this repository.
+
+## Quick start
+
+1. Run `EnesMem\EnesMem.exe`.
+2. Select the target with **Attach**.
+3. Choose a type and value, then run **First Scan** (F5).
+4. Change the value in the game; narrow with **Next Scan** (F6).
+5. Double-click a result to add it to the watchlist, then edit or freeze it.
+
+### Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `F5` | First scan |
+| `F6` | Next scan |
+| `Ctrl+R` | Reset scan |
+| `Ctrl+O` | Select process |
+| `Ctrl+M` | Memory viewer |
+| `Ctrl+Shift+X` | Speedhack |
+
+## Screenshots
+
+| Dark | Light |
+|---|---|
+| ![Dark](UI_DARK.png) | ![Light](UI_LIGHT.png) |
+
+## Highlights
+
+| Area | Features |
+|---|---|
+| Scanning | First/next scan, AOB + wildcard, UIV, float tolerance, between |
+| Types | Int8/16/32/64, UInt, Float, Double, String, Bytes |
+| Results | Paging, search, filter, live refresh, watchlist |
+| Pointer | Module + offset resolution, chain scan, live values |
+| Memory | Hex viewer, x64 assembly (Capstone), structure dissector |
+| Advanced | HWBP “What writes here”, speedhack, trainer generation |
+| Interface | Dark/light theme, Turkish/English, resizable three-pane workspace |
+
+### Scan modes
+
+`Exact` · `Bigger` · `Smaller` · `Between` · `Increased` · `Decreased` ·
+`Changed` · `Unchanged` · `Unknown` · `Increased By` · `Decreased By` ·
+`Float Tolerance` · `AOB`
+
+## Performance
+
+Measured on the same machine with the release Rust core:
+
+| Operation | Before | After |
+|---|---:|---:|
+| AOB scan (4 MB) | 3.96 s | ~0.001 s |
+| UIV 2M dword follow-up | 6.68 s | 0.046 s |
+| Next UNCHANGED (300k) | 1.508 s | 0.078 s |
+| Next EXACT (300k) | 1.535 s | 0.085 s |
+| Pointer scan (4 MiB) | 0.036 s | 0.002 s |
+| Watchlist refresh | 5.3 ms | 4.4 ms |
+
+> Results depend on hardware and the target process memory layout.
+
+## Verification
+
+- **121** Python tests
+- **20** Rust tests
+- GUI smoke: attach → scan → detach → close
+- Frozen **onedir** and **onefile** `--smoke-test` pass
+- Dark/light layouts checked at 1440×900
+
+## Development
+
+This repository hosts packaged releases and release documentation. The source
+tree is kept in a separate workspace; use the [issue tracker](https://github.com/enes59255X/EnesMem/issues)
+for bugs and requests.
+
+## Known limits
+
+- UIV UNCHANGED can still use significant memory (~1.70 GiB peak, 134M results).
+- 32-bit targets are not covered by automated tests.
+- HWBP and speedhack behavior depends on the target and antivirus; elevation may
+  be required.
+- Use this tool only on processes you own or have permission to test. Using it
+  in online games may violate their terms and lead to bans.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+---
+
+**EnesMem v1.2.0** · native core **0.2.0** · [Release](https://github.com/enes59255X/EnesMem/releases/tag/v1.2.0) · [Report an issue](https://github.com/enes59255X/EnesMem/issues)
+
+```
+
+`SHA256SUMS.txt`:
+
+```txt
+9edaf783bbbff12bb490f8ec74ea835ce18cd35572e4dc6d100f46f21beab562  EnesMem-1.2.0-win64.exe
+32aafc8acd74f84f9f4a692e35939a017f8afecb1517ac69d9fea367c8f437e7  EnesMem-1.2.0-win64.zip
+
+```
+
+`version.json`:
+
+```json
+{
+  "version": "1.2.0",
+  "native_core": "0.2.0",
+  "platform": "windows-x64",
+  "released": "2026-11-22"
+}
+
+```
