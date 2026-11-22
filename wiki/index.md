@@ -1812,6 +1812,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GptHidra](entities/gpthidra.md) — Ghidra ChatGPT plugin (selected-function explanation to console; cheat / Ghidra Plugins)
 - [ghidra-orbis](entities/ghidra-orbis.md) — Ghidra PS4 Orbis extension (loaders, analyzers, syscall/NID data; Java/Gradle; astrelsky)
 - [ghidra-openai](entities/ghidra-openai.md) — Ghidra OpenAI GPT plugin (decompiled-function explain/rename/vuln hints; ChatGPT lane)
+- [ghidra-re](entities/ghidra-re.md) — Antigravity Desktop Ghidra RE workbench (on-demand JVM daemon, offline SQLite FTS5 index, 18 MCP tools, sync C/ASM CFG UI; Yultas)
 - [ghidra-scripts](entities/ghidra-scripts.md) — CTF-oriented GhidraScript collection (automated common RE challenge patterns; cheat / Scripts)
 - [ghidra-struct-importer](entities/ghidra-struct-importer.md) — GhidraScript targeted C struct importer (Java; per-struct dependency resolution beyond Parse C Source; SDK-leak/decompiled-header layout reconstruction; Katharsas; cheat / Struct Importer)
 - [ghidra-teak-dsp](entities/ghidra-teak-dsp.md) — Ghidra SLEIGH extension + CDC/DSP1 loader for Nintendo 3DS/DSi CEVA XpertTeak DSP firmware (Home Menu, Sound App disasm/decomp; Java/SLEIGH; PSI-Rockin; WIP console DSP firmware RE)
