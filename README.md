@@ -4616,6 +4616,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/StanislawGolec/Ultimo [Java 21 authoritative multiplayer card-game server with fog-of-war hand hiding, virtual threads, and WebSockets]
 - https://github.com/Ogonx/anticheat-lab [Six-month self-study lab attacking and defending deliberately vulnerable own-game builds, with ASM/C++ memory exercises, devlog, and VM-only scope]
 - https://github.com/senolbasyigit/anticheat-lab [Claude Code skill plus Python scripts to memory-scan your own dev builds (devbuild.json guard), report exposed client values, and suggest server-side validation fixes; optional pywinauto RPA mode]
+- https://github.com/itsHabib/free-to-learn [Open project-based systems course snapshots with anti-cheat engineering (and part two) labs on server authority, replay, and integrity for an original toy game]
 - https://github.com/Ibrahim9876Q/roblox-exploit-auditor [Roblox Studio plugin that scans Luau for insecure remotes, backdoors, movement gaps, and client-trusted logic, with live Studio cheat trials and Markdown reports]
 - https://github.com/aloqqgem/fighting-system [Roblox Luau melee combat reference with server lag compensation, client prediction reconciliation, and server-side combat validation tests]
 - https://github.com/jshdcn/anti-cheating-assistant [AI agent skill with anti-cheat playbooks, underground-slang lexicon sync, three-flow risk modeling, and Python workflows for business security consulting]
