@@ -708,6 +708,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/pkurth/D3D12Renderer [DX12]
 
 > Hook
+- https://github.com/adamhlt/D3D9-Hook-ImGui [D3D9 EndScene/Reset hook template with MS Detours and ImGui (x86/x64), including resize, fullscreen, and safe unload]
 - https://github.com/rdbo/DX11-BaseHook [DX11 Imgui]
 - https://github.com/DrNseven/D3D12-Hook-ImGui [DX12 Imgui]
 - https://github.com/frostbone25/ShaderInjector [D3D12 shader injector for FF7 Rebirth PC — intercepts rendering API calls to inject/replace pixel shaders at runtime; minhook + ImGui; adaptable to other D3D12 titles]
@@ -5043,6 +5044,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/AODOJUST/gomoku-anti-cheat-detector [Browser extension (Baishen) that replays gomoku.com and papergames.io games locally with Rapfi WASM to score AI-assistance suspicion via multi-engine move analysis and feature fingerprinting]
 - https://github.com/NetVar1337/apex-anticheat-lab [FPS anti-cheat research lab with cheat taxonomy docs, Python aim-kinematics detectors, match-integrity SQL, YARA loader rules, and PowerShell host driver/PCIe surveys]
 - https://github.com/NetVar1337/cheat-intel [Cheat-community OSINT methodology, trend report templates, and intel-to-detection workflow for FPS anti-cheat teams]
+- https://github.com/tieqianhao/raven [CPU-only adversarial text normalization and character n-gram risk engine for game/ACG community cheat, boosting, and account-trade spam]
 - https://github.com/JoshRob297/halo-ce-server [OpenCE Halo CE dedicated-server packaging with documented host-authoritative anti-cheat audit, source-level protection matrix, and operator ban/HWID guidance]
 - https://github.com/saadahmedscse/kac-inspector [Windows CLI that enumerates known kernel anti-cheat drivers via SCM, driver store, and EnumDeviceDrivers with running/stale/orphaned states]
 - https://github.com/zzjjmkk/eagle-eye [Read-only Windows x64 CLI that scans local cheat artifacts (handles, drivers, injections, overlays, DMA PCIe devices) and emits JSON/HTML evidence-chain reports without hooking or reading game memory]
