@@ -940,6 +940,7 @@ sources:
   - wiki/sources/descriptions/nkga__cheat-driver.md
   - wiki/sources/descriptions/nikaiw__VMkatz.md
   - wiki/sources/descriptions/nickcano__RelocBonus.md
+  - wiki/sources/descriptions/nioney1277-lab__NavroProxy.md
   - wiki/sources/descriptions/caprinux__rel-fuscate.md
   - wiki/sources/descriptions/can1357__ThePerfectInjector.md
   - wiki/sources/descriptions/magnussen7__Embuche.md
@@ -1522,6 +1523,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Nukkit Bedrock prediction AC:** [[ghost-anticheat]] (GhostNgEnd; Java Gradle Nukkit plugin; ECS architecture simulating BDS movement, collision, and physics; latency-compensated packet checks for phase, no-slow, anti-knockback, reach, hitbox abuse, invalid block breaking, elytra flight anomalies, bad packets, and multi-action violations; server-side cheat detection for Bedrock Nukkit operators; Anti Cheat / game:minecraft). (source: wiki/sources/descriptions/GhostNgEnd__Ghost-AntiCheat.md)
 
 **GeyserMC pre-translation Bedrock AC:** [[astrox-anticheat]] (Eangly99; Java Maven GeyserMC extension; intercepts raw Bedrock UDP/RakNet packets at the Netty channel layer before Java translation; sub-ms detection off main server tick; movement/combat/inventory/packet heuristics—reach, hitbox backtracking, flight, autoclicker, device spoofing, crash-packet firewall; Bedrock-native kinematics, input-mode-aware reach, latency backtracking, leaky-bucket timer; Discord webhooks + admin commands; Anti Cheat / game:minecraft) for GeyserMC operators beside MiTM proxies such as [[oomph]] and Nukkit prediction plugins such as [[ghost-anticheat]]. (source: wiki/sources/descriptions/Eangly99__AstroX-AntiCheat.md)
+
+**Bedrock RakNet/NetherNet AC proxy:** [[navro-proxy]] (nioney1277-lab; Java 21 Gradle; front-terminates Bedrock player sessions in front of a private backend; mirrors world/player state; validates movement and gameplay packets before they reach the game server—22+ movement/gameplay checks across movement, sprint, timer, placement, elytra, and bad-packet families; YAML tolerances and violation punishments; detect or inspect modes; optional Go NetherNet frontend; bridge plugins for BDS, Geyser/Floodgate, Nukkit, PocketMine-MP; Windows/Linux; Anti Cheat / game:minecraft) for network operators hardening public Bedrock hosts beside MiTM proxies such as [[oomph]] and Geyser interceptors such as [[astrox-anticheat]]. (source: wiki/sources/descriptions/nioney1277-lab__NavroProxy.md)
 
 **Paper/Folia Floodgate-scoped Bedrock AC:** [[bedrockguard]] (TheMax98000; Paper/Spigot/Folia plugin; PacketEvents; checks only Floodgate-linked Bedrock clients on Geyser cross-play Java servers—timer, speed, fly, reach, nuker, scaffold, autoclicker, bad packets, velocity, kill aura; VL decay; staff alerts, Discord webhooks, punishments; developer cancel/observe API; runs beside conventional Java AC; Anti Cheat / game:minecraft) for operators who need touch/controller-tuned Bedrock coverage without replacing Java-side plugins, beside Geyser interceptors such as [[astrox-anticheat]] and PacketEvents stacks such as [[fox-addition]]. (source: wiki/sources/descriptions/TheMax98000__BedrockGuard.md)
 

@@ -20,4 +20,4 @@ Features server-authoritative movement and combat with latency-aware position co
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[open.mp-anticheat]] · [[wellsanticheat]] · [[certael]] · [[magnetite]]
+[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[navro-proxy]] · [[open.mp-anticheat]] · [[wellsanticheat]] · [[certael]] · [[magnetite]]
