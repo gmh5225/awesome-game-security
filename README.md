@@ -805,6 +805,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/kovidomi/game-reversing
 - https://github.com/Vieuxnorris/farcry-6-hack [Offline Far Cry 6 RE learning project: in-process C++ DLL with aimbot, skeleton ESP, D2D overlay, fc6probe scanner, and Python tooling over game systems (Havok, aim-assist targets)]
 - https://github.com/xxchaosxx210/SplinterCellTrainer [C#/WPF Windows trainer for Tom Clancy's Splinter Cell (Steam build 252083) with ESP overlay, god-mode flags, and movement/detection tweaks via a 32-bit game helper]
+- https://github.com/Rip-07/FahrenHack [Rust Windows trainer for single-player games: JSON profiles, guided pointer calibration, hotkeys, optional phone remote; refuses anti-cheat processes]
 - https://github.com/TheZong/Game-Hacking
 - https://github.com/mytechnotalent/Reverse-Engineering
 - https://github.com/wtsxDev/reverse-engineering
@@ -2364,6 +2365,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/thatonekidnextdoorlol-hash/CemuTap [Open-source CE-style memory scanner and live editor for the Cemu Wii U emulator, with plugins and address tables]
 - https://github.com/antaresjay/freeplay [Rust Windows trainer that converts Cheat Engine .CT tables to TOML and runs Auto Assembler scripts]
 - https://github.com/abhijeetadarsh/CTTrainer [Standalone Windows ImGui/DX11 trainer that parses Cheat Engine .CT tables and reads, writes, and freezes values in attached 32/64-bit game processes]
+- https://github.com/tertit133/cheatos [Windows x64 memory scanner and trainer (C++20, ImGui/DX11) with pointer chains, freezer thread, and Cheat Engine .CT import/export]
 - https://github.com/heaven-hm/gtlibcpp [C++17 memory/trainer library with Cheat Engine .CT parsing, freeze management, and a local JSON-RPC agent for authorized offline trainer workflows on Windows]
 - https://github.com/inuNorii/Elden-Ring-CT-TGA [Elden Ring]
 - https://github.com/gmh5225/CE-remap-plugin [Remap]
