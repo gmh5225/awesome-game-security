@@ -1,0 +1,235 @@
+Project Path: arc_misteorecandy_New-anti-cheat-for-Roblox-games_8nxn2gfe
+
+Source Tree:
+
+```txt
+arc_misteorecandy_New-anti-cheat-for-Roblox-games_8nxn2gfe
+├── LICENSE
+├── README.md
+├── Script Local (La persecución y el Jumpscare).lua
+└── Script del Servidor (Detector).lua
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 misteorecandy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# 👁️ Shadow Nextbot Anti-Cheat (Roblox Luau)
+
+**Creado por:** Sylvio Andrés Burgos
+
+Un sistema **Anti-Cheat de terror psicológico** para Roblox Studio. En lugar de expulsar aburridamente a los *exploiters*, este script los aísla en una dimensión oscura y libera un **Nextbot Sombra** que los persigue por todo el mapa con susurros hasta darles un *jumpscare* con advertencia y sacarlos del servidor.
+
+---
+
+## ✨ Características
+
+* **Detección del lado del Servidor:** Protegido contra manipulaciones básicas del cliente para evitar falsos positivos y bypasses simples.
+* **Anti-Speed & Anti-Fly:** Detecta velocidades anormales y vuelo prolongado sin tocar el suelo.
+* **Castigo Inmersivo (Solo para el tramposo):**
+  * Oscurece el mapa y cierra la niebla únicamente en la pantalla del *exploiter*.
+  * Invoca un **Nextbot negro** que atraviesa paredes y acelera poco a poco.
+  * Audio ambiental perturbador (*susurro*) que culmina en un **Jumpscare** en pantalla completa antes del `Kick` automático.
+
+---
+
+## 🛠️ Instalación en Roblox Studio
+
+Sigue estos 3 pasos para instalar el sistema en tu juego:
+
+### 1. Configurar el Nextbot y el Evento
+1. Crea una `Part` en el `Workspace` con tamaño `(6, 8, 1)`, activa `CanCollide = false`, `Anchored = true` y `Transparency = 1`. Cámbiale el nombre a **`SombraNextbot`**.
+2. Dentro de `SombraNextbot`, añade un **`BillboardGui`** (`Size = {6, 0}, {8, 0}`, `AlwaysOnTop = true`) con un **`ImageLabel`** negro con el rostro de tu Nextbot.
+3. Añade dos objetos **`Sound`** dentro de `SombraNextbot`:
+   * **`Susurro`**: Audio de estática o respiración (`Volume = 0.2`, `Looped = true`).
+   * **`Susto`**: Audio del jumpscare (`Volume = 2`).
+4. Mueve **`SombraNextbot`** dentro de **`ReplicatedStorage`**.
+5. Crea un **`RemoteEvent`** en `ReplicatedStorage` y llámalo **`ActivarCastigo`**.
+
+### 2. Instalar el Script del Servidor
+Crea un `Script` dentro de **`ServerScriptService`**, llámalo `AntiCheatServer` y pega el código de la carpeta `/src/ServerScriptService` de este repositorio.
+
+### 3. Instalar el Script del Cliente
+Crea un `LocalScript` dentro de **`StarterPlayer > StarterPlayerScripts`**, llámalo `AntiCheatClient` y pega el código de la carpeta `/src/StarterPlayerScripts` de este repositorio.
+
+---
+
+## ⚙️ Configuración Rápida
+
+En el script del servidor puedes ajustar la sensibilidad según las mecánicas de tu juego (por ejemplo, si tienes habilidades de correr o saltos altos):
+
+```lua
+local VELOCIDAD_MAX = 32   -- Velocidad máxima permitida (WalkSpeed por defecto en Roblox es 16)
+local TIEMPO_AIRE_MAX = 4  -- Segundos máximos permitidos en el aire antes de activar el castigo
+```
+
+---
+
+## 👨‍💻 Autor
+
+* **Nombre:** Sylvio Andrés Burgos
+
+---
+
+## 🤝 Contribuciones
+
+¿Tienes ideas para detectar más tipos de *exploits* (como *Teleport*, *NoClip* o *GodMode*) o mejorar los efectos de terror? ¡Haz un **Fork** del proyecto y abre un **Pull Request**!
+
+## 📄 Licencia
+
+Este proyecto está bajo la **Licencia MIT** — © 2026 **Sylvio Andrés Burgos**. Consulta el archivo `LICENSE` para más detalles.
+
+```
+
+`Script Local (La persecución y el Jumpscare).lua`:
+
+```lua
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local eventoCastigo = ReplicatedStorage:WaitForChild("ActivarCastigo")
+local plantillaNextbot = ReplicatedStorage:WaitForChild("SombraNextbot")
+
+eventoCastigo.OnClientEvent:Connect(function()
+	local char = player.Character or player.CharacterAdded:Wait()
+	local root = char:WaitForChild("HumanoidRootPart")
+	local humanoid = char:WaitForChild("Humanoid")
+	
+	-- Oscurecer el mapa solo para el tramposo
+	Lighting.Brightness = 0
+	Lighting.FogEnd = 45
+	Lighting.FogColor = Color3.new(0, 0, 0)
+	
+	-- Clonar el Nextbot lejos de él
+	local nextbot = plantillaNextbot:Clone()
+	nextbot.CFrame = root.CFrame * CFrame.new(0, 0, -60)
+	nextbot.Parent = workspace
+	nextbot.Susurro:Play()
+	
+	-- Hacer que lo persiga por todo el mapa cada vez más rápido
+	local velocidadPersecucion = 22
+	local persecucion
+	persecucion = RunService.RenderStepped:Connect(function(dt)
+		if not root or not nextbot then return end
+		
+		velocidadPersecucion += dt * 3 -- Acelera poco a poco
+		local direccion = (root.Position - nextbot.Position).Unit
+		nextbot.Position += direccion * (velocidadPersecucion * dt)
+		
+		-- Si lo alcanza (distancia menor a 4 studs), lanza el Jumpscare
+		if (root.Position - nextbot.Position).Magnitude < 4 then
+			persecucion:Disconnect()
+			nextbot.Susurro:Stop()
+			nextbot.Susto:Play()
+			
+			-- Pantalla negra con el mensaje de advertencia
+			local gui = Instance.new("ScreenGui", player.PlayerGui)
+			gui.IgnoreGuiInset = true
+			local texto = Instance.new("TextLabel", gui)
+			texto.Size = UDim2.new(1, 0, 1, 0)
+			texto.BackgroundColor3 = Color3.new(0, 0, 0)
+			texto.TextColor3 = Color3.new(1, 0, 0)
+			texto.Font = Enum.Font.Creepster
+			texto.TextScaled = true
+			texto.Text = "NO USES EXPLOITS O SINO DUÉRMETE"
+			
+			task.wait(2.5)
+			eventoCastigo:FireServer() -- Avisa al servidor para darle Kick
+		end
+	end)
+end)
+
+```
+
+`Script del Servidor (Detector).lua`:
+
+```lua
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local eventoCastigo = ReplicatedStorage:WaitForChild("ActivarCastigo")
+local atrapados = {}
+
+local VELOCIDAD_MAX = 32 -- Ajusta según la velocidad normal de tu juego
+local TIEMPO_AIRE_MAX = 4 -- Segundos máximos en el aire
+
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(char)
+		local root = char:WaitForChild("HumanoidRootPart")
+		local humanoid = char:WaitForChild("Humanoid")
+		
+		local ultimaPos = root.Position
+		local tiempoEnAire = 0
+		
+		local conexion
+		conexion = RunService.Heartbeat:Connect(function(dt)
+			if not char.Parent or atrapados[player.UserId] then return end
+			
+			-- 1. Detección de Speed Hack
+			local distancia = (Vector3.new(root.Position.X, 0, root.Position.Z) - Vector3.new(ultimaPos.X, 0, ultimaPos.Z)).Magnitude
+			local velocidadActual = distancia / dt
+			
+			if velocidadActual > VELOCIDAD_MAX and humanoid.WalkSpeed <= 16 then
+				atrapados[player.UserId] = true
+				eventoCastigo:FireClient(player)
+				conexion:Disconnect()
+				return
+			end
+			
+			-- 2. Detección de Fly Hack
+			if humanoid.FloorMaterial == Enum.Material.Air then
+				tiempoEnAire += dt
+				if tiempoEnAire > TIEMPO_AIRE_MAX and root.Velocity.Y >= -5 then
+					atrapados[player.UserId] = true
+					eventoCastigo:FireClient(player)
+					conexion:Disconnect()
+					return
+				end
+			else
+				tiempoEnAire = 0
+			end
+			
+			ultimaPos = root.Position
+		end)
+	end)
+end)
+
+-- Expulsar al jugador cuando el Nextbot lo atrape
+eventoCastigo.OnServerEvent:Connect(function(player)
+	if atrapados[player.UserId] then
+		player:Kick("👁️ NO USES EXPLOITS... O SINO DUÉRMETE. 👁️")
+	end
+end)
+
+```
