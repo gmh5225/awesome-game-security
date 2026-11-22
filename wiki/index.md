@@ -1038,6 +1038,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [D3D12Renderer](entities/d3d12renderer.md) — DX12 renderer sample (raytracing / mesh shaders; DirectX / guide)
 - [D3D9 Hook ImGui](entities/d3d9-hook-imgui.md) — D3D9 EndScene/Reset injectable DLL + ImGui overlay template (adamhlt; C++; MS Detours; dummy-device vtable; VS x86/x64; resize/fullscreen/safe unload; RE/modding/graphics-hook; DirectX Hook)
 - [D3D9 Overlay ImGui](entities/d3d9-overlay-imgui.md) — D3D9 swap-chain ImGui overlay template (adamhlt; EXE HWND picker or injectable DLL; optional raw `IDirect3DDevice9` draws; INSERT toggle; VS x86/x64; overlay/RE prototyping; DirectX Hook)
+- [D3D11 Overlay ImGui](entities/d3d11-overlay-imgui.md) — D3D11 transparent topmost ImGui overlay (adamhlt; HWND track/focus; works when host is non-DX; EXE picker or injectable DLL; click-through; auto-exit on target close; OBS/capture hide; VS x86/x64; overlay/injection prototyping; DirectX Hook)
 - [D3D9On12](entities/d3d9on12.md) — Microsoft D3D9 usermode DDI → D3D12 mapping layer (DirectX Compatibility)
 - [D2D Overlay](entities/d2d-overlay.md) — header-only Direct2D external overlay library (`DirectOverlay.h`; simple API + performance; coltonon)
 - [D2GI](entities/d2gi.md) — Hard Truck 2 DirectDraw7/D3D7→D3D9 wrapper (modern resolutions, MSAA, anisotropic filtering, graphics fixes, widescreen hooks; REDPOWAR; DirectX Compatibility)
