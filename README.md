@@ -759,6 +759,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Overlay
 - https://github.com/SeanPesce/Direct3D9-Overlay
+- https://github.com/adamhlt/D3D9-Overlay-ImGui [D3D9 ImGui overlay template (x86/x64) as standalone EXE or injected DLL for in-game DirectX 9 drawing]
+- https://github.com/adamhlt/D3D11-Overlay-ImGui [D3D11 ImGui overlay template (x86/x64) as EXE or DLL for DirectX 11 in-game UI and diagnostics]
 - https://github.com/dantebuilds/swapchain-bottleneck [Architecture analysis of DXGI swapchain/MPO overlay injection, Present-hook collisions, TDR cascades, and anti-cheat whitelist friction]
 - https://github.com/TheBlackSide243/perfoverlay-supreme [Single-exe Windows 10/11 in-game performance overlay (FPS, frame time, 1% low, CPU/GPU/RAM/VRAM) via ETW Present events—no DLL injection; D3D11 overlay window with RTSS-style layout editor]
 - https://github.com/justsomesnake/ACP-Reloaded [Unofficial Assassin's Creed Origins DirectX 11 in-game overlay (dinput8 proxy) rebuilding the Animus Control Panel with live parameter editing]
@@ -2282,6 +2284,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Rantanen/ghidra-minidump-loader [Windows Minidump loader for Ghidra]
 - https://github.com/andrew-hoffman/ghidra-vxd-tools [Ghidra Jython scripts to annotate Windows 9x VxD INT 20h calls in legacy device drivers]
 - https://github.com/jtang613/GhidrAssistMCP [An MCP extension for Ghidra]
+- https://github.com/Yultas/ghidra-re [Headless Ghidra RE workbench plugin with single-JVM decompiler daemon, offline FTS index, 18 MCP tools, and sync’d C/ASM CFG UI]
 - https://github.com/bethington/ghidra-mcp [Ghidra MCP server/plugin with 200+ tools for AI-assisted reverse engineering]
 - https://github.com/ant4g0nist/pyre [Ghidra decompiler in your browser]
 - https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
@@ -4369,6 +4372,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/jrv97/steam-ai-reporter [Browser extension and userscript that tags Steam store listings with Valve-reported anti-cheat (including kernel-level), AI disclosure, DRM, and related store metadata]
 - https://github.com/IZxMD/ac-compat-research [Vendor-agnostic feasibility study on hosting kernel anti-cheat components on Linux without virtualization, covering LSM, signing, isolation, and ABI constraints]
 - https://github.com/MarceloAlm/EAC-compliance [Arch Linux guide and check-eac-compliance.sh auditor for EAC Linux v2 (Secure Boot, TPM, kernel lockdown, DKMS signing) alongside NVIDIA and VirtualBox]
+- https://github.com/Dezmonius/bodycam-eac-driver-fixes [Documented, reversible PowerShell workarounds when Easy Anti-Cheat blocks Bodycam over loaded AsUpIO.sys, ssgdio64.sys, or RTCore64.sys]
 - https://github.com/ManInMyVan/Minecraft-Anticheat-List [Curated catalog of public Minecraft Java/Bedrock anticheats across platforms and versions]
 - https://github.com/aethelreborn/minecraft-anticheat-docs [Structured educational docs on Minecraft server anticheat architecture, cheat categories, detection methods, and enforcement]
 - https://github.com/gmh5225/alt-V-Anticheat-Guide [GTA5 MP servers]
@@ -4849,6 +4853,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/GrimAnticheat/Grim [Minecraft]
 - https://github.com/Vagdedes/Spartan-AntiCheat-In-Rewrite [Java/Maven rewrite of the long-running Spartan Minecraft server anti-cheat (Spigot/Paper ecosystem)]
 - https://github.com/redsignalofficial/RedSignalAntiCheat [Open-source AGPL Spigot/Paper/Folia Minecraft anti-cheat (RSAC) with movement, combat, interaction, and packet checks plus RSInjector hooks]
+- https://github.com/ElbsxS1/AntiCheat-Asthen [Open Paper/Folia 26.3 server anti-cheat (AsthenGuard) with movement, combat, mining checks, Bedrock-aware tuning, and bundled Paper anti-xray assets]
 - https://github.com/mrKozy/KozyAntiCheat [Server-side anti-cheat for Paper, Purpur, Folia, and Fabric Minecraft Java networks]
 - https://github.com/Fi3w0/Fiw-Anticheat [Shared-engine Minecraft server modpack verification, anti-cheat support, and admin enforcement across Fabric, Forge, and NeoForge]
 - https://github.com/Ender3D/minecraft-mod-creative-scroll [Fabric server mod granting timed admin-issued Creative sessions with inventory sandboxing, packet-level spawn blocklist, and container/drop isolation]
