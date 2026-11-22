@@ -37,6 +37,7 @@ sources:
   - wiki/sources/descriptions/eysang-blip__pubg-match-pipeline.md
   - wiki/sources/descriptions/ImNotVirgola__VirgolaAntiCheat.md
   - wiki/sources/descriptions/InsideExploit__phoenix-ac.md
+  - wiki/sources/descriptions/itsHabib__free-to-learn.md
   - wiki/sources/descriptions/flameteamdev__LavaGuardAC.md
   - wiki/sources/descriptions/fluxolex__ocean-anticheat-analysis.md
   - wiki/sources/descriptions/vipmaycom__AntiCheat-detection.md
@@ -1588,7 +1589,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 
 **Multiplayer FPS telemetry ML pipeline:** [[anticheat-engine]] (bvishwesh; Python **Isolation Forest** on normal-only session profiles—velocity, accuracy, headshot rate, APS; **FastAPI** live analysis; multi-session confidence scoring, shadow-lobby quarantine, adaptive matchmaking thresholds; HTML SecOps dashboard + simulator; prototype telemetry-based enforcement; Anti Cheat / Machine Learning) beside synthetic CS2 benches such as [[cs2-anti-cheat-ml-research]] and live collector stacks such as [[aegis-ac-fps]]. (source: wiki/sources/descriptions/bvishwesh__AntiCheat-Engine.md)
 
-**Educational AC curriculum:** [[anticheat-lab]] (Ogonx; six-month self-study track on deliberately vulnerable own-game builds—x64 ASM/C++ memory layout, RE tooling, server authority, statistical/client checks; Compiler Explorer + VS stack tracing; devlog; VM-only scope; Anti Cheat) complements guide-style labs such as [[minecraft-anticheat-docs]] and telemetry research stacks such as [[apex-anticheat-lab]]. (source: wiki/sources/descriptions/Ogonx__anticheat-lab.md) (source: wiki/sources/README-categories.md)
+**Educational AC curriculum:** [[anticheat-lab]] (Ogonx; six-month self-study track on deliberately vulnerable own-game builds—x64 ASM/C++ memory layout, RE tooling, server authority, statistical/client checks; Compiler Explorer + VS stack tracing; devlog; VM-only scope; Anti Cheat) complements guide-style labs such as [[minecraft-anticheat-docs]] and telemetry research stacks such as [[apex-anticheat-lab]]. (source: wiki/sources/descriptions/Ogonx__anticheat-lab.md) (source: wiki/sources/README-categories.md) Multi-track interactive lab corpus [[free-to-learn]] (itsHabib; JS/Python course modules + automated check harnesses; anti-cheat engineering I/II on server authority, replay, and integrity for an original toy game; plus time-travel debugging, firmware forensics, and adjacent systems tracks; Anti Cheat) extends that hands-on curriculum lane beside [[oficina-cheat-e-anticheat]]. (source: wiki/sources/descriptions/itsHabib__free-to-learn.md)
 
 **Pre-ship client memory audit:** [[anticheat-lab-senolbasyigit]] (senolbasyigit; Claude Code skill + Python; CE-style scan/filter/RW on SHA-256–guarded own dev builds via `devbuild.json`; documents exposed health/ammo/currency with server-side fix recommendations and regression tests; optional pywinauto RPA without memory reads; Open Source Anti Cheat System) for teams validating client value exposure before release beside QA clients such as [[anticheat-qa]] and curriculum labs such as [[anticheat-lab]] (Ogonx). (source: wiki/sources/descriptions/senolbasyigit__anticheat-lab.md)
 

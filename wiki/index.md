@@ -1651,6 +1651,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Free-RASP-KMP](entities/free-rasp-kmp.md) — Kotlin Multiplatform freeRASP plugin (Talsec; shared Kotlin; root/jailbreak/Frida/hook/emulator/tamper/integrity; Android+iOS)
 - [Free-RASP-ReactNative](entities/free-rasp-reactnative.md) — React Native freeRASP plugin (Talsec; Magisk/KernelSU/Frida/tamper/integrity; Android+iOS)
 - [Free-RASP-Unity-POC](entities/free-rasp-unity-poc.md) — Unity freeRASP plugin (Talsec; root/jailbreak/Frida/tamper/integrity; Android+iOS)
+- [Free to Learn](entities/free-to-learn.md) — itsHabib open multi-track interactive labs (JS/Python + automated checks; anti-cheat engineering I/II on server authority/replay/integrity for toy game; time-travel debug, firmware forensics, agents; Anti Cheat / Guide)
 
 - [fn-dma-cheat](entities/fn-dma-cheat.md) — Fortnite DMA cheat sample (C++; Unreal Engine; cheat / game:fortnite [DMA])
 - [fnv-speedhack](entities/fnv-speedhack.md) — lightview FNV MinHook timing-API speed control (NVSE or dinput8 proxy; optional Decky/Proton; cheat / game:fallout new vegas [SpeedHack])
