@@ -1,0 +1,632 @@
+Project Path: arc_Dezmonius_bodycam-eac-driver-fixes_l8x93z3t
+
+Source Tree:
+
+```txt
+arc_Dezmonius_bodycam-eac-driver-fixes_l8x93z3t
+├── LICENSE
+├── README.md
+├── README.ru.md
+├── docs
+│   ├── REPORT.md
+│   └── screenshots
+└── fixes
+    ├── AsUpIO-Fix
+    │   ├── FIX.cmd
+    │   ├── README.txt
+    │   ├── RESTORE.cmd
+    │   └── driver-fix.ps1
+    ├── RTCore64-Fix
+    │   ├── FIX.cmd
+    │   ├── README.txt
+    │   ├── RESTORE.cmd
+    │   └── driver-fix.ps1
+    └── SSGDIO-Fix
+        ├── FIX.cmd
+        ├── README.txt
+        ├── RESTORE.cmd
+        └── driver-fix.ps1
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 bodycam-eac-driver-fixes contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Bodycam EAC driver fixes
+
+Community workarounds for Bodycam startup errors asking you to unload **AsUpIO.sys**, **ssgdio64.sys**, or **RTCore64.sys**. Includes readable PowerShell scripts, rollback launchers, and screenshots of the errors.
+
+[Инструкция на русском](README.ru.md) · [Technical report](docs/REPORT.md)
+
+## Reported results
+
+| Error names this file | Fix folder | Result |
+| --- | --- | --- |
+| `AsUpIO.sys` | [AsUpIO-Fix](fixes/AsUpIO-Fix) | Successful game launch reported by the original user |
+| `ssgdio64.sys` | [SSGDIO-Fix](fixes/SSGDIO-Fix) | Successful game launch reported by the user for their friend |
+| `RTCore64.sys` | [RTCore64-Fix](fixes/RTCore64-Fix) | Successful game launch reported by the user for their friend |
+
+These are reports from two PCs, not broad compatibility testing. The original AsUpIO service change was directly verified; the other results were reported by the user. This project is not affiliated with Bodycam, Easy Anti-Cheat, ASUS, or MSI.
+
+## What causes the error?
+
+The startup dialog explicitly asks for a loaded third-party driver to be unloaded. AsUpIO is used by ASUS utilities; RTCore64 is associated with MSI Afterburner. The program responsible for ssgdio64 on the affected PC was not identified. The exact reason EAC rejects a given driver version is unknown; this report does not establish that the detections are incorrect.
+
+## Apply a workaround
+
+Requires Windows and Windows PowerShell 5.1 with administrator privileges. The original AsUpIO case was on Windows 10; the friend's exact Windows build was not collected.
+
+1. Extract the entire downloaded archive. If using GitHub's Download ZIP, extract it first.
+2. Close Bodycam and hardware monitoring/tuning utilities. For RTCore64, fully exit MSI Afterburner from the system tray and disable its startup in that application's settings.
+3. Open **only the folder matching the filename in your error**, under `fixes/`.
+4. Right-click **FIX.cmd** and choose **Run as administrator**. Accept the Windows administrator prompt.
+5. Read the output. If it says `Try Bodycam now`, launch the game. If it requests a restart, save your work and restart Windows manually.
+
+Do not run the AsUpIO workaround during a BIOS or firmware update. No automatic reboot occurs.
+
+## What changes / how to undo
+
+The script finds registered kernel-driver services by the exact filename in their paths, saves their original startup settings, disables their startup, and attempts to stop them. It checks the resulting settings and running state. It does not delete driver files, modify EAC, or disable Windows security.
+
+**This changes the driver globally**, so dependent utility features, including monitoring, tuning, or fan control, may become unavailable. A utility may re-enable/reinstall its driver; avoid reopening it while playing. Updating or removing the responsible utility may be a more suitable long-term solution.
+
+To undo, right-click **RESTORE.cmd** in the same fix folder, run as administrator, then restart Windows. This restores saved startup settings; it does not automatically reopen utilities.
+
+Backups (`backup.json`) and logs (`result.log`) are stored separately in:
+
+```text
+C:\ProgramData\Bodycam-AsUpIO-Fix
+C:\ProgramData\Bodycam-SSGDIO-Fix
+C:\ProgramData\Bodycam-RTCore64-Fix
+```
+
+Keep the backup until you no longer need rollback. Repeated FIX runs preserve the first backup. If a run fails partway through, changes already applied may remain; inspect the log and use RESTORE. If the driver is not found, the script does not change driver settings.
+
+The CMD launchers use a process-local PowerShell execution-policy override to run the included script; they do not persistently change that policy. Review the source before running it.
+
+## Reporting problems
+
+Open an issue using the template. Include the exact error, Windows build, game/utility versions, and script output. Inspect logs before posting: PowerShell transcripts may contain your username, PC name, and local paths. Do not upload `backup.json`, driver binaries, or unredacted personal logs.
+
+Scripts passed PowerShell syntax checks. The workarounds have not been tested across hardware configurations or all Windows versions. See the [technical report](docs/REPORT.md) for evidence and limitations.
+
+## License
+
+Original scripts and documentation: [MIT](LICENSE). Error screenshots depict third-party software; associated trademarks and artwork belong to their respective owners and are not covered by this license.
+
+```
+
+`README.ru.md`:
+
+```md
+# Исправление ошибок запуска Bodycam / Easy Anti-Cheat
+
+Три отдельных обратимых решения для сообщений «Выгрузите AsUpIO.sys / ssgdio64.sys / RTCore64.sys перед запуском игры».
+
+Пользователь подтвердил успешный запуск после всех трёх исправлений. AsUpIO проверялся на его ПК, два других — на ПК друга по сообщению пользователя. Это результаты двух компьютеров, а не проверка на всех конфигурациях. Проект неофициальный.
+
+## Как применить
+
+1. Распакуйте **весь архив**.
+2. Закройте игру и утилиты мониторинга/разгона. Для RTCore64 полностью закройте MSI Afterburner через значок в трее и отключите его автозапуск.
+3. В `fixes` откройте папку **только того драйвера, который указан в ошибке**:
+   - `AsUpIO-Fix` — для `AsUpIO.sys`;
+   - `SSGDIO-Fix` — для `ssgdio64.sys`;
+   - `RTCore64-Fix` — для `RTCore64.sys`.
+4. Правой кнопкой на `FIX.cmd` → **Запуск от имени администратора**.
+5. При `Try Bodycam now` запускайте игру. Если скрипт просит перезагрузку, сохраните работу и перезагрузите Windows.
+
+Не применяйте AsUpIO-фикс во время обновления BIOS или прошивки. Требуется Windows PowerShell 5.1. Исходный случай AsUpIO был на Windows 10; версия Windows друга не зафиксирована.
+
+## Что делает фикс
+
+Находит службу по точному имени файла драйвера, сохраняет тип запуска, отключает его автозагрузку и пробует выгрузить драйвер. Файл не удаляется; настройки античита и защиты Windows не меняются. Проверяется итоговое состояние службы.
+
+Отключение действует для всей системы. Зависимые функции утилит ASUS, MSI или другой программы могут перестать работать. Утилита может повторно включить драйвер. Обновление либо удаление соответствующей утилиты может быть более подходящим постоянным решением.
+
+## Как отменить
+
+Запустите `RESTORE.cmd` из той же папки от администратора и перезагрузите компьютер. Восстановится сохранённый тип запуска драйвера.
+
+Резервные копии и журналы: `C:\ProgramData\Bodycam-AsUpIO-Fix`, `Bodycam-SSGDIO-Fix` или `Bodycam-RTCore64-Fix`. Не удаляйте `backup.json`, пока нужна отмена. Повторный FIX сохраняет первую копию. При частичной ошибке уже внесённые изменения могут остаться — изучите журнал и используйте RESTORE.
+
+Если драйвер не найден, настройки драйверов не меняются. При ошибке создайте issue с текстом окна. Перед публикацией журнала удалите имя пользователя, имя ПК и личные пути. Резервные копии и файлы драйверов публиковать не нужно.
+
+Синтаксис проверен; тестирование всех конфигураций не проводилось. Подробности, ограничения и исходные скриншоты — в [техническом отчёте](docs/REPORT.md).
+
+```
+
+`docs/REPORT.md`:
+
+```md
+# Bodycam / Easy Anti-Cheat driver compatibility report
+
+Prepared 2026-11-22. Updated after the user confirmed successful launches following all three workarounds.
+
+## Observations
+
+| Driver | Observed message (translated from Russian) | Evidence |
+| --- | --- | --- |
+| AsUpIO.sys | Please unload AsUpIO.sys before starting the game. | [Screenshot](screenshots/01-AsUpIO.png) |
+| ssgdio64.sys | Please unload ssgdio64.sys before starting the game. | [Screenshot](screenshots/02-ssgdio64.png) |
+| RTCore64.sys | Please unload RTCore64.sys before starting the game. | [Screenshot](screenshots/03-RTCore64.png) |
+
+The AsUpIO case was on the original user's PC. The other two messages were supplied for a friend's PC, with RTCore64 shown after the ssgdio64 report. The user subsequently confirmed that the other fixes also helped and the game launched. No detailed before/after service output was supplied for the friend's PC.
+
+## Directly verified AsUpIO configuration
+
+Before:
+
+```text
+Name: AsUpIO
+Type: KERNEL_DRIVER
+State: RUNNING
+Startup: SYSTEM_START
+Path: SysWow64\drivers\AsUpIO.sys
+```
+
+Executed with administrator privileges:
+
+```cmd
+sc.exe stop AsUpIO
+sc.exe config AsUpIO start= disabled
+```
+
+After: `STOPPED`, startup `DISABLED`. The user subsequently confirmed successful game launch. Searching installed apps for ASUS returned no results; the originating utility was not identified.
+
+The portable scripts use service discovery by filename rather than assuming a fixed service name. Their syntax was checked, but the exact portable AsUpIO variant was not separately run on the original PC.
+
+## Interpretation
+
+The dialog indicates an EAC block involving loaded third-party kernel drivers. AsUpIO is documented in ASUS software, and RTCore64 is associated with MSI Afterburner. The installed application responsible for ssgdio64 was not identified. Specific driver versions, signatures, and hashes were not collected. A screenshot alone does not establish why EAC blocks a driver or that it is a false positive.
+
+Background references:
+
+- [ASUS documentation mentioning AsUpIO.sys](https://dlcdnets.asus.com/pub/ASUS/server/ACC/E21761_ASUS_Control_Center_CSM_EM_V9_WEB.pdf)
+- [NVD entry identifying RTCore64.sys in an MSI Afterburner version](https://nvd.nist.gov/vuln/detail/CVE-2019-16098)
+
+These references do not identify the exact software versions on the affected PCs.
+
+## Implementation and limitations
+
+The scripts save startup settings before disabling matching kernel-driver services, attempt to unload them, and verify the resulting state. Separate restore scripts reinstate startup settings. They do not delete driver files, change EAC, or disable Windows security. Restoration may require a reboot.
+
+Disabling a driver affects dependent utilities globally. A utility may recreate or re-enable its driver. Changes are not transactional: a mid-run error may leave earlier changes applied. See the main README for rollback and log locations.
+
+## Further investigation requested
+
+Collect the game build, EAC version/logs, exact Windows build, utility versions, full driver paths, signatures and hashes, and before/after service output. Investigate with the anti-cheat provider whether supported utility updates resolve the blocks or whether a compatibility change is appropriate. The workarounds are not a replacement for that investigation.
+
+No private transcripts, usernames, registry exports, or driver binaries are included in this repository.
+
+```
+
+`fixes/AsUpIO-Fix/FIX.cmd`:
+
+```cmd
+@echo off
+cd /d "%~dp0"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0driver-fix.ps1"
+echo.
+pause
+
+```
+
+`fixes/AsUpIO-Fix/README.txt`:
+
+```txt
+Исправление ошибки Easy Anti-Cheat: «Выгрузите AsUpIO.sys перед запуском игры».
+
+1. Распакуйте ВСЮ папку из ZIP-архива.
+2. Закройте игру и программы настройки/мониторинга оборудования.
+3. Нажмите правой кнопкой на FIX.cmd → «Запуск от имени администратора».
+4. Подтвердите запрос Windows. Дождитесь результата.
+5. Если появилось «Try Bodycam now», попробуйте запустить игру.
+   Если появилось «Restart Windows», сохраните работу и перезагрузите ПК.
+
+Скрипт находит службу по точному имени файла AsUpIO.sys, сохраняет
+исходный тип запуска, отключает автозагрузку и пробует выгрузить драйвер.
+Драйвер не удаляется. Защита Windows и античит не изменяются.
+Утилита, использующая этот драйвер, может потерять часть функций.
+Не открывайте её во время игры: она может повторно установить/включить драйвер.
+
+Отмена: запустите RESTORE.cmd от имени администратора, затем перезагрузите ПК.
+Он возвращает сохранённый тип запуска. Не удаляйте резервную копию до отмены.
+Резервная копия и журнал: C:\ProgramData\Bodycam-AsUpIO-Fix
+
+При ERROR пришлите текст окна и result.log из этой папки.
+Если драйвер не найден, скрипт ничего не меняет: нужна отдельная диагностика.
+Пользователи сообщили об успешном запуске игры после исправления. Полная проверка на разных конфигурациях не проводилась.
+
+Перед запуском закройте утилиты ASUS для обновления BIOS и мониторинга.
+Не запускайте фикс во время обновления BIOS или прошивки оборудования.
+После отключения драйвера использующие его функции утилит ASUS могут
+быть недоступны. Запуск такой утилиты может снова включить драйвер.
+
+```
+
+`fixes/AsUpIO-Fix/RESTORE.cmd`:
+
+```cmd
+@echo off
+cd /d "%~dp0"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0driver-fix.ps1" -Restore
+echo.
+pause
+
+```
+
+`fixes/AsUpIO-Fix/driver-fix.ps1`:
+
+```ps1
+param([switch]$Restore)
+$ErrorActionPreference = 'Stop'
+$stateDir = Join-Path $env:ProgramData 'Bodycam-AsUpIO-Fix'
+$backupPath = Join-Path $stateDir 'backup.json'
+$logPath = Join-Path $stateDir 'result.log'
+$transcribing = $false
+try {
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+    if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        throw 'Run FIX.cmd or RESTORE.cmd as administrator (right-click).'
+    }
+    New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
+    Start-Transcript -Path $logPath -Append | Out-Null
+    $transcribing = $true
+    $pattern = '(?i)(^|[\\/])AsUpIO\.sys\s*"?\s*$'
+    if ($Restore) {
+        if (-not (Test-Path -LiteralPath $backupPath)) { throw 'No saved backup found on this PC.' }
+        $saved = @(Get-Content -LiteralPath $backupPath -Raw | ConvertFrom-Json)
+        foreach ($entry in $saved) {
+            $key = Get-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $entry.Name)
+            if ($key.ImagePath -notmatch $pattern -or $key.Type -ne 1) { throw 'Driver identity changed; restore aborted.' }
+            Set-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $entry.Name) -Name Start -Value ([int]$entry.Start)
+            Write-Host ('Restored startup setting for ' + $entry.Name)
+        }
+        Write-Host 'Restore complete. Restart Windows when convenient to reload the driver.' -ForegroundColor Green
+    } else {
+        $drivers = @(Get-CimInstance Win32_SystemDriver | Where-Object { $_.PathName -match $pattern })
+        if ($drivers.Count -eq 0) { throw 'No registered AsUpIO.sys driver found. Nothing changed. Send result.log for diagnosis.' }
+        $snapshot = @()
+        foreach ($driver in $drivers) {
+            $key = Get-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $driver.Name)
+            if ($key.Type -ne 1) { throw 'Unexpected driver type. Nothing changed.' }
+            Write-Host ('Found: ' + $driver.Name + ' / ' + $driver.PathName + ' / ' + $driver.State)
+            $snapshot += [pscustomobject]@{ Name = $driver.Name; Start = [int]$key.Start }
+        }
+        if (-not (Test-Path -LiteralPath $backupPath)) {
+            ConvertTo-Json -InputObject $snapshot | Set-Content -LiteralPath $backupPath -Encoding UTF8
+        } else {
+            $saved = @(Get-Content -LiteralPath $backupPath -Raw | ConvertFrom-Json)
+            foreach ($driver in $drivers) {
+                if ($driver.Name -notin @($saved.Name)) { throw 'Driver registration changed since backup. Nothing changed.' }
+            }
+        }
+        foreach ($driver in $drivers) {
+            & sc.exe config $driver.Name start= disabled
+            if ($LASTEXITCODE -ne 0) { throw 'Could not disable startup. See log.' }
+            if ($driver.State -ne 'Stopped') {
+                & sc.exe stop $driver.Name
+                if ($LASTEXITCODE -ne 0) { Write-Host 'Could not unload now. Restart Windows manually after closing your apps.' -ForegroundColor Yellow }
+            }
+        }
+        Start-Sleep -Seconds 2
+        $needsRestart = $false
+        foreach ($driver in $drivers) {
+            $current = Get-CimInstance Win32_SystemDriver -Filter ("Name='" + $driver.Name.Replace("'", "''") + "'")
+            $key = Get-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $driver.Name)
+            if ($key.Start -ne 4) { throw 'Startup setting did not persist. See log.' }
+            if ($current.State -ne 'Stopped') { $needsRestart = $true }
+            Write-Host ($driver.Name + ': ' + $current.State + ', startup disabled')
+        }
+        if ($needsRestart) {
+            Write-Host 'Restart Windows, then try Bodycam. No automatic restart will occur.' -ForegroundColor Yellow
+        } else {
+            Write-Host 'Driver unloaded and startup disabled. Try Bodycam now.' -ForegroundColor Green
+        }
+    }
+    Write-Host ('Backup and log: ' + $stateDir)
+} catch {
+    Write-Host ('ERROR: ' + $_.Exception.Message) -ForegroundColor Red
+    Write-Host ('Log (if created): ' + $logPath)
+    exit 1
+} finally {
+    if ($transcribing) { Stop-Transcript | Out-Null }
+}
+
+```
+
+`fixes/RTCore64-Fix/FIX.cmd`:
+
+```cmd
+@echo off
+cd /d "%~dp0"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0driver-fix.ps1"
+echo.
+pause
+
+```
+
+`fixes/RTCore64-Fix/README.txt`:
+
+```txt
+Исправление ошибки Easy Anti-Cheat: «Выгрузите RTCore64.sys перед запуском игры».
+
+1. Распакуйте ВСЮ папку из ZIP-архива.
+2. Закройте игру и программы настройки/мониторинга оборудования.
+3. Нажмите правой кнопкой на FIX.cmd → «Запуск от имени администратора».
+4. Подтвердите запрос Windows. Дождитесь результата.
+5. Если появилось «Try Bodycam now», попробуйте запустить игру.
+   Если появилось «Restart Windows», сохраните работу и перезагрузите ПК.
+
+Скрипт находит службу по точному имени файла RTCore64.sys, сохраняет
+исходный тип запуска, отключает автозагрузку и пробует выгрузить драйвер.
+Драйвер не удаляется. Защита Windows и античит не изменяются.
+Утилита, использующая этот драйвер, может потерять часть функций.
+Не открывайте её во время игры: она может повторно установить/включить драйвер.
+
+Отмена: запустите RESTORE.cmd от имени администратора, затем перезагрузите ПК.
+Он возвращает сохранённый тип запуска. Не удаляйте резервную копию до отмены.
+Резервная копия и журнал: C:\ProgramData\Bodycam-RTCore64-Fix
+
+При ERROR пришлите текст окна и result.log из этой папки.
+Если драйвер не найден, скрипт ничего не меняет: нужна отдельная диагностика.
+Пользователи сообщили об успешном запуске игры после исправления. Полная проверка на разных конфигурациях не проводилась.
+
+Перед FIX.cmd полностью закройте MSI Afterburner через значок в трее.
+Отключите его запуск вместе с Windows, иначе драйвер может включиться снова.
+После отключения драйвера функции разгона, мониторинга и управления
+вентиляторами в использующей его программе могут быть недоступны.
+
+```
+
+`fixes/RTCore64-Fix/RESTORE.cmd`:
+
+```cmd
+@echo off
+cd /d "%~dp0"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0driver-fix.ps1" -Restore
+echo.
+pause
+
+```
+
+`fixes/RTCore64-Fix/driver-fix.ps1`:
+
+```ps1
+param([switch]$Restore)
+$ErrorActionPreference = 'Stop'
+$stateDir = Join-Path $env:ProgramData 'Bodycam-RTCore64-Fix'
+$backupPath = Join-Path $stateDir 'backup.json'
+$logPath = Join-Path $stateDir 'result.log'
+$transcribing = $false
+try {
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+    if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        throw 'Run FIX.cmd or RESTORE.cmd as administrator (right-click).'
+    }
+    New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
+    Start-Transcript -Path $logPath -Append | Out-Null
+    $transcribing = $true
+    $pattern = '(?i)(^|[\\/])RTCore64\.sys\s*"?\s*$'
+    if ($Restore) {
+        if (-not (Test-Path -LiteralPath $backupPath)) { throw 'No saved backup found on this PC.' }
+        $saved = @(Get-Content -LiteralPath $backupPath -Raw | ConvertFrom-Json)
+        foreach ($entry in $saved) {
+            $key = Get-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $entry.Name)
+            if ($key.ImagePath -notmatch $pattern -or $key.Type -ne 1) { throw 'Driver identity changed; restore aborted.' }
+            Set-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $entry.Name) -Name Start -Value ([int]$entry.Start)
+            Write-Host ('Restored startup setting for ' + $entry.Name)
+        }
+        Write-Host 'Restore complete. Restart Windows when convenient to reload the driver.' -ForegroundColor Green
+    } else {
+        $drivers = @(Get-CimInstance Win32_SystemDriver | Where-Object { $_.PathName -match $pattern })
+        if ($drivers.Count -eq 0) { throw 'No registered RTCore64.sys driver found. Nothing changed. Send result.log for diagnosis.' }
+        $snapshot = @()
+        foreach ($driver in $drivers) {
+            $key = Get-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $driver.Name)
+            if ($key.Type -ne 1) { throw 'Unexpected driver type. Nothing changed.' }
+            Write-Host ('Found: ' + $driver.Name + ' / ' + $driver.PathName + ' / ' + $driver.State)
+            $snapshot += [pscustomobject]@{ Name = $driver.Name; Start = [int]$key.Start }
+        }
+        if (-not (Test-Path -LiteralPath $backupPath)) {
+            ConvertTo-Json -InputObject $snapshot | Set-Content -LiteralPath $backupPath -Encoding UTF8
+        } else {
+            $saved = @(Get-Content -LiteralPath $backupPath -Raw | ConvertFrom-Json)
+            foreach ($driver in $drivers) {
+                if ($driver.Name -notin @($saved.Name)) { throw 'Driver registration changed since backup. Nothing changed.' }
+            }
+        }
+        foreach ($driver in $drivers) {
+            & sc.exe config $driver.Name start= disabled
+            if ($LASTEXITCODE -ne 0) { throw 'Could not disable startup. See log.' }
+            if ($driver.State -ne 'Stopped') {
+                & sc.exe stop $driver.Name
+                if ($LASTEXITCODE -ne 0) { Write-Host 'Could not unload now. Restart Windows manually after closing your apps.' -ForegroundColor Yellow }
+            }
+        }
+        Start-Sleep -Seconds 2
+        $needsRestart = $false
+        foreach ($driver in $drivers) {
+            $current = Get-CimInstance Win32_SystemDriver -Filter ("Name='" + $driver.Name.Replace("'", "''") + "'")
+            $key = Get-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $driver.Name)
+            if ($key.Start -ne 4) { throw 'Startup setting did not persist. See log.' }
+            if ($current.State -ne 'Stopped') { $needsRestart = $true }
+            Write-Host ($driver.Name + ': ' + $current.State + ', startup disabled')
+        }
+        if ($needsRestart) {
+            Write-Host 'Restart Windows, then try Bodycam. No automatic restart will occur.' -ForegroundColor Yellow
+        } else {
+            Write-Host 'Driver unloaded and startup disabled. Try Bodycam now.' -ForegroundColor Green
+        }
+    }
+    Write-Host ('Backup and log: ' + $stateDir)
+} catch {
+    Write-Host ('ERROR: ' + $_.Exception.Message) -ForegroundColor Red
+    Write-Host ('Log (if created): ' + $logPath)
+    exit 1
+} finally {
+    if ($transcribing) { Stop-Transcript | Out-Null }
+}
+
+```
+
+`fixes/SSGDIO-Fix/FIX.cmd`:
+
+```cmd
+@echo off
+cd /d "%~dp0"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0driver-fix.ps1"
+echo.
+pause
+
+```
+
+`fixes/SSGDIO-Fix/README.txt`:
+
+```txt
+Исправление ошибки Easy Anti-Cheat: «Выгрузите ssgdio64.sys перед запуском игры».
+
+1. Распакуйте ВСЮ папку из ZIP-архива.
+2. Закройте игру и программы настройки/мониторинга оборудования.
+3. Нажмите правой кнопкой на FIX.cmd → «Запуск от имени администратора».
+4. Подтвердите запрос Windows. Дождитесь результата.
+5. Если появилось «Try Bodycam now», попробуйте запустить игру.
+   Если появилось «Restart Windows», сохраните работу и перезагрузите ПК.
+
+Скрипт находит службу по точному имени файла ssgdio64.sys, сохраняет
+исходный тип запуска, отключает автозагрузку и пробует выгрузить драйвер.
+Драйвер не удаляется. Защита Windows и античит не изменяются.
+Утилита, использующая этот драйвер, может потерять часть функций.
+Не открывайте её во время игры: она может повторно установить/включить драйвер.
+
+Отмена: запустите RESTORE.cmd от имени администратора, затем перезагрузите ПК.
+Он возвращает сохранённый тип запуска. Не удаляйте резервную копию до отмены.
+Резервная копия и журнал: C:\ProgramData\Bodycam-SSGDIO-Fix
+
+При ERROR пришлите текст окна и result.log из этой папки.
+Если драйвер не найден, скрипт ничего не меняет: нужна отдельная диагностика.
+Пользователи сообщили об успешном запуске игры после исправления. Полная проверка на разных конфигурациях не проводилась.
+
+```
+
+`fixes/SSGDIO-Fix/RESTORE.cmd`:
+
+```cmd
+@echo off
+cd /d "%~dp0"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0driver-fix.ps1" -Restore
+echo.
+pause
+
+```
+
+`fixes/SSGDIO-Fix/driver-fix.ps1`:
+
+```ps1
+param([switch]$Restore)
+$ErrorActionPreference = 'Stop'
+$stateDir = Join-Path $env:ProgramData 'Bodycam-SSGDIO-Fix'
+$backupPath = Join-Path $stateDir 'backup.json'
+$logPath = Join-Path $stateDir 'result.log'
+$transcribing = $false
+try {
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+    if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        throw 'Run FIX.cmd or RESTORE.cmd as administrator (right-click).'
+    }
+    New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
+    Start-Transcript -Path $logPath -Append | Out-Null
+    $transcribing = $true
+    $pattern = '(?i)(^|[\\/])ssgdio64\.sys\s*"?\s*$'
+    if ($Restore) {
+        if (-not (Test-Path -LiteralPath $backupPath)) { throw 'No saved backup found on this PC.' }
+        $saved = @(Get-Content -LiteralPath $backupPath -Raw | ConvertFrom-Json)
+        foreach ($entry in $saved) {
+            $key = Get-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $entry.Name)
+            if ($key.ImagePath -notmatch $pattern -or $key.Type -ne 1) { throw 'Driver identity changed; restore aborted.' }
+            Set-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $entry.Name) -Name Start -Value ([int]$entry.Start)
+            Write-Host ('Restored startup setting for ' + $entry.Name)
+        }
+        Write-Host 'Restore complete. Restart Windows when convenient to reload the driver.' -ForegroundColor Green
+    } else {
+        $drivers = @(Get-CimInstance Win32_SystemDriver | Where-Object { $_.PathName -match $pattern })
+        if ($drivers.Count -eq 0) { throw 'No registered ssgdio64.sys driver found. Nothing changed. Send result.log for diagnosis.' }
+        $snapshot = @()
+        foreach ($driver in $drivers) {
+            $key = Get-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $driver.Name)
+            if ($key.Type -ne 1) { throw 'Unexpected driver type. Nothing changed.' }
+            Write-Host ('Found: ' + $driver.Name + ' / ' + $driver.PathName + ' / ' + $driver.State)
+            $snapshot += [pscustomobject]@{ Name = $driver.Name; Start = [int]$key.Start }
+        }
+        if (-not (Test-Path -LiteralPath $backupPath)) {
+            ConvertTo-Json -InputObject $snapshot | Set-Content -LiteralPath $backupPath -Encoding UTF8
+        } else {
+            $saved = @(Get-Content -LiteralPath $backupPath -Raw | ConvertFrom-Json)
+            foreach ($driver in $drivers) {
+                if ($driver.Name -notin @($saved.Name)) { throw 'Driver registration changed since backup. Nothing changed.' }
+            }
+        }
+        foreach ($driver in $drivers) {
+            & sc.exe config $driver.Name start= disabled
+            if ($LASTEXITCODE -ne 0) { throw 'Could not disable startup. See log.' }
+            if ($driver.State -ne 'Stopped') {
+                & sc.exe stop $driver.Name
+                if ($LASTEXITCODE -ne 0) { Write-Host 'Could not unload now. Restart Windows manually after closing your apps.' -ForegroundColor Yellow }
+            }
+        }
+        Start-Sleep -Seconds 2
+        $needsRestart = $false
+        foreach ($driver in $drivers) {
+            $current = Get-CimInstance Win32_SystemDriver -Filter ("Name='" + $driver.Name.Replace("'", "''") + "'")
+            $key = Get-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $driver.Name)
+            if ($key.Start -ne 4) { throw 'Startup setting did not persist. See log.' }
+            if ($current.State -ne 'Stopped') { $needsRestart = $true }
+            Write-Host ($driver.Name + ': ' + $current.State + ', startup disabled')
+        }
+        if ($needsRestart) {
+            Write-Host 'Restart Windows, then try Bodycam. No automatic restart will occur.' -ForegroundColor Yellow
+        } else {
+            Write-Host 'Driver unloaded and startup disabled. Try Bodycam now.' -ForegroundColor Green
+        }
+    }
+    Write-Host ('Backup and log: ' + $stateDir)
+} catch {
+    Write-Host ('ERROR: ' + $_.Exception.Message) -ForegroundColor Red
+    Write-Host ('Log (if created): ' + $logPath)
+    exit 1
+} finally {
+    if ($transcribing) { Stop-Transcript | Out-Null }
+}
+
+```

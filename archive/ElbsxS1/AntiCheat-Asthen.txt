@@ -1,0 +1,1461 @@
+Project Path: arc_ElbsxS1_AntiCheat-Asthen_j15y2ado
+
+Source Tree:
+
+```txt
+arc_ElbsxS1_AntiCheat-Asthen_j15y2ado
+├── README.md
+├── antixray
+│   ├── paper-world-defaults_anti-xray.yml
+│   ├── the_end_paper-world.yml
+│   └── the_nether_paper-world.yml
+├── pom.xml
+└── src
+    └── main
+        ├── java
+        │   └── com
+        │       └── asthen
+        │           └── guard
+        │               ├── AsthenGuard.java
+        │               ├── BuildListener.java
+        │               ├── CombatListener.java
+        │               ├── Flagger.java
+        │               ├── GuardCommand.java
+        │               ├── MovementListener.java
+        │               └── PlayerData.java
+        └── resources
+            ├── config.yml
+            └── plugin.yml
+
+```
+
+`README.md`:
+
+```md
+# AsthenGuard
+
+Anti-cheat para **Paper 26.3** (Java 25) com três verificações de jogo e um monitor de x-ray.
+Vem junto com os arquivos de **anti-xray nativo do Paper** (pasta `antixray/`), que é a defesa real contra x-ray.
+
+> Nenhum anti-cheat chega a zero cheater. Este foi calibrado para errar o mínimo possível com jogador
+> legítimo (Java e Bedrock) e para travar quem usa cheat no momento em que tenta.
+
+## O que ele pega
+
+| Verificação | Nome no alerta | O que faz |
+| --- | --- | --- |
+| Velocidade | `speed` | Passou do limite por vários ticks seguidos: volta o jogador ao último ponto limpo |
+| Voo / planar / pulo alto | `fly` | Muitos ticks no ar sem cair, ou subiu mais que um pulo permite: volta ao chão |
+| Queda falsa | `nofall` | Caiu vários blocos e o servidor não contou a queda |
+| Atravessar bloco | `phase` | Entrou em bloco sólido vindo de fora |
+| Alcance | `reach` | Bateu mais longe que o permitido (considera o ping): o golpe é cancelado |
+| Kill aura | `killaura-angle`, `-wall`, `-multi` | Bateu fora da mira, através de parede, ou em 2 alvos no mesmo tick: golpe cancelado |
+| Autoclick | `clicks` | Mais cliques por segundo que um humano consegue |
+| Nuker | `nuker`, `nuker-reach` | Quebrou blocos rápido demais ou longe demais: quebra cancelada |
+| Colocação rápida | `fastplace` | Colocou blocos rápido demais: colocação cancelada |
+| X-ray (monitor) | `xray` | Proporção de diamante/escombros/esmeralda alta demais para a pedra minerada: **só avisa a equipe** |
+
+Cada falha soma **VL** (pontos de violação) que somem sozinhos com o tempo (`decay-per-second`).
+- VL ≥ `alert-vl` (4): a equipe vê o alerta no chat e ele vai para `plugins/AsthenGuard/violations.log`.
+- VL ≥ `kick-vl` (16): o jogador é expulso.
+- Ban automático vem **desligado** (`punish-vl: 0`). Para ligar: `punish-vl: 40` e `punish-command: "tempban {player} 1d"`.
+
+## Instalar
+
+1. Suba esta pasta para um repositório no GitHub. O workflow compila sozinho:
+   **Actions → Build → Artifacts → AsthenGuard**. (Local: JDK 25 + Maven, `mvn package`.)
+2. Coloque `AsthenGuard-1.0.0.jar` em `plugins/` e reinicie.
+3. Instale o anti-xray do Paper (próxima seção).
+4. Dê `asthenguard.alerts` a quem da equipe deve ver os alertas (OPs já têm).
+
+Funciona junto com **Floodgate/Geyser**: jogadores Bedrock são identificados pela API do Floodgate (não pelo
+nome/prefixo) e ganham uma margem maior de velocidade e alcance. Também convive com AsthenEssentials e LobbyGuard:
+teleportes, respawn e troca de mundo dão carência automática.
+
+## Anti-xray do Paper (a defesa de verdade)
+
+O monitor do plugin só **detecta**. Quem **impede** o x-ray é o Paper, trocando minério escondido por minério falso:
+
+| Arquivo | Onde vai |
+| --- | --- |
+| `antixray/paper-world-defaults_anti-xray.yml` | Substitui o bloco `anticheat.anti-xray` de `config/paper-world-defaults.yml` |
+| `antixray/the_nether_paper-world.yml` | `<mundo>/dimensions/minecraft/the_nether/paper-world.yml` |
+| `antixray/the_end_paper-world.yml` | `<mundo>/dimensions/minecraft/the_end/paper-world.yml` |
+
+Faça backup, edite e **reinicie** o servidor (`/reload` não aplica). Limite do Paper: minério exposto ao ar
+(parede de caverna) continua visível.
+
+## Comandos
+
+| Comando | O que faz |
+| --- | --- |
+| `/ag alerts` | Liga/desliga os alertas no seu chat |
+| `/ag vl <jogador>` | Mostra o VL atual por verificação |
+| `/ag reset <jogador>` | Zera o VL (e libera nova expulsão) |
+| `/ag xray <jogador>` | Minérios e pedra na janela atual |
+| `/ag reload` | Recarrega o `config.yml` |
+
+Permissões: `asthenguard.admin` (comandos), `asthenguard.alerts` (receber alertas), `asthenguard.bypass`
+(ignora tudo; padrão ninguém, nem OP, a menos que `general.bypass-ops: true`).
+
+## Roteiro de teste em jogo
+
+Use uma conta **sem** `asthenguard.bypass`, em sobrevivência.
+
+- [ ] Andar, correr, pular, nadar, usar gelo, elytra, tridente, cavalo, barco: **nenhum alerta**.
+- [ ] Levar knockback, explosão e cair em slime/cama: sem alerta.
+- [ ] Teleportar (`/home`, `/tpa`, lobby ↔ sobrevivência): sem alerta e sem setback.
+- [ ] Minerar em ritmo normal e quebrar pedra com Eficiência V + Pressa: sem alerta.
+- [ ] Com um cliente de teste (conta secundária), ligar fly/speed/reach: deve voltar para trás e gerar alerta.
+- [ ] `/ag vl <conta>` mostra os VL; `/ag reset <conta>` zera.
+- [ ] Jogador Bedrock via Geyser: jogar normalmente, sem alerta.
+
+Se algum jogador legítimo cair em alerta, mande a linha do `violations.log` para ajustar o limite certo.
+
+## Limitações conhecidas
+
+- Plugins que quebram/movem jogadores em massa (mina em área, vein miner, jetpacks) podem disparar `nuker` ou `fly`:
+  dê `asthenguard.bypass` só para o caso específico ou ajuste os limites.
+- Não há verificação de timer, scaffold, Jesus/Water-walk nem NoSlow nesta versão.
+- O monitor de x-ray é estatístico: avisa, não pune. Confirme olhando o jogador antes de agir.
+- Esta versão foi escrita sem poder compilar contra o `paper-api` 26.3 (o ambiente de criação não tem rede):
+  se o GitHub Actions apontar erro de compilação, é um ajuste de nome de método.
+
+```
+
+`antixray/paper-world-defaults_anti-xray.yml`:
+
+```yml
+# ANTI-XRAY DO PAPER - OVERWORLD (vale para todos os mundos que não tenham override)
+#
+# Onde colocar: abra  config/paper-world-defaults.yml  do servidor, ache o bloco
+#   anticheat:
+#     anti-xray:
+# e SUBSTITUA esse bloco inteiro pelo conteúdo abaixo (mantenha a indentação).
+# Faça backup do arquivo antes. Depois REINICIE o servidor (não adianta /reload).
+#
+# Por que engine-mode 2: o servidor troca os minérios escondidos por minérios falsos aleatórios.
+# Quem usa x-ray vê minério por toda parte e não sabe qual é real. O modo 1 só esconde minério
+# totalmente cercado de pedra e é mais leve, mas engana bem menos.
+#
+# Limite do método: minério exposto ao ar (em caverna) continua visível. Isso é do próprio Paper.
+
+anticheat:
+  anti-xray:
+    enabled: true
+    engine-mode: 2
+    hidden-blocks:
+    # Descomente "- air" para gerar buracos falsos (ajuda contra quem acha caverna),
+    # mas pode derrubar o FPS dos jogadores.
+    # - air
+    - copper_ore
+    - deepslate_copper_ore
+    - raw_copper_block
+    - diamond_ore
+    - deepslate_diamond_ore
+    - gold_ore
+    - deepslate_gold_ore
+    - iron_ore
+    - deepslate_iron_ore
+    - raw_iron_block
+    - lapis_ore
+    - deepslate_lapis_ore
+    - redstone_ore
+    - deepslate_redstone_ore
+    lava-obscures: false
+    # Minérios das versões novas aparecem em alturas maiores; aumente se quiser cobrir mais.
+    max-block-height: 64
+    replacement-blocks:
+    - chest
+    - amethyst_block
+    - andesite
+    - budding_amethyst
+    - calcite
+    - coal_ore
+    - deepslate_coal_ore
+    - deepslate
+    - diorite
+    - dirt
+    - emerald_ore
+    - deepslate_emerald_ore
+    - granite
+    - gravel
+    - oak_planks
+    - smooth_basalt
+    - stone
+    - tuff
+    update-radius: 2
+    # false = vale para todos. Com true, quem tiver a permissão paper.antixray.bypass enxerga tudo.
+    use-permission: false
+
+```
+
+`antixray/the_end_paper-world.yml`:
+
+```yml
+# ANTI-XRAY DO PAPER - END
+#
+# Onde colocar (caminho indicado na documentação do Paper):
+#   <pasta do mundo>/dimensions/minecraft/the_end/paper-world.yml
+# O End não tem minério para esconder, então o anti-xray fica desligado lá (poupa processamento).
+
+anticheat:
+  anti-xray:
+    enabled: false
+
+```
+
+`antixray/the_nether_paper-world.yml`:
+
+```yml
+# ANTI-XRAY DO PAPER - NETHER
+#
+# Onde colocar (caminho indicado na documentação do Paper):
+#   <pasta do mundo>/dimensions/minecraft/the_nether/paper-world.yml
+# Se o arquivo já existir, junte este bloco ao que está lá. Se o seu Nether estiver em outra pasta,
+# use a pasta equivalente da dimensão the_nether. Reinicie o servidor depois.
+#
+# Sem este arquivo o Nether usaria a lista do Overworld, que não protege Ancient Debris.
+
+anticheat:
+  anti-xray:
+    enabled: true
+    engine-mode: 2
+    hidden-blocks:
+    # Descomente "- air" se quiser buracos falsos (pode custar FPS no cliente).
+    # - air
+    - ancient_debris
+    - bone_block
+    - glowstone
+    - magma_block
+    - nether_bricks
+    - nether_gold_ore
+    - nether_quartz_ore
+    - polished_blackstone_bricks
+    lava-obscures: false
+    max-block-height: 128
+    replacement-blocks:
+    - basalt
+    - blackstone
+    - gravel
+    - netherrack
+    - soul_sand
+    - soul_soil
+    update-radius: 2
+    use-permission: false
+
+```
+
+`pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.asthen</groupId>
+    <artifactId>AsthenGuard</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>AsthenGuard</name>
+
+    <properties>
+        <maven.compiler.release>25</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>[26.3.build,)</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>AsthenGuard-${project.version}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+```
+
+`src/main/java/com/asthen/guard/AsthenGuard.java`:
+
+```java
+package com.asthen.guard;
+
+import org.bukkit.entity.Player;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public final class AsthenGuard extends JavaPlugin implements Listener {
+    private final Map<UUID, PlayerData> players = new ConcurrentHashMap<>();
+    private Flagger flagger;
+
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+        flagger = new Flagger(this);
+
+        getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(new MovementListener(this), this);
+        getServer().getPluginManager().registerEvents(new CombatListener(this), this);
+        getServer().getPluginManager().registerEvents(new BuildListener(this), this);
+
+        PluginCommand command = getCommand("asthenguard");
+        if (command != null) {
+            GuardCommand handler = new GuardCommand(this);
+            command.setExecutor(handler);
+            command.setTabCompleter(handler);
+        }
+
+        // jogadores já online (caso de /reload ou plugin carregado com o servidor aberto)
+        for (Player p : getServer().getOnlinePlayers()) {
+            data(p).bedrock = detectBedrock(p);
+        }
+        getLogger().info("AsthenGuard ativo.");
+    }
+
+    @Override
+    public void onDisable() {
+        players.clear();
+    }
+
+    PlayerData data(Player p) {
+        return players.computeIfAbsent(p.getUniqueId(), k -> new PlayerData());
+    }
+
+    Flagger flagger() {
+        return flagger;
+    }
+
+    void reloadAll() {
+        reloadConfig();
+        flagger.reload();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onJoin(PlayerJoinEvent e) {
+        PlayerData d = data(e.getPlayer());
+        d.lastJoin = System.currentTimeMillis();
+        d.bedrock = detectBedrock(e.getPlayer());
+        d.lastSafe = e.getPlayer().getLocation().clone();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(PlayerQuitEvent e) {
+        players.remove(e.getPlayer().getUniqueId());
+    }
+
+    /** Pergunta ao Floodgate (por reflexão, sem dependência de compilação). O nome do jogador nunca é usado. */
+    private boolean detectBedrock(Player p) {
+        try {
+            Class<?> api = Class.forName("org.geysermc.floodgate.api.FloodgateApi");
+            Object instance = api.getMethod("getInstance").invoke(null);
+            Object result = api.getMethod("isFloodgatePlayer", UUID.class).invoke(instance, p.getUniqueId());
+            return result instanceof Boolean b && b;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+}
+
+```
+
+`src/main/java/com/asthen/guard/BuildListener.java`:
+
+```java
+package com.asthen.guard;
+
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Tag;
+import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+
+import java.util.ArrayDeque;
+import java.util.Locale;
+
+/** Nuker (quebra rápida/distante), colocação rápida e monitor de x-ray por estatística de minério. */
+final class BuildListener implements Listener {
+    private final AsthenGuard plugin;
+
+    BuildListener(AsthenGuard plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBreak(BlockBreakEvent e) {
+        Player p = e.getPlayer();
+        Flagger fl = plugin.flagger();
+        if (fl.bypassed(p)) return;
+        GameMode gm = p.getGameMode();
+        if (gm == GameMode.CREATIVE || gm == GameMode.SPECTATOR) return;
+
+        FileConfiguration c = plugin.getConfig();
+        PlayerData d = plugin.data(p);
+        Block block = e.getBlock();
+        long now = System.currentTimeMillis();
+
+        // ---- distância até o bloco ----
+        if (block.getWorld() == p.getWorld()) {
+            Location eye = p.getEyeLocation();
+            double dist = eye.distance(block.getLocation().add(0.5, 0.5, 0.5));
+            double max = c.getDouble("building.max-break-reach", 5.7)
+                    + (d.bedrock ? c.getDouble("bedrock.extra-reach", 0.5) : 0);
+            if (dist > max) {
+                fl.flag(p, "nuker-reach", 1, String.format(Locale.ROOT, "dist=%.2f max=%.2f", dist, max), true);
+                e.setCancelled(true);
+                return;
+            }
+        }
+
+        // ---- ritmo de quebra ----
+        if (overRate(d.breaks, now, c.getInt("building.max-breaks-per-second", 14))) {
+            fl.flag(p, "nuker", 1, "blocos/s=" + d.breaks.size(), true);
+            e.setCancelled(true);
+            return;
+        }
+
+        if (c.getBoolean("xray.enabled", true)) {
+            xray(p, d, block.getType(), now, c);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPlace(BlockPlaceEvent e) {
+        Player p = e.getPlayer();
+        Flagger fl = plugin.flagger();
+        if (fl.bypassed(p)) return;
+        GameMode gm = p.getGameMode();
+        if (gm == GameMode.CREATIVE || gm == GameMode.SPECTATOR) return;
+
+        PlayerData d = plugin.data(p);
+        long now = System.currentTimeMillis();
+        if (overRate(d.places, now, plugin.getConfig().getInt("building.max-places-per-second", 14))) {
+            fl.flag(p, "fastplace", 1, "blocos/s=" + d.places.size(), true);
+            e.setCancelled(true);
+        }
+    }
+
+    /** Registra o evento e diz se passou de {@code max} na última 1s. */
+    private static boolean overRate(ArrayDeque<Long> times, long now, int max) {
+        times.addLast(now);
+        while (!times.isEmpty() && now - times.peekFirst() > 1000) times.pollFirst();
+        return times.size() > max;
+    }
+
+    /**
+     * Monitor de x-ray: compara minério valioso com pedra comum na mesma janela de tempo.
+     * Só alerta a equipe (não expulsa): ratio alto também acontece em caverna rica.
+     */
+    private void xray(Player p, PlayerData d, Material type, long now, FileConfiguration c) {
+        long windowMs = c.getLong("xray.window-minutes", 10L) * 60_000L;
+        if (now - d.xrayWindowStart > windowMs) {
+            d.xrayWindowStart = now;
+            d.stoneMined = 0;
+            d.oreMined = 0;
+        }
+
+        if (isStone(type)) {
+            d.stoneMined++;
+            return;
+        }
+        if (!plugin.flagger().xrayBlocks().contains(type)) return;
+
+        d.oreMined++;
+        d.oreTotal++;
+        int min = c.getInt("xray.min-ores", 8);
+        double ratio = (double) d.oreMined / (d.stoneMined + d.oreMined);
+        if (d.oreMined >= min && ratio >= c.getDouble("xray.ratio", 0.08)) {
+            plugin.flagger().flag(p, "xray", 4, String.format(Locale.ROOT,
+                    "minerios=%d pedra=%d (%.1f%%) em %d min", d.oreMined, d.stoneMined, ratio * 100,
+                    (now - d.xrayWindowStart) / 60_000L), false);
+        }
+    }
+
+    private static boolean isStone(Material m) {
+        return Tag.BASE_STONE_OVERWORLD.isTagged(m) || Tag.BASE_STONE_NETHER.isTagged(m);
+    }
+}
+
+```
+
+`src/main/java/com/asthen/guard/CombatListener.java`:
+
+```java
+package com.asthen.guard;
+
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerAnimationType;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
+
+import java.util.Locale;
+
+/** Alcance (reach), kill aura (ângulo, alvos múltiplos, bater através de parede) e cliques por segundo. */
+final class CombatListener implements Listener {
+    private final AsthenGuard plugin;
+
+    CombatListener(AsthenGuard plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onSwing(PlayerAnimationEvent e) {
+        if (e.getAnimationType() != PlayerAnimationType.ARM_SWING) return;
+        Player p = e.getPlayer();
+        Flagger fl = plugin.flagger();
+        if (fl.bypassed(p)) return;
+        PlayerData d = plugin.data(p);
+        if (d.bedrock) return; // toque no Bedrock gera rajadas de swing legítimas
+
+        long now = System.currentTimeMillis();
+        d.swings.addLast(now);
+        while (!d.swings.isEmpty() && now - d.swings.peekFirst() > 1000) d.swings.pollFirst();
+
+        int max = plugin.getConfig().getInt("combat.max-cps", 22);
+        if (d.swings.size() > max) {
+            fl.flag(p, "clicks", 0.5, "cps=" + d.swings.size(), true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onHit(EntityDamageByEntityEvent e) {
+        if (!(e.getDamager() instanceof Player p)) return;
+        // varredura (sweep) e outros tipos não são o golpe direto do jogador
+        if (e.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) return;
+
+        Flagger fl = plugin.flagger();
+        if (fl.bypassed(p)) return;
+        GameMode gm = p.getGameMode();
+        if (gm == GameMode.CREATIVE || gm == GameMode.SPECTATOR) return;
+
+        FileConfiguration c = plugin.getConfig();
+        PlayerData d = plugin.data(p);
+        Entity target = e.getEntity();
+        if (target.getWorld() != p.getWorld()) return;
+
+        long now = System.currentTimeMillis();
+        Location eye = p.getEyeLocation();
+        BoundingBox box = target.getBoundingBox();
+        boolean cancel = false;
+
+        // ---- alcance: do olho ao ponto mais próximo da caixa do alvo ----
+        double nx = clamp(eye.getX(), box.getMinX(), box.getMaxX());
+        double ny = clamp(eye.getY(), box.getMinY(), box.getMaxY());
+        double nz = clamp(eye.getZ(), box.getMinZ(), box.getMaxZ());
+        double dist = Math.sqrt(sq(eye.getX() - nx) + sq(eye.getY() - ny) + sq(eye.getZ() - nz));
+        double pingExtra = Math.min(Math.max(p.getPing(), 0), 300) / 1000.0 * 2.0;
+        double allowed = c.getDouble("combat.max-reach", 3.6) + pingExtra
+                + (d.bedrock ? c.getDouble("bedrock.extra-reach", 0.5) : 0);
+        if (dist > allowed) {
+            fl.flag(p, "reach", dist > allowed + 1.0 ? 2 : 1,
+                    String.format(Locale.ROOT, "dist=%.2f max=%.2f", dist, allowed), true);
+            cancel = true;
+        }
+
+        // ---- ângulo: bater em quem está fora da mira ----
+        Vector toCenter = box.getCenter().subtract(eye.toVector());
+        double len = toCenter.length();
+        if (len > 1.5) {
+            double angle = Math.toDegrees(toCenter.angle(eye.getDirection()));
+            if (angle > c.getDouble("combat.max-angle", 80)) {
+                fl.flag(p, "killaura-angle", 2, String.format(Locale.ROOT, "angulo=%.0f", angle), true);
+                cancel = true;
+            }
+
+            // ---- bater através de bloco sólido ----
+            if (c.getBoolean("combat.wall-check", true)) {
+                RayTraceResult hit = p.getWorld().rayTraceBlocks(eye, toCenter.clone().normalize(), len,
+                        FluidCollisionMode.NEVER, true);
+                if (hit != null && hit.getHitBlock() != null && hit.getHitBlock().getType().isOccluding()) {
+                    double blockDist = hit.getHitPosition().distance(eye.toVector());
+                    if (blockDist < len - 0.8) {
+                        fl.flag(p, "killaura-wall", 2, "bloco entre atacante e alvo", true);
+                        cancel = true;
+                    }
+                }
+            }
+        }
+
+        // ---- dois alvos diferentes no mesmo tick ----
+        if (c.getBoolean("combat.multi-target", true)
+                && d.lastHitTarget != null
+                && now - d.lastHitTime < 40
+                && !d.lastHitTarget.equals(target.getUniqueId())) {
+            fl.flag(p, "killaura-multi", 1, "2 alvos em " + (now - d.lastHitTime) + "ms", true);
+            cancel = true;
+        }
+        d.lastHitTime = now;
+        d.lastHitTarget = target.getUniqueId();
+
+        if (cancel) e.setCancelled(true);
+    }
+
+    private static double clamp(double v, double min, double max) {
+        return Math.max(min, Math.min(max, v));
+    }
+
+    private static double sq(double v) {
+        return v * v;
+    }
+}
+
+```
+
+`src/main/java/com/asthen/guard/Flagger.java`:
+
+```java
+package com.asthen.guard;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.EnumSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+
+/** Registra violações, avisa a equipe e aplica expulsão/punição. */
+final class Flagger {
+    private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacyAmpersand();
+    private static final Pattern SAFE_NAME = Pattern.compile("[A-Za-z0-9_.]{1,20}");
+    private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    private final AsthenGuard plugin;
+    private final Set<UUID> alertsOff = ConcurrentHashMap.newKeySet();
+    private final Set<Material> xrayBlocks = EnumSet.noneOf(Material.class);
+
+    private boolean bypassOps;
+    private boolean logFile;
+    private double decay;
+    private double alertVl;
+    private double kickVl;
+    private double punishVl;
+    private String punishCommand = "";
+    private String kickMessage = "";
+    private String alertFormat = "";
+
+    Flagger(AsthenGuard plugin) {
+        this.plugin = plugin;
+        reload();
+    }
+
+    void reload() {
+        FileConfiguration c = plugin.getConfig();
+        bypassOps = c.getBoolean("general.bypass-ops", false);
+        logFile = c.getBoolean("general.log-file", true);
+        decay = c.getDouble("general.decay-per-second", 0.15);
+        alertVl = c.getDouble("punishment.alert-vl", 4);
+        kickVl = c.getDouble("punishment.kick-vl", 16);
+        punishVl = c.getDouble("punishment.punish-vl", 0);
+        punishCommand = c.getString("punishment.punish-command", "");
+        kickMessage = c.getString("punishment.kick-message", "&cRemovido pelo anti-cheat.");
+        alertFormat = c.getString("messages.alert",
+                "&8[&cAsthenGuard&8] &f{player} &7falhou &c{check} &7(VL &f{vl}&7) &8{info}");
+
+        xrayBlocks.clear();
+        for (String name : c.getStringList("xray.watch-blocks")) {
+            Material m = Material.matchMaterial(name);
+            if (m != null) {
+                xrayBlocks.add(m);
+            } else {
+                plugin.getLogger().warning("xray.watch-blocks: material desconhecido '" + name + "'");
+            }
+        }
+    }
+
+    double decay() {
+        return decay;
+    }
+
+    Set<Material> xrayBlocks() {
+        return xrayBlocks;
+    }
+
+    boolean bypassed(Player p) {
+        return p.hasPermission("asthenguard.bypass") || (bypassOps && p.isOp());
+    }
+
+    /** Alterna os alertas de um membro da equipe. Devolve true se ficaram ligados. */
+    boolean toggleAlerts(UUID id) {
+        if (alertsOff.remove(id)) return true;
+        alertsOff.add(id);
+        return false;
+    }
+
+    /**
+     * Soma violação e aplica as consequências.
+     *
+     * @param punishable false para verificações que só devem alertar (x-ray)
+     * @return o VL atual desta verificação
+     */
+    double flag(Player p, String check, double weight, String info, boolean punishable) {
+        PlayerData d = plugin.data(p);
+        double vl = d.addVl(check, weight, decay);
+        long now = System.currentTimeMillis();
+
+        if (vl >= alertVl && d.canAlert(check, now, 1500)) {
+            alert(p, check, vl, info);
+        }
+
+        if (punishable && !d.punished) {
+            if (punishVl > 0 && !punishCommand.isBlank() && vl >= punishVl) {
+                punish(p, d, check, vl);
+            } else if (kickVl > 0 && vl >= kickVl) {
+                kick(p, d, check, vl);
+            }
+        }
+        return vl;
+    }
+
+    private void alert(Player p, String check, double vl, String info) {
+        String vlText = String.format(Locale.ROOT, "%.1f", vl);
+        String text = alertFormat
+                .replace("{player}", p.getName())
+                .replace("{check}", check)
+                .replace("{vl}", vlText)
+                .replace("{info}", info);
+        Component msg = LEGACY.deserialize(text);
+        for (Player staff : Bukkit.getOnlinePlayers()) {
+            if (staff.hasPermission("asthenguard.alerts") && !alertsOff.contains(staff.getUniqueId())) {
+                staff.sendMessage(msg);
+            }
+        }
+        plugin.getLogger().info(p.getName() + " falhou " + check + " (VL " + vlText + ") " + info);
+        log(p.getName() + " " + check + " VL=" + vlText + " " + info);
+    }
+
+    private void kick(Player p, PlayerData d, String check, double vl) {
+        d.punished = true;
+        log("KICK " + p.getName() + " " + check);
+        Component reason = LEGACY.deserialize(kickMessage);
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (p.isOnline()) p.kick(reason);
+        });
+    }
+
+    private void punish(Player p, PlayerData d, String check, double vl) {
+        d.punished = true;
+        String name = p.getName();
+        if (!SAFE_NAME.matcher(name).matches()) {
+            // nome fora do padrão: não monta comando, só expulsa
+            kick(p, d, check, vl);
+            return;
+        }
+        String cmd = punishCommand
+                .replace("{player}", name)
+                .replace("{check}", check)
+                .replace("{vl}", String.format(Locale.ROOT, "%.0f", vl));
+        log("PUNISH " + name + " " + check + " -> " + cmd);
+        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
+    }
+
+    private void log(String line) {
+        if (!logFile) return;
+        Path file = plugin.getDataFolder().toPath().resolve("violations.log");
+        String text = LocalDateTime.now().format(TIME) + " " + line.replace('\n', ' ').replace('\r', ' ')
+                + System.lineSeparator();
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                Files.createDirectories(file.getParent());
+                Files.writeString(file, text, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (IOException ignored) {
+                // log é opcional
+            }
+        });
+    }
+}
+
+```
+
+`src/main/java/com/asthen/guard/GuardCommand.java`:
+
+```java
+package com.asthen.guard;
+
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+final class GuardCommand implements CommandExecutor, TabCompleter {
+    private static final String PREFIX = "§8[§cAsthenGuard§8] §7";
+    private static final List<String> SUBS = List.of("alerts", "reload", "vl", "reset", "xray");
+
+    private final AsthenGuard plugin;
+
+    GuardCommand(AsthenGuard plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (args.length == 0) {
+            help(sender);
+            return true;
+        }
+        String sub = args[0].toLowerCase(Locale.ROOT);
+        switch (sub) {
+            case "alerts" -> {
+                if (!(sender instanceof Player p)) {
+                    sender.sendMessage(PREFIX + "Só jogadores podem ligar/desligar alertas.");
+                    return true;
+                }
+                boolean on = plugin.flagger().toggleAlerts(p.getUniqueId());
+                sender.sendMessage(PREFIX + "Alertas " + (on ? "§aligados" : "§cdesligados") + "§7.");
+            }
+            case "reload" -> {
+                plugin.reloadAll();
+                sender.sendMessage(PREFIX + "Configuração recarregada.");
+            }
+            case "vl", "reset", "xray" -> {
+                if (args.length < 2) {
+                    sender.sendMessage(PREFIX + "Uso: /ag " + sub + " <jogador>");
+                    return true;
+                }
+                Player target = Bukkit.getPlayerExact(args[1]);
+                if (target == null) {
+                    sender.sendMessage(PREFIX + "Jogador não encontrado (precisa estar online).");
+                    return true;
+                }
+                PlayerData d = plugin.data(target);
+                if (sub.equals("reset")) {
+                    d.clearVl();
+                    d.punished = false;
+                    sender.sendMessage(PREFIX + "VL de §f" + target.getName() + " §7zerado.");
+                } else if (sub.equals("vl")) {
+                    Map<String, Double> snap = d.snapshot(plugin.flagger().decay());
+                    if (snap.isEmpty()) {
+                        sender.sendMessage(PREFIX + target.getName() + " está limpo.");
+                    } else {
+                        sender.sendMessage(PREFIX + "VL de §f" + target.getName() + "§7:");
+                        snap.forEach((check, vl) -> sender.sendMessage(
+                                "  §c" + check + " §7= §f" + String.format(Locale.ROOT, "%.1f", vl)));
+                    }
+                } else {
+                    int total = d.oreMined + d.stoneMined;
+                    double ratio = total == 0 ? 0 : 100.0 * d.oreMined / total;
+                    sender.sendMessage(PREFIX + "X-ray de §f" + target.getName() + "§7 (janela atual): minérios §f"
+                            + d.oreMined + "§7, pedra §f" + d.stoneMined + "§7, proporção §f"
+                            + String.format(Locale.ROOT, "%.1f", ratio) + "%§7. Total de minérios valiosos na sessão: §f"
+                            + d.oreTotal + "§7.");
+                }
+            }
+            default -> help(sender);
+        }
+        return true;
+    }
+
+    private void help(CommandSender s) {
+        s.sendMessage(PREFIX + "Comandos: §f/ag alerts§7, §f/ag reload§7, §f/ag vl <jogador>§7, "
+                + "§f/ag reset <jogador>§7, §f/ag xray <jogador>");
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
+        List<String> out = new ArrayList<>();
+        if (args.length == 1) {
+            for (String s : SUBS) {
+                if (s.startsWith(args[0].toLowerCase(Locale.ROOT))) out.add(s);
+            }
+        } else if (args.length == 2 && !args[0].equalsIgnoreCase("alerts") && !args[0].equalsIgnoreCase("reload")) {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.getName().toLowerCase(Locale.ROOT).startsWith(args[1].toLowerCase(Locale.ROOT))) {
+                    out.add(p.getName());
+                }
+            }
+        }
+        return out;
+    }
+}
+
+```
+
+`src/main/java/com/asthen/guard/MovementListener.java`:
+
+```java
+package com.asthen.guard;
+
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Tag;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerRiptideEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerVelocityEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import java.util.Locale;
+
+/** Velocidade, voo/planar, queda falsa (nofall) e atravessar blocos (phase). */
+final class MovementListener implements Listener {
+    private final AsthenGuard plugin;
+
+    MovementListener(AsthenGuard plugin) {
+        this.plugin = plugin;
+    }
+
+    // ---------- eventos que dão carência / zeram o estado ----------
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onTeleport(PlayerTeleportEvent e) {
+        PlayerData d = plugin.data(e.getPlayer());
+        d.lastTeleport = System.currentTimeMillis();
+        d.resetAir();
+        d.lastSafe = e.getTo().clone();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onRespawn(PlayerRespawnEvent e) {
+        PlayerData d = plugin.data(e.getPlayer());
+        d.lastTeleport = System.currentTimeMillis();
+        d.resetAir();
+        d.lastSafe = e.getRespawnLocation().clone();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onWorldChange(PlayerChangedWorldEvent e) {
+        PlayerData d = plugin.data(e.getPlayer());
+        d.lastTeleport = System.currentTimeMillis();
+        d.resetAir();
+        d.lastSafe = e.getPlayer().getLocation().clone();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onGameMode(PlayerGameModeChangeEvent e) {
+        PlayerData d = plugin.data(e.getPlayer());
+        d.lastTeleport = System.currentTimeMillis();
+        d.resetAir();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onVelocity(PlayerVelocityEvent e) {
+        plugin.data(e.getPlayer()).lastVelocity = System.currentTimeMillis();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onRiptide(PlayerRiptideEvent e) {
+        // tridente com Riptide: carência maior (valor no futuro estende a janela)
+        plugin.data(e.getPlayer()).lastVelocity = System.currentTimeMillis() + 3000;
+    }
+
+    // ---------- verificação principal ----------
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onMove(PlayerMoveEvent e) {
+        if (!e.hasChangedPosition()) return;
+        Player p = e.getPlayer();
+        Flagger fl = plugin.flagger();
+        if (fl.bypassed(p)) return;
+
+        Location from = e.getFrom();
+        Location to = e.getTo();
+        PlayerData d = plugin.data(p);
+        long now = System.currentTimeMillis();
+        FileConfiguration c = plugin.getConfig();
+
+        if (from.getWorld() != to.getWorld()) {
+            d.resetAir();
+            d.lastSafe = to.clone();
+            return;
+        }
+        if (!to.isChunkLoaded()) return;
+
+        if (exempt(p, d, now, c)) {
+            d.resetAir();
+            d.lastSafe = to.clone();
+            return;
+        }
+
+        double dx = to.getX() - from.getX();
+        double dz = to.getZ() - from.getZ();
+        double dy = to.getY() - from.getY();
+        double h = Math.hypot(dx, dz);
+
+        boolean ground = nearGround(to);
+        boolean special = special(to)
+                || amp(p, PotionEffectType.LEVITATION) >= 0
+                || amp(p, PotionEffectType.SLOW_FALLING) >= 0;
+
+        if (ground) {
+            Material under = to.clone().subtract(0, 0.3, 0).getBlock().getType();
+            if (under == Material.SLIME_BLOCK || Tag.BEDS.isTagged(under)) d.lastBounce = now;
+        }
+        if (now - d.lastBounce < c.getLong("movement.bounce-grace-ms", 4000L)) special = true;
+
+        boolean setback = false;
+        boolean backToFrom = false;
+        boolean clean = true;
+
+        // ---- velocidade horizontal ----
+        double limit = c.getDouble("movement.max-horizontal", 0.45) * speedFactor(p, to);
+        if (d.bedrock) limit *= c.getDouble("bedrock.leniency", 1.25);
+        if (h > limit) {
+            clean = false;
+            d.speedBuf += 1;
+            if (d.speedBuf >= c.getDouble("movement.speed-buffer", 3)) {
+                fl.flag(p, "speed", 1, String.format(Locale.ROOT, "h=%.3f max=%.3f", h, limit), true);
+                setback = true;
+            }
+        } else {
+            d.speedBuf = Math.max(0, d.speedBuf - 0.5);
+        }
+
+        // ---- voo / planar / pulo alto ----
+        if (ground) {
+            d.airTicks = 0;
+            d.hoverTicks = 0;
+            d.airStartY = to.getY();
+        } else {
+            if (d.airTicks == 0) d.airStartY = from.getY();
+            d.airTicks++;
+            if (special) {
+                d.hoverTicks = 0;
+                d.airStartY = to.getY();
+            } else {
+                d.hoverTicks = dy > -0.05 ? d.hoverTicks + 1 : 0;
+                int jb = amp(p, PotionEffectType.JUMP_BOOST) + 1;
+                double maxHeight = c.getDouble("movement.max-jump-height", 1.4) + 0.7 * jb;
+                int maxHover = c.getInt("movement.max-hover-ticks", 14) + 5 * jb;
+                double climbed = to.getY() - d.airStartY;
+                if ((climbed > maxHeight || d.hoverTicks > maxHover) && !standingOnEntity(p)) {
+                    clean = false;
+                    fl.flag(p, "fly", 1, String.format(Locale.ROOT,
+                            "subiu=%.2f paradoTicks=%d noAr=%d", climbed, d.hoverTicks, d.airTicks), true);
+                    setback = true;
+                }
+            }
+        }
+
+        // ---- queda falsa (nofall): caiu bastante mas o servidor não contou a queda ----
+        if (!ground && !special && dy < 0) {
+            d.fallAccum += -dy;
+        } else {
+            d.fallAccum = 0;
+        }
+        if (d.fallAccum > 4.0 && p.getFallDistance() < d.fallAccum * 0.4) {
+            d.nofallBuf += 1;
+            if (d.nofallBuf >= 3) {
+                clean = false;
+                fl.flag(p, "nofall", 1, String.format(Locale.ROOT,
+                        "caiu=%.1f servidor=%.1f", d.fallAccum, p.getFallDistance()), true);
+                setback = true;
+            }
+        } else {
+            d.nofallBuf = Math.max(0, d.nofallBuf - 1);
+        }
+
+        // ---- atravessar blocos (phase) ----
+        boolean inside = solid(to.getBlock()) || solid(to.getBlock().getRelative(BlockFace.UP));
+        boolean wasInside = solid(from.getBlock()) || solid(from.getBlock().getRelative(BlockFace.UP));
+        if (inside && !wasInside) {
+            d.phaseBuf += 1;
+            if (d.phaseBuf >= 2) {
+                clean = false;
+                fl.flag(p, "phase", 1, "entrou em bloco sólido", true);
+                setback = true;
+                backToFrom = true;
+            }
+        } else {
+            d.phaseBuf = Math.max(0, d.phaseBuf - 0.5);
+        }
+
+        if (setback) {
+            Location back = (backToFrom || d.lastSafe == null || d.lastSafe.getWorld() != to.getWorld())
+                    ? from.clone() : d.lastSafe.clone();
+            back.setYaw(to.getYaw());
+            back.setPitch(to.getPitch());
+            e.setTo(back);
+            d.resetAir();
+        } else if (clean && ground) {
+            d.lastSafe = to.clone();
+        }
+    }
+
+    // ---------- auxiliares ----------
+
+    private boolean exempt(Player p, PlayerData d, long now, FileConfiguration c) {
+        GameMode gm = p.getGameMode();
+        if (gm == GameMode.CREATIVE || gm == GameMode.SPECTATOR) return true;
+        if (p.getAllowFlight() || p.isFlying() || p.isGliding() || p.isRiptiding()
+                || p.isInsideVehicle() || p.isSleeping() || p.isDead()) return true;
+        return now - d.lastTeleport < c.getLong("movement.teleport-grace-ms", 2500L)
+                || now - d.lastJoin < c.getLong("movement.join-grace-ms", 4000L)
+                || now - d.lastVelocity < c.getLong("movement.velocity-grace-ms", 1500L);
+    }
+
+    /** Multiplicador do limite de velocidade: efeitos, /walkspeed, gelo e areia das almas. */
+    private double speedFactor(Player p, Location l) {
+        double m = Math.max(1.0, p.getWalkSpeed() / 0.2);
+        int speed = amp(p, PotionEffectType.SPEED) + 1;
+        if (speed > 0) m *= 1 + 0.2 * speed;
+        if (onIce(l)) m *= 3.0;
+        Material under = l.clone().subtract(0, 0.3, 0).getBlock().getType();
+        if (under == Material.SOUL_SAND || under == Material.SOUL_SOIL) m *= 1.8;
+        if (p.isInWater() || p.isSwimming()) m *= 1.5;
+        return m;
+    }
+
+    private static boolean onIce(Location l) {
+        World w = l.getWorld();
+        int x = (int) Math.floor(l.getX());
+        int z = (int) Math.floor(l.getZ());
+        int y1 = (int) Math.floor(l.getY() - 0.2);
+        int y2 = (int) Math.floor(l.getY() - 1.2);
+        return w.getBlockAt(x, y1, z).getType().name().endsWith("ICE")
+                || w.getBlockAt(x, y2, z).getType().name().endsWith("ICE");
+    }
+
+    private static int amp(Player p, PotionEffectType type) {
+        PotionEffect effect = p.getPotionEffect(type);
+        return effect == null ? -1 : effect.getAmplifier();
+    }
+
+    /** Há bloco sólido sob qualquer ponto da base do jogador (0,6 de largura)? */
+    private static boolean nearGround(Location l) {
+        World w = l.getWorld();
+        double[] offsets = {-0.3, 0.0, 0.3};
+        int y = (int) Math.floor(l.getY() - 0.2);
+        for (double ox : offsets) {
+            for (double oz : offsets) {
+                Block b = w.getBlockAt((int) Math.floor(l.getX() + ox), y, (int) Math.floor(l.getZ() + oz));
+                if (!b.isPassable()) return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean special(Location l) {
+        Block b = l.getBlock();
+        return special(b) || special(b.getRelative(BlockFace.UP)) || special(b.getRelative(BlockFace.DOWN));
+    }
+
+    private static boolean special(Block b) {
+        Material m = b.getType();
+        return b.isLiquid()
+                || Tag.CLIMBABLE.isTagged(m)
+                || m == Material.COBWEB
+                || m == Material.HONEY_BLOCK
+                || m == Material.SLIME_BLOCK
+                || m == Material.BUBBLE_COLUMN
+                || m == Material.POWDER_SNOW
+                || m == Material.SWEET_BERRY_BUSH;
+    }
+
+    private static boolean solid(Block b) {
+        return b.getType().isOccluding();
+    }
+
+    /** Barco, carrinho ou shulker por perto podem servir de chão sem ser bloco. */
+    private static boolean standingOnEntity(Player p) {
+        for (Entity en : p.getNearbyEntities(1.5, 2.0, 1.5)) {
+            if (en instanceof Vehicle || en.getType() == EntityType.SHULKER) return true;
+        }
+        return false;
+    }
+}
+
+```
+
+`src/main/java/com/asthen/guard/PlayerData.java`:
+
+```java
+package com.asthen.guard;
+
+import org.bukkit.Location;
+
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+
+/** Estado por jogador. Só é acessado pela thread principal do servidor. */
+final class PlayerData {
+    // geral
+    boolean bedrock;
+    boolean punished;
+    long lastJoin = System.currentTimeMillis();
+    long lastTeleport;
+    long lastVelocity;
+    long lastBounce;
+    Location lastSafe;
+
+    // movimento
+    int airTicks;
+    int hoverTicks;
+    double airStartY;
+    double fallAccum;
+    double speedBuf;
+    double nofallBuf;
+    double phaseBuf;
+
+    // combate
+    final ArrayDeque<Long> swings = new ArrayDeque<>();
+    long lastHitTime;
+    UUID lastHitTarget;
+
+    // construção
+    final ArrayDeque<Long> breaks = new ArrayDeque<>();
+    final ArrayDeque<Long> places = new ArrayDeque<>();
+
+    // x-ray
+    long xrayWindowStart = System.currentTimeMillis();
+    int stoneMined;
+    int oreMined;
+    int oreTotal;
+
+    // violações: check -> {vl, instante da última atualização}
+    private final Map<String, double[]> vl = new HashMap<>();
+    private final Map<String, Long> lastAlert = new HashMap<>();
+
+    void resetAir() {
+        airTicks = 0;
+        hoverTicks = 0;
+        fallAccum = 0;
+        speedBuf = 0;
+        nofallBuf = 0;
+        phaseBuf = 0;
+    }
+
+    double addVl(String check, double weight, double decayPerSecond) {
+        long now = System.currentTimeMillis();
+        double[] v = vl.computeIfAbsent(check, k -> new double[]{0, now});
+        v[0] = Math.max(0, v[0] - decayPerSecond * (now - v[1]) / 1000.0) + weight;
+        v[1] = now;
+        return v[0];
+    }
+
+    Map<String, Double> snapshot(double decayPerSecond) {
+        long now = System.currentTimeMillis();
+        Map<String, Double> out = new LinkedHashMap<>();
+        for (Map.Entry<String, double[]> en : vl.entrySet()) {
+            double cur = Math.max(0, en.getValue()[0] - decayPerSecond * (now - en.getValue()[1]) / 1000.0);
+            if (cur > 0.05) out.put(en.getKey(), cur);
+        }
+        return out;
+    }
+
+    void clearVl() {
+        vl.clear();
+        lastAlert.clear();
+    }
+
+    boolean canAlert(String check, long now, long gapMs) {
+        Long last = lastAlert.get(check);
+        if (last != null && now - last < gapMs) return false;
+        lastAlert.put(check, now);
+        return true;
+    }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+# AsthenGuard - configuração
+# Depois de editar: /ag reload
+
+general:
+  # false = nem OPs escapam das verificações (recomendado, assim você consegue testar com a sua conta).
+  # O modo criativo/espectador e quem tem permissão de voar já são ignorados nas verificações de movimento.
+  bypass-ops: false
+  # Grava cada alerta em plugins/AsthenGuard/violations.log
+  log-file: true
+  # Quanto de VL (pontos de violação) cada jogador perde por segundo. Faz erros isolados sumirem sozinhos.
+  decay-per-second: 0.15
+
+punishment:
+  # VL a partir do qual a equipe recebe o alerta no chat
+  alert-vl: 4
+  # VL a partir do qual o jogador é expulso (0 = desligado)
+  kick-vl: 16
+  kick-message: "&cVocê foi removido pelo anti-cheat.\n&7Se foi engano, fale com a administração."
+  # Comando executado pelo console ao chegar nesse VL (0 = desligado).
+  # Vem DESLIGADO de propósito: ban automático com falso positivo é pior do que cheater passando.
+  # Exemplo para ligar: punish-vl: 40  e  punish-command: "tempban {player} 1d"
+  # Placeholders: {player} {check} {vl}
+  punish-vl: 0
+  punish-command: ""
+
+messages:
+  alert: "&8[&cAsthenGuard&8] &f{player} &7falhou &c{check} &7(VL &f{vl}&7) &8{info}"
+
+movement:
+  # Velocidade horizontal máxima por tick (andar correndo + pulando fica perto de 0.36).
+  max-horizontal: 0.45
+  # Quantos excessos seguidos antes de contar (absorve lag e empurrões de pistão)
+  speed-buffer: 3
+  # Altura máxima de um pulo normal (o pulo vanilla chega a 1.25)
+  max-jump-height: 1.4
+  # Ticks seguidos no ar sem cair antes de contar como voo/planar
+  max-hover-ticks: 14
+  # Carência (ms) depois de teleporte, respawn, troca de mundo e ao entrar
+  teleport-grace-ms: 2500
+  join-grace-ms: 4000
+  # Carência depois de knockback/explosão/vento (ms)
+  velocity-grace-ms: 1500
+  # Carência depois de pisar em slime/cama (quicar)
+  bounce-grace-ms: 4000
+
+combat:
+  # Alcance máximo de ataque (vanilla = 3.0). A margem cobre lag e a posição do alvo.
+  # O ping do jogador soma até +0.6 automaticamente.
+  max-reach: 3.6
+  # Ângulo máximo entre onde o jogador olha e o alvo (kill aura costuma bater de costas)
+  max-angle: 80
+  # Cliques máximos por segundo (minerar já dá 20/s sozinho)
+  max-cps: 22
+  # Bate em alvo atrás de bloco sólido
+  wall-check: true
+  # Dois alvos diferentes no mesmo tick
+  multi-target: true
+
+building:
+  # Distância máxima do olho do jogador ao bloco que ele quebra (vanilla ~4.5)
+  max-break-reach: 5.7
+  # Blocos quebrados por segundo (nuker)
+  max-breaks-per-second: 14
+  # Blocos colocados por segundo
+  max-places-per-second: 14
+
+xray:
+  # Só ALERTA a equipe, nunca expulsa: a defesa de verdade é o anti-xray do Paper (veja a pasta antixray).
+  enabled: true
+  # Janela de observação em minutos
+  window-minutes: 10
+  # Mínimo de minérios valiosos na janela para considerar
+  min-ores: 8
+  # Proporção valiosos / (pedra + valiosos) a partir da qual alerta (0.08 = 8%). Mineração normal fica abaixo de 2%.
+  ratio: 0.08
+  watch-blocks:
+    - DIAMOND_ORE
+    - DEEPSLATE_DIAMOND_ORE
+    - ANCIENT_DEBRIS
+    - EMERALD_ORE
+    - DEEPSLATE_EMERALD_ORE
+
+bedrock:
+  # Jogadores Bedrock (via Geyser/Floodgate) têm toque e ping diferentes. Multiplica o limite de velocidade
+  # e soma alcance. A checagem usa a API do Floodgate, nunca o prefixo do nome.
+  leniency: 1.25
+  extra-reach: 0.5
+
+```
+
+`src/main/resources/plugin.yml`:
+
+```yml
+name: AsthenGuard
+version: '${project.version}'
+main: com.asthen.guard.AsthenGuard
+api-version: '26.3'
+description: Anti-cheat (movimento, combate, construção) e monitor de x-ray
+softdepend: [floodgate, Geyser-Spigot, AsthenEssentials, LobbyGuard]
+commands:
+  asthenguard:
+    description: Administração do AsthenGuard
+    usage: /asthenguard <alerts|reload|vl|reset|xray>
+    aliases: [ag]
+    permission: asthenguard.admin
+permissions:
+  asthenguard.admin:
+    description: Usar /asthenguard
+    default: op
+  asthenguard.alerts:
+    description: Receber alertas de violação no chat
+    default: op
+  asthenguard.bypass:
+    description: Ignorar todas as verificações (não dê para jogadores comuns)
+    default: false
+
+```
