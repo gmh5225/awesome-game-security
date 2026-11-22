@@ -4955,6 +4955,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/uamo11/y0x1Server [Piqueserver Ace of Spades dedicated server fork with persistent HWID bans and server-side speed/fly/teleport, reach, rapid-fire, and snap-aim checks]
 - https://github.com/Longno242/Encryptic-Roblox-Anti-Cheat [Server-authoritative Luau anti-cheat for Roblox with movement, remote, fly/noclip, fire-rate, and combat guards plus Studio demo]
 - https://github.com/mastershadow547/Advanced-Anticheat [Open-source Roblox server anti-cheat detecting movement exploits, unauthorized remotes, and environment tampering]
+- https://github.com/misteorecandy/New-anti-cheat-for-Roblox-games [Server-side Roblox Luau anti-cheat with speed/fly detection and client-side punishment flow for exploiters]
 - https://github.com/sorrelhub/shprotect-ac [Server-first Roblox Luau anti-cheat with movement, remote spam, fly/noclip, and client watchdog detectors]
 - https://github.com/theo926/VolcanoAC [Open-source Roblox Luau server anti-cheat with speed, fly, noclip, and seated-state movement validation plus lag-back enforcement]
 - https://github.com/Dalbonden/Anti-cheat [ACF: modular server-authoritative Roblox anti-cheat framework (Luau) with detection modules, evidence store, enforcement ladder, and offline/Studio tests]
