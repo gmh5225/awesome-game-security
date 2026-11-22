@@ -4932,6 +4932,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/TheNINJALLO/endstone-paradox [Native C++23 Paradox anti-cheat plugin for Endstone Bedrock dedicated servers (54 modules, movement/combat heuristics, staff moderation)]
 - https://github.com/LiteLDev/LeviAntiCheat [Open-source LeviLamina plugin anti-cheat for Minecraft Bedrock dedicated servers with X-ray, reach, auto-click, and duplication exploit mitigations]
 - https://github.com/oomph-ac/oomph [Minecraft Bedrock MiTM anti-cheat proxy with server-authoritative movement and combat]
+- https://github.com/nioney1277-lab/NavroProxy [MIT-licensed Java anti-cheat proxy for Minecraft Bedrock (RakNet/NetherNet) with 22 movement and gameplay checks, configurable punishments, and detect or inspect modes]
 - https://github.com/GhostNgEnd/Ghost-AntiCheat [Prediction-based movement anti-cheat for Minecraft Bedrock Edition with packet, offset, and ping checks]
 - https://github.com/NaySurGithub/Amethyst [Prediction-based movement anti-cheat plugin for PowerNukkitX that replays Bedrock physics to flag unexplained client positions]
 - https://github.com/BlaizerBrumo/SafeGuard [Minecraft Bedrock behavior-pack anti-cheat add-on with combat, item, and world-abuse detections plus admin moderation tools]
