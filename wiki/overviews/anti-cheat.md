@@ -1097,6 +1097,7 @@ sources:
   - wiki/sources/descriptions/smoothjazzchazz__game-integrity-code.md
   - wiki/sources/descriptions/DMN-Software__dmn_minigame.md
   - wiki/sources/descriptions/mioolio__AntiCheatExpert.md
+  - wiki/sources/descriptions/misteorecandy__New-anti-cheat-for-Roblox-games.md
   - wiki/sources/descriptions/Ender3D__minecraft-mod-creative-scroll.md
 updated: 2026-11-22
 confidence: high
@@ -1628,6 +1629,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Roblox melee combat validation reference:** [[fighting-system]] (aloqqgem; Luau server-authoritative melee with lag compensation, position-history rewind hit tests, client prediction, shared hitbox previews, schema-checked combat requests, strike-based kicks, and sliding-window movement snap-backs; automated Studio tests) for engineers studying exploit-resistant combat validation beside modular Luau AC such as [[acf]]. (source: wiki/sources/descriptions/aloqqgem__fighting-system.md)
 
 **Roblox community exploiter ID registry:** [[anti-cheat-exploiter-ids]] (dynex-studios; public registry of verified Roblox user IDs flagged by participating anti-cheat systems; newline-delimited numeric dataset plus curation, appeal, and usage documentation; detection logic private; developers import as shared blocklist or cross-reference; Anti Cheat / game:roblox) beside Luau AC and staff tooling such as [[anticheat-dashboard]]. (source: wiki/sources/descriptions/dynex-studios__Anti-Cheat_exploiter-Ids.md)
+
+**Roblox horror deterrent punishment flow:** [[new-anti-cheat-for-roblox-games]] (misteorecandy; **Shadow Nextbot Anti-Cheat** Studio package; Luau server `Heartbeat` movement monitors flag speed hacks and prolonged flight; server fires a `ReplicatedStorage` RemoteEvent; client LocalScript dims lighting, spawns a wall-passing shadow Nextbot, plays escalating whisper audio to a fullscreen jumpscare, then removes the player—psychological horror chase instead of instant kick; configurable max speed and air-time thresholds; lightweight server-authoritative detection; Open Source Anti Cheat System / game:roblox) beside instantaneous-kick Luau stacks such as [[volcano-ac]] and scored frameworks such as [[acf]]. (source: wiki/sources/descriptions/misteorecandy__New-anti-cheat-for-Roblox-games.md)
 
 **Engine-agnostic world-profile server AC:** [[guard-game]] (Parko-Developer; Node.js; zero runtime dependencies; clients report movement/actions; server validates against configurable world profiles—speed/jump/teleport/fly/hover, packet flood, timestamp/sequence spoofing, item/quest abuse; strike ladder + admin API/console; TCP JSON lines + HTTP ingest + optional HMAC; Unity/Godot/Roblox/JS SDKs; Docker; Open Source Anti Cheat System) for custom multiplayer hosts needing an external validation layer beside engine-native addons such as [[dot-server-security]] (Godot) and [[volcano-ac]] (Roblox). Legacy voxel FPS stacks such as [[y0x1-server]] (Ace of Spades 0.75 **piqueserver** fork; Python/Cython server authority with HWID bans and movement/combat heuristics) show the same pattern on classic dedicated-server codebases. (source: wiki/sources/descriptions/Parko-Developer__guard-game.md) (source: wiki/sources/descriptions/uamo11__y0x1Server.md)
 
