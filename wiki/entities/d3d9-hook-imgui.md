@@ -12,7 +12,7 @@ confidence: medium
 
 **D3D9 Hook ImGui** (adamhlt/D3D9-Hook-ImGui) is a Windows **injectable DLL template** that intercepts `IDirect3DDevice9` **EndScene** and **Reset** to draw a **Dear ImGui** overlay inside any DirectX 9 application. Built in **C++** with Visual Studio for **x86** and **x64**, it obtains the device virtual table via the **dummy-device** technique and applies hooks using **Microsoft Detours**. The scaffold handles window resize, fullscreen resets, keyboard toggles, and safe unload so developers mainly customize the menu in source—suited to reverse engineering, game modding, and graphics-hook research needing a ready-made D3D9 + ImGui integration point. (source: wiki/sources/descriptions/adamhlt__D3D9-Hook-ImGui.md)
 
-Sits in the legacy **D3D9 EndScene/Reset** internal-overlay lane beside cross-API starters such as [[d3dhook-imgui]] and [[universal-dear-imgui-hook]], DX9 overlay frameworks such as [[direct3d9-overlay]], and sibling adamhlt samples such as [[imgui-standalone]] (external D3D11 window) and API-specific templates such as [[d3d12-hook-imgui]].
+Sits in the legacy **D3D9 EndScene/Reset** internal-overlay lane beside cross-API starters such as [[d3dhook-imgui]] and [[universal-dear-imgui-hook]], DX9 overlay frameworks such as [[direct3d9-overlay]], and sibling adamhlt samples such as [[d3d9-overlay-imgui]] (swap-chain overlay EXE/DLL with HWND picker), [[imgui-standalone]] (external D3D11 window), and API-specific templates such as [[d3d12-hook-imgui]].
 
 ## Architecture highlights
 
@@ -32,4 +32,4 @@ See [[present-hook]] for DXGI/D3D9 present-path patterns and [[draw-call-hook]] 
 
 ## Related
 
-[[present-hook]] · [[imgui]] · [[d3dhook-imgui]] · [[direct3d9-overlay]] · [[universal-dear-imgui-hook]] · [[imgui-standalone]] · [[d3d12-hook-imgui]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
+[[present-hook]] · [[imgui]] · [[d3d9-overlay-imgui]] · [[d3dhook-imgui]] · [[direct3d9-overlay]] · [[universal-dear-imgui-hook]] · [[imgui-standalone]] · [[d3d12-hook-imgui]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
