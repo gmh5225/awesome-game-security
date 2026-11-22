@@ -1,0 +1,3254 @@
+Project Path: arc_tertit133_cheatos_hcuabzmf
+
+Source Tree:
+
+```txt
+arc_tertit133_cheatos_hcuabzmf
+├── CMakeLists.txt
+├── LICENSE
+├── README.md
+└── src
+    ├── bookmarks.cpp
+    ├── bookmarks.h
+    ├── ce_table.cpp
+    ├── ce_table.h
+    ├── common.h
+    ├── engine.cpp
+    ├── engine.h
+    ├── freezer.cpp
+    ├── freezer.h
+    ├── main.cpp
+    ├── mem_regions.cpp
+    ├── mem_regions.h
+    ├── pointer_scan.cpp
+    ├── pointer_scan.h
+    ├── proc_attach.cpp
+    ├── proc_attach.h
+    ├── scanner.cpp
+    ├── scanner.h
+    ├── ui
+    │   ├── app.cpp
+    │   ├── app.h
+    │   ├── theme.cpp
+    │   ├── theme.h
+    │   ├── views.cpp
+    │   └── views.h
+    ├── value_types.cpp
+    └── value_types.h
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.20)
+project(cheatos LANGUAGES CXX)
+
+if(NOT WIN32)
+    message(FATAL_ERROR "CheatOS is Windows-only (uses the Win32 process APIs).")
+endif()
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(MSVC)
+    add_compile_options(/W4 /EHsc /utf-8)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS NOMINMAX WIN32_LEAN_AND_MEAN)
+endif()
+
+include(FetchContent)
+
+# ---- Dear ImGui (docking branch) -------------------------------------------
+FetchContent_Declare(
+    imgui
+    GIT_REPOSITORY https://github.com/ocornut/imgui.git
+    GIT_TAG        v1.90.5-docking
+)
+FetchContent_MakeAvailable(imgui)
+
+set(IMGUI_SOURCES
+    ${imgui_SOURCE_DIR}/imgui.cpp
+    ${imgui_SOURCE_DIR}/imgui_draw.cpp
+    ${imgui_SOURCE_DIR}/imgui_tables.cpp
+    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_win32.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_dx11.cpp
+)
+
+# ---- pugixml (CE-table XML read/write) -------------------------------------
+FetchContent_Declare(
+    pugixml
+    GIT_REPOSITORY https://github.com/zeux/pugixml.git
+    GIT_TAG        v1.14
+)
+FetchContent_MakeAvailable(pugixml)
+
+# ---- cheatos executable ----------------------------------------------------
+add_executable(cheatos WIN32
+    src/main.cpp
+    src/value_types.cpp
+    src/proc_attach.cpp
+    src/mem_regions.cpp
+    src/scanner.cpp
+    src/bookmarks.cpp
+    src/freezer.cpp
+    src/pointer_scan.cpp
+    src/ce_table.cpp
+    src/engine.cpp
+    src/ui/theme.cpp
+    src/ui/app.cpp
+    src/ui/views.cpp
+    ${IMGUI_SOURCES}
+)
+
+target_include_directories(cheatos PRIVATE
+    src
+    ${imgui_SOURCE_DIR}
+    ${imgui_SOURCE_DIR}/backends
+)
+
+target_link_libraries(cheatos PRIVATE
+    pugixml::pugixml
+    d3d11 dxgi dxguid dwmapi psapi
+)
+
+set_target_properties(cheatos PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 tertit133
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+
+# CheatOS
+
+**Memory scanner and trainer framework for Windows x64.**
+
+[![build](https://github.com/tertit133/cheatos/actions/workflows/build.yml/badge.svg)](https://github.com/tertit133/cheatos/actions/workflows/build.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![C++](https://img.shields.io/badge/C%2B%2B-20-00599C.svg?logo=c%2B%2B)](https://en.cppreference.com/w/cpp/20)
+[![platform](https://img.shields.io/badge/platform-Windows%20x64-0078D6.svg?logo=windows)](https://learn.microsoft.com/en-us/windows/win32/memory/)
+
+ImGui + DX11 UI (docking) * pugixml for CheatEngine .CT compatibility
+
+</div>
+
+> A compact Cheat-Engine-style trainer: attach to any process, scan
+> memory for values, filter down across scans, freeze what you want,
+> resolve pointer chains, and load/save CheatEngine tables. ~2.5k LOC
+> of straight C++20 with a small set of focused modules.
+
+## Features
+
+- **Attach to any PID** with full RW access; process list with live filter.
+- **Typed scanner** -- int8/16/32/64 signed & unsigned, float/double,
+  byte patterns (`DE AD ?? EF`), ASCII and wide strings.
+- **Scan ops** -- `exact`, `!=`, `>`, `>=`, `<`, `<=`, `between`,
+  and the next-scan filters `changed` / `unchanged` / `increased` /
+  `decreased`. Fast aligned scans or every-byte mode.
+- **Freezer thread** -- rewrites pinned bookmark values ~60 Hz so game
+  logic can't decrement them.
+- **Pointer scanner** -- BFS over the process's pointer map, finds
+  chains `*(static + o1) ... + oN` that land on a target, up to depth 6.
+  Keeps only chains rooted in a module image so they survive restarts.
+- **Bookmarks** -- live value column, inline rename/type-change, freeze
+  toggle, pointer-path aware.
+- **CheatEngine table I/O** -- load/save `.CT` XML via pugixml; works
+  with existing tables for common entries.
+- **ImGui docking layout** -- drag any pane, split, float; layout
+  persists in `imgui.ini` next to the exe.
+
+## Build
+
+Prerequisites:
+
+- Windows 10/11 x64
+- Visual Studio 2022 (MSVC, x64 Native Tools) or CMake + Ninja with MSVC
+- CMake 3.20+
+- Git (FetchContent pulls ImGui + pugixml)
+
+```bat
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+cmake --build build --config Release
+build\bin\Release\cheatos.exe
+```
+
+First configure pulls ~30 MB of dependencies.
+
+## Architecture
+
+```
+src/
++-- common.h            types, Windows includes (windows.h FIRST, lesson learned)
++-- value_types.{h,cpp} typed values, parse/compare/format, byte patterns
++-- proc_attach.{h,cpp} enumerate processes, OpenProcess for VM RW
++-- mem_regions.{h,cpp} VirtualQueryEx walker (committed + readable/writable)
++-- scanner.{h,cpp}     first-scan and next-scan, chunked RPM, cancellable
++-- bookmarks.{h,cpp}   saved address list (name, type, frozen value, pointer path)
++-- freezer.{h,cpp}     ~60 Hz WPM thread that holds frozen values
++-- pointer_scan.{h,cpp} BFS pointer-path finder, rooted in MEM_IMAGE
++-- ce_table.{h,cpp}    CheatEngine .CT XML read/write (pugixml)
++-- engine.{h,cpp}      orchestrator; UI thread talks only to this class
++-- main.cpp            wWinMain
++-- ui/
+    +-- theme.{h,cpp}  gray ImGui style
+    +-- app.{h,cpp}    Win32 + DX11 + ImGui docking bootstrap
+    +-- views.{h,cpp}  Control / Scan / Results / Bookmarks / Memory / Pointer / Log
+```
+
+The `Engine` owns a single worker thread that scans/pointer-scans run
+on, so the UI thread never blocks. State (results list, pointer paths,
+bookmarks) is read via thread-safe snapshot calls. The freezer is its
+own thread that pulls bookmarks through a provider callback so it does
+not need to co-own the list.
+
+## Scan engine
+
+- `enumerateRegions` walks `VirtualQueryEx` from `lpMinimumApplicationAddress`
+  to `lpMaximumApplicationAddress`, keeping committed pages that match
+  the access mask (`PAGE_READWRITE`, `PAGE_WRITECOPY`, ...).
+- `firstScan` splits every region into 4 MiB chunks, `ReadProcessMemory`
+  into a reusable buffer, then walks aligned slots applying the typed
+  comparator. Cancellation is checked between chunks.
+- `nextScan` filters the stored previous results in place -- one RPM per
+  entry, compare against the user operand (plus the previous value for
+  `changed`/`increased`/... ops).
+- Match captures the current bytes so the next scan can compare against
+  them without re-reading. Byte pattern + wildcard mask (`DE AD ?? EF`)
+  supported via a parallel mask vector.
+
+## Pointer scan
+
+1. Walk every readable region, interpret each aligned 8-byte slot as a
+   pointer value, keep only those pointing inside another readable
+   region -- stored sorted by `dest`.
+2. Starting from the target address, binary-search the pointer-map for
+   `dest` in `[T - maxOff, T]`. Each hit is a one-level resolve with
+   offset `T - dest`.
+3. If the hit source lives in a `MEM_IMAGE` region (module), accept it
+   as a final chain. Otherwise enqueue it as a new target and recurse
+   up to `maxDepth`.
+4. Keeps up to `maxResults` paths so huge targets don't blow the UI.
+
+## CheatEngine .CT compatibility
+
+`loadCheatTable` / `saveCheatTable` handle the subset that actually
+matters for trainer entries:
+
+- `<Description>`
+- `<VariableType>` -- "Byte", "2 Bytes", "4 Bytes", "8 Bytes", "Float",
+  "Double", "String", "Array of byte"
+- `<Address>` in hex (base when there's a pointer chain)
+- `<Offsets><Offset>...</Offset></Offsets>`
+
+Scripts, groupings, and anti-cheat sections are ignored on read and
+omitted on write. Round-trips are stable for every entry in that set.
+
+## License
+
+MIT. See `LICENSE`.
+
+```
+
+`src/bookmarks.cpp`:
+
+```cpp
+#include "bookmarks.h"
+
+namespace cheat {
+
+BookmarkId BookmarkList::add(Bookmark b) {
+    if (b.id == 0) b.id = m_next++;
+    else           m_next = std::max(m_next, b.id + 1);
+    m_items.push_back(std::move(b));
+    return m_items.back().id;
+}
+
+bool BookmarkList::remove(BookmarkId id) {
+    for (auto it = m_items.begin(); it != m_items.end(); ++it) {
+        if (it->id == id) { m_items.erase(it); return true; }
+    }
+    return false;
+}
+
+Bookmark* BookmarkList::find(BookmarkId id) {
+    for (auto& b : m_items) if (b.id == id) return &b;
+    return nullptr;
+}
+
+const Bookmark* BookmarkList::find(BookmarkId id) const {
+    for (const auto& b : m_items) if (b.id == id) return &b;
+    return nullptr;
+}
+
+} // namespace cheat
+
+```
+
+`src/bookmarks.h`:
+
+```h
+// bookmarks.h -- the saved address list ("cheat table" entries).
+//
+// Each entry is a labeled address with a type and optional pinned
+// value that the freezer writes back on a timer.
+#pragma once
+
+#include "common.h"
+#include "value_types.h"
+
+namespace cheat {
+
+using BookmarkId = std::uint32_t;
+
+struct Bookmark {
+    BookmarkId  id{};
+    std::string name;
+    Address     address{};
+    ValueType   type{ValueType::I32};
+    bool        frozen{false};
+    TypedValue  frozenValue;        // what the freezer writes on tick
+    // Pointer path (optional). If present, the effective address is
+    // resolved as *(... *(base + off[0]) ... + off[n-1]).
+    std::vector<std::int32_t> pointerOffsets;
+    Address     pointerBase{};
+};
+
+class BookmarkList {
+public:
+    BookmarkId add(Bookmark b);        // id is assigned if 0
+    bool       remove(BookmarkId id);
+    Bookmark*  find(BookmarkId id);
+    const Bookmark* find(BookmarkId id) const;
+
+    const std::vector<Bookmark>& list() const { return m_items; }
+    std::vector<Bookmark>&       mutableList()      { return m_items; }
+
+    void clear() { m_items.clear(); }
+
+private:
+    std::vector<Bookmark> m_items;
+    BookmarkId            m_next{1};
+};
+
+} // namespace cheat
+
+```
+
+`src/ce_table.cpp`:
+
+```cpp
+#include "ce_table.h"
+
+#include <pugixml.hpp>
+
+namespace cheat {
+
+namespace {
+
+const char* ceTypeName(ValueType t) {
+    switch (t) {
+        case ValueType::I8:  case ValueType::U8:  return "Byte";
+        case ValueType::I16: case ValueType::U16: return "2 Bytes";
+        case ValueType::I32: case ValueType::U32: return "4 Bytes";
+        case ValueType::I64: case ValueType::U64: return "8 Bytes";
+        case ValueType::F32: return "Float";
+        case ValueType::F64: return "Double";
+        case ValueType::AsciiString: return "String";
+        case ValueType::WideString:  return "String";
+        case ValueType::Bytes:       return "Array of byte";
+    }
+    return "4 Bytes";
+}
+
+ValueType ceTypeFromName(const std::string& s) {
+    if (s == "Byte")               return ValueType::U8;
+    if (s == "2 Bytes")            return ValueType::U16;
+    if (s == "4 Bytes")            return ValueType::U32;
+    if (s == "8 Bytes")            return ValueType::U64;
+    if (s == "Float")              return ValueType::F32;
+    if (s == "Double")             return ValueType::F64;
+    if (s == "String")             return ValueType::AsciiString;
+    if (s == "Array of byte")      return ValueType::Bytes;
+    return ValueType::I32;
+}
+
+} // anonymous
+
+bool saveCheatTable(const std::wstring& path,
+                     const std::vector<Bookmark>& items) {
+    pugi::xml_document doc;
+    auto decl = doc.append_child(pugi::node_declaration);
+    decl.append_attribute("version")  = "1.0";
+    decl.append_attribute("encoding") = "utf-8";
+
+    auto root = doc.append_child("CheatTable");
+    root.append_attribute("CheatEngineTableVersion") = 31;
+    auto entries = root.append_child("CheatEntries");
+
+    for (const auto& b : items) {
+        auto e = entries.append_child("CheatEntry");
+        e.append_child("ID").text().set(static_cast<unsigned>(b.id));
+        e.append_child("Description").text().set(("\"" + b.name + "\"").c_str());
+        e.append_child("VariableType").text().set(ceTypeName(b.type));
+
+        char addrBuf[32];
+        std::snprintf(addrBuf, sizeof(addrBuf), "%llX",
+                       static_cast<unsigned long long>(
+                           b.pointerOffsets.empty() ? b.address : b.pointerBase));
+        e.append_child("Address").text().set(addrBuf);
+
+        if (!b.pointerOffsets.empty()) {
+            auto offs = e.append_child("Offsets");
+            for (auto o : b.pointerOffsets) {
+                char ob[16];
+                std::snprintf(ob, sizeof(ob), "%X", o);
+                offs.append_child("Offset").text().set(ob);
+            }
+        }
+    }
+
+    return doc.save_file(path.c_str());
+}
+
+std::optional<std::vector<Bookmark>>
+loadCheatTable(const std::wstring& path) {
+    pugi::xml_document doc;
+    auto res = doc.load_file(path.c_str());
+    if (!res) return std::nullopt;
+
+    auto root = doc.child("CheatTable");
+    if (!root) return std::nullopt;
+
+    std::vector<Bookmark> out;
+    for (auto e : root.child("CheatEntries").children("CheatEntry")) {
+        Bookmark b{};
+        std::string desc = e.child_value("Description");
+        if (desc.size() >= 2 && desc.front() == '"' && desc.back() == '"') {
+            desc = desc.substr(1, desc.size() - 2);
+        }
+        b.name = std::move(desc);
+        b.type = ceTypeFromName(e.child_value("VariableType"));
+
+        const char* addrText = e.child_value("Address");
+        b.address = static_cast<Address>(
+            std::strtoull(addrText ? addrText : "0", nullptr, 16));
+
+        if (auto offs = e.child("Offsets")) {
+            for (auto o : offs.children("Offset")) {
+                b.pointerOffsets.push_back(
+                    static_cast<int>(std::strtol(o.child_value(), nullptr, 16)));
+            }
+            b.pointerBase = b.address;
+            b.address     = 0;  // resolved live by the engine
+        }
+
+        b.frozenValue = TypedValue::zero(b.type);
+        out.push_back(std::move(b));
+    }
+    return out;
+}
+
+} // namespace cheat
+
+```
+
+`src/ce_table.h`:
+
+```h
+// ce_table.h -- read / write a subset of CheatEngine's .CT XML format.
+//
+// We handle the three fields that actually matter for a trainer:
+// Description, VariableType, Address (hex), plus an optional
+// <Offsets> chain. Advanced CE features (scripts, groupings, pointer
+// scanner thresholds) are ignored on read and omitted on write.
+#pragma once
+
+#include "bookmarks.h"
+#include "common.h"
+
+namespace cheat {
+
+bool saveCheatTable(const std::wstring& path,
+                     const std::vector<Bookmark>& items);
+
+std::optional<std::vector<Bookmark>>
+loadCheatTable(const std::wstring& path);
+
+} // namespace cheat
+
+```
+
+`src/common.h`:
+
+```h
+// common.h -- shared types, Windows includes, utility helpers.
+#pragma once
+
+// Windows headers must come first so stdlib headers that pull in Win32
+// internals (thread, mutex, ...) see a fully populated <windows.h> on
+// first use. This ordering was the root cause of a nasty cascade of
+// "DWORD undeclared" errors in a sibling project; keep it.
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
+#include <algorithm>
+#include <array>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <functional>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <queue>
+#include <string>
+#include <thread>
+#include <utility>
+#include <vector>
+
+namespace cheat {
+
+using Address = std::uintptr_t;
+using Byte    = std::uint8_t;
+using Bytes   = std::vector<Byte>;
+
+template <typename... Args>
+inline std::string sfmt(const char* fmt, Args... args) {
+    char buf[512];
+    int n = std::snprintf(buf, sizeof(buf), fmt, args...);
+    if (n < 0) return {};
+    return std::string(buf, static_cast<std::size_t>(
+                             std::min<int>(n, sizeof(buf) - 1)));
+}
+
+inline std::wstring utf8_to_wide(const std::string& s) {
+    if (s.empty()) return {};
+    int n = ::MultiByteToWideChar(CP_UTF8, 0, s.data(), (int)s.size(), nullptr, 0);
+    std::wstring w(static_cast<std::size_t>(n), L'\0');
+    ::MultiByteToWideChar(CP_UTF8, 0, s.data(), (int)s.size(), w.data(), n);
+    return w;
+}
+
+inline std::string wide_to_utf8(const std::wstring& s) {
+    if (s.empty()) return {};
+    int n = ::WideCharToMultiByte(CP_UTF8, 0, s.data(), (int)s.size(),
+                                   nullptr, 0, nullptr, nullptr);
+    std::string u(static_cast<std::size_t>(n), '\0');
+    ::WideCharToMultiByte(CP_UTF8, 0, s.data(), (int)s.size(),
+                           u.data(), n, nullptr, nullptr);
+    return u;
+}
+
+} // namespace cheat
+
+```
+
+`src/engine.cpp`:
+
+```cpp
+#include "engine.h"
+
+namespace cheat {
+
+Engine::Engine() {
+    m_worker = std::thread(&Engine::workerLoop, this);
+}
+
+Engine::~Engine() {
+    m_workerQuit = true;
+    m_taskCv.notify_all();
+    if (m_worker.joinable()) m_worker.join();
+    detach();
+}
+
+// ---------------------------------------------------------------------------
+// Process lifecycle
+// ---------------------------------------------------------------------------
+bool Engine::attach(DWORD pid) {
+    detach();
+    HANDLE h = openForFullAccess(pid);
+    if (!h) { pushLog(sfmt("[!] OpenProcess failed (pid=%lu)", pid)); return false; }
+    {
+        std::lock_guard<std::mutex> lk(m_mtx);
+        m_process = h;
+        m_pid     = pid;
+    }
+    pushLog(sfmt("[+] attached to pid=%lu", pid));
+    return true;
+}
+
+void Engine::detach() {
+    freezerStop();
+    cancelScan();
+
+    HANDLE h = nullptr;
+    {
+        std::lock_guard<std::mutex> lk(m_mtx);
+        h = m_process;
+        m_process = nullptr;
+        m_pid = 0;
+        m_results.clear();
+        m_ptrPaths.clear();
+    }
+    if (h) ::CloseHandle(h);
+}
+
+std::wstring Engine::imagePath() {
+    std::lock_guard<std::mutex> lk(m_mtx);
+    return m_process ? processImagePath(m_process) : std::wstring{};
+}
+
+// ---------------------------------------------------------------------------
+// Scanning
+// ---------------------------------------------------------------------------
+void Engine::startFirstScan(ScanConfig cfg) {
+    if (!m_process || m_scanning.load()) return;
+    m_scanCancel = false;
+    m_scanning   = true;
+    m_scanProgress = 0;
+
+    enqueue([this, cfg = std::move(cfg)]() {
+        auto results = m_scanner.firstScan(
+            m_process, cfg, m_scanCancel,
+            [this](std::size_t d, std::size_t t) {
+                m_scanProgress = t ? float(d) / float(t) : 1.0f;
+            });
+        {
+            std::lock_guard<std::mutex> lk(m_mtx);
+            m_results = std::move(results);
+        }
+        pushLog(sfmt("[*] first scan complete: %zu hits",
+                       m_results.size()));
+        m_scanning = false;
+    });
+}
+
+void Engine::startNextScan(ScanConfig cfg) {
+    if (!m_process || m_scanning.load()) return;
+    m_scanCancel = false;
+    m_scanning   = true;
+    m_scanProgress = 0;
+
+    enqueue([this, cfg = std::move(cfg)]() {
+        std::vector<ScanResult> prev;
+        {
+            std::lock_guard<std::mutex> lk(m_mtx);
+            prev = m_results;
+        }
+        auto results = m_scanner.nextScan(
+            m_process, prev, cfg, m_scanCancel,
+            [this](std::size_t d, std::size_t t) {
+                m_scanProgress = t ? float(d) / float(t) : 1.0f;
+            });
+        {
+            std::lock_guard<std::mutex> lk(m_mtx);
+            m_results = std::move(results);
+        }
+        pushLog(sfmt("[*] next scan: %zu -> %zu",
+                       prev.size(), m_results.size()));
+        m_scanning = false;
+    });
+}
+
+void Engine::cancelScan() {
+    m_scanCancel = true;
+}
+
+void Engine::resetScan() {
+    cancelScan();
+    std::lock_guard<std::mutex> lk(m_mtx);
+    m_results.clear();
+}
+
+std::size_t Engine::resultCount() {
+    std::lock_guard<std::mutex> lk(m_mtx);
+    return m_results.size();
+}
+
+std::vector<ScanResult> Engine::resultsSlice(std::size_t offset,
+                                               std::size_t count) {
+    std::lock_guard<std::mutex> lk(m_mtx);
+    if (offset >= m_results.size()) return {};
+    const std::size_t end = std::min(m_results.size(), offset + count);
+    return { m_results.begin() + offset, m_results.begin() + end };
+}
+
+// ---------------------------------------------------------------------------
+// Bookmarks
+// ---------------------------------------------------------------------------
+BookmarkId Engine::addBookmark(Bookmark b) {
+    std::lock_guard<std::mutex> lk(m_mtx);
+    return m_bookmarks.add(std::move(b));
+}
+
+bool Engine::removeBookmark(BookmarkId id) {
+    std::lock_guard<std::mutex> lk(m_mtx);
+    return m_bookmarks.remove(id);
+}
+
+bool Engine::setBookmarkFreeze(BookmarkId id, bool frozen) {
+    std::lock_guard<std::mutex> lk(m_mtx);
+    auto* b = m_bookmarks.find(id);
+    if (!b) return false;
+    b->frozen = frozen;
+    if (frozen && b->frozenValue.bytes.empty()) {
+        b->frozenValue = TypedValue::zero(b->type);
+    }
+    return true;
+}
+
+bool Engine::setBookmarkValue(BookmarkId id, const TypedValue& v) {
+    std::lock_guard<std::mutex> lk(m_mtx);
+    auto* b = m_bookmarks.find(id);
+    if (!b) return false;
+    b->frozenValue = v;
+    // Also push the value into the target now so the change is visible
+    // immediately; the freezer takes over on the next tick.
+    if (m_process && b->address) {
+        SIZE_T w = 0;
+        ::WriteProcessMemory(m_process,
+                              reinterpret_cast<LPVOID>(b->address),
+                              v.bytes.data(), v.bytes.size(), &w);
+    }
+    return true;
+}
+
+bool Engine::setBookmarkName(BookmarkId id, std::string name) {
+    std::lock_guard<std::mutex> lk(m_mtx);
+    auto* b = m_bookmarks.find(id);
+    if (!b) return false;
+    b->name = std::move(name);
+    return true;
+}
+
+bool Engine::setBookmarkType(BookmarkId id, ValueType t) {
+    std::lock_guard<std::mutex> lk(m_mtx);
+    auto* b = m_bookmarks.find(id);
+    if (!b) return false;
+    b->type = t;
+    b->frozenValue = TypedValue::zero(t);
+    return true;
+}
+
+std::vector<Bookmark> Engine::bookmarks() {
+    std::lock_guard<std::mutex> lk(m_mtx);
+    return m_bookmarks.list();
+}
+
+TypedValue Engine::readBookmarkValue(const Bookmark& b) {
+    TypedValue v = TypedValue::zero(b.type);
+    if (!m_process) return v;
+
+    Address addr = b.address;
+    if (!b.pointerOffsets.empty()) {
+        addr = resolvePointerPath(b);
+        if (!addr) return v;
+    }
+
+    std::size_t sz = fixedSize(b.type);
+    if (!sz) return v;
+    v.bytes.assign(sz, 0);
+    SIZE_T got = 0;
+    ::ReadProcessMemory(m_process, reinterpret_cast<LPCVOID>(addr),
+                         v.bytes.data(), sz, &got);
+    return v;
+}
+
+Address Engine::resolvePointerPath(const Bookmark& b) {
+    Address cur = b.pointerBase;
+    for (std::size_t i = 0; i < b.pointerOffsets.size(); ++i) {
+        Address next = 0;
+        SIZE_T got = 0;
+        if (!::ReadProcessMemory(m_process,
+                                   reinterpret_cast<LPCVOID>(cur),
+                                   &next, sizeof(next), &got) || got != sizeof(next)) {
+            return 0;
+        }
+        cur = next + b.pointerOffsets[i];
+    }
+    return cur;
+}
+
+// ---------------------------------------------------------------------------
+// Memory
+// ---------------------------------------------------------------------------
+bool Engine::readMemory(Address a, void* buf, std::size_t n) {
+    HANDLE p;
+    { std::lock_guard<std::mutex> lk(m_mtx); p = m_process; }
+    if (!p) return false;
+    SIZE_T got = 0;
+    return ::ReadProcessMemory(p, reinterpret_cast<LPCVOID>(a), buf, n, &got)
+           && got == n;
+}
+
+bool Engine::writeMemory(Address a, const void* buf, std::size_t n) {
+    HANDLE p;
+    { std::lock_guard<std::mutex> lk(m_mtx); p = m_process; }
+    if (!p) return false;
+    DWORD oldProt = 0;
+    ::VirtualProtectEx(p, reinterpret_cast<LPVOID>(a), n,
+                        PAGE_READWRITE, &oldProt);
+    SIZE_T w = 0;
+    BOOL ok = ::WriteProcessMemory(p, reinterpret_cast<LPVOID>(a), buf, n, &w);
+    if (oldProt) {
+        DWORD tmp = 0;
+        ::VirtualProtectEx(p, reinterpret_cast<LPVOID>(a), n, oldProt, &tmp);
+    }
+    return ok && w == n;
+}
+
+// ---------------------------------------------------------------------------
+// Freezer
+// ---------------------------------------------------------------------------
+void Engine::freezerStart() {
+    if (!m_process) return;
+    m_freezer.start(m_process, [this]{ return bookmarks(); });
+    pushLog("[*] freezer started");
+}
+
+void Engine::freezerStop() {
+    m_freezer.stop();
+}
+
+// ---------------------------------------------------------------------------
+// Pointer scanner
+// ---------------------------------------------------------------------------
+void Engine::startPointerScan(Address target, PointerScanConfig cfg) {
+    if (!m_process || m_ptrScanning.load()) return;
+    m_scanCancel   = false;
+    m_ptrScanning  = true;
+    m_ptrProgress  = 0;
+
+    enqueue([this, target, cfg]() {
+        auto paths = m_ptrScanner.find(
+            m_process, target, cfg, m_scanCancel,
+            [this](std::size_t d, std::size_t t) {
+                m_ptrProgress = t ? float(d) / float(t) : 1.0f;
+            });
+        {
+            std::lock_guard<std::mutex> lk(m_mtx);
+            m_ptrPaths = std::move(paths);
+        }
+        pushLog(sfmt("[*] pointer scan: %zu paths", m_ptrPaths.size()));
+        m_ptrScanning = false;
+    });
+}
+
+std::vector<PointerPath> Engine::pointerPaths() {
+    std::lock_guard<std::mutex> lk(m_mtx);
+    return m_ptrPaths;
+}
+
+// ---------------------------------------------------------------------------
+// CE table I/O
+// ---------------------------------------------------------------------------
+bool Engine::loadTable(const std::wstring& path) {
+    auto items = loadCheatTable(path);
+    if (!items) { pushLog("[!] CE table load failed"); return false; }
+    {
+        std::lock_guard<std::mutex> lk(m_mtx);
+        m_bookmarks.clear();
+        for (auto& b : *items) m_bookmarks.add(std::move(b));
+    }
+    pushLog(sfmt("[+] loaded %zu entries from CT", items->size()));
+    return true;
+}
+
+bool Engine::saveTable(const std::wstring& path) {
+    auto bms = bookmarks();
+    if (!saveCheatTable(path, bms)) { pushLog("[!] CE table save failed"); return false; }
+    pushLog(sfmt("[+] saved %zu entries to CT", bms.size()));
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// Log + task queue
+// ---------------------------------------------------------------------------
+std::vector<std::string> Engine::drainLog() {
+    std::lock_guard<std::mutex> lk(m_logMtx);
+    auto v = std::move(m_log);
+    m_log.clear();
+    return v;
+}
+
+void Engine::pushLog(std::string s) {
+    std::lock_guard<std::mutex> lk(m_logMtx);
+    m_log.push_back(std::move(s));
+}
+
+void Engine::enqueue(std::function<void()> fn) {
+    {
+        std::lock_guard<std::mutex> lk(m_taskMtx);
+        m_tasks.push(std::move(fn));
+    }
+    m_taskCv.notify_one();
+}
+
+void Engine::workerLoop() {
+    while (!m_workerQuit.load()) {
+        std::function<void()> task;
+        {
+            std::unique_lock<std::mutex> lk(m_taskMtx);
+            m_taskCv.wait(lk, [this]{ return !m_tasks.empty() || m_workerQuit.load(); });
+            if (m_workerQuit.load() && m_tasks.empty()) break;
+            task = std::move(m_tasks.front());
+            m_tasks.pop();
+        }
+        try { task(); } catch (...) { pushLog("[!] task threw"); }
+    }
+}
+
+} // namespace cheat
+
+```
+
+`src/engine.h`:
+
+```h
+// engine.h -- the CheatOS orchestrator: process handle, scanner,
+// bookmark list, freezer, pointer scanner. Mirrors the shape of
+// MiniDbg's Debugger so the UI thread never touches a Win32 API
+// directly; everything flows through this class.
+#pragma once
+
+#include "bookmarks.h"
+#include "ce_table.h"
+#include "common.h"
+#include "freezer.h"
+#include "pointer_scan.h"
+#include "proc_attach.h"
+#include "scanner.h"
+#include "value_types.h"
+
+namespace cheat {
+
+class Engine {
+public:
+    Engine();
+    ~Engine();
+
+    Engine(const Engine&)            = delete;
+    Engine& operator=(const Engine&) = delete;
+
+    // ---- process lifecycle ------------------------------------------------
+    bool         attach(DWORD pid);
+    void         detach();
+    bool         isAttached() const { return m_process != nullptr; }
+    DWORD        pid() const        { return m_pid; }
+    std::wstring imagePath();
+
+    // ---- scanning ---------------------------------------------------------
+    void        startFirstScan(ScanConfig cfg);
+    void        startNextScan(ScanConfig cfg);
+    void        cancelScan();
+    void        resetScan();
+    bool        scanning() const      { return m_scanning.load(); }
+    float       scanProgress() const  { return m_scanProgress.load(); }
+    std::size_t resultCount();
+    std::vector<ScanResult> resultsSlice(std::size_t offset, std::size_t count);
+
+    // ---- bookmarks --------------------------------------------------------
+    BookmarkId  addBookmark(Bookmark b);
+    bool        removeBookmark(BookmarkId id);
+    bool        setBookmarkFreeze(BookmarkId id, bool frozen);
+    bool        setBookmarkValue(BookmarkId id, const TypedValue& v);
+    bool        setBookmarkName(BookmarkId id, std::string name);
+    bool        setBookmarkType(BookmarkId id, ValueType t);
+    std::vector<Bookmark> bookmarks();
+
+    // Live read of a bookmark's value (resolves pointer chain if present).
+    TypedValue  readBookmarkValue(const Bookmark& b);
+
+    // ---- memory -----------------------------------------------------------
+    bool readMemory (Address a, void* buf, std::size_t n);
+    bool writeMemory(Address a, const void* buf, std::size_t n);
+
+    // ---- freezer ----------------------------------------------------------
+    void freezerStart();
+    void freezerStop();
+    bool freezerRunning() const { return m_freezer.running(); }
+
+    // ---- pointer scanner --------------------------------------------------
+    void startPointerScan(Address target, PointerScanConfig cfg);
+    void cancelPointerScan() { m_scanCancel = true; }
+    bool pointerScanning() const    { return m_ptrScanning.load(); }
+    float pointerScanProgress() const { return m_ptrProgress.load(); }
+    std::vector<PointerPath> pointerPaths();
+
+    // ---- CE table I/O -----------------------------------------------------
+    bool loadTable(const std::wstring& path);
+    bool saveTable(const std::wstring& path);
+
+    // ---- log --------------------------------------------------------------
+    std::vector<std::string> drainLog();
+
+private:
+    void workerLoop();
+    void enqueue(std::function<void()> fn);
+    void pushLog(std::string s);
+
+    Address resolvePointerPath(const Bookmark& b);
+
+private:
+    HANDLE  m_process{};
+    DWORD   m_pid{};
+
+    mutable std::mutex       m_mtx;
+    Scanner                  m_scanner;
+    PointerScanner           m_ptrScanner;
+    std::vector<ScanResult>  m_results;
+    std::vector<PointerPath> m_ptrPaths;
+    BookmarkList             m_bookmarks;
+    Freezer                  m_freezer;
+
+    std::atomic<bool>  m_scanning{false};
+    std::atomic<bool>  m_ptrScanning{false};
+    std::atomic<bool>  m_scanCancel{false};
+    std::atomic<float> m_scanProgress{0.0f};
+    std::atomic<float> m_ptrProgress{0.0f};
+
+    std::thread                      m_worker;
+    std::mutex                       m_taskMtx;
+    std::condition_variable          m_taskCv;
+    std::queue<std::function<void()>> m_tasks;
+    std::atomic<bool>                m_workerQuit{false};
+
+    std::mutex               m_logMtx;
+    std::vector<std::string> m_log;
+};
+
+} // namespace cheat
+
+```
+
+`src/freezer.cpp`:
+
+```cpp
+#include "freezer.h"
+
+namespace cheat {
+
+Freezer::~Freezer() { stop(); }
+
+void Freezer::start(HANDLE process, Provider provider) {
+    stop();
+    if (!process || !provider) return;
+    m_process  = process;
+    m_provider = std::move(provider);
+    m_running  = true;
+    m_thread   = std::thread(&Freezer::loop, this);
+}
+
+void Freezer::stop() {
+    m_running = false;
+    if (m_thread.joinable()) m_thread.join();
+    m_process = nullptr;
+}
+
+void Freezer::loop() {
+    while (m_running.load()) {
+        const auto bms = m_provider ? m_provider() : std::vector<Bookmark>{};
+
+        for (const auto& b : bms) {
+            if (!b.frozen || b.frozenValue.bytes.empty()) continue;
+
+            // Un-protect the target page just enough to write, then restore.
+            // Write-only via VirtualProtectEx: if the page isn't writable
+            // we can still succeed, otherwise WriteProcessMemory fails.
+            DWORD oldProt = 0;
+            ::VirtualProtectEx(m_process,
+                                reinterpret_cast<LPVOID>(b.address),
+                                b.frozenValue.bytes.size(),
+                                PAGE_READWRITE, &oldProt);
+            SIZE_T w = 0;
+            ::WriteProcessMemory(m_process,
+                                  reinterpret_cast<LPVOID>(b.address),
+                                  b.frozenValue.bytes.data(),
+                                  b.frozenValue.bytes.size(), &w);
+            if (oldProt) {
+                DWORD tmp = 0;
+                ::VirtualProtectEx(m_process,
+                                    reinterpret_cast<LPVOID>(b.address),
+                                    b.frozenValue.bytes.size(),
+                                    oldProt, &tmp);
+            }
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(m_tickMs.load()));
+    }
+}
+
+} // namespace cheat
+
+```
+
+`src/freezer.h`:
+
+```h
+// freezer.h -- background thread that rewrites "frozen" bookmark values.
+//
+// The freezer wakes up every ~16 ms (a video-frame-ish cadence), walks
+// the current bookmark list under a shared mutex, and for each frozen
+// entry writes its pinned bytes back into the target process. That rate
+// is fast enough that normal in-game logic that tries to decrement a
+// value (hp, ammo, cooldown) can't win against it.
+#pragma once
+
+#include "bookmarks.h"
+#include "common.h"
+
+namespace cheat {
+
+class Freezer {
+public:
+    Freezer() = default;
+    ~Freezer();
+
+    Freezer(const Freezer&) = delete;
+    Freezer& operator=(const Freezer&) = delete;
+
+    // The freezer reads bookmarks through a provider callback so it does
+    // not assume ownership of the list. The callback must be thread-safe
+    // (typically it locks the Engine's state mutex and copies the list).
+    using Provider = std::function<std::vector<Bookmark>()>;
+
+    void start(HANDLE process, Provider provider);
+    void stop();
+
+    bool running() const { return m_running.load(); }
+
+    // Tick period in milliseconds. Default 16 ms (about 60 Hz).
+    void setTickMs(unsigned ms) { m_tickMs.store(ms ? ms : 1); }
+
+private:
+    void loop();
+
+    HANDLE                m_process{};
+    Provider              m_provider;
+    std::thread           m_thread;
+    std::atomic<bool>     m_running{false};
+    std::atomic<unsigned> m_tickMs{16};
+};
+
+} // namespace cheat
+
+```
+
+`src/main.cpp`:
+
+```cpp
+// main.cpp -- CheatOS WinMain
+#include "common.h"
+#include "engine.h"
+#include "ui/app.h"
+
+int WINAPI wWinMain(HINSTANCE hInst, HINSTANCE, PWSTR, int) {
+    cheat::Engine     eng;
+    cheat::ui::App    app;
+
+    if (!app.init(hInst)) {
+        ::MessageBoxW(nullptr, L"Failed to initialise UI (D3D11?)",
+                       L"CheatOS", MB_OK | MB_ICONERROR);
+        return 1;
+    }
+    app.bind(&eng);
+    app.run();
+    app.shutdown();
+    return 0;
+}
+
+```
+
+`src/mem_regions.cpp`:
+
+```cpp
+#include "mem_regions.h"
+
+namespace cheat {
+
+std::vector<Region> enumerateRegions(HANDLE process, bool writableOnly) {
+    std::vector<Region> out;
+    if (!process) return out;
+
+    SYSTEM_INFO si{};
+    ::GetSystemInfo(&si);
+
+    auto addr    = reinterpret_cast<Byte*>(si.lpMinimumApplicationAddress);
+    auto maxAddr = reinterpret_cast<Byte*>(si.lpMaximumApplicationAddress);
+
+    MEMORY_BASIC_INFORMATION mbi{};
+    while (addr < maxAddr) {
+        if (::VirtualQueryEx(process, addr, &mbi, sizeof(mbi)) != sizeof(mbi)) {
+            break;
+        }
+
+        const bool committed = (mbi.State == MEM_COMMIT);
+        const bool wantable  = writableOnly ? protectWritable(mbi.Protect)
+                                             : protectReadable(mbi.Protect);
+        if (committed && wantable) {
+            Region r{};
+            r.base    = reinterpret_cast<Address>(mbi.BaseAddress);
+            r.size    = mbi.RegionSize;
+            r.protect = mbi.Protect;
+            r.type    = mbi.Type;
+            out.push_back(r);
+        }
+
+        addr += mbi.RegionSize;
+    }
+    return out;
+}
+
+} // namespace cheat
+
+```
+
+`src/mem_regions.h`:
+
+```h
+// mem_regions.h -- enumerate the debuggee's readable / writable memory
+// pages. The scanner iterates these.
+#pragma once
+
+#include "common.h"
+
+namespace cheat {
+
+struct Region {
+    Address base{};
+    std::size_t size{};
+    DWORD protect{};          // PAGE_* flags
+    DWORD type{};             // MEM_PRIVATE / MEM_MAPPED / MEM_IMAGE
+};
+
+// Walk the process address space and return every committed region that
+// is readable (and not a guard page). If `writableOnly` is true, skip
+// read-only regions -- useful for scanning values the target owns,
+// skipping modules' .text.
+std::vector<Region> enumerateRegions(HANDLE process, bool writableOnly);
+
+inline bool protectReadable(DWORD p) {
+    const DWORD readableMask =
+        PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY |
+        PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
+    return (p & readableMask) != 0 && (p & PAGE_GUARD) == 0;
+}
+
+inline bool protectWritable(DWORD p) {
+    const DWORD writableMask =
+        PAGE_READWRITE | PAGE_WRITECOPY |
+        PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
+    return (p & writableMask) != 0 && (p & PAGE_GUARD) == 0;
+}
+
+} // namespace cheat
+
+```
+
+`src/pointer_scan.cpp`:
+
+```cpp
+#include "pointer_scan.h"
+
+#include <algorithm>
+
+namespace cheat {
+
+namespace {
+
+// Compact "a pointer value P was found at source slot S" record. Sorted
+// by `dest` so a range lookup [T - off, T] is a single lower_bound.
+struct PtrHit {
+    Address dest{};     // the value we read at `src`
+    Address src{};      // where that pointer lives in memory
+    bool    srcIsImage{}; // src came from a MEM_IMAGE region (module)
+};
+
+// Build the hit table by walking every readable region and interpreting
+// each aligned 8-byte slot as a pointer. Only slots that land inside
+// another readable region are kept -- a pointer that points to nothing
+// mapped is not useful for a chain.
+std::vector<PtrHit> buildPtrMap(HANDLE process,
+                                 const std::vector<Region>& regions,
+                                 const std::atomic<bool>& cancel,
+                                 PointerProgress prog) {
+    std::vector<PtrHit> hits;
+    hits.reserve(1 << 20);
+
+    constexpr std::size_t kChunk = 4 * 1024 * 1024;
+
+    // Precompute a sorted (base, end) list of valid destinations so a
+    // pointer value can be checked with binary search.
+    std::vector<std::pair<Address, Address>> readable;
+    readable.reserve(regions.size());
+    for (const auto& r : regions) {
+        readable.emplace_back(r.base, r.base + r.size);
+    }
+    std::sort(readable.begin(), readable.end());
+
+    auto isMapped = [&](Address a) {
+        auto it = std::upper_bound(readable.begin(), readable.end(),
+                                     std::make_pair(a, Address{0}));
+        if (it == readable.begin()) return false;
+        --it;
+        return a >= it->first && a < it->second;
+    };
+
+    std::size_t totalPages = 0;
+    for (const auto& r : regions) totalPages += (r.size + kChunk - 1) / kChunk;
+
+    Bytes buf;
+    buf.reserve(kChunk);
+
+    std::size_t done = 0;
+    for (const auto& reg : regions) {
+        const bool srcIsImage = (reg.type == MEM_IMAGE);
+
+        Address cursor = reg.base;
+        std::size_t remain = reg.size;
+        while (remain > 0) {
+            if (cancel.load()) return hits;
+            std::size_t take = std::min(remain, kChunk);
+            buf.resize(take);
+            SIZE_T got = 0;
+            if (::ReadProcessMemory(process,
+                                     reinterpret_cast<LPCVOID>(cursor),
+                                     buf.data(), take, &got) && got >= 8) {
+                const std::size_t aligned = got & ~std::size_t{7};
+                for (std::size_t off = 0; off + 8 <= aligned; off += 8) {
+                    Address val = 0;
+                    std::memcpy(&val, buf.data() + off, 8);
+                    if (val < 0x10000 || val > 0x7FFFFFFFFFFF) continue;
+                    if (!isMapped(val)) continue;
+                    PtrHit h{};
+                    h.dest       = val;
+                    h.src        = cursor + off;
+                    h.srcIsImage = srcIsImage;
+                    hits.push_back(h);
+                }
+            }
+            cursor += take;
+            remain -= take;
+            ++done;
+            if (prog && (done % 16 == 0)) prog(done, totalPages);
+        }
+    }
+    if (prog) prog(totalPages, totalPages);
+    std::sort(hits.begin(), hits.end(),
+               [](const PtrHit& a, const PtrHit& b){ return a.dest < b.dest; });
+    return hits;
+}
+
+// All hits whose `dest` lies in [lo, hi].
+std::pair<std::size_t, std::size_t> hitsInRange(const std::vector<PtrHit>& hits,
+                                                  Address lo, Address hi) {
+    auto first = std::lower_bound(hits.begin(), hits.end(), lo,
+                                    [](const PtrHit& h, Address v){ return h.dest < v; });
+    auto last  = std::upper_bound(hits.begin(), hits.end(), hi,
+                                    [](Address v, const PtrHit& h){ return v < h.dest; });
+    return { static_cast<std::size_t>(first - hits.begin()),
+             static_cast<std::size_t>(last  - hits.begin()) };
+}
+
+} // anonymous
+
+std::vector<PointerPath> PointerScanner::find(HANDLE process, Address target,
+                                                const PointerScanConfig& cfg,
+                                                const std::atomic<bool>& cancel,
+                                                PointerProgress prog) {
+    std::vector<PointerPath> out;
+    if (!process || !target) return out;
+
+    // Build the pointer map once; subsequent BFS iterations are cheap.
+    auto regions = enumerateRegions(process, /*writableOnly*/ false);
+    auto hits    = buildPtrMap(process, regions, cancel, prog);
+    if (hits.empty()) return out;
+
+    struct QItem {
+        Address          cur;
+        int              depthLeft;
+        std::vector<int> offsets;   // innermost first
+    };
+
+    std::vector<QItem> frontier;
+    frontier.push_back({ target, cfg.maxDepth, {} });
+
+    while (!frontier.empty()) {
+        if (cancel.load() || out.size() >= cfg.maxResults) break;
+
+        QItem q = std::move(frontier.back());
+        frontier.pop_back();
+
+        Address lo = (q.cur > (Address)cfg.maxOffset) ? q.cur - cfg.maxOffset : 0;
+        Address hi = q.cur;
+        auto [lb, ub] = hitsInRange(hits, lo, hi);
+
+        for (std::size_t i = lb; i < ub; ++i) {
+            if (out.size() >= cfg.maxResults) break;
+            const auto& h = hits[i];
+            int off = static_cast<int>(q.cur - h.dest);
+
+            // Fresh path = [this off, then the deeper offsets we already had]
+            std::vector<int> path;
+            path.reserve(q.offsets.size() + 1);
+            path.push_back(off);
+            path.insert(path.end(), q.offsets.begin(), q.offsets.end());
+
+            if (h.srcIsImage) {
+                out.push_back({ h.src, std::move(path) });
+            } else if (q.depthLeft > 1) {
+                frontier.push_back({ h.src, q.depthLeft - 1, std::move(path) });
+            }
+        }
+    }
+
+    return out;
+}
+
+} // namespace cheat
+
+```
+
+`src/pointer_scan.h`:
+
+```h
+// pointer_scan.h -- discover pointer-path chains that resolve to a given
+// target address.
+//
+// Given a dynamic address T that moves between runs (e.g. the current
+// slot for `playerHealth`), the scanner walks the process's readable
+// memory to find chains of the form:
+//
+//     *(... *( STATIC + o1 ) ... + oN-1 ) + oN == T
+//
+// where STATIC is a pointer that lives inside a module image (MEM_IMAGE
+// region), so its address survives process restarts. Depth and the
+// offset window are configurable; results are capped to keep UI usable.
+#pragma once
+
+#include "common.h"
+#include "mem_regions.h"
+
+namespace cheat {
+
+struct PointerPath {
+    Address          base{};      // the "static" starting slot
+    std::vector<int> offsets;     // applied in order, deepest last
+};
+
+struct PointerScanConfig {
+    int         maxDepth{3};      // 1 .. 6 in practice
+    int         maxOffset{0x1000};
+    std::size_t maxResults{500};
+};
+
+using PointerProgress = std::function<void(std::size_t donePages,
+                                             std::size_t totalPages)>;
+
+class PointerScanner {
+public:
+    std::vector<PointerPath> find(HANDLE process, Address target,
+                                    const PointerScanConfig& cfg,
+                                    const std::atomic<bool>& cancel,
+                                    PointerProgress prog = {});
+};
+
+} // namespace cheat
+
+```
+
+`src/proc_attach.cpp`:
+
+```cpp
+#include "proc_attach.h"
+
+#include <tlhelp32.h>
+
+namespace cheat {
+
+std::vector<ProcEntry> enumerateProcesses() {
+    std::vector<ProcEntry> out;
+    HANDLE snap = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snap == INVALID_HANDLE_VALUE) return out;
+
+    PROCESSENTRY32W pe{};
+    pe.dwSize = sizeof(pe);
+    if (::Process32FirstW(snap, &pe)) {
+        do {
+            out.push_back({ pe.th32ProcessID, pe.szExeFile });
+        } while (::Process32NextW(snap, &pe));
+    }
+    ::CloseHandle(snap);
+    return out;
+}
+
+HANDLE openForFullAccess(DWORD pid) {
+    // Minimum set for scan + write + VirtualProtect + VirtualQuery.
+    constexpr DWORD kAccess =
+        PROCESS_VM_READ |
+        PROCESS_VM_WRITE |
+        PROCESS_VM_OPERATION |
+        PROCESS_QUERY_INFORMATION;
+    return ::OpenProcess(kAccess, FALSE, pid);
+}
+
+std::wstring processImagePath(HANDLE process) {
+    wchar_t buf[MAX_PATH]{};
+    DWORD n = MAX_PATH;
+    if (!::QueryFullProcessImageNameW(process, 0, buf, &n)) return {};
+    return std::wstring(buf, n);
+}
+
+} // namespace cheat
+
+```
+
+`src/proc_attach.h`:
+
+```h
+// proc_attach.h -- process enumeration + open-for-full-RW.
+#pragma once
+
+#include "common.h"
+
+namespace cheat {
+
+struct ProcEntry {
+    DWORD        pid{};
+    std::wstring name;
+};
+
+std::vector<ProcEntry> enumerateProcesses();
+
+// OpenProcess with the access rights the scanner / writer need. Returns
+// nullptr on failure. Caller owns the handle.
+HANDLE openForFullAccess(DWORD pid);
+
+// Full path to the executable file on disk, derived from the process
+// handle via QueryFullProcessImageNameW. Empty on failure.
+std::wstring processImagePath(HANDLE process);
+
+} // namespace cheat
+
+```
+
+`src/scanner.cpp`:
+
+```cpp
+#include "scanner.h"
+
+#include <future>
+
+namespace cheat {
+
+namespace {
+
+std::size_t effectiveStride(const ScanConfig& cfg) {
+    if (!cfg.fastScan) return 1;
+    if (cfg.alignment > 0) return cfg.alignment;
+    std::size_t sz = fixedSize(cfg.type);
+    return sz ? sz : 1;
+}
+
+std::size_t itemSize(const ScanConfig& cfg) {
+    std::size_t sz = fixedSize(cfg.type);
+    if (sz) return sz;
+    return cfg.operand.bytes.size();
+}
+
+// Scan one contiguous page / chunk in memory. Appends matches to `out`.
+void scanChunk(const ScanConfig& cfg,
+               Address base,
+               const Byte* buf, std::size_t len,
+               std::vector<ScanResult>& out) {
+    const std::size_t stride = effectiveStride(cfg);
+    const std::size_t sz     = itemSize(cfg);
+    if (!sz || len < sz) return;
+
+    const std::size_t limit = len - sz;
+    for (std::size_t off = 0; off <= limit; off += stride) {
+        const Byte* here = buf + off;
+        if (cfg.operand.matches(cfg.op, here, len - off,
+                                  /*prev*/ nullptr,
+                                  cfg.op == ScanOp::Between ? &cfg.operand2 : nullptr)) {
+            ScanResult r{};
+            r.address = base + off;
+            r.value.assign(here, here + sz);
+            out.push_back(std::move(r));
+        }
+    }
+}
+
+} // anonymous
+
+std::vector<ScanResult> Scanner::firstScan(HANDLE process,
+                                             const ScanConfig& cfg,
+                                             const std::atomic<bool>& cancel,
+                                             ScanProgress prog) {
+    std::vector<ScanResult> out;
+    if (!process) return out;
+
+    auto regions = enumerateRegions(process, cfg.writableOnly);
+    if (regions.empty()) return out;
+
+    // Chunk every region into <=4 MiB slices so we don't allocate huge
+    // buffers and so we can honour cancellation promptly.
+    constexpr std::size_t kChunk = 4 * 1024 * 1024;
+
+    std::size_t totalPages = 0;
+    for (const auto& r : regions) totalPages += (r.size + kChunk - 1) / kChunk;
+
+    Bytes buf;
+    buf.reserve(kChunk);
+
+    std::size_t done = 0;
+    for (const auto& reg : regions) {
+        Address cursor = reg.base;
+        std::size_t remain = reg.size;
+        while (remain > 0) {
+            if (cancel.load()) { if (prog) prog(done, totalPages); return out; }
+            std::size_t take = std::min(remain, kChunk);
+            buf.resize(take);
+            SIZE_T got = 0;
+            BOOL ok = ::ReadProcessMemory(process,
+                                           reinterpret_cast<LPCVOID>(cursor),
+                                           buf.data(), take, &got);
+            if (ok && got >= itemSize(cfg)) {
+                scanChunk(cfg, cursor, buf.data(), got, out);
+            }
+            cursor += take;
+            remain -= take;
+            ++done;
+            if (prog && (done % 16 == 0)) prog(done, totalPages);
+        }
+    }
+    if (prog) prog(totalPages, totalPages);
+    return out;
+}
+
+std::vector<ScanResult> Scanner::nextScan(HANDLE process,
+                                            const std::vector<ScanResult>& prev,
+                                            const ScanConfig& cfg,
+                                            const std::atomic<bool>& cancel,
+                                            ScanProgress prog) {
+    std::vector<ScanResult> out;
+    if (!process) return out;
+
+    out.reserve(prev.size() / 2);
+
+    const std::size_t sz = itemSize(cfg);
+    if (!sz) return out;
+
+    std::size_t done = 0;
+    const std::size_t total = prev.size();
+
+    Byte here[32]{};  // enough for fixed scalars
+    Bytes heapBuf;
+    const std::size_t stackCap = sizeof(here);
+
+    for (const auto& e : prev) {
+        if (cancel.load()) { if (prog) prog(done, total); return out; }
+
+        Byte* dst = (sz <= stackCap) ? here : (heapBuf.resize(sz), heapBuf.data());
+        SIZE_T got = 0;
+        BOOL ok = ::ReadProcessMemory(process,
+                                       reinterpret_cast<LPCVOID>(e.address),
+                                       dst, sz, &got);
+        if (!ok || got != sz) {
+            ++done;
+            continue;
+        }
+
+        const Byte* prevBytes = e.value.size() == sz ? e.value.data() : nullptr;
+        if (cfg.operand.matches(cfg.op, dst, sz, prevBytes,
+                                  cfg.op == ScanOp::Between ? &cfg.operand2 : nullptr)) {
+            ScanResult r{};
+            r.address = e.address;
+            r.value.assign(dst, dst + sz);
+            out.push_back(std::move(r));
+        }
+        ++done;
+        if (prog && (done % 1024 == 0)) prog(done, total);
+    }
+    if (prog) prog(total, total);
+    return out;
+}
+
+} // namespace cheat
+
+```
+
+`src/scanner.h`:
+
+```h
+// scanner.h -- first-scan + next-scan memory search.
+//
+// A first-scan walks every committed writable region, reading in large
+// chunks and applying the comparator at every aligned position. A
+// next-scan filters the previous result set in place. Both report progress
+// through a callback and honour an atomic cancel flag so the UI can stop
+// a runaway scan.
+#pragma once
+
+#include "common.h"
+#include "mem_regions.h"
+#include "value_types.h"
+
+namespace cheat {
+
+struct ScanConfig {
+    ValueType  type{ValueType::I32};
+    ScanOp     op{ScanOp::Exact};
+    TypedValue operand;
+    TypedValue operand2;        // Between upper bound (optional)
+    std::size_t alignment{0};   // 0 = default (type size, min 1)
+    bool       fastScan{true};  // honour alignment vs. scan every byte
+    bool       writableOnly{true};
+};
+
+struct ScanResult {
+    Address address{};
+    Bytes   value;              // captured so next-scan can compare
+};
+
+using ScanProgress = std::function<void(std::size_t donePages,
+                                          std::size_t totalPages)>;
+
+class Scanner {
+public:
+    std::vector<ScanResult> firstScan(HANDLE process,
+                                        const ScanConfig& cfg,
+                                        const std::atomic<bool>& cancel,
+                                        ScanProgress prog = {});
+
+    std::vector<ScanResult> nextScan(HANDLE process,
+                                       const std::vector<ScanResult>& prev,
+                                       const ScanConfig& cfg,
+                                       const std::atomic<bool>& cancel,
+                                       ScanProgress prog = {});
+};
+
+} // namespace cheat
+
+```
+
+`src/ui/app.cpp`:
+
+```cpp
+#include "app.h"
+
+#include "theme.h"
+#include "views.h"
+
+#include "imgui.h"
+#include "imgui_internal.h"   // DockBuilder* lives here
+#include "imgui_impl_dx11.h"
+#include "imgui_impl_win32.h"
+
+#include <dxgi.h>
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);
+
+namespace cheat::ui {
+
+static App* g_app = nullptr;
+
+LRESULT CALLBACK App::wndProcThunk(HWND h, UINT m, WPARAM w, LPARAM l) {
+    if (g_app) return g_app->handleMessage(h, m, w, l);
+    return ::DefWindowProcW(h, m, w, l);
+}
+
+LRESULT App::handleMessage(HWND h, UINT m, WPARAM w, LPARAM l) {
+    if (ImGui_ImplWin32_WndProcHandler(h, m, w, l)) return 0;
+    switch (m) {
+        case WM_SIZE:
+            if (m_dev && w != SIZE_MINIMIZED) {
+                m_resizeW = LOWORD(l);
+                m_resizeH = HIWORD(l);
+                m_resizePending = true;
+            }
+            return 0;
+        case WM_SYSCOMMAND:
+            if ((w & 0xFFF0) == SC_KEYMENU) return 0;
+            break;
+        case WM_DESTROY:
+            ::PostQuitMessage(0);
+            return 0;
+    }
+    return ::DefWindowProcW(h, m, w, l);
+}
+
+bool App::init(HINSTANCE hInst) {
+    g_app = this;
+
+    WNDCLASSEXW wc{};
+    wc.cbSize        = sizeof(wc);
+    wc.style         = CS_HREDRAW | CS_VREDRAW;
+    wc.lpfnWndProc   = wndProcThunk;
+    wc.hInstance     = hInst;
+    wc.hCursor       = ::LoadCursor(nullptr, IDC_ARROW);
+    wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW);
+    wc.lpszClassName = L"CheatOsWindow";
+    ::RegisterClassExW(&wc);
+
+    m_hwnd = ::CreateWindowExW(
+        0, wc.lpszClassName, L"CheatOS -- memory scanner / trainer",
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, 1400, 900,
+        nullptr, nullptr, hInst, nullptr);
+    if (!m_hwnd) return false;
+
+    DXGI_SWAP_CHAIN_DESC sd{};
+    sd.BufferCount       = 2;
+    sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    sd.BufferUsage       = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    sd.OutputWindow      = m_hwnd;
+    sd.SampleDesc.Count  = 1;
+    sd.Windowed          = TRUE;
+    sd.SwapEffect        = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+
+    D3D_FEATURE_LEVEL fl;
+    HRESULT hr = ::D3D11CreateDeviceAndSwapChain(
+        nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0,
+        nullptr, 0, D3D11_SDK_VERSION, &sd, &m_sc,
+        &m_dev, &fl, &m_ctx);
+    if (FAILED(hr)) return false;
+    makeRenderTarget();
+
+    ::ShowWindow(m_hwnd, SW_SHOW);
+    ::UpdateWindow(m_hwnd);
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard
+                                 | ImGuiConfigFlags_DockingEnable;
+    applyGrayTheme();
+    ImGui_ImplWin32_Init(m_hwnd);
+    ImGui_ImplDX11_Init(m_dev, m_ctx);
+    return true;
+}
+
+void App::makeRenderTarget() {
+    ID3D11Texture2D* bb = nullptr;
+    m_sc->GetBuffer(0, IID_PPV_ARGS(&bb));
+    if (bb) {
+        m_dev->CreateRenderTargetView(bb, nullptr, &m_rtv);
+        bb->Release();
+    }
+}
+
+void App::dropRenderTarget() {
+    if (m_rtv) { m_rtv->Release(); m_rtv = nullptr; }
+}
+
+void App::run() {
+    MSG msg{};
+    bool done = false;
+    while (!done) {
+        while (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            ::TranslateMessage(&msg);
+            ::DispatchMessage(&msg);
+            if (msg.message == WM_QUIT) done = true;
+        }
+        if (done) break;
+
+        if (m_resizePending) {
+            dropRenderTarget();
+            m_sc->ResizeBuffers(0, m_resizeW, m_resizeH, DXGI_FORMAT_UNKNOWN, 0);
+            makeRenderTarget();
+            m_resizePending = false;
+        }
+        frame();
+        present();
+    }
+}
+
+void App::frame() {
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+
+    if (m_eng) {
+        auto lines = m_eng->drainLog();
+        for (auto& ln : lines) m_ui.log.push_back(std::move(ln));
+        if (m_ui.log.size() > m_ui.logLimit) {
+            m_ui.log.erase(m_ui.log.begin(),
+                            m_ui.log.begin() + (m_ui.log.size() - m_ui.logLimit));
+        }
+    }
+
+    ImGuiID dockId = ImGui::DockSpaceOverViewport(
+        ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+    buildDefaultDockLayoutIfFirstRun(dockId);
+
+    drawControlBar (m_ui, *m_eng);
+    drawScanPanel  (m_ui, *m_eng);
+    drawResults    (m_ui, *m_eng);
+    drawBookmarks  (m_ui, *m_eng);
+    drawMemory     (m_ui, *m_eng);
+    drawPointerPane(m_ui, *m_eng);
+    drawLog        (m_ui);
+
+    drawAttachDialog   (m_ui, *m_eng);
+    drawPointerScanDialog(m_ui, *m_eng);
+
+    ImGui::Render();
+}
+
+void App::buildDefaultDockLayoutIfFirstRun(ImGuiID dockId) {
+    if (m_dockLayoutBuilt) return;
+    m_dockLayoutBuilt = true;
+
+    if (ImGui::DockBuilderGetNode(dockId) &&
+        ImGui::DockBuilderGetNode(dockId)->ChildNodes[0]) {
+        return;
+    }
+    ImGuiViewport* vp = ImGui::GetMainViewport();
+    ImGui::DockBuilderRemoveNode(dockId);
+    ImGui::DockBuilderAddNode(dockId, ImGuiDockNodeFlags_DockSpace);
+    ImGui::DockBuilderSetNodeSize(dockId, vp->WorkSize);
+
+    ImGuiID top    = ImGui::DockBuilderSplitNode(dockId, ImGuiDir_Up,   0.06f, nullptr, &dockId);
+    ImGuiID left   = ImGui::DockBuilderSplitNode(dockId, ImGuiDir_Left, 0.35f, nullptr, &dockId);
+    ImGuiID right  = dockId;
+    ImGuiID bottom = ImGui::DockBuilderSplitNode(right,  ImGuiDir_Down, 0.30f, nullptr, &right);
+
+    ImGui::DockBuilderDockWindow("Control",        top);
+    ImGui::DockBuilderDockWindow("Scan",           left);
+    ImGui::DockBuilderDockWindow("Results",        left);
+    ImGui::DockBuilderDockWindow("Bookmarks",      right);
+    ImGui::DockBuilderDockWindow("Memory",         right);
+    ImGui::DockBuilderDockWindow("Pointer paths",  right);
+    ImGui::DockBuilderDockWindow("Log",            bottom);
+
+    ImGui::DockBuilderFinish(dockId);
+}
+
+void App::present() {
+    const float clearColor[4]{ 0.08f, 0.08f, 0.09f, 1.0f };
+    m_ctx->OMSetRenderTargets(1, &m_rtv, nullptr);
+    m_ctx->ClearRenderTargetView(m_rtv, clearColor);
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+    m_sc->Present(1, 0);
+}
+
+void App::shutdown() {
+    if (m_eng) m_eng->detach();
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+    dropRenderTarget();
+    if (m_sc)  { m_sc->Release();  m_sc  = nullptr; }
+    if (m_ctx) { m_ctx->Release(); m_ctx = nullptr; }
+    if (m_dev) { m_dev->Release(); m_dev = nullptr; }
+    if (m_hwnd) { ::DestroyWindow(m_hwnd); m_hwnd = nullptr; }
+    g_app = nullptr;
+}
+
+} // namespace cheat::ui
+
+```
+
+`src/ui/app.h`:
+
+```h
+// app.h -- Win32 window + DX11 swapchain + ImGui docking host.
+#pragma once
+
+#include "common.h"
+#include "engine.h"
+
+#include "imgui.h"
+
+#include <d3d11.h>
+
+namespace cheat::ui {
+
+struct UiState {
+    std::vector<std::string> log;
+    std::size_t              logLimit{4096};
+
+    // Attach dialog
+    bool    showAttach{false};
+    std::vector<ProcEntry> procs;
+    char    procFilter[64]{};
+    int     procSelected{-1};
+
+    // Scan panel
+    int     scanType{4};       // index into ValueType enum (I32 default)
+    int     scanOp{1};         // Exact
+    char    scanValue[128]  = "0";
+    char    scanValue2[128] = "0";
+    int     scanAlignment{0};  // 0 = type size default
+    bool    fastScan{true};
+    bool    writableOnly{true};
+
+    // Results pagination
+    std::size_t resultOffset{0};
+    std::size_t resultPage{200};
+    std::vector<ScanResult> resultCache;
+
+    // Bookmark editor
+    BookmarkId  selectedBookmark{};
+    char        bookmarkName[64] = "new entry";
+    // Per-bookmark edit buffers keyed by id, lazily populated
+    std::map<BookmarkId, std::array<char, 128>> bmValueBuf;
+
+    // Memory viewer
+    char    memAddrBuf[32] = "0";
+    Bytes   memBuf;
+    Address memAddr{};
+    int     memRows{16};
+
+    // Pointer scanner dialog
+    bool    showPtrScan{false};
+    char    ptrTarget[32] = "0x";
+    int     ptrDepth{3};
+    int     ptrMaxOff{0x1000};
+};
+
+class App {
+public:
+    bool init(HINSTANCE hInst);
+    void run();
+    void shutdown();
+
+    void bind(Engine* eng) { m_eng = eng; }
+
+private:
+    void frame();
+    void present();
+    void makeRenderTarget();
+    void dropRenderTarget();
+    void buildDefaultDockLayoutIfFirstRun(ImGuiID dockId);
+
+    static LRESULT CALLBACK wndProcThunk(HWND, UINT, WPARAM, LPARAM);
+    LRESULT handleMessage(HWND, UINT, WPARAM, LPARAM);
+
+    HWND                    m_hwnd{};
+    ID3D11Device*           m_dev{};
+    ID3D11DeviceContext*    m_ctx{};
+    IDXGISwapChain*         m_sc{};
+    ID3D11RenderTargetView* m_rtv{};
+
+    bool      m_resizePending{};
+    UINT      m_resizeW{}, m_resizeH{};
+    bool      m_dockLayoutBuilt{false};
+
+    Engine*  m_eng{};
+    UiState  m_ui;
+};
+
+} // namespace cheat::ui
+
+```
+
+`src/ui/theme.cpp`:
+
+```cpp
+#include "theme.h"
+
+#include "imgui.h"
+
+namespace cheat::ui {
+
+void applyGrayTheme() {
+    auto& s = ImGui::GetStyle();
+    auto& c = s.Colors;
+
+    s.WindowRounding    = 6.0f;
+    s.FrameRounding     = 4.0f;
+    s.GrabRounding      = 4.0f;
+    s.ScrollbarRounding = 4.0f;
+    s.TabRounding       = 4.0f;
+    s.WindowBorderSize  = 1.0f;
+    s.FrameBorderSize   = 0.0f;
+    s.WindowPadding     = ImVec2(10, 10);
+    s.FramePadding      = ImVec2(6, 4);
+    s.ItemSpacing       = ImVec2(8, 6);
+    s.CellPadding       = ImVec2(6, 3);
+
+    const ImVec4 bg      = ImVec4(0.11f, 0.11f, 0.12f, 1.00f);
+    const ImVec4 panel   = ImVec4(0.16f, 0.16f, 0.17f, 1.00f);
+    const ImVec4 panelHi = ImVec4(0.22f, 0.22f, 0.23f, 1.00f);
+    const ImVec4 panelAc = ImVec4(0.30f, 0.30f, 0.32f, 1.00f);
+    const ImVec4 border  = ImVec4(0.28f, 0.28f, 0.30f, 1.00f);
+    const ImVec4 accent  = ImVec4(0.55f, 0.55f, 0.58f, 1.00f);
+    const ImVec4 text    = ImVec4(0.86f, 0.86f, 0.88f, 1.00f);
+    const ImVec4 textDim = ImVec4(0.55f, 0.55f, 0.58f, 1.00f);
+
+    c[ImGuiCol_Text]              = text;
+    c[ImGuiCol_TextDisabled]      = textDim;
+    c[ImGuiCol_WindowBg]          = bg;
+    c[ImGuiCol_ChildBg]           = bg;
+    c[ImGuiCol_PopupBg]           = panel;
+    c[ImGuiCol_Border]            = border;
+    c[ImGuiCol_FrameBg]           = panel;
+    c[ImGuiCol_FrameBgHovered]    = panelHi;
+    c[ImGuiCol_FrameBgActive]     = panelAc;
+    c[ImGuiCol_TitleBg]           = panel;
+    c[ImGuiCol_TitleBgActive]     = panelHi;
+    c[ImGuiCol_TitleBgCollapsed]  = panel;
+    c[ImGuiCol_MenuBarBg]         = panel;
+    c[ImGuiCol_ScrollbarBg]       = bg;
+    c[ImGuiCol_ScrollbarGrab]     = panelHi;
+    c[ImGuiCol_ScrollbarGrabHovered] = panelAc;
+    c[ImGuiCol_ScrollbarGrabActive]  = accent;
+    c[ImGuiCol_CheckMark]         = accent;
+    c[ImGuiCol_SliderGrab]        = accent;
+    c[ImGuiCol_SliderGrabActive]  = ImVec4(0.70f, 0.70f, 0.72f, 1.00f);
+    c[ImGuiCol_Button]            = panel;
+    c[ImGuiCol_ButtonHovered]     = panelHi;
+    c[ImGuiCol_ButtonActive]      = panelAc;
+    c[ImGuiCol_Header]            = panel;
+    c[ImGuiCol_HeaderHovered]     = panelHi;
+    c[ImGuiCol_HeaderActive]      = panelAc;
+    c[ImGuiCol_Separator]         = border;
+    c[ImGuiCol_SeparatorHovered]  = accent;
+    c[ImGuiCol_SeparatorActive]   = accent;
+    c[ImGuiCol_ResizeGrip]        = panel;
+    c[ImGuiCol_ResizeGripHovered] = panelHi;
+    c[ImGuiCol_ResizeGripActive]  = panelAc;
+    c[ImGuiCol_Tab]               = panel;
+    c[ImGuiCol_TabHovered]        = panelHi;
+    c[ImGuiCol_TabActive]         = panelAc;
+    c[ImGuiCol_TabUnfocused]      = panel;
+    c[ImGuiCol_TabUnfocusedActive]= panelHi;
+    c[ImGuiCol_TableHeaderBg]     = panelHi;
+    c[ImGuiCol_TableBorderStrong] = border;
+    c[ImGuiCol_TableBorderLight]  = ImVec4(0.22f, 0.22f, 0.23f, 1.00f);
+    c[ImGuiCol_TableRowBg]        = ImVec4(0, 0, 0, 0);
+    c[ImGuiCol_TableRowBgAlt]     = ImVec4(1, 1, 1, 0.03f);
+    c[ImGuiCol_PlotHistogram]     = accent;
+    c[ImGuiCol_PlotHistogramHovered] = ImVec4(0.70f, 0.70f, 0.72f, 1.00f);
+}
+
+} // namespace cheat::ui
+
+```
+
+`src/ui/theme.h`:
+
+```h
+// theme.h -- ImGui style setup (gray).
+#pragma once
+
+namespace cheat::ui {
+
+void applyGrayTheme();
+
+} // namespace cheat::ui
+
+```
+
+`src/ui/views.cpp`:
+
+```cpp
+#include "views.h"
+
+#include "imgui.h"
+
+#include <algorithm>
+#include <cstring>
+
+namespace cheat::ui {
+
+// RAII pair so every pane's Begin has a matching End even on early return.
+namespace {
+struct Window {
+    bool open;
+    Window(const char* name, ImGuiWindowFlags flags = 0) {
+        open = ImGui::Begin(name, nullptr, flags);
+    }
+    ~Window() { ImGui::End(); }
+    operator bool() const { return open; }
+    Window(const Window&)            = delete;
+    Window& operator=(const Window&) = delete;
+};
+
+bool parseHex(const char* s, std::uint64_t& out) {
+    if (!s) return false;
+    while (*s == ' ') ++s;
+    if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) s += 2;
+    if (!*s) return false;
+    char* end = nullptr;
+    out = std::strtoull(s, &end, 16);
+    return end != s;
+}
+
+const char* kTypeItems[] = {
+    "int8", "uint8", "int16", "uint16", "int32", "uint32",
+    "int64", "uint64", "float", "double", "bytes", "string", "wstring",
+};
+
+const char* kOpItems[] = {
+    "unknown", "==", "!=", ">", ">=", "<", "<=", "between",
+    "changed", "unchanged", "increased", "decreased",
+};
+
+ValueType typeFromIndex(int i) {
+    switch (i) {
+        case 0: return ValueType::I8;   case 1: return ValueType::U8;
+        case 2: return ValueType::I16;  case 3: return ValueType::U16;
+        case 4: return ValueType::I32;  case 5: return ValueType::U32;
+        case 6: return ValueType::I64;  case 7: return ValueType::U64;
+        case 8: return ValueType::F32;  case 9: return ValueType::F64;
+        case 10: return ValueType::Bytes;
+        case 11: return ValueType::AsciiString;
+        case 12: return ValueType::WideString;
+    }
+    return ValueType::I32;
+}
+
+ScanOp opFromIndex(int i) {
+    switch (i) {
+        case 0: return ScanOp::Unknown;
+        case 1: return ScanOp::Exact;    case 2: return ScanOp::NotEqual;
+        case 3: return ScanOp::Greater;  case 4: return ScanOp::GreaterEq;
+        case 5: return ScanOp::Less;     case 6: return ScanOp::LessEq;
+        case 7: return ScanOp::Between;
+        case 8: return ScanOp::Changed;  case 9: return ScanOp::Unchanged;
+        case 10: return ScanOp::Increased; case 11: return ScanOp::Decreased;
+    }
+    return ScanOp::Exact;
+}
+
+bool opNeedsOperand(ScanOp op) {
+    switch (op) {
+        case ScanOp::Unknown:
+        case ScanOp::Changed: case ScanOp::Unchanged:
+        case ScanOp::Increased: case ScanOp::Decreased: return false;
+        default: return true;
+    }
+}
+
+bool opIsFirstScanValid(ScanOp op) {
+    switch (op) {
+        case ScanOp::Changed: case ScanOp::Unchanged:
+        case ScanOp::Increased: case ScanOp::Decreased: return false;
+        default: return true;
+    }
+}
+
+} // anonymous
+
+// ---------------------------------------------------------------------------
+// control bar
+// ---------------------------------------------------------------------------
+void drawControlBar(UiState& ui, Engine& eng) {
+    Window w("Control");
+    if (!w) return;
+
+    if (ImGui::Button("Attach...")) {
+        ui.procs = enumerateProcesses();
+        std::sort(ui.procs.begin(), ui.procs.end(),
+                   [](auto& a, auto& b){ return a.name < b.name; });
+        ui.showAttach = true;
+    }
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!eng.isAttached());
+    if (ImGui::Button("Detach")) eng.detach();
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGui::Dummy(ImVec2(12, 0)); ImGui::SameLine();
+
+    ImGui::BeginDisabled(!eng.isAttached());
+    if (eng.freezerRunning()) {
+        if (ImGui::Button("Freezer: ON")) eng.freezerStop();
+    } else {
+        if (ImGui::Button("Freezer: off")) eng.freezerStart();
+    }
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGui::Dummy(ImVec2(12, 0)); ImGui::SameLine();
+
+    ImGui::BeginDisabled(!eng.isAttached());
+    if (ImGui::Button("Save .CT")) {
+        // Very small inline save dialog -- no Win32 common dialog pulled.
+        ImGui::OpenPopup("save_ct");
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Load .CT")) ImGui::OpenPopup("load_ct");
+    ImGui::EndDisabled();
+
+    static char ctPath[260] = "cheat.ct";
+    if (ImGui::BeginPopup("save_ct")) {
+        ImGui::InputText("path", ctPath, sizeof(ctPath));
+        if (ImGui::Button("Save")) { eng.saveTable(utf8_to_wide(ctPath)); ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
+    }
+    if (ImGui::BeginPopup("load_ct")) {
+        ImGui::InputText("path", ctPath, sizeof(ctPath));
+        if (ImGui::Button("Load")) { eng.loadTable(utf8_to_wide(ctPath)); ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
+    }
+
+    ImGui::SameLine();
+    ImGui::Dummy(ImVec2(16, 0)); ImGui::SameLine();
+    if (eng.isAttached()) {
+        ImGui::TextDisabled("pid %lu   results %zu   bookmarks %zu",
+                             eng.pid(), eng.resultCount(),
+                             eng.bookmarks().size());
+    } else {
+        ImGui::TextDisabled("not attached");
+    }
+}
+
+// ---------------------------------------------------------------------------
+// scan panel
+// ---------------------------------------------------------------------------
+void drawScanPanel(UiState& ui, Engine& eng) {
+    Window w("Scan");
+    if (!w) return;
+
+    ImGui::SetNextItemWidth(130);
+    ImGui::Combo("type", &ui.scanType, kTypeItems, IM_ARRAYSIZE(kTypeItems));
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(110);
+    ImGui::Combo("op",   &ui.scanOp,   kOpItems,   IM_ARRAYSIZE(kOpItems));
+
+    const ScanOp     op = opFromIndex(ui.scanOp);
+    const ValueType  vt = typeFromIndex(ui.scanType);
+
+    ImGui::SetNextItemWidth(-1);
+    if (opNeedsOperand(op)) {
+        ImGui::InputText("##v1", ui.scanValue, sizeof(ui.scanValue));
+        if (op == ScanOp::Between) {
+            ImGui::SetNextItemWidth(-1);
+            ImGui::InputText("##v2", ui.scanValue2, sizeof(ui.scanValue2));
+        }
+    } else {
+        ImGui::TextDisabled("(no operand needed)");
+    }
+
+    ImGui::Checkbox("fast scan (aligned)", &ui.fastScan); ImGui::SameLine();
+    ImGui::Checkbox("writable only",       &ui.writableOnly);
+
+    const bool scanning  = eng.scanning();
+    const bool hasResult = eng.resultCount() > 0;
+    const bool firstOk   = opIsFirstScanValid(op);
+
+    ImGui::BeginDisabled(scanning || !eng.isAttached() || !firstOk);
+    if (ImGui::Button(hasResult ? "Restart scan" : "First scan")) {
+        ScanConfig cfg{};
+        cfg.type          = vt;
+        cfg.op            = op;
+        cfg.fastScan      = ui.fastScan;
+        cfg.writableOnly  = ui.writableOnly;
+        if (opNeedsOperand(op)) {
+            cfg.operand = TypedValue::parse(vt, ui.scanValue);
+            if (op == ScanOp::Between) {
+                cfg.operand2 = TypedValue::parse(vt, ui.scanValue2);
+            }
+        } else {
+            cfg.operand = TypedValue::zero(vt);
+        }
+        eng.resetScan();
+        eng.startFirstScan(cfg);
+    }
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(scanning || !hasResult);
+    if (ImGui::Button("Next scan")) {
+        ScanConfig cfg{};
+        cfg.type         = vt;
+        cfg.op           = op;
+        cfg.fastScan     = ui.fastScan;
+        cfg.writableOnly = ui.writableOnly;
+        if (opNeedsOperand(op)) {
+            cfg.operand = TypedValue::parse(vt, ui.scanValue);
+            if (op == ScanOp::Between) {
+                cfg.operand2 = TypedValue::parse(vt, ui.scanValue2);
+            }
+        } else {
+            cfg.operand = TypedValue::zero(vt);
+        }
+        eng.startNextScan(cfg);
+    }
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!scanning);
+    if (ImGui::Button("Cancel")) eng.cancelScan();
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(scanning || !hasResult);
+    if (ImGui::Button("Reset")) eng.resetScan();
+    ImGui::EndDisabled();
+
+    if (scanning) {
+        ImGui::ProgressBar(eng.scanProgress(), ImVec2(-1, 0));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// results
+// ---------------------------------------------------------------------------
+void drawResults(UiState& ui, Engine& eng) {
+    Window w("Results");
+    if (!w) return;
+
+    std::size_t total = eng.resultCount();
+    ImGui::TextDisabled("%zu results", total);
+    if (total == 0) return;
+
+    if (ui.resultOffset >= total) ui.resultOffset = 0;
+    ui.resultCache = eng.resultsSlice(ui.resultOffset, ui.resultPage);
+
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(80);
+    int rp = static_cast<int>(ui.resultPage);
+    if (ImGui::InputInt("per page", &rp, 50, 200)) {
+        if (rp < 10) rp = 10; if (rp > 5000) rp = 5000;
+        ui.resultPage = static_cast<std::size_t>(rp);
+    }
+    ImGui::SameLine();
+    if (ImGui::SmallButton("<")) {
+        if (ui.resultOffset >= ui.resultPage) ui.resultOffset -= ui.resultPage;
+        else ui.resultOffset = 0;
+    }
+    ImGui::SameLine();
+    ImGui::Text("%zu .. %zu", ui.resultOffset,
+                 std::min(total, ui.resultOffset + ui.resultPage));
+    ImGui::SameLine();
+    if (ImGui::SmallButton(">")) {
+        if (ui.resultOffset + ui.resultPage < total) ui.resultOffset += ui.resultPage;
+    }
+
+    ValueType vt = typeFromIndex(ui.scanType);
+    if (ImGui::BeginTable("##res", 3,
+                           ImGuiTableFlags_BordersInnerV |
+                           ImGuiTableFlags_RowBg |
+                           ImGuiTableFlags_ScrollY |
+                           ImGuiTableFlags_SizingFixedFit)) {
+        ImGui::TableSetupColumn("Address", 0, 160);
+        ImGui::TableSetupColumn("Value",   ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("",        0, 100);
+        ImGui::TableHeadersRow();
+
+        for (const auto& r : ui.resultCache) {
+            ImGui::PushID((int)r.address);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("0x%016llX", (unsigned long long)r.address);
+
+            ImGui::TableSetColumnIndex(1);
+            TypedValue cur;
+            cur.type = vt;
+            cur.bytes = r.value;
+            ImGui::Text("%s", cur.toString().c_str());
+
+            ImGui::TableSetColumnIndex(2);
+            if (ImGui::SmallButton("+ Bookmark")) {
+                Bookmark b{};
+                b.name = sfmt("entry_%llX",
+                                (unsigned long long)r.address);
+                b.address = r.address;
+                b.type    = vt;
+                b.frozenValue = cur;
+                eng.addBookmark(std::move(b));
+            }
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// bookmarks
+// ---------------------------------------------------------------------------
+void drawBookmarks(UiState& ui, Engine& eng) {
+    Window w("Bookmarks");
+    if (!w) return;
+
+    auto list = eng.bookmarks();
+    if (list.empty()) {
+        ImGui::TextDisabled("(no entries -- add some from the Results pane)");
+        return;
+    }
+
+    if (ImGui::BeginTable("##bm", 6,
+                           ImGuiTableFlags_BordersInnerV |
+                           ImGuiTableFlags_RowBg |
+                           ImGuiTableFlags_SizingFixedFit)) {
+        ImGui::TableSetupColumn("Freeze",  0, 50);
+        ImGui::TableSetupColumn("Name",    0, 160);
+        ImGui::TableSetupColumn("Address", 0, 170);
+        ImGui::TableSetupColumn("Type",    0, 70);
+        ImGui::TableSetupColumn("Value",   ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("",        0, 70);
+        ImGui::TableHeadersRow();
+
+        for (auto& b : list) {
+            ImGui::PushID((int)b.id);
+            ImGui::TableNextRow();
+
+            ImGui::TableSetColumnIndex(0);
+            bool fr = b.frozen;
+            if (ImGui::Checkbox("##f", &fr)) eng.setBookmarkFreeze(b.id, fr);
+
+            ImGui::TableSetColumnIndex(1);
+            char nameBuf[64]{};
+            std::strncpy(nameBuf, b.name.c_str(), sizeof(nameBuf) - 1);
+            ImGui::SetNextItemWidth(-1);
+            if (ImGui::InputText("##n", nameBuf, sizeof(nameBuf),
+                                   ImGuiInputTextFlags_EnterReturnsTrue)) {
+                eng.setBookmarkName(b.id, nameBuf);
+            }
+
+            ImGui::TableSetColumnIndex(2);
+            if (b.pointerOffsets.empty()) {
+                ImGui::Text("0x%016llX", (unsigned long long)b.address);
+            } else {
+                ImGui::Text("[P] 0x%llX", (unsigned long long)b.pointerBase);
+            }
+
+            ImGui::TableSetColumnIndex(3);
+            int ti = (int)b.type;
+            ImGui::SetNextItemWidth(-1);
+            if (ImGui::Combo("##t", &ti, kTypeItems, IM_ARRAYSIZE(kTypeItems))) {
+                eng.setBookmarkType(b.id, typeFromIndex(ti));
+            }
+
+            ImGui::TableSetColumnIndex(4);
+            TypedValue live = eng.readBookmarkValue(b);
+            auto& buf = ui.bmValueBuf[b.id];
+            if (!b.frozen) {
+                auto s = live.toString();
+                std::strncpy(buf.data(), s.c_str(), buf.size() - 1);
+                buf.back() = '\0';
+            }
+            ImGui::SetNextItemWidth(-1);
+            if (ImGui::InputText("##v", buf.data(), buf.size(),
+                                   ImGuiInputTextFlags_EnterReturnsTrue)) {
+                TypedValue nv = TypedValue::parse(b.type, buf.data());
+                eng.setBookmarkValue(b.id, nv);
+            }
+
+            ImGui::TableSetColumnIndex(5);
+            if (ImGui::SmallButton("Remove")) eng.removeBookmark(b.id);
+
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// memory
+// ---------------------------------------------------------------------------
+void drawMemory(UiState& ui, Engine& eng) {
+    Window w("Memory");
+    if (!w) return;
+
+    ImGui::SetNextItemWidth(220);
+    ImGui::InputText("Address", ui.memAddrBuf, sizeof(ui.memAddrBuf),
+                      ImGuiInputTextFlags_CharsHexadecimal);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(80);
+    ImGui::InputInt("Rows", &ui.memRows);
+    if (ui.memRows < 1)  ui.memRows = 1;
+    if (ui.memRows > 64) ui.memRows = 64;
+    ImGui::SameLine();
+    if (ImGui::Button("Read")) {
+        std::uint64_t addr = 0;
+        if (parseHex(ui.memAddrBuf, addr)) {
+            ui.memAddr = (Address)addr;
+            ui.memBuf.assign(ui.memRows * 16, 0);
+            eng.readMemory(ui.memAddr, ui.memBuf.data(), ui.memBuf.size());
+        }
+    }
+    if (ui.memBuf.empty()) {
+        ImGui::TextDisabled("(enter an address and Read)");
+        return;
+    }
+
+    ImGui::BeginChild("##dump", ImVec2(0, 0), false);
+    for (int row = 0; row < ui.memRows; ++row) {
+        std::size_t off = row * 16;
+        if (off >= ui.memBuf.size()) break;
+        Address rowAddr = ui.memAddr + off;
+        ImGui::TextColored(ImVec4(.7f,.7f,.75f,1), "%016llX:",
+                           (unsigned long long)rowAddr);
+        ImGui::SameLine();
+        char hex[64]{}, ascii[20]{};
+        int h = 0, a = 0;
+        for (int i = 0; i < 16 && off + i < ui.memBuf.size(); ++i) {
+            Byte b = ui.memBuf[off + i];
+            h += std::snprintf(hex + h, sizeof(hex) - h, "%02X ", b);
+            ascii[a++] = (b >= 0x20 && b < 0x7F) ? (char)b : '.';
+        }
+        ImGui::Text("%-48s |%s|", hex, ascii);
+    }
+    ImGui::EndChild();
+}
+
+// ---------------------------------------------------------------------------
+// pointer paths (results pane for the scanner)
+// ---------------------------------------------------------------------------
+void drawPointerPane(UiState& ui, Engine& eng) {
+    Window w("Pointer paths");
+    if (!w) return;
+
+    if (ImGui::Button("New pointer scan...")) ui.showPtrScan = true;
+    ImGui::SameLine();
+    if (eng.pointerScanning()) {
+        if (ImGui::Button("Cancel")) eng.cancelPointerScan();
+        ImGui::SameLine();
+        ImGui::ProgressBar(eng.pointerScanProgress(), ImVec2(-1, 0));
+    }
+
+    auto paths = eng.pointerPaths();
+    if (paths.empty()) {
+        ImGui::TextDisabled("(no paths yet)");
+        return;
+    }
+    ImGui::TextDisabled("%zu paths", paths.size());
+
+    if (ImGui::BeginTable("##pp", 3,
+                           ImGuiTableFlags_BordersInnerV |
+                           ImGuiTableFlags_RowBg |
+                           ImGuiTableFlags_ScrollY |
+                           ImGuiTableFlags_SizingFixedFit)) {
+        ImGui::TableSetupColumn("Base",     0, 160);
+        ImGui::TableSetupColumn("Offsets",  ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("",         0, 100);
+        ImGui::TableHeadersRow();
+        int idx = 0;
+        for (const auto& p : paths) {
+            ImGui::PushID(idx++);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("0x%016llX", (unsigned long long)p.base);
+
+            ImGui::TableSetColumnIndex(1);
+            std::string s;
+            for (auto o : p.offsets) {
+                if (!s.empty()) s += " -> ";
+                s += sfmt("+0x%X", o);
+            }
+            ImGui::TextColored(ImVec4(.8f,.9f,.75f,1), "%s", s.c_str());
+
+            ImGui::TableSetColumnIndex(2);
+            if (ImGui::SmallButton("+ Bookmark")) {
+                Bookmark b{};
+                b.name = sfmt("ptr_%llX", (unsigned long long)p.base);
+                b.type = ValueType::I32;
+                b.pointerBase    = p.base;
+                b.pointerOffsets = p.offsets;
+                b.frozenValue    = TypedValue::zero(b.type);
+                eng.addBookmark(std::move(b));
+            }
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// log
+// ---------------------------------------------------------------------------
+void drawLog(UiState& ui) {
+    Window w("Log");
+    if (!w) return;
+    ImGui::BeginChild("##lt", ImVec2(0, 0), false,
+                      ImGuiWindowFlags_HorizontalScrollbar);
+    for (const auto& line : ui.log) ImGui::TextUnformatted(line.c_str());
+    if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY() - 20)
+        ImGui::SetScrollHereY(1.0f);
+    ImGui::EndChild();
+}
+
+// ---------------------------------------------------------------------------
+// attach dialog
+// ---------------------------------------------------------------------------
+void drawAttachDialog(UiState& ui, Engine& eng) {
+    if (!ui.showAttach) return;
+    ImGui::OpenPopup("Attach to process");
+    ImGui::SetNextWindowSize(ImVec2(520, 440), ImGuiCond_FirstUseEver);
+    if (ImGui::BeginPopupModal("Attach to process", &ui.showAttach)) {
+        ImGui::SetNextItemWidth(-1);
+        ImGui::InputTextWithHint("##f", "filter...",
+                                   ui.procFilter, sizeof(ui.procFilter));
+
+        ImGui::BeginChild("##pl", ImVec2(0, -40), true);
+        for (int i = 0; i < (int)ui.procs.size(); ++i) {
+            const auto& e = ui.procs[i];
+            std::string name = wide_to_utf8(e.name);
+            if (ui.procFilter[0] && !std::strstr(name.c_str(), ui.procFilter)) continue;
+            char lbl[256];
+            std::snprintf(lbl, sizeof(lbl), "%-6lu  %s##%d", e.pid, name.c_str(), i);
+            if (ImGui::Selectable(lbl, ui.procSelected == i,
+                                    ImGuiSelectableFlags_AllowDoubleClick)) {
+                ui.procSelected = i;
+                if (ImGui::IsMouseDoubleClicked(0)) {
+                    eng.attach(e.pid);
+                    ui.showAttach = false;
+                }
+            }
+        }
+        ImGui::EndChild();
+
+        ImGui::BeginDisabled(ui.procSelected < 0);
+        if (ImGui::Button("Attach", ImVec2(120, 0))) {
+            if (ui.procSelected >= 0 && ui.procSelected < (int)ui.procs.size()) {
+                eng.attach(ui.procs[ui.procSelected].pid);
+                ui.showAttach = false;
+            }
+        }
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        if (ImGui::Button("Refresh", ImVec2(120, 0))) {
+            ui.procs = enumerateProcesses();
+            std::sort(ui.procs.begin(), ui.procs.end(),
+                       [](auto& a, auto& b){ return a.name < b.name; });
+            ui.procSelected = -1;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) ui.showAttach = false;
+        ImGui::EndPopup();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// pointer-scan dialog
+// ---------------------------------------------------------------------------
+void drawPointerScanDialog(UiState& ui, Engine& eng) {
+    if (!ui.showPtrScan) return;
+    ImGui::OpenPopup("Pointer scan");
+    ImGui::SetNextWindowSize(ImVec2(420, 200), ImGuiCond_FirstUseEver);
+    if (ImGui::BeginPopupModal("Pointer scan", &ui.showPtrScan,
+                                 ImGuiWindowFlags_NoResize)) {
+        ImGui::TextDisabled("Target address (hex) to find pointers for:");
+        ImGui::SetNextItemWidth(-1);
+        ImGui::InputText("##t", ui.ptrTarget, sizeof(ui.ptrTarget),
+                          ImGuiInputTextFlags_CharsHexadecimal);
+
+        ImGui::SetNextItemWidth(120);
+        ImGui::InputInt("Max depth",  &ui.ptrDepth);
+        ImGui::SetNextItemWidth(120);
+        ImGui::InputInt("Max offset", &ui.ptrMaxOff);
+
+        if (ImGui::Button("Run", ImVec2(120, 0))) {
+            std::uint64_t t = 0;
+            if (parseHex(ui.ptrTarget, t)) {
+                PointerScanConfig cfg{};
+                cfg.maxDepth  = std::max(1, std::min(ui.ptrDepth, 6));
+                cfg.maxOffset = std::max(0x10, ui.ptrMaxOff);
+                eng.startPointerScan((Address)t, cfg);
+                ui.showPtrScan = false;
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) ui.showPtrScan = false;
+        ImGui::EndPopup();
+    }
+}
+
+} // namespace cheat::ui
+
+```
+
+`src/ui/views.h`:
+
+```h
+// views.h -- panel entry points. Each is a top-level ImGui window
+// (docking branch), so the user can drag / split / float them.
+#pragma once
+
+#include "app.h"
+
+namespace cheat::ui {
+
+void drawControlBar  (UiState& ui, Engine& eng);
+void drawScanPanel   (UiState& ui, Engine& eng);
+void drawResults     (UiState& ui, Engine& eng);
+void drawBookmarks   (UiState& ui, Engine& eng);
+void drawMemory      (UiState& ui, Engine& eng);
+void drawPointerPane (UiState& ui, Engine& eng);
+void drawLog         (UiState& ui);
+
+void drawAttachDialog       (UiState& ui, Engine& eng);
+void drawPointerScanDialog  (UiState& ui, Engine& eng);
+
+} // namespace cheat::ui
+
+```
+
+`src/value_types.cpp`:
+
+```cpp
+#include "value_types.h"
+
+#include <charconv>
+#include <cwchar>
+#include <sstream>
+
+namespace cheat {
+
+std::size_t fixedSize(ValueType t) {
+    switch (t) {
+        case ValueType::I8:  case ValueType::U8:  return 1;
+        case ValueType::I16: case ValueType::U16: return 2;
+        case ValueType::I32: case ValueType::U32: case ValueType::F32: return 4;
+        case ValueType::I64: case ValueType::U64: case ValueType::F64: return 8;
+        default: return 0;   // Bytes / strings are variable
+    }
+}
+
+bool isInteger(ValueType t) {
+    switch (t) {
+        case ValueType::I8:  case ValueType::U8:
+        case ValueType::I16: case ValueType::U16:
+        case ValueType::I32: case ValueType::U32:
+        case ValueType::I64: case ValueType::U64:
+            return true;
+        default: return false;
+    }
+}
+
+bool isFloat(ValueType t) {
+    return t == ValueType::F32 || t == ValueType::F64;
+}
+
+bool isNumeric(ValueType t) { return isInteger(t) || isFloat(t); }
+
+const char* name(ValueType t) {
+    switch (t) {
+        case ValueType::I8:  return "int8";
+        case ValueType::U8:  return "uint8";
+        case ValueType::I16: return "int16";
+        case ValueType::U16: return "uint16";
+        case ValueType::I32: return "int32";
+        case ValueType::U32: return "uint32";
+        case ValueType::I64: return "int64";
+        case ValueType::U64: return "uint64";
+        case ValueType::F32: return "float";
+        case ValueType::F64: return "double";
+        case ValueType::Bytes:       return "bytes";
+        case ValueType::AsciiString: return "string";
+        case ValueType::WideString:  return "wstring";
+    }
+    return "?";
+}
+
+const char* name(ScanOp op) {
+    switch (op) {
+        case ScanOp::Unknown:    return "unknown";
+        case ScanOp::Exact:      return "==";
+        case ScanOp::NotEqual:   return "!=";
+        case ScanOp::Greater:    return ">";
+        case ScanOp::GreaterEq:  return ">=";
+        case ScanOp::Less:       return "<";
+        case ScanOp::LessEq:     return "<=";
+        case ScanOp::Between:    return "between";
+        case ScanOp::Changed:    return "changed";
+        case ScanOp::Unchanged:  return "unchanged";
+        case ScanOp::Increased:  return "increased";
+        case ScanOp::Decreased:  return "decreased";
+    }
+    return "?";
+}
+
+TypedValue TypedValue::zero(ValueType t) {
+    TypedValue v;
+    v.type = t;
+    std::size_t sz = fixedSize(t);
+    if (sz) v.bytes.assign(sz, 0);
+    return v;
+}
+
+namespace {
+
+template <typename T>
+TypedValue packInt(ValueType vt, long long x) {
+    TypedValue v;
+    v.type = vt;
+    T n = static_cast<T>(x);
+    v.bytes.assign(reinterpret_cast<Byte*>(&n),
+                    reinterpret_cast<Byte*>(&n) + sizeof(T));
+    return v;
+}
+
+template <typename T>
+TypedValue packFloat(ValueType vt, double x) {
+    TypedValue v;
+    v.type = vt;
+    T n = static_cast<T>(x);
+    v.bytes.assign(reinterpret_cast<Byte*>(&n),
+                    reinterpret_cast<Byte*>(&n) + sizeof(T));
+    return v;
+}
+
+// Parse "DE AD BE EF" or "DE ?? BE EF" style aob patterns.
+std::pair<Bytes, Bytes> parseAob(const std::string& text) {
+    Bytes out, mask;
+    const char* p = text.c_str();
+    while (*p) {
+        while (*p == ' ' || *p == '\t' || *p == ',') ++p;
+        if (!*p) break;
+        if (p[0] == '?' && p[1] == '?') {
+            out.push_back(0);
+            mask.push_back(0);
+            p += 2;
+        } else if (std::isxdigit(static_cast<unsigned char>(p[0])) &&
+                   std::isxdigit(static_cast<unsigned char>(p[1]))) {
+            char buf[3] = { p[0], p[1], 0 };
+            out.push_back(static_cast<Byte>(std::strtoul(buf, nullptr, 16)));
+            mask.push_back(1);
+            p += 2;
+        } else {
+            return {{}, {}};  // malformed
+        }
+    }
+    return { std::move(out), std::move(mask) };
+}
+
+} // anonymous
+
+TypedValue TypedValue::parse(ValueType t, const std::string& text, bool* ok) {
+    auto setOk = [&](bool v) { if (ok) *ok = v; };
+    setOk(true);
+
+    if (isInteger(t)) {
+        try {
+            long long x = 0;
+            std::size_t pos = 0;
+            if (text.rfind("0x", 0) == 0 || text.rfind("0X", 0) == 0) {
+                x = std::stoll(text.substr(2), &pos, 16);
+            } else {
+                x = std::stoll(text, &pos, 10);
+            }
+            switch (t) {
+                case ValueType::I8:  return packInt<std::int8_t>(t, x);
+                case ValueType::U8:  return packInt<std::uint8_t>(t, x);
+                case ValueType::I16: return packInt<std::int16_t>(t, x);
+                case ValueType::U16: return packInt<std::uint16_t>(t, x);
+                case ValueType::I32: return packInt<std::int32_t>(t, x);
+                case ValueType::U32: return packInt<std::uint32_t>(t, x);
+                case ValueType::I64: return packInt<std::int64_t>(t, x);
+                case ValueType::U64: return packInt<std::uint64_t>(t, x);
+                default: break;
+            }
+        } catch (...) { setOk(false); return zero(t); }
+    } else if (isFloat(t)) {
+        try {
+            double x = std::stod(text);
+            return (t == ValueType::F32) ? packFloat<float>(t, x)
+                                          : packFloat<double>(t, x);
+        } catch (...) { setOk(false); return zero(t); }
+    } else if (t == ValueType::AsciiString) {
+        TypedValue v;
+        v.type = t;
+        v.bytes.assign(text.begin(), text.end());
+        return v;
+    } else if (t == ValueType::WideString) {
+        TypedValue v;
+        v.type = t;
+        std::wstring w = utf8_to_wide(text);
+        v.bytes.assign(reinterpret_cast<const Byte*>(w.data()),
+                        reinterpret_cast<const Byte*>(w.data() + w.size()));
+        return v;
+    } else if (t == ValueType::Bytes) {
+        TypedValue v;
+        v.type = t;
+        auto [bs, ms] = parseAob(text);
+        if (bs.empty()) { setOk(false); return v; }
+        v.bytes = std::move(bs);
+        v.mask  = std::move(ms);
+        return v;
+    }
+
+    setOk(false);
+    return zero(t);
+}
+
+std::string TypedValue::toString() const {
+    auto u8  = [&](std::size_t i) { return bytes[i]; };
+    auto rd  = [&](auto* p, std::size_t n) {
+        if (bytes.size() < n) return false;
+        std::memcpy(p, bytes.data(), n);
+        return true;
+    };
+    char buf[64];
+    switch (type) {
+        case ValueType::I8:  return sfmt("%d",   (int)(std::int8_t)u8(0));
+        case ValueType::U8:  return sfmt("%u",   (unsigned)u8(0));
+        case ValueType::I16: { std::int16_t v;  rd(&v, 2); return sfmt("%d",  (int)v); }
+        case ValueType::U16: { std::uint16_t v; rd(&v, 2); return sfmt("%u",  (unsigned)v); }
+        case ValueType::I32: { std::int32_t v;  rd(&v, 4); return sfmt("%d",  (int)v); }
+        case ValueType::U32: { std::uint32_t v; rd(&v, 4); return sfmt("%u",  (unsigned)v); }
+        case ValueType::I64: { std::int64_t v;  rd(&v, 8); return sfmt("%lld",(long long)v); }
+        case ValueType::U64: { std::uint64_t v; rd(&v, 8); return sfmt("%llu",(unsigned long long)v); }
+        case ValueType::F32: { float v;         rd(&v, 4); std::snprintf(buf,sizeof(buf),"%g",v); return buf; }
+        case ValueType::F64: { double v;        rd(&v, 8); std::snprintf(buf,sizeof(buf),"%g",v); return buf; }
+        case ValueType::AsciiString:
+            return std::string(bytes.begin(), bytes.end());
+        case ValueType::WideString: {
+            std::wstring w(reinterpret_cast<const wchar_t*>(bytes.data()),
+                            bytes.size() / sizeof(wchar_t));
+            return wide_to_utf8(w);
+        }
+        case ValueType::Bytes: {
+            std::string s;
+            for (std::size_t i = 0; i < bytes.size(); ++i) {
+                if (!s.empty()) s += ' ';
+                if (i < mask.size() && mask[i] == 0) s += "??";
+                else s += sfmt("%02X", bytes[i]);
+            }
+            return s;
+        }
+    }
+    return {};
+}
+
+namespace {
+
+template <typename T>
+bool cmpInt(ScanOp op, const Byte* a, const Byte* b, const Byte* prev) {
+    T x, y;
+    std::memcpy(&x, a, sizeof(T));
+    std::memcpy(&y, b, sizeof(T));
+    T p = 0;
+    if (prev) std::memcpy(&p, prev, sizeof(T));
+    switch (op) {
+        case ScanOp::Exact:     return x == y;
+        case ScanOp::NotEqual:  return x != y;
+        case ScanOp::Greater:   return x >  y;
+        case ScanOp::GreaterEq: return x >= y;
+        case ScanOp::Less:      return x <  y;
+        case ScanOp::LessEq:    return x <= y;
+        case ScanOp::Changed:   return x != p;
+        case ScanOp::Unchanged: return x == p;
+        case ScanOp::Increased: return x >  p;
+        case ScanOp::Decreased: return x <  p;
+        default: return false;
+    }
+}
+
+template <typename T>
+bool cmpBetween(const Byte* a, const Byte* lo, const Byte* hi) {
+    T x, l, h;
+    std::memcpy(&x, a,  sizeof(T));
+    std::memcpy(&l, lo, sizeof(T));
+    std::memcpy(&h, hi, sizeof(T));
+    if (l > h) std::swap(l, h);
+    return x >= l && x <= h;
+}
+
+template <typename T>
+bool cmpFloat(ScanOp op, const Byte* a, const Byte* b, const Byte* prev) {
+    T x, y;
+    std::memcpy(&x, a, sizeof(T));
+    std::memcpy(&y, b, sizeof(T));
+    T p = 0;
+    if (prev) std::memcpy(&p, prev, sizeof(T));
+    const T eps = static_cast<T>(0.0001);
+    switch (op) {
+        case ScanOp::Exact:     return std::abs(x - y) < eps;
+        case ScanOp::NotEqual:  return std::abs(x - y) >= eps;
+        case ScanOp::Greater:   return x >  y;
+        case ScanOp::GreaterEq: return x >= y;
+        case ScanOp::Less:      return x <  y;
+        case ScanOp::LessEq:    return x <= y;
+        case ScanOp::Changed:   return std::abs(x - p) >= eps;
+        case ScanOp::Unchanged: return std::abs(x - p) <  eps;
+        case ScanOp::Increased: return x >  p;
+        case ScanOp::Decreased: return x <  p;
+        default: return false;
+    }
+}
+
+template <typename T>
+bool cmpFloatBetween(const Byte* a, const Byte* lo, const Byte* hi) {
+    T x, l, h;
+    std::memcpy(&x, a,  sizeof(T));
+    std::memcpy(&l, lo, sizeof(T));
+    std::memcpy(&h, hi, sizeof(T));
+    if (l > h) std::swap(l, h);
+    return x >= l && x <= h;
+}
+
+} // anonymous
+
+bool TypedValue::matches(ScanOp op,
+                          const Byte* candidate, std::size_t len,
+                          const Byte* prev,
+                          const TypedValue* operand2) const {
+    if (op == ScanOp::Unknown) return true;
+
+    std::size_t need = fixedSize(type);
+    if (need > 0 && len < need) return false;
+
+    if (type == ValueType::Bytes) {
+        if (bytes.size() > len) return false;
+        for (std::size_t i = 0; i < bytes.size(); ++i) {
+            if (!mask.empty() && mask[i] == 0) continue;
+            if (candidate[i] != bytes[i]) return false;
+        }
+        return op == ScanOp::Exact;   // Bytes only supports Exact today
+    }
+
+    if (type == ValueType::AsciiString || type == ValueType::WideString) {
+        if (bytes.size() > len) return false;
+        if (op != ScanOp::Exact) return false;
+        return std::memcmp(candidate, bytes.data(), bytes.size()) == 0;
+    }
+
+    if (op == ScanOp::Between) {
+        if (!operand2 || operand2->bytes.size() < need) return false;
+        switch (type) {
+            case ValueType::I8:  return cmpBetween<std::int8_t>  (candidate, bytes.data(), operand2->bytes.data());
+            case ValueType::U8:  return cmpBetween<std::uint8_t> (candidate, bytes.data(), operand2->bytes.data());
+            case ValueType::I16: return cmpBetween<std::int16_t> (candidate, bytes.data(), operand2->bytes.data());
+            case ValueType::U16: return cmpBetween<std::uint16_t>(candidate, bytes.data(), operand2->bytes.data());
+            case ValueType::I32: return cmpBetween<std::int32_t> (candidate, bytes.data(), operand2->bytes.data());
+            case ValueType::U32: return cmpBetween<std::uint32_t>(candidate, bytes.data(), operand2->bytes.data());
+            case ValueType::I64: return cmpBetween<std::int64_t> (candidate, bytes.data(), operand2->bytes.data());
+            case ValueType::U64: return cmpBetween<std::uint64_t>(candidate, bytes.data(), operand2->bytes.data());
+            case ValueType::F32: return cmpFloatBetween<float>   (candidate, bytes.data(), operand2->bytes.data());
+            case ValueType::F64: return cmpFloatBetween<double>  (candidate, bytes.data(), operand2->bytes.data());
+            default: return false;
+        }
+    }
+
+    switch (type) {
+        case ValueType::I8:  return cmpInt<std::int8_t>  (op, candidate, bytes.data(), prev);
+        case ValueType::U8:  return cmpInt<std::uint8_t> (op, candidate, bytes.data(), prev);
+        case ValueType::I16: return cmpInt<std::int16_t> (op, candidate, bytes.data(), prev);
+        case ValueType::U16: return cmpInt<std::uint16_t>(op, candidate, bytes.data(), prev);
+        case ValueType::I32: return cmpInt<std::int32_t> (op, candidate, bytes.data(), prev);
+        case ValueType::U32: return cmpInt<std::uint32_t>(op, candidate, bytes.data(), prev);
+        case ValueType::I64: return cmpInt<std::int64_t> (op, candidate, bytes.data(), prev);
+        case ValueType::U64: return cmpInt<std::uint64_t>(op, candidate, bytes.data(), prev);
+        case ValueType::F32: return cmpFloat<float>      (op, candidate, bytes.data(), prev);
+        case ValueType::F64: return cmpFloat<double>     (op, candidate, bytes.data(), prev);
+        default: return false;
+    }
+}
+
+} // namespace cheat
+
+```
+
+`src/value_types.h`:
+
+```h
+// value_types.h -- typed scalar / string / byte-pattern values used
+// across the scanner, freezer and CE-table I/O.
+#pragma once
+
+#include "common.h"
+
+namespace cheat {
+
+enum class ValueType {
+    I8, U8, I16, U16, I32, U32, I64, U64,
+    F32, F64,
+    Bytes,          // "DE AD BE EF" aob-scan pattern (?? wildcard)
+    AsciiString,
+    WideString,
+};
+
+// Comparison a scanner applies against each candidate in memory.
+// First-scan vs next-scan is a property of the scan session, not the op:
+//   - Exact/Greater/Less/Between use the user-supplied operand(s).
+//   - Changed/Unchanged/Increased/Decreased compare to the PREVIOUS value
+//     captured by the last scan; invalid as a first-scan op.
+//   - Unknown is first-scan only -- capture all values without filtering.
+enum class ScanOp {
+    Unknown,
+    Exact,
+    NotEqual,
+    Greater,
+    GreaterEq,
+    Less,
+    LessEq,
+    Between,
+    Changed,
+    Unchanged,
+    Increased,
+    Decreased,
+};
+
+// Fixed byte size for integer / float types. Returns 0 for variable-length
+// types (Bytes / strings).
+std::size_t fixedSize(ValueType t);
+
+bool isNumeric(ValueType t);
+bool isInteger(ValueType t);
+bool isFloat(ValueType t);
+
+const char* name(ValueType t);
+const char* name(ScanOp op);
+
+struct TypedValue {
+    ValueType type{ValueType::I32};
+    Bytes     bytes;                    // raw storage matching `type`
+    // For Bytes-scan: parallel wildcard mask, 1 = compare, 0 = wildcard.
+    // Empty means no wildcards.
+    Bytes     mask;
+
+    static TypedValue zero(ValueType t);
+    static TypedValue parse(ValueType t, const std::string& text,
+                              bool* ok = nullptr);
+
+    std::string toString() const;
+
+    // Compare this value against `candidate`+`len` bytes in memory.
+    // `prev` is the previously-captured bytes for next-scan ops; nullptr
+    // for first-scan. `operand2` is the upper bound for Between.
+    bool matches(ScanOp op,
+                 const Byte* candidate, std::size_t len,
+                 const Byte* prev,
+                 const TypedValue* operand2) const;
+};
+
+} // namespace cheat
+
+```
