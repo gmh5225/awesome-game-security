@@ -1036,6 +1036,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [D3D11 World-to-Screen Finder](entities/d3d11-worldtoscreen-finder.md) — DX11 W2S projection finder (DrNseven; C++; MinHook + ImGui overlay; brute-force matrix/CB combos; model-position text + matched-target logging; ESP/aim bootstrap; game security research)
 - [D3D12 Hook ImGui](entities/d3d12-hook-imgui.md) — DX12 ImGui overlay hook sample (DrNseven; C++; MinHook-style interception; DLL inject + frame hook + real-time menu; graphics API research / overlay prototyping; DirectX Hook [DX12 Imgui])
 - [D3D12Renderer](entities/d3d12renderer.md) — DX12 renderer sample (raytracing / mesh shaders; DirectX / guide)
+- [D3D9 Hook ImGui](entities/d3d9-hook-imgui.md) — D3D9 EndScene/Reset injectable DLL + ImGui overlay template (adamhlt; C++; MS Detours; dummy-device vtable; VS x86/x64; resize/fullscreen/safe unload; RE/modding/graphics-hook; DirectX Hook)
 - [D3D9On12](entities/d3d9on12.md) — Microsoft D3D9 usermode DDI → D3D12 mapping layer (DirectX Compatibility)
 - [D2D Overlay](entities/d2d-overlay.md) — header-only Direct2D external overlay library (`DirectOverlay.h`; simple API + performance; coltonon)
 - [D2GI](entities/d2gi.md) — Hard Truck 2 DirectDraw7/D3D7→D3D9 wrapper (modern resolutions, MSAA, anisotropic filtering, graphics fixes, widescreen hooks; REDPOWAR; DirectX Compatibility)
