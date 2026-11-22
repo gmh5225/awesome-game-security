@@ -1,0 +1,3081 @@
+Project Path: arc_adamhlt_D3D9-Hook-ImGui_1732di67
+
+Source Tree:
+
+```txt
+arc_adamhlt_D3D9-Hook-ImGui_1732di67
+├── D3D9HookImGui.sln
+├── D3D9HookImGui.vcxproj
+├── LICENSE
+├── README.md
+├── docs
+│   └── Functions.md
+├── external
+│   ├── detours
+│   │   ├── include
+│   │   │   ├── detours.h
+│   │   │   ├── detver.h
+│   │   │   └── syelog.h
+│   │   └── x86
+│   └── imgui
+└── src
+    ├── Config.h
+    ├── d3d9
+    │   ├── VTable.cpp
+    │   └── VTable.h
+    ├── dllmain.cpp
+    ├── hooks
+    │   ├── Detour.h
+    │   ├── Hook.cpp
+    │   └── Hook.h
+    ├── input
+    │   ├── Input.cpp
+    │   └── Input.h
+    ├── pch.h
+    └── ui
+        ├── Menu.cpp
+        └── Menu.h
+
+```
+
+`D3D9HookImGui.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "D3D9HookImGui", "D3D9HookImGui.vcxproj", "{C39DFB12-1AD1-4190-98B0-65757A3C63D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C39DFB12-1AD1-4190-98B0-65757A3C63D8}.Debug|x64.ActiveCfg = Debug|x64
+		{C39DFB12-1AD1-4190-98B0-65757A3C63D8}.Debug|x64.Build.0 = Debug|x64
+		{C39DFB12-1AD1-4190-98B0-65757A3C63D8}.Debug|x86.ActiveCfg = Debug|Win32
+		{C39DFB12-1AD1-4190-98B0-65757A3C63D8}.Debug|x86.Build.0 = Debug|Win32
+		{C39DFB12-1AD1-4190-98B0-65757A3C63D8}.Release|x64.ActiveCfg = Release|x64
+		{C39DFB12-1AD1-4190-98B0-65757A3C63D8}.Release|x64.Build.0 = Release|x64
+		{C39DFB12-1AD1-4190-98B0-65757A3C63D8}.Release|x86.ActiveCfg = Release|Win32
+		{C39DFB12-1AD1-4190-98B0-65757A3C63D8}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1B341399-D62F-4738-8EF8-7C273DCA00F3}
+	EndGlobalSection
+EndGlobal
+
+```
+
+`D3D9HookImGui.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32"><Configuration>Debug</Configuration><Platform>Win32</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32"><Configuration>Release</Configuration><Platform>Win32</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{c39dfb12-1ad1-4190-98b0-65757a3c63d8}</ProjectGuid>
+    <RootNamespace>D3D9HookImGui</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>D3D9HookImGui</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)'=='Debug'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)'=='Release'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)external\imgui;$(ProjectDir)external\detours\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>d3d9.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(ProjectDir)external\detours\x86\detours.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <Link>
+      <AdditionalDependencies>$(ProjectDir)external\detours\x64\detours.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Config.h" />
+    <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\d3d9\VTable.h" />
+    <ClInclude Include="src\hooks\Detour.h" />
+    <ClInclude Include="src\hooks\Hook.h" />
+    <ClInclude Include="src\input\Input.h" />
+    <ClInclude Include="src\ui\Menu.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\d3d9\VTable.cpp" />
+    <ClCompile Include="src\hooks\Hook.cpp" />
+    <ClCompile Include="src\input\Input.cpp" />
+    <ClCompile Include="src\ui\Menu.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="external\imgui\imgui.cpp" />
+    <ClCompile Include="external\imgui\imgui_demo.cpp" />
+    <ClCompile Include="external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="external\imgui\imgui_tables.cpp" />
+    <ClCompile Include="external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="external\imgui\backends\imgui_impl_dx9.cpp" />
+    <ClCompile Include="external\imgui\backends\imgui_impl_win32.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
+
+```
+
+`LICENSE`:
+
+```
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.  We, the Free Software Foundation, use the
+GNU General Public License for most of our software; it applies also to
+any other work released this way by its authors.  You can apply it to
+your programs, too.
+
+  When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+  To protect your rights, we need to prevent others from denying you
+these rights or asking you to surrender the rights.  Therefore, you have
+certain responsibilities if you distribute copies of the software, or if
+you modify it: responsibilities to respect the freedom of others.
+
+  For example, if you distribute copies of such a program, whether
+gratis or for a fee, you must pass on to the recipients the same
+freedoms that you received.  You must make sure that they, too, receive
+or can get the source code.  And you must show them these terms so they
+know their rights.
+
+  Developers that use the GNU GPL protect your rights with two steps:
+(1) assert copyright on the software, and (2) offer you this License
+giving you legal permission to copy, distribute and/or modify it.
+
+  For the developers' and authors' protection, the GPL clearly explains
+that there is no warranty for this free software.  For both users' and
+authors' sake, the GPL requires that modified versions be marked as
+changed, so that their problems will not be attributed erroneously to
+authors of previous versions.
+
+  Some devices are designed to deny users access to install or run
+modified versions of the software inside them, although the manufacturer
+can do so.  This is fundamentally incompatible with the aim of
+protecting users' freedom to change the software.  The systematic
+pattern of such abuse occurs in the area of products for individuals to
+use, which is precisely where it is most unacceptable.  Therefore, we
+have designed this version of the GPL to prohibit the practice for those
+products.  If such problems arise substantially in other domains, we
+stand ready to extend this provision to those domains in future versions
+of the GPL, as needed to protect the freedom of users.
+
+  Finally, every program is threatened constantly by software patents.
+States should not allow patents to restrict development and use of
+software on general-purpose computers, but in those that do, we wish to
+avoid the special danger that patents applied to a free program could
+make it effectively proprietary.  To prevent this, the GPL assures that
+patents cannot be used to render the program non-free.
+
+  The precise terms and conditions for copying, distribution and
+modification follow.
+
+                       TERMS AND CONDITIONS
+
+  0. Definitions.
+
+  "This License" refers to version 3 of the GNU General Public License.
+
+  "Copyright" also means copyright-like laws that apply to other kinds of
+works, such as semiconductor masks.
+
+  "The Program" refers to any copyrightable work licensed under this
+License.  Each licensee is addressed as "you".  "Licensees" and
+"recipients" may be individuals or organizations.
+
+  To "modify" a work means to copy from or adapt all or part of the work
+in a fashion requiring copyright permission, other than the making of an
+exact copy.  The resulting work is called a "modified version" of the
+earlier work or a work "based on" the earlier work.
+
+  A "covered work" means either the unmodified Program or a work based
+on the Program.
+
+  To "propagate" a work means to do anything with it that, without
+permission, would make you directly or secondarily liable for
+infringement under applicable copyright law, except executing it on a
+computer or modifying a private copy.  Propagation includes copying,
+distribution (with or without modification), making available to the
+public, and in some countries other activities as well.
+
+  To "convey" a work means any kind of propagation that enables other
+parties to make or receive copies.  Mere interaction with a user through
+a computer network, with no transfer of a copy, is not conveying.
+
+  An interactive user interface displays "Appropriate Legal Notices"
+to the extent that it includes a convenient and prominently visible
+feature that (1) displays an appropriate copyright notice, and (2)
+tells the user that there is no warranty for the work (except to the
+extent that warranties are provided), that licensees may convey the
+work under this License, and how to view a copy of this License.  If
+the interface presents a list of user commands or options, such as a
+menu, a prominent item in the list meets this criterion.
+
+  1. Source Code.
+
+  The "source code" for a work means the preferred form of the work
+for making modifications to it.  "Object code" means any non-source
+form of a work.
+
+  A "Standard Interface" means an interface that either is an official
+standard defined by a recognized standards body, or, in the case of
+interfaces specified for a particular programming language, one that
+is widely used among developers working in that language.
+
+  The "System Libraries" of an executable work include anything, other
+than the work as a whole, that (a) is included in the normal form of
+packaging a Major Component, but which is not part of that Major
+Component, and (b) serves only to enable use of the work with that
+Major Component, or to implement a Standard Interface for which an
+implementation is available to the public in source code form.  A
+"Major Component", in this context, means a major essential component
+(kernel, window system, and so on) of the specific operating system
+(if any) on which the executable work runs, or a compiler used to
+produce the work, or an object code interpreter used to run it.
+
+  The "Corresponding Source" for a work in object code form means all
+the source code needed to generate, install, and (for an executable
+work) run the object code and to modify the work, including scripts to
+control those activities.  However, it does not include the work's
+System Libraries, or general-purpose tools or generally available free
+programs which are used unmodified in performing those activities but
+which are not part of the work.  For example, Corresponding Source
+includes interface definition files associated with source files for
+the work, and the source code for shared libraries and dynamically
+linked subprograms that the work is specifically designed to require,
+such as by intimate data communication or control flow between those
+subprograms and other parts of the work.
+
+  The Corresponding Source need not include anything that users
+can regenerate automatically from other parts of the Corresponding
+Source.
+
+  The Corresponding Source for a work in source code form is that
+same work.
+
+  2. Basic Permissions.
+
+  All rights granted under this License are granted for the term of
+copyright on the Program, and are irrevocable provided the stated
+conditions are met.  This License explicitly affirms your unlimited
+permission to run the unmodified Program.  The output from running a
+covered work is covered by this License only if the output, given its
+content, constitutes a covered work.  This License acknowledges your
+rights of fair use or other equivalent, as provided by copyright law.
+
+  You may make, run and propagate covered works that you do not
+convey, without conditions so long as your license otherwise remains
+in force.  You may convey covered works to others for the sole purpose
+of having them make modifications exclusively for you, or provide you
+with facilities for running those works, provided that you comply with
+the terms of this License in conveying all material for which you do
+not control copyright.  Those thus making or running the covered works
+for you must do so exclusively on your behalf, under your direction
+and control, on terms that prohibit them from making any copies of
+your copyrighted material outside their relationship with you.
+
+  Conveying under any other circumstances is permitted solely under
+the conditions stated below.  Sublicensing is not allowed; section 10
+makes it unnecessary.
+
+  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+
+  No covered work shall be deemed part of an effective technological
+measure under any applicable law fulfilling obligations under article
+11 of the WIPO copyright treaty adopted on 20 December 1996, or
+similar laws prohibiting or restricting circumvention of such
+measures.
+
+  When you convey a covered work, you waive any legal power to forbid
+circumvention of technological measures to the extent such circumvention
+is effected by exercising rights under this License with respect to
+the covered work, and you disclaim any intention to limit operation or
+modification of the work as a means of enforcing, against the work's
+users, your or third parties' legal rights to forbid circumvention of
+technological measures.
+
+  4. Conveying Verbatim Copies.
+
+  You may convey verbatim copies of the Program's source code as you
+receive it, in any medium, provided that you conspicuously and
+appropriately publish on each copy an appropriate copyright notice;
+keep intact all notices stating that this License and any
+non-permissive terms added in accord with section 7 apply to the code;
+keep intact all notices of the absence of any warranty; and give all
+recipients a copy of this License along with the Program.
+
+  You may charge any price or no price for each copy that you convey,
+and you may offer support or warranty protection for a fee.
+
+  5. Conveying Modified Source Versions.
+
+  You may convey a work based on the Program, or the modifications to
+produce it from the Program, in the form of source code under the
+terms of section 4, provided that you also meet all of these conditions:
+
+    a) The work must carry prominent notices stating that you modified
+    it, and giving a relevant date.
+
+    b) The work must carry prominent notices stating that it is
+    released under this License and any conditions added under section
+    7.  This requirement modifies the requirement in section 4 to
+    "keep intact all notices".
+
+    c) You must license the entire work, as a whole, under this
+    License to anyone who comes into possession of a copy.  This
+    License will therefore apply, along with any applicable section 7
+    additional terms, to the whole of the work, and all its parts,
+    regardless of how they are packaged.  This License gives no
+    permission to license the work in any other way, but it does not
+    invalidate such permission if you have separately received it.
+
+    d) If the work has interactive user interfaces, each must display
+    Appropriate Legal Notices; however, if the Program has interactive
+    interfaces that do not display Appropriate Legal Notices, your
+    work need not make them do so.
+
+  A compilation of a covered work with other separate and independent
+works, which are not by their nature extensions of the covered work,
+and which are not combined with it such as to form a larger program,
+in or on a volume of a storage or distribution medium, is called an
+"aggregate" if the compilation and its resulting copyright are not
+used to limit the access or legal rights of the compilation's users
+beyond what the individual works permit.  Inclusion of a covered work
+in an aggregate does not cause this License to apply to the other
+parts of the aggregate.
+
+  6. Conveying Non-Source Forms.
+
+  You may convey a covered work in object code form under the terms
+of sections 4 and 5, provided that you also convey the
+machine-readable Corresponding Source under the terms of this License,
+in one of these ways:
+
+    a) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by the
+    Corresponding Source fixed on a durable physical medium
+    customarily used for software interchange.
+
+    b) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by a
+    written offer, valid for at least three years and valid for as
+    long as you offer spare parts or customer support for that product
+    model, to give anyone who possesses the object code either (1) a
+    copy of the Corresponding Source for all the software in the
+    product that is covered by this License, on a durable physical
+    medium customarily used for software interchange, for a price no
+    more than your reasonable cost of physically performing this
+    conveying of source, or (2) access to copy the
+    Corresponding Source from a network server at no charge.
+
+    c) Convey individual copies of the object code with a copy of the
+    written offer to provide the Corresponding Source.  This
+    alternative is allowed only occasionally and noncommercially, and
+    only if you received the object code with such an offer, in accord
+    with subsection 6b.
+
+    d) Convey the object code by offering access from a designated
+    place (gratis or for a charge), and offer equivalent access to the
+    Corresponding Source in the same way through the same place at no
+    further charge.  You need not require recipients to copy the
+    Corresponding Source along with the object code.  If the place to
+    copy the object code is a network server, the Corresponding Source
+    may be on a different server (operated by you or a third party)
+    that supports equivalent copying facilities, provided you maintain
+    clear directions next to the object code saying where to find the
+    Corresponding Source.  Regardless of what server hosts the
+    Corresponding Source, you remain obligated to ensure that it is
+    available for as long as needed to satisfy these requirements.
+
+    e) Convey the object code using peer-to-peer transmission, provided
+    you inform other peers where the object code and Corresponding
+    Source of the work are being offered to the general public at no
+    charge under subsection 6d.
+
+  A separable portion of the object code, whose source code is excluded
+from the Corresponding Source as a System Library, need not be
+included in conveying the object code work.
+
+  A "User Product" is either (1) a "consumer product", which means any
+tangible personal property which is normally used for personal, family,
+or household purposes, or (2) anything designed or sold for incorporation
+into a dwelling.  In determining whether a product is a consumer product,
+doubtful cases shall be resolved in favor of coverage.  For a particular
+product received by a particular user, "normally used" refers to a
+typical or common use of that class of product, regardless of the status
+of the particular user or of the way in which the particular user
+actually uses, or expects or is expected to use, the product.  A product
+is a consumer product regardless of whether the product has substantial
+commercial, industrial or non-consumer uses, unless such uses represent
+the only significant mode of use of the product.
+
+  "Installation Information" for a User Product means any methods,
+procedures, authorization keys, or other information required to install
+and execute modified versions of a covered work in that User Product from
+a modified version of its Corresponding Source.  The information must
+suffice to ensure that the continued functioning of the modified object
+code is in no case prevented or interfered with solely because
+modification has been made.
+
+  If you convey an object code work under this section in, or with, or
+specifically for use in, a User Product, and the conveying occurs as
+part of a transaction in which the right of possession and use of the
+User Product is transferred to the recipient in perpetuity or for a
+fixed term (regardless of how the transaction is characterized), the
+Corresponding Source conveyed under this section must be accompanied
+by the Installation Information.  But this requirement does not apply
+if neither you nor any third party retains the ability to install
+modified object code on the User Product (for example, the work has
+been installed in ROM).
+
+  The requirement to provide Installation Information does not include a
+requirement to continue to provide support service, warranty, or updates
+for a work that has been modified or installed by the recipient, or for
+the User Product in which it has been modified or installed.  Access to a
+network may be denied when the modification itself materially and
+adversely affects the operation of the network or violates the rules and
+protocols for communication across the network.
+
+  Corresponding Source conveyed, and Installation Information provided,
+in accord with this section must be in a format that is publicly
+documented (and with an implementation available to the public in
+source code form), and must require no special password or key for
+unpacking, reading or copying.
+
+  7. Additional Terms.
+
+  "Additional permissions" are terms that supplement the terms of this
+License by making exceptions from one or more of its conditions.
+Additional permissions that are applicable to the entire Program shall
+be treated as though they were included in this License, to the extent
+that they are valid under applicable law.  If additional permissions
+apply only to part of the Program, that part may be used separately
+under those permissions, but the entire Program remains governed by
+this License without regard to the additional permissions.
+
+  When you convey a copy of a covered work, you may at your option
+remove any additional permissions from that copy, or from any part of
+it.  (Additional permissions may be written to require their own
+removal in certain cases when you modify the work.)  You may place
+additional permissions on material, added by you to a covered work,
+for which you have or can give appropriate copyright permission.
+
+  Notwithstanding any other provision of this License, for material you
+add to a covered work, you may (if authorized by the copyright holders of
+that material) supplement the terms of this License with terms:
+
+    a) Disclaiming warranty or limiting liability differently from the
+    terms of sections 15 and 16 of this License; or
+
+    b) Requiring preservation of specified reasonable legal notices or
+    author attributions in that material or in the Appropriate Legal
+    Notices displayed by works containing it; or
+
+    c) Prohibiting misrepresentation of the origin of that material, or
+    requiring that modified versions of such material be marked in
+    reasonable ways as different from the original version; or
+
+    d) Limiting the use for publicity purposes of names of licensors or
+    authors of the material; or
+
+    e) Declining to grant rights under trademark law for use of some
+    trade names, trademarks, or service marks; or
+
+    f) Requiring indemnification of licensors and authors of that
+    material by anyone who conveys the material (or modified versions of
+    it) with contractual assumptions of liability to the recipient, for
+    any liability that these contractual assumptions directly impose on
+    those licensors and authors.
+
+  All other non-permissive additional terms are considered "further
+restrictions" within the meaning of section 10.  If the Program as you
+received it, or any part of it, contains a notice stating that it is
+governed by this License along with a term that is a further
+restriction, you may remove that term.  If a license document contains
+a further restriction but permits relicensing or conveying under this
+License, you may add to a covered work material governed by the terms
+of that license document, provided that the further restriction does
+not survive such relicensing or conveying.
+
+  If you add terms to a covered work in accord with this section, you
+must place, in the relevant source files, a statement of the
+additional terms that apply to those files, or a notice indicating
+where to find the applicable terms.
+
+  Additional terms, permissive or non-permissive, may be stated in the
+form of a separately written license, or stated as exceptions;
+the above requirements apply either way.
+
+  8. Termination.
+
+  You may not propagate or modify a covered work except as expressly
+provided under this License.  Any attempt otherwise to propagate or
+modify it is void, and will automatically terminate your rights under
+this License (including any patent licenses granted under the third
+paragraph of section 11).
+
+  However, if you cease all violation of this License, then your
+license from a particular copyright holder is reinstated (a)
+provisionally, unless and until the copyright holder explicitly and
+finally terminates your license, and (b) permanently, if the copyright
+holder fails to notify you of the violation by some reasonable means
+prior to 60 days after the cessation.
+
+  Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+
+  Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, you do not qualify to receive new licenses for the same
+material under section 10.
+
+  9. Acceptance Not Required for Having Copies.
+
+  You are not required to accept this License in order to receive or
+run a copy of the Program.  Ancillary propagation of a covered work
+occurring solely as a consequence of using peer-to-peer transmission
+to receive a copy likewise does not require acceptance.  However,
+nothing other than this License grants you permission to propagate or
+modify any covered work.  These actions infringe copyright if you do
+not accept this License.  Therefore, by modifying or propagating a
+covered work, you indicate your acceptance of this License to do so.
+
+  10. Automatic Licensing of Downstream Recipients.
+
+  Each time you convey a covered work, the recipient automatically
+receives a license from the original licensors, to run, modify and
+propagate that work, subject to this License.  You are not responsible
+for enforcing compliance by third parties with this License.
+
+  An "entity transaction" is a transaction transferring control of an
+organization, or substantially all assets of one, or subdividing an
+organization, or merging organizations.  If propagation of a covered
+work results from an entity transaction, each party to that
+transaction who receives a copy of the work also receives whatever
+licenses to the work the party's predecessor in interest had or could
+give under the previous paragraph, plus a right to possession of the
+Corresponding Source of the work from the predecessor in interest, if
+the predecessor has it or can get it with reasonable efforts.
+
+  You may not impose any further restrictions on the exercise of the
+rights granted or affirmed under this License.  For example, you may
+not impose a license fee, royalty, or other charge for exercise of
+rights granted under this License, and you may not initiate litigation
+(including a cross-claim or counterclaim in a lawsuit) alleging that
+any patent claim is infringed by making, using, selling, offering for
+sale, or importing the Program or any portion of it.
+
+  11. Patents.
+
+  A "contributor" is a copyright holder who authorizes use under this
+License of the Program or a work on which the Program is based.  The
+work thus licensed is called the contributor's "contributor version".
+
+  A contributor's "essential patent claims" are all patent claims
+owned or controlled by the contributor, whether already acquired or
+hereafter acquired, that would be infringed by some manner, permitted
+by this License, of making, using, or selling its contributor version,
+but do not include claims that would be infringed only as a
+consequence of further modification of the contributor version.  For
+purposes of this definition, "control" includes the right to grant
+patent sublicenses in a manner consistent with the requirements of
+this License.
+
+  Each contributor grants you a non-exclusive, worldwide, royalty-free
+patent license under the contributor's essential patent claims, to
+make, use, sell, offer for sale, import and otherwise run, modify and
+propagate the contents of its contributor version.
+
+  In the following three paragraphs, a "patent license" is any express
+agreement or commitment, however denominated, not to enforce a patent
+(such as an express permission to practice a patent or covenant not to
+sue for patent infringement).  To "grant" such a patent license to a
+party means to make such an agreement or commitment not to enforce a
+patent against the party.
+
+  If you convey a covered work, knowingly relying on a patent license,
+and the Corresponding Source of the work is not available for anyone
+to copy, free of charge and under the terms of this License, through a
+publicly available network server or other readily accessible means,
+then you must either (1) cause the Corresponding Source to be so
+available, or (2) arrange to deprive yourself of the benefit of the
+patent license for this particular work, or (3) arrange, in a manner
+consistent with the requirements of this License, to extend the patent
+license to downstream recipients.  "Knowingly relying" means you have
+actual knowledge that, but for the patent license, your conveying the
+covered work in a country, or your recipient's use of the covered work
+in a country, would infringe one or more identifiable patents in that
+country that you have reason to believe are valid.
+
+  If, pursuant to or in connection with a single transaction or
+arrangement, you convey, or propagate by procuring conveyance of, a
+covered work, and grant a patent license to some of the parties
+receiving the covered work authorizing them to use, propagate, modify
+or convey a specific copy of the covered work, then the patent license
+you grant is automatically extended to all recipients of the covered
+work and works based on it.
+
+  A patent license is "discriminatory" if it does not include within
+the scope of its coverage, prohibits the exercise of, or is
+conditioned on the non-exercise of one or more of the rights that are
+specifically granted under this License.  You may not convey a covered
+work if you are a party to an arrangement with a third party that is
+in the business of distributing software, under which you make payment
+to the third party based on the extent of your activity of conveying
+the work, and under which the third party grants, to any of the
+parties who would receive the covered work from you, a discriminatory
+patent license (a) in connection with copies of the covered work
+conveyed by you (or copies made from those copies), or (b) primarily
+for and in connection with specific products or compilations that
+contain the covered work, unless you entered into that arrangement,
+or that patent license was granted, prior to 28 March 2007.
+
+  Nothing in this License shall be construed as excluding or limiting
+any implied license or other defenses to infringement that may
+otherwise be available to you under applicable patent law.
+
+  12. No Surrender of Others' Freedom.
+
+  If conditions are imposed on you (whether by court order, agreement or
+otherwise) that contradict the conditions of this License, they do not
+excuse you from the conditions of this License.  If you cannot convey a
+covered work so as to satisfy simultaneously your obligations under this
+License and any other pertinent obligations, then as a consequence you may
+not convey it at all.  For example, if you agree to terms that obligate you
+to collect a royalty for further conveying from those to whom you convey
+the Program, the only way you could satisfy both those terms and this
+License would be to refrain entirely from conveying the Program.
+
+  13. Use with the GNU Affero General Public License.
+
+  Notwithstanding any other provision of this License, you have
+permission to link or combine any covered work with a work licensed
+under version 3 of the GNU Affero General Public License into a single
+combined work, and to convey the resulting work.  The terms of this
+License will continue to apply to the part which is the covered work,
+but the special requirements of the GNU Affero General Public License,
+section 13, concerning interaction through a network will apply to the
+combination as such.
+
+  14. Revised Versions of this License.
+
+  The Free Software Foundation may publish revised and/or new versions of
+the GNU General Public License from time to time.  Such new versions will
+be similar in spirit to the present version, but may differ in detail to
+address new problems or concerns.
+
+  Each version is given a distinguishing version number.  If the
+Program specifies that a certain numbered version of the GNU General
+Public License "or any later version" applies to it, you have the
+option of following the terms and conditions either of that numbered
+version or of any later version published by the Free Software
+Foundation.  If the Program does not specify a version number of the
+GNU General Public License, you may choose any version ever published
+by the Free Software Foundation.
+
+  If the Program specifies that a proxy can decide which future
+versions of the GNU General Public License can be used, that proxy's
+public statement of acceptance of a version permanently authorizes you
+to choose that version for the Program.
+
+  Later license versions may give you additional or different
+permissions.  However, no additional obligations are imposed on any
+author or copyright holder as a result of your choosing to follow a
+later version.
+
+  15. Disclaimer of Warranty.
+
+  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+  16. Limitation of Liability.
+
+  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+
+  17. Interpretation of Sections 15 and 16.
+
+  If the disclaimer of warranty and limitation of liability provided
+above cannot be given local legal effect according to their terms,
+reviewing courts shall apply local law that most closely approximates
+an absolute waiver of all civil liability in connection with the
+Program, unless a warranty or assumption of liability accompanies a
+copy of the Program in return for a fee.
+
+                     END OF TERMS AND CONDITIONS
+
+            How to Apply These Terms to Your New Programs
+
+  If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these terms.
+
+  To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+state the exclusion of warranty; and each file should have at least
+the "copyright" line and a pointer to where the full notice is found.
+
+    <one line to give the program's name and a brief idea of what it does.>
+    Copyright (C) <year>  <name of author>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Also add information on how to contact you by electronic and paper mail.
+
+  If the program does terminal interaction, make it output a short
+notice like this when it starts in an interactive mode:
+
+    <program>  Copyright (C) <year>  <name of author>
+    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+    This is free software, and you are welcome to redistribute it
+    under certain conditions; type `show c' for details.
+
+The hypothetical commands `show w' and `show c' should show the appropriate
+parts of the General Public License.  Of course, your program's commands
+might be different; for a GUI interface, you would use an "about box".
+
+  You should also get your employer (if you work as a programmer) or school,
+if any, to sign a "copyright disclaimer" for the program, if necessary.
+For more information on this, and how to apply and follow the GNU GPL, see
+<https://www.gnu.org/licenses/>.
+
+  The GNU General Public License does not permit incorporating your program
+into proprietary programs.  If your program is a subroutine library, you
+may consider it more useful to permit linking proprietary applications with
+the library.  If this is what you want to do, use the GNU Lesser General
+Public License instead of this License.  But first, please read
+<https://www.gnu.org/licenses/why-not-lgpl.html>.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+
+# D3D9 Hook ImGui
+
+**D3D9 hook with ImGui integration, as a DLL (x86 / x64)**
+
+![Language](https://img.shields.io/badge/C%2B%2B-16171C?logo=cplusplus)
+![Platform](https://img.shields.io/badge/Windows-16171C)
+![Arch](https://img.shields.io/badge/x86%20%7C%20x64-16171C)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-16171C)](LICENSE)
+
+</div>
+
+---
+
+D3D9 Hook ImGui hooks `IDirect3DDevice9::EndScene` and `IDirect3DDevice9::Reset` to draw an [ImGui](https://github.com/ocornut/imgui) menu inside any DirectX 9 process.
+
+The virtual method table is retrieved with the [**dummy device technique**](https://guidedhacking.com/threads/get-direct3d9-and-direct3d11-devices-dummy-device-method.11867/) and hooked with [MS Detours](https://www.microsoft.com/en-us/research/project/detours/). Everything is set up: you only write your menu.
+
+### Example
+https://github.com/adamhlt/D3D9-Hook-ImGui/assets/48086737/08665cbd-0f4c-49bc-ae98-9c9fa3bc240b
+
+## Features
+
+**Targets**
+- x86 and x64, Debug and Release
+- DLL to inject in a DirectX 9 process (same architecture)
+- Direct3D 9 headers and libs from the Windows SDK, no legacy DirectX SDK needed
+
+**Hook**
+- Window resize and fullscreen changes are handled
+- `Insert` shows or hides the menu
+- `End` removes the hooks and unloads the DLL
+- Unload requested from outside (`FreeLibrary`) is handled
+
+**Customize**
+- Write your interface in `DrawWindow` (`src/ui/Menu.cpp`)
+- Change the hotkeys in `src/Config.h`
+- ImGui sources are kept untouched in `external/imgui/` (git submodule)
+
+## Usage
+
+Add your widgets in `DrawWindow`:
+
+```cpp
+void DrawWindow()
+{
+	ImGui::SetNextWindowSize({ 500, 300 }, ImGuiCond_FirstUseEver);
+
+	if (ImGui::Begin("Menu Window Title", &g_visible))
+	{
+		ImGui::Text("Draw your menu here.");
+	}
+	ImGui::End();
+}
+```
+
+### Hooking another function
+
+Every function of DirectX 9 can be hooked by changing its virtual function index in `src/d3d9/VTable.h` and `src/hooks/Hook.cpp`:
+
+```cpp
+oEndScene = reinterpret_cast<tEndScene>(vtable[D3D9::EndScene]);
+```
+
+All the function indexes are listed [here](docs/Functions.md).
+
+## Build
+
+1. Clone with the submodules: `git clone --recurse-submodules https://github.com/adamhlt/D3D9-Hook-ImGui.git` (or `git submodule update --init` in an existing clone).
+2. Open `D3D9HookImGui.sln` in Visual Studio.
+3. Build in Release (x86 or x64).
+
+- **Output:** `bin/<platform>/<configuration>/D3D9HookImGui.dll`
+- **Configuration:** every configuration is already set up with libraries and includes
+- **Missing ImGui files:** the submodule is not initialized, run `git submodule update --init`
+
+## Credits
+
+- [**@liyunlong23**](https://github.com/liyunlong23) - Fix crash when changing resolution.
+
+## License
+
+This project is licensed under the [GNU GPLv3](LICENSE).
+
+```
+
+`docs/Functions.md`:
+
+```md
+```
+    QueryInterface : 0
+    AddRef : 1
+    Release : 2
+    TestCooperativeLevel : 3
+    GetAvailableTextureMem : 4
+    EvictManagedResources : 5
+    GetDirect3D : 6
+    GetDeviceCaps : 7
+    GetDisplayMode : 8
+    GetCreationParameters : 9
+    SetCursorProperties : 10
+    SetCursorPosition : 11
+    ShowCursor : 12
+    CreateAdditionalSwapChain : 13
+    GetSwapChain : 14
+    GetNumberOfSwapChains : 15
+    Reset : 16
+    Present : 17
+    GetBackBuffer : 18
+    GetRasterStatus : 19
+    SetDialogBoxMode : 20
+    SetGammaRamp : 21
+    GetGammaRamp : 22
+    CreateTexture : 23
+    CreateVolumeTexture : 24
+    CreateCubeTexture : 25
+    CreateVertexBuffer : 26
+    CreateIndexBuffer : 27
+    CreateRenderTarget : 28
+    CreateDepthStencilSurface : 29
+    UpdateSurface : 30
+    UpdateTexture : 31
+    GetRenderTargetData : 32
+    GetFrontBufferData : 33
+    StretchRect : 34
+    ColorFill : 35
+    CreateOffscreenPlainSurface : 36
+    SetRenderTarget : 37
+    GetRenderTarget : 38
+    SetDepthStencilSurface : 39
+    GetDepthStencilSurface : 40
+    BeginScene : 41
+    EndScene : 42
+    Clear : 43
+    SetTransform : 44
+    GetTransform : 45
+    MultiplyTransform : 46
+    SetViewport : 47
+    GetViewport : 48
+    SetMaterial : 49
+    GetMaterial : 50
+    SetLight : 51
+    GetLight : 52
+    LightEnable : 53
+    GetLightEnable : 54
+    SetClipPlane : 55
+    GetClipPlane : 56
+    SetRenderState : 57
+    GetRenderState : 58
+    CreateStateBlock : 59
+    BeginStateBlock : 60
+    EndStateBlock : 61
+    SetClipStatus : 62
+    GetClipStatus : 63
+    GetTexture : 64
+    SetTexture : 65
+    GetTextureStageState : 66
+    SetTextureStageState : 67
+    GetSamplerState : 68
+    SetSamplerState : 69
+    ValidateDevice : 70
+    SetPaletteEntries : 71
+    GetPaletteEntries : 72
+    SetCurrentTexturePalette : 73
+    GetCurrentTexturePalette : 74
+    SetScissorRect : 75
+    GetScissorRect : 76
+    SetSoftwareVertexProcessing : 77
+    GetSoftwareVertexProcessing : 78
+    SetNPatchMode : 79
+    GetNPatchMode : 80
+    DrawPrimitive : 81
+    DrawIndexedPrimitive : 82
+    DrawPrimitiveUP : 83
+    DrawIndexedPrimitiveUP : 84
+    ProcessVertices : 85
+    CreateVertexDeclaration : 86
+    SetVertexDeclaration : 87
+    GetVertexDeclaration : 88
+    SetFVF : 89
+    GetFVF : 90
+    CreateVertexShader : 91
+    SetVertexShader : 92
+    GetVertexShader : 93
+    SetVertexShaderConstantF : 94
+    GetVertexShaderConstantF : 95
+    SetVertexShaderConstantI : 96
+    GetVertexShaderConstantI : 97
+    SetVertexShaderConstantB : 98
+    GetVertexShaderConstantB : 99
+    SetStreamSource : 100
+    GetStreamSource : 101
+    SetStreamSourceFreq : 102
+    GetStreamSourceFreq : 103
+    SetIndices : 104
+    GetIndices : 105
+    CreatePixelShader : 106
+    SetPixelShader : 107
+    GetPixelShader : 108
+    SetPixelShaderConstantF : 109
+    GetPixelShaderConstantF : 110
+    SetPixelShaderConstantI : 111
+    GetPixelShaderConstantI : 112
+    SetPixelShaderConstantB : 113
+    GetPixelShaderConstantB : 114
+    DrawRectPatch : 115
+    DrawTriPatch : 116
+    DeletePatch : 117
+    CreateQuery : 118
+```
+```
+
+`external/detours/include/detours.h`:
+
+```h
+/////////////////////////////////////////////////////////////////////////////
+//
+//  Core Detours Functionality (detours.h of detours.lib)
+//
+//  Microsoft Research Detours Package, Version 4.0.1
+//
+//  Copyright (c) Microsoft Corporation.  All rights reserved.
+//
+
+#pragma once
+#ifndef _DETOURS_H_
+#define _DETOURS_H_
+
+#define DETOURS_VERSION     0x4c0c1   // 0xMAJORcMINORcPATCH
+
+//////////////////////////////////////////////////////////////////////////////
+//
+
+#ifdef DETOURS_INTERNAL
+
+#define _CRT_STDIO_ARBITRARY_WIDE_SPECIFIERS 1
+#define _ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE 1
+
+#pragma warning(disable:4068) // unknown pragma (suppress)
+
+#if _MSC_VER >= 1900
+#pragma warning(push)
+#pragma warning(disable:4091) // empty typedef
+#endif
+
+// Suppress declspec(dllimport) for the sake of Detours
+// users that provide kernel32 functionality themselves.
+// This is ok in the mainstream case, it will just cost
+// an extra instruction calling some functions, which
+// LTCG optimizes away.
+//
+#define _KERNEL32_ 1
+#define _USER32_ 1
+
+#include <windows.h>
+#if (_MSC_VER < 1310)
+#else
+#pragma warning(push)
+#if _MSC_VER > 1400
+#pragma warning(disable:6102 6103) // /analyze warnings
+#endif
+#include <strsafe.h>
+#include <intsafe.h>
+#pragma warning(pop)
+#endif
+#include <crtdbg.h>
+
+// Allow Detours to cleanly compile with the MingW toolchain.
+//
+#ifdef __GNUC__
+#define __try
+#define __except(x) if (0)
+#include <strsafe.h>
+#endif
+
+// From winerror.h, as this error isn't found in some SDKs:
+//
+// MessageId: ERROR_DYNAMIC_CODE_BLOCKED
+//
+// MessageText:
+//
+// The operation was blocked as the process prohibits dynamic code generation.
+//
+#define ERROR_DYNAMIC_CODE_BLOCKED       1655L
+
+#endif // DETOURS_INTERNAL
+
+//////////////////////////////////////////////////////////////////////////////
+//
+
+#undef DETOURS_X64
+#undef DETOURS_X86
+#undef DETOURS_IA64
+#undef DETOURS_ARM
+#undef DETOURS_ARM64
+#undef DETOURS_BITS
+#undef DETOURS_32BIT
+#undef DETOURS_64BIT
+
+#if defined(_X86_)
+#define DETOURS_X86
+#define DETOURS_OPTION_BITS 64
+
+#elif defined(_AMD64_)
+#define DETOURS_X64
+#define DETOURS_OPTION_BITS 32
+
+#elif defined(_IA64_)
+#define DETOURS_IA64
+#define DETOURS_OPTION_BITS 32
+
+#elif defined(_ARM_)
+#define DETOURS_ARM
+
+#elif defined(_ARM64_)
+#define DETOURS_ARM64
+
+#else
+#error Unknown architecture (x86, amd64, ia64, arm, arm64)
+#endif
+
+#ifdef _WIN64
+#undef DETOURS_32BIT
+#define DETOURS_64BIT 1
+#define DETOURS_BITS 64
+// If all 64bit kernels can run one and only one 32bit architecture.
+//#define DETOURS_OPTION_BITS 32
+#else
+#define DETOURS_32BIT 1
+#undef DETOURS_64BIT
+#define DETOURS_BITS 32
+// If all 64bit kernels can run one and only one 32bit architecture.
+//#define DETOURS_OPTION_BITS 32
+#endif
+
+/////////////////////////////////////////////////////////////// Helper Macros.
+//
+#define DETOURS_STRINGIFY_(x)    #x
+#define DETOURS_STRINGIFY(x)    DETOURS_STRINGIFY_(x)
+
+#define VER_DETOURS_BITS    DETOURS_STRINGIFY(DETOURS_BITS)
+
+//////////////////////////////////////////////////////////////////////////////
+//
+
+#if (_MSC_VER < 1299) && !defined(__MINGW32__)
+typedef LONG LONG_PTR;
+typedef ULONG ULONG_PTR;
+#endif
+
+///////////////////////////////////////////////// SAL 2.0 Annotations w/o SAL.
+//
+//  These definitions are include so that Detours will build even if the
+//  compiler doesn't have full SAL 2.0 support.
+//
+#ifndef DETOURS_DONT_REMOVE_SAL_20
+
+#ifdef DETOURS_TEST_REMOVE_SAL_20
+#undef _Analysis_assume_
+#undef _Benign_race_begin_
+#undef _Benign_race_end_
+#undef _Field_range_
+#undef _Field_size_
+#undef _In_
+#undef _In_bytecount_
+#undef _In_count_
+#undef __in_ecount
+#undef _In_opt_
+#undef _In_opt_bytecount_
+#undef _In_opt_count_
+#undef _In_opt_z_
+#undef _In_range_
+#undef _In_reads_
+#undef _In_reads_bytes_
+#undef _In_reads_opt_
+#undef _In_reads_opt_bytes_
+#undef _In_reads_or_z_
+#undef _In_z_
+#undef _Inout_
+#undef _Inout_opt_
+#undef _Inout_z_count_
+#undef _Out_
+#undef _Out_opt_
+#undef _Out_writes_
+#undef _Outptr_result_maybenull_
+#undef _Readable_bytes_
+#undef _Success_
+#undef _Writable_bytes_
+#undef _Pre_notnull_
+#endif
+
+#if defined(_Deref_out_opt_z_) && !defined(_Outptr_result_maybenull_)
+#define _Outptr_result_maybenull_ _Deref_out_opt_z_
+#endif
+
+#if defined(_In_count_) && !defined(_In_reads_)
+#define _In_reads_(x) _In_count_(x)
+#endif
+
+#if defined(_In_opt_count_) && !defined(_In_reads_opt_)
+#define _In_reads_opt_(x) _In_opt_count_(x)
+#endif
+
+#if defined(_In_opt_bytecount_) && !defined(_In_reads_opt_bytes_)
+#define _In_reads_opt_bytes_(x) _In_opt_bytecount_(x)
+#endif
+
+#if defined(_In_bytecount_) && !defined(_In_reads_bytes_)
+#define _In_reads_bytes_(x) _In_bytecount_(x)
+#endif
+
+#ifndef _In_
+#define _In_
+#endif
+
+#ifndef _In_bytecount_
+#define _In_bytecount_(x)
+#endif
+
+#ifndef _In_count_
+#define _In_count_(x)
+#endif
+
+#ifndef __in_ecount
+#define __in_ecount(x)
+#endif
+
+#ifndef _In_opt_
+#define _In_opt_
+#endif
+
+#ifndef _In_opt_bytecount_
+#define _In_opt_bytecount_(x)
+#endif
+
+#ifndef _In_opt_count_
+#define _In_opt_count_(x)
+#endif
+
+#ifndef _In_opt_z_
+#define _In_opt_z_
+#endif
+
+#ifndef _In_range_
+#define _In_range_(x,y)
+#endif
+
+#ifndef _In_reads_
+#define _In_reads_(x)
+#endif
+
+#ifndef _In_reads_bytes_
+#define _In_reads_bytes_(x)
+#endif
+
+#ifndef _In_reads_opt_
+#define _In_reads_opt_(x)
+#endif
+
+#ifndef _In_reads_opt_bytes_
+#define _In_reads_opt_bytes_(x)
+#endif
+
+#ifndef _In_reads_or_z_
+#define _In_reads_or_z_
+#endif
+
+#ifndef _In_z_
+#define _In_z_
+#endif
+
+#ifndef _Inout_
+#define _Inout_
+#endif
+
+#ifndef _Inout_opt_
+#define _Inout_opt_
+#endif
+
+#ifndef _Inout_z_count_
+#define _Inout_z_count_(x)
+#endif
+
+#ifndef _Out_
+#define _Out_
+#endif
+
+#ifndef _Out_opt_
+#define _Out_opt_
+#endif
+
+#ifndef _Out_writes_
+#define _Out_writes_(x)
+#endif
+
+#ifndef _Outptr_result_maybenull_
+#define _Outptr_result_maybenull_
+#endif
+
+#ifndef _Writable_bytes_
+#define _Writable_bytes_(x)
+#endif
+
+#ifndef _Readable_bytes_
+#define _Readable_bytes_(x)
+#endif
+
+#ifndef _Success_
+#define _Success_(x)
+#endif
+
+#ifndef _Pre_notnull_
+#define _Pre_notnull_
+#endif
+
+#ifdef DETOURS_INTERNAL
+
+#pragma warning(disable:4615) // unknown warning type (suppress with older compilers)
+
+#ifndef _Benign_race_begin_
+#define _Benign_race_begin_
+#endif
+
+#ifndef _Benign_race_end_
+#define _Benign_race_end_
+#endif
+
+#ifndef _Field_size_
+#define _Field_size_(x)
+#endif
+
+#ifndef _Field_range_
+#define _Field_range_(x,y)
+#endif
+
+#ifndef _Analysis_assume_
+#define _Analysis_assume_(x)
+#endif
+
+#endif // DETOURS_INTERNAL
+#endif // DETOURS_DONT_REMOVE_SAL_20
+
+//////////////////////////////////////////////////////////////////////////////
+//
+#ifndef GUID_DEFINED
+#define GUID_DEFINED
+typedef struct  _GUID
+{
+    DWORD Data1;
+    WORD Data2;
+    WORD Data3;
+    BYTE Data4[ 8 ];
+} GUID;
+
+#ifdef INITGUID
+#define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+        const GUID name \
+                = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
+#else
+#define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+    const GUID name
+#endif // INITGUID
+#endif // !GUID_DEFINED
+
+#if defined(__cplusplus)
+#ifndef _REFGUID_DEFINED
+#define _REFGUID_DEFINED
+#define REFGUID             const GUID &
+#endif // !_REFGUID_DEFINED
+#else // !__cplusplus
+#ifndef _REFGUID_DEFINED
+#define _REFGUID_DEFINED
+#define REFGUID             const GUID * const
+#endif // !_REFGUID_DEFINED
+#endif // !__cplusplus
+
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(x)    (sizeof(x)/sizeof(x[0]))
+#endif
+
+//
+//////////////////////////////////////////////////////////////////////////////
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+/////////////////////////////////////////////////// Instruction Target Macros.
+//
+#define DETOUR_INSTRUCTION_TARGET_NONE          ((PVOID)0)
+#define DETOUR_INSTRUCTION_TARGET_DYNAMIC       ((PVOID)(LONG_PTR)-1)
+#define DETOUR_SECTION_HEADER_SIGNATURE         0x00727444   // "Dtr\0"
+
+extern const GUID DETOUR_EXE_RESTORE_GUID;
+extern const GUID DETOUR_EXE_HELPER_GUID;
+
+#define DETOUR_TRAMPOLINE_SIGNATURE             0x21727444  // Dtr!
+typedef struct _DETOUR_TRAMPOLINE DETOUR_TRAMPOLINE, *PDETOUR_TRAMPOLINE;
+
+/////////////////////////////////////////////////////////// Binary Structures.
+//
+#pragma pack(push, 8)
+typedef struct _DETOUR_SECTION_HEADER
+{
+    DWORD       cbHeaderSize;
+    DWORD       nSignature;
+    DWORD       nDataOffset;
+    DWORD       cbDataSize;
+
+    DWORD       nOriginalImportVirtualAddress;
+    DWORD       nOriginalImportSize;
+    DWORD       nOriginalBoundImportVirtualAddress;
+    DWORD       nOriginalBoundImportSize;
+
+    DWORD       nOriginalIatVirtualAddress;
+    DWORD       nOriginalIatSize;
+    DWORD       nOriginalSizeOfImage;
+    DWORD       cbPrePE;
+
+    DWORD       nOriginalClrFlags;
+    DWORD       reserved1;
+    DWORD       reserved2;
+    DWORD       reserved3;
+
+    // Followed by cbPrePE bytes of data.
+} DETOUR_SECTION_HEADER, *PDETOUR_SECTION_HEADER;
+
+typedef struct _DETOUR_SECTION_RECORD
+{
+    DWORD       cbBytes;
+    DWORD       nReserved;
+    GUID        guid;
+} DETOUR_SECTION_RECORD, *PDETOUR_SECTION_RECORD;
+
+typedef struct _DETOUR_CLR_HEADER
+{
+    // Header versioning
+    ULONG                   cb;
+    USHORT                  MajorRuntimeVersion;
+    USHORT                  MinorRuntimeVersion;
+
+    // Symbol table and startup information
+    IMAGE_DATA_DIRECTORY    MetaData;
+    ULONG                   Flags;
+
+    // Followed by the rest of the IMAGE_COR20_HEADER
+} DETOUR_CLR_HEADER, *PDETOUR_CLR_HEADER;
+
+typedef struct _DETOUR_EXE_RESTORE
+{
+    DWORD               cb;
+    DWORD               cbidh;
+    DWORD               cbinh;
+    DWORD               cbclr;
+
+    PBYTE               pidh;
+    PBYTE               pinh;
+    PBYTE               pclr;
+
+    IMAGE_DOS_HEADER    idh;
+    union {
+        IMAGE_NT_HEADERS    inh;        // all environments have this
+#ifdef IMAGE_NT_OPTIONAL_HDR32_MAGIC    // some environments do not have this
+        IMAGE_NT_HEADERS32  inh32;
+#endif
+#ifdef IMAGE_NT_OPTIONAL_HDR64_MAGIC    // some environments do not have this
+        IMAGE_NT_HEADERS64  inh64;
+#endif
+#ifdef IMAGE_NT_OPTIONAL_HDR64_MAGIC    // some environments do not have this
+        BYTE                raw[sizeof(IMAGE_NT_HEADERS64) +
+                                sizeof(IMAGE_SECTION_HEADER) * 32];
+#else
+        BYTE                raw[0x108 + sizeof(IMAGE_SECTION_HEADER) * 32];
+#endif
+    };
+    DETOUR_CLR_HEADER   clr;
+
+} DETOUR_EXE_RESTORE, *PDETOUR_EXE_RESTORE;
+
+#ifdef IMAGE_NT_OPTIONAL_HDR64_MAGIC
+C_ASSERT(sizeof(IMAGE_NT_HEADERS64) == 0x108);
+#endif
+
+// The size can change, but assert for clarity due to the muddying #ifdefs.
+#ifdef _WIN64
+C_ASSERT(sizeof(DETOUR_EXE_RESTORE) == 0x688);
+#else
+C_ASSERT(sizeof(DETOUR_EXE_RESTORE) == 0x678);
+#endif
+
+typedef struct _DETOUR_EXE_HELPER
+{
+    DWORD               cb;
+    DWORD               pid;
+    DWORD               nDlls;
+    CHAR                rDlls[4];
+} DETOUR_EXE_HELPER, *PDETOUR_EXE_HELPER;
+
+#pragma pack(pop)
+
+#define DETOUR_SECTION_HEADER_DECLARE(cbSectionSize) \
+{ \
+      sizeof(DETOUR_SECTION_HEADER),\
+      DETOUR_SECTION_HEADER_SIGNATURE,\
+      sizeof(DETOUR_SECTION_HEADER),\
+      (cbSectionSize),\
+      \
+      0,\
+      0,\
+      0,\
+      0,\
+      \
+      0,\
+      0,\
+      0,\
+      0,\
+}
+
+///////////////////////////////////////////////////////////// Binary Typedefs.
+//
+typedef BOOL (CALLBACK *PF_DETOUR_BINARY_BYWAY_CALLBACK)(
+    _In_opt_ PVOID pContext,
+    _In_opt_ LPCSTR pszFile,
+    _Outptr_result_maybenull_ LPCSTR *ppszOutFile);
+
+typedef BOOL (CALLBACK *PF_DETOUR_BINARY_FILE_CALLBACK)(
+    _In_opt_ PVOID pContext,
+    _In_ LPCSTR pszOrigFile,
+    _In_ LPCSTR pszFile,
+    _Outptr_result_maybenull_ LPCSTR *ppszOutFile);
+
+typedef BOOL (CALLBACK *PF_DETOUR_BINARY_SYMBOL_CALLBACK)(
+    _In_opt_ PVOID pContext,
+    _In_ ULONG nOrigOrdinal,
+    _In_ ULONG nOrdinal,
+    _Out_ ULONG *pnOutOrdinal,
+    _In_opt_ LPCSTR pszOrigSymbol,
+    _In_opt_ LPCSTR pszSymbol,
+    _Outptr_result_maybenull_ LPCSTR *ppszOutSymbol);
+
+typedef BOOL (CALLBACK *PF_DETOUR_BINARY_COMMIT_CALLBACK)(
+    _In_opt_ PVOID pContext);
+
+typedef BOOL (CALLBACK *PF_DETOUR_ENUMERATE_EXPORT_CALLBACK)(_In_opt_ PVOID pContext,
+                                                             _In_ ULONG nOrdinal,
+                                                             _In_opt_ LPCSTR pszName,
+                                                             _In_opt_ PVOID pCode);
+
+typedef BOOL (CALLBACK *PF_DETOUR_IMPORT_FILE_CALLBACK)(_In_opt_ PVOID pContext,
+                                                        _In_opt_ HMODULE hModule,
+                                                        _In_opt_ LPCSTR pszFile);
+
+typedef BOOL (CALLBACK *PF_DETOUR_IMPORT_FUNC_CALLBACK)(_In_opt_ PVOID pContext,
+                                                        _In_ DWORD nOrdinal,
+                                                        _In_opt_ LPCSTR pszFunc,
+                                                        _In_opt_ PVOID pvFunc);
+
+// Same as PF_DETOUR_IMPORT_FUNC_CALLBACK but extra indirection on last parameter.
+typedef BOOL (CALLBACK *PF_DETOUR_IMPORT_FUNC_CALLBACK_EX)(_In_opt_ PVOID pContext,
+                                                           _In_ DWORD nOrdinal,
+                                                           _In_opt_ LPCSTR pszFunc,
+                                                           _In_opt_ PVOID* ppvFunc);
+
+typedef VOID * PDETOUR_BINARY;
+typedef VOID * PDETOUR_LOADED_BINARY;
+
+//////////////////////////////////////////////////////////// Transaction APIs.
+//
+LONG WINAPI DetourTransactionBegin(VOID);
+LONG WINAPI DetourTransactionAbort(VOID);
+LONG WINAPI DetourTransactionCommit(VOID);
+LONG WINAPI DetourTransactionCommitEx(_Out_opt_ PVOID **pppFailedPointer);
+
+LONG WINAPI DetourUpdateThread(_In_ HANDLE hThread);
+
+LONG WINAPI DetourAttach(_Inout_ PVOID *ppPointer,
+                         _In_ PVOID pDetour);
+
+LONG WINAPI DetourAttachEx(_Inout_ PVOID *ppPointer,
+                           _In_ PVOID pDetour,
+                           _Out_opt_ PDETOUR_TRAMPOLINE *ppRealTrampoline,
+                           _Out_opt_ PVOID *ppRealTarget,
+                           _Out_opt_ PVOID *ppRealDetour);
+
+LONG WINAPI DetourDetach(_Inout_ PVOID *ppPointer,
+                         _In_ PVOID pDetour);
+
+BOOL WINAPI DetourSetIgnoreTooSmall(_In_ BOOL fIgnore);
+BOOL WINAPI DetourSetRetainRegions(_In_ BOOL fRetain);
+PVOID WINAPI DetourSetSystemRegionLowerBound(_In_ PVOID pSystemRegionLowerBound);
+PVOID WINAPI DetourSetSystemRegionUpperBound(_In_ PVOID pSystemRegionUpperBound);
+
+////////////////////////////////////////////////////////////// Code Functions.
+//
+PVOID WINAPI DetourFindFunction(_In_ LPCSTR pszModule,
+                                _In_ LPCSTR pszFunction);
+PVOID WINAPI DetourCodeFromPointer(_In_ PVOID pPointer,
+                                   _Out_opt_ PVOID *ppGlobals);
+PVOID WINAPI DetourCopyInstruction(_In_opt_ PVOID pDst,
+                                   _Inout_opt_ PVOID *ppDstPool,
+                                   _In_ PVOID pSrc,
+                                   _Out_opt_ PVOID *ppTarget,
+                                   _Out_opt_ LONG *plExtra);
+BOOL WINAPI DetourSetCodeModule(_In_ HMODULE hModule,
+                                _In_ BOOL fLimitReferencesToModule);
+PVOID WINAPI DetourAllocateRegionWithinJumpBounds(_In_ LPCVOID pbTarget,
+                                                  _Out_ PDWORD pcbAllocatedSize);
+
+///////////////////////////////////////////////////// Loaded Binary Functions.
+//
+HMODULE WINAPI DetourGetContainingModule(_In_ PVOID pvAddr);
+HMODULE WINAPI DetourEnumerateModules(_In_opt_ HMODULE hModuleLast);
+PVOID WINAPI DetourGetEntryPoint(_In_opt_ HMODULE hModule);
+ULONG WINAPI DetourGetModuleSize(_In_opt_ HMODULE hModule);
+BOOL WINAPI DetourEnumerateExports(_In_ HMODULE hModule,
+                                   _In_opt_ PVOID pContext,
+                                   _In_ PF_DETOUR_ENUMERATE_EXPORT_CALLBACK pfExport);
+BOOL WINAPI DetourEnumerateImports(_In_opt_ HMODULE hModule,
+                                   _In_opt_ PVOID pContext,
+                                   _In_opt_ PF_DETOUR_IMPORT_FILE_CALLBACK pfImportFile,
+                                   _In_opt_ PF_DETOUR_IMPORT_FUNC_CALLBACK pfImportFunc);
+
+BOOL WINAPI DetourEnumerateImportsEx(_In_opt_ HMODULE hModule,
+                                     _In_opt_ PVOID pContext,
+                                     _In_opt_ PF_DETOUR_IMPORT_FILE_CALLBACK pfImportFile,
+                                     _In_opt_ PF_DETOUR_IMPORT_FUNC_CALLBACK_EX pfImportFuncEx);
+
+_Writable_bytes_(*pcbData)
+_Readable_bytes_(*pcbData)
+_Success_(return != NULL)
+PVOID WINAPI DetourFindPayload(_In_opt_ HMODULE hModule,
+                               _In_ REFGUID rguid,
+                               _Out_opt_ DWORD *pcbData);
+
+_Writable_bytes_(*pcbData)
+_Readable_bytes_(*pcbData)
+_Success_(return != NULL)
+PVOID WINAPI DetourFindPayloadEx(_In_ REFGUID rguid,
+                                 _Out_opt_ DWORD *pcbData);
+
+DWORD WINAPI DetourGetSizeOfPayloads(_In_opt_ HMODULE hModule);
+
+BOOL WINAPI DetourFreePayload(_In_ PVOID pvData);
+///////////////////////////////////////////////// Persistent Binary Functions.
+//
+
+PDETOUR_BINARY WINAPI DetourBinaryOpen(_In_ HANDLE hFile);
+
+_Writable_bytes_(*pcbData)
+_Readable_bytes_(*pcbData)
+_Success_(return != NULL)
+PVOID WINAPI DetourBinaryEnumeratePayloads(_In_ PDETOUR_BINARY pBinary,
+                                           _Out_opt_ GUID *pGuid,
+                                           _Out_ DWORD *pcbData,
+                                           _Inout_ DWORD *pnIterator);
+
+_Writable_bytes_(*pcbData)
+_Readable_bytes_(*pcbData)
+_Success_(return != NULL)
+PVOID WINAPI DetourBinaryFindPayload(_In_ PDETOUR_BINARY pBinary,
+                                     _In_ REFGUID rguid,
+                                     _Out_ DWORD *pcbData);
+
+PVOID WINAPI DetourBinarySetPayload(_In_ PDETOUR_BINARY pBinary,
+                                    _In_ REFGUID rguid,
+                                    _In_reads_opt_(cbData) PVOID pData,
+                                    _In_ DWORD cbData);
+BOOL WINAPI DetourBinaryDeletePayload(_In_ PDETOUR_BINARY pBinary, _In_ REFGUID rguid);
+BOOL WINAPI DetourBinaryPurgePayloads(_In_ PDETOUR_BINARY pBinary);
+BOOL WINAPI DetourBinaryResetImports(_In_ PDETOUR_BINARY pBinary);
+BOOL WINAPI DetourBinaryEditImports(_In_ PDETOUR_BINARY pBinary,
+                                    _In_opt_ PVOID pContext,
+                                    _In_opt_ PF_DETOUR_BINARY_BYWAY_CALLBACK pfByway,
+                                    _In_opt_ PF_DETOUR_BINARY_FILE_CALLBACK pfFile,
+                                    _In_opt_ PF_DETOUR_BINARY_SYMBOL_CALLBACK pfSymbol,
+                                    _In_opt_ PF_DETOUR_BINARY_COMMIT_CALLBACK pfCommit);
+BOOL WINAPI DetourBinaryWrite(_In_ PDETOUR_BINARY pBinary, _In_ HANDLE hFile);
+BOOL WINAPI DetourBinaryClose(_In_ PDETOUR_BINARY pBinary);
+
+/////////////////////////////////////////////////// Create Process & Load Dll.
+//
+_Success_(return != NULL)
+PVOID WINAPI DetourFindRemotePayload(_In_ HANDLE hProcess,
+                                     _In_ REFGUID rguid,
+                                     _Out_opt_ DWORD *pcbData);
+
+typedef BOOL (WINAPI *PDETOUR_CREATE_PROCESS_ROUTINEA)(
+    _In_opt_ LPCSTR lpApplicationName,
+    _Inout_opt_ LPSTR lpCommandLine,
+    _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
+    _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
+    _In_ BOOL bInheritHandles,
+    _In_ DWORD dwCreationFlags,
+    _In_opt_ LPVOID lpEnvironment,
+    _In_opt_ LPCSTR lpCurrentDirectory,
+    _In_ LPSTARTUPINFOA lpStartupInfo,
+    _Out_ LPPROCESS_INFORMATION lpProcessInformation);
+
+typedef BOOL (WINAPI *PDETOUR_CREATE_PROCESS_ROUTINEW)(
+    _In_opt_ LPCWSTR lpApplicationName,
+    _Inout_opt_ LPWSTR lpCommandLine,
+    _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
+    _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
+    _In_ BOOL bInheritHandles,
+    _In_ DWORD dwCreationFlags,
+    _In_opt_ LPVOID lpEnvironment,
+    _In_opt_ LPCWSTR lpCurrentDirectory,
+    _In_ LPSTARTUPINFOW lpStartupInfo,
+    _Out_ LPPROCESS_INFORMATION lpProcessInformation);
+
+BOOL WINAPI DetourCreateProcessWithDllA(_In_opt_ LPCSTR lpApplicationName,
+                                        _Inout_opt_ LPSTR lpCommandLine,
+                                        _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
+                                        _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
+                                        _In_ BOOL bInheritHandles,
+                                        _In_ DWORD dwCreationFlags,
+                                        _In_opt_ LPVOID lpEnvironment,
+                                        _In_opt_ LPCSTR lpCurrentDirectory,
+                                        _In_ LPSTARTUPINFOA lpStartupInfo,
+                                        _Out_ LPPROCESS_INFORMATION lpProcessInformation,
+                                        _In_ LPCSTR lpDllName,
+                                        _In_opt_ PDETOUR_CREATE_PROCESS_ROUTINEA pfCreateProcessA);
+
+BOOL WINAPI DetourCreateProcessWithDllW(_In_opt_ LPCWSTR lpApplicationName,
+                                        _Inout_opt_ LPWSTR lpCommandLine,
+                                        _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
+                                        _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
+                                        _In_ BOOL bInheritHandles,
+                                        _In_ DWORD dwCreationFlags,
+                                        _In_opt_ LPVOID lpEnvironment,
+                                        _In_opt_ LPCWSTR lpCurrentDirectory,
+                                        _In_ LPSTARTUPINFOW lpStartupInfo,
+                                        _Out_ LPPROCESS_INFORMATION lpProcessInformation,
+                                        _In_ LPCSTR lpDllName,
+                                        _In_opt_ PDETOUR_CREATE_PROCESS_ROUTINEW pfCreateProcessW);
+
+#ifdef UNICODE
+#define DetourCreateProcessWithDll      DetourCreateProcessWithDllW
+#define PDETOUR_CREATE_PROCESS_ROUTINE  PDETOUR_CREATE_PROCESS_ROUTINEW
+#else
+#define DetourCreateProcessWithDll      DetourCreateProcessWithDllA
+#define PDETOUR_CREATE_PROCESS_ROUTINE  PDETOUR_CREATE_PROCESS_ROUTINEA
+#endif // !UNICODE
+
+BOOL WINAPI DetourCreateProcessWithDllExA(_In_opt_ LPCSTR lpApplicationName,
+                                          _Inout_opt_ LPSTR lpCommandLine,
+                                          _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
+                                          _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
+                                          _In_ BOOL bInheritHandles,
+                                          _In_ DWORD dwCreationFlags,
+                                          _In_opt_ LPVOID lpEnvironment,
+                                          _In_opt_ LPCSTR lpCurrentDirectory,
+                                          _In_ LPSTARTUPINFOA lpStartupInfo,
+                                          _Out_ LPPROCESS_INFORMATION lpProcessInformation,
+                                          _In_ LPCSTR lpDllName,
+                                          _In_opt_ PDETOUR_CREATE_PROCESS_ROUTINEA pfCreateProcessA);
+
+BOOL WINAPI DetourCreateProcessWithDllExW(_In_opt_ LPCWSTR lpApplicationName,
+                                          _Inout_opt_  LPWSTR lpCommandLine,
+                                          _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
+                                          _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
+                                          _In_ BOOL bInheritHandles,
+                                          _In_ DWORD dwCreationFlags,
+                                          _In_opt_ LPVOID lpEnvironment,
+                                          _In_opt_ LPCWSTR lpCurrentDirectory,
+                                          _In_ LPSTARTUPINFOW lpStartupInfo,
+                                          _Out_ LPPROCESS_INFORMATION lpProcessInformation,
+                                          _In_ LPCSTR lpDllName,
+                                          _In_opt_ PDETOUR_CREATE_PROCESS_ROUTINEW pfCreateProcessW);
+
+#ifdef UNICODE
+#define DetourCreateProcessWithDllEx    DetourCreateProcessWithDllExW
+#else
+#define DetourCreateProcessWithDllEx    DetourCreateProcessWithDllExA
+#endif // !UNICODE
+
+BOOL WINAPI DetourCreateProcessWithDllsA(_In_opt_ LPCSTR lpApplicationName,
+                                         _Inout_opt_ LPSTR lpCommandLine,
+                                         _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
+                                         _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
+                                         _In_ BOOL bInheritHandles,
+                                         _In_ DWORD dwCreationFlags,
+                                         _In_opt_ LPVOID lpEnvironment,
+                                         _In_opt_ LPCSTR lpCurrentDirectory,
+                                         _In_ LPSTARTUPINFOA lpStartupInfo,
+                                         _Out_ LPPROCESS_INFORMATION lpProcessInformation,
+                                         _In_ DWORD nDlls,
+                                         _In_reads_(nDlls) LPCSTR *rlpDlls,
+                                         _In_opt_ PDETOUR_CREATE_PROCESS_ROUTINEA pfCreateProcessA);
+
+BOOL WINAPI DetourCreateProcessWithDllsW(_In_opt_ LPCWSTR lpApplicationName,
+                                         _Inout_opt_ LPWSTR lpCommandLine,
+                                         _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
+                                         _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
+                                         _In_ BOOL bInheritHandles,
+                                         _In_ DWORD dwCreationFlags,
+                                         _In_opt_ LPVOID lpEnvironment,
+                                         _In_opt_ LPCWSTR lpCurrentDirectory,
+                                         _In_ LPSTARTUPINFOW lpStartupInfo,
+                                         _Out_ LPPROCESS_INFORMATION lpProcessInformation,
+                                         _In_ DWORD nDlls,
+                                         _In_reads_(nDlls) LPCSTR *rlpDlls,
+                                         _In_opt_ PDETOUR_CREATE_PROCESS_ROUTINEW pfCreateProcessW);
+
+#ifdef UNICODE
+#define DetourCreateProcessWithDlls     DetourCreateProcessWithDllsW
+#else
+#define DetourCreateProcessWithDlls     DetourCreateProcessWithDllsA
+#endif // !UNICODE
+
+BOOL WINAPI DetourProcessViaHelperA(_In_ DWORD dwTargetPid,
+                                    _In_ LPCSTR lpDllName,
+                                    _In_ PDETOUR_CREATE_PROCESS_ROUTINEA pfCreateProcessA);
+
+BOOL WINAPI DetourProcessViaHelperW(_In_ DWORD dwTargetPid,
+                                    _In_ LPCSTR lpDllName,
+                                    _In_ PDETOUR_CREATE_PROCESS_ROUTINEW pfCreateProcessW);
+
+#ifdef UNICODE
+#define DetourProcessViaHelper          DetourProcessViaHelperW
+#else
+#define DetourProcessViaHelper          DetourProcessViaHelperA
+#endif // !UNICODE
+
+BOOL WINAPI DetourProcessViaHelperDllsA(_In_ DWORD dwTargetPid,
+                                        _In_ DWORD nDlls,
+                                        _In_reads_(nDlls) LPCSTR *rlpDlls,
+                                        _In_ PDETOUR_CREATE_PROCESS_ROUTINEA pfCreateProcessA);
+
+BOOL WINAPI DetourProcessViaHelperDllsW(_In_ DWORD dwTargetPid,
+                                        _In_ DWORD nDlls,
+                                        _In_reads_(nDlls) LPCSTR *rlpDlls,
+                                        _In_ PDETOUR_CREATE_PROCESS_ROUTINEW pfCreateProcessW);
+
+#ifdef UNICODE
+#define DetourProcessViaHelperDlls      DetourProcessViaHelperDllsW
+#else
+#define DetourProcessViaHelperDlls      DetourProcessViaHelperDllsA
+#endif // !UNICODE
+
+BOOL WINAPI DetourUpdateProcessWithDll(_In_ HANDLE hProcess,
+                                       _In_reads_(nDlls) LPCSTR *rlpDlls,
+                                       _In_ DWORD nDlls);
+
+BOOL WINAPI DetourUpdateProcessWithDllEx(_In_ HANDLE hProcess,
+                                         _In_ HMODULE hImage,
+                                         _In_ BOOL bIs32Bit,
+                                         _In_reads_(nDlls) LPCSTR *rlpDlls,
+                                         _In_ DWORD nDlls);
+
+BOOL WINAPI DetourCopyPayloadToProcess(_In_ HANDLE hProcess,
+                                       _In_ REFGUID rguid,
+                                       _In_reads_bytes_(cbData) LPCVOID pvData,
+                                       _In_ DWORD cbData);
+_Success_(return != NULL)
+PVOID WINAPI DetourCopyPayloadToProcessEx(_In_ HANDLE hProcess,
+                                          _In_ REFGUID rguid,
+                                          _In_reads_bytes_(cbData) LPCVOID pvData,
+                                          _In_ DWORD cbData);
+
+BOOL WINAPI DetourRestoreAfterWith(VOID);
+BOOL WINAPI DetourRestoreAfterWithEx(_In_reads_bytes_(cbData) PVOID pvData,
+                                     _In_ DWORD cbData);
+BOOL WINAPI DetourIsHelperProcess(VOID);
+VOID CALLBACK DetourFinishHelperProcess(_In_ HWND,
+                                        _In_ HINSTANCE,
+                                        _In_ LPSTR,
+                                        _In_ INT);
+
+//
+//////////////////////////////////////////////////////////////////////////////
+#ifdef __cplusplus
+}
+#endif // __cplusplus
+
+/////////////////////////////////////////////////// Type-safe overloads for C++
+//
+#if __cplusplus >= 201103L || _MSVC_LANG >= 201103L
+#include <type_traits>
+
+template<typename T>
+struct DetoursIsFunctionPointer : std::false_type {};
+
+template<typename T>
+struct DetoursIsFunctionPointer<T*> : std::is_function<typename std::remove_pointer<T>::type> {};
+
+template<
+    typename T,
+    typename std::enable_if<DetoursIsFunctionPointer<T>::value, int>::type = 0>
+LONG DetourAttach(_Inout_ T *ppPointer,
+                  _In_ T pDetour) noexcept
+{
+    return DetourAttach(
+        reinterpret_cast<void**>(ppPointer),
+        reinterpret_cast<void*>(pDetour));
+}
+
+template<
+    typename T,
+    typename std::enable_if<DetoursIsFunctionPointer<T>::value, int>::type = 0>
+LONG DetourAttachEx(_Inout_ T *ppPointer,
+                    _In_ T pDetour,
+                    _Out_opt_ PDETOUR_TRAMPOLINE *ppRealTrampoline,
+                    _Out_opt_ T *ppRealTarget,
+                    _Out_opt_ T *ppRealDetour) noexcept
+{
+    return DetourAttachEx(
+        reinterpret_cast<void**>(ppPointer),
+        reinterpret_cast<void*>(pDetour),
+        ppRealTrampoline,
+        reinterpret_cast<void**>(ppRealTarget),
+        reinterpret_cast<void**>(ppRealDetour));
+}
+
+template<
+    typename T,
+    typename std::enable_if<DetoursIsFunctionPointer<T>::value, int>::type = 0>
+LONG DetourDetach(_Inout_ T *ppPointer,
+                  _In_ T pDetour) noexcept
+{
+    return DetourDetach(
+        reinterpret_cast<void**>(ppPointer),
+        reinterpret_cast<void*>(pDetour));
+}
+
+#endif // __cplusplus >= 201103L || _MSVC_LANG >= 201103L
+//
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////// Detours Internal Definitions.
+//
+#ifdef __cplusplus
+#ifdef DETOURS_INTERNAL
+
+#define NOTHROW
+// #define NOTHROW (nothrow)
+
+//////////////////////////////////////////////////////////////////////////////
+//
+#if (_MSC_VER < 1299) && !defined(__GNUC__)
+#include <imagehlp.h>
+typedef IMAGEHLP_MODULE IMAGEHLP_MODULE64;
+typedef PIMAGEHLP_MODULE PIMAGEHLP_MODULE64;
+typedef IMAGEHLP_SYMBOL SYMBOL_INFO;
+typedef PIMAGEHLP_SYMBOL PSYMBOL_INFO;
+
+static inline
+LONG InterlockedCompareExchange(_Inout_ LONG *ptr, _In_ LONG nval, _In_ LONG oval)
+{
+    return (LONG)::InterlockedCompareExchange((PVOID*)ptr, (PVOID)nval, (PVOID)oval);
+}
+#else
+#pragma warning(push)
+#pragma warning(disable:4091) // empty typedef
+#include <dbghelp.h>
+#pragma warning(pop)
+#endif
+
+#ifdef IMAGEAPI // defined by DBGHELP.H
+typedef LPAPI_VERSION (NTAPI *PF_ImagehlpApiVersionEx)(_In_ LPAPI_VERSION AppVersion);
+
+typedef BOOL (NTAPI *PF_SymInitialize)(_In_ HANDLE hProcess,
+                                       _In_opt_ LPCSTR UserSearchPath,
+                                       _In_ BOOL fInvadeProcess);
+typedef DWORD (NTAPI *PF_SymSetOptions)(_In_ DWORD SymOptions);
+typedef DWORD (NTAPI *PF_SymGetOptions)(VOID);
+typedef DWORD64 (NTAPI *PF_SymLoadModule64)(_In_ HANDLE hProcess,
+                                            _In_opt_ HANDLE hFile,
+                                            _In_ LPSTR ImageName,
+                                            _In_opt_ LPSTR ModuleName,
+                                            _In_ DWORD64 BaseOfDll,
+                                            _In_opt_ DWORD SizeOfDll);
+typedef BOOL (NTAPI *PF_SymGetModuleInfo64)(_In_ HANDLE hProcess,
+                                            _In_ DWORD64 qwAddr,
+                                            _Out_ PIMAGEHLP_MODULE64 ModuleInfo);
+typedef BOOL (NTAPI *PF_SymFromName)(_In_ HANDLE hProcess,
+                                     _In_ LPSTR Name,
+                                     _Out_ PSYMBOL_INFO Symbol);
+
+typedef struct _DETOUR_SYM_INFO
+{
+    HANDLE                  hProcess;
+    HMODULE                 hDbgHelp;
+    PF_ImagehlpApiVersionEx pfImagehlpApiVersionEx;
+    PF_SymInitialize        pfSymInitialize;
+    PF_SymSetOptions        pfSymSetOptions;
+    PF_SymGetOptions        pfSymGetOptions;
+    PF_SymLoadModule64      pfSymLoadModule64;
+    PF_SymGetModuleInfo64   pfSymGetModuleInfo64;
+    PF_SymFromName          pfSymFromName;
+} DETOUR_SYM_INFO, *PDETOUR_SYM_INFO;
+
+PDETOUR_SYM_INFO DetourLoadImageHlp(VOID);
+
+#endif // IMAGEAPI
+
+#if defined(_INC_STDIO) && !defined(_CRT_STDIO_ARBITRARY_WIDE_SPECIFIERS)
+#error detours.h must be included before stdio.h (or at least define _CRT_STDIO_ARBITRARY_WIDE_SPECIFIERS earlier)
+#endif
+#define _CRT_STDIO_ARBITRARY_WIDE_SPECIFIERS 1
+
+#ifdef _DEBUG
+
+int Detour_AssertExprWithFunctionName(int reportType, const char* filename, int linenumber, const char* FunctionName, const char* msg);
+
+#define DETOUR_ASSERT_EXPR_WITH_FUNCTION(expr, msg) \
+    (void) ((expr) || \
+    (1 != Detour_AssertExprWithFunctionName(_CRT_ASSERT, __FILE__, __LINE__,__FUNCTION__, msg)) || \
+    (_CrtDbgBreak(), 0))
+
+#define DETOUR_ASSERT(expr) DETOUR_ASSERT_EXPR_WITH_FUNCTION((expr), #expr)
+
+#else// _DEBUG
+#define DETOUR_ASSERT(expr)
+#endif// _DEBUG
+
+#ifndef DETOUR_TRACE
+#if DETOUR_DEBUG
+#define DETOUR_TRACE(x) printf x
+#define DETOUR_BREAK()  __debugbreak()
+#include <stdio.h>
+#include <limits.h>
+#else
+#define DETOUR_TRACE(x)
+#define DETOUR_BREAK()
+#endif
+#endif
+
+#if 1 || defined(DETOURS_IA64)
+
+//
+// IA64 instructions are 41 bits, 3 per bundle, plus 5 bit bundle template => 128 bits per bundle.
+//
+
+#define DETOUR_IA64_INSTRUCTIONS_PER_BUNDLE (3)
+
+#define DETOUR_IA64_TEMPLATE_OFFSET (0)
+#define DETOUR_IA64_TEMPLATE_SIZE   (5)
+
+#define DETOUR_IA64_INSTRUCTION_SIZE (41)
+#define DETOUR_IA64_INSTRUCTION0_OFFSET (DETOUR_IA64_TEMPLATE_SIZE)
+#define DETOUR_IA64_INSTRUCTION1_OFFSET (DETOUR_IA64_TEMPLATE_SIZE + DETOUR_IA64_INSTRUCTION_SIZE)
+#define DETOUR_IA64_INSTRUCTION2_OFFSET (DETOUR_IA64_TEMPLATE_SIZE + DETOUR_IA64_INSTRUCTION_SIZE + DETOUR_IA64_INSTRUCTION_SIZE)
+
+C_ASSERT(DETOUR_IA64_TEMPLATE_SIZE + DETOUR_IA64_INSTRUCTIONS_PER_BUNDLE * DETOUR_IA64_INSTRUCTION_SIZE == 128);
+
+__declspec(align(16)) struct DETOUR_IA64_BUNDLE
+{
+  public:
+    union
+    {
+        BYTE    data[16];
+        UINT64  wide[2];
+    };
+
+    enum {
+        A_UNIT  = 1u,
+        I_UNIT  = 2u,
+        M_UNIT  = 3u,
+        B_UNIT  = 4u,
+        F_UNIT  = 5u,
+        L_UNIT  = 6u,
+        X_UNIT  = 7u,
+    };
+    struct DETOUR_IA64_METADATA
+    {
+        ULONG       nTemplate       : 8;    // Instruction template.
+        ULONG       nUnit0          : 4;    // Unit for slot 0
+        ULONG       nUnit1          : 4;    // Unit for slot 1
+        ULONG       nUnit2          : 4;    // Unit for slot 2
+    };
+
+  protected:
+    static const DETOUR_IA64_METADATA s_rceCopyTable[33];
+
+    UINT RelocateBundle(_Inout_ DETOUR_IA64_BUNDLE* pDst, _Inout_opt_ DETOUR_IA64_BUNDLE* pBundleExtra) const;
+
+    bool RelocateInstruction(_Inout_ DETOUR_IA64_BUNDLE* pDst,
+                             _In_ BYTE slot,
+                             _Inout_opt_ DETOUR_IA64_BUNDLE* pBundleExtra) const;
+
+    // 120 112 104 96 88 80 72 64 56 48 40 32 24 16  8  0
+    //  f.  e.  d. c. b. a. 9. 8. 7. 6. 5. 4. 3. 2. 1. 0.
+
+    //                                      00
+    // f.e. d.c. b.a. 9.8. 7.6. 5.4. 3.2. 1.0.
+    // 0000 0000 0000 0000 0000 0000 0000 001f : Template [4..0]
+    // 0000 0000 0000 0000 0000 03ff ffff ffe0 : Zero [ 41..  5]
+    // 0000 0000 0000 0000 0000 3c00 0000 0000 : Zero [ 45.. 42]
+    // 0000 0000 0007 ffff ffff c000 0000 0000 : One  [ 82.. 46]
+    // 0000 0000 0078 0000 0000 0000 0000 0000 : One  [ 86.. 83]
+    // 0fff ffff ff80 0000 0000 0000 0000 0000 : Two  [123.. 87]
+    // f000 0000 0000 0000 0000 0000 0000 0000 : Two  [127..124]
+    BYTE    GetTemplate() const;
+    // Get 4 bit opcodes.
+    BYTE    GetInst0() const;
+    BYTE    GetInst1() const;
+    BYTE    GetInst2() const;
+    BYTE    GetUnit(BYTE slot) const;
+    BYTE    GetUnit0() const;
+    BYTE    GetUnit1() const;
+    BYTE    GetUnit2() const;
+    // Get 37 bit data.
+    UINT64  GetData0() const;
+    UINT64  GetData1() const;
+    UINT64  GetData2() const;
+
+    // Get/set the full 41 bit instructions.
+    UINT64  GetInstruction(BYTE slot) const;
+    UINT64  GetInstruction0() const;
+    UINT64  GetInstruction1() const;
+    UINT64  GetInstruction2() const;
+    void    SetInstruction(BYTE slot, UINT64 instruction);
+    void    SetInstruction0(UINT64 instruction);
+    void    SetInstruction1(UINT64 instruction);
+    void    SetInstruction2(UINT64 instruction);
+
+    // Get/set bitfields.
+    static UINT64 GetBits(UINT64 Value, UINT64 Offset, UINT64 Count);
+    static UINT64 SetBits(UINT64 Value, UINT64 Offset, UINT64 Count, UINT64 Field);
+
+    // Get specific read-only fields.
+    static UINT64 GetOpcode(UINT64 instruction); // 4bit opcode
+    static UINT64 GetX(UINT64 instruction); // 1bit opcode extension
+    static UINT64 GetX3(UINT64 instruction); // 3bit opcode extension
+    static UINT64 GetX6(UINT64 instruction); // 6bit opcode extension
+
+    // Get/set specific fields.
+    static UINT64 GetImm7a(UINT64 instruction);
+    static UINT64 SetImm7a(UINT64 instruction, UINT64 imm7a);
+    static UINT64 GetImm13c(UINT64 instruction);
+    static UINT64 SetImm13c(UINT64 instruction, UINT64 imm13c);
+    static UINT64 GetSignBit(UINT64 instruction);
+    static UINT64 SetSignBit(UINT64 instruction, UINT64 signBit);
+    static UINT64 GetImm20a(UINT64 instruction);
+    static UINT64 SetImm20a(UINT64 instruction, UINT64 imm20a);
+    static UINT64 GetImm20b(UINT64 instruction);
+    static UINT64 SetImm20b(UINT64 instruction, UINT64 imm20b);
+
+    static UINT64 SignExtend(UINT64 Value, UINT64 Offset);
+
+    BOOL    IsMovlGp() const;
+
+    VOID    SetInst(BYTE Slot, BYTE nInst);
+    VOID    SetInst0(BYTE nInst);
+    VOID    SetInst1(BYTE nInst);
+    VOID    SetInst2(BYTE nInst);
+    VOID    SetData(BYTE Slot, UINT64 nData);
+    VOID    SetData0(UINT64 nData);
+    VOID    SetData1(UINT64 nData);
+    VOID    SetData2(UINT64 nData);
+    BOOL    SetNop(BYTE Slot);
+    BOOL    SetNop0();
+    BOOL    SetNop1();
+    BOOL    SetNop2();
+
+  public:
+    BOOL    IsBrl() const;
+    VOID    SetBrl();
+    VOID    SetBrl(UINT64 target);
+    UINT64  GetBrlTarget() const;
+    VOID    SetBrlTarget(UINT64 target);
+    VOID    SetBrlImm(UINT64 imm);
+    UINT64  GetBrlImm() const;
+
+    UINT64  GetMovlGp() const;
+    VOID    SetMovlGp(UINT64 gp);
+
+    VOID    SetStop();
+
+    UINT    Copy(_Out_ DETOUR_IA64_BUNDLE *pDst, _Inout_opt_ DETOUR_IA64_BUNDLE* pBundleExtra = NULL) const;
+};
+#endif // DETOURS_IA64
+
+#ifdef DETOURS_ARM
+
+#define DETOURS_PFUNC_TO_PBYTE(p)  ((PBYTE)(((ULONG_PTR)(p)) & ~(ULONG_PTR)1))
+#define DETOURS_PBYTE_TO_PFUNC(p)  ((PBYTE)(((ULONG_PTR)(p)) | (ULONG_PTR)1))
+
+#endif // DETOURS_ARM
+
+//////////////////////////////////////////////////////////////////////////////
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+#define DETOUR_OFFLINE_LIBRARY(x)                                       \
+PVOID WINAPI DetourCopyInstruction##x(_In_opt_ PVOID pDst,              \
+                                      _Inout_opt_ PVOID *ppDstPool,     \
+                                      _In_ PVOID pSrc,                  \
+                                      _Out_opt_ PVOID *ppTarget,        \
+                                      _Out_opt_ LONG *plExtra);         \
+                                                                        \
+BOOL WINAPI DetourSetCodeModule##x(_In_ HMODULE hModule,                \
+                                   _In_ BOOL fLimitReferencesToModule); \
+
+DETOUR_OFFLINE_LIBRARY(X86)
+DETOUR_OFFLINE_LIBRARY(X64)
+DETOUR_OFFLINE_LIBRARY(ARM)
+DETOUR_OFFLINE_LIBRARY(ARM64)
+DETOUR_OFFLINE_LIBRARY(IA64)
+
+#undef DETOUR_OFFLINE_LIBRARY
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Helpers for manipulating page protection.
+//
+
+_Success_(return != FALSE)
+BOOL WINAPI DetourVirtualProtectSameExecuteEx(_In_  HANDLE hProcess,
+                                              _In_  PVOID pAddress,
+                                              _In_  SIZE_T nSize,
+                                              _In_  DWORD dwNewProtect,
+                                              _Out_ PDWORD pdwOldProtect);
+
+_Success_(return != FALSE)
+BOOL WINAPI DetourVirtualProtectSameExecute(_In_  PVOID pAddress,
+                                            _In_  SIZE_T nSize,
+                                            _In_  DWORD dwNewProtect,
+                                            _Out_ PDWORD pdwOldProtect);
+
+// Detours must depend only on kernel32.lib, so we cannot use IsEqualGUID
+BOOL WINAPI DetourAreSameGuid(_In_ REFGUID left, _In_ REFGUID right);
+#ifdef __cplusplus
+}
+#endif // __cplusplus
+
+//////////////////////////////////////////////////////////////////////////////
+
+#define MM_ALLOCATION_GRANULARITY 0x10000
+
+//////////////////////////////////////////////////////////////////////////////
+
+#endif // DETOURS_INTERNAL
+#endif // __cplusplus
+
+#endif // _DETOURS_H_
+//
+////////////////////////////////////////////////////////////////  End of File.
+
+```
+
+`external/detours/include/detver.h`:
+
+```h
+//////////////////////////////////////////////////////////////////////////////
+//
+//  Common version parameters.
+//
+//  Microsoft Research Detours Package, Version 4.0.1
+//
+//  Copyright (c) Microsoft Corporation.  All rights reserved.
+//
+
+#define _USING_V110_SDK71_ 1
+#include "winver.h"
+#if 0
+#include <windows.h>
+#include <detours.h>
+#else
+#ifndef DETOURS_STRINGIFY
+#define DETOURS_STRINGIFY_(x)    #x
+#define DETOURS_STRINGIFY(x)    DETOURS_STRINGIFY_(x)
+#endif
+
+#define VER_FILEFLAGSMASK   0x3fL
+#define VER_FILEFLAGS       0x0L
+#define VER_FILEOS          0x00040004L
+#define VER_FILETYPE        0x00000002L
+#define VER_FILESUBTYPE     0x00000000L
+#endif
+#define VER_DETOURS_BITS    DETOURS_STRINGIFY(DETOURS_BITS)
+
+```
+
+`external/detours/include/syelog.h`:
+
+```h
+//////////////////////////////////////////////////////////////////////////////
+//
+//  Detours Test Program (syelog.h of syelog.lib)
+//
+//  Microsoft Research Detours Package
+//
+//  Copyright (c) Microsoft Corporation.  All rights reserved.
+//
+#pragma once
+#ifndef _SYELOGD_H_
+#define _SYELOGD_H_
+#include <stdarg.h>
+
+#pragma pack(push, 1)
+#pragma warning(push)
+#pragma warning(disable: 4200)
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//
+#define SYELOG_PIPE_NAMEA       "\\\\.\\pipe\\syelog"
+#define SYELOG_PIPE_NAMEW       L"\\\\.\\pipe\\syelog"
+#ifdef UNICODE
+#define SYELOG_PIPE_NAME        SYELOG_PIPE_NAMEW
+#else
+#define SYELOG_PIPE_NAME        SYELOG_PIPE_NAMEA
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
+//
+#define SYELOG_MAXIMUM_MESSAGE  4086    // 4096 - sizeof(header stuff)
+
+typedef struct _SYELOG_MESSAGE
+{
+    USHORT      nBytes;
+    BYTE        nFacility;
+    BYTE        nSeverity;
+    DWORD       nProcessId;
+    FILETIME    ftOccurance;
+    BOOL        fTerminate;
+    CHAR        szMessage[SYELOG_MAXIMUM_MESSAGE];
+} SYELOG_MESSAGE, *PSYELOG_MESSAGE;
+
+
+// Facility Codes.
+//
+#define SYELOG_FACILITY_KERNEL          0x10            // OS Kernel
+#define SYELOG_FACILITY_SECURITY        0x20            // OS Security
+#define SYELOG_FACILITY_LOGGING         0x30            // OS Logging-internal
+#define SYELOG_FACILITY_SERVICE         0x40            // User-mode system daemon
+#define SYELOG_FACILITY_APPLICATION     0x50            // User-mode application
+#define SYELOG_FACILITY_USER            0x60            // User self-generated.
+#define SYELOG_FACILITY_LOCAL0          0x70            // Locally defined.
+#define SYELOG_FACILITY_LOCAL1          0x71            // Locally defined.
+#define SYELOG_FACILITY_LOCAL2          0x72            // Locally defined.
+#define SYELOG_FACILITY_LOCAL3          0x73            // Locally defined.
+#define SYELOG_FACILITY_LOCAL4          0x74            // Locally defined.
+#define SYELOG_FACILITY_LOCAL5          0x75            // Locally defined.
+#define SYELOG_FACILITY_LOCAL6          0x76            // Locally defined.
+#define SYELOG_FACILITY_LOCAL7          0x77            // Locally defined.
+#define SYELOG_FACILITY_LOCAL8          0x78            // Locally defined.
+#define SYELOG_FACILITY_LOCAL9          0x79            // Locally defined.
+
+// Severity Codes.
+//
+#define SYELOG_SEVERITY_FATAL           0x00            // System is dead.
+#define SYELOG_SEVERITY_ALERT           0x10            // Take action immediately.
+#define SYELOG_SEVERITY_CRITICAL        0x20            // Critical condition.
+#define SYELOG_SEVERITY_ERROR           0x30            // Error
+#define SYELOG_SEVERITY_WARNING         0x40            // Warning
+#define SYELOG_SEVERITY_NOTICE          0x50            // Significant condition.
+#define SYELOG_SEVERITY_INFORMATION     0x60            // Informational
+#define SYELOG_SEVERITY_AUDIT_FAIL      0x66            // Audit Failed
+#define SYELOG_SEVERITY_AUDIT_PASS      0x67            // Audit Succeeeded
+#define SYELOG_SEVERITY_DEBUG           0x70            // Debugging
+
+// Logging Functions.
+//
+VOID SyelogOpen(PCSTR pszIdentifier, BYTE nFacility);
+VOID Syelog(BYTE nSeverity, PCSTR pszMsgf, ...);
+VOID SyelogV(BYTE nSeverity, PCSTR pszMsgf, va_list args);
+VOID SyelogClose(BOOL fTerminate);
+
+#pragma warning(pop)
+#pragma pack(pop)
+
+#endif //  _SYELOGD_H_
+//
+///////////////////////////////////////////////////////////////// End of File.
+
+```
+
+`src/Config.h`:
+
+```h
+#pragma once
+
+#include "pch.h"
+
+// User-facing settings of the template.
+namespace Config
+{
+	constexpr WPARAM kToggleMenuKey = VK_INSERT; // Show / hide the menu.
+	constexpr WPARAM kUnloadKey = VK_END;        // Unhook everything and unload the DLL.
+}
+
+```
+
+`src/d3d9/VTable.cpp`:
+
+```cpp
+#include "VTable.h"
+
+// Dummy device technique: https://guidedhacking.com/threads/get-direct3d9-and-direct3d11-devices-dummy-device-method.11867/
+// A private hidden window is used so we never depend on the window of the host process.
+
+namespace
+{
+	constexpr wchar_t kDummyClassName[] = L"D3D9HookImGuiDummyWindow";
+
+	struct DummyWindow
+	{
+		HINSTANCE instance = GetModuleHandleW(nullptr);
+		HWND handle = nullptr;
+
+		DummyWindow()
+		{
+			WNDCLASSEXW wc = { sizeof(wc) };
+			wc.lpfnWndProc = DefWindowProcW;
+			wc.hInstance = instance;
+			wc.lpszClassName = kDummyClassName;
+			RegisterClassExW(&wc);
+
+			handle = CreateWindowExW(0, kDummyClassName, L"", WS_OVERLAPPEDWINDOW, 0, 0, 100, 100, nullptr, nullptr, instance, nullptr);
+		}
+
+		~DummyWindow()
+		{
+			if (handle)
+				DestroyWindow(handle);
+			UnregisterClassW(kDummyClassName, instance);
+		}
+	};
+}
+
+bool D3D9::GetDeviceVTable(DeviceVTable& table)
+{
+	DummyWindow window;
+	if (!window.handle)
+		return false;
+
+	IDirect3D9* pD3D = Direct3DCreate9(D3D_SDK_VERSION);
+	if (!pD3D)
+		return false;
+
+	D3DPRESENT_PARAMETERS d3dpp = {};
+	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	d3dpp.hDeviceWindow = window.handle;
+	d3dpp.Windowed = TRUE;
+
+	IDirect3DDevice9* pDummyDevice = nullptr;
+	const HRESULT hr = pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_NULLREF, window.handle, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &pDummyDevice);
+	pD3D->Release();
+	if (FAILED(hr) || !pDummyDevice)
+		return false;
+
+	const void* const* vtable = *reinterpret_cast<void***>(pDummyDevice);
+	for (size_t i = 0; i < table.size(); ++i)
+		table[i] = const_cast<void*>(vtable[i]);
+
+	pDummyDevice->Release();
+	return true;
+}
+
+```
+
+`src/d3d9/VTable.h`:
+
+```h
+#pragma once
+
+#include "pch.h"
+#include <array>
+
+namespace D3D9
+{
+	// Number of methods of IDirect3DDevice9 (IUnknown included). See docs/Functions.md.
+	constexpr size_t kDeviceVTableSize = 119;
+
+	// Indexes in the IDirect3DDevice9 virtual method table.
+	enum DeviceMethod : size_t
+	{
+		Reset = 16,
+		EndScene = 42,
+	};
+
+	using DeviceVTable = std::array<void*, kDeviceVTableSize>;
+
+	/**
+	    @brief : Retrieve the virtual method table of IDirect3DDevice9 using a dummy device.
+	    @param  table : Receives the function pointers.
+	    @retval : True on success.
+	**/
+	bool GetDeviceVTable(DeviceVTable& table);
+}
+
+```
+
+`src/dllmain.cpp`:
+
+```cpp
+#include "hooks/Hook.h"
+
+namespace
+{
+	DWORD WINAPI MainThread(LPVOID lpParam)
+	{
+		Hook::Install(static_cast<HMODULE>(lpParam));
+		return 0;
+	}
+}
+
+BOOL WINAPI DllMain(const HINSTANCE hinstDLL, const DWORD fdwReason, LPVOID lpReserved)
+{
+	switch (fdwReason)
+	{
+	case DLL_PROCESS_ATTACH:
+		DisableThreadLibraryCalls(hinstDLL);
+		if (HANDLE thread = CreateThread(nullptr, 0, MainThread, hinstDLL, 0, nullptr))
+			CloseHandle(thread);
+		break;
+
+	case DLL_PROCESS_DETACH:
+		// lpReserved != nullptr: the process is terminating, nothing to clean up.
+		if (!lpReserved)
+			Hook::Uninstall();
+		break;
+	}
+
+	return TRUE;
+}
+
+```
+
+`src/hooks/Detour.h`:
+
+```h
+#pragma once
+
+#include "pch.h"
+#include "detours.h"
+
+namespace Detour
+{
+	/**
+	    @brief : RAII wrapper around a Detours transaction. The transaction is aborted
+	             automatically if Commit() has not been called.
+	**/
+	class Transaction
+	{
+	public:
+		Transaction()
+		{
+			m_active = DetourTransactionBegin() == NO_ERROR;
+			if (m_active)
+				DetourUpdateThread(GetCurrentThread());
+		}
+
+		~Transaction()
+		{
+			if (m_active)
+				DetourTransactionAbort();
+		}
+
+		Transaction(const Transaction&) = delete;
+		Transaction& operator=(const Transaction&) = delete;
+
+		/** @brief : Hook `target` (updated to point to the trampoline) with `hook`. **/
+		template <typename Fn>
+		bool Attach(Fn& target, Fn hook)
+		{
+			return m_active && DetourAttach(reinterpret_cast<PVOID*>(&target), reinterpret_cast<PVOID>(hook)) == NO_ERROR;
+		}
+
+		/** @brief : Remove `hook` from `target`. **/
+		template <typename Fn>
+		bool Detach(Fn& target, Fn hook)
+		{
+			return m_active && DetourDetach(reinterpret_cast<PVOID*>(&target), reinterpret_cast<PVOID>(hook)) == NO_ERROR;
+		}
+
+		bool Commit()
+		{
+			if (!m_active)
+				return false;
+			m_active = false;
+			return DetourTransactionCommit() == NO_ERROR;
+		}
+
+	private:
+		bool m_active = false;
+	};
+}
+
+```
+
+`src/hooks/Hook.cpp`:
+
+```cpp
+#include "Hook.h"
+#include "Detour.h"
+#include "d3d9/VTable.h"
+#include "input/Input.h"
+#include "ui/Menu.h"
+#include <atomic>
+
+namespace
+{
+	using tEndScene = HRESULT(APIENTRY*)(LPDIRECT3DDEVICE9 pDevice);
+	using tReset = HRESULT(APIENTRY*)(LPDIRECT3DDEVICE9 pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
+
+	tEndScene oEndScene = nullptr; // Original EndScene (trampoline once hooked).
+	tReset oReset = nullptr;       // Original Reset (trampoline once hooked).
+	HMODULE g_module = nullptr;
+
+	std::atomic<bool> g_installed = false;
+	std::atomic<bool> g_unloadRequested = false;
+	std::atomic<bool> g_tornDown = false;
+
+	HRESULT APIENTRY hkEndScene(LPDIRECT3DDEVICE9 pDevice);
+	HRESULT APIENTRY hkReset(LPDIRECT3DDEVICE9 pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
+
+	/** @brief : Release ImGui and restore the window procedure. Runs once. **/
+	void TearDownUi()
+	{
+		if (g_tornDown.exchange(true))
+			return;
+
+		Input::Uninstall();
+		Menu::Shutdown();
+	}
+
+	/** @brief : Remove the detours. Runs once. **/
+	void DetachHooks()
+	{
+		if (!g_installed.exchange(false))
+			return;
+
+		Detour::Transaction transaction;
+		transaction.Detach(oEndScene, hkEndScene);
+		transaction.Detach(oReset, hkReset);
+		transaction.Commit();
+	}
+
+	/** @brief : Detach the hooks, give in-flight calls time to leave them, then free the DLL. **/
+	DWORD WINAPI UnloadThread(LPVOID)
+	{
+		DetachHooks();
+		Sleep(200);
+		FreeLibraryAndExitThread(g_module, 0);
+	}
+
+	bool InitUi(IDirect3DDevice9* pDevice)
+	{
+		D3DDEVICE_CREATION_PARAMETERS params = {};
+		if (FAILED(pDevice->GetCreationParameters(&params)) || !params.hFocusWindow)
+			return false;
+
+		if (!Menu::Init(pDevice, params.hFocusWindow))
+			return false;
+
+		if (!Input::Install(params.hFocusWindow))
+		{
+			Menu::Shutdown();
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	    @brief : Hook of IDirect3DDevice9::EndScene.
+	    @param  pDevice : Current Direct3D9 Device Object.
+	    @retval : Result of the original EndScene function.
+	**/
+	HRESULT APIENTRY hkEndScene(const LPDIRECT3DDEVICE9 pDevice)
+	{
+		if (g_unloadRequested)
+		{
+			// First frame after the request: tear down on the render thread, then free the DLL.
+			if (!g_tornDown)
+			{
+				TearDownUi();
+				if (HANDLE thread = CreateThread(nullptr, 0, UnloadThread, nullptr, 0, nullptr))
+					CloseHandle(thread);
+			}
+			return oEndScene(pDevice);
+		}
+
+		if (!Menu::IsInitialized() && !InitUi(pDevice))
+			return oEndScene(pDevice);
+
+		Menu::Render();
+		return oEndScene(pDevice);
+	}
+
+	/**
+	    @brief : Hook of IDirect3DDevice9::Reset, to handle resize / fullscreen changes.
+	    @retval : Result of the original Reset function.
+	**/
+	HRESULT APIENTRY hkReset(const LPDIRECT3DDEVICE9 pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
+	{
+		Menu::OnDeviceLost();
+		const HRESULT hr = oReset(pDevice, pPresentationParameters);
+		if (SUCCEEDED(hr))
+			Menu::OnDeviceReset();
+		return hr;
+	}
+}
+
+bool Hook::Install(const HMODULE hModule)
+{
+	if (g_installed)
+		return true;
+
+	D3D9::DeviceVTable vtable;
+	if (!D3D9::GetDeviceVTable(vtable))
+		return false;
+
+	g_module = hModule;
+	oEndScene = reinterpret_cast<tEndScene>(vtable[D3D9::EndScene]);
+	oReset = reinterpret_cast<tReset>(vtable[D3D9::Reset]);
+
+	Detour::Transaction transaction;
+	if (!transaction.Attach(oEndScene, hkEndScene) || !transaction.Attach(oReset, hkReset) || !transaction.Commit())
+		return false;
+
+	g_installed = true;
+	return true;
+}
+
+void Hook::Uninstall()
+{
+	g_unloadRequested = true;
+	TearDownUi();
+	DetachHooks();
+}
+
+void Hook::RequestUnload()
+{
+	g_unloadRequested = true;
+}
+
+```
+
+`src/hooks/Hook.h`:
+
+```h
+#pragma once
+
+#include "pch.h"
+
+namespace Hook
+{
+	/** @brief : Hook IDirect3DDevice9::EndScene and ::Reset. Can be called from any thread. **/
+	bool Install(HMODULE hModule);
+
+	/** @brief : Remove every hook and release ImGui. Idempotent. **/
+	void Uninstall();
+
+	/**
+	    @brief : Ask for the DLL to unload itself. The actual teardown happens on the render
+	             thread (next EndScene) and the library is freed from a helper thread.
+	**/
+	void RequestUnload();
+}
+
+```
+
+`src/input/Input.cpp`:
+
+```cpp
+#include "Input.h"
+#include "Config.h"
+#include "hooks/Hook.h"
+#include "ui/Menu.h"
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+namespace
+{
+	HWND g_window = nullptr;
+	WNDPROC g_originalWndProc = nullptr;
+
+	bool IsMouseMessage(const UINT msg)
+	{
+		return msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST;
+	}
+
+	bool IsKeyboardMessage(const UINT msg)
+	{
+		return msg >= WM_KEYFIRST && msg <= WM_KEYLAST;
+	}
+
+	LRESULT CALLBACK WndProc(const HWND hWnd, const UINT msg, const WPARAM wParam, const LPARAM lParam)
+	{
+		// Hotkeys (ignore auto-repeat).
+		if (msg == WM_KEYDOWN && (lParam & (1 << 30)) == 0)
+		{
+			if (wParam == Config::kToggleMenuKey)
+				Menu::ToggleVisible();
+			else if (wParam == Config::kUnloadKey)
+				Hook::RequestUnload();
+		}
+
+		if (Menu::IsInitialized() && Menu::IsVisible())
+		{
+			ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
+
+			// Only swallow the input ImGui wants, everything else reaches the host application.
+			const ImGuiIO& io = ImGui::GetIO();
+			if ((io.WantCaptureMouse && IsMouseMessage(msg)) || (io.WantCaptureKeyboard && IsKeyboardMessage(msg)))
+				return 0;
+		}
+
+		return CallWindowProc(g_originalWndProc, hWnd, msg, wParam, lParam);
+	}
+}
+
+bool Input::Install(const HWND window)
+{
+	if (g_originalWndProc || !window)
+		return false;
+
+	g_window = window;
+	g_originalWndProc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
+	return g_originalWndProc != nullptr;
+}
+
+void Input::Uninstall()
+{
+	if (!g_originalWndProc)
+		return;
+
+	SetWindowLongPtr(g_window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(g_originalWndProc));
+	g_originalWndProc = nullptr;
+	g_window = nullptr;
+}
+
+```
+
+`src/input/Input.h`:
+
+```h
+#pragma once
+
+#include "pch.h"
+
+namespace Input
+{
+	/** @brief : Subclass the window procedure of `window` to feed ImGui and handle the hotkeys. **/
+	bool Install(HWND window);
+
+	/** @brief : Restore the original window procedure. **/
+	void Uninstall();
+}
+
+```
+
+`src/pch.h`:
+
+```h
+#pragma once
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <Windows.h>
+#include <d3d9.h>
+
+#include "imgui.h"
+#include "backends/imgui_impl_dx9.h"
+#include "backends/imgui_impl_win32.h"
+
+```
+
+`src/ui/Menu.cpp`:
+
+```cpp
+#include "Menu.h"
+
+namespace
+{
+	bool g_initialized = false;
+	bool g_visible = true;
+
+	// ---------------------------------------------------------------------
+	// Edit this function to build your own menu.
+	// ---------------------------------------------------------------------
+	void DrawWindow()
+	{
+		ImGui::SetNextWindowSize({ 500, 300 }, ImGuiCond_FirstUseEver);
+
+		if (ImGui::Begin("Menu Window Title", &g_visible))
+		{
+			ImGui::Text("Draw your menu here.");
+		}
+		ImGui::End();
+	}
+}
+
+bool Menu::Init(IDirect3DDevice9* pDevice, HWND window)
+{
+	if (g_initialized)
+		return true;
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+
+	ImGuiIO& io = ImGui::GetIO();
+	io.IniFilename = nullptr;
+	io.Fonts->AddFontDefault();
+	ImGui::StyleColorsDark();
+
+	if (!ImGui_ImplWin32_Init(window))
+	{
+		ImGui::DestroyContext();
+		return false;
+	}
+
+	if (!ImGui_ImplDX9_Init(pDevice))
+	{
+		ImGui_ImplWin32_Shutdown();
+		ImGui::DestroyContext();
+		return false;
+	}
+
+	g_initialized = true;
+	return true;
+}
+
+void Menu::Shutdown()
+{
+	if (!g_initialized)
+		return;
+
+	g_initialized = false;
+	ImGui_ImplDX9_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+}
+
+bool Menu::IsInitialized() { return g_initialized; }
+bool Menu::IsVisible() { return g_visible; }
+void Menu::ToggleVisible() { g_visible = !g_visible; }
+
+void Menu::OnDeviceLost()
+{
+	if (g_initialized)
+		ImGui_ImplDX9_InvalidateDeviceObjects();
+}
+
+void Menu::OnDeviceReset()
+{
+	if (g_initialized)
+		ImGui_ImplDX9_CreateDeviceObjects();
+}
+
+void Menu::Render()
+{
+	if (!g_initialized)
+		return;
+
+	ImGui_ImplDX9_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+
+	// Draw the software cursor only while the mouse is over the menu.
+	ImGui::GetIO().MouseDrawCursor = g_visible && ImGui::GetIO().WantCaptureMouse;
+
+	if (g_visible)
+		DrawWindow();
+
+	ImGui::EndFrame();
+	ImGui::Render();
+	ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+}
+
+```
+
+`src/ui/Menu.h`:
+
+```h
+#pragma once
+
+#include "pch.h"
+
+namespace Menu
+{
+	/** @brief : Create the ImGui context and its Win32 / DX9 backends. **/
+	bool Init(IDirect3DDevice9* pDevice, HWND window);
+
+	/** @brief : Destroy the ImGui context and backends. Safe to call if not initialized. **/
+	void Shutdown();
+
+	bool IsInitialized();
+	bool IsVisible();
+	void ToggleVisible();
+
+	/** @brief : Release / recreate the device objects around IDirect3DDevice9::Reset. **/
+	void OnDeviceLost();
+	void OnDeviceReset();
+
+	/** @brief : Build and render one ImGui frame. Call once per EndScene. **/
+	void Render();
+}
+
+```
