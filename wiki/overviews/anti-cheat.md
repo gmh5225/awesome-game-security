@@ -788,6 +788,7 @@ sources:
   - wiki/sources/descriptions/Kiyogitpy__wardogs-data-docs.md
   - wiki/sources/descriptions/guided-hacking__GuidedHacking-Injector.md
   - wiki/sources/descriptions/tingwei1111__maplestory-worlds-automation.md
+  - wiki/sources/descriptions/tieqianhao__raven.md
   - wiki/sources/descriptions/thesecretclub__CVEAC-2020.md
   - wiki/sources/descriptions/thexin7__kernel-cve-analysis.md
   - wiki/sources/descriptions/vul-os__magnetite.md
@@ -1148,6 +1149,8 @@ Client-side **loader + subscription update** narratives (rapid refresh after sig
 [[game-cheating-exploit-detection-agent-skill]] (dungnotnull; Python) pairs a Claude Code skill with a six-step executable engine—statistical and invariant detectors for aimbots, wallhacks, macros, memory tampering, and economy/duplication exploits—plus CI-verifiable harnesses, telemetry ingestion, quality gates, and a self-updating knowledge base from academic/domain crawls for structured decision support. (source: wiki/sources/descriptions/dungnotnull__game-cheating-exploit-detection-agent-skill.md)
 
 [[anti-cheating-assistant]] (jshdcn; Markdown skills + Python helpers) guides **business risk-control and anti-fraud** consulting: three-flow graph modeling of roles/carriers, underground-slang lexicon sync for fraud investigations, risk-catalog mapping, and domain playbooks (account, mobile, transaction, marketing, content, financial security)—repeatable control design for online businesses and economies, not live AC telemetry. (source: wiki/sources/descriptions/jshdcn__anti-cheating-assistant.md)
+
+[[raven]] (tieqianhao; Python + browser JS demo; CPU-only NumPy/Pillow) is a reproducible **community content risk** engine for game/ACG black-market spam—cheat sales, boosting, account trades, off-platform solicitation—via traceable adversarial-text normalization, character n-gram + SGD logistic regression, rule fusion with tiered enforcement, and optional ELA/noise-residual/JPEG-ghost image forensics; offline synthetic-data through simulation pipeline for trust-and-safety and obfuscation-evasion study, not in-client AC. (source: wiki/sources/descriptions/tieqianhao__raven.md)
 
 Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots440; Node.js/Express; R6Data API K/D/headshot/win-rate heuristics with historical snapshot comparison and sample-size weighting; community integrity leads—not enforcement verdicts) illustrates third-party statistical anomaly scoring beside kernel AC under [[battleye]]. (source: wiki/sources/descriptions/baldspots440__R6Intel.md)
 

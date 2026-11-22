@@ -3498,6 +3498,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r3d](entities/r3d.md) — C/C++ 3D rendering extension for raylib (PBR, deferred/forward, shadow mapping, SSAO, bloom, decals, skeletal animation, particles; OpenGL pipeline; Game Engine / source)
 - [raytracing](entities/raytracing.md) — CUDA mesh ray tracing with BVH + PyTorch bindings (ashawkey; RayTracer)
 - [raybot-zero](entities/raybot-zero.md) — kernel-mode CS:GO cheat; C++ driver + C# loader; triggerbot, bunnyhop, glow, kernel key-state reads; no traditional usermode controller (R4YVEN; Kernel-mode)
+- [raven](entities/raven.md) — CPU-only community content risk engine (tieqianhao; Python; adversarial text normalization + char n-gram SGD logistic regression; cheat/boost/account-trade spam; ELA/JPEG-ghost image forensics; game/ACG trust and safety)
 - [ravengine](entities/ravengine.md) — modern C++ ECS game engine (Vulkan via RGL; GameNetworkingSockets; CMake cross-platform; input/GUI/audio + resource packing; C++ 3D)
 - [raival-file-explorer](entities/raival-file-explorer.md) — lightweight Kotlin/Java Material 3 Android file manager (multi-tab, task handling, code editor, deep content search; Gradle baseline; Cheat Android File Explorer; Raival-e; slug disambiguated from [[file-explorer]])
 - [railroader-cheat-menu](entities/railroader-cheat-menu.md) — Railroader 0.6.x Experimental host-only Unity IMGUI debug/cheat mod (C# official modding contract; economy/damage/wear/session tools; optional HarmonyLib physics patches; Sylvrwynd; cheat / Unity modding)
