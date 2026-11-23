@@ -2150,6 +2150,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PS2 Port Engine](entities/ps2-port-engine.md) — danielgomesvieira2000; verified PS2 decomp toolchain + native PC port runtime (ps2decomp ELF/disc, R5900/VU lift + R5900 interpreter difftest; C++17 EE/IOP/DMA/SPU2/VIF/VU host; Vulkan GS + SDL3; user-owned disc images; Cheat / RE Tools)
 - [spu2c](entities/spu2c.md) — IDA Python plugin: PS3 Cell SPU opcode C-style annotation (vector lanes; shuffle masks; function scan; firmware/library/anti-cheat RE)
 - [ida-jm-xorstr-decrypt-plugin](entities/ida-jm-xorstr-decrypt-plugin.md) — IDA Pro JM Xorstr decrypt (x64; Python)
+- [IDA Junk Remover](entities/ida-junk-remover.md) — b2tmy; Python IDAPython plugin; auto-detect/repair junk-code obfuscation (overlapping insns, mid-jump landings, call-pop EIP); dry-run; x86; IDA 7.4–9.x; IDB rebuild; cheat / IDA Plugins
 - [ida-gameguard-str-dec](entities/ida-gameguard-str-dec.md) — IDA Pro nProtect GameGuard string decrypt (Python; modding; cheat / IDA Plugins; crtdll)
 - [SpiritIDAPlugin](entities/spirit-ida-plugin.md) — IDA Pro MapleStory packet analysis (Python IDAPython; structure/header extraction, function output, text export; protocol RE; Bratah123; cheat / IDA Plugins)
 - [Spirit-PTCGO](entities/spirit-ptcgo.md) — Python PTCGO private-server emulator (card rules/effects, account/inventory/economy, versus/tournaments, protobuf client protocol, bundle RE helpers, nginx/Caddy deploy; Bratah123; Private Server / game:ptcgo)
