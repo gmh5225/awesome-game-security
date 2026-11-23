@@ -1,0 +1,3628 @@
+Project Path: arc_KiZakiXD_NZeyMod-Manager_evi1u030
+
+Source Tree:
+
+```txt
+arc_KiZakiXD_NZeyMod-Manager_evi1u030
+├── README.md
+├── android
+│   ├── BUILD.md
+│   ├── app
+│   │   └── src
+│   │       └── main
+│   │           ├── AndroidManifest.xml
+│   │           ├── java
+│   │           │   └── com
+│   │           │       └── kizakixd
+│   │           │           └── nzeymodmanager
+│   │           │               └── MainActivity.java
+│   │           └── res
+│   │               ├── layout
+│   │               │   └── activity_main.xml
+│   │               ├── mipmap-hdpi
+│   │               ├── mipmap-mdpi
+│   │               ├── mipmap-xhdpi
+│   │               ├── mipmap-xxhdpi
+│   │               ├── mipmap-xxxhdpi
+│   │               └── values
+│   │                   ├── strings.xml
+│   │                   └── themes.xml
+│   └── build-manual.sh
+├── docs
+│   ├── batasan.md
+│   ├── fixes.md
+│   └── panduan.md
+├── prototype
+│   ├── index.html
+│   ├── manifest.webmanifest
+│   └── sw.js
+└── rom-fixes
+    ├── README.md
+    ├── config.prop
+    ├── join.sh
+    ├── nzeymod-fixed.patch
+    └── operators.txt
+
+```
+
+`README.md`:
+
+```md
+# NZeyMod Launcher
+
+> Launcher untuk ROM NZeyMod (Virtual Master Android 11, identitas Pixel 5).
+> Memilih ROM utuh dari penyimpanan, memverifikasi SHA-256, menyiapkan
+> impor ke NZey Master, lalu meluncurkan NZey Master — tanpa Virtual Master
+> premium. Menggabungkan part ROM, mengacak identitas, mengatur profil
+> Magisk, dan mengganti keybox tetap tersedia.
+
+**Status: Dalam Tahap Pengembangan — Beta Tester**
+
+Proyek ini masih dalam tahap pengembangan. Fitur, tampilan, dan performa
+dapat berubah. Laporan bug dan hasil pengujian sangat membantu pengembangan
+selanjutnya.
+
+## Penting: Launcher ini BUKAN mesin virtual
+
+NZeyMod Launcher **bukan** pengganti Virtual Master dan **bukan** emulator
+Android di dalam HP. Menjalankan Android 11 di dalam HP membutuhkan
+hypervisor / emulator, dan itu tidak dapat dibangun menjadi satu APK
+dalam sekali jalan. Mesin yang menjalankan ROM adalah **NZey Master**
+(Virtual Master 3.2.68 remake, VIP sudah di-patch).
+
+Yang dilakukan Launcher:
+
+1. **Jalankan ROM (ROM utuh) — fitur utama v2** — memilih berkas ROM utuh
+   (sekitar 405 MB) dari **folder mana pun di penyimpanan** melalui
+   file picker. Nama berkas dan folder sumber bebas — verifikasi
+   berdasarkan isi berkas (SHA-256), bukan nama berkas.
+   SHA-256 dan membandingkannya dengan hash resmi
+   `1d8e0031a1076b4de7192274fb156a7ab88c97f1eb3b4bf3be98adf2e65c364c`.
+   Bila hash tidak cocok, impor ditolak: kemungkinan berkas corrupt,
+   bukan ROM NZeyMod utuh, atau masih berupa bagian terpisah.
+   Bila lolos, Launcher menyalin berkas ke folder `NZeyMod/` dan
+   menampilkan langkah impor, lalu meluncurkan NZey Master.
+2. **Impor di NZey Master** — buka NZey Master, tap tombol **+**, tap
+   titik tiga, pilih **Import Local ROM**, pilih berkas ROM dari folder
+   `NZeyMod/`, tunggu instalasi selesai, lalu jalankan VM.
+3. **Gabung ROM (opsional)** — menggabungkan 5 part ROM (masing-masing
+   ≤ 90 MB, total ± 405 MB) menjadi satu file utuh. Hanya diperlukan bila
+   yang dimiliki masih berupa bagian terpisah, bukan ROM utuh.
+4. **Acak identitas** — membuat identitas perangkat baru (Pixel 5 /
+   redfin) dan menyimpan / memulihkan profil.
+5. **Profil Magisk** — mengatur modul Magisk ON / OFF per profil
+   (Zygisk Next, Play Integrity Fork, Shamiko, LSPosed, Tricky Store).
+6. **Ganti keybox** — mengganti keybox dan memeriksa masa berlakunya.
+7. **Buka NZey Master** — meluncurkan paket baru `com.kizakixd.nzeymaster`
+   (hasil repackage v2.1-beta, dapat terpasang berdampingan dengan
+   Virtual Master lama tanpa uninstall). Bila paket baru belum terpasang,
+   Launcher mencoba paket lama `com.clone.android.dual.space` sebagai
+   fallback. Bila keduanya belum terpasang, Launcher mengarahkan ke
+   `NZeyMaster-nzey.apk` hasil repackage (± 139 MB, SHA-256
+   `224083a8cd2920f67d9c8a67a9f6746afa62820a218d9cb5f7174760a46bb55c`).
+   APK paket lama (± 145 MB, SHA-256
+   `2d70516e1f7bd85ca105341b8bd13760fe7484d6b1983e0446a436253d90c602`)
+   hanya dipakai sebagai fallback dan tetap memerlukan uninstall
+   Virtual Master lama terlebih dahulu, karena tanda tangannya berbeda.
+
+NZeyMod Launcher adalah aplikasi pendamping untuk ROM NZeyMod dari
+repositori `KiZakiXD/nzeymod-rom` (repositori privat). ROM ini hanya
+dapat dijalankan oleh mesin Virtual Master / NZey Master, bukan oleh
+QEMU, Vectras, DroidVM, atau VineOS — format ROM-nya khusus Virtual
+Master.
+
+## Catatan Penting
+
+- Keybox yang ada di repositori saat ini hanya ECDSA dan **kedaluwarsa
+  28 November 2026**. Keybox pengganti perlu disiapkan sebelum tanggal
+  tersebut, jika tidak Play Integrity akan bermasalah.
+- Play Integrity STRONG tidak dapat dijamin di virtual machine mana pun.
+  Hal ini sudah ditulis di README repositori ROM.
+- Modul Magisk dan keybox **tidak ada** di dalam repositori, hanya
+  daftar dan hash-nya di `docs/modules-report.md`. Launcher meminta file
+  tersebut diimpor, bukan menganggap file tersebut sudah ada.
+- Dua ketidakcocokan di repositori sudah diperbaiki di Launcher ini,
+  lihat `docs/fixes.md`.
+
+## APK yang sudah dibangun
+
+### v2.1-beta (terbaru)
+
+- `NZeyMod-Manager-v2.1-beta.apk` — 46.375 byte (46 KB), paket
+  `com.kizakixd.nzeymodmanager`, versi 2.1-beta (versionCode 3), minSdk 26,
+  targetSdk 34, label NZeyMod Launcher.
+- SHA-256: `ec47c87d6e3a6e3846dd58be01b6ea669863886f913ddd42bba8e4a4b1978da4`
+- Terverifikasi dengan `apksigner verify`: skema v2 dan v3, 1 penanda tangan.
+- Perubahan utama: Launcher meluncurkan NZey Master paket baru
+  `com.kizakixd.nzeymaster` (hasil repackage, lihat `nzeymaster/REPACK.md`),
+  dengan fallback ke paket lama `com.clone.android.dual.space`.
+- NZey Master hasil repackage: `NZeyMaster-nzey.apk` — 144.895.840 byte
+  (139 MB), paket `com.kizakixd.nzeymaster`, versi 3.2.68 (versionCode 3268),
+  SHA-256 `224083a8cd2920f67d9c8a67a9f6746afa62820a218d9cb5f7174760a46bb55c`,
+  `apksigner verify` lolos v1/v2/v3. APK asli 151.323.409 byte (145 MB),
+  SHA-256 `2d70516e1f7bd85ca105341b8bd13760fe7484d6b1983e0446a436253d90c602`.
+  Yang dibuang hanya lib `armeabi-v7a` (13,8 MB, tidak dipakai POCO X7 Pro
+  arm64); string path paket lama di native lib `libkr*.so` di-patch ke
+  paket baru. Patch VIP dan rebranding NZey Master dipertahankan
+  (tidak ada smali yang diubah).
+- **Keduanya belum diuji di perangkat fisik** — hanya verifikasi statis.
+  Rename package dapat merusak login server / cloud sync / provider
+  Virtual Master, jadi wajib dites di HP sebelum dipakai rutin.
+
+### v2.0-beta
+
+- `NZeyMod-Manager-v2.0-beta.apk` — 46.375 byte (46 KB), paket
+  `com.kizakixd.nzeymodmanager`, versi 2.0-beta (versionCode 2), minSdk 26,
+  targetSdk 34, label NZeyMod Launcher.
+- SHA-256: `4ace99669148f2c608322c44d636963026c8193b33ce507ce8cda5072c62360e`
+- Terverifikasi dengan `apksigner verify`: skema v2 dan v3, 1 penanda tangan.
+  `aapt2 dump badging` mengonfirmasi paket, versi, dan SDK di atas.
+- APK ini **belum diuji di perangkat fisik**. Pengujian yang dilakukan baru
+  berupa verifikasi statis dan pengujian logika identitas (1.000 IMEI acak:
+  semuanya 15 digit, TAC valid, dan lolos Luhn; vektor Luhn yang dikenal
+  `490154203237518` terverifikasi).
+
+### v1.0-beta
+
+- `NZeyMod-Manager-debug.apk` — 42 KB, paket `com.kizakixd.nzeymodmanager`,
+  versi 1.0-beta (versionCode 1), minSdk 26, targetSdk 34.
+- SHA-256: `d6e6f82587eab4920fb1c245bdc1cc3a0ae110c5dd566aaf8925d6009e5acec4`
+- Terverifikasi dengan `apksigner verify`: skema v2 dan v3, 1 penanda tangan.
+
+## Mencoba v2.1-beta
+
+1. Salin APK ke HP (POCO X7 Pro).
+2. Di HP, izinkan instalasi dari sumber tidak dikenal.
+3. Buka APK, izinkan akses penyimpanan saat diminta.
+4. Di bagian Jalankan ROM, pilih ROM utuh dari folder mana pun di
+   penyimpanan (nama berkas bebas, yang penting isinya), tekan
+   **Verifikasi ROM Utuh**, tunggu sampai hasil LOLOS.
+5. Tekan **Siapkan untuk Impor**, lalu tekan **Buka NZey Master**.
+6. Di NZey Master: tap **+**, tap titik tiga, pilih **Import Local ROM**,
+   pilih berkas ROM dari folder `NZeyMod/`, tunggu instalasi selesai,
+   lalu jalankan VM.
+
+Prototipe web dengan fitur yang sama ada di `prototype/index.html`.
+
+Build memakai pipeline manual yang sama dengan Voice-Changer-Beta-Android
+(`android/build-manual.sh`), karena Gradle daemon tidak berjalan di VM ini.
+
+```
+
+`android/BUILD.md`:
+
+```md
+# NZeyMod Launcher — Build Manual
+
+Aplikasi Android native (Java saja, tanpa Gradle, tanpa dependensi eksternal).
+Paket: `com.kizakixd.nzeymodmanager`, label NZeyMod Launcher, minSdk 26,
+targetSdk 34, versionCode 3, versionName 2.1-beta. Launcher v2.1-beta meluncurkan NZey Master paket baru com.kizakixd.nzeymaster (fallback paket lama).
+
+## Prasyarat
+
+- JDK 17 di `$HOME/opt/jdk-17*` (atau set `JAVA_HOME`)
+- Android SDK di `$HOME/Android/sdk` (atau set `ANDROID_HOME`)
+  - build-tools 34.0.0 (`aapt2`, `d8`, `zipalign`, `apksigner`)
+  - platform `android-34` (`android.jar`)
+
+## Build
+
+```bash
+cd ~/workspace/nzeymod-manager/android
+chmod +x build-manual.sh
+./build-manual.sh
+```
+
+Hasil: `app/build/manual/app-debug.apk`
+
+## Alur pipeline
+
+1. `aapt2 compile` — kompilasi resource (`res/`)
+2. `aapt2 link` — gabung APK + hasilkan `R.java`
+3. `javac` — kompilasi `MainActivity.java` + `R.java` terhadap `android.jar`
+4. `d8` — ubah `.class` menjadi `classes.dex`
+5. Tambah `classes.dex` ke APK, lalu `zipalign`
+6. `apksigner` — tanda tangani dengan keystore debug, lalu verifikasi
+
+## Catatan
+
+- Tidak ada Gradle dan tidak ada Kotlin; seluruh sumber hanya memakai
+  API `android.*` dan `java.*` yang tersedia di API 34.
+- Karena tidak ada dependensi androidx, hasil Activity memakai
+  `onActivityResult` / `startActivityForResult` (bukan
+  `registerForActivityResult`, yang berasal dari androidx).
+- Identitas dan profil disimpan di direktori file eksternal aplikasi,
+  `Android/data/com.kizakixd.nzeymodmanager/files/NZeyMod/`.
+- Aplikasi ini BUKAN mesin virtual; aplikasi ini hanya menyiapkan dan
+  mengimpor ROM, lalu meluncurkan NZey Master. ROM berjalan di dalam
+  NZey Master.
+
+```
+
+`android/app/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.kizakixd.nzeymodmanager">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <uses-sdk
+        android:minSdkVersion="26"
+        android:targetSdkVersion="34" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>
+
+```
+
+`android/app/src/main/java/com/kizakixd/nzeymodmanager/MainActivity.java`:
+
+```java
+package com.kizakixd.nzeymodmanager;
+
+import android.app.Activity;
+import android.content.ClipData;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.OpenableColumns;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+/**
+ * NZeyMod Manager — satu Activity, Java saja, tanpa pustaka eksternal.
+ *
+ * Catatan API: registerForActivityResult dan ActivityResultContracts berasal
+ * dari androidx.activity, yang tidak tersedia tanpa dependensi eksternal.
+ * Karena aplikasi ini dibangun tanpa Gradle dan tanpa dependensi, Activity
+ * ini memakai onActivityResult / startActivityForResult secara konsisten
+ * di seluruh bagian (API android.app.Activity, tersedia di API 34).
+ * Metode tersebut memang ditandai deprecated sejak API 30, tetapi tetap
+ * berfungsi dan tetap dapat dikompilasi dengan android.jar API 34.
+ */
+public class MainActivity extends Activity {
+
+    private static final int REQ_PICK_PARTS = 101;
+    private static final int REQ_PICK_OUTPUT = 102;
+    private static final int REQ_PICK_KEYBOX = 103;
+    private static final int REQ_PICK_WHOLE_ROM = 104;
+
+    private static final String EXPECTED_ROM_SHA256 =
+            "1d8e0031a1076b4de7192274fb156a7ab88c97f1eb3b4bf3be98adf2e65c364c";
+    private static final String WHOLE_ROM_FILENAME =
+            "rom_11_0_0_1036_3281_M27_NZeyMod.zip";
+    private static final long WHOLE_ROM_MIN_BYTES = 380L * 1024L * 1024L;
+    private static final long WHOLE_ROM_MAX_BYTES = 430L * 1024L * 1024L;
+    // NZey Master hasil repackage (v2.1-beta): paket baru agar dapat
+    // terpasang berdampingan dengan Virtual Master lama, tanpa uninstall.
+    // Paket lama tetap didukung sebagai fallback.
+    private static final String NZEY_PACKAGE = "com.kizakixd.nzeymaster";
+    private static final String NZEY_PACKAGE_LEGACY = "com.clone.android.dual.space";
+    private static final String NZEY_VERSION = "3.2.68";
+    private static final String NZEY_DOWNLOAD_URL =
+            "https://129.226.154.152.sslip.io/download/NZeyMaster.apk";
+    // SHA-256 NZeyMaster-nzey.apk hasil repackage (139 MB, 144.895.840 byte,
+    // arm64 saja, tanpa lib armeabi-v7a).
+    private static final String NZEY_SHA256 =
+            "224083a8cd2920f67d9c8a67a9f6746afa62820a218d9cb5f7174760a46bb55c";
+    // SHA-256 APK asli (paket lama, 145 MB) — hanya untuk referensi fallback.
+    private static final String NZEY_SHA256_LEGACY =
+            "2d70516e1f7bd85ca105341b8bd13760fe7484d6b1983e0446a436253d90c602";
+
+    private static final String[] IMEI_TACS = {
+            "35254410", "35482510", "35737210"
+    };
+
+    private static final Map<String, String> OPERATORS = new LinkedHashMap<>();
+    static {
+        OPERATORS.put("telkomsel", "51010");
+        OPERATORS.put("indosat", "51021");
+        OPERATORS.put("xl", "51011");
+        OPERATORS.put("axis", "51008");
+        OPERATORS.put("tri", "51089");
+        OPERATORS.put("smartfren", "51009");
+    }
+
+    private static final String[] SU_PATHS = {
+            "/system/bin/su", "/system/xbin/su", "/sbin/su"
+    };
+
+    private final SecureRandom random = new SecureRandom();
+
+    private String currentAndroidId = "";
+    private String currentSerial = "";
+    private String currentImei = "";
+    private String currentOperatorKey = "";
+    private String currentOperatorCode = "";
+
+    private List<Uri> pickedPartUris = new ArrayList<>();
+    private List<String> pickedPartNames = new ArrayList<>();
+    private List<String> profileNames = new ArrayList<>();
+
+    private Uri wholeRomUri = null;
+    private String wholeRomName = "";
+    private long wholeRomSize = 0;
+    private boolean wholeRomVerified = false;
+    private String wholeRomPreparedPath = "";
+
+    private Spinner spinnerOperatorMode;
+    private Spinner spinnerProfiles;
+    private TextView tvAndroidId;
+    private TextView tvSerial;
+    private TextView tvImei;
+    private TextView tvOperator;
+    private TextView tvIdentityPath;
+    private TextView tvProfiles;
+    private TextView tvPartsList;
+    private TextView tvRomProgress;
+    private TextView tvRomResult;
+    private TextView tvWholeRomInfo;
+    private TextView tvWholeRomProgress;
+    private TextView tvWholeRomResult;
+    private TextView tvImportSteps;
+    private TextView tvMagiskStatus;
+    private TextView tvModules;
+    private TextView tvDenyList;
+    private TextView tvKeyboxStatus;
+    private TextView tvLeakResult;
+    private TextView tvNzeyInstalled;
+    private EditText etProfileName;
+    private ProgressBar progressBarRom;
+    private ProgressBar progressBarWholeRom;
+    private Switch switchMagisk;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        spinnerOperatorMode = findViewById(R.id.spinnerOperatorMode);
+        spinnerProfiles = findViewById(R.id.spinnerProfiles);
+        tvAndroidId = findViewById(R.id.tvAndroidId);
+        tvSerial = findViewById(R.id.tvSerial);
+        tvImei = findViewById(R.id.tvImei);
+        tvOperator = findViewById(R.id.tvOperator);
+        tvIdentityPath = findViewById(R.id.tvIdentityPath);
+        tvProfiles = findViewById(R.id.tvProfiles);
+        tvPartsList = findViewById(R.id.tvPartsList);
+        tvRomProgress = findViewById(R.id.tvRomProgress);
+        tvRomResult = findViewById(R.id.tvRomResult);
+        tvWholeRomInfo = findViewById(R.id.tvWholeRomInfo);
+        tvWholeRomProgress = findViewById(R.id.tvWholeRomProgress);
+        tvWholeRomResult = findViewById(R.id.tvWholeRomResult);
+        tvImportSteps = findViewById(R.id.tvImportSteps);
+        tvMagiskStatus = findViewById(R.id.tvMagiskStatus);
+        tvModules = findViewById(R.id.tvModules);
+        tvDenyList = findViewById(R.id.tvDenyList);
+        tvKeyboxStatus = findViewById(R.id.tvKeyboxStatus);
+        tvLeakResult = findViewById(R.id.tvLeakResult);
+        tvNzeyInstalled = findViewById(R.id.tvNzeyInstalled);
+        etProfileName = findViewById(R.id.etProfileName);
+        progressBarRom = findViewById(R.id.progressBarRom);
+        progressBarWholeRom = findViewById(R.id.progressBarWholeRom);
+        switchMagisk = findViewById(R.id.switchMagisk);
+
+        ArrayAdapter<CharSequence> modeAdapter = ArrayAdapter.createFromResource(
+                this, R.array.operator_modes, android.R.layout.simple_spinner_item);
+        modeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerOperatorMode.setAdapter(modeAdapter);
+
+        Button btnPickWholeRom = findViewById(R.id.btnPickWholeRom);
+        btnPickWholeRom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickWholeRom();
+            }
+        });
+
+        Button btnVerifyWholeRom = findViewById(R.id.btnVerifyWholeRom);
+        btnVerifyWholeRom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                verifyWholeRom();
+            }
+        });
+
+        Button btnPrepareWholeRom = findViewById(R.id.btnPrepareWholeRom);
+        btnPrepareWholeRom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                prepareWholeRom();
+            }
+        });
+
+        Button btnLaunchNzey = findViewById(R.id.btnLaunchNzey);
+        btnLaunchNzey.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchNzeyMaster();
+            }
+        });
+
+        Button btnGenerate = findViewById(R.id.btnGenerate);
+        btnGenerate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                generateIdentity();
+            }
+        });
+
+        Button btnSaveIdentity = findViewById(R.id.btnSaveIdentity);
+        btnSaveIdentity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveIdentity();
+            }
+        });
+
+        Button btnShareIdentity = findViewById(R.id.btnShareIdentity);
+        btnShareIdentity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shareIdentity();
+            }
+        });
+
+        Button btnSaveProfile = findViewById(R.id.btnSaveProfile);
+        btnSaveProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveProfile();
+            }
+        });
+
+        Button btnLoadProfile = findViewById(R.id.btnLoadProfile);
+        btnLoadProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadSelectedProfile();
+            }
+        });
+
+        Button btnDeleteProfile = findViewById(R.id.btnDeleteProfile);
+        btnDeleteProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteSelectedProfile();
+            }
+        });
+
+        Button btnRefreshProfiles = findViewById(R.id.btnRefreshProfiles);
+        btnRefreshProfiles.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refreshProfileList();
+            }
+        });
+
+        Button btnPickParts = findViewById(R.id.btnPickParts);
+        btnPickParts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickRomParts();
+            }
+        });
+
+        Button btnPickOutput = findViewById(R.id.btnPickOutput);
+        btnPickOutput.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickRomOutput();
+            }
+        });
+
+        Button btnPickKeybox = findViewById(R.id.btnPickKeybox);
+        btnPickKeybox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickKeybox();
+            }
+        });
+
+        Button btnLeakCheck = findViewById(R.id.btnLeakCheck);
+        btnLeakCheck.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                runLeakCheck();
+            }
+        });
+
+        Button btnDownloadNzey = findViewById(R.id.btnDownloadNzey);
+        btnDownloadNzey.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(NZEY_DOWNLOAD_URL));
+                startActivity(intent);
+            }
+        });
+
+        Button btnCheckNzey = findViewById(R.id.btnCheckNzey);
+        btnCheckNzey.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkNzeyInstalled();
+            }
+        });
+
+        switchMagisk.setOnCheckedChangeListener(
+                new android.widget.CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(
+                            android.widget.CompoundButton buttonView, boolean isChecked) {
+                        updateMagiskUi(isChecked);
+                    }
+                });
+
+        updateMagiskUi(false);
+        refreshProfileList();
+        checkNzeyInstalled();
+    }
+
+    // ------------------------------------------------------------------
+    // Identitas
+    // ------------------------------------------------------------------
+
+    private void generateIdentity() {
+        currentAndroidId = randomHex(8);
+        currentSerial = randomHex(8);
+        currentImei = generateImei();
+
+        String mode = String.valueOf(spinnerOperatorMode.getSelectedItem());
+        if ("acak".equals(mode)) {
+            List<String> keys = new ArrayList<>(OPERATORS.keySet());
+            currentOperatorKey = keys.get(random.nextInt(keys.size()));
+        } else {
+            currentOperatorKey = mode;
+        }
+        currentOperatorCode = OPERATORS.get(currentOperatorKey);
+
+        tvAndroidId.setText("Android ID: " + currentAndroidId);
+        tvSerial.setText("Serial: " + currentSerial);
+        tvImei.setText("IMEI: " + currentImei);
+        tvOperator.setText("Operator: " + operatorDisplayName(currentOperatorKey)
+                + " (" + currentOperatorCode + ")");
+        toast("Identitas baru dibuat");
+    }
+
+    private String operatorDisplayName(String key) {
+        if ("telkomsel".equals(key)) return "Telkomsel";
+        if ("indosat".equals(key)) return "Indosat Ooredoo";
+        if ("xl".equals(key)) return "XL Axiata";
+        if ("axis".equals(key)) return "AXIS";
+        if ("tri".equals(key)) return "Tri";
+        if ("smartfren".equals(key)) return "Smartfren";
+        return key;
+    }
+
+    /** Menghasilkan 16 karakter hex (8 byte acak) dengan SecureRandom. */
+    private String randomHex(int bytes) {
+        byte[] data = new byte[bytes];
+        random.nextBytes(data);
+        StringBuilder sb = new StringBuilder(bytes * 2);
+        for (byte b : data) {
+            sb.append(String.format(Locale.US, "%02x", b & 0xff));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * IMEI 15 digit: TAC (8 digit) + 6 digit acak + 1 digit pemeriksa Luhn.
+     * Digit pemeriksa dihitung dengan menambahkan 0 sementara, lalu
+     * menerapkan jumlah Luhn pada 15 digit tersebut.
+     */
+    private String generateImei() {
+        String tac = IMEI_TACS[random.nextInt(IMEI_TACS.length)];
+        StringBuilder base = new StringBuilder(tac);
+        for (int i = 0; i < 6; i++) {
+            base.append(random.nextInt(10));
+        }
+        int check = luhnCheckDigit(base.toString());
+        return base.toString() + check;
+    }
+
+    private int luhnCheckDigit(String fourteenDigits) {
+        String withZero = fourteenDigits + "0";
+        int sum = 0;
+        boolean doubleDigit = false;
+        for (int i = withZero.length() - 1; i >= 0; i--) {
+            int digit = withZero.charAt(i) - '0';
+            if (doubleDigit) {
+                digit *= 2;
+                if (digit > 9) {
+                    digit -= 9;
+                }
+            }
+            sum += digit;
+            doubleDigit = !doubleDigit;
+        }
+        return (10 - (sum % 10)) % 10;
+    }
+
+    /** Memeriksa apakah sebuah IMEI lengkap 15 digit lolos Luhn. */
+    private static boolean isValidImei(String imei) {
+        if (imei == null || imei.length() != 15) {
+            return false;
+        }
+        int sum = 0;
+        boolean doubleDigit = false;
+        for (int i = imei.length() - 1; i >= 0; i--) {
+            char c = imei.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+            int digit = c - '0';
+            if (doubleDigit) {
+                digit *= 2;
+                if (digit > 9) {
+                    digit -= 9;
+                }
+            }
+            sum += digit;
+            doubleDigit = !doubleDigit;
+        }
+        return sum % 10 == 0;
+    }
+
+    private String buildIdentityJson() {
+        return "{\n"
+                + "  \"android_id\": \"" + escapeJson(currentAndroidId) + "\",\n"
+                + "  \"serial\": \"" + escapeJson(currentSerial) + "\",\n"
+                + "  \"imei\": \"" + escapeJson(currentImei) + "\",\n"
+                + "  \"operator_name\": \"" + escapeJson(operatorDisplayName(currentOperatorKey)) + "\",\n"
+                + "  \"operator_numeric\": \"" + escapeJson(currentOperatorCode) + "\",\n"
+                + "  \"operator_alpha\": \"" + escapeJson(operatorAlpha(currentOperatorKey)) + "\"\n"
+                + "}\n";
+    }
+
+    /** Alpha operator, sesuai operators.txt (format nama|numeric|alpha). */
+    private String operatorAlpha(String key) {
+        if ("telkomsel".equals(key)) return "Telkomsel";
+        if ("indosat".equals(key)) return "Indosat Ooredoo";
+        if ("xl".equals(key)) return "XL";
+        if ("axis".equals(key)) return "AXIS";
+        if ("tri".equals(key)) return "3";
+        if ("smartfren".equals(key)) return "Smartfren";
+        return key;
+    }
+
+    private String buildConfigProp() {
+        return "# NZeyMod user config\n"
+                + "operator_mode=" + currentOperatorKey + "\n"
+                + "identity_mode=full\n"
+                + "keybox_path=/sdcard/NZeyMod/keybox.xml\n"
+                + "randomize_on_boot=true\n"
+                + "wipe_profiles_on_randomize=false\n"
+                + "show_toast=true\n";
+    }
+
+    private void saveIdentity() {
+        if (currentAndroidId.isEmpty() || currentImei.isEmpty()) {
+            toast("Buat identitas terlebih dahulu");
+            return;
+        }
+        File dir = getNzeyModDir();
+        if (dir == null) {
+            toast("Penyimpanan eksternal aplikasi tidak tersedia");
+            return;
+        }
+        try {
+            writeTextFile(new File(dir, "identity.json"), buildIdentityJson());
+            writeTextFile(new File(dir, "config.prop"), buildConfigProp());
+            tvIdentityPath.setText("Lokasi penyimpanan:\n"
+                    + new File(dir, "identity.json").getAbsolutePath() + "\n"
+                    + new File(dir, "config.prop").getAbsolutePath());
+            toast("Identitas disimpan di NZeyMod/");
+        } catch (IOException e) {
+            toast("Gagal menyimpan: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Berbagi identitas sebagai teks melalui ACTION_SEND. File tidak dibagikan
+     * sebagai lampiran Uri file:// karena FileProvider berasal dari androidx
+     * dan tidak tersedia tanpa dependensi; isi JSON dibagikan sebagai teks,
+     * sedangkan jalur file lengkap ditampilkan di layar.
+     */
+    private void shareIdentity() {
+        if (currentAndroidId.isEmpty() || currentImei.isEmpty()) {
+            toast("Buat identitas terlebih dahulu");
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Identitas NZeyMod");
+        intent.putExtra(Intent.EXTRA_TEXT, buildIdentityJson());
+        startActivity(Intent.createChooser(intent, "Bagikan identitas"));
+    }
+
+    // ------------------------------------------------------------------
+    // Profil
+    // ------------------------------------------------------------------
+
+    private File getNzeyModDir() {
+        File base = getExternalFilesDir(null);
+        if (base == null) {
+            return null;
+        }
+        File dir = new File(base, "NZeyMod");
+        if (!dir.exists() && !dir.mkdirs()) {
+            return null;
+        }
+        return dir;
+    }
+
+    private File getProfilesDir() {
+        File base = getNzeyModDir();
+        if (base == null) {
+            return null;
+        }
+        File dir = new File(base, "profiles");
+        if (!dir.exists() && !dir.mkdirs()) {
+            return null;
+        }
+        return dir;
+    }
+
+    private void saveProfile() {
+        if (currentAndroidId.isEmpty() || currentImei.isEmpty()) {
+            toast("Buat identitas terlebih dahulu");
+            return;
+        }
+        String name = etProfileName.getText().toString().trim();
+        if (name.isEmpty()) {
+            toast("Isi nama profil terlebih dahulu");
+            return;
+        }
+        File dir = getProfilesDir();
+        if (dir == null) {
+            toast("Penyimpanan eksternal aplikasi tidak tersedia");
+            return;
+        }
+        String safeName = name.replaceAll("[^A-Za-z0-9._\\- ]", "_").trim();
+        try {
+            writeTextFile(new File(dir, safeName + ".json"), buildIdentityJson());
+            toast("Profil \"" + safeName + "\" disimpan");
+            refreshProfileList();
+        } catch (IOException e) {
+            toast("Gagal menyimpan profil: " + e.getMessage());
+        }
+    }
+
+    private void refreshProfileList() {
+        profileNames = new ArrayList<>();
+        File dir = getProfilesDir();
+        if (dir != null) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                Arrays.sort(files, new Comparator<File>() {
+                    @Override
+                    public int compare(File a, File b) {
+                        return a.getName().compareToIgnoreCase(b.getName());
+                    }
+                });
+                for (File f : files) {
+                    if (f.isFile() && f.getName().toLowerCase(Locale.US).endsWith(".json")) {
+                        String name = f.getName();
+                        profileNames.add(name.substring(0, name.length() - 5));
+                    }
+                }
+            }
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item, profileNames);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerProfiles.setAdapter(adapter);
+        if (profileNames.isEmpty()) {
+            tvProfiles.setText(getString(R.string.no_profiles));
+        } else {
+            StringBuilder sb = new StringBuilder("Profil tersimpan:\n");
+            for (String name : profileNames) {
+                sb.append("• ").append(name).append("\n");
+            }
+            tvProfiles.setText(sb.toString().trim());
+        }
+    }
+
+    private String selectedProfileName() {
+        Object selected = spinnerProfiles.getSelectedItem();
+        return selected == null ? null : String.valueOf(selected);
+    }
+
+    private void loadSelectedProfile() {
+        String name = selectedProfileName();
+        if (name == null) {
+            toast("Tidak ada profil yang dipilih");
+            return;
+        }
+        File dir = getProfilesDir();
+        if (dir == null) {
+            return;
+        }
+        File file = new File(dir, name + ".json");
+        try {
+            String json = readTextFile(file);
+            String androidId = jsonValue(json, "android_id");
+            String serial = jsonValue(json, "serial");
+            String imei = jsonValue(json, "imei");
+            String operator = jsonValue(json, "operator_name");
+            if (operator == null) {
+                operator = jsonValue(json, "operator");
+            }
+            String operatorCode = jsonValue(json, "operator_numeric");
+            if (operatorCode == null) {
+                operatorCode = jsonValue(json, "operator_code");
+            }
+            // operator_name berisi nama tampilan (mis. "Indosat Ooredoo");
+            // petakan kembali ke kunci mode (mis. "indosat").
+            String operatorKey = operatorKeyFromName(operator);
+            if (androidId == null || imei == null) {
+                toast("File profil tidak valid");
+                return;
+            }
+            currentAndroidId = androidId;
+            currentSerial = serial == null ? "" : serial;
+            currentImei = imei;
+            currentOperatorKey = operatorKey == null ? "" : operatorKey;
+            currentOperatorCode = operatorCode == null ? "" : operatorCode;
+            tvAndroidId.setText("Android ID: " + currentAndroidId);
+            tvSerial.setText("Serial: " + currentSerial);
+            tvImei.setText("IMEI: " + currentImei);
+            tvOperator.setText("Operator: " + operatorDisplayName(currentOperatorKey)
+                    + " (" + currentOperatorCode + ")");
+            etProfileName.setText(name);
+            toast("Profil \"" + name + "\" dimuat");
+        } catch (IOException e) {
+            toast("Gagal memuat profil: " + e.getMessage());
+        }
+    }
+
+    /** Petakan nama tampilan / kunci lama ke kunci mode operator. */
+    private String operatorKeyFromName(String name) {
+        if (name == null) return "";
+        String n = name.trim().toLowerCase(Locale.US);
+        if (n.equals("telkomsel")) return "telkomsel";
+        if (n.equals("indosat ooredoo") || n.equals("indosat")) return "indosat";
+        if (n.equals("xl axiata") || n.equals("xl")) return "xl";
+        if (n.equals("axis")) return "axis";
+        if (n.equals("tri") || n.equals("3")) return "tri";
+        if (n.equals("smartfren")) return "smartfren";
+        return n;
+    }
+
+    private void deleteSelectedProfile() {
+        String name = selectedProfileName();
+        if (name == null) {
+            toast("Tidak ada profil yang dipilih");
+            return;
+        }
+        File dir = getProfilesDir();
+        if (dir == null) {
+            return;
+        }
+        File file = new File(dir, name + ".json");
+        if (file.delete()) {
+            toast("Profil \"" + name + "\" dihapus");
+            refreshProfileList();
+        } else {
+            toast("Gagal menghapus profil");
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Jalankan ROM utuh (impor dari penyimpanan, lalu NZey Master)
+    //
+    // Aplikasi ini BUKAN mesin virtual. Mesinnya adalah NZey Master.
+    // Launcher hanya: memilih ROM utuh, memverifikasi SHA-256,
+    // menyalinnya ke folder NZeyMod/, lalu meluncurkan NZey Master
+    // agar pengguna mengimpornya lewat Import Local ROM.
+    // ------------------------------------------------------------------
+
+    private void pickWholeRom() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivityForResult(
+                Intent.createChooser(intent, "Pilih ROM utuh"), REQ_PICK_WHOLE_ROM);
+    }
+
+    private void handlePickedWholeRom(Uri uri) {
+        wholeRomUri = uri;
+        wholeRomName = displayName(uri);
+        wholeRomSize = contentLength(uri);
+        wholeRomVerified = false;
+        wholeRomPreparedPath = "";
+        tvImportSteps.setVisibility(View.GONE);
+        StringBuilder sb = new StringBuilder();
+        sb.append("ROM utuh: ").append(wholeRomName).append("\n");
+        sb.append("Ukuran: ").append(formatSize(wholeRomSize))
+                .append(" (").append(wholeRomSize).append(" byte)")
+                .append(" — diharapkan sekitar 405 MB (380–430 MB): ")
+                .append(wholeRomSize >= WHOLE_ROM_MIN_BYTES
+                        && wholeRomSize <= WHOLE_ROM_MAX_BYTES ? "sesuai" : "DI LUAR RENTANG");
+        if (wholeRomName.toLowerCase(Locale.US).matches(".*\\.part\\d+$")) {
+            sb.append("\nPERINGATAN: nama berkas berakhiran .part — "
+                    + "ini tampak seperti bagian ROM terpisah, bukan ROM utuh. "
+                    + "Gabungkan dahulu di bagian Gabung ROM.");
+        }
+        tvWholeRomInfo.setText(sb.toString());
+        tvWholeRomResult.setText("Berkas dipilih. Tekan Verifikasi ROM Utuh "
+                + "untuk menghitung SHA-256.");
+        toast("ROM utuh dipilih");
+    }
+
+    private void verifyWholeRom() {
+        if (wholeRomUri == null) {
+            toast("Pilih ROM utuh terlebih dahulu");
+            tvWholeRomResult.setText("GAGAL — tidak ada berkas yang dipilih.");
+            return;
+        }
+        progressBarWholeRom.setVisibility(View.VISIBLE);
+        progressBarWholeRom.setProgress(0);
+        tvWholeRomProgress.setText("Menghitung SHA-256…");
+        tvWholeRomResult.setText("");
+        final Uri uri = wholeRomUri;
+        final long total = wholeRomSize;
+        final Context context = this;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                    long readTotal = 0;
+                    InputStream in = null;
+                    try {
+                        in = context.getContentResolver().openInputStream(uri);
+                        if (in == null) {
+                            throw new IOException("Tidak dapat membuka berkas ROM");
+                        }
+                        byte[] buffer = new byte[64 * 1024];
+                        int read;
+                        while ((read = in.read(buffer)) != -1) {
+                            digest.update(buffer, 0, read);
+                            readTotal += read;
+                            final int percent = total > 0
+                                    ? (int) (readTotal * 100 / total) : 0;
+                            final long done = readTotal;
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    progressBarWholeRom.setProgress(percent);
+                                    tvWholeRomProgress.setText("Menghitung SHA-256… "
+                                            + percent + "% (" + formatSize(done) + ")");
+                                }
+                            });
+                        }
+                    } finally {
+                        if (in != null) {
+                            try {
+                                in.close();
+                            } catch (IOException ignored) {
+                                // Abaikan kegagalan penutupan stream.
+                            }
+                        }
+                    }
+                    final String actualHash = bytesToHex(digest.digest());
+                    final long finalSize = readTotal;
+                    final boolean sizeOk = finalSize >= WHOLE_ROM_MIN_BYTES
+                            && finalSize <= WHOLE_ROM_MAX_BYTES;
+                    final boolean hashOk = EXPECTED_ROM_SHA256.equalsIgnoreCase(actualHash);
+                    final boolean ok = sizeOk && hashOk;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            wholeRomVerified = ok;
+                            tvImportSteps.setVisibility(View.GONE);
+                            progressBarWholeRom.setProgress(100);
+                            tvWholeRomProgress.setText("Selesai: " + formatSize(finalSize));
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("Nama: ").append(wholeRomName).append("\n");
+                            sb.append("Ukuran: ").append(formatSize(finalSize))
+                                    .append(" (").append(finalSize).append(" byte)")
+                                    .append(" — diharapkan sekitar 405 MB: ")
+                                    .append(sizeOk ? "sesuai" : "DI LUAR RENTANG").append("\n");
+                            sb.append("SHA-256: ").append(actualHash).append("\n");
+                            sb.append("Hasil: ").append(ok ? "LOLOS" : "GAGAL — impor ditolak");
+                            if (!ok) {
+                                sb.append("\nKemungkinan penyebab:");
+                                if (!hashOk) {
+                                    sb.append("\n- Berkas rusak / corrupt saat diunduh atau disalin.");
+                                    sb.append("\n- Berkas ini bukan ROM NZeyMod utuh.");
+                                }
+                                if (wholeRomName.toLowerCase(Locale.US)
+                                        .matches(".*\\.part\\d+$")) {
+                                    sb.append("\n- Berkas ini masih berupa bagian ROM terpisah "
+                                            + "(.part00–.part04). Gabungkan dahulu di bagian "
+                                            + "Gabung ROM.");
+                                }
+                                if (!sizeOk) {
+                                    sb.append("\n- Ukuran berkas jauh dari 405 MB: kemungkinan "
+                                            + "berkas terpotong atau belum selesai diunduh.");
+                                }
+                                sb.append("\nJangan mengimpor berkas yang gagal verifikasi.");
+                            }
+                            tvWholeRomResult.setText(sb.toString());
+                            toast(ok ? "ROM utuh lolos verifikasi"
+                                    : "ROM utuh gagal verifikasi");
+                        }
+                    });
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            tvWholeRomProgress.setText("Gagal memverifikasi");
+                            tvWholeRomResult.setText("Galat: " + e.getMessage());
+                            toast("Gagal memverifikasi ROM: " + e.getMessage());
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    private void prepareWholeRom() {
+        if (wholeRomUri == null) {
+            toast("Pilih ROM utuh terlebih dahulu");
+            return;
+        }
+        if (!wholeRomVerified) {
+            toast("Verifikasi ROM utuh terlebih dahulu hingga LOLOS");
+            tvWholeRomResult.setText("Impor ditolak: ROM belum lolos verifikasi SHA-256. "
+                    + "Tekan Verifikasi ROM Utuh terlebih dahulu.");
+            return;
+        }
+        File dir = getNzeyModDir();
+        if (dir == null) {
+            toast("Penyimpanan eksternal aplikasi tidak tersedia");
+            return;
+        }
+        final File dest = new File(dir, WHOLE_ROM_FILENAME);
+        final Uri uri = wholeRomUri;
+        final Context context = this;
+        progressBarWholeRom.setVisibility(View.VISIBLE);
+        progressBarWholeRom.setProgress(0);
+        tvWholeRomProgress.setText("Menyalin ke NZeyMod/…");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                    long copied = 0;
+                    InputStream in = null;
+                    OutputStream out = null;
+                    try {
+                        in = context.getContentResolver().openInputStream(uri);
+                        if (in == null) {
+                            throw new IOException("Tidak dapat membuka berkas ROM");
+                        }
+                        out = new FileOutputStream(dest);
+                        byte[] buffer = new byte[64 * 1024];
+                        int read;
+                        while ((read = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, read);
+                            digest.update(buffer, 0, read);
+                            copied += read;
+                            final int percent = wholeRomSize > 0
+                                    ? (int) (copied * 100 / wholeRomSize) : 0;
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    progressBarWholeRom.setProgress(percent);
+                                }
+                            });
+                        }
+                        out.flush();
+                    } finally {
+                        if (in != null) {
+                            try {
+                                in.close();
+                            } catch (IOException ignored) {
+                                // Abaikan kegagalan penutupan stream.
+                            }
+                        }
+                        if (out != null) {
+                            try {
+                                out.close();
+                            } catch (IOException ignored) {
+                                // Abaikan kegagalan penutupan stream.
+                            }
+                        }
+                    }
+                    final String copyHash = bytesToHex(digest.digest());
+                    final long finalSize = copied;
+                    final boolean ok = EXPECTED_ROM_SHA256.equalsIgnoreCase(copyHash);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!ok) {
+                                tvWholeRomProgress.setText("Gagal menyiapkan");
+                                tvWholeRomResult.setText("GAGAL — hash salinan tidak cocok ("
+                                        + copyHash + "). Hapus salinan dan verifikasi ulang.");
+                                toast("Salinan ROM gagal verifikasi");
+                                return;
+                            }
+                            wholeRomPreparedPath = dest.getAbsolutePath();
+                            tvWholeRomProgress.setText("Siap: " + formatSize(finalSize));
+                            tvWholeRomResult.setText("ROM utuh disiapkan di:\n"
+                                    + wholeRomPreparedPath + "\n"
+                                    + "SHA-256 salinan: " + copyHash + " (LOLOS)");
+                            tvImportSteps.setVisibility(View.VISIBLE);
+                            toast("ROM siap diimpor ke NZey Master");
+                        }
+                    });
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            tvWholeRomProgress.setText("Gagal menyiapkan");
+                            tvWholeRomResult.setText("Galat: " + e.getMessage());
+                            toast("Gagal menyiapkan ROM: " + e.getMessage());
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    private void launchNzeyMaster() {
+        PackageManager pm = getPackageManager();
+        // Utama: paket baru hasil repackage; fallback: paket lama.
+        Intent launch = pm.getLaunchIntentForPackage(NZEY_PACKAGE);
+        String usedPackage = NZEY_PACKAGE;
+        if (launch == null) {
+            launch = pm.getLaunchIntentForPackage(NZEY_PACKAGE_LEGACY);
+            usedPackage = NZEY_PACKAGE_LEGACY;
+        }
+        if (launch == null) {
+            tvNzeyInstalled.setText("Status pemasangan: belum terinstal. "
+                    + "Pasang NZeyMaster-nzey.apk hasil repackage " + NZEY_VERSION
+                    + " (139 MB, SHA-256 " + NZEY_SHA256 + "). "
+                    + "Paket barunya " + NZEY_PACKAGE + ", jadi dapat terpasang "
+                    + "berdampingan dengan Virtual Master lama tanpa uninstall. "
+                    + "Tautan unduh di bawah ini masih mengarah ke APK paket lama "
+                    + "(145 MB, SHA-256 " + NZEY_SHA256_LEGACY + ") sebagai fallback.");
+            toast("NZey Master belum terpasang — pasang NZeyMaster-nzey.apk dahulu");
+            return;
+        }
+        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(launch);
+        toast("Membuka NZey Master (" + usedPackage + ") — impor ROM lewat + > titik tiga > Import Local ROM");
+    }
+
+    // ------------------------------------------------------------------
+    // Gabung ROM (Storage Access Framework)
+    // ------------------------------------------------------------------
+
+    private void pickRomParts() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivityForResult(Intent.createChooser(intent, "Pilih bagian ROM"), REQ_PICK_PARTS);
+    }
+
+    private void pickRomOutput() {
+        if (pickedPartUris.isEmpty()) {
+            toast("Pilih bagian ROM terlebih dahulu");
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/octet-stream");
+        intent.putExtra(Intent.EXTRA_TITLE, "nzeymod-rom-joined.bin");
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        startActivityForResult(intent, REQ_PICK_OUTPUT);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != RESULT_OK || data == null) {
+            return;
+        }
+        if (requestCode == REQ_PICK_PARTS) {
+            handlePickedParts(data);
+        } else if (requestCode == REQ_PICK_OUTPUT) {
+            Uri output = data.getData();
+            if (output != null) {
+                joinRomParts(output);
+            }
+        } else if (requestCode == REQ_PICK_KEYBOX) {
+            Uri uri = data.getData();
+            if (uri != null) {
+                handlePickedKeybox(uri);
+            }
+        } else if (requestCode == REQ_PICK_WHOLE_ROM) {
+            Uri uri = data.getData();
+            if (uri != null) {
+                handlePickedWholeRom(uri);
+            }
+        }
+    }
+
+    private void handlePickedParts(Intent data) {
+        List<Uri> uris = new ArrayList<>();
+        ClipData clip = data.getClipData();
+        if (clip != null) {
+            for (int i = 0; i < clip.getItemCount(); i++) {
+                Uri uri = clip.getItemAt(i).getUri();
+                if (uri != null) {
+                    uris.add(uri);
+                }
+            }
+        } else if (data.getData() != null) {
+            uris.add(data.getData());
+        }
+        if (uris.isEmpty()) {
+            return;
+        }
+        // Urutkan berdasarkan nama tampilan agar bagian 1..5 tersusun benar.
+        Collections.sort(uris, new Comparator<Uri>() {
+            @Override
+            public int compare(Uri a, Uri b) {
+                return displayName(a).compareToIgnoreCase(displayName(b));
+            }
+        });
+        pickedPartUris = uris;
+        pickedPartNames = new ArrayList<>();
+        StringBuilder sb = new StringBuilder("Bagian yang dipilih:\n");
+        for (Uri uri : uris) {
+            String name = displayName(uri);
+            pickedPartNames.add(name);
+            sb.append("• ").append(name).append("\n");
+        }
+        tvPartsList.setText(sb.toString().trim());
+        tvRomResult.setText("");
+        toast(pickedPartUris.size() + " bagian dipilih");
+    }
+
+    private String displayName(Uri uri) {
+        String name = uri.getLastPathSegment();
+        ContentResolver resolver = getContentResolver();
+        Cursor cursor = null;
+        try {
+            cursor = resolver.query(uri,
+                    new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                if (index >= 0) {
+                    String value = cursor.getString(index);
+                    if (value != null && !value.isEmpty()) {
+                        name = value;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+            // Tetap memakai nama dari path bila kueri gagal.
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return name == null ? "(tanpa nama)" : name;
+    }
+
+    private void joinRomParts(final Uri outputUri) {
+        progressBarRom.setVisibility(View.VISIBLE);
+        progressBarRom.setProgress(0);
+        tvRomProgress.setText("Menggabungkan…");
+        tvRomResult.setText("");
+        final List<Uri> parts = new ArrayList<>(pickedPartUris);
+        final Context context = this;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    long totalBytes = 0;
+                    for (Uri part : parts) {
+                        totalBytes += contentLength(part);
+                    }
+                    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                    long copied = 0;
+                    ContentResolver resolver = context.getContentResolver();
+                    OutputStream out = null;
+                    try {
+                        out = resolver.openOutputStream(outputUri);
+                        if (out == null) {
+                            throw new IOException("Tidak dapat membuka file keluaran");
+                        }
+                        byte[] buffer = new byte[64 * 1024];
+                        for (Uri part : parts) {
+                            InputStream in = null;
+                            try {
+                                in = resolver.openInputStream(part);
+                                if (in == null) {
+                                    throw new IOException(
+                                            "Tidak dapat membuka bagian: " + displayName(part));
+                                }
+                                int read;
+                                while ((read = in.read(buffer)) != -1) {
+                                    out.write(buffer, 0, read);
+                                    digest.update(buffer, 0, read);
+                                    copied += read;
+                                    final int percent = totalBytes > 0
+                                            ? (int) (copied * 100 / totalBytes) : 0;
+                                    final long done = copied;
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            progressBarRom.setProgress(percent);
+                                            tvRomProgress.setText("Menggabungkan… "
+                                                    + percent + "% ("
+                                                    + formatSize(done) + ")");
+                                        }
+                                    });
+                                }
+                            } finally {
+                                if (in != null) {
+                                    try {
+                                        in.close();
+                                    } catch (IOException ignored) {
+                                        // Abaikan kegagalan penutupan stream.
+                                    }
+                                }
+                            }
+                        }
+                        out.flush();
+                    } finally {
+                        if (out != null) {
+                            try {
+                                out.close();
+                            } catch (IOException ignored) {
+                                // Abaikan kegagalan penutupan stream.
+                            }
+                        }
+                    }
+                    final String actualHash = bytesToHex(digest.digest());
+                    final long finalSize = copied;
+                    final boolean ok = EXPECTED_ROM_SHA256.equalsIgnoreCase(actualHash);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressBarRom.setProgress(100);
+                            tvRomProgress.setText("Selesai: " + formatSize(finalSize));
+                            tvRomResult.setText("Ukuran: " + formatSize(finalSize)
+                                    + " (" + finalSize + " byte)\n"
+                                    + "SHA-256: " + actualHash + "\n"
+                                    + "Hasil: " + (ok ? "Lolos" : "Gagal")
+                                    + (ok ? "" : " — hash tidak cocok dengan yang diharapkan"));
+                            toast(ok ? "ROM lolos verifikasi" : "ROM gagal verifikasi");
+                        }
+                    });
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            tvRomProgress.setText("Gagal menggabungkan");
+                            tvRomResult.setText("Galat: " + e.getMessage());
+                            toast("Gagal menggabungkan ROM: " + e.getMessage());
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    private long contentLength(Uri uri) {
+        ContentResolver resolver = getContentResolver();
+        Cursor cursor = null;
+        try {
+            cursor = resolver.query(uri,
+                    new String[]{OpenableColumns.SIZE}, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int index = cursor.getColumnIndex(OpenableColumns.SIZE);
+                if (index >= 0) {
+                    return cursor.getLong(index);
+                }
+            }
+        } catch (Exception ignored) {
+            // Ukuran tidak diketahui; progres memakai persen 0 sampai selesai.
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return 0;
+    }
+
+    // ------------------------------------------------------------------
+    // Magisk
+    // ------------------------------------------------------------------
+
+    private void updateMagiskUi(boolean enabled) {
+        if (enabled) {
+            tvMagiskStatus.setText(getString(R.string.magisk_on_text));
+            tvModules.setVisibility(View.VISIBLE);
+            tvDenyList.setVisibility(View.VISIBLE);
+        } else {
+            tvMagiskStatus.setText(getString(R.string.magisk_off_text));
+            tvModules.setVisibility(View.GONE);
+            tvDenyList.setVisibility(View.GONE);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Keybox
+    // ------------------------------------------------------------------
+
+    private void pickKeybox() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivityForResult(Intent.createChooser(intent, "Pilih file keybox"), REQ_PICK_KEYBOX);
+    }
+
+    private void handlePickedKeybox(Uri uri) {
+        String name = displayName(uri);
+        if (name == null || !name.toLowerCase(Locale.US).endsWith(".xml")) {
+            tvKeyboxStatus.setText("Keybox: gagal — file harus berekstensi .xml");
+            toast("File keybox harus berekstensi .xml");
+            return;
+        }
+        File dir = getNzeyModDir();
+        if (dir == null) {
+            toast("Penyimpanan eksternal aplikasi tidak tersedia");
+            return;
+        }
+        try {
+            String content = readTextFromUri(uri);
+            if (content == null
+                    || !content.toLowerCase(Locale.US).contains("keybox")) {
+                tvKeyboxStatus.setText("Keybox: gagal — isi file tidak mengandung keybox");
+                toast("Isi file tidak mengandung keybox");
+                return;
+            }
+            File dest = new File(dir, "keybox.xml");
+            writeTextFile(dest, content);
+            tvKeyboxStatus.setText("Keybox: tersimpan di "
+                    + dest.getAbsolutePath()
+                    + "\nPeringatan: keybox ini hanya ECDSA dan kedaluwarsa pada 28 Nov 2026.");
+            toast("Keybox disimpan");
+        } catch (IOException e) {
+            tvKeyboxStatus.setText("Keybox: gagal — " + e.getMessage());
+            toast("Gagal membaca keybox: " + e.getMessage());
+        }
+    }
+
+    private String readTextFromUri(Uri uri) throws IOException {
+        InputStream in = getContentResolver().openInputStream(uri);
+        if (in == null) {
+            throw new IOException("Tidak dapat membuka file");
+        }
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            return new String(out.toByteArray(), StandardCharsets.UTF_8);
+        } finally {
+            in.close();
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Pemeriksaan kebocoran (host — bukan di dalam VM)
+    // ------------------------------------------------------------------
+
+    private void runLeakCheck() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Pemeriksaan host (bukan di dalam VM):\n");
+        String tags = Build.TAGS == null ? "" : Build.TAGS;
+        boolean testKeys = tags.contains("test-keys");
+        sb.append("• Build.TAGS mengandung test-keys: ")
+                .append(testKeys ? "Ya" : "Tidak").append("\n");
+        for (String path : SU_PATHS) {
+            sb.append("• ").append(path).append(": ")
+                    .append(new File(path).exists() ? "Ada" : "Tidak ada").append("\n");
+        }
+        sb.append("Catatan: pemeriksaan yang sebenarnya hanya berlaku di dalam VM. "
+                + "Hasil di atas hanya menggambarkan ponsel host ini.");
+        tvLeakResult.setText(sb.toString().trim());
+    }
+
+    // ------------------------------------------------------------------
+    // NZey Master
+    // ------------------------------------------------------------------
+
+    private void checkNzeyInstalled() {
+        PackageManager pm = getPackageManager();
+        String foundPackage = installedPackage(pm, NZEY_PACKAGE);
+        if (foundPackage == null) {
+            foundPackage = installedPackage(pm, NZEY_PACKAGE_LEGACY);
+        }
+        if (foundPackage != null) {
+            String installedVersion = installedVersion(pm, foundPackage);
+            tvNzeyInstalled.setText("Status pemasangan: terinstal (versi "
+                    + installedVersion + ", paket " + foundPackage + "). "
+                    + "Versi yang diharapkan: " + NZEY_VERSION + ". "
+                    + (NZEY_PACKAGE.equals(foundPackage)
+                            ? "Ini paket baru hasil repackage — dapat berdampingan dengan Virtual Master lama."
+                            : "Ini paket lama — tetap dapat dipakai sebagai fallback."));
+            return;
+        }
+        tvNzeyInstalled.setText("Status pemasangan: belum terinstal. "
+                + "Pasang NZeyMaster-nzey.apk hasil repackage " + NZEY_VERSION
+                + " (139 MB, SHA-256 " + NZEY_SHA256 + "). "
+                + "Paket barunya " + NZEY_PACKAGE + ", jadi dapat terpasang "
+                + "berdampingan dengan Virtual Master lama tanpa uninstall.");
+    }
+
+    /** Mengembalikan nama paket bila terpasang, atau null bila tidak ada. */
+    private String installedPackage(PackageManager pm, String pkg) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.getPackageInfo(pkg, PackageManager.PackageInfoFlags.of(0));
+            } else {
+                @SuppressWarnings("deprecation")
+                PackageInfo legacy = pm.getPackageInfo(pkg, 0);
+            }
+            return pkg;
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+    }
+
+    /** Mengembalikan versionName paket yang terpasang, atau "?" bila gagal. */
+    private String installedVersion(PackageManager pm, String pkg) {
+        try {
+            PackageInfo info;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                info = pm.getPackageInfo(pkg, PackageManager.PackageInfoFlags.of(0));
+            } else {
+                @SuppressWarnings("deprecation")
+                PackageInfo legacy = pm.getPackageInfo(pkg, 0);
+                info = legacy;
+            }
+            return info.versionName == null ? "?" : info.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            return "?";
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Utilitas
+    // ------------------------------------------------------------------
+
+    private void writeTextFile(File file, String content) throws IOException {
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
+        FileOutputStream out = new FileOutputStream(file);
+        try {
+            out.write(content.getBytes(StandardCharsets.UTF_8));
+            out.flush();
+        } finally {
+            out.close();
+        }
+    }
+
+    private String readTextFile(File file) throws IOException {
+        FileInputStream in = new FileInputStream(file);
+        try {
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(in, StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            return sb.toString();
+        } finally {
+            in.close();
+        }
+    }
+
+    private static String escapeJson(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    /** Mengambil nilai string sederhana "kunci": "nilai" dari JSON satu tingkat. */
+    private static String jsonValue(String json, String key) {
+        if (json == null) {
+            return null;
+        }
+        String marker = "\"" + key + "\"";
+        int keyIndex = json.indexOf(marker);
+        if (keyIndex < 0) {
+            return null;
+        }
+        int colon = json.indexOf(':', keyIndex + marker.length());
+        if (colon < 0) {
+            return null;
+        }
+        int firstQuote = json.indexOf('"', colon + 1);
+        if (firstQuote < 0) {
+            return null;
+        }
+        int secondQuote = json.indexOf('"', firstQuote + 1);
+        if (secondQuote < 0) {
+            return null;
+        }
+        return json.substring(firstQuote + 1, secondQuote);
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            sb.append(String.format(Locale.US, "%02x", b & 0xff));
+        }
+        return sb.toString();
+    }
+
+    private static String formatSize(long bytes) {
+        if (bytes < 1024) {
+            return bytes + " B";
+        } else if (bytes < 1024L * 1024L) {
+            return String.format(Locale.US, "%.2f KB", bytes / 1024.0);
+        } else if (bytes < 1024L * 1024L * 1024L) {
+            return String.format(Locale.US, "%.2f MB", bytes / (1024.0 * 1024.0));
+        } else {
+            return String.format(Locale.US, "%.2f GB", bytes / (1024.0 * 1024.0 * 1024.0));
+        }
+    }
+
+    private void toast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+}
+
+```
+
+`android/app/src/main/res/layout/activity_main.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/subtitle"
+            android:paddingBottom="16dp" />
+
+        <!-- Identitas -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/section_identity"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/label_operator_mode" />
+
+        <Spinner
+            android:id="@+id/spinnerOperatorMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnGenerate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_generate" />
+
+        <TextView
+            android:id="@+id/tvAndroidId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Android ID: -" />
+
+        <TextView
+            android:id="@+id/tvSerial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Serial: -" />
+
+        <TextView
+            android:id="@+id/tvImei"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="IMEI: -" />
+
+        <TextView
+            android:id="@+id/tvOperator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Operator: -" />
+
+        <Button
+            android:id="@+id/btnSaveIdentity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_save_identity" />
+
+        <Button
+            android:id="@+id/btnShareIdentity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_share_identity" />
+
+        <TextView
+            android:id="@+id/tvIdentityPath"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lokasi penyimpanan: belum disimpan" />
+
+        <!-- Profil -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/section_profiles"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <EditText
+            android:id="@+id/etProfileName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_profile_name"
+            android:inputType="text" />
+
+        <Button
+            android:id="@+id/btnSaveProfile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_save_profile" />
+
+        <Spinner
+            android:id="@+id/spinnerProfiles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnLoadProfile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_load_profile" />
+
+        <Button
+            android:id="@+id/btnDeleteProfile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_delete_profile" />
+
+        <Button
+            android:id="@+id/btnRefreshProfiles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_refresh_profiles" />
+
+        <TextView
+            android:id="@+id/tvProfiles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_profiles" />
+
+        <!-- ROM -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/section_rom"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/rom_expected_text" />
+
+        <Button
+            android:id="@+id/btnPickParts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_pick_parts" />
+
+        <TextView
+            android:id="@+id/tvPartsList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_parts" />
+
+        <Button
+            android:id="@+id/btnPickOutput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_pick_output" />
+
+        <ProgressBar
+            android:id="@+id/progressBarRom"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="0"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvRomProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="" />
+
+        <TextView
+            android:id="@+id/tvRomResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="" />
+
+        <!-- Magisk -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/section_magisk"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <Switch
+            android:id="@+id/switchMagisk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Magisk" />
+
+        <TextView
+            android:id="@+id/tvMagiskStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/magisk_off_text" />
+
+        <TextView
+            android:id="@+id/tvModules"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/modules_text"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvDenyList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/denylist_text"
+            android:visibility="gone" />
+
+        <!-- Keybox -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/section_keybox"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/keybox_warning" />
+
+        <Button
+            android:id="@+id/btnPickKeybox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_pick_keybox" />
+
+        <TextView
+            android:id="@+id/tvKeyboxStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Keybox: belum dipilih" />
+
+        <!-- Pemeriksaan kebocoran -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/section_leak"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pemeriksaan ini hanya memeriksa perangkat host (ponsel ini). Pemeriksaan yang sebenarnya hanya berlaku di dalam VM." />
+
+        <Button
+            android:id="@+id/btnLeakCheck"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_leak_check" />
+
+        <TextView
+            android:id="@+id/tvLeakResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Belum diperiksa" />
+
+        <!-- NZey Master -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/section_nzey"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <TextView
+            android:id="@+id/tvNzeyInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/nzey_info_text" />
+
+        <Button
+            android:id="@+id/btnDownloadNzey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_download_nzey" />
+
+        <Button
+            android:id="@+id/btnCheckNzey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_check_nzey" />
+
+        <TextView
+            android:id="@+id/tvNzeyInstalled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status pemasangan: belum diperiksa" />
+
+        <!-- Kejujuran -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/section_honesty"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <TextView
+            android:id="@+id/tvHonesty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="24dp"
+            android:text="@string/honesty_text" />
+
+    </LinearLayout>
+</ScrollView>
+
+```
+
+`android/app/src/main/res/values/strings.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NZeyMod Manager</string>
+    <string name="subtitle">Pengelola identitas, profil, ROM, dan modul NZeyMod</string>
+
+    <string name="section_identity">Identitas Perangkat</string>
+    <string name="section_profiles">Profil Tersimpan</string>
+    <string name="section_rom">Gabung ROM (5 Bagian)</string>
+    <string name="section_magisk">Profil Magisk</string>
+    <string name="section_keybox">Keybox</string>
+    <string name="section_leak">Pemeriksaan Kebocoran (Host)</string>
+    <string name="section_nzey">NZey Master</string>
+    <string name="section_honesty">Catatan Kejujuran</string>
+
+    <string name="btn_generate">Buat Identitas Baru</string>
+    <string name="btn_save_identity">Simpan identity.json dan config.prop</string>
+    <string name="btn_share_identity">Bagikan Identitas</string>
+    <string name="label_operator_mode">Mode operator</string>
+    <string name="label_android_id">Android ID</string>
+    <string name="label_serial">Serial</string>
+    <string name="label_imei">IMEI</string>
+    <string name="label_operator">Operator</string>
+    <string name="hint_profile_name">Nama profil, contoh: Shopee Utama</string>
+    <string name="btn_save_profile">Simpan Profil</string>
+    <string name="btn_load_profile">Muat Profil</string>
+    <string name="btn_delete_profile">Hapus Profil</string>
+    <string name="btn_refresh_profiles">Muat Ulang Daftar</string>
+    <string name="btn_pick_parts">Pilih Bagian ROM (bisa banyak)</string>
+    <string name="btn_pick_output">Pilih File Keluaran dan Gabung</string>
+    <string name="btn_pick_keybox">Pilih File Keybox (.xml)</string>
+    <string name="btn_leak_check">Jalankan Pemeriksaan</string>
+    <string name="btn_download_nzey">Unduh NZey Master (145 MB)</string>
+    <string name="btn_check_nzey">Periksa Apakah Terinstal</string>
+
+    <string name="honesty_text">Catatan kejujuran:\n• Play Integrity STRONG tidak dijamin di dalam mesin virtual (VM).\n• IMEI pada Android 11 bersifat best-effort; sistem membatasi akses pengenal perangkat.\n• Shopee secara resmi melarang emulator dan VM dalam ketentuan layanannya. Penggunaan VM berisiko dibatasi atau diblokir oleh Shopee.\n• Aplikasi ini BUKAN mesin virtual. Aplikasi ini hanya pengelola identitas, profil, ROM, dan modul untuk NZey Master.</string>
+    <string name="nzey_info_text">Paket: com.clone.android.dual.space\nVersi: 3.2.68\nUkuran: 145 MB\nSHA-256: 2d70516e1f7bd85ca105341b8bd13760fe7484d6b1983e0446a436253d90c602\n\nPeringatan: hapus Virtual Master lama terlebih dahulu sebelum memasang NZey Master, karena tanda tangan (signature) keduanya berbeda.</string>
+    <string name="keybox_warning">Keybox ini hanya ECDSA dan kedaluwarsa pada 28 Nov 2026. Setelah tanggal tersebut, keybox perlu diganti.</string>
+    <string name="magisk_off_text">Magisk NONAKTIF: bersih, tanpa root dan tanpa modul.</string>
+    <string name="magisk_on_text">Magisk AKTIF: modul berikut akan dipasang di dalam VM saat pertama kali boot oleh nzeymod.sh. Modul TIDAK disertakan di dalam APK ini.</string>
+    <string name="modules_text">• Zygisk Next v1.2.8\n• Play Integrity Fork v18.4.1\n• Shamiko v1.2.1\n• LSPosed v1.10.1-7244\n• Tricky Store v1.3.0\n• Hide My Applist v3.7.0\n• Clone App Pro v1.0.0</string>
+    <string name="denylist_text">DenyList:\n• com.shopee.id\n• com.shopee.tw\n• com.shopee.ph\n• com.shopee.vn\n• com.shopee.my\n• com.shopee.sg\n• com.shopee.br\n• com.shopee.co.id\n• com.clone.app.pro</string>
+    <string name="rom_expected_text">SHA-256 yang diharapkan: 1d8e0031a1076b4de7192274fb156a7ab88c97f1eb3b4bf3be98adf2e65c364c</string>
+    <string name="not_generated">Belum dibuat</string>
+    <string name="no_parts">Belum ada bagian yang dipilih</string>
+    <string name="no_profiles">Belum ada profil tersimpan</string>
+
+    <string-array name="operator_modes">
+        <item>acak</item>
+        <item>telkomsel</item>
+        <item>indosat</item>
+        <item>xl</item>
+        <item>axis</item>
+        <item>tri</item>
+        <item>smartfren</item>
+    </string-array>
+</resources>
+
+```
+
+`android/app/src/main/res/values/themes.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
+        <item name="android:colorPrimary">#1B5E20</item>
+        <item name="android:colorPrimaryDark">#0D3311</item>
+        <item name="android:colorAccent">#2E7D32</item>
+    </style>
+</resources>
+
+```
+
+`android/build-manual.sh`:
+
+```sh
+#!/bin/bash
+# Build manual APK NZeyMod Manager tanpa Gradle (Java saja).
+#
+# Dipakai karena Gradle daemon di VM ini tidak bisa berkomunikasi
+# (koneksi TCP loopback antar proses Java diblokir sandbox),
+# sementara aapt2 / javac / d8 / apksigner berjalan lokal tanpa TCP.
+# Hasilnya sama dengan ./gradlew assembleDebug: APK debug yang
+# bisa diinstal. Untuk build normal di Android Studio, tetap
+# pakai Gradle.
+set -e
+cd "$(dirname "$0")"
+
+JAVA_HOME="${JAVA_HOME:-$(echo $HOME/opt/jdk-17*)}"
+export JAVA_HOME
+export PATH="$JAVA_HOME/bin:$PATH"
+
+SDK="${ANDROID_HOME:-$HOME/Android/sdk}"
+AAPT2="$SDK/build-tools/34.0.0/aapt2"
+D8="$SDK/build-tools/34.0.0/d8"
+ZIPALIGN="$SDK/build-tools/34.0.0/zipalign"
+APKSIGNER="$SDK/build-tools/34.0.0/apksigner"
+ANDROID_JAR="$SDK/platforms/android-34/android.jar"
+
+OUT="app/build/manual"
+rm -rf "$OUT"
+mkdir -p "$OUT/gen" "$OUT/classes" "$OUT/dex"
+
+echo "== 1. aapt2 compile (resources) =="
+"$AAPT2" compile --dir app/src/main/res -o "$OUT/compiled.zip"
+
+echo "== 2. aapt2 link (APK + R.java) =="
+"$AAPT2" link -o "$OUT/app-unsigned.apk" \
+  --manifest app/src/main/AndroidManifest.xml \
+  -I "$ANDROID_JAR" \
+  --java "$OUT/gen" \
+  --min-sdk-version 26 --target-sdk-version 34 \
+  --version-code 3 --version-name "2.1-beta" \
+  --auto-add-overlay \
+  "$OUT/compiled.zip"
+
+echo "== 3. javac (Java -> class) =="
+"$JAVA_HOME/bin/javac" -J-Xmx768m \
+  -encoding UTF-8 \
+  -source 17 -target 17 \
+  -cp "$ANDROID_JAR" \
+  -d "$OUT/classes" \
+  app/src/main/java/com/kizakixd/nzeymodmanager/*.java \
+  $(find "$OUT/gen" -name "*.java")
+
+echo "== 4. d8 (class -> dex) =="
+(cd "$OUT/classes" && "$JAVA_HOME/bin/jar" cf "../classes.jar" .)
+"$D8" --lib "$ANDROID_JAR" --output "$OUT/dex" \
+  "$OUT/classes.jar"
+
+echo "== 5. tambah classes.dex ke APK =="
+python3 - "$OUT/app-unsigned.apk" "$OUT/dex/classes.dex" << 'PY'
+import sys, zipfile
+apk, dex = sys.argv[1], sys.argv[2]
+with zipfile.ZipFile(apk, "a", zipfile.ZIP_DEFLATED) as z:
+    z.write(dex, "classes.dex")
+print("dex ditambahkan")
+PY
+
+echo "== 6. zipalign =="
+"$ZIPALIGN" -f 4 "$OUT/app-unsigned.apk" "$OUT/app-aligned.apk"
+
+echo "== 7. keystore debug (jika belum ada) =="
+if [ ! -f "$OUT/debug.keystore" ]; then
+  keytool -genkeypair -keystore "$OUT/debug.keystore" \
+    -alias androiddebugkey -storepass android -keypass android \
+    -keyalg RSA -keysize 2048 -validity 10000 \
+    -dname "CN=Android Debug,O=Android,C=US" -noprompt
+fi
+
+echo "== 8. apksigner =="
+"$APKSIGNER" sign --ks "$OUT/debug.keystore" \
+  --ks-pass pass:android --key-pass pass:android \
+  --out "$OUT/app-debug.apk" "$OUT/app-aligned.apk"
+
+echo "== 9. verifikasi =="
+"$APKSIGNER" verify --verbose "$OUT/app-debug.apk"
+"$AAPT2" dump badging "$OUT/app-debug.apk" | head -5
+ls -lh "$OUT/app-debug.apk"
+
+```
+
+`docs/batasan.md`:
+
+```md
+# Batasan — NZeyMod Launcher v2.1-beta
+
+Dokumen ini menjelaskan batasan secara jujur, agar tidak ada klaim yang melebihi kemampuan aplikasi dan ROM.
+
+## 1. Launcher bukan mesin virtual
+
+NZeyMod Launcher tidak menjalankan ROM Android 11. Launcher hanya menyiapkan berkas: memilih ROM utuh dari penyimpanan, memverifikasi SHA-256, menyalinnya ke folder `NZeyMod/`, menggabungkan part ROM, membuat identitas, menyimpan profil, menyiapkan keybox, dan menampilkan daftar modul — lalu meluncurkan NZey Master. ROM hanya berjalan di dalam NZey Master (atau Virtual Master).
+
+## 2. Play Integrity STRONG tidak dijamin
+
+Play Integrity STRONG tidak dapat dijamin di VM mana pun. VM tidak memiliki TEE (Trusted Execution Environment) atau bootloader terkunci sendiri. Yang dapat diupayakan adalah hasil BASIC dan DEVICE, dengan keybox dan konfigurasi Play Integrity Fork yang benar.
+
+## 3. Keybox kedaluwarsa 28 November 2026
+
+Keybox yang digunakan saat ini hanya ECDSA dan kedaluwarsa pada 28 November 2026. Setelah tanggal tersebut, keybox harus diganti dengan keybox baru yang masih berlaku. Manager menampilkan peringatan ini pada fitur Ganti Keybox.
+
+## 4. IMEI bersifat best-effort
+
+Di Android 11, IMEI dibaca dari layanan telepon virtual. Penggantian properti IMEI bersifat best-effort dan tidak selalu terbaca sama oleh semua aplikasi.
+
+## 5. Shopee melarang emulator dan VM
+
+Shopee secara resmi melarang emulator atau VM di ketentuan layanannya. Modifikasi ini hanya menurunkan sinyal deteksi lokal. Hal ini tidak menjamin akun aman dari pembatasan atau penindakan oleh pihak aplikasi.
+
+## 6. Modul Magisk tidak termasuk
+
+File ZIP dan APK modul Magisk tidak ada di repositori `nzeymod-rom` dan tidak disertakan di dalam APK Manager. Daftar modul di Manager hanya berfungsi sebagai panduan versi dan sumber. Modul harus diperoleh dari sumber resmi masing-masing.
+
+Daftar modul yang dirujuk:
+
+- Zygisk Next v1.2.8
+- Play Integrity Fork v18.4.1
+- Shamiko v1.2.1
+- LSPosed v1.10.1-7244
+- Tricky Store v1.3.0
+- Hide My Applist v3.7.0
+- Clone App Pro v1.0.0 (APK milik pengguna)
+
+## 7. Pemeriksaan di host bukan pemeriksaan di VM
+
+Fitur Cek Kebocoran di Manager memeriksa perangkat host. Hasilnya tidak membuktikan kondisi di dalam VM. Pemeriksaan yang berlaku adalah pemeriksaan di dalam VM, melalui aplikasi NZeyMod Identity dan log `nzeymod.log`.
+
+## 8. APK belum diuji di perangkat fisik
+
+APK versi 2.1-beta dibangun dan diverifikasi secara statis di lingkungan pengembangan (tanda tangan, manifest, dan SHA-256). APK belum dipasang dan diuji di perangkat fisik. Pengujian di perangkat POCO X7 Pro masih diperlukan sebelum digunakan secara rutin, terutama alur impor ROM utuh ke NZey Master.
+
+## 9. NZey Master hasil repackage belum teruji — rename package berisiko
+
+`NZeyMaster-nzey.apk` adalah Virtual Master 3.2.68 hasil repackage: paket diubah dari `com.clone.android.dual.space` menjadi `com.kizakixd.nzeymaster` agar dapat terpasang berdampingan dengan Virtual Master lama tanpa uninstall, dan lib `armeabi-v7a` dibuang (hanya arm64 yang dipertahankan, sesuai POCO X7 Pro). String path paket lama di native lib `libkr*.so` (mis. `/data/data/com.clone.android.dual.space/vm/vm%d/fs`) di-patch ke paket baru dengan panjang berkas yang dipertahankan; tidak ada smali yang diubah, jadi patch VIP dipertahankan.
+
+Risiko yang tersisa dan wajib dites di HP:
+
+- Login server / cloud sync Virtual Master dapat menolak paket baru, karena server dapat memeriksa nama paket atau tanda tangan aplikasi.
+- Provider / FileProvider dan Firebase / Mobile Ads memakai authority berbasis nama paket — sudah diubah di manifest, tetapi perilaku runtime-nya belum teruji.
+- VM dapat gagal booting bila ada path lain yang masih mengarah ke paket lama di dalam native lib atau di dalam ROM yang diimpor.
+- APK hasil repackage hanya untuk perangkat arm64 (POCO X7 Pro). Perangkat ARM 32-bit tidak dapat memakai APK ini karena lib `armeabi-v7a` sudah dibuang.
+- Bila NZey Master hasil repackage gagal jalan, fallback-nya adalah APK paket lama — tetapi APK lama tetap bentrok dengan Virtual Master yang masih terpasang dan memerlukan uninstall terlebih dahulu.
+
+Detail lengkap ada di `nzeymaster/REPACK.md` dan `nzeymaster/REMOVED.md`.
+
+## 10. Keamanan berkas
+
+- `identity.json` berisi identitas perangkat. Jangan dibagikan ke pihak yang tidak dipercaya.
+- `keybox.xml` adalah kredensial sensitif. Jangan dibagikan dan jangan diunggah ke repositori publik.
+- Simpan cadangan profil di tempat yang aman, dan hapus berkas yang sudah tidak diperlukan.
+
+```
+
+`docs/fixes.md`:
+
+```md
+# Perbaikan Ketidakcocokan di nzeymod-rom
+
+Ditemukan saat membaca isi repositori pada 23 November 2026.
+Kedua perbaikan ini diterapkan di Manager, bukan diasumsikan sudah
+benar di repo.
+
+## 1. Nama file operator
+
+- Script `nzeymod.sh` membaca `$SYS/operators.txt`.
+- File yang ada di repositori: `scripts/operators_id.txt`.
+- Perbaikan: file operator harus bernama `operators.txt` (bukan
+  `operators_id.txt`), karena `nzeymod.sh` membaca `$SYS/operators.txt`.
+  Manager memakai `operators.txt` dengan format `nama|numeric|alpha`
+  (lihat `rom-fixes/operators.txt`). Jika skrip repo dipakai apa adanya
+  dengan nama file lama, skrip akan gagal karena file tidak ditemukan.
+
+## 2. Board di vendor-build.prop
+
+- `props/vendor-build.prop` menulis `ro.product.board=flame`
+  (Pixel 4).
+- Semua identitas lain di repo: `redfin` (Pixel 5).
+- Perbaikan: Manager memakai `redfin` secara konsisten untuk semua
+  properti board / device / model Pixel 5.
+
+## 3. File yang tidak ada di repo (bukan bug, tetapi harus diimpor)
+
+- ZIP modul Magisk (Zygisk Next, Play Integrity Fork, Shamiko,
+  LSPosed, Tricky Store) dan `keybox.xml` **tidak ada** di repo.
+  Yang ada hanya daftar dan hash di `docs/modules-report.md`.
+- Manager tidak menganggap file tersebut sudah ada; pengguna
+  mengimpor file tersebut dari penyimpanan HP.
+
+```
+
+`docs/panduan.md`:
+
+```md
+# Panduan — NZeyMod Launcher v2.1-beta
+
+## Penting: Launcher ini BUKAN mesin virtual
+
+NZeyMod Launcher bukan mesin virtual dan bukan emulator Android di dalam
+HP. Mesin yang menjalankan ROM NZeyMod adalah **NZey Master** (Virtual
+Master 3.2.68 remake, VIP sudah di-patch). Launcher menyiapkan ROM utuh
+dari penyimpanan, memverifikasi SHA-256, menyalinnya ke folder `NZeyMod/`,
+lalu meluncurkan NZey Master untuk diimpor lewat **Import Local ROM**.
+ROM ini hanya dapat dijalankan oleh mesin Virtual Master / NZey Master.
+
+## Perangkat yang dituju
+
+Panduan ini ditulis untuk POCO X7 Pro sebagai perangkat host. Perangkat
+host adalah perangkat tempat Launcher dan NZey Master dipasang. ROM
+Android 11 berjalan di dalam VM (NZey Master), bukan langsung di perangkat
+host.
+
+## 1. Persiapan
+
+1. Pastikan ruang kosong di perangkat host minimal 1 GB: sekitar 405 MB
+   untuk ROM utuh, dan 139 MB untuk APK NZey Master hasil repackage
+   (bila belum terpasang). Bila masih memakai 5 part ROM, sediakan
+   sekitar 1,5 GB (405 MB untuk part, 405 MB untuk file ZIP gabungan,
+   dan 139 MB untuk APK NZey Master hasil repackage).
+2. Siapkan ROM utuh yang sudah dimiliki:
+   `rom_11_0_0_1036_3281_M27_NZeyMod.zip` (sekitar 405 MB).
+   SHA-256 yang benar adalah:
+   `1d8e0031a1076b4de7192274fb156a7ab88c97f1eb3b4bf3be98adf2e65c364c`
+3. Sejak v2.1-beta, Virtual Master lama **tidak perlu dihapus**: NZey
+   Master hasil repackage memakai paket `com.kizakixd.nzeymaster` dan
+   dapat terpasang berdampingan dengan Virtual Master lama. Ini hanya
+   berlaku untuk APK hasil repackage (`NZeyMaster-nzey.apk`, 139 MB).
+   APK paket lama (145 MB) tetap bentrok dan tetap memerlukan uninstall
+   Virtual Master lama terlebih dahulu.
+4. Pasang NZey Master hasil repackage bila belum terpasang. APK-nya
+   `NZeyMaster-nzey.apk`, berukuran 139 MB (144.895.840 byte), SHA-256
+   `224083a8cd2920f67d9c8a67a9f6746afa62820a218d9cb5f7174760a46bb55c`.
+   Tautan / berkas rilis tercantum di Launcher bagian NZey Master.
+   Launcher tidak mengunduh APK tersebut di dalam aplikasi; unduhan
+   dilakukan melalui peramban / aplikasi Unduhan, lalu dipasang dari sana.
+
+## 2. Jalankan ROM utuh (fitur utama v2)
+
+Ini adalah cara yang dipakai bila ROM utuh sudah dimiliki. Menggabungkan
+5 bagian ROM tidak diperlukan dalam cara ini.
+
+1. Buka Launcher, masuk ke bagian **Jalankan ROM (ROM Utuh)**.
+2. Tekan **Pilih ROM Utuh**, lalu cari dan pilih berkas ROM utuh dari
+   folder mana pun di penyimpanan (nama berkas bebas — yang diperiksa
+   adalah isi berkas melalui SHA-256, bukan namanya).
+   Launcher menampilkan nama berkas dan ukurannya. Ukuran yang diterima
+   adalah 380–430 MB. Bila nama berkas berakhiran `.part00` sampai
+   `.part04`, itu adalah bagian ROM terpisah — gunakan bagian Gabung ROM
+   di bawah, bukan cara ini.
+3. Tekan **Verifikasi ROM Utuh**. Launcher menghitung SHA-256 berkas
+   (405 MB membutuhkan waktu beberapa saat) dan membandingkannya dengan
+   hash resmi di atas.
+4. Bila hasil **LOLOS**, tekan **Siapkan untuk Impor**. Launcher menyalin
+   berkas ke folder `NZeyMod/` di penyimpanan aplikasi dan menghitung
+   ulang SHA-256 salinan tersebut. Bila salinan tidak cocok, hapus salinan
+   dan verifikasi ulang.
+5. Bila hasil **GAGAL**, impor ditolak dan Launcher menjelaskan
+   kemungkinannya: berkas corrupt saat diunduh atau disalin, berkas bukan
+   ROM NZeyMod utuh, masih berupa bagian terpisah, atau ukuran jauh dari
+   405 MB (berkas terpotong atau belum selesai diunduh). Jangan mengimpor
+   berkas yang gagal verifikasi. Periksa sumber berkas, salin atau unduh
+   ulang, lalu verifikasi lagi.
+6. Tekan **Buka NZey Master**. Bila NZey Master belum terpasang, Launcher
+   menampilkan status belum terpasang dan tautan unduhnya.
+7. Di NZey Master, lakukan impor:
+   - Tap tombol **+** (Tambah).
+   - Tap titik tiga (⋮).
+   - Pilih **Import Local ROM**.
+   - Pilih berkas `rom_11_0_0_1036_3281_M27_NZeyMod.zip` dari folder
+     `NZeyMod/`.
+   - Tunggu instalasi ROM selesai, lalu jalankan VM.
+8. Pada boot pertama, `nzeymod.sh` memasang modul, menerapkan identitas,
+   dan menulis log ke `/sdcard/NZeyMod/nzeymod.log` di dalam VM.
+
+Di prototipe web, cara yang sama dapat dicoba: pilih ROM utuh, verifikasi
+SHA-256, lalu unduh salinan dengan nama yang benar ke folder `NZeyMod/`.
+Peluncuran NZey Master dari peramban tidak dapat dilakukan; langkah impor
+tetap dilakukan manual di NZey Master.
+
+## 3. Gabung ROM (opsional, bila yang dimiliki masih 5 bagian)
+
+Langkah ini hanya diperlukan bila yang dimiliki masih berupa 5 bagian
+ROM, bukan ROM utuh.
+
+1. Buka Launcher, masuk ke bagian Gabung ROM.
+2. Pilih kelima file part. Urutan file ditentukan berdasarkan nama file, dari `.part00` sampai `.part04`:
+   - `rom_11_0_0_1036_3281_M27_NZeyMod.zip.part00` (90 MB)
+   - `rom_11_0_0_1036_3281_M27_NZeyMod.zip.part01` (90 MB)
+   - `rom_11_0_0_1036_3281_M27_NZeyMod.zip.part02` (90 MB)
+   - `rom_11_0_0_1036_3281_M27_NZeyMod.zip.part03` (90 MB)
+   - `rom_11_0_0_1036_3281_M27_NZeyMod.zip.part04` (44,9 MB)
+3. Pilih lokasi penyimpanan untuk file hasil gabungan, dengan nama `rom_11_0_0_1036_3281_M27_NZeyMod.zip`.
+4. Tunggu proses selesai. Launcher menghitung SHA-256 selama penggabungan.
+5. Nilai yang benar adalah:
+   `1d8e0031a1076b4de7192274fb156a7ab88c97f1eb3b4bf3be98adf2e65c364c`
+6. Jika nilai tidak sesuai, jangan lanjutkan. Unduh ulang part yang rusak dan gabungkan kembali. Setelah hasil gabungan lolos, kembali ke langkah 2 di atas dan impor berkas tersebut ke NZey Master.
+
+Perintah yang setara di Termux atau Linux, bila dilakukan manual, ada di `rom-fixes/join.sh`.
+
+## 4. Buat identitas
+
+1. Masuk ke bagian Acak Identitas.
+2. Pilih mode operator: `random` atau salah satu operator (Telkomsel, Indosat Ooredoo, XL Axiata, AXIS, Tri, Smartfren).
+3. Tekan tombol acak identitas. Launcher membuat:
+   - Android ID: 16 karakter heksadesimal acak.
+   - Serial: 16 karakter heksadesimal acak.
+   - IMEI: diawali TAC Pixel 5 (35254410, 35482510, atau 35737210), dilanjutkan 6 digit acak, dan diakhiri digit Luhn yang valid.
+   - Operator beserta kode MCCMNC-nya.
+4. Simpan hasilnya. Launcher menulis `identity.json` dan `config.prop` ke folder `NZeyMod/` di penyimpanan aplikasi, dan dapat membagikannya sebagai file.
+5. Untuk memakai kembali identitas yang sama di lain waktu, simpan sebagai profil dengan nama yang jelas, misalnya `shopee-bersih` atau `utama`.
+
+## 5. Profil Magisk
+
+- **Magisk OFF (profil bersih)**: tanpa root dan tanpa modul. Profil ini ditujukan untuk aplikasi yang sensitif terhadap root.
+- **Magisk ON (profil root)**: modul dipasang di dalam VM saat boot pertama oleh `nzeymod.sh`, dari folder `/system/nzeymod/modules/`. Daftar modul:
+  - Zygisk Next v1.2.8
+  - Play Integrity Fork v18.4.1
+  - Shamiko v1.2.1
+  - LSPosed v1.10.1-7244
+  - Tricky Store v1.3.0
+  - Hide My Applist v3.7.0
+  - Clone App Pro v1.0.0
+
+  DenyList yang diterapkan mencakup aplikasi Shopee (`com.shopee.id`, `com.shopee.tw`, `com.shopee.ph`, `com.shopee.vn`, `com.shopee.my`, `com.shopee.sg`, `com.shopee.br`, `com.shopee.co.id`) dan `com.clone.app.pro`.
+
+Modul-modul tersebut **tidak termasuk** di dalam APK Launcher. Unduh modul dari sumber resmi masing-masing sesuai `docs/modules-report.md` di repositori asal, lalu pastikan modul berada di dalam ROM sebelum boot pertama, atau pasang secara manual melalui aplikasi Magisk di dalam VM.
+
+## 6. Ganti keybox
+
+1. Siapkan file keybox XML yang baru dan masih berlaku.
+2. Di Launcher, pilih file XML tersebut.
+3. Launcher memeriksa bahwa file berekstensi `.xml` dan berisi data keybox, lalu menyalinnya sebagai `keybox.xml`.
+4. Salin file tersebut ke `/sdcard/NZeyMod/keybox.xml` di dalam VM, lalu nyalakan ulang VM.
+
+Keybox yang ada saat ini kedaluwarsa pada 28 November 2026. Setelah tanggal tersebut, keybox harus diganti, karena Play Integrity dapat gagal.
+
+## 7. Pasang NZey Master dan impor ROM
+
+1. Di bagian NZey Master pada Launcher, periksa apakah NZey Master sudah terpasang. Launcher memeriksa paket baru `com.kizakixd.nzeymaster` terlebih dahulu, lalu paket lama `com.clone.android.dual.space` sebagai fallback.
+2. Jika belum, pasang `NZeyMaster-nzey.apk` hasil repackage (139 MB). Periksa SHA-256 APK bila memungkinkan:
+   `224083a8cd2920f67d9c8a67a9f6746afa62820a218d9cb5f7174760a46bb55c`
+   APK ini dapat terpasang berdampingan dengan Virtual Master lama — tidak perlu uninstall. APK paket lama (145 MB, SHA-256 `2d70516e1f7bd85ca105341b8bd13760fe7484d6b1983e0446a436253d90c602`) hanya fallback dan tetap memerlukan uninstall Virtual Master lama.
+3. Pasang APK tersebut.
+4. Impor file ZIP ROM utuh yang sudah diverifikasi ke NZey Master dengan langkah pada bagian 2 di atas.
+5. Salin `identity.json`, `config.prop`, dan `keybox.xml` hasil Launcher ke folder `/sdcard/NZeyMod/` di dalam VM. Cara penyalinan berkas mengikuti fitur berbagi berkas yang disediakan NZey Master.
+6. Nyalakan ulang VM. Pada boot pertama, `nzeymod.sh` memasang modul, menerapkan identitas, dan menulis log ke `/sdcard/NZeyMod/nzeymod.log` di dalam VM.
+
+## 8. Cek kebocoran
+
+Gunakan fitur Cek Kebocoran di dalam VM (aplikasi NZeyMod Identity) untuk pemeriksaan yang sebenarnya. Fitur Cek Kebocoran di Launcher hanya memeriksa perangkat host dan digunakan sebagai gambaran awal. Nilai yang diharapkan di dalam VM antara lain `ro.debuggable=0`, `ro.build.tags=release-keys`, dan `ro.secure=1`, serta tidak ada jejak `su` di luar Magisk.
+
+## 9. Jika terjadi masalah
+
+- **SHA-256 ROM tidak sesuai**: jangan impor berkas tersebut. Periksa ukuran berkas (harus sekitar 405 MB), periksa apakah berkas masih berupa bagian `.part`, lalu salin atau unduh ulang dan verifikasi lagi.
+- **NZey Master tidak muncul saat ditekan Buka**: periksa apakah NZey Master sudah terpasang (bagian NZey Master di Launcher). Bila belum, unduh dan pasang terlebih dahulu.
+- **Import Local ROM tidak menemukan berkas**: pastikan berkas berada di folder `NZeyMod/` dan bernama `rom_11_0_0_1036_3281_M27_NZeyMod.zip`, lalu coba pilih melalui pengelola berkas NZey Master.
+- **Identitas tidak berubah setelah reboot**: periksa `nzeymod.log` di dalam VM dan pastikan `identity.json` berada di `/sdcard/NZeyMod/`.
+- **Modul tidak terpasang**: pastikan folder `/system/nzeymod/modules/` berisi file modul, lalu periksa log boot pertama.
+- **NZey Master tidak dapat dipasang**: bila memasang APK paket lama (145 MB), pastikan Virtual Master lama sudah dihapus, karena tanda tangan APK berbeda. Bila memasang `NZeyMaster-nzey.apk` hasil repackage (139 MB, paket `com.kizakixd.nzeymaster`), uninstall tidak diperlukan — APK ini dibuat agar dapat berdampingan dengan Virtual Master lama.
+- **Play Integrity gagal**: periksa masa berlaku keybox dan konfigurasi Play Integrity Fork. STRONG tidak dapat dijamin di VM; lihat `docs/batasan.md`.
+
+```
+
+`prototype/index.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NZeyMod Manager — Prototype</title>
+<meta name="description" content="Prototype pengelola NZeyMod ROM: gabung ROM, acak identitas, profil, Magisk, keybox, dan cek kebocoran (simulasi).">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f172a">
+<style>
+  :root{--bg:#0f172a;--card:#1e293b;--card2:#334155;--text:#f1f5f9;--muted:#94a3b8;--accent:#22c55e;--accent2:#38bdf8;--warn:#f59e0b;--danger:#ef4444;--ok:#22c55e;--border:#475569}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.55}
+  header{padding:24px 16px 12px;max-width:960px;margin:0 auto}
+  header h1{margin:0 0 6px;font-size:28px}
+  header p{margin:4px 0;color:var(--muted)}
+  .badge{display:inline-block;background:#14532d;color:#bbf7d0;border:1px solid #22c55e;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
+  main{max-width:960px;margin:0 auto;padding:8px 16px 48px}
+  section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:16px 0}
+  h2{margin:0 0 8px;font-size:20px}
+  h3{margin:16px 0 6px;font-size:16px}
+  p{margin:8px 0}
+  .muted{color:var(--muted);font-size:14px}
+  .small{font-size:13px}
+  label{display:block;font-weight:600;margin:10px 0 4px}
+  input[type=text],input[type=file],select,textarea{width:100%;background:#0f172a;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:15px}
+  textarea{min-height:120px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+  button{background:var(--accent);color:#052e16;border:0;border-radius:8px;padding:10px 16px;font-weight:700;font-size:15px;cursor:pointer;margin:6px 6px 6px 0}
+  button.secondary{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+  button.info{background:var(--accent2);color:#082f49}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .row{display:flex;flex-wrap:wrap;gap:12px}
+  .row>*{flex:1;min-width:220px}
+  .kv{background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;word-break:break-all;white-space:pre-wrap}
+  .status{font-weight:800;padding:6px 10px;border-radius:8px;display:inline-block}
+  .status.ok{background:#14532d;color:#bbf7d0}
+  .status.bad{background:#7f1d1d;color:#fecaca}
+  .status.idle{background:#334155;color:#e2e8f0}
+  .status.warn{background:#78350f;color:#fde68a}
+  .warnbox{background:#451a03;border:1px solid var(--warn);border-radius:12px;padding:16px;margin:16px 0}
+  .warnbox h2{color:#fde68a}
+  .infobox{background:#082f49;border:1px solid var(--accent2);border-radius:12px;padding:16px;margin:16px 0}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:8px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{color:var(--muted)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
+  .pill.pass{background:#14532d;color:#bbf7d0}
+  .pill.fail{background:#7f1d1d;color:#fecaca}
+  .pill.sim{background:#334155;color:#e2e8f0}
+  .profile-item{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:10px;margin:6px 0}
+  .toggle{font-size:15px}
+  .checklist{list-style:none;padding:0;margin:8px 0}
+  .checklist li{padding:6px 0;border-bottom:1px solid #334155}
+  footer{max-width:960px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:13px}
+  a{color:var(--accent2)}
+  code{background:#0f172a;padding:2px 6px;border-radius:6px;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <span class="badge">PROTOTYPE WEB — BUKAN MESIN VIRTUAL</span>
+  <h1>NZeyMod Manager</h1>
+  <p>Pengelola NZeyMod ROM (Android 11, Pixel 5 / redfin, M27). Prototype ini berjalan sepenuhnya di browser: memilih ROM utuh dari penyimpanan, memverifikasi SHA-256, menggabungkan berkas ROM, membuat identitas acak, menyimpan profil, dan menyiapkan konfigurasi untuk dipakai di dalam NZey Master.</p>
+  <p class="muted">Bahasa: Bahasa Indonesia baku. Versi prototype: 2.1-beta.</p>
+</header>
+
+<main>
+  <!-- Honesty / limitations -->
+  <div class="warnbox" id="keterbatasan">
+    <h2>Kejujuran dan Batasan — Harap Dibaca Dahulu</h2>
+    <ul>
+      <li><strong>Manager ini BUKAN mesin virtual (VM).</strong> ROM tetap berjalan di dalam aplikasi NZey Master (Virtual Master 3.2.68 remake). Manager ini hanya menyiapkan berkas dan konfigurasi, lalu meluncurkan NZey Master.</li>
+      <li><strong>ROM utuh sudah dimiliki pengguna.</strong> Bila sudah memiliki berkas ROM utuh (<code>rom_11_0_0_1036_3281_M27_NZeyMod.zip</code>, sekitar 405 MB), gunakan bagian “Jalankan ROM (ROM Utuh)” di bawah. Menggabungkan 5 bagian ROM hanya diperlukan bila yang dimiliki masih berupa bagian terpisah.</li>
+      <li><strong>Play Integrity STRONG tidak dijamin.</strong> Hasil STRONG bergantung pada keybox, fingerprint, dan kondisi perangkat/VM. Tidak ada jaminan lolos STRONG.</li>
+      <li><strong>Keybox ECDSA-only dan kedaluwarsa 28 November 2026.</strong> Setelah tanggal tersebut keybox ini tidak lagi dapat diandalkan. Jangan mengandalkan satu keybox saja.</li>
+      <li><strong>Cek Kebocoran di prototype ini adalah simulasi di host (browser).</strong> Pemeriksaan nyata hanya dapat dilakukan di dalam VM setelah ROM berjalan.</li>
+      <li><strong>Tidak ada ROM yang diunduh oleh halaman ini.</strong> Pengguna harus sudah memiliki ROM utuh (sekitar 405 MB) atau 5 bagian ROM dari sumbernya sendiri. Gunakan bagian “Jalankan ROM (ROM Utuh)” bila ROM utuh sudah dimiliki, atau “Gabung ROM” bila yang dimiliki masih berupa 5 bagian.</li>
+      <li><strong>Virtual Master asli sulit digunakan dan memerlukan premium.</strong> NZey Master adalah remake yang disediakan sebagai alternatif. Sejak v2.1-beta ada NZey Master hasil repackage dengan paket <code>com.kizakixd.nzeymaster</code> yang dapat terpasang berdampingan dengan Virtual Master lama tanpa uninstall. APK paket lama tetap memerlukan uninstall Virtual Master lama terlebih dahulu karena tanda tangan (signature) berbeda.</li>
+    </ul>
+  </div>
+
+  <!-- (0) Jalankan ROM utuh -->
+  <section id="jalankan-rom">
+    <h2>0. Jalankan ROM (ROM Utuh) — Utama</h2>
+    <p><span class="badge">UTAMA — BILA ROM UTUH SUDAH DIMILIKI</span></p>
+    <p>Pilih berkas ROM utuh dari penyimpanan, verifikasi SHA-256, lalu siapkan untuk diimpor ke NZey Master. <strong>Prototype ini dan APK Manager bukan mesin virtual</strong> — ROM tetap dijalankan oleh NZey Master. Di browser, pemasangan NZey Master tidak dapat dideteksi; periksa pemasangannya di APK Manager atau di pengaturan perangkat.</p>
+    <p class="muted">Berkas yang diharapkan: <code>rom_11_0_0_1036_3281_M27_NZeyMod.zip</code> &nbsp;|&nbsp; Ukuran sekitar 405 MB (diterima 380–430 MB)<br>
+    Nama berkas dan folder sumber bebas — berkas dapat dipilih dari folder mana pun di penyimpanan. Verifikasi berdasarkan isi berkas (SHA-256), bukan nama berkas.<br>
+    SHA-256 yang diharapkan:<br><code>1d8e0031a1076b4de7192274fb156a7ab88c97f1eb3b4bf3be98adf2e65c364c</code></p>
+    <label for="wholeRomFile">Pilih ROM utuh (berkas apa pun, dari folder mana pun di penyimpanan)</label>
+    <input type="file" id="wholeRomFile">
+    <div>
+      <button id="btnVerifyWholeRom">Verifikasi ROM Utuh</button>
+      <button id="btnPrepareWholeRom" class="secondary" disabled>Siapkan untuk Impor (Unduh Salinan)</button>
+    </div>
+    <div id="wholeRomFileInfo" class="muted small"></div>
+    <h3>Hasil verifikasi</h3>
+    <div id="wholeRomResult" class="kv">Belum ada berkas yang dipilih. Pilih ROM utuh, lalu tekan “Verifikasi ROM Utuh”.</div>
+    <p><span id="wholeRomStatus" class="status idle">MENUNGGU</span></p>
+    <div id="wholeRomImportSteps" style="display:none">
+      <h3>Langkah impor ke NZey Master</h3>
+      <ol>
+        <li>Pasang NZey Master hasil repackage (<code>NZeyMaster-nzey.apk</code>, paket <code>com.kizakixd.nzeymaster</code>) bila belum terpasang (lihat bagian 7). APK ini dapat berdampingan dengan Virtual Master lama tanpa uninstall.</li>
+        <li>Simpan berkas ROM utuh di folder <code>NZeyMod/</code> di penyimpanan (tombol “Siapkan untuk Impor” mengunduh salinan dengan nama yang benar).</li>
+        <li>Buka NZey Master.</li>
+        <li>Tap tombol <strong>+</strong> (Tambah), lalu tap titik tiga (⋮).</li>
+        <li>Pilih <strong>Import Local ROM</strong>.</li>
+        <li>Pilih berkas <code>rom_11_0_0_1036_3281_M27_NZeyMod.zip</code> dari folder <code>NZeyMod/</code>.</li>
+        <li>Tunggu instalasi ROM selesai, lalu jalankan VM. Pada boot pertama, <code>nzeymod.sh</code> memasang modul dan menerapkan identitas.</li>
+      </ol>
+      <p class="muted small">Catatan: di browser, tombol di bawah ini hanya membuka tautan unduh NZey Master. Peluncuran aplikasi NZey Master hanya dapat dilakukan dari APK Manager di perangkat Android.</p>
+      <p><a href="https://129.226.154.152.sslip.io/download/NZeyMaster.apk"><button type="button" class="info">Unduh NZey Master paket lama (145 MB)</button></a></p>
+    </div>
+    <p class="muted small">Catatan: verifikasi SHA-256 dilakukan lokal di browser menggunakan File API dan <code>crypto.subtle.digest</code>. Berkas tidak diunggah ke server mana pun. Berkas sebesar 405 MB membutuhkan waktu beberapa saat dan memori yang cukup.</p>
+  </section>
+
+  <!-- (a) Gabung ROM -->
+  <section id="gabung-rom">
+    <h2>1. Gabung ROM</h2>
+    <p>Gabungkan 5 bagian ROM menjadi satu berkas, lalu verifikasi SHA-256.</p>
+    <p class="muted">Nama berkas hasil gabungan: <code>rom_11_0_0_1036_3281_M27_NZeyMod.zip</code><br>
+    Bagian yang diharapkan: <code>.part00</code> sampai <code>.part04</code> &nbsp;|&nbsp; Total sekitar 405 MB<br>
+    SHA-256 yang diharapkan:<br><code>1d8e0031a1076b4de7192274fb156a7ab88c97f1eb3b4bf3be98adf2e65c364c</code></p>
+    <label for="romFiles">Pilih 5 bagian ROM (bisa dipilih sekaligus)</label>
+    <input type="file" id="romFiles" multiple accept=".zip,.part00,.part01,.part02,.part03,.part04,application/zip,application/octet-stream">
+    <div>
+      <button id="btnJoinRom">Gabungkan dan Verifikasi</button>
+      <button id="btnDownloadJoined" class="secondary" disabled>Unduh Berkas Gabungan</button>
+    </div>
+    <div id="romFileList" class="muted small"></div>
+    <h3>Hasil</h3>
+    <div id="romResult" class="kv">Belum ada berkas yang diproses. Pilih 5 bagian ROM, lalu tekan “Gabungkan dan Verifikasi”.</div>
+    <p><span id="romStatus" class="status idle">MENUNGGU</span></p>
+    <p class="muted small">Catatan: penggabungan dan perhitungan SHA-256 dilakukan lokal di browser menggunakan File API / Blob dan <code>crypto.subtle.digest</code>. Berkas tidak diunggah ke server mana pun.</p>
+  </section>
+
+  <!-- (b) Acak Identitas -->
+  <section id="acak-identitas">
+    <h2>2. Acak Identitas</h2>
+    <p>Buat identitas perangkat baru: Android ID, nomor seri, IMEI, dan operator.</p>
+    <div class="row">
+      <div>
+        <label for="operatorMode">Mode operator</label>
+        <select id="operatorMode">
+          <option value="random" selected>Acak</option>
+          <option value="manual">Pilih manual</option>
+        </select>
+      </div>
+      <div>
+        <label for="operatorSelect">Operator (dipakai bila mode manual)</label>
+        <select id="operatorSelect">
+          <option value="Telkomsel|51010|Telkomsel">Telkomsel (51010)</option>
+          <option value="Indosat Ooredoo|51021|Indosat Ooredoo">Indosat Ooredoo (51021)</option>
+          <option value="XL Axiata|51011|XL">XL Axiata (51011)</option>
+          <option value="AXIS|51008|AXIS">AXIS (51008)</option>
+          <option value="Tri|51089|3">Tri (51089)</option>
+          <option value="Smartfren|51009|Smartfren">Smartfren (51009)</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <button id="btnRandomIdentity">Acak Identitas</button>
+      <button id="btnDownloadIdentityJson" class="secondary" disabled>Unduh identity.json</button>
+      <button id="btnDownloadConfigProp" class="secondary" disabled>Unduh config.prop</button>
+    </div>
+    <h3>Identitas saat ini</h3>
+    <div id="identityResult" class="kv">Belum ada identitas. Tekan “Acak Identitas”.</div>
+    <p class="muted small">Fingerprint perangkat: <code>google/redfin/redfin:11/RQ3A.211001.001/7641976:user/release-keys</code> — Android 11, Pixel 5 (redfin), locale <code>id-ID</code>, zona waktu <code>Asia/Jakarta</code>.<br>
+    IMEI dibuat dari TAC <code>35254410</code>, <code>35482510</code>, atau <code>35737210</code> + 6 digit acak + 1 digit cek Luhn (total 15 digit).</p>
+  </section>
+
+  <!-- (c) Profil -->
+  <section id="profil">
+    <h2>3. Profil</h2>
+    <p>Simpan identitas saat ini sebagai profil di penyimpanan lokal browser (<code>localStorage</code>), lalu muat kembali kapan saja.</p>
+    <label for="profileName">Nama profil</label>
+    <input type="text" id="profileName" placeholder="Contoh: Profil Utama" maxlength="80">
+    <div>
+      <button id="btnSaveProfile">Simpan Profil</button>
+    </div>
+    <h3>Daftar profil tersimpan</h3>
+    <div id="profileList"><p class="muted">Belum ada profil tersimpan.</p></div>
+    <p class="muted small">Format unduhan profil (.json) ditujukan untuk <code>/sdcard/NZeyMod/profiles/</code>.</p>
+  </section>
+
+  <!-- (d) Magisk -->
+  <section id="magisk">
+    <h2>4. Magisk</h2>
+    <p>Pilih mode root. Mode <strong>OFF</strong> berarti profil bersih: tanpa root dan tanpa modul. Mode <strong>ON</strong> berarti root aktif dengan 7 modul dan DenyList.</p>
+    <p>
+      <button id="btnMagiskOff" class="secondary toggle">Magisk OFF — Profil Bersih</button>
+      <button id="btnMagiskOn" class="toggle">Magisk ON — Root + Modul</button>
+    </p>
+    <p>Status: <span id="magiskStatus" class="status idle">OFF — Profil Bersih (tanpa root, tanpa modul)</span></p>
+    <div id="magiskModules" style="display:none">
+      <h3>Modul aktif (7)</h3>
+      <table>
+        <thead><tr><th>Modul</th><th>Versi</th></tr></thead>
+        <tbody id="magiskModuleRows"></tbody>
+      </table>
+      <h3>DenyList Shopee (+ Clone App Pro)</h3>
+      <div id="denyList" class="kv"></div>
+      <p class="muted small">DenyList menyembunyikan root dari aplikasi yang terdaftar. Daftar ini tidak menjamin aplikasi tidak mendeteksi root dengan cara lain.</p>
+    </div>
+    <h3>Pratinjau konfigurasi</h3>
+    <div id="configPreview" class="kv"></div>
+  </section>
+
+  <!-- (e) Ganti Keybox -->
+  <section id="keybox">
+    <h2>5. Ganti Keybox</h2>
+    <div class="warnbox" style="margin:0 0 12px">
+      <strong>Peringatan:</strong> Keybox yang tersedia saat ini hanya ECDSA dan <strong>kedaluwarsa 28 November 2026</strong>. Setelah tanggal tersebut, keybox ini tidak dapat diandalkan untuk Play Integrity. Siapkan keybox pengganti sebelum tanggal tersebut.
+    </div>
+    <label for="keyboxFile">Pilih berkas keybox (.xml)</label>
+    <input type="file" id="keyboxFile" accept=".xml,text/xml,application/xml">
+    <div>
+      <button id="btnValidateKeybox">Periksa Keybox</button>
+    </div>
+    <h3>Status keybox</h3>
+    <div id="keyboxResult" class="kv">Belum ada keybox yang dipilih.</div>
+    <p><span id="keyboxStatus" class="status idle">MENUNGGU</span></p>
+    <p class="muted small">Catatan: isi penuh keybox tidak disimpan di <code>localStorage</code> bila berukuran besar — hanya metadata (nama berkas, ukuran, tanggal dipilih) yang disimpan. Salinan isi disimpan di memori halaman ini saja selama halaman terbuka.</p>
+  </section>
+
+  <!-- (f) Cek Kebocoran -->
+  <section id="cek-kebocoran">
+    <h2>6. Cek Kebocoran (Simulasi)</h2>
+    <p>Tempel <code>identity.json</code> atau <code>config.prop</code>, atau gunakan identitas yang sudah dibuat di bagian 2. Pemeriksaan ini adalah <strong>simulasi di host (browser)</strong> — pemeriksaan nyata hanya dapat dilakukan di dalam VM setelah ROM berjalan.</p>
+    <label for="leakInput">Tempel identity.json / config.prop (opsional)</label>
+    <textarea id="leakInput" placeholder='Contoh: {"android_id":"...","serial":"...","imei":"..."} atau isi config.prop'></textarea>
+    <div>
+      <button id="btnLeakCheck">Jalankan Cek Kebocoran</button>
+      <button id="btnLeakUseCurrent" class="secondary">Gunakan Identitas Saat Ini</button>
+    </div>
+    <h3>Hasil pemeriksaan</h3>
+    <table>
+      <thead><tr><th>Pemeriksaan</th><th>Nilai yang diharapkan</th><th>Hasil (simulasi)</th><th>Keterangan</th></tr></thead>
+      <tbody id="leakRows">
+        <tr><td colspan="4" class="muted">Belum ada pemeriksaan yang dijalankan.</td></tr>
+      </tbody>
+    </table>
+    <p class="muted small">Pemeriksaan <code>su</code> di browser selalu dilaporkan sebagai “tidak ditemukan di host” karena browser tidak memiliki akses ke sistem berkas perangkat. Di dalam VM, pemeriksaan ini harus membaca keberadaan biner <code>su</code> dan status Magisk yang sebenarnya.</p>
+  </section>
+
+  <!-- (g) NZey Master -->
+  <section id="nzey-master">
+    <h2>7. NZey Master (Mesin Virtual)</h2>
+    <p><strong>NZey Master</strong> adalah remake dari Virtual Master 3.2.68 — aplikasi mesin virtual tempat ROM NZeyMod dijalankan. Manager ini <strong>bukan</strong> mesin virtual.</p>
+    <table>
+      <tbody>
+        <tr><th>Nama</th><td>NZey Master (Virtual Master 3.2.68 remake)</td></tr>
+        <tr><th>Paket (repackage, v2.1-beta)</th><td><code>com.kizakixd.nzeymaster</code> — dapat terpasang berdampingan dengan Virtual Master lama tanpa uninstall</td></tr>
+        <tr><th>Paket (lama, fallback)</th><td><code>com.clone.android.dual.space</code></td></tr>
+        <tr><th>Ukuran APK (repackage)</th><td>139 MB (144.895.840 byte, arm64 saja)</td></tr>
+        <tr><th>SHA-256 APK (repackage)</th><td><code>224083a8cd2920f67d9c8a67a9f6746afa62820a218d9cb5f7174760a46bb55c</code></td></tr>
+        <tr><th>Ukuran APK (lama)</th><td>145 MB</td></tr>
+        <tr><th>SHA-256 APK (lama)</th><td><code>2d70516e1f7bd85ca105341b8bd13760fe7484d6b1983e0446a436253d90c602</code></td></tr>
+        <tr><th>Unduhan (lama)</th><td><a href="https://129.226.154.152.sslip.io/download/NZeyMaster.apk">https://129.226.154.152.sslip.io/download/NZeyMaster.apk</a></td></tr>
+      </tbody>
+    </table>
+    <div class="warnbox" style="margin-top:12px">
+      <strong>Penting:</strong> Pasang <code>NZeyMaster-nzey.apk</code> hasil repackage (paket <code>com.kizakixd.nzeymaster</code>, 139 MB) — APK ini dapat terpasang berdampingan dengan Virtual Master lama tanpa uninstall. APK paket lama (145 MB) tetap memerlukan uninstall Virtual Master lama terlebih dahulu, karena tanda tangan (signature) keduanya berbeda. Repackage ini belum teruji di perangkat fisik: rename package dapat merusak login server / cloud sync, jadi wajib dites di HP.
+    </div>
+    <p>
+      <a href="https://129.226.154.152.sslip.io/download/NZeyMaster.apk"><button type="button" class="info">Unduh NZeyMaster.apk (145 MB)</button></a>
+    </p>
+    <h3>Langkah singkat</h3>
+    <ol>
+      <li>Pasang <code>NZeyMaster-nzey.apk</code> hasil repackage dan verifikasi SHA-256 di atas. APK ini tidak memerlukan uninstall Virtual Master lama.</li>
+      <li>Bila ROM utuh sudah dimiliki, verifikasi di bagian 0 (Jalankan ROM), lalu impor berkas tersebut ke NZey Master (+ &gt; titik tiga &gt; Import Local ROM). Bila yang dimiliki masih 5 bagian, gabungkan dahulu di bagian 1, lalu impor berkas hasil gabungan.</li>
+      <li>Buat identitas di bagian 2, simpan sebagai profil di bagian 3, lalu terapkan di dalam VM.</li>
+      <li>Atur Magisk dan keybox (bagian 4–5) sebelum menjalankan aplikasi yang sensitif.</li>
+    </ol>
+  </section>
+
+  <div class="infobox">
+    <h2 style="margin-top:0">Ringkasan Teknis</h2>
+    <p class="small">Perangkat: Pixel 5 (redfin) — Android 11 — Fingerprint: <code>google/redfin/redfin:11/RQ3A.211001.001/7641976:user/release-keys</code> — Locale: <code>id-ID</code> — Zona waktu: <code>Asia/Jakarta</code><br>
+    ROM: <code>rom_11_0_0_1036_3281_M27_NZeyMod.zip</code>, 5 bagian, total sekitar 405 MB, SHA-256 <code>1d8e0031a1076b4de7192274fb156a7ab88c97f1eb3b4bf3be98adf2e65c364c</code><br>
+    Semua pemrosesan di halaman ini dilakukan lokal di browser. Tidak ada data yang dikirim ke server.</p>
+  </div>
+</main>
+
+<footer>
+  <p>NZeyMod Manager — Prototype web. Manager ini bukan mesin virtual; ROM berjalan di dalam NZey Master. Play Integrity STRONG tidak dijamin. Keybox ECDSA-only, kedaluwarsa 28 November 2026.</p>
+</footer>
+
+<script>
+'use strict';
+/* NZeyMod Manager — Prototype. Semua logika berjalan lokal di browser. */
+
+var EXPECTED_ROM_SHA256 = '1d8e0031a1076b4de7192274fb156a7ab88c97f1eb3b4bf3be98adf2e65c364c';
+var JOINED_FILENAME = 'rom_11_0_0_1036_3281_M27_NZeyMod.zip';
+var FINGERPRINT = 'google/redfin/redfin:11/RQ3A.211001.001/7641976:user/release-keys';
+var NZEY_MASTER_SHA256 = '2d70516e1f7bd85ca105341b8bd13760fe7484d6b1983e0446a436253d90c602';
+var KEYBOX_EXPIRY = '28 November 2026';
+
+var OPERATORS = [
+  { name: 'Telkomsel', numeric: '51010', alpha: 'Telkomsel' },
+  { name: 'Indosat Ooredoo', numeric: '51021', alpha: 'Indosat Ooredoo' },
+  { name: 'XL Axiata', numeric: '51011', alpha: 'XL' },
+  { name: 'AXIS', numeric: '51008', alpha: 'AXIS' },
+  { name: 'Tri', numeric: '51089', alpha: '3' },
+  { name: 'Smartfren', numeric: '51009', alpha: 'Smartfren' }
+];
+
+var MAGISK_MODULES = [
+  { name: 'Zygisk Next', version: 'v1.2.8' },
+  { name: 'Play Integrity Fork', version: 'v18.4.1' },
+  { name: 'Shamiko', version: 'v1.2.1' },
+  { name: 'LSPosed', version: 'v1.10.1-7244' },
+  { name: 'Tricky Store', version: 'v1.3.0' },
+  { name: 'Hide My Applist', version: 'v3.7.0' },
+  { name: 'Clone App Pro', version: 'v1.0.0' }
+];
+
+var DENYLIST = [
+  'com.shopee.id', 'com.shopee.tw', 'com.shopee.ph', 'com.shopee.vn',
+  'com.shopee.my', 'com.shopee.sg', 'com.shopee.br', 'com.shopee.co.id',
+  'com.clone.app.pro'
+];
+
+var IMEI_TACS = ['35254410', '35482510', '35737210'];
+var PROFILE_STORAGE_KEY = 'nzeymod_profiles';
+var KEYBOX_META_KEY = 'nzeymod_keybox_meta';
+
+var currentIdentity = null;
+var magiskOn = false;
+var joinedBlob = null;
+var joinedUrl = null;
+var keyboxContentInMemory = null;
+var keyboxMeta = null;
+
+/* ---------- Util ---------- */
+function $(id) { return document.getElementById(id); }
+function randomHex(n) {
+  var bytes = new Uint8Array(Math.ceil(n / 2));
+  window.crypto.getRandomValues(bytes);
+  var s = '';
+  for (var i = 0; i < bytes.length; i++) s += ('0' + bytes[i].toString(16)).slice(-2);
+  return s.slice(0, n);
+}
+function randomDigits(n) {
+  var s = '';
+  var arr = new Uint8Array(n);
+  window.crypto.getRandomValues(arr);
+  for (var i = 0; i < n; i++) s += String(arr[i] % 10);
+  return s;
+}
+function luhnCheckDigit(base14) {
+  // Hitung digit cek Luhn untuk 14 digit dasar sehingga 15 digit penuh lolos Luhn.
+  var withZero = base14 + '0';
+  var sum = 0;
+  var doubleIt = false;
+  for (var i = withZero.length - 1; i >= 0; i--) {
+    var d = parseInt(withZero.charAt(i), 10);
+    if (doubleIt) { d = d * 2; if (d > 9) d -= 9; }
+    sum += d;
+    doubleIt = !doubleIt;
+  }
+  return String((10 - (sum % 10)) % 10);
+}
+function isValidLuhn15(imei) {
+  if (!/^\d{15}$/.test(imei)) return false;
+  var sum = 0, doubleIt = false;
+  for (var i = imei.length - 1; i >= 0; i--) {
+    var d = parseInt(imei.charAt(i), 10);
+    if (doubleIt) { d = d * 2; if (d > 9) d -= 9; }
+    sum += d;
+    doubleIt = !doubleIt;
+  }
+  return sum % 10 === 0;
+}
+function generateImei() {
+  var tac = IMEI_TACS[Math.floor(Math.random() * IMEI_TACS.length)];
+  var base14 = tac + randomDigits(6);
+  return base14 + luhnCheckDigit(base14);
+}
+function downloadBlob(blob, filename) {
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+}
+function downloadText(text, filename, mime) {
+  downloadBlob(new Blob([text], { type: mime || 'text/plain;charset=utf-8' }), filename);
+}
+function bufToHex(buffer) {
+  var bytes = new Uint8Array(buffer), s = '';
+  for (var i = 0; i < bytes.length; i++) s += ('0' + bytes[i].toString(16)).slice(-2);
+  return s;
+}
+function setStatus(el, text, kind) {
+  el.textContent = text;
+  el.className = 'status ' + (kind || 'idle');
+}
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ---------- (0) Jalankan ROM utuh ---------- */
+var WHOLE_ROM_MIN_BYTES = 380 * 1024 * 1024;
+var WHOLE_ROM_MAX_BYTES = 430 * 1024 * 1024;
+var wholeRomFile = null;
+var wholeRomVerified = false;
+var wholeRomSha = '';
+
+function showWholeRomFileInfo() {
+  var f = $('wholeRomFile').files && $('wholeRomFile').files[0];
+  wholeRomFile = f || null;
+  wholeRomVerified = false;
+  wholeRomSha = '';
+  $('btnPrepareWholeRom').disabled = true;
+  $('wholeRomImportSteps').style.display = 'none';
+  if (!f) {
+    $('wholeRomFileInfo').textContent = '';
+    $('wholeRomResult').textContent = 'Belum ada berkas yang dipilih. Pilih ROM utuh, lalu tekan “Verifikasi ROM Utuh”.';
+    setStatus($('wholeRomStatus'), 'MENUNGGU', 'idle');
+    return;
+  }
+  var sizeMb = (f.size / 1048576).toFixed(2);
+  var sizeOk = f.size >= WHOLE_ROM_MIN_BYTES && f.size <= WHOLE_ROM_MAX_BYTES;
+  var isPart = /\.part\d+$/i.test(f.name);
+  var lines = 'Nama berkas: ' + f.name + '\nUkuran: ' + sizeMb + ' MB (' + f.size + ' byte) — diharapkan sekitar 405 MB (380–430 MB): ' + (sizeOk ? 'sesuai' : 'DI LUAR RENTANG') + (isPart ? '\nPERINGATAN: nama berkas berakhiran .part — ini tampak seperti bagian ROM terpisah, bukan ROM utuh.' : '');
+  $('wholeRomFileInfo').textContent = lines;
+  $('wholeRomResult').textContent = 'Berkas dipilih. Tekan “Verifikasi ROM Utuh” untuk menghitung SHA-256.';
+  setStatus($('wholeRomStatus'), 'MENUNGGU VERIFIKASI', 'idle');
+}
+$('wholeRomFile').addEventListener('change', showWholeRomFileInfo);
+
+$('btnVerifyWholeRom').addEventListener('click', function () {
+  var f = wholeRomFile;
+  if (!f) {
+    $('wholeRomResult').textContent = 'Pilih ROM utuh terlebih dahulu.';
+    setStatus($('wholeRomStatus'), 'GAGAL — TIDAK ADA BERKAS', 'bad');
+    return;
+  }
+  $('wholeRomResult').textContent = 'Menghitung SHA-256 untuk ' + f.name + ' (' + (f.size / 1048576).toFixed(2) + ' MB)… Berkas besar membutuhkan waktu beberapa saat.';
+  setStatus($('wholeRomStatus'), 'MEMPROSES…', 'idle');
+  $('btnVerifyWholeRom').disabled = true;
+  f.arrayBuffer().then(function (buf) {
+    return window.crypto.subtle.digest('SHA-256', buf).then(function (hash) {
+      var hex = bufToHex(hash);
+      wholeRomSha = hex;
+      var sizeOk = f.size >= WHOLE_ROM_MIN_BYTES && f.size <= WHOLE_ROM_MAX_BYTES;
+      var hashOk = hex === EXPECTED_ROM_SHA256;
+      var ok = sizeOk && hashOk;
+      wholeRomVerified = ok;
+      var lines = [];
+      lines.push('Nama berkas      : ' + f.name);
+      lines.push('Ukuran           : ' + (f.size / 1048576).toFixed(2) + ' MB (' + f.size + ' byte) — diharapkan sekitar 405 MB (380–430 MB): ' + (sizeOk ? 'sesuai' : 'DI LUAR RENTANG'));
+      lines.push('SHA-256 terhitung : ' + hex);
+      lines.push('SHA-256 diharapkan: ' + EXPECTED_ROM_SHA256);
+      lines.push('Status           : ' + (ok ? 'LOLOS — ROM utuh terverifikasi. Lanjutkan ke langkah impor di bawah.' : 'GAGAL — impor ditolak.'));
+      if (!ok) {
+        lines.push('');
+        lines.push('Kemungkinan penyebab:');
+        if (!hashOk) lines.push('- Berkas rusak / corrupt saat diunduh atau disalin.');
+        if (!hashOk) lines.push('- Berkas ini bukan ROM NZeyMod utuh (nama atau isi berbeda).');
+        if (/\.part\d+$/i.test(f.name)) lines.push('- Berkas ini masih berupa bagian ROM terpisah (.part00–.part04). Gabungkan dahulu di bagian 1 (Gabung ROM).');
+        if (!sizeOk) lines.push('- Ukuran berkas jauh dari 405 MB: kemungkinan berkas terpotong, belum selesai diunduh, atau bukan ROM ini.');
+        lines.push('Periksa kembali sumber berkas, unduh / salin ulang, lalu verifikasi lagi. Jangan mengimpor berkas yang gagal verifikasi.');
+      }
+      $('wholeRomResult').textContent = lines.join('\n');
+      setStatus($('wholeRomStatus'), ok ? 'LOLOS' : 'GAGAL — IMPOR DITOLAK', ok ? 'ok' : 'bad');
+      $('btnPrepareWholeRom').disabled = !ok;
+      $('wholeRomImportSteps').style.display = ok ? 'block' : 'none';
+      $('btnVerifyWholeRom').disabled = false;
+    });
+  }).catch(function (err) {
+    $('wholeRomResult').textContent = 'Terjadi kesalahan saat menghitung SHA-256: ' + err.message;
+    setStatus($('wholeRomStatus'), 'GAGAL', 'bad');
+    $('btnVerifyWholeRom').disabled = false;
+  });
+});
+
+$('btnPrepareWholeRom').addEventListener('click', function () {
+  if (!wholeRomFile || !wholeRomVerified) {
+    alert('Verifikasi ROM utuh terlebih dahulu hingga LOLOS.');
+    return;
+  }
+  downloadBlob(wholeRomFile, JOINED_FILENAME);
+  $('wholeRomResult').textContent = $('wholeRomResult').textContent +
+    '\n\nSalinan disiapkan: simpan berkas yang diunduh sebagai ' + JOINED_FILENAME + ' di folder NZeyMod/ di penyimpanan, lalu impor dari NZey Master (+ > titik tiga > Import Local ROM).';
+});
+
+/* ---------- (a) Gabung ROM ---------- */
+function listRomFiles() {
+  var files = $('romFiles').files;
+  if (!files || files.length === 0) { $('romFileList').textContent = ''; return; }
+  var sorted = Array.prototype.slice.call(files).sort(function (a, b) { return a.name.localeCompare(b.name); });
+  var total = 0, lines = [];
+  sorted.forEach(function (f, i) { total += f.size; lines.push((i + 1) + '. ' + f.name + ' — ' + (f.size / 1048576).toFixed(2) + ' MB'); });
+  $('romFileList').innerHTML = escapeHtml(lines.join('\n')).replace(/\n/g, '<br>') +
+    '<br>Total terpilih: ' + (total / 1048576).toFixed(2) + ' MB (' + total + ' byte) dari ' + sorted.length + ' berkas.';
+}
+$('romFiles').addEventListener('change', listRomFiles);
+
+$('btnJoinRom').addEventListener('click', function () {
+  var files = $('romFiles').files;
+  if (!files || files.length === 0) {
+    $('romResult').textContent = 'Pilih 5 bagian ROM terlebih dahulu.';
+    setStatus($('romStatus'), 'GAGAL — TIDAK ADA BERKAS', 'bad');
+    return;
+  }
+  var sorted = Array.prototype.slice.call(files).sort(function (a, b) { return a.name.localeCompare(b.name); });
+  if (sorted.length !== 5) {
+    $('romResult').textContent = 'Jumlah berkas: ' + sorted.length + '. Diharapkan 5 bagian (.part00–.part04). Proses tetap dilanjutkan, tetapi hasil mungkin tidak valid.';
+  }
+  $('romResult').textContent = 'Menggabungkan ' + sorted.length + ' berkas dan menghitung SHA-256… (berkas besar membutuhkan waktu beberapa saat)';
+  setStatus($('romStatus'), 'MEMPROSES…', 'idle');
+  $('btnJoinRom').disabled = true;
+  var joined = new Blob(sorted, { type: 'application/zip' });
+  var totalSize = joined.size;
+  joined.arrayBuffer().then(function (buf) {
+    return window.crypto.subtle.digest('SHA-256', buf).then(function (hash) {
+      var hex = bufToHex(hash);
+      var ok = hex === EXPECTED_ROM_SHA256;
+      joinedBlob = joined;
+      if (joinedUrl) URL.revokeObjectURL(joinedUrl);
+      joinedUrl = URL.createObjectURL(joined);
+      $('btnDownloadJoined').disabled = false;
+      var lines = [];
+      lines.push('Berkas hasil gabungan : ' + JOINED_FILENAME);
+      lines.push('Bagian digabung      : ' + sorted.map(function (f) { return f.name; }).join(', '));
+      lines.push('Total ukuran         : ' + (totalSize / 1048576).toFixed(2) + ' MB (' + totalSize + ' byte) — diharapkan sekitar 405 MB');
+      lines.push('SHA-256 terhitung    : ' + hex);
+      lines.push('SHA-256 diharapkan   : ' + EXPECTED_ROM_SHA256);
+      lines.push('Status               : ' + (ok ? 'LOLOS — hash cocok.' : 'GAGAL — hash tidak cocok. Periksa kembali kelima bagian ROM.'));
+      $('romResult').textContent = lines.join('\n');
+      setStatus($('romStatus'), ok ? 'LOLOS' : 'GAGAL — HASH TIDAK COCOK', ok ? 'ok' : 'bad');
+      $('btnJoinRom').disabled = false;
+    });
+  }).catch(function (err) {
+    $('romResult').textContent = 'Terjadi kesalahan saat menghitung SHA-256: ' + err.message;
+    setStatus($('romStatus'), 'GAGAL', 'bad');
+    $('btnJoinRom').disabled = false;
+  });
+});
+
+$('btnDownloadJoined').addEventListener('click', function () {
+  if (!joinedBlob) return;
+  downloadBlob(joinedBlob, JOINED_FILENAME);
+});
+
+/* ---------- (b) Acak Identitas ---------- */
+function buildIdentity() {
+  var mode = $('operatorMode').value;
+  var op;
+  if (mode === 'manual') {
+    var parts = $('operatorSelect').value.split('|');
+    op = { name: parts[0], numeric: parts[1], alpha: parts[2] };
+  } else {
+    op = OPERATORS[Math.floor(Math.random() * OPERATORS.length)];
+  }
+  return {
+    android_id: randomHex(16),
+    serial: randomHex(16),
+    imei: generateImei(),
+    operator: op,
+    operator_mode: mode,
+    fingerprint: FINGERPRINT,
+    device: 'Pixel 5 (redfin)',
+    android_version: '11',
+    locale: 'id-ID',
+    timezone: 'Asia/Jakarta',
+    identity_mode: 'full',
+    randomize_on_boot: true
+  };
+}
+function identityToJson(id) {
+  return {
+    android_id: id.android_id,
+    serial: id.serial,
+    imei: id.imei,
+    operator: id.operator.name,
+    operator_numeric: id.operator.numeric,
+    operator_alpha: id.operator.alpha,
+    operator_mode: id.operator_mode,
+    fingerprint: id.fingerprint,
+    device: id.device,
+    android_version: id.android_version,
+    locale: id.locale,
+    timezone: id.timezone,
+    identity_mode: id.identity_mode,
+    randomize_on_boot: id.randomize_on_boot
+  };
+}
+function identityToConfigProp(id) {
+  var lines = [];
+  lines.push('# NZeyMod config.prop — dibuat oleh NZeyMod Manager (prototype)');
+  lines.push('operator_mode=' + id.operator_mode);
+  lines.push('identity_mode=full');
+  lines.push('randomize_on_boot=true');
+  lines.push('ro.product.model=Pixel 5');
+  lines.push('ro.product.device=redfin');
+  lines.push('ro.product.brand=google');
+  lines.push('ro.build.fingerprint=' + id.fingerprint);
+  lines.push('ro.build.version.release=11');
+  lines.push('persist.sys.locale=id-ID');
+  lines.push('persist.sys.timezone=Asia/Jakarta');
+  lines.push('android_id=' + id.android_id);
+  lines.push('ro.serialno=' + id.serial);
+  lines.push('imei=' + id.imei);
+  lines.push('gsm.operator.numeric=' + id.operator.numeric);
+  lines.push('gsm.operator.alpha=' + id.operator.alpha);
+  lines.push('gsm.sim.operator.numeric=' + id.operator.numeric);
+  lines.push('gsm.sim.operator.alpha=' + id.operator.alpha);
+  lines.push('magisk=' + (magiskOn ? 'on' : 'off'));
+  if (magiskOn) {
+    lines.push('# Magisk modules: ' + MAGISK_MODULES.map(function (m) { return m.name + ' ' + m.version; }).join(', '));
+    lines.push('# DenyList: ' + DENYLIST.join(','));
+  }
+  return lines.join('\n') + '\n';
+}
+function renderIdentity() {
+  if (!currentIdentity) return;
+  var id = currentIdentity;
+  var lines = [];
+  lines.push('Android ID : ' + id.android_id + ' (16 karakter hex)');
+  lines.push('Serial     : ' + id.serial + ' (16 karakter hex)');
+  lines.push('IMEI       : ' + id.imei + ' (15 digit, Luhn ' + (isValidLuhn15(id.imei) ? 'valid' : 'TIDAK VALID') + ')');
+  lines.push('Operator   : ' + id.operator.name + ' | numeric ' + id.operator.numeric + ' | alpha ' + id.operator.alpha + ' (mode: ' + id.operator_mode + ')');
+  lines.push('Perangkat  : ' + id.device + ' — Android ' + id.android_version);
+  lines.push('Fingerprint: ' + id.fingerprint);
+  lines.push('Locale     : ' + id.locale + ' | Zona waktu: ' + id.timezone);
+  $('identityResult').textContent = lines.join('\n');
+  $('btnDownloadIdentityJson').disabled = false;
+  $('btnDownloadConfigProp').disabled = false;
+  updateConfigPreview();
+}
+$('btnRandomIdentity').addEventListener('click', function () {
+  currentIdentity = buildIdentity();
+  renderIdentity();
+});
+$('btnDownloadIdentityJson').addEventListener('click', function () {
+  if (!currentIdentity) return;
+  downloadText(JSON.stringify(identityToJson(currentIdentity), null, 2), 'identity.json', 'application/json');
+});
+$('btnDownloadConfigProp').addEventListener('click', function () {
+  if (!currentIdentity) return;
+  downloadText(identityToConfigProp(currentIdentity), 'config.prop', 'text/plain');
+});
+
+/* ---------- (c) Profil ---------- */
+function loadProfiles() {
+  try { return JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+function saveProfiles(obj) {
+  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(obj));
+}
+function renderProfiles() {
+  var profiles = loadProfiles();
+  var names = Object.keys(profiles).sort();
+  var box = $('profileList');
+  if (names.length === 0) { box.innerHTML = '<p class="muted">Belum ada profil tersimpan.</p>'; return; }
+  box.innerHTML = '';
+  names.forEach(function (name) {
+    var p = profiles[name];
+    var div = document.createElement('div');
+    div.className = 'profile-item';
+    var info = document.createElement('div');
+    info.innerHTML = '<strong>' + escapeHtml(name) + '</strong><br><span class="muted small">' +
+      escapeHtml((p.android_id || '-') + ' · ' + (p.operator || '-') + ' · ' + (p.saved_at || '')) + '</span>';
+    var actions = document.createElement('div');
+    var bLoad = document.createElement('button'); bLoad.textContent = 'Muat'; bLoad.className = 'secondary';
+    bLoad.addEventListener('click', function () { loadProfile(name); });
+    var bDl = document.createElement('button'); bDl.textContent = 'Unduh .json'; bDl.className = 'secondary';
+    bDl.addEventListener('click', function () {
+      downloadText(JSON.stringify(profiles[name], null, 2), name.replace(/[^\w\-]+/g, '_') + '.json', 'application/json');
+    });
+    var bDel = document.createElement('button'); bDel.textContent = 'Hapus'; bDel.className = 'secondary';
+    bDel.addEventListener('click', function () {
+      var all = loadProfiles(); delete all[name]; saveProfiles(all); renderProfiles();
+    });
+    actions.appendChild(bLoad); actions.appendChild(bDl); actions.appendChild(bDel);
+    div.appendChild(info); div.appendChild(actions);
+    box.appendChild(div);
+  });
+}
+function loadProfile(name) {
+  var profiles = loadProfiles();
+  var p = profiles[name];
+  if (!p) return;
+  var op = null;
+  for (var i = 0; i < OPERATORS.length; i++) {
+    if (OPERATORS[i].numeric === p.operator_numeric) { op = OPERATORS[i]; break; }
+  }
+  if (!op) op = { name: p.operator || 'Telkomsel', numeric: p.operator_numeric || '51010', alpha: p.operator_alpha || 'Telkomsel' };
+  currentIdentity = {
+    android_id: p.android_id, serial: p.serial, imei: p.imei,
+    operator: op, operator_mode: p.operator_mode || 'manual',
+    fingerprint: p.fingerprint || FINGERPRINT, device: p.device || 'Pixel 5 (redfin)',
+    android_version: p.android_version || '11', locale: p.locale || 'id-ID',
+    timezone: p.timezone || 'Asia/Jakarta', identity_mode: 'full',
+    randomize_on_boot: true
+  };
+  renderIdentity();
+  $('profileName').value = name;
+  window.scrollTo({ top: $('acak-identitas').offsetTop - 10, behavior: 'smooth' });
+}
+$('btnSaveProfile').addEventListener('click', function () {
+  var name = $('profileName').value.trim();
+  if (!currentIdentity) { alert('Buat identitas terlebih dahulu di bagian 2 (Acak Identitas).'); return; }
+  if (!name) { alert('Isi nama profil terlebih dahulu.'); $('profileName').focus(); return; }
+  var profiles = loadProfiles();
+  var data = identityToJson(currentIdentity);
+  data.saved_at = new Date().toISOString();
+  profiles[name] = data;
+  saveProfiles(profiles);
+  renderProfiles();
+});
+
+/* ---------- (d) Magisk ---------- */
+function renderMagisk() {
+  var rows = $('magiskModuleRows');
+  rows.innerHTML = '';
+  MAGISK_MODULES.forEach(function (m) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + escapeHtml(m.name) + '</td><td>' + escapeHtml(m.version) + '</td>';
+    rows.appendChild(tr);
+  });
+  $('denyList').textContent = DENYLIST.join('\n');
+  if (magiskOn) {
+    setStatus($('magiskStatus'), 'ON — Root aktif, 7 modul + DenyList', 'ok');
+    $('magiskModules').style.display = 'block';
+  } else {
+    setStatus($('magiskStatus'), 'OFF — Profil Bersih (tanpa root, tanpa modul)', 'idle');
+    $('magiskModules').style.display = 'none';
+  }
+  updateConfigPreview();
+}
+$('btnMagiskOn').addEventListener('click', function () { magiskOn = true; renderMagisk(); });
+$('btnMagiskOff').addEventListener('click', function () { magiskOn = false; renderMagisk(); });
+
+function updateConfigPreview() {
+  var lines = [];
+  lines.push('# Pratinjau config.prop');
+  lines.push('operator_mode=' + (currentIdentity ? currentIdentity.operator_mode : 'random'));
+  lines.push('identity_mode=full');
+  lines.push('randomize_on_boot=true');
+  lines.push('magisk=' + (magiskOn ? 'on' : 'off'));
+  if (currentIdentity) {
+    lines.push('android_id=' + currentIdentity.android_id);
+    lines.push('ro.serialno=' + currentIdentity.serial);
+    lines.push('imei=' + currentIdentity.imei);
+    lines.push('gsm.operator.numeric=' + currentIdentity.operator.numeric);
+  } else {
+    lines.push('# (belum ada identitas — buat di bagian 2)');
+  }
+  if (magiskOn) lines.push('# Modul: ' + MAGISK_MODULES.map(function (m) { return m.name + ' ' + m.version; }).join(', '));
+  else lines.push('# Profil bersih: tanpa root, tanpa modul.');
+  $('configPreview').textContent = lines.join('\n');
+}
+
+/* ---------- (e) Ganti Keybox ---------- */
+function loadKeyboxMeta() {
+  try {
+    var raw = localStorage.getItem(KEYBOX_META_KEY);
+    if (!raw) return;
+    keyboxMeta = JSON.parse(raw);
+    $('keyboxResult').textContent = 'Keybox terakhir: ' + keyboxMeta.name + ' (' + keyboxMeta.size + ' byte, dipilih ' + keyboxMeta.date + ').\nPeringatan: keybox ECDSA-only, kedaluwarsa ' + KEYBOX_EXPIRY + '.';
+    setStatus($('keyboxStatus'), 'TERSIMPAN (METADATA) — KEDALUWARSA ' + KEYBOX_EXPIRY.toUpperCase(), 'warn');
+  } catch (e) { /* abaikan metadata rusak */ }
+}
+$('btnValidateKeybox').addEventListener('click', function () {
+  var f = $('keyboxFile').files && $('keyboxFile').files[0];
+  if (!f) {
+    $('keyboxResult').textContent = 'Pilih berkas keybox (.xml) terlebih dahulu.';
+    setStatus($('keyboxStatus'), 'GAGAL — TIDAK ADA BERKAS', 'bad');
+    return;
+  }
+  if (!/\.xml$/i.test(f.name)) {
+    $('keyboxResult').textContent = 'Berkas "' + f.name + '" bukan .xml. Pilih berkas keybox berformat XML.';
+    setStatus($('keyboxStatus'), 'GAGAL — BUKAN XML', 'bad');
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function () {
+    var text = String(reader.result || '');
+    var hasKeybox = /keybox/i.test(text);
+    var hasEcdsa = /ecdsa/i.test(text);
+    var hasKey = /<key/i.test(text) || /certificate/i.test(text);
+    keyboxContentInMemory = text;
+    keyboxMeta = { name: f.name, size: f.size, date: new Date().toISOString() };
+    try { localStorage.setItem(KEYBOX_META_KEY, JSON.stringify(keyboxMeta)); } catch (e) { /* penyimpanan penuh — metadata dilewati */ }
+    var lines = [];
+    lines.push('Nama berkas : ' + f.name);
+    lines.push('Ukuran      : ' + f.size + ' byte');
+    lines.push('Mengandung teks "keybox" : ' + (hasKeybox ? 'Ya' : 'Tidak'));
+    lines.push('Mengandung teks "ECDSA"  : ' + (hasEcdsa ? 'Ya' : 'Tidak'));
+    lines.push('Mengandung kunci/sertifikat : ' + (hasKey ? 'Ya' : 'Tidak'));
+    lines.push('');
+    lines.push('PERINGATAN: keybox ini ECDSA-only dan kedaluwarsa ' + KEYBOX_EXPIRY + '.');
+    lines.push('Isi penuh keybox disimpan di memori halaman ini saja (tidak di localStorage bila besar). Metadata (nama, ukuran, tanggal) disimpan di localStorage.');
+    var valid = hasKeybox && (hasEcdsa || hasKey);
+    lines.push('Status validasi dasar: ' + (valid ? 'LOLOS (validasi dasar)' : 'GAGAL (validasi dasar) — berkas tidak tampak seperti keybox.'));
+    $('keyboxResult').textContent = lines.join('\n');
+    setStatus($('keyboxStatus'), valid ? 'LOLOS (DASAR) — KEDALUWARSA ' + KEYBOX_EXPIRY.toUpperCase() : 'GAGAL — BUKAN KEYBOX', valid ? 'warn' : 'bad');
+  };
+  reader.onerror = function () {
+    $('keyboxResult').textContent = 'Tidak dapat membaca berkas keybox.';
+    setStatus($('keyboxStatus'), 'GAGAL — TIDAK DAPAT DIBACA', 'bad');
+  };
+  reader.readAsText(f);
+});
+
+/* ---------- (f) Cek Kebocoran (simulasi) ---------- */
+function parseLeakInput(text) {
+  var out = { android_id: null, serial: null, imei: null, source: 'tidak diketahui' };
+  if (!text || !text.trim()) return out;
+  var t = text.trim();
+  try {
+    var obj = JSON.parse(t);
+    out.android_id = obj.android_id || null;
+    out.serial = obj.serial || obj.ro_serialno || null;
+    out.imei = obj.imei || null;
+    out.source = 'identity.json (JSON)';
+    return out;
+  } catch (e) { /* bukan JSON — coba sebagai config.prop */ }
+  var lines = t.split(/\r?\n/);
+  lines.forEach(function (line) {
+    var m = line.match(/^\s*([^#=\s]+)\s*=\s*(.+?)\s*$/);
+    if (!m) return;
+    var k = m[1], v = m[2];
+    if (k === 'android_id') out.android_id = v;
+    if (k === 'ro.serialno' || k === 'serial') out.serial = v;
+    if (k === 'imei') out.imei = v;
+  });
+  out.source = 'config.prop';
+  return out;
+}
+function leakRowHTML(check, expected, result, pass, note) {
+  return '<tr><td>' + escapeHtml(check) + '</td><td><code>' + escapeHtml(expected) + '</code></td>' +
+    '<td><span class="pill ' + (pass ? 'pass' : 'fail') + '">' + escapeHtml(result) + '</span> <span class="pill sim">SIMULASI</span></td>' +
+    '<td>' + escapeHtml(note) + '</td></tr>';
+}
+function runLeakCheck(parsed) {
+  var rows = [];
+  var hasId = !!(parsed.android_id || parsed.serial || parsed.imei);
+  rows.push(leakRowHTML('ro.debuggable', '0', 'LOLOS (simulasi)', true,
+    'Nilai yang diharapkan 0. Di host ini nilainya disimulasikan; periksa nilai sebenarnya di dalam VM.'));
+  rows.push(leakRowHTML('ro.build.tags', 'release-keys', 'LOLOS (simulasi)', true,
+    'Fingerprint redfin release-keys. Nilai sebenarnya harus dibaca dari build.prop di dalam VM.'));
+  rows.push(leakRowHTML('ro.secure', '1', 'LOLOS (simulasi)', true,
+    'Nilai yang diharapkan 1. Nilai sebenarnya harus dibaca di dalam VM.'));
+  var suFound = false; // Browser tidak dapat memeriksa biner su di perangkat.
+  rows.push(leakRowHTML('Keberadaan su (/system/bin/su, /system/xbin/su)', 'tidak ditemukan (bila Magisk OFF)', suFound ? 'DITEMUKAN' : 'TIDAK DITEMUKAN (simulasi)', !suFound,
+    magiskOn
+      ? 'Magisk ON: su diharapkan ada di dalam VM karena root aktif. Di host ini pemeriksaan disimulasikan sebagai tidak ditemukan.'
+      : 'Magisk OFF (profil bersih): su tidak boleh ada. Di host ini pemeriksaan disimulasikan; pastikan di dalam VM.'));
+  var idOk = hasId && (!parsed.android_id || /^[0-9a-f]{16}$/i.test(parsed.android_id)) &&
+    (!parsed.imei || isValidLuhn15(parsed.imei));
+  rows.push(leakRowHTML('Format identitas', 'Android ID 16 hex, IMEI 15 digit Luhn valid',
+    hasId ? (idOk ? 'LOLOS' : 'GAGAL') : 'TIDAK ADA DATA', hasId && idOk,
+    hasId
+      ? 'Sumber: ' + parsed.source + '. Android ID: ' + (parsed.android_id || '-') + ' | IMEI: ' + (parsed.imei || '-') + (parsed.imei ? ' (Luhn ' + (isValidLuhn15(parsed.imei) ? 'valid' : 'tidak valid') + ')' : '')
+      : 'Tidak ada identitas yang ditempel atau dibuat. Buat identitas di bagian 2 atau tempel identity.json/config.prop.'));
+  $('leakRows').innerHTML = rows.join('');
+}
+$('btnLeakCheck').addEventListener('click', function () {
+  var parsed = parseLeakInput($('leakInput').value);
+  if (!parsed.android_id && !parsed.serial && !parsed.imei && !$('leakInput').value.trim() && currentIdentity) {
+    parsed = { android_id: currentIdentity.android_id, serial: currentIdentity.serial, imei: currentIdentity.imei, source: 'identitas saat ini' };
+  }
+  runLeakCheck(parsed);
+});
+$('btnLeakUseCurrent').addEventListener('click', function () {
+  if (!currentIdentity) { alert('Belum ada identitas. Tekan “Acak Identitas” di bagian 2 terlebih dahulu.'); return; }
+  $('leakInput').value = JSON.stringify(identityToJson(currentIdentity), null, 2);
+  runLeakCheck({ android_id: currentIdentity.android_id, serial: currentIdentity.serial, imei: currentIdentity.imei, source: 'identitas saat ini' });
+});
+
+/* ---------- Init ---------- */
+renderProfiles();
+renderMagisk();
+loadKeyboxMeta();
+updateConfigPreview();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () { /* SW opsional — abaikan bila gagal */ });
+  });
+}
+</script>
+</body>
+</html>
+
+```
+
+`prototype/manifest.webmanifest`:
+
+```webmanifest
+{"background_color":"#0f172a","description":"Prototype pengelola NZeyMod ROM: gabung ROM, acak identitas, profil, Magisk, keybox, dan cek kebocoran (simulasi). Manager ini bukan mesin virtual.","display":"standalone","lang":"id","name":"NZeyMod Manager","short_name":"NZeyMod","start_url":"index.html","theme_color":"#0f172a"}
+```
+
+`prototype/sw.js`:
+
+```js
+/* NZeyMod Manager — Service Worker (opsional, cache-first untuk halaman prototype). */
+var CACHE_NAME = 'nzeymod-manager-v1';
+var ASSETS = ['index.html', 'manifest.webmanifest'];
+
+self.addEventListener('install', function (event) {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(function (cache) {
+      return cache.addAll(ASSETS);
+    }).catch(function () { /* abaikan bila aset belum tersedia */ })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', function (event) {
+  event.waitUntil(
+    caches.keys().then(function (keys) {
+      return Promise.all(keys.filter(function (k) { return k !== CACHE_NAME; }).map(function (k) { return caches.delete(k); }));
+    })
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', function (event) {
+  if (event.request.method !== 'GET') return;
+  event.respondWith(
+    caches.match(event.request).then(function (cached) {
+      return cached || fetch(event.request).then(function (resp) {
+        if (resp && resp.ok && event.request.url.indexOf(self.location.origin) === 0) {
+          var copy = resp.clone();
+          caches.open(CACHE_NAME).then(function (cache) { cache.put(event.request, copy); });
+        }
+        return resp;
+      });
+    }).catch(function () { return caches.match('index.html'); })
+  );
+});
+
+```
+
+`rom-fixes/README.md`:
+
+```md
+# Perbaikan ROM — NZeyMod
+
+File di folder ini adalah versi yang diperbaiki dari file di repositori `nzeymod-rom`. File ini tidak mengubah isi ROM biner; file ini memperbaiki nama berkas, konfigurasi, dan skrip pendukung agar konsisten.
+
+## 1. `operators.txt` — nama berkas diperbaiki
+
+Masalah: `scripts/nzeymod.sh` membaca `$SYS/operators.txt`, tetapi file di repositori bernama `scripts/operators_id.txt`. Akibatnya, skrip tidak menemukan daftar operator.
+
+Perbaikan: file ini bernama `operators.txt` dan berisi 6 operator dengan format `nama|numeric|alpha`:
+
+- Telkomsel|51010|Telkomsel
+- Indosat Ooredoo|51021|Indosat Ooredoo
+- XL Axiata|51011|XL
+- AXIS|51008|AXIS
+- Tri|51089|3
+- Smartfren|51009|Smartfren
+
+Cara memakai: salin file ini menjadi `/system/nzeymod/operators.txt` di dalam ROM (atau sertakan saat repack). Aplikasi NZeyMod Identity juga memakai `/sdcard/NZeyMod/operators.txt` dengan format yang sama.
+
+## 2. `config.prop` — kunci dipisah dengan jelas
+
+Masalah: aplikasi NZeyMod Identity menulis kunci `identity_mode`, `keybox_path`, `randomize_on_boot`, `wipe_profiles_on_randomize`, dan `show_toast`, tetapi `nzeymod.sh` hanya membaca `operator_mode`. Kunci lain tidak berpengaruh pada skrip boot.
+
+Perbaikan: `config.prop` di folder ini memberi komentar pada tiap kunci, yang menjelaskan kunci mana yang dibaca skrip dan mana yang hanya dipakai aplikasi. Nilai default tetap sama: `operator_mode=random`.
+
+## 3. Identitas perangkat — gunakan `redfin`, bukan `flame`
+
+Masalah: `props/vendor-build.prop` menulis `ro.product.board=flame` (Pixel 4), padahal seluruh identitas lain adalah Pixel 5 (`redfin`): model, device, fingerprint, dan `board` di partisi system.
+
+Perbaikan: gunakan `redfin` secara konsisten di seluruh partisi:
+
+- `ro.product.model=Pixel 5`
+- `ro.product.device=redfin`
+- `ro.product.board=redfin`
+- `ro.build.fingerprint=google/redfin/redfin:11/RQ3A.211001.001/7641976:user/release-keys`
+
+Catatan: `ro.hardware.*=master` di vendor sengaja tidak diubah. Nilai tersebut adalah nama HAL fungsional VM; menggantinya dapat membuat HAL tidak berfungsi.
+
+## 4. `join.sh` — sama dengan skrip asal, ditambah penjelasan
+
+`join.sh` di folder ini memiliki logika yang sama dengan `rom/join.sh` di repositori asal: menggabungkan 5 part dengan `cat`, lalu memeriksa SHA-256. Nilai SHA-256 yang benar:
+
+`1d8e0031a1076b4de7192274fb156a7ab88c97f1eb3b4bf3be98adf2e65c364c`
+
+Total ukuran gabungan sekitar 405 MB (90 + 90 + 90 + 90 + 44,9 MB).
+
+## 5. Catatan perbaikan dalam bentuk patch
+
+`nzeymod-fixed.patch` berisi perubahan yang sama dalam format patch, agar dapat ditinjau baris demi baris sebelum diterapkan ke repositori asal. Patch tersebut mencakup:
+
+- Penambahan `operators.txt` dengan isi yang benar (pengganti nama `operators_id.txt` untuk keperluan skrip).
+- Komentar penjelas di `config.prop`.
+- Perbaikan `ro.product.board` dari `flame` menjadi `redfin` di `vendor-build.prop`.
+
+## 6. Yang tidak diperbaiki di sini
+
+- Modul Magisk (ZIP/APK) dan `keybox.xml` tidak disertakan, karena tidak ada di repositori asal dan tidak boleh dibagikan secara sembarangan. Lihat `docs/batasan.md`.
+- File ROM biner tidak diubah. Perbaikan ini hanya menyangkut berkas pendukung.
+
+```
+
+`rom-fixes/config.prop`:
+
+```prop
+# NZeyMod user config - file aktif ada di /sdcard/NZeyMod/config.prop (edit di sana, lalu reboot)
+# operator_mode: random | telkomsel | indosat | xl | axis | tri | smartfren
+operator_mode=random
+# identity_mode: full | basic (hanya dipakai aplikasi NZeyMod Identity, tidak dibaca nzeymod.sh)
+identity_mode=full
+# keybox_path: lokasi cadangan keybox di dalam VM
+keybox_path=/sdcard/NZeyMod/keybox.xml
+# randomize_on_boot: true | false (hanya dipakai aplikasi, nzeymod.sh hanya membuat identitas bila identity.json belum ada)
+randomize_on_boot=true
+# wipe_profiles_on_randomize: true | false (hanya dipakai aplikasi)
+wipe_profiles_on_randomize=false
+# show_toast: true | false (hanya dipakai aplikasi)
+show_toast=true
+# Catatan: identitas device (Pixel 5, redfin) tertanam di build.prop ROM.
+# Ganti keybox: pakai NZeyMod Manager > Ganti Keybox, atau timpa /sdcard/NZeyMod/keybox.xml lalu reboot.
+# Modul tambahan: install manual via aplikasi Magisk di dalam VM, atau minta repack.
+
+```
+
+`rom-fixes/join.sh`:
+
+```sh
+#!/bin/sh
+# Gabungkan part jadi zip ROM utuh, lalu cek hash-nya.
+# Pakai: sh join.sh (jalankan di folder ini, di samping file .part*)
+cat rom_11_0_0_1036_3281_M27_NZeyMod.zip.part* > rom_11_0_0_1036_3281_M27_NZeyMod.zip
+echo "Hasil: rom_11_0_0_1036_3281_M27_NZeyMod.zip"
+echo "SHA256 seharusnya: 1d8e0031a1076b4de7192274fb156a7ab88c97f1eb3b4bf3be98adf2e65c364c"
+command -v sha256sum >/dev/null && sha256sum rom_11_0_0_1036_3281_M27_NZeyMod.zip
+
+```
+
+`rom-fixes/nzeymod-fixed.patch`:
+
+```patch
+--- a/scripts/operators_id.txt
++++ b/scripts/operators.txt
+@@
+-# Indonesian operators for identity randomizer (name|numeric MCCMNC|alpha)
+-Telkomsel|51010|Telkomsel
+-Indosat Ooredoo|51021|Indosat Ooredoo
+-XL Axiata|51011|XL
+-AXIS|51008|AXIS
+-Tri|51089|3
+-Smartfren|51009|Smartfren
++# Indonesian operators for identity randomizer (name|numeric MCCMNC|alpha)
++# NOTE: nzeymod.sh reads $SYS/operators.txt, so this file MUST be named
++# operators.txt (not operators_id.txt) inside /system/nzeymod/.
++Telkomsel|51010|Telkomsel
++Indosat Ooredoo|51021|Indosat Ooredoo
++XL Axiata|51011|XL
++AXIS|51008|AXIS
++Tri|51089|3
++Smartfren|51009|Smartfren
+--- a/scripts/config.prop
++++ b/scripts/config.prop
+@@
+ # NZeyMod user config - file aktif ada di /sdcard/NZeyMod/config.prop (edit di sana, lalu reboot)
+ # operator_mode: random | telkomsel | indosat | xl | axis | tri | smartfren
+ operator_mode=random
++# identity_mode: full | basic (hanya dipakai aplikasi NZeyMod Identity, tidak dibaca nzeymod.sh)
++identity_mode=full
++# keybox_path: lokasi cadangan keybox di dalam VM
++keybox_path=/sdcard/NZeyMod/keybox.xml
++# randomize_on_boot: true | false (hanya dipakai aplikasi, nzeymod.sh hanya membuat identitas bila identity.json belum ada)
++randomize_on_boot=true
++# wipe_profiles_on_randomize: true | false (hanya dipakai aplikasi)
++wipe_profiles_on_randomize=false
++# show_toast: true | false (hanya dipakai aplikasi)
++show_toast=true
+ # Catatan: identitas device (Pixel 5) tertanam di build.prop ROM.
+-# Ganti keybox: pakai aplikasi NZeyMod Identity > GANTI KEYBOX, atau timpa /sdcard/NZeyMod/keybox.xml lalu reboot.
++# Ganti keybox: pakai NZeyMod Manager > Ganti Keybox, atau timpa /sdcard/NZeyMod/keybox.xml lalu reboot.
+ # Modul tambahan: install manual via aplikasi Magisk, atau minta repack.
+--- a/props/vendor-build.prop
++++ b/props/vendor-build.prop
+@@
+-ro.product.board=flame
++ro.product.board=redfin
+ # NOTE: flame adalah Pixel 4. Seluruh identitas lain di ROM ini adalah
+ # Pixel 5 (redfin): model, device, dan fingerprint. Gunakan redfin
+ # agar konsisten.
+
+```
+
+`rom-fixes/operators.txt`:
+
+```txt
+Telkomsel|51010|Telkomsel
+Indosat Ooredoo|51021|Indosat Ooredoo
+XL Axiata|51011|XL
+AXIS|51008|AXIS
+Tri|51089|3
+Smartfren|51009|Smartfren
+
+```
