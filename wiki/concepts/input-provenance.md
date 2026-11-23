@@ -12,7 +12,8 @@ sources:
   - wiki/sources/descriptions/ToldByNun__earlybuffering-gd.md
   - wiki/sources/descriptions/kyzoeth__bitgeist.md
   - wiki/sources/descriptions/DMN-Software__dmn_minigame.md
-updated: 2026-11-21
+  - wiki/sources/descriptions/eric-rolph__serverless-time-trial-racing-game.md
+updated: 2026-11-23
 confidence: high
 ---
 
@@ -86,8 +87,10 @@ Geode timing-assist mod [[earlybuffering-gd]] holds slightly early jump presses 
 
 Browser retro speedrun platform [[bitgeist]] ingests **60 Hz run-length-encoded joypad logs** as **client-reported** submit payloads, samples player position and finish state from **emulated Libretro WASM RAM** on the client, and promotes leaderboard acceptance only after a **headless deterministic WASM replay** reproduces movement against game-specific rules (wall climbs, air dashes)—treat verified replay outcomes as **server-derived** integrity evidence, not raw client RAM reads. (source: wiki/sources/descriptions/kyzoeth__bitgeist.md)
 
+Async sim-racing reference [[serverless-time-trial-racing-game]] treats **Ed25519-signed steering/throttle input logs** as **client-reported** evidence, runs the same **400 Hz Box3D WASM** kernel on the native client and on a **Cloudflare Worker** referee, and accepts leaderboard lap times only when replay **state hashes** match and telemetry heuristics pass—label validated lap times **server-derived**, not client finish timestamps. (source: wiki/sources/descriptions/eric-rolph__serverless-time-trial-racing-game.md)
+
 Embeddable minigame suite [[dmn-minigame]] accepts only **tick-aligned input logs** as **client-reported** telemetry, then derives leaderboard scores from a **server-side replay** of the shared seeded TypeScript simulation—label final scores **server-derived** and treat direct client score POSTs as untrusted unless replay-validated. (source: wiki/sources/descriptions/DMN-Software__dmn_minigame.md)
 
 ## Related
 
-[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[chompchomp-io]] · [[earlybuffering-gd]] · [[bitgeist]] · [[dmn-minigame]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[chompchomp-io]] · [[earlybuffering-gd]] · [[bitgeist]] · [[serverless-time-trial-racing-game]] · [[dmn-minigame]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
