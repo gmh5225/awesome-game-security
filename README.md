@@ -4806,6 +4806,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/nimjump/game [Godot 4 Web3 game with server-side replay verification, signed seed batches, and documented minimal client-authority anti-cheat design]
 - https://github.com/Stellar-Splash/stellar-splash-engine [Stellar Splash tournament backend with anti-cheat session tokens, deterministic replay score verification from game events, Soroban settlement, and Stellar testnet indexing]
 - https://github.com/kyzoeth/bitgeist [Browser retro speedrun platform with WASM libretro cores, RAM telemetry, and 60Hz input-log verification plus deterministic replay for cheat-resistant leaderboards]
+- https://github.com/eric-rolph/serverless-time-trial-racing-game [Serverless sim racing with shared Box3D WASM physics: Ed25519-signed input replay on Cloudflare Workers for bit-exact lap validation and cheat-resistant leaderboards]
 - https://github.com/web-coder-lab/chessking [Rust server-side anti-cheat for multiplayer chess: risk scoring, device fingerprinting, match integrity, captcha, and ban escalation]
 - https://github.com/AbdulAmi09/SentinelAntiCheat [Chess integrity platform with seven-layer statistical engine-assistance detection, explainable risk tiers, arbiter case management, and hash-chained audit logging]
 - https://github.com/MaksymSakundiak/chess-anti-cheat [TensorFlow/Keras engine-assistance detector with bidirectional LSTM and Conv1D over moves, timing, and color for interactive risk scoring]
