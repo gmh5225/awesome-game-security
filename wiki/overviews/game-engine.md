@@ -8,6 +8,7 @@ sources:
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/1llu50ry__mcp-reverse.md
   - wiki/sources/descriptions/snackbar92hypernova__quen-mcp.md
+  - wiki/sources/descriptions/quarterhood__engine.md
   - wiki/sources/descriptions/danielgomesvieira2000__ps2-port-engine.md
   - wiki/sources/descriptions/nat649__fs15-reconstruction.md
   - wiki/sources/descriptions/morluto__rea.md
@@ -742,7 +743,7 @@ sources:
   - wiki/sources/descriptions/abczsl520__game-quality-gates.md
   - wiki/sources/descriptions/imjustadudegamer__Provenance-Elite-Force-II-decomp-Android-linux.md
   - wiki/sources/descriptions/ocornut__imgui_test_engine.md
-updated: 2026-11-18
+updated: 2026-11-23
 confidence: high
 ---
 
@@ -822,6 +823,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **GameSpice Anticheat** — [[gamespice-anticheat]] Godot 4.7+ server suspicion-scoring addon (GDScript; command sanity + decaying scores from GameSpice Server Security detectors; escalation signals only; YAML/env; headless dedicated servers; gamespice-platform; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/gamespice-platform__anticheat.md)
 - **Ghostline** — [[ghostline]] Godot 4 C# client + shared fixed-point C# sim; GHST input replay stream; ASP.NET Core headless re-simulation for PostgreSQL leaderboards; HTML5 GHST tick inspector (marclourens19; deterministic netcode + server-side score verification reference; Anti Cheat / Game Engine) (source: wiki/sources/descriptions/marclourens19__ghostline.md)
 - **Stellar Splash Engine** — [[stellar-splash-engine]] TypeScript tournament backend; deterministic headless replay of raw match events with session-token and timing/entropy AC checks; cryptographic attestations + Stellar/Soroban settlement for Web3 splash esports (Stellar-Splash; server-side score verification + on-chain payout reference; Anti Cheat / Game Engine) (source: wiki/sources/descriptions/Stellar-Splash__stellar-splash-engine.md)
+- **Quarterhood Engine** — [[quarterhood-engine]] TypeScript deterministic arcade replay core (xorshift32 RNG, integer physics, multi-game mini-games); server seeds + per-frame input logs only; Node CLI verifier + golden fixtures; Solidity Merkle-root leaderboard commits on Robinhood Chain; public anti-scripting review flags (quarterhood; verifiable browser-arcade scoring; Game Engine / public run API) (source: wiki/sources/descriptions/quarterhood__engine.md)
 - **NimJump** — [[nimjump]] Godot 4 WASM browser client + Go backend; server-signed offline seed batches, signed API requests, and native replay-verifier attestation for crypto reward payouts (nimjump/game; minimal client-authority AC reference; Anti Cheat / Game Develop) (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/nimjump__game.md)
 - **guard-game** — [[guard-game]] Node.js engine-agnostic server-side AC (Parko-Developer; world-profile movement/action validation; TCP JSON lines + HTTP ingest; Unity/Godot/Roblox/JS SDKs; strike ladder + admin API; optional HMAC signing; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/Parko-Developer__guard-game.md)
 - **y0x1Server** — [[y0x1-server]] Ace of Spades 0.75 piqueserver/pyspades dedicated server (uamo11; Python 3.10+ + Cython/C++ voxel/net path; HWID bans; server-side movement/combat validation scripts; Docker + ban pub/sub; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/uamo11__y0x1Server.md)

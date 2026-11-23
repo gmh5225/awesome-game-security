@@ -3484,6 +3484,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ispras/qemu](entities/ispras-qemu.md) — ISP RAS QEMU fork (analysis / instrumentation / windbg tree; Cheat QEMU/KVM)
 - [qemu-wasm](entities/qemu-wasm.md) — Emscripten WASM QEMU in browser (x86/arch guests; VirtIO; Cheat QEMU/KVM lab)
 - [quen-mcp](entities/quen-mcp.md) — Rust MCP/CLI + C++/WitcherScript bridge for agent-driven Witcher 3 mod dev/testing (reproducible sessions, PresentMon A/B, memory reads/patches, staged mods, SQLite evidence ledger; folder restore on exit; snackbar92hypernova; Game Develop / MCP server)
+- [Quarterhood Engine](entities/quarterhood-engine.md) — TypeScript deterministic arcade replay core + Node CLI verifier (server seed; per-frame input logs; xorshift32/integer physics; golden fixtures; Robinhood Chain Merkle leaderboard commits; anti-scripting review flags; quarterhood)
 - [QuickAsm](entities/quickasm.md) — x86/x64 assemble-and-run GUI (Keystone)
 - [QuickPGTrigger](entities/quickpgtrigger.md) — PatchGuard stress testing (C/C++; cheat / PatchGuard-related; gmh5225)
 - [quickemu](entities/quickemu.md) — optimized QEMU VM create/run (Win/macOS/Linux; Cheat QEMU/KVM lab)
