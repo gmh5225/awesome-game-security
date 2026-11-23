@@ -1888,6 +1888,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ServenScorpion/VirtualApp [Android]
 - https://github.com/chinaapps/zn-toolbox [Host-no-root Android container VM (Twoyi fork) with built-in root and LSPosed for isolated mobile modding]
 - https://github.com/wumingzhinu/VirtualMachine [Android VM app (VM Studio) with Vulkan rendering, Magisk root toggle, Xposed module support, and Google Play services for isolated mobile environments]
+- https://github.com/KiZakiXD/NZeyMod-Manager [Android companion launcher for NZeyMod ROM on NZey Master (Virtual Master): SHA-256 ROM import, identity randomization, Magisk module profiles, and keybox management]
 - https://github.com/boz700908/droid-vm [Non-root Android host running a real Linux/UML arm64 guest with Magisk, KernelSU LKM, and KernelPatch for isolated mobile modding research]
 - https://github.com/woand/ShitJumpingVM [Android NEXTVM engine: isolated app sandboxes via Binder proxy and ActivityThread hooks, multi-instance identity spoofing, and anti-detection without root]
 - https://github.com/Iviesever/rooted-android-game-vm [Windows desktop rooted Android game VM workbench with GUI/CLI management, APK install/update, root diagnostics, and private app-data export for isolated mobile testing]
