@@ -2014,6 +2014,7 @@ sources:
   - wiki/sources/descriptions/xuanfeng0316__MCBotMod.md
   - wiki/sources/descriptions/winstxnhdw__lc-hax.md
   - wiki/sources/descriptions/elkir0__sc2-android-recomp.md
+  - wiki/sources/descriptions/Mag1cByt3s__mha2-remastered.md
   - wiki/sources/descriptions/byroweb__AC1_RE.md
   - wiki/sources/descriptions/mlafeldt__codebreaker-rs.md
   - wiki/sources/descriptions/mohasi__game-cheats.md
@@ -3229,6 +3230,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - *Kabus 22* Windows→Linux engine RE port via [[kabus22-linux]] (sergen213; C++20 WDL script runtime + ODE/SDL2/FFmpeg; OpenGL/Vulkan + optional RT/PBR/FSR; GTK launcher/updater; user-supplied retail assets; Cheat / RE Tools) (source: wiki/sources/descriptions/sergen213__kabus22-linux.md)
 - PS3 *MotorStorm: Monument Valley* WIP PPU/SPU static translation via [[motorstorm-mv-recomp]] (robbe1912; ps3recomp + CMake/Python lift; Cell HLE + D3D12/FFmpeg host runtime; Havok/SPURS/SPU-ELF + source-coverage research; source-only authorized local RE; Cheat / RE Tools) beside Xenon/Saturn static-recomp lanes such as [[mcla-pc]] and [[saturnkit]]. (source: wiki/sources/descriptions/robbe1912__motorstorm-mv-recomp.md)
 - StarCraft II x86-32→ARM64 static recompilation toolkit via [[sc2-android-recomp]] (elkir0; Unicorn per-function difftest oracle; D3D9 SM2/3→SPIR-V; MPQ tools; pcrecomp closure extensions; Android Bionic/Vulkan helpers; method and tooling only—no game assets; Cheat / RE Tools) (source: wiki/sources/descriptions/elkir0__sc2-android-recomp.md) (source: wiki/sources/README-categories.md)
+- *Moorhuhn Adventure 2* Win32 x86-32→Linux x86_64 static recompilation via [[mha2-remastered]] (Mag1cByt3s; Capstone Python lifter; clean-room Win32/DirectDraw–DirectShow HLE + OpenGL 3.3/SDL2/FFmpeg renderer; archive unpack + neural 4K upscale; BYO legal copy; Cheat / static recomp) for legacy PE lift and preservation RE without Wine. (source: wiki/sources/descriptions/Mag1cByt3s__mha2-remastered.md) (source: wiki/sources/README-categories.md)
 - Xbox 360 emulator [[xbox360-emu]] (C/C++; kernel-level work, modding, memory analysis) sits in the console `Xbox` lane for emulator developers and Xbox researchers. (source: wiki/sources/descriptions/exjam__xbox360-emu.md)
 - Xbox 360 XEX static analysis in IDA Pro via [[idaxex]] (C++ loader; XEX format parse, PE extraction, import/export + kernel symbol naming; IDA 9) sits in the console `Xbox` lane for reverse engineers and console security researchers. (source: wiki/sources/descriptions/emoose__idaxex.md)
 - Xbox 360 VMX128 operand decode correction in IDA Pro via [[ida-vmx128-helper]] (Goatman13; Python IDAPython; processor-module hook; accurate A/B/C/D register fields on `vaddfp128`, `vperm128`, `vsldoi128`; auto-loads for PPC/XEX targets; Cheat / RE Tools) complements [[idaxex]] XEX loading when analyzing VMX128-heavy Xenon game code beside static-recomp projects such as [[mcla-pc]]. (source: wiki/sources/descriptions/Goatman13__ida_vmx128_helper.md)

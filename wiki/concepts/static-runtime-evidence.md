@@ -13,6 +13,7 @@ sources:
   - wiki/sources/descriptions/xshxdex98__OpenMCM2.md
   - wiki/sources/descriptions/dybeky__custos.md
   - wiki/sources/descriptions/TalhaMudo__NFSU2Recomp.md
+  - wiki/sources/descriptions/Mag1cByt3s__mha2-remastered.md
   - wiki/sources/descriptions/HanYolo1__timeLink.md
   - wiki/sources/descriptions/elkir0__sc2-android-recomp.md
   - wiki/sources/descriptions/gamboozino__ngbrecomp.md
@@ -42,7 +43,7 @@ sources:
   - wiki/sources/descriptions/tamcdonald42__legacy-recreated.md
   - wiki/sources/descriptions/ILFforever__YW4Recomp.md
   - wiki/sources/descriptions/Revivedx__SavageWindRecomp.md
-updated: 2026-11-19
+updated: 2026-11-23
 confidence: high
 ---
 
@@ -98,6 +99,8 @@ BGT/NVGT blind-audio-game toolkits such as [[bgt-decomp-tools]] (KamiKitsune420;
 
 Win32 PE32 static recompilation such as [[nfsu2recomp]] (TalhaMudo; *Need for Speed: Underground 2* x86→ARM64 macOS; ahead-of-time lift to C plus Win32/D3D9 runtime translation) separates **static discovery** (PE relocation recovery, recursive function discovery, indirect-call dispatch tables) from **runtime fidelity** claims about HLE shortcuts (e.g. D3DX effect framework)—label which API paths are fully lifted vs emulated before treating the native build as a reference port. (source: wiki/sources/descriptions/TalhaMudo__NFSU2Recomp.md)
 
+Win32 PE32 x86-32 static recompilation to native Linux x86_64 such as [[mha2-remastered]] (Mag1cByt3s; *Moorhuhn Adventure 2*; Capstone-based Python lifter discovers functions and switch tables and emits C; runtime emulates flat guest memory and x87 FPU while HLE-ing DirectDraw, DirectInput, DirectSound, and DirectShow-style video behind **OpenGL 3.3 Core** via SDL2/FFmpeg—no Wine or CPU emulator; neural 4K asset upscaling and portable Linux packaging; BYO legal copy) requires the same split—label which Win32/DirectX API families and lifted control flow are oracle-validated vs host-emulated before preservation or renderer claims beside [[nfsu2recomp]]. (source: wiki/sources/descriptions/Mag1cByt3s__mha2-remastered.md)
+
 Win32 PE32 x86-32 static recompilation to Android ARM64 such as [[sc2-android-recomp]] (elkir0; StarCraft II reference target; per-function differential testing against Unicorn as a lift oracle; offline D3D9 SM2/3→SPIR-V plus Bionic/Vulkan porting helpers; users supply lifted artifacts from legitimate installs) requires the same split—label which graphics, audio, and Win32 runtime paths are translated vs stubbed before treating the ARM64 build as a fidelity reference. (source: wiki/sources/descriptions/elkir0__sc2-android-recomp.md)
 
 Switch AArch64 static recompilation to native Windows x64 such as [[smo-recomp]] (Coz-0; *Super Mario Odyssey* 1.4.1; Python AOT lifter→C with Clang build; Unicorn per-function difftest as lift oracle; custom host runtime for Switch system libraries, file I/O, audio, SDL3 input, and NVN-style graphics on Vulkan with Maxwell→SPIR-V shader translation; users supply decrypted dumps—no bundled assets) illustrates the same boundary between lifted guest code and reimplemented platform services when studying commercial porting without a CPU interpreter or JIT. (source: wiki/sources/descriptions/Coz-0__smo-recomp.md)
@@ -152,4 +155,4 @@ Game-server PC checks often combine **offline host artifacts** (Prefetch, Amcach
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[smo-harmony]] · [[letsgo-recomp]] · [[yw4recomp]] · [[totk-pc-recomp]] · [[savage-wind-recomp]] · [[timelink]] · [[xcx-recomp]] · [[xc2-recomp]] · [[dkb-pc-recomp]] · [[mkw-thwomp]] · [[emblem-weave]] · [[spr-recomp-project]] · [[nakagawa-recomp]] · [[gow-pc-port]] · [[vp2s-recomp]] · [[mksm]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[ng2recomp]] · [[cod6-nx]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[legacy-recreated]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[mha2-remastered]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[smo-harmony]] · [[letsgo-recomp]] · [[yw4recomp]] · [[totk-pc-recomp]] · [[savage-wind-recomp]] · [[timelink]] · [[xcx-recomp]] · [[xc2-recomp]] · [[dkb-pc-recomp]] · [[mkw-thwomp]] · [[emblem-weave]] · [[spr-recomp-project]] · [[nakagawa-recomp]] · [[gow-pc-port]] · [[vp2s-recomp]] · [[mksm]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[ng2recomp]] · [[cod6-nx]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[legacy-recreated]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
