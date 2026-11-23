@@ -1757,6 +1757,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/BuSung-dev/Root-My-Galaxy [One-click KernelSU installer for supported Samsung Galaxy firmware via CVE-2026-43499]
 - https://github.com/tbc0309/KPA-Root [Bootloader unlock, Magisk root, and restore toolkit for the KONKR Pocket Advance gaming handheld with integrity-module support]
 - https://github.com/yingyangdao/honor-v10-lab [Documented Honor V10 (EMUI 9) root lab: SWTP bootloader unlock, Magisk 20.1, EdXposed, Frida Gadget workaround for Huawei SELinux limits, tcpdump, and reusable scripts]
+- https://github.com/YuanZ1949/oppo-r9sk-root [Documented OPPO R9sk (Android 6.0.1) root path: 9008 EDL, BL unlock, Magisk 23.0, MagiskHide, and ColorOS install-gate bypass with evidence chain]
 - https://github.com/bmax121/APatch
 - https://github.com/Chill-Astro/FOSS-Root-Checker [Open-source Android app to verify Magisk, KernelSU, APatch, and legacy root/BusyBox status on Android 7+]
 - https://github.com/lzghzr/APatch_kpm [APatch modules]
@@ -4625,6 +4626,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/kodeni-am/leaderboard [Open-source multi-tenant leaderboard API (Go/Redis) with durable ingest, scalable ranking, and optional per-app HMAC-signed score submits with replay protection]
 - https://github.com/AtakanKeser/BlastScale [Server-authoritative mobile puzzle backend with move-replay anti-cheat, exactly-once rewards, and LiveOps tooling]
 - https://github.com/DMN-Software/dmn_minigame [Embeddable browser minigames whose leaderboard scores come only from server-side input replay, not client-submitted totals]
+- https://github.com/acidvegas/acid-maze [Flask browser maze arcade whose server replays per-tick input logs through shared QuickJS simulation before accepting leaderboard scores]
+- https://github.com/ctrl-sagesh/breach [Browser terminal security training game whose Supabase Edge Function replays command logs through a shared deterministic engine for cheat-resistant leaderboards]
 - https://github.com/StanislawGolec/Ultimo [Java 21 authoritative multiplayer card-game server with fog-of-war hand hiding, virtual threads, and WebSockets]
 - https://github.com/Ogonx/anticheat-lab [Six-month self-study lab attacking and defending deliberately vulnerable own-game builds, with ASM/C++ memory exercises, devlog, and VM-only scope]
 - https://github.com/senolbasyigit/anticheat-lab [Claude Code skill plus Python scripts to memory-scan your own dev builds (devbuild.json guard), report exposed client values, and suggest server-side validation fixes; optional pywinauto RPA mode]
