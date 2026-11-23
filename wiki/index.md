@@ -170,6 +170,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [bethesda-modding-starter](entities/bethesda-modding-starter.md) — Bethesda F4SE/SFSE plugin bootstrap + Ghidra/x64dbg MCP RE (Fallout 4/Skyrim/Starfield; CommonLib; CMake/vcpkg; rollingrock)
 - [bevy](entities/bevy.md) — Rust data-driven ECS game engine (free OSS; Game Engine / source)
 - [bevy-personal-test](entities/bevy-personal-test.md) — Rust/Bevy multiplayer security testbed (rollback netcode, shadow-VM Wasm checks, Rhai sandbox VM, server replay validation; XX-Batsu)
+- [breach](entities/breach.md) — Browser terminal pentest training game (ctrl-sagesh; Next.js/TypeScript; Kali-style shell; missions + daily challenges; Supabase Edge Function command-log replay for cheat-resistant leaderboards; Vitest replay/AC coverage; Cheat / Guide)
 - [big5-decode-ida](entities/big5-decode-ida.md) — IDA plugin: decode bytes as Big5 (Python; cheat / IDA Plugins)
 - [BigBaseV2](entities/bigbasev2.md) — GTA V C++/Lua mod-menu base (rendering / modding / hooking; cheat / game:gta5; gmh5225)
 - [BigWhiteTool](entities/bigwhite-tool.md) — Android native UE memory/SDK utility (C/C++ NDK; GName/GObject metadata traversal, process R/W, SDK dump; ImGui Vulkan/OpenGL overlay; offset finding + runtime inspection; BigWhite666; cheat / [SDK Dump For Android])
