@@ -1,0 +1,1464 @@
+Project Path: arc_b2tmy_ida-junk-remover_nfwpkjq1
+
+Source Tree:
+
+```txt
+arc_b2tmy_ida-junk-remover_nfwpkjq1
+├── LICENSE
+├── README.md
+├── demo
+│   └── make_junk_sample.py
+├── ida_junk_remover.py
+└── tests
+    └── mock_test.py
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 b2tmy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+[![tests](https://github.com/b2tmy/ida-junk-remover/actions/workflows/tests.yml/badge.svg)](https://github.com/b2tmy/ida-junk-remover/actions/workflows/tests.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![IDA Pro 7.4+](https://img.shields.io/badge/IDA%20Pro-7.4%2B%20%7C%208.x%20%7C%209.x-orange.svg)
+
+# IDA 花指令清理插件
+
+`ida_junk_remover.py` —— 自动找出并清理 IDA 里的花指令（junk code / 垃圾字节），
+让反汇编重新对齐、Hex-Rays 能正常反编译。
+
+适用 IDA Pro **7.4+ / 8.x / 9.x**（Python 3）。单文件，无依赖。
+
+---
+
+## 安装
+
+把 `ida_junk_remover.py` 丢进 IDA 的 plugins 目录：
+
+| 系统 | 路径 |
+| --- | --- |
+| Windows | `%APPDATA%\Hex-Rays\IDA Pro\plugins\` |
+| Linux | `~/.idapro/plugins/` |
+| macOS | `~/.idapro/plugins/` |
+
+重启 IDA。菜单 **Edit → Plugins → Junk Code Remover**，或直接 **Ctrl-Alt-J**。
+
+不想装插件也行：**File → Script file...** 选这个 py，会先对当前函数跑一次预览。
+
+---
+
+## 怎么用
+
+按 Ctrl-Alt-J，弹出：
+
+```
+Junk Code Remover
+┌ 扫描范围 ─────────────┐
+│ (•) 当前函数           │
+│ ( ) 当前代码段         │
+│ ( ) 全部代码段         │
+└──────────────────────┘
+[x] Report dead jumps (jmp/call to next insn)
+[x] Report const-condition jumps
+[ ] Report call $+5 / get-EIP
+[x] Dry run (只列出, 不改)          <- 默认勾上，先看再动
+[ ] Also patch const-condition to jmp
+```
+
+第一次建议就用默认值（**Dry run 打勾**），看输出窗口的清单：
+
+```
+[junk] ========================================================
+[junk]   jump_into_middle     12   跳进指令中间
+[junk]   overlap               3   指令重叠
+[junk]   dead_jump             8   跳转到下一条
+[junk] --------------------------------------------------------
+[junk]   jump_into_middle @00401006 -> 00401009  (jz 目标落在 00401008 的指令内部)
+[junk]   overlap           @00401320  (上一条指令覆盖到 00401324)
+[junk] ========================================================
+[junk] 预览(未落地): 共 23 处, 修复 0 处
+```
+
+看着没问题，把 **Dry run 取消**，再跑一次，它就会落地：
+
+```
+[junk] 修复 jump_into_middle @00401006 -> 00401009  (jz 目标落在 00401008 的指令内部)
+[junk] 完成: 共 15 处, 修复 15 处
+[junk] 提示: 回到反汇编窗口按 F5 重新反编译, 效果才看得到。
+```
+
+---
+
+## 它能认出的 5 类
+
+### 1. 跳进指令中间 `jump_into_middle` ✅ 自动修
+
+最典型的一种。垃圾字节让 IDA 把两条指令合并成一条，跳转目标就落在这条"胖"指令的内部：
+
+```asm
+00401006  74 01        jz   short 00401009
+00401008  E8           db   0E8h               ; 垃圾字节
+00401009  55           push ebp                 ; 真正的跳转目标
+```
+
+IDA 在 401008 处解码 `E8 55 ...`（call rel32，5 字节），把 401009 吞了。
+插件把 `[401008, 401009)` 这段从代码里摘掉、标成字节数据，再从 401009 重新建指令。
+
+### 2. 指令重叠 `overlap` ✅ 自动修
+
+两条指令覆盖同一段字节，通常后一条是假指令（上一个花指令的副产物）。
+处理方式同上：把前一条砍到后一条起点之前。
+
+### 3. 跳到自己下一条 `dead_jump` ⚠️ 只报告
+
+```asm
+0040100A  EB 00        jmp  $+0        ; 等于 nop
+0040100E  74 00        jz   $+0
+```
+
+本身无害（不影响流程），但它是花指令的标志。默认只列出来，不动它——
+把它改成 nop 会让地址偏移变化，可能连带破坏别的地方。
+
+### 4. 恒真/恒假条件跳转 `const_cond` ⚠️ 报告，可选 patch
+
+```asm
+0040100C  31 C0        xor  eax, eax   ; eax 一定是 0 → ZF=1
+0040100E  74 05        jz   00401015   ; 恒真，跳转永远发生
+```
+
+识别 `xor r,r` / `sub r,r` / `and r,0` / `mov r,0` 后面紧跟 `jcc` 的模式。
+打开 `Also patch const-condition to jmp` 才会把 `jz rel8` 改成 `jmp rel8`（74→EB）、
+`jz rel32` 改成 `jmp rel32`（0F 8x → E9）。**这会改字节值**，所以默认关。
+
+### 5. 取 EIP `get_eip` ⚠️ 只报告
+
+```asm
+00401015  E8 00 00 00 00   call $+5
+0040101A  58               pop  eax        ; eax = 0040101A
+```
+
+壳和 shellcode 里极常见。这是**有效逻辑**，不是垃圾，所以只报告不删——
+你需要知道它在那儿（往往意味着后面有重定位/解密代码）。
+
+---
+
+## 安全设计
+
+**默认一个字节都不改。**
+
+插件只改 IDA 的数据库分析状态（`undefine` + 重建指令），不 `patch` 原始字节。
+也就是说：
+
+* 磁盘上的 exe 完全没动过；
+* 数据库不保存关掉，一切恢复原样；
+* 唯一的例外是勾了 `Also patch const-condition to jmp`，那才会写字节（且只写 IDB，不写文件）。
+
+另外：
+
+* 所有 IDA API 调用都包了 `try/except`，单个函数失败继续下一个，不会把 IDA 搞崩；
+* 单次扫描有 20000 条告警上限，病态文件不会卡死；
+* 修复后自动 `plan_and_wait` 重分析，最多迭代 6 轮直到稳定。
+
+---
+
+## 自测（没有样本也能跑）
+
+```bash
+python demo/make_junk_sample.py        # 生成 demo/junk_sample.bin (31 字节)
+```
+
+IDA 里 `File → Open` 选这个 bin：
+* Processor: **x86 (metapc)**
+* 32-bit
+* Base address: **0x401000**
+* 勾 "Load as code segment"
+
+然后 Ctrl-Alt-J，范围选"当前代码段"，Dry run 先看一眼。预期：
+
+| 地址 | 类型 | 说明 |
+| --- | --- | --- |
+| 0x401006 | jump_into_middle | 可修 |
+| 0x40100A | dead_jump | 只报告 |
+| 0x40100E | const_cond | 只报告 |
+| 0x401015 | get_eip | 只报告 |
+
+取消 Dry run 再跑，0x401006 那处会被修好，`push ebp` 恢复成独立指令。
+
+---
+
+## 单元测试（不需要 IDA）
+
+```bash
+python tests/mock_test.py
+```
+
+用一套假的 `ida_*` 模块把插件的扫描/修复逻辑整个跑一遍，覆盖 7 个用例：
+跳进中间、重叠、死跳转、恒真跳转、取 EIP、干净代码不误报、patch 开关。
+
+```
+== 1. 跳进指令中间 ==
+  ok   jump_into_middle: 检出
+  ok   jump_into_middle: 有修复动作
+  ok   jump_into_middle: undefine 区间正确
+  ok   jump_into_middle: 没 patch 字节
+...
+全部通过
+```
+
+---
+
+## 已知边界
+
+* **整段被识别成数据**时扫不到东西。先在函数头按 `U` 再按 `C`，或选中范围按 `P` 定义函数，再跑插件。
+* **恒真/恒假判定**只覆盖 `xor/sub/and/mov` 立即数这几种最常见的模式；
+  `mov eax, [mem]` 之类要看内存内容，静态判不了，不猜。
+* **VMProtect / Themida** 那种"字节码虚拟机"层的花指令不在射程内——那不是字节级垃圾，
+  是整套自定义指令集，得上专门的 devirtualizer。
+* **`jmp $+0` 不自动改**：改了会挪地址，可能连带破坏其他引用，宁可只报告。
+* 跳转目标如果是**间接跳转**（`jmp [eax]`、`call [reg+4]`），拿不到静态目标，扫不到。
+
+---
+
+## 和别的方案比
+
+| 方案 | 差别 |
+| --- | --- |
+| 手动 U / C / P | 这个就是把它自动化 + 批量扫描，还带报告 |
+| IDA 自带的 "Force jump" | 只解决个别跳转，不处理垃圾字节本身 |
+| 各种 junk code 脚本 | 多数靠 `patch_byte(0x90)` 硬抹，改字节且不可逆；这里默认只动分析状态 |
+| de-obfuscator 框架 | 重，依赖多；这个是单文件，扔进 plugins 就能用 |
+
+---
+
+## 扩展点
+
+想加新的花指令模式，改 `scan_range()` 里那段线性扫描即可：
+
+```python
+# 模式: 某条指令的目标落在另一条指令内部
+if tgt is not None and start <= tgt < end:
+    cover = covering_insn(view, ea, start, end)
+    if cover is not None:
+        add(Issue('jump_into_middle', ea, tgt, cover, ...))
+```
+
+加一个新的 `Issue.kind` + 对应的 `fix_issue` 分支就行，`FIXABLE` 里登记一下即可参与自动修复。
+
+```
+
+`demo/make_junk_sample.py`:
+
+```py
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+生成一个"满是花指令"的 32 位 x86 二进制，专门用来验证插件。
+
+    python make_junk_sample.py            # 生成 junk_sample.bin
+
+在 IDA 里：
+    File -> Open -> 选 junk_sample.bin
+    Loading a binary file: Processor = x86 (metapc), 32-bit,
+    Base address = 0x401000, 勾上 "Load as code segment"
+    打开后按 P 把 0x401000 定义成函数（或直接跑插件，范围选"当前代码段"）
+"""
+
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+BASE = 0x401000
+
+# (字节, 说明) —— 按顺序拼起来，地址自动算
+PARTS = [
+    (b'\x55',             'push ebp'),
+    (b'\x89\xe5',         'mov ebp, esp'),
+    (b'\x83\xec\x10',     'sub esp, 0x10'),
+
+    # 花指令 1: 跳进指令中间
+    (b'\x74\x01',         'jz +1        -> 目标 = push ebp 那条'),
+    (b'\xe8',             'db 0xE8      <- 垃圾字节 (会被 IDA 当成 call 的开头)'),
+    (b'\x55',             'push ebp     <- 跳转真正落点'),
+
+    # 花指令 2: 死跳转
+    (b'\xeb\x00',         'jmp +0       -> 跳到自己下一条'),
+
+    # 花指令 3: 恒真条件跳转，目标不是下一条
+    (b'\x31\xc0',         'xor eax, eax'),
+    (b'\x74\x05',         'jz +5        -> 恒真 (ZF 一定为 1)'),
+    (b'\x90' * 5,         'nop x5       <- 永远走不到的死代码'),
+
+    # 花指令 4: call $+5 / pop
+    (b'\xe8\x00\x00\x00\x00', 'call $+5'),
+    (b'\x58',             'pop eax      <- 取 EIP'),
+
+    # 正常收尾
+    (b'\x89\xec',         'mov esp, ebp'),
+    (b'\x5d',             'pop ebp'),
+    (b'\xc3',             'ret'),
+]
+
+
+def build():
+    blob = bytearray()
+    notes = []
+    for data, note in PARTS:
+        notes.append((BASE + len(blob), data, note))
+        blob.extend(data)
+    return bytes(blob), notes
+
+
+def main():
+    blob, notes = build()
+    out = os.path.join(HERE, 'junk_sample.bin')
+    with open(out, 'wb') as f:
+        f.write(blob)
+
+    print('写出 %s  (%d 字节, 基址 0x%X)' % (out, len(blob), BASE))
+    print('')
+    print('  地址     字节              说明')
+    for ea, data, note in notes:
+        print('  %08X %-16s  %s' % (ea, data.hex(' '), note))
+    print('')
+    print('预期插件报告:')
+    print('  jump_into_middle @0x401006 -> 0x401009   可修')
+    print('  dead_jump        @0x40100A -> 0x40100C   只报告')
+    print('  const_cond       @0x40100E -> 0x401015   只报告 (可选 patch)')
+    print('  get_eip          @0x401015 -> 0x40101A   只报告')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+```
+
+`ida_junk_remover.py`:
+
+```py
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+ida_junk_remover.py -- IDA 花指令(junk code)自动清理插件
+
+适用: IDA Pro 7.4+ / 8.x / 9.x (Python 3)
+
+安装:
+    把本文件丢进 IDA 的 plugins 目录:
+        Windows : %APPDATA%\\Hex-Rays\\IDA Pro\\plugins\\
+        Linux   : ~/.idapro/plugins/
+        macOS   : ~/.idapro/plugins/
+    重启 IDA, 菜单 Edit -> Plugins -> "Junk Code Remover"
+    或直接按 Ctrl-Alt-J
+
+也可以不装: File -> Script file... 直接跑, 末尾会自动执行一次"当前函数"。
+
+它做什么
+--------
+1. 扫描"跳进指令中间"(jump-into-middle) 的花指令
+       jz  short loc_X
+       db 0E8h              <- 垃圾字节, 被上一条指令吞掉了
+   loc_X:
+   做法: 把 [指令起点, 跳转目标) 这段垃圾字节从代码里摘掉 (undefine),
+        再从跳转目标重新建立指令, 让后面的反汇编重新对齐。
+
+2. 扫描指令重叠 (overlap)
+   两条指令覆盖了同一段字节, 后一条是假指令 -> 摘掉后一条的头部。
+
+3. 扫描"死跳转"(jz $+2 之类), 只报告, 不默认动手。
+
+4. 扫描"永真/永假条件跳转"(xor eax,eax / jz ...), 报告; 可选把条件跳转
+   patch 成 jmp (改 IDB, 不改磁盘文件)。
+
+5. 扫描 call $+5 / pop reg 这类"取 EIP"的壳代码, 只报告。
+
+安全设计
+--------
+* 默认 **不改任何字节**, 只改 IDA 的数据库分析状态 (undefine / 重分析)。
+  也就是说磁盘上的原始文件一个字节都没动, 关掉数据库不保存即可完全恢复。
+* 所有修改前先干跑(dry-run)列出清单, 你确认后才落地。
+* 每处修改都写进日志窗口, 带地址, 可以跳转。
+* 出错不影响 IDA: 全部调用包在 try/except 里, 单个函数失败继续下一个。
+
+已知边界
+--------
+* 需要指令"能解码"。如果整段被识别成数据, 先用 C 键或本插件的
+  "重分析当前函数" 把它变成代码。
+* 不支持 VMProtect/Themida 那种"字节码虚拟机"级别的花指令, 那是另一回事。
+* 恒真/恒假判断只覆盖 xor/sub/and/mov 立即数这几种最常见的模式。
+"""
+
+from __future__ import print_function
+
+import sys
+import traceback
+
+try:
+    import idaapi
+    import idc
+    import ida_bytes
+    import ida_ua
+    import ida_auto
+    import ida_funcs
+    import ida_segment
+    import ida_kernwin
+    import ida_xref
+    import ida_ida
+except ImportError as e:                      # 在 IDA 外面被 import 时
+    idaapi = None
+    _IMPORT_ERROR = e
+else:
+    _IMPORT_ERROR = None
+
+
+# --------------------------------------------------------------------------
+# 常量
+# --------------------------------------------------------------------------
+
+PLUGIN_NAME = "Junk Code Remover"
+PLUGIN_HOTKEY = "Ctrl-Alt-J"
+
+BADADDR = 0xFFFFFFFFFFFFFFFF if sys.maxsize > 2 ** 32 else 0xFFFFFFFF
+
+MAX_ITER = 6                # 修复-重扫的迭代上限
+MAX_ISSUES = 20000          # 单次扫描的告警上限, 防止病态文件卡死
+
+# 指令助记符分类
+COND_JMP_PREFIX = 'j'
+UNCOND_JMP = ('jmp', 'jmpq', 'ljmp', 'b', 'br')
+CALL_MNEM = ('call', 'callq', 'lcall', 'bl', 'blx')
+
+
+def vlog(fmt, *args):
+    """带前缀的日志, 走 IDA 输出窗口。"""
+    msg = fmt % args if args else fmt
+    try:
+        ida_kernwin.msg('[junk] %s\n' % msg)
+    except Exception:
+        print('[junk] %s' % msg)
+
+
+# --------------------------------------------------------------------------
+# 抽象视图: 插件逻辑只依赖这几个方法, 方便脱离 IDA 做单元测试
+# --------------------------------------------------------------------------
+
+class IdaView(object):
+    """把 IDA 的 API 收拢成一个小接口 (见 tests 里的 MockView)。"""
+
+    def is_loaded(self):
+        if idaapi is None:
+            return False
+        try:
+            return idaapi.get_inf_structure() is not None
+        except Exception:
+            return True          # 老/新版本 API 差异, 只要能 import 就当有库
+
+    def read_bytes(self, ea, n):
+        try:
+            return ida_bytes.get_bytes(ea, n)
+        except Exception:
+            return None
+
+    def is_code_head(self, ea):
+        try:
+            return ida_bytes.is_code(ida_bytes.get_flags(ea)) \
+                and ida_bytes.is_head(ida_bytes.get_flags(ea))
+        except Exception:
+            return False
+
+    def is_code_any(self, ea):
+        try:
+            return ida_bytes.is_code(ida_bytes.get_flags(ea))
+        except Exception:
+            return False
+
+    def insn_size(self, ea):
+        """返回指令长度; 解码失败返回 0。"""
+        try:
+            if ida_bytes.is_code(ida_bytes.get_flags(ea)):
+                return ida_bytes.get_item_size(ea)
+        except Exception:
+            pass
+        return 0
+
+    def mnem(self, ea):
+        try:
+            return (idc.print_insn_mnem(ea) or '').lower()
+        except Exception:
+            return ''
+
+    def next_head(self, ea, end):
+        try:
+            n = ida_bytes.next_head(ea, end)
+        except Exception:
+            n = ea + max(1, self.insn_size(ea))
+        if n is None:
+            return end
+        return n
+
+    def prev_head(self, ea, start):
+        try:
+            p = ida_bytes.prev_head(ea, start)
+            return p if p is not None else BADADDR
+        except Exception:
+            return BADADDR
+
+    def flow_target(self, ea):
+        """取下一条 flow 引用的目标 (直接跳转/调用)。没有则返回 None。"""
+        try:
+            t = ida_xref.get_first_fcref_from(ea)
+            if t is None or t == BADADDR:
+                return None
+            return t
+        except Exception:
+            return None
+
+    def op_addr(self, ea):
+        """取操作数里的近地址(用于 x86 的 jmp/call imm)。"""
+        try:
+            insn = ida_ua.insn_t()
+            if ida_ua.decode_insn(insn, ea) <= 0:
+                return None
+            for op in insn.ops:
+                if op.type in (ida_ua.o_near, ida_ua.o_far):
+                    return op.addr
+        except Exception:
+            pass
+        return None
+
+    # -- 修改 ---------------------------------------------------------
+    def undefine(self, ea, size):
+        try:
+            ida_bytes.del_items(ea, ida_bytes.DELIT_SIMPLE, size)
+            return True
+        except Exception as e:
+            vlog('undefine 失败 @%x: %s' % (ea, e))
+            return False
+
+    def make_byte(self, ea, size):
+        try:
+            ida_bytes.create_data(ea, ida_bytes.FF_BYTE, size, BADADDR)
+            return True
+        except Exception:
+            return False
+
+    def make_code(self, ea):
+        try:
+            return bool(ida_bytes.create_insn(ea))
+        except Exception:
+            return False
+
+    def patch_byte(self, ea, val):
+        try:
+            ida_bytes.patch_byte(ea, val)
+            return True
+        except Exception:
+            return False
+
+    def plan_and_wait(self, ea1, ea2):
+        try:
+            ida_auto.plan_and_wait(ea1, ea2)
+        except Exception:
+            try:
+                ida_auto.auto_make_code(ea1)
+                ida_auto.auto_wait()
+            except Exception:
+                pass
+
+    def auto_make_code(self, ea):
+        try:
+            ida_auto.auto_make_code(ea)
+        except Exception:
+            pass
+
+
+class FuncRange(object):
+    def __init__(self, start, end, name=''):
+        self.start = start
+        self.end = end
+        self.name = name
+
+
+def it_funcs(view):
+    """遍历所有函数, 产出 FuncRange。"""
+    if idaapi is None:
+        return
+    for i in range(ida_funcs.get_func_qty()):
+        f = ida_funcs.getn_func(i)
+        if f is None:
+            continue
+        name = ida_funcs.get_func_name(f.start_ea) or ''
+        yield FuncRange(f.start_ea, f.end_ea, name)
+
+
+def it_segments(view, code_only=True):
+    for i in range(ida_segment.get_segm_qty()):
+        s = ida_segment.getnseg(i)
+        if s is None:
+            continue
+        if code_only and s.type != ida_segment.SEG_CODE:
+            continue
+        yield (s.start_ea, s.end_ea, ida_segment.get_segm_name(s) or '')
+
+
+# --------------------------------------------------------------------------
+# 问题模型
+# --------------------------------------------------------------------------
+
+class Issue(object):
+    """一条花指令嫌疑。"""
+
+    def __init__(self, kind, ea, target=None, span=None, detail=''):
+        self.kind = kind          # jump_into_middle / overlap / dead_jump / const_cond / get_eip
+        self.ea = ea              # 出问题的指令地址
+        self.target = target      # 跳转目标 (如果有)
+        self.span = span          # 被覆盖的指令区间 (start, end)
+        self.detail = detail
+        self.fixed = False
+
+    def key(self):
+        return (self.kind, self.ea, self.target)
+
+    def __str__(self):
+        s = '%-18s @%08X' % (self.kind, self.ea)
+        if self.target is not None:
+            s += ' -> %08X' % self.target
+        if self.detail:
+            s += '  (%s)' % self.detail
+        return s
+
+
+KIND_CN = {
+    'jump_into_middle': '跳进指令中间',
+    'overlap': '指令重叠',
+    'dead_jump': '跳转到下一条',
+    'const_cond': '恒真/恒假条件跳转',
+    'get_eip': 'call $+5 取 EIP',
+}
+
+
+# --------------------------------------------------------------------------
+# 扫描
+# --------------------------------------------------------------------------
+
+def covering_insn(view, ea, lower, upper):
+    """
+    ea 落在哪条指令的内部 (严格 s < ea < e)。
+    返回 (start, end); 没有被覆盖返回 None。
+    """
+    for back in range(1, 16):
+        s = ea - back
+        if s < lower:
+            break
+        if not view.is_code_head(s):
+            continue
+        size = view.insn_size(s)
+        if size <= 0:
+            continue
+        e = s + size
+        if s < ea < e:
+            return (s, e)
+    return None
+
+
+def scan_range(view, start, end, want_dead=True, want_const=True,
+               want_eip=True, limit=MAX_ISSUES):
+    """扫描 [start, end) 的所有嫌疑, 返回 Issue 列表。"""
+    issues = []
+    seen = set()
+
+    def add(it):
+        k = it.key()
+        if k in seen or len(issues) >= limit:
+            return
+        seen.add(k)
+        issues.append(it)
+
+    # ---- 1) 线性扫描: 重叠 / 跳进中间 / 死跳转 / 取 EIP ----
+    prev_s, prev_e = None, None
+    ea = start
+    while ea is not None and ea < end:
+        if view.is_code_head(ea):
+            size = view.insn_size(ea)
+            if size <= 0:
+                ea = view.next_head(ea, end)
+                continue
+            cur_end = ea + size
+
+            # 重叠: 当前指令起点落在上一条指令内部
+            if prev_e is not None and ea < prev_e:
+                add(Issue('overlap', ea, None, (prev_s, prev_e),
+                          '上一条指令覆盖到 %08X' % prev_e))
+
+            mnem = view.mnem(ea)
+            is_jmp = mnem.startswith(COND_JMP_PREFIX) or mnem in UNCOND_JMP
+            is_call = mnem in CALL_MNEM
+            tgt = view.flow_target(ea) if (is_jmp or is_call) else None
+
+            if tgt is not None:
+                # 跳进指令中间
+                if start <= tgt < end:
+                    cover = covering_insn(view, tgt, start, end)
+                    if cover is not None:
+                        add(Issue('jump_into_middle', ea, tgt, cover,
+                                  '%s 目标落在 %08X 的指令内部'
+                                  % (mnem, cover[0])))
+                    elif tgt == ea + size and is_jmp:
+                        # 跳到自己的下一条: 典型花指令
+                        add(Issue('dead_jump', ea, tgt, None, mnem))
+
+            # 取 EIP: call $+5 / call 下一条
+            if is_call and tgt is not None and tgt == ea + size:
+                add(Issue('get_eip', ea, tgt, None, 'call 下一条后接 pop?'))
+
+            # 恒真/恒假条件跳转
+            if want_const and mnem.startswith(COND_JMP_PREFIX):
+                prev = view.prev_head(ea, start)
+                if prev not in (None, BADADDR) and prev != ea:
+                    pm = view.mnem(prev)
+                    if pm in ('xor', 'sub', 'and', 'mov') and _zeroes_reg(
+                            view, prev, pm):
+                        add(Issue('const_cond', ea, tgt, None,
+                                  '%s 之后是 %s (寄存器恒为 0)' % (pm, mnem)))
+
+            prev_s, prev_e = ea, cur_end
+            nxt = view.next_head(ea, end)
+            ea = nxt if nxt > ea else ea + 1
+        else:
+            nxt = view.next_head(ea, end)
+            ea = nxt if nxt > ea else ea + 1
+
+    return issues
+
+
+def _zeroes_reg(view, ea, mnem):
+    """
+    粗判: 这条指令是否把某个寄存器置 0。
+    xor r,r / sub r,r / and r,0 / mov r,0
+    """
+    try:
+        insn = ida_ua.insn_t()
+        if ida_ua.decode_insn(insn, ea) <= 0:
+            return False
+        ops = list(insn.ops)
+        if len(ops) < 2:
+            return False
+        a, b = ops[0], ops[1]
+        if a.type != ida_ua.o_reg:
+            return False
+        if mnem in ('xor', 'sub'):
+            return b.type == ida_ua.o_reg and a.reg == b.reg
+        if mnem == 'and':
+            return b.type == ida_ua.o_imm and b.value == 0
+        if mnem == 'mov':
+            return b.type == ida_ua.o_imm and b.value == 0
+    except Exception:
+        pass
+    return False
+
+
+# --------------------------------------------------------------------------
+# 修复
+# --------------------------------------------------------------------------
+
+FIXABLE = ('jump_into_middle', 'overlap')
+
+
+def fix_issue(view, issue, opts):
+    """
+    落一次修复。返回 True 表示改了数据库。
+    原则: 只 undefine 垃圾字节 + 重建指令, 不动任何字节值。
+    """
+    if issue.kind == 'jump_into_middle':
+        s, e = issue.span
+        tgt = issue.target
+        if not (s < tgt < e):
+            return False
+        # 1) 把 [s, tgt) 从代码里摘掉
+        if not view.undefine(s, tgt - s):
+            return False
+        # 2) 标成字节数据 (便于阅读, 也让 Hex-Rays 不再当指令)
+        if opts.get('mark_byte', True):
+            view.make_byte(s, tgt - s)
+        # 3) 从跳转目标重新建立指令
+        if not view.make_code(tgt):
+            # 有时候需要先 undefine 目标处被误建的指令
+            view.undefine(tgt, 1)
+            view.make_code(tgt)
+        view.auto_make_code(tgt)
+        return True
+
+    if issue.kind == 'overlap':
+        s, e = issue.span
+        tgt = issue.ea                     # 后一条(假)指令的起点
+        if not (s < tgt < e):
+            return False
+        # 把前一条指令砍到 tgt 之前 -> 让重叠消失
+        if not view.undefine(s, tgt - s):
+            return False
+        if opts.get('mark_byte', True):
+            view.make_byte(s, tgt - s)
+        view.make_code(tgt)
+        view.auto_make_code(tgt)
+        return True
+
+    if issue.kind == 'const_cond':
+        if not opts.get('patch_const_cond', False):
+            return False
+        # jcc rel8/rel32 -> jmp 同长度 (E9/EB), 只改 IDB
+        ea = issue.ea
+        size = view.insn_size(ea)
+        first = view.read_bytes(ea, 1)
+        if not first:
+            return False
+        b = ord(first)
+        if size == 2:                      # jcc rel8 -> jmp rel8
+            return view.patch_byte(ea, 0xEB)
+        if size >= 5:                      # jcc rel32 -> jmp rel32 (E9 xx xx xx xx)
+            return view.patch_byte(ea, 0xE9)
+        return False
+
+    return False
+
+
+# --------------------------------------------------------------------------
+# 主流程
+# --------------------------------------------------------------------------
+
+class Opts(dict):
+    def __init__(self, **kw):
+        dict.__init__(self, mark_byte=True, patch_const_cond=False,
+                      want_dead=True, want_const=True, want_eip=True)
+        self.update(kw)
+
+
+def collect_targets(view, scope, arg=None):
+    """按范围产出 FuncRange 列表。"""
+    if scope == 'func':
+        ea = idc.get_screen_ea() if idaapi else 0
+        f = ida_funcs.get_func(ea)
+        if f is None:
+            return []
+        return [FuncRange(f.start_ea, f.end_ea, ida_funcs.get_func_name(f.start_ea) or '')]
+
+    if scope == 'seg':
+        ea = idc.get_screen_ea()
+        s = ida_segment.getseg(ea)
+        if s is None:
+            return []
+        return [FuncRange(s.start_ea, s.end_ea,
+                          ida_segment.get_segm_name(s) or '')]
+
+    if scope == 'all':
+        return list(it_segments(view, code_only=True))
+
+    if scope == 'range' and arg:
+        try:
+            a, b = arg
+            return [FuncRange(a, b, 'range')]
+        except Exception:
+            return []
+    return []
+
+
+def run(view, scope='func', arg=None, dry_run=False, opts=None):
+    """扫描 + (可选)修复。返回 (issues, fixed_count)。"""
+    opts = opts or Opts()
+    targets = collect_targets(view, scope, arg)
+    if not targets:
+        vlog('没有可处理的范围 (光标不在函数里?)')
+        return [], 0
+
+    all_issues = []
+    fixed = 0
+
+    for tr in targets:
+        vlog('扫描 %s  %08X - %08X' % (tr.name or '?', tr.start, tr.end))
+        issues = scan_range(view, tr.start, tr.end,
+                            want_dead=opts['want_dead'],
+                            want_const=opts['want_const'],
+                            want_eip=opts['want_eip'])
+        all_issues.extend(issues)
+
+        if dry_run or not issues:
+            continue
+
+        # 修复 -> 重扫, 直到稳定
+        for _round in range(MAX_ITER):
+            todo = [x for x in issues if x.kind in FIXABLE and not x.fixed]
+            if not todo:
+                break
+            changed = 0
+            for i in todo:
+                if fix_issue(view, i, opts):
+                    i.fixed = True
+                    changed += 1
+                    fixed += 1
+                    vlog('修复 %s' % i)
+            if not changed:
+                break
+            view.plan_and_wait(tr.start, tr.end)
+            issues = scan_range(view, tr.start, tr.end,
+                                want_dead=opts['want_dead'],
+                                want_const=opts['want_const'],
+                                want_eip=opts['want_eip'])
+            all_issues.extend([x for x in issues if not x.fixed])
+
+    # 去重
+    uniq = {}
+    for i in all_issues:
+        uniq[i.key()] = i
+    all_issues = list(uniq.values())
+
+    report(all_issues, fixed, dry_run)
+    return all_issues, fixed
+
+
+def report(issues, fixed, dry_run):
+    if not issues:
+        vlog('干净: 没发现花指令。')
+        return
+    stat = {}
+    for i in issues:
+        stat[i.kind] = stat.get(i.kind, 0) + 1
+    vlog('=' * 56)
+    for k, v in sorted(stat.items(), key=lambda kv: -kv[1]):
+        vlog('  %-10s %4d   %s' % (k, v, KIND_CN.get(k, '')))
+    vlog('-' * 56)
+    for i in issues[:200]:
+        vlog('  %s%s' % ('[已修] ' if i.fixed else '', i))
+    if len(issues) > 200:
+        vlog('  ... 还有 %d 条, 见下方统计' % (len(issues) - 200))
+    vlog('=' * 56)
+    vlog('%s: 共 %d 处, 修复 %d 处'
+         % ('预览(未落地)' if dry_run else '完成', len(issues), fixed))
+    if fixed:
+        vlog('提示: 回到反汇编窗口按 F5 重新反编译, 效果才看得到。')
+
+
+# --------------------------------------------------------------------------
+# UI
+# --------------------------------------------------------------------------
+
+class JunkForm(ida_kernwin.Form if idaapi else object):
+    """范围 + 选项对话框。"""
+
+    def __init__(self):
+        if idaapi is None:
+            return
+        F = ida_kernwin.Form
+        self.inp_scope = F.RadGroupControl(
+            ('func', '当前函数'),
+            ('seg', '当前代码段'),
+            ('all', '全部代码段'),
+        )
+        self.cb_dead = F.ChkGroupControl(('dead',))
+        self.cb_const = F.ChkGroupControl(('const',))
+        self.cb_eip = F.ChkGroupControl(('eip',))
+        self.cb_dry = F.ChkGroupControl(('dry',))
+        self.cb_patch = F.ChkGroupControl(('patch',))
+        F.__init__(self,
+                   r"""BUTTON YES NONE
+BUTTON NO NONE
+BUTTON CANCEL NONE
+Junk Code Remover
+{form_change}
+
+<#{iScope}>{cScope}>
+
+<Report dead jumps (jmp/call to next insn) :{cDead}>
+<Report const-condition jumps              :{cConst}>
+<Report call $+5 / get-EIP                 :{cEip}>
+<Dry run (只列出, 不改)                     :{cDry}>
+<Also patch const-condition to jmp         :{cPatch}>
+""",
+                   {
+                       'form_change': F.FormChangeCb(self.OnFormChange),
+                       'iScope': F.RadGroupControl,
+                       'cScope': self.inp_scope,
+                       'cDead': F.ChkGroupControl,
+                       'cConst': F.ChkGroupControl,
+                       'cEip': F.ChkGroupControl,
+                       'cDry': F.ChkGroupControl,
+                       'cPatch': F.ChkGroupControl,
+                   })
+        self.inp_scope.value = 1
+        self.cb_dead.value = 1
+        self.cb_const.value = 1
+        self.cb_eip.value = 0
+        self.cb_dry.value = 1          # 默认先预览, 不直接改
+        self.cb_patch.value = 0
+
+    def OnFormChange(self, fid):
+        return 1
+
+    def scope_key(self):
+        v = self.inp_scope.value
+        return ('func', 'seg', 'all')[v] if v < 3 else 'func'
+
+
+def ask_options():
+    """返回 (scope, opts, dry_run); 用户取消返回 None。"""
+    if idaapi is None:
+        return None
+    try:
+        f = JunkForm()
+        ok = f.Execute()
+        if ok != 1:
+            return None
+        scope = f.scope_key()
+        opts = Opts(mark_byte=True,
+                    patch_const_cond=bool(f.cb_patch.value),
+                    want_dead=bool(f.cb_dead.value),
+                    want_const=bool(f.cb_const.value),
+                    want_eip=bool(f.cb_eip.value))
+        dry = bool(f.cb_dry.value)
+        f.Free()
+        return scope, opts, dry
+    except Exception:
+        vlog('对话框不可用, 回退到"当前函数 + 预览"')
+        traceback.print_exc()
+        return 'func', Opts(), True
+
+
+def plugin_main():
+    view = IdaView()
+    if not view.is_loaded():
+        vlog('没有打开的数据库。')
+        return
+    got = ask_options()
+    if got is None:
+        return
+    scope, opts, dry = got
+    try:
+        run(view, scope=scope, dry_run=dry, opts=opts)
+    except Exception:
+        vlog('执行出错:')
+        traceback.print_exc()
+
+
+def script_main():
+    """File -> Script file 直接跑时的入口: 先预览当前函数。"""
+    view = IdaView()
+    if not view.is_loaded():
+        print('没有打开的数据库。')
+        return
+    vlog('脚本模式: 预览当前函数 (要落地请用插件菜单)')
+    issues, fixed = run(view, scope='func', dry_run=True, opts=Opts())
+
+
+# --------------------------------------------------------------------------
+# 插件注册
+# --------------------------------------------------------------------------
+
+if idaapi is not None:
+    class junk_remover_plugin_t(idaapi.plugin_t):
+        flags = idaapi.PLUGIN_PROC | idaapi.PLUGIN_MOD
+        comment = '扫描并清理花指令 (junk code)'
+        help = 'Jump-into-middle / overlap / dead jump / const cond'
+        wanted_name = PLUGIN_NAME
+        wanted_hotkey = PLUGIN_HOTKEY
+
+        def init(self):
+            vlog('已加载 (快捷键 %s)' % PLUGIN_HOTKEY)
+            return idaapi.PLUGIN_KEEP
+
+        def run(self, arg):
+            plugin_main()
+
+        def term(self):
+            pass
+
+
+    def PLUGIN_ENTRY():
+        return junk_remover_plugin_t()
+
+
+if __name__ == '__main__':
+    # 在 IDA 里用 File -> Script file 跑时会走到这里
+    if idaapi is not None:
+        script_main()
+    else:
+        print('这是 IDA 插件, 需要在 IDA 里运行。')
+
+```
+
+`tests/mock_test.py`:
+
+```py
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+脱离 IDA 的单元测试：用一套假的 ida_* 模块跑插件的扫描/修复逻辑。
+
+    python tests/mock_test.py
+
+覆盖：
+  1. 跳进指令中间（最常见的花指令）能检出并修复
+  2. 指令重叠能检出并修复
+  3. 跳到自己下一条（死跳转）能检出
+  4. xor r,r + jcc 的恒真条件跳转能检出
+  5. call 下一条（取 EIP）能检出
+  6. 干净代码不误报
+  7. 修复动作只 undefine 垃圾字节，不 patch 任何字节值
+"""
+
+import io
+import os
+import sys
+import types
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+sys.path.insert(0, ROOT)
+
+
+# --------------------------------------------------------------------------
+# 假 ida_* 模块
+# --------------------------------------------------------------------------
+
+class Op(object):
+    def __init__(self, type_, reg=None, value=None, addr=None):
+        self.type = type_
+        self.reg = reg
+        self.value = value
+        self.addr = addr
+
+
+class Insn(object):
+    def __init__(self, ops):
+        self.ops = ops
+
+
+# o_* 常量
+O_REG, O_IMM, O_NEAR, O_FAR = 1, 2, 3, 4
+
+
+def build_ida_stubs(code):
+    """
+    code: dict[ea] = dict(size=, mnem=, target=, ops=[Op...])
+    返回 (modules, state)，state 记录被改动的地址。
+    """
+    state = {'undef': [], 'mades': [], 'patched': [], 'data': []}
+
+    ida_bytes = types.ModuleType('ida_bytes')
+    ida_bytes.DELIT_SIMPLE = 1
+    ida_bytes.FF_BYTE = 0xFF
+
+    def get_flags(ea):
+        return 0x400 if ea in code else 0        # 0x400 任意非零即可
+
+    def is_code(flags):
+        return flags != 0
+
+    def is_head(flags):
+        return flags != 0
+
+    def get_item_size(ea):
+        return code.get(ea, {}).get('size', 0)
+
+    def next_head(ea, end):
+        nxt = [a for a in code if a > ea and a < end]
+        return min(nxt) if nxt else end
+
+    def prev_head(ea, start):
+        prv = [a for a in code if a < ea and a >= start]
+        return max(prv) if prv else 0xFFFFFFFF
+
+    def del_items(ea, flags, size):
+        state['undef'].append((ea, size))
+        for a in list(code):
+            if ea <= a < ea + size:
+                del code[a]
+        return True
+
+    def create_data(ea, typ, size, tid):
+        state['data'].append((ea, size))
+        return True
+
+    def create_insn(ea):
+        state['mades'].append(ea)
+        return True
+
+    def patch_byte(ea, val):
+        state['patched'].append((ea, val))
+        return True
+
+    def get_bytes(ea, n):
+        return b'\x90' * n
+
+    for name, fn in [('get_flags', get_flags), ('is_code', is_code),
+                     ('is_head', is_head), ('get_item_size', get_item_size),
+                     ('next_head', next_head), ('prev_head', prev_head),
+                     ('del_items', del_items), ('create_data', create_data),
+                     ('create_insn', create_insn), ('patch_byte', patch_byte),
+                     ('get_bytes', get_bytes)]:
+        setattr(ida_bytes, name, fn)
+
+    ida_ua = types.ModuleType('ida_ua')
+    ida_ua.o_reg, ida_ua.o_imm, ida_ua.o_near, ida_ua.o_far = O_REG, O_IMM, O_NEAR, O_FAR
+
+    class insn_t(object):
+        def __init__(self):
+            self.ops = []
+
+    def decode_insn(insn, ea):
+        info = code.get(ea)
+        if not info:
+            return 0
+        insn.ops = info.get('ops', [])
+        return info.get('size', 0)
+
+    ida_ua.insn_t = insn_t
+    ida_ua.decode_insn = decode_insn
+
+    ida_xref = types.ModuleType('ida_xref')
+
+    def get_first_fcref_from(ea):
+        t = code.get(ea, {}).get('target')
+        return t if t is not None else 0xFFFFFFFF
+
+    ida_xref.get_first_fcref_from = get_first_fcref_from
+
+    ida_auto = types.ModuleType('ida_auto')
+    ida_auto.plan_and_wait = lambda a, b: None
+    ida_auto.auto_make_code = lambda a: None
+    ida_auto.auto_wait = lambda: None
+
+    ida_kernwin = types.ModuleType('ida_kernwin')
+    ida_kernwin.msg = lambda s: None
+
+    class _Rad(object):
+        def __init__(self, *a, **k):
+            self.value = 1
+
+    class _Chk(object):
+        def __init__(self, *a, **k):
+            self.value = 0
+
+    class _FormBase(object):
+        def __init__(self, *a, **k):
+            pass
+
+        def Execute(self):
+            return 0            # 模拟用户取消
+
+        def Free(self):
+            pass
+
+    _FormBase.FormChangeCb = staticmethod(lambda fn: fn)
+    _FormBase.RadGroupControl = _Rad
+    _FormBase.ChkGroupControl = _Chk
+    ida_kernwin.Form = _FormBase
+
+    idc = types.ModuleType('idc')
+
+    def print_insn_mnem(ea):
+        return code.get(ea, {}).get('mnem', '')
+
+    idc.print_insn_mnem = print_insn_mnem
+    idc.get_screen_ea = lambda: min(code) if code else 0
+
+    ida_funcs = types.ModuleType('ida_funcs')
+    ida_funcs.get_func_qty = lambda: 0
+    ida_funcs.get_func = lambda ea: None
+    ida_funcs.get_func_name = lambda ea: ''
+
+    ida_segment = types.ModuleType('ida_segment')
+    ida_segment.SEG_CODE = 2
+    ida_segment.get_segm_qty = lambda: 0
+    ida_segment.getnseg = lambda i: None
+    ida_segment.getseg = lambda ea: None
+    ida_segment.get_segm_name = lambda s: ''
+
+    idaapi = types.ModuleType('idaapi')
+    idaapi.BADADDR = 0xFFFFFFFF
+    idaapi.get_inf_structure = lambda: True
+    idaapi.plugin_t = object
+    idaapi.PLUGIN_PROC = 0
+    idaapi.PLUGIN_MOD = 0
+    idaapi.PLUGIN_KEEP = 0
+
+    mods = {
+        'idaapi': idaapi,
+        'idc': idc,
+        'ida_bytes': ida_bytes,
+        'ida_ua': ida_ua,
+        'ida_auto': ida_auto,
+        'ida_funcs': ida_funcs,
+        'ida_segment': ida_segment,
+        'ida_kernwin': ida_kernwin,
+        'ida_xref': ida_xref,
+        'ida_ida': types.ModuleType('ida_ida'),
+    }
+    return mods, state
+
+
+def load_plugin(code):
+    mods, state = build_ida_stubs(code)
+    saved = {}
+    for name, m in mods.items():
+        saved[name] = sys.modules.get(name)
+        sys.modules[name] = m
+    path = os.path.join(ROOT, 'ida_junk_remover.py')
+    with io.open(path, encoding='utf-8') as f:
+        src = f.read()
+    module = types.ModuleType('ida_junk_remover')
+    module.__file__ = path
+    exec(compile(src, path, 'exec'), module.__dict__)
+    return module, state, mods, saved
+
+
+def unload(mods, saved):
+    for name in mods:
+        if saved[name] is None:
+            sys.modules.pop(name, None)
+        else:
+            sys.modules[name] = saved[name]
+
+
+# --------------------------------------------------------------------------
+# 测试
+# --------------------------------------------------------------------------
+
+FAILED = []
+
+
+def check(name, cond, detail=''):
+    if cond:
+        print('  ok   %s' % name)
+    else:
+        print('  FAIL %s %s' % (name, detail))
+        FAILED.append(name)
+
+
+def case(name, code, want_kinds, do_fix=False, expect_undef=None):
+    mod, state, mods, saved = load_plugin(code)
+    try:
+        issues = mod.scan_range(mod.IdaView(), min(code), max(code) + 0x40)
+        kinds = sorted(set(i.kind for i in issues))
+        check('%s: 检出' % name, kinds == sorted(want_kinds),
+              'got %r want %r' % (kinds, sorted(want_kinds)))
+
+        if do_fix:
+            fixed = 0
+            for i in issues:
+                if mod.fix_issue(mod.IdaView(), i, mod.Opts()):
+                    fixed += 1
+            check('%s: 有修复动作' % name, fixed > 0, 'fixed=%d' % fixed)
+            if expect_undef is not None:
+                check('%s: undefine 区间正确' % name,
+                      expect_undef in state['undef'],
+                      'undef=%r' % (state['undef'],))
+            check('%s: 没 patch 字节' % name, not state['patched'],
+                  'patched=%r' % (state['patched'],))
+    finally:
+        unload(mods, saved)
+
+
+def main():
+    print('== 1. 跳进指令中间 ==')
+    # 0x1000: jz 0x1003 (2 字节)
+    # 0x1002: call, 5 字节 -> 覆盖 0x1002..0x1006
+    # 0x1003 落在 0x1002 内部
+    case('jump_into_middle',
+         {0x1000: dict(size=2, mnem='jz', target=0x1003),
+          0x1002: dict(size=5, mnem='call', target=0x2000),
+          0x1007: dict(size=1, mnem='ret')},
+         ['jump_into_middle'], do_fix=True, expect_undef=(0x1002, 1))
+
+    print('== 2. 指令重叠 ==')
+    case('overlap',
+         {0x1000: dict(size=6, mnem='mov'),
+          0x1004: dict(size=2, mnem='nop'),
+          0x1006: dict(size=1, mnem='ret')},
+         ['overlap'], do_fix=True, expect_undef=(0x1000, 4))
+
+    print('== 3. 死跳转 jz $+2 ==')
+    case('dead_jump',
+         {0x1000: dict(size=2, mnem='jz', target=0x1002),
+          0x1002: dict(size=1, mnem='ret')},
+         ['dead_jump'])
+
+    print('== 4. 恒真条件跳转 ==')
+    case('const_cond',
+         {0x1000: dict(size=2, mnem='xor',
+                       ops=[Op(O_REG, reg=0), Op(O_REG, reg=0)]),
+          0x1002: dict(size=2, mnem='jz', target=0x1010),
+          0x1004: dict(size=1, mnem='ret'),
+          0x1010: dict(size=1, mnem='ret')},
+         ['const_cond'])
+
+    print('== 5. call 下一条 (取 EIP) ==')
+    case('get_eip',
+         {0x1000: dict(size=5, mnem='call', target=0x1005),
+          0x1005: dict(size=1, mnem='pop'),
+          0x1006: dict(size=1, mnem='ret')},
+         ['get_eip'])
+
+    print('== 6. 干净代码不误报 ==')
+    case('clean',
+         {0x1000: dict(size=1, mnem='push'),
+          0x1001: dict(size=5, mnem='mov'),
+          0x1006: dict(size=2, mnem='jz', target=0x1010),
+          0x1008: dict(size=1, mnem='ret'),
+          0x1010: dict(size=1, mnem='ret')},
+         [])
+
+    print('== 7. patch 选项只在显式打开时才动字节 ==')
+    mod, state, mods, saved = load_plugin(
+        {0x1000: dict(size=2, mnem='xor',
+                      ops=[Op(O_REG, reg=0), Op(O_REG, reg=0)]),
+         0x1002: dict(size=2, mnem='jz', target=0x1010),
+         0x1004: dict(size=1, mnem='ret'),
+         0x1010: dict(size=1, mnem='ret')})
+    try:
+        issues = mod.scan_range(mod.IdaView(), 0x1000, 0x1020)
+        cc = [i for i in issues if i.kind == 'const_cond']
+        check('默认不 patch', not mod.fix_issue(mod.IdaView(), cc[0], mod.Opts())
+              and not state['patched'])
+        check('显式打开才 patch',
+              mod.fix_issue(mod.IdaView(), cc[0],
+                            mod.Opts(patch_const_cond=True))
+              and state['patched'] == [(0x1002, 0xEB)])
+    finally:
+        unload(mods, saved)
+
+    print('')
+    if FAILED:
+        print('FAILED: %s' % ', '.join(FAILED))
+        return 1
+    print('全部通过')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+```
