@@ -1,0 +1,2845 @@
+Project Path: arc_zezindozap_android-game-hacking_idkgyk7o
+
+Source Tree:
+
+```txt
+arc_zezindozap_android-game-hacking_idkgyk7o
+├── INDEX.md
+├── Makefile
+├── README.md
+├── bin
+│   └── dops
+├── bootstrap
+│   └── install.sh
+├── deps.lock
+├── lib
+│   ├── backup.py
+│   ├── doctor.py
+│   ├── evidence.py
+│   ├── hook.py
+│   ├── hookrun.py
+│   ├── iap.py
+│   ├── il2cpp.py
+│   ├── lsposed.py
+│   ├── mem.py
+│   ├── mitm.py
+│   ├── recipe.py
+│   ├── recon.py
+│   ├── save.py
+│   └── util.py
+├── mitm
+│   ├── addon.py
+│   └── dispatch.py
+├── recipes
+│   ├── iap-fkiab.toml
+│   ├── iap-mitm.toml
+│   └── recon-save.toml
+├── runbooks
+│   ├── README.md
+│   ├── iap-fkiab.md
+│   ├── iap-mitm.md
+│   ├── memory.md
+│   ├── recon.md
+│   ├── rollback.md
+│   ├── save.md
+│   └── server-validated-iap.md
+├── targets
+│   ├── bloons-blitz.toml
+│   ├── cat-gunner.toml
+│   ├── mob-control.toml
+│   └── zombero.toml
+├── tests
+│   ├── fixtures
+│   └── test_units.py
+└── tools
+    └── agm
+
+```
+
+`INDEX.md`:
+
+```md
+# droid-arsenal — índice
+
+Entrada única do toolkit: `bin/dops`. Comece por `dops doctor`; por app, só `targets/<nome>.toml`.
+
+## Mapa
+
+| Caminho | O que é |
+|---|---|
+| `README.md` | visão, instalação, comandos, configuração de alvo e limites |
+| `bin/dops` | CLI (recon, backup/restore, mem, save, iap, lsposed, mitm, evidence, hook, recipe, cleanup) |
+| `lib/` | módulos (transporte, doctor, recon, backup, mem, iap, lsposed, mitm, save, evidence, hook, recipe) |
+| `mitm/addon.py` | addon mitmproxy: log + patch JSON por host/path |
+| `mitm/dispatch.py` | dispatcher por SNI: só o host alvo vai ao proxy; resto passa direto |
+| `targets/` | **única parte por app** (package/uid, hosts, match/patch, save paths) |
+| `recipes/` | sequências declarativas (`recon-save`, `iap-fkiab`, `iap-mitm`) |
+| `runbooks/` | procedimentos por técnica (ver abaixo) |
+| `tests/` | unit tests (`python3 -m unittest discover -s tests`) + fixture de ClientHello |
+| `bootstrap/install.sh` | venv com frida + mitmproxy, checagens |
+| `deps.lock` | versões validadas (host e device) |
+| `Makefile` | `make test`, `make doctor`, `make dry` |
+
+## Runbooks
+
+| Runbook | Quando |
+|---|---|
+| `runbooks/recon.md` | antes de tocar: engine, storage, proteções, billing |
+| `runbooks/save.md` | estado local (sniff, codec, edição, verificação) |
+| `runbooks/memory.md` | valor vivo/não persistido (scan, refine, obscured) |
+| `runbooks/iap-fkiab.md` | billing fake (FakeBinder), recibos, ownership |
+| `runbooks/server-validated-iap.md` | grant no backend: hook da validação, resposta fabricada, `abort`=exceção, campos obrigatórios |
+| `runbooks/iap-mitm.md` | forjar validação server-side (CA, dispatcher, gates) |
+| `runbooks/rollback.md` | desmontar e voltar ao estado inicial |
+
+## Recipes
+
+| Recipe | Passos |
+|---|---|
+| `recipes/recon-save.toml` | recon → backup → evidence |
+| `recipes/iap-fkiab.toml` | doctor → iap status → escopo → evidence |
+| `recipes/iap-mitm.toml` | doctor → iap status → mitm enable → evidence |
+
+## Alvos de referência
+
+`cat-gunner` (IAP type=1 local, MITM bloqueado por CA própria/pinning), `bloons-blitz` (forge de
+endpoint LiNK), `mob-control` (Voodoo/Nakama). Servem de template; remova IDs/segredos ao publicar.
+
+## Validação e limites
+
+Matriz em `README.md` (seção Validação). Resumo: CLI, recon/backup/restore, save sniff, iap,
+mem, mitm enable/disable+dispatcher, evidence, hook, scope-db e recipe validados ao vivo;
+`lspctl` developer-mode é impossível em build user (use `scope-db` + reboot); sucesso do MITM
+depende de o app confiar na CA (ver `runbooks/iap-mitm.md`).
+
+## Metodologia
+
+Os runbooks acima são a referência; `android-game-hacking` (metodologia ampla) e os casos
+`cat-gunner-ops`/`bloons-blitz-ops` vivem no acervo privado do operador, não neste repo.
+
+```
+
+`Makefile`:
+
+```
+test:
+	python3 -m unittest discover -s tests -v
+
+doctor:
+	bin/dops doctor
+
+dry:
+	bin/dops recipe run iap-mitm --target cat-gunner --dry-run
+
+.PHONY: test doctor dry
+
+```
+
+`README.md`:
+
+```md
+# droid-arsenal
+
+Índice completo: `INDEX.md`.
+
+Toolkit reprodutível para análise e modificação de apps Android no device próprio, com
+**interferência mínima**: nada de patch de APK, nada em `/system`, Frida só quando necessário.
+Entrada única: `bin/dops`. Por app, só um arquivo em `targets/`.
+
+## Instalação
+
+```bash
+bootstrap/install.sh          # venv com frida + mitmproxy, checagens
+export PATH="$PWD/bin:$PATH"
+dops doctor
+```
+
+Requisitos: `ponte` (preferido) ou `adb` com root; device com KernelSU/Magisk; LSPosed 2.x e
+FKIAB 1.8.1 para a parte de billing.
+
+## Comandos
+
+```bash
+dops doctor                     # transporte, root, SELinux, LSPosed, FKIAB, mitmproxy
+dops recon com.exemplo.app      # engine, APKs, libs, prefs, paths de save
+dops backup com.exemplo.app     # tar internal+external + sha256 (state/backups)
+dops restore com.exemplo.app state/backups/foo.tar.gz
+
+dops mem scan 18000 --type int64 --package com.exemplo.app   # passthrough agm
+dops save sniff caminho/save.bin
+dops il2cpp dump com.exemplo.app   # pull APK(s) + Il2CppDumper; --apks a.apk,b.apk reusa locais
+# Il2CppDumper: coloque em ~/.local/share/droid-arsenal/Il2CppDumper/ ou exporte DOPS_IL2CPP_DUMPER
+
+dops iap status com.exemplo.app
+dops iap scope  com.exemplo.app [--remove]
+dops iap receipts com.exemplo.app [--clean | --clone <produto> --count N]
+dops iap script com.exemplo.app --loader loader.js [--payload b.js]
+
+dops lsposed status | modules
+dops lsposed scope com.fuck.iab com.exemplo.app [--remove]
+dops lsposed scope-db com.fuck.iab com.exemplo.app [--remove] [--reboot]
+
+dops mitm enable com.exemplo.app [--host h] [--port 8080] [--dry-run]
+dops mitm disable
+dops mitm ca [--install]
+
+dops evidence com.exemplo.app [--seconds N] [--tag label]
+dops hook run script.js com.exemplo.app [--spawn] [--seconds N]
+
+dops recipe list
+dops recipe run iap-mitm --target com.exemplo.app [--dry-run]
+dops cleanup                    # mitm off + frida off + SELinux enforcing
+```
+
+## Alvos (`targets/<nome>.toml`)
+
+A única parte específica por app:
+
+```toml
+package = "com.exemplo.app"
+uid = 10478                       # opcional
+save_paths = ["/sdcard/Android/data/{package}/files"]
+receipt_prefs = "/data/data/{package}/shared_prefs/fuck.iab.xml"
+
+[mitm]
+hosts = ["validador.exemplo.com"]
+match_path = "/verify"
+patch = { result = 1 }
+```
+
+`--target` aceita o nome do arquivo (ex.: `cat-gunner`) ou o próprio package (procura
+`<pkg>.toml`, `<pkg-com-hifens>.toml`, `<último-segmento>.toml`).
+
+## Receitas
+
+`recipes/*.toml` encadeiam verbos com `{target}`. `--dry-run` mostra a sequência.
+
+## Runbooks
+
+`runbooks/` cobre recon, save, memória, FKIAB, MITM e rollback. Metodologia genérica:
+veja `runbooks/recon.md` e `runbooks/save.md`; casos de referência em `targets/`.
+
+## Segurança e rollback
+
+- `cleanup` remove iptables do MITM, mata frida-server e volta SELinux para `Enforcing`.
+- CA de usuário e módulo LSPosed ficam instalados (reutilizáveis); remova manualmente se quiser.
+- Backups têm sha256; restaure com `dops restore`.
+- `state/` e segredos ficam fora do git.
+
+## Validação (2026-11-24)
+
+Validado ao vivo (device Android 16, root via KernelSU): `doctor` (5 s), `recon` (6 s), `backup`, `restore` ponta a ponta
+(sentinel restaurado), `save sniff`, `iap status` (5 s)/`scripts`, `mem` passthrough,
+`mitm enable/disable` com dispatcher SNI, `evidence`, `cleanup`, recipe real (`recon-save`),
+`hook run` (frida-server attach), `lsposed scope-db` (add/remove no `modules_config.db`),
+10 testes unitários (inclui parser SNI). Forge do addon validado com mitmproxy reverse + curl
+(`result:1` no corpo). `lsposed scope` via lspctl é **impossível em build user** (exige ADB root
+real); use `scope-db` + reboot. MITM no alvo Cat Gunner: handshake recusado mesmo com CA no system
+store (init+zygote) → gate por app registrado em `runbooks/iap-mitm.md`.
+
+Não exercitado: aplicação do escopo LSPosed pós-reboot, sucesso do MITM em app que confie na CA.
+
+## Limites conhecidos
+
+- MITM depende de o app aceitar CA (usuário+módulo de trust ou sistema) e não ter pinning.
+- Metadata IL2CPP cifrada (PGL Armor) impede dump estático; use recon por runtime/string-xref.
+- Consumíveis com validação server-side só passam com MITM/patch; `NonConsumable` costuma
+  conceder localmente (ver skill `cat-gunner-ops`).
+
+```
+
+`bin/dops`:
+
+```
+#!/usr/bin/env python3
+"""dops — droid arsenal CLI: recon, backup, memory, saves, IAP, LSPosed, MITM, evidence."""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from lib import backup, doctor, evidence, hook, iap, il2cpp, lsposed, mem, mitm, recon, recipe, save, util  # noqa: E402
+
+
+def cfg_for(pkg: str) -> dict:
+    for cand in (pkg, pkg.replace(".", "-"), pkg.split(".")[-1].lower()):
+        try:
+            return util.target(cand)
+        except util.DopsError:
+            continue
+    return {"package": pkg}
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(prog="dops", description="Android app hacking toolkit (minimal device interference)")
+    ap.add_argument("--json", action="store_true", help="machine-readable output")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    sub.add_parser("doctor", help="environment/device readiness")
+
+    p = sub.add_parser("recon", help="package recon")
+    p.add_argument("pkg")
+
+    p = sub.add_parser("backup", help="backup app internal+external data")
+    p.add_argument("pkg")
+    p.add_argument("--name")
+
+    p = sub.add_parser("restore", help="restore a backup archive")
+    p.add_argument("pkg")
+    p.add_argument("archive", type=Path)
+
+    p = sub.add_parser("backups", help="list backups")
+    p.add_argument("pkg", nargs="?")
+
+    p = sub.add_parser("mem", help="memory scan/edit (agm passthrough)")
+    p.add_argument("args", nargs=argparse.REMAINDER)
+
+    p = sub.add_parser("iap", help="FKIAB billing emulation")
+    isub = p.add_subparsers(dest="iap_cmd", required=True)
+    for name in ("status", "scope", "receipts", "script"):
+        s = isub.add_parser(name)
+        s.add_argument("pkg")
+        if name == "scope":
+            s.add_argument("--remove", action="store_true")
+        if name == "receipts":
+            s.add_argument("--clean", action="store_true")
+            s.add_argument("--clone")
+            s.add_argument("--count", type=int, default=1)
+        if name == "script":
+            s.add_argument("--loader", type=Path)
+            s.add_argument("--payload", type=Path)
+            s.add_argument("--remove", action="store_true")
+
+    p = sub.add_parser("lsposed", help="LSPosed control via lspctl")
+    lsub = p.add_subparsers(dest="ls_cmd", required=True)
+    lsub.add_parser("status")
+    lsub.add_parser("modules")
+    s = lsub.add_parser("scope")
+    s.add_argument("module")
+    s.add_argument("pkg")
+    s.add_argument("--remove", action="store_true")
+    s = lsub.add_parser("scope-db")
+    s.add_argument("module")
+    s.add_argument("pkg")
+    s.add_argument("--remove", action="store_true")
+    s.add_argument("--reboot", action="store_true")
+
+    p = sub.add_parser("mitm", help="TLS interception for one app/host")
+    msub = p.add_subparsers(dest="mitm_cmd", required=True)
+    s = msub.add_parser("enable")
+    s.add_argument("pkg")
+    s.add_argument("--host")
+    s.add_argument("--port", type=int, default=8080)
+    s.add_argument("--dry-run", action="store_true")
+    msub.add_parser("disable")
+    s = msub.add_parser("ca")
+    s.add_argument("--install", action="store_true")
+    s.add_argument("--system", action="store_true")
+    s.add_argument("--unmount", action="store_true")
+
+    p = sub.add_parser("save", help="save file sniffing")
+    ssub = p.add_subparsers(dest="save_cmd", required=True)
+    s = ssub.add_parser("sniff")
+    s.add_argument("path", type=Path)
+
+    p = sub.add_parser("il2cpp", help="dump IL2CPP metadata/libs")
+    isub = p.add_subparsers(dest="il_cmd", required=True)
+    s = isub.add_parser("dump")
+    s.add_argument("pkg")
+    s.add_argument("--apks", help="lista de APKs locais (vírgula) para pular o pull")
+    s.add_argument("--force-pull", action="store_true")
+
+    p = sub.add_parser("evidence", help="logcat+screenshot+files bundle")
+    p.add_argument("pkg")
+    p.add_argument("--seconds", type=int, default=0)
+    p.add_argument("--tag", default="")
+
+    p = sub.add_parser("hook", help="run a Frida script")
+    hsub = p.add_subparsers(dest="hook_cmd", required=True)
+    s = hsub.add_parser("run")
+    s.add_argument("script", type=Path)
+    s.add_argument("pkg")
+    s.add_argument("--spawn", action="store_true")
+    s.add_argument("--seconds", type=int, default=0)
+    s.add_argument("--host")
+
+    p = sub.add_parser("recipe", help="declarative recipes")
+    rsub = p.add_subparsers(dest="rec_cmd", required=True)
+    rsub.add_parser("list")
+    s = rsub.add_parser("run")
+    s.add_argument("name")
+    s.add_argument("--target")
+    s.add_argument("--dry-run", action="store_true")
+
+    sub.add_parser("cleanup", help="stop mitm/frida and restore SELinux")
+    sub.add_parser("version", help="toolkit version (git describe)")
+
+    a = ap.parse_args()
+
+    if a.cmd == "doctor":
+        info = doctor.collect()
+        print(json.dumps(info, indent=1) if a.json else doctor.render(info))
+        return 0
+
+    if a.cmd == "recon":
+        cfg = cfg_for(a.pkg)
+        pkg = cfg.get("package", a.pkg)
+        info = recon.recon(pkg, cfg)
+        print(json.dumps(info, indent=1) if a.json else recon.render(info))
+        return 0
+
+    if a.cmd == "backup":
+        cfg = cfg_for(a.pkg)
+        pkg = cfg.get("package", a.pkg)
+        dest = backup.backup(pkg, cfg, a.name)
+        print(dest)
+        return 0
+
+    if a.cmd == "restore":
+        backup.restore(cfg_for(a.pkg).get("package", a.pkg), a.archive)
+        print("restored", a.archive)
+        return 0
+
+    if a.cmd == "backups":
+        print("\n".join(backup.list_backups(a.pkg)) or "none")
+        return 0
+
+    if a.cmd == "mem":
+        return mem.agm(a.args)
+
+    if a.cmd == "iap":
+        cfg = cfg_for(a.pkg)
+        pkg = cfg.get("package", a.pkg)
+        if a.iap_cmd == "status":
+            st = iap.status(pkg)
+            scope_txt = st["scope"] if "scope_error" not in st else f"(indisponível: {st['scope_error'].splitlines()[0]})"
+            print(json.dumps(st, indent=1) if a.json else
+                  f"installed={st['installed']} uid={st.get('uid')} injected={st['injected']} "
+                  f"scope={scope_txt} scripts={st['scripts']} receipts={len(st['receipts'])}")
+            for r in st["receipts"]:
+                print("  ", r["productId"], r["orderId"])
+            return 0
+        if a.iap_cmd == "scope":
+            print(iap.scope_remove(pkg) if a.remove else iap.scope_add(pkg))
+            return 0
+        if a.iap_cmd == "receipts":
+            if a.clean:
+                iap.clean_receipts(pkg, cfg)
+                print("cleaned")
+                return 0
+            if a.clone:
+                print(iap.clone_receipts(pkg, cfg, a.clone, a.count))
+                return 0
+            for r in iap.receipts(pkg, cfg):
+                print(r["productId"], r["orderId"], r["purchaseTime"])
+            return 0
+        if a.iap_cmd == "script":
+            if a.remove:
+                print(iap.remove_script(pkg))
+            else:
+                if not a.loader:
+                    raise util.DopsError("--loader required (or use --remove)")
+                print(iap.install_script(pkg, a.loader, a.payload))
+            return 0
+
+    if a.cmd == "lsposed":
+        if a.ls_cmd == "status":
+            print(lsposed.status())
+            return 0
+        if a.ls_cmd == "modules":
+            print("\n".join(lsposed.modules()))
+            return 0
+        if a.ls_cmd == "scope":
+            print(lsposed.scope_remove(a.module, a.pkg) if a.remove else lsposed.scope_add(a.module, a.pkg))
+            return 0
+        if a.ls_cmd == "scope-db":
+            print(lsposed.scope_db(a.module, a.pkg, add=not a.remove, reboot=a.reboot))
+            return 0
+
+    if a.cmd == "mitm":
+        if a.mitm_cmd == "enable":
+            cfg = cfg_for(a.pkg)
+            pkg = cfg.get("package", a.pkg)
+            print(json.dumps(mitm.enable(pkg, cfg, a.host, a.port, a.dry_run), indent=1))
+            return 0
+        if a.mitm_cmd == "disable":
+            print(json.dumps(mitm.disable(), indent=1))
+            return 0
+        if a.mitm_cmd == "ca":
+            if a.unmount:
+                print(json.dumps(mitm.unmount_ca_system(), indent=1))
+            elif a.system:
+                print(json.dumps(mitm.install_ca_system(), indent=1))
+            else:
+                print(json.dumps(mitm.install_ca() if a.install else mitm.ca_info(), indent=1))
+            return 0
+
+    if a.cmd == "il2cpp":
+        cfg = cfg_for(a.pkg)
+        pkg = cfg.get("package", a.pkg)
+        apks = [Path(x) for x in a.apks.split(",") if x] if a.apks else None
+        print(json.dumps(il2cpp.dump(pkg, cfg, apks, a.force_pull), indent=1))
+        return 0
+
+    if a.cmd == "save":
+        info = save.sniff(a.path)
+        print(json.dumps(info, indent=1) if a.json else save.render(info))
+        return 0
+
+    if a.cmd == "evidence":
+        cfg = cfg_for(a.pkg)
+        print(evidence.capture(cfg.get("package", a.pkg), cfg, a.seconds, a.tag))
+        return 0
+
+    if a.cmd == "hook":
+        return hook.run(a.script, a.pkg, a.spawn, a.seconds, a.host)
+
+    if a.cmd == "recipe":
+        if a.rec_cmd == "list":
+            print("\n".join(recipe.listing()))
+            return 0
+        return recipe.run(a.name, a.target, a.dry_run)
+
+    if a.cmd == "version":
+        import subprocess
+
+        print(subprocess.run(["git", "-C", str(ROOT), "describe", "--always", "--dirty"],
+                             capture_output=True, text=True).stdout.strip() or "unknown")
+        return 0
+
+    if a.cmd == "cleanup":
+        print(json.dumps(mitm.disable(), indent=1))
+        try:
+            util.dev("kill -9 $(pidof .fs) 2>/dev/null; setenforce 1; getenforce", timeout=30)
+        except util.DopsError:
+            pass
+        print("cleanup done")
+        return 0
+
+    return 2
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except util.DopsError as e:
+        print(f"erro: {e}", file=sys.stderr)
+        raise SystemExit(1)
+    except KeyboardInterrupt:
+        raise SystemExit(130)
+
+```
+
+`bootstrap/install.sh`:
+
+```sh
+#!/usr/bin/env bash
+# Idempotent host bootstrap: venv com frida + mitmproxy, sanity checks.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+PY=${PYTHON:-python3}
+if [ ! -d .venv ]; then
+  "$PY" -m venv .venv
+fi
+./.venv/bin/python -m pip -q install --upgrade pip
+./.venv/bin/python -m pip -q install 'frida==17.27.4' 'mitmproxy>=10'
+
+echo "host deps ok"
+command -v ponte >/dev/null && echo "ponte: $(ponte status 2>/dev/null | head -1)" || echo "ponte: ausente"
+command -v adb   >/dev/null && echo "adb: ok" || echo "adb: ausente"
+echo "python: $(./.venv/bin/python -V)"
+echo "próximo: export DOPS_PY=$PWD/.venv/bin/python; bin/dops doctor"
+
+```
+
+`deps.lock`:
+
+```lock
+# Versões validadas em 2026-11 (host: Ubuntu, Python 3.13)
+python = ">=3.11"          # tomllib
+frida-python = "17.27.4"   # combina com frida-server 17.x no device
+mitmproxy = ">=10"         # mitmdump reverse mode
+frida-il2cpp-bridge = "0.14.0"   # node_modules do frida-agent
+unitypy = ">=1.20"         # extração de TextAssets/catálogos
+# device
+lsposed = "2.2.1"
+fkiab = "1.8.1"
+
+```
+
+`lib/backup.py`:
+
+```py
+"""Backup/restore app data (internal + external) with checksums."""
+from __future__ import annotations
+
+import hashlib
+import tarfile
+import time
+from pathlib import Path
+
+from . import util
+
+BACKUPS = util.STATE / "backups"
+
+
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def backup(pkg: str, cfg: dict | None = None, name: str | None = None) -> Path:
+    cfg = cfg or {}
+    BACKUPS.mkdir(parents=True, exist_ok=True)
+    stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    dest = BACKUPS / (name or f"{pkg}-{stamp}.tar.gz")
+    if dest.suffix != ".gz":
+        dest = dest.with_name(dest.name + ".tar.gz")
+    tmp = f"/sdcard/Download/.dops-backup-{pkg}.tar"
+    paths = [f"/data/data/{pkg}", f"/sdcard/Android/data/{pkg}"]
+    paths += [util.expand(p, {"package": pkg}) for p in cfg.get("save_paths", [])]
+    existing = " ".join(p for p in paths if _exists(p))
+    util.dev(f"tar -czf {util.shell_quote(tmp)} {existing} 2>/dev/null || true", timeout=180)
+    util.dev_pull(tmp, dest)
+    util.dev(f"rm -f {util.shell_quote(tmp)}")
+    meta = dest.with_suffix(dest.suffix + ".sha256")
+    meta.write_text(_sha256(dest) + "\n")
+    return dest
+
+
+def restore(pkg: str, archive: Path) -> None:
+    if not archive.exists():
+        raise util.DopsError(f"archive not found: {archive}")
+    remote = f"/sdcard/Download/.dops-restore-{pkg}.tar.gz"
+    util.dev_push(archive, remote)
+    # tar rc=1 means warnings only (changed/vanished files); rc>=2 is an error
+    util.dev(f"tar -xf {util.shell_quote(remote)} -C / 2>/dev/null; rc=$?; rm -f {util.shell_quote(remote)}; test $rc -le 1", timeout=180)
+def list_backups(pkg: str | None = None) -> list[str]:
+    if not BACKUPS.exists():
+        return []
+    out = []
+    for p in sorted(BACKUPS.glob("*.tar.gz")):
+        if pkg and not p.name.startswith(pkg):
+            continue
+        sha = p.with_suffix(p.suffix + ".sha256")
+        out.append(f"{p.name}  {p.stat().st_size} B  {_sha256(p)[:12] if sha.exists() else ''}")
+    return out
+
+
+def _exists(path: str) -> bool:
+    try:
+        util.dev(f"test -e {util.shell_quote(path)}", timeout=30)
+        return True
+    except util.DopsError:
+        return False
+
+```
+
+`lib/doctor.py`:
+
+```py
+"""Environment/device readiness checks for the toolkit."""
+from __future__ import annotations
+
+import shutil
+import subprocess
+from pathlib import Path
+
+from concurrent.futures import ThreadPoolExecutor
+
+from . import util
+
+LSPCTL = "/data/adb/modules/zygisk_lsposed/lspctl"
+FKIAB = "com.fuck.iab"
+
+
+def _dev_status() -> dict:
+    info = {"transport": None, "model": None, "android": None, "root": None, "selinux": None}
+    if util.ponte_ok():
+        info["transport"] = "ponte"
+    elif util.adb_ok():
+        info["transport"] = "adb"
+    if not info["transport"]:
+        return info
+    try:
+        out = util.dev("getprop ro.product.model; getprop ro.build.version.release; id; getenforce")
+        model, ver, uid, se = [x.strip() for x in out.strip().splitlines()[-4:]]
+        info.update(model=model, android=ver, root=("uid=0" in uid), selinux=se)
+    except Exception as e:  # noqa: BLE001
+        info["error"] = str(e)
+    return info
+
+
+def _lsposed() -> dict:
+    res = {"lspctl": None, "daemon": None, "developer": None, "modules": []}
+    try:
+        out = util.dev(f"{LSPCTL} status 2>&1")
+        for line in out.splitlines():
+            if line.startswith("LSPosed "):
+                res["lspctl"] = line.strip()
+            if "System server:" in line:
+                res["daemon"] = line.split(":", 1)[1].strip()
+            if "Developer mode:" in line:
+                res["developer"] = line.split(":", 1)[1].strip()
+        res["modules"] = [x for x in util.dev(f"{LSPCTL} module list 2>&1").splitlines() if x.strip()]
+    except Exception as e:  # noqa: BLE001
+        res["error"] = str(e)
+    return res
+
+
+def _fkiab() -> dict:
+    res = {"installed": False, "version": None, "injected_into": []}
+    try:
+        out = util.dev("pm list packages com.fuck.iab")
+        res["installed"] = FKIAB in out
+        if res["installed"]:
+            res["version"] = util.dev("dumpsys package com.fuck.iab | grep -m1 versionName").strip().split("=")[-1]
+    except Exception as e:  # noqa: BLE001
+        res["error"] = str(e)
+    return res
+
+
+def _mitm() -> dict:
+    venv_bin = Path(util.PY).parent / "mitmdump"
+    return {
+        "mitmdump": shutil.which("mitmdump") or (str(venv_bin) if venv_bin.exists() else None),
+        "ca": str(Path.home() / ".mitmproxy" / "mitmproxy-ca-cert.pem"),
+    }
+
+
+def collect() -> dict:
+    with ThreadPoolExecutor(max_workers=4) as ex:
+        f_dev = ex.submit(_dev_status)
+        f_ls = ex.submit(_lsposed)
+        f_fk = ex.submit(_fkiab)
+        mitm = _mitm()
+        return {
+            "tools": {
+                "ponte": bool(shutil.which("ponte")),
+                "adb": bool(shutil.which("adb")),
+                "agm": (util.TOOLS / "agm").exists(),
+                "frida_py": util.PY,
+            },
+            "device": f_dev.result(),
+            "lsposed": f_ls.result(),
+            "fkiab": f_fk.result(),
+            "mitm": mitm,
+        }
+
+
+def render(info: dict) -> str:
+    lines = []
+
+    def g(*ks):
+        cur = info
+        for k in ks:
+            cur = cur.get(k) if isinstance(cur, dict) else None
+        return cur
+
+    dev = info["device"]
+    lines.append(f"transport : {dev.get('transport') or 'NENHUM (ponte/adb)'}")
+    lines.append(f"device    : {dev.get('model')} Android {dev.get('android')} root={dev.get('root')} selinux={dev.get('selinux')}")
+    ls = info["lsposed"]
+    lines.append(f"lsposed   : {ls.get('lspctl') or 'ausente'} daemon={ls.get('daemon')} dev={ls.get('developer')}")
+    fk = info["fkiab"]
+    lines.append(f"fkiab     : installed={fk.get('installed')} version={fk.get('version')}")
+    mitm = info["mitm"]
+    lines.append(f"mitmproxy : {mitm.get('mitmdump') or 'ausente (pip install mitmproxy)'}")
+    lines.append(f"tools     : agm={info['tools']['agm']} python={info['tools']['frida_py']}")
+    ok = bool(dev.get("transport")) and bool(dev.get("root"))
+    lines.append("STATUS    : " + ("OK" if ok else "INCOMPLETO"))
+    return "\n".join(lines)
+
+```
+
+`lib/evidence.py`:
+
+```py
+"""Evidence capture: logcat, screenshot, and selected app files into a timestamped bundle."""
+from __future__ import annotations
+
+import time
+from pathlib import Path
+
+from . import util
+
+
+def capture(pkg: str, cfg: dict | None = None, seconds: int = 0, tag: str = "") -> Path:
+    cfg = cfg or {}
+    stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    dest = util.STATE / "evidence" / f"{pkg}-{stamp}{('-' + tag) if tag else ''}"
+    dest.mkdir(parents=True, exist_ok=True)
+
+    if seconds:
+        util.dev(f"logcat -c", timeout=30)
+        time.sleep(seconds)
+    log = util.dev("logcat -d -v threadtime", timeout=180)
+    (dest / "logcat.txt").write_text(log, errors="replace")
+
+    shot = f"/sdcard/Download/.dops-shot-{pkg}.png"
+    util.dev(f"screencap -p {shot}", timeout=60)
+    try:
+        util.dev_pull(shot, dest / "screen.png")
+    finally:
+        util.dev(f"rm -f {shot}")
+
+    paths = [f"/data/data/{pkg}/shared_prefs", f"/sdcard/Android/data/{pkg}/files"]
+    paths += [util.expand(p, {"package": pkg}) for p in cfg.get("save_paths", [])]
+    manifest = []
+    for i, p in enumerate(paths):
+        tmp = f"/sdcard/Download/.dops-ev-{pkg}-{i}.tar"
+        try:
+            util.dev(f"tar -cf {tmp} {p} 2>/dev/null || true", timeout=120)
+            util.dev_pull(tmp, dest / f"files-{i}.tar")
+            util.dev(f"rm -f {tmp}")
+            manifest.append(f"files-{i}.tar <- {p}")
+        except util.DopsError:
+            continue
+    (dest / "MANIFEST").write_text("\n".join(manifest) + f"\npackage={pkg}\n", errors="replace")
+    return dest
+
+```
+
+`lib/hook.py`:
+
+```py
+"""Frida hook runner (attach/spawn) using the configured python interpreter."""
+from __future__ import annotations
+
+import subprocess
+from pathlib import Path
+
+from . import util
+
+RUNNER = util.HOME / "lib" / "hookrun.py"
+
+
+def run(script: Path, pkg: str, spawn: bool = False, seconds: int = 0, host: str | None = None) -> int:
+    if not script.exists():
+        raise util.DopsError(f"script not found: {script}")
+    argv = [util.PY, str(RUNNER), str(script), pkg]
+    if spawn:
+        argv.append("--spawn")
+    if seconds:
+        argv += ["--seconds", str(seconds)]
+    import os
+
+    env = dict(os.environ)
+    if host:
+        env["FRIDA_HOST"] = host
+    if os.environ.get("DOPS_DRY_RUN"):
+        print("dry-run:", " ".join(argv))
+        return 0
+    return subprocess.call(argv, env=env)
+
+```
+
+`lib/hookrun.py`:
+
+```py
+#!/usr/bin/env python3
+"""Attach or spawn the target and load a Frida script; prints messages."""
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+import time
+
+try:
+    import frida
+except ImportError:
+    sys.exit("frida python package missing (install in DOPS_PY venv)")
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("script")
+    ap.add_argument("package")
+    ap.add_argument("--spawn", action="store_true")
+    ap.add_argument("--seconds", type=int, default=0)
+    ap.add_argument("--host", default=os.environ.get("FRIDA_HOST", "127.0.0.1:27042"))
+    a = ap.parse_args()
+
+    dev = frida.get_device_manager().add_remote_device(a.host)
+    if a.spawn:
+        pid = dev.spawn([a.package])
+        session = dev.attach(pid)
+        dev.resume(pid)
+    else:
+        app = next((x for x in dev.enumerate_applications() if x.identifier == a.package), None)
+        if app:
+            pid = app.pid
+        else:
+            tail = a.package.split(".")[-1].lower()
+            pid = next((p.pid for p in dev.enumerate_processes()
+                        if p.name.lower() == tail or tail in p.name.lower()), None)
+        if not pid:
+            sys.exit(f"process not found for {a.package}")
+        session = dev.attach(pid)
+    src = open(a.script).read()
+    script = session.create_script(src)
+    script.on("message", lambda m, d: print(m.get("payload", m), flush=True))
+    script.load()
+    print(f"[hookrun] attached pid={pid}", flush=True)
+    try:
+        if a.seconds:
+            time.sleep(a.seconds)
+        else:
+            while True:
+                time.sleep(1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        session.detach()
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`lib/iap.py`:
+
+```py
+"""FKIAB (LSPosed FakeBinder) operations: scope, injected status, GumJS scripts, fake receipts."""
+from __future__ import annotations
+
+import html
+import json
+import random
+import re
+import string
+import time
+from pathlib import Path
+
+from . import lsposed, util
+
+FKIAB = "com.fuck.iab"
+SCRIPTS = f"/data/data/{FKIAB}/files/scripts"
+
+
+def _fk_uid() -> int | None:
+    try:
+        out = util.dev(f"dumpsys package {FKIAB} | grep -oE '(appId|userId)=[0-9]+' | head -1", timeout=60)
+        return int(out.strip().split("=")[-1])
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def status(pkg: str) -> dict:
+    cmd = "; ".join([
+        "echo '@@VER'; dumpsys package com.fuck.iab | grep -m1 versionName",
+        "echo '@@UID'; dumpsys package com.fuck.iab | grep -oE '(appId|userId)=[0-9]+' | head -1",
+        f"echo '@@SCRIPTS'; ls {SCRIPTS} 2>/dev/null",
+        f"echo '@@PID'; pidof {pkg}",
+        f"echo '@@MAPS'; p=$(pidof {pkg}); [ -n \"$p\" ] && grep -c 'com.fuck.iab' /proc/$p/maps 2>/dev/null || echo 0",
+        "echo '@@RECEIPTS'; cat " + _prefs_path(pkg, {}) + " 2>/dev/null",
+    ])
+    raw = util.dev(cmd, timeout=120)
+    sec: dict[str, list[str]] = {}
+    cur = None
+    for line in raw.splitlines():
+        if line.startswith("@@"):
+            cur = line[2:].strip()
+            sec[cur] = []
+        elif cur:
+            sec[cur].append(line)
+    ver = "".join(sec.get("VER", [])).strip().split("=")[-1]
+    uid_txt = "".join(sec.get("UID", []))
+    uid = int(uid_txt.split("=")[-1]) if "=" in uid_txt else None
+    res = {"installed": uid is not None, "uid": uid, "version": ver or None,
+           "injected": "".join(sec.get("MAPS", [])).strip() not in ("", "0"),
+           "scripts": [l.split("/")[-1] for l in sec.get("SCRIPTS", []) if l.strip()],
+           "receipts": _parse_receipts("\n".join(sec.get("RECEIPTS", []))), "scope": []}
+    try:
+        res["scope"] = lsposed.scope_list(FKIAB)
+    except Exception as e:  # noqa: BLE001
+        res["scope_error"] = str(e)
+    return res
+
+
+def _parse_receipts(text: str) -> list[dict]:
+    out = []
+    for _key, val in re.findall(r'<string name="([^"]+)">(.*?)</string>', text, re.S):
+        try:
+            j = json.loads(html.unescape(val))
+            out.append({"productId": j.get("productId"), "orderId": j.get("orderId"),
+                        "purchaseTime": j.get("purchaseTime")})
+        except Exception:  # noqa: BLE001
+            continue
+    return out
+
+
+def _pid(pkg: str) -> str | None:
+    try:
+        return util.dev(f"pidof {pkg}", timeout=30).strip().splitlines()[0].strip()
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def scope_add(pkg: str) -> str:
+    return lsposed.scope_add(FKIAB, pkg)
+
+
+def scope_remove(pkg: str) -> str:
+    return lsposed.scope_remove(FKIAB, pkg)
+
+
+def install_script(pkg: str, loader: Path, payload: Path | None = None) -> dict:
+    """Install loader as <pkg>.js (FKIAB editor-equivalent) and payload under the app's external files."""
+    uid = _fk_uid()
+    if uid is None:
+        raise util.DopsError("FKIAB not installed")
+    dst = f"{SCRIPTS}/{pkg}.js"
+    util.dev_push(loader, dst)
+    util.dev(f"chown {uid}:{uid} {dst}; chmod 660 {dst}")
+    try:
+        ctx = util.dev(f"ls -Z {SCRIPTS} | head -1", timeout=30)
+        if "u:object_r" in ctx:
+            util.dev(f"chcon '{ctx.split()[0]}' {dst} 2>/dev/null || true")
+    except Exception:  # noqa: BLE001
+        pass
+    out = {"script": dst}
+    if payload:
+        ext = f"/sdcard/Android/data/{pkg}/files/b.js"
+        util.dev_push(payload, ext)
+        app_uid = util.dev(f"stat -c %U /sdcard/Android/data/{pkg}/files", timeout=30).strip()
+        grp = util.dev(f"stat -c %G /sdcard/Android/data/{pkg}/files", timeout=30).strip()
+        util.dev(f"chown {app_uid}:{grp} {ext}; chmod 660 {ext}")
+        out["payload"] = ext
+    return out
+
+
+def remove_script(pkg: str) -> str:
+    dst = f"{SCRIPTS}/{pkg}.js"
+    util.dev(f"rm -f {dst}")
+    return dst
+
+
+def _prefs_path(pkg: str, cfg: dict) -> str:
+    return util.expand(cfg.get("receipt_prefs", f"/data/data/{pkg}/shared_prefs/fuck.iab.xml"), {"package": pkg})
+
+
+def receipts(pkg: str, cfg: dict | None = None) -> list[dict]:
+    cfg = cfg or {}
+    try:
+        text = util.dev(f"cat {_prefs_path(pkg, cfg)} 2>/dev/null", timeout=60)
+    except util.DopsError:
+        return []
+    return _parse_receipts(text)
+
+
+def clean_receipts(pkg: str, cfg: dict | None = None) -> None:
+    cfg = cfg or {}
+    util.dev(f"rm -f {_prefs_path(pkg, cfg)}")
+
+
+def clone_receipts(pkg: str, cfg: dict, product: str, count: int) -> Path:
+    """Duplicate an existing receipt for `product` with fresh orderIds (device write-back)."""
+    path = _prefs_path(pkg, cfg)
+    uid = util.dev(f"stat -c %u {path}", timeout=30).strip()
+    gid = util.dev(f"stat -c %g {path}", timeout=30).strip()
+    ctx = util.dev(f"ls -Z {path} | awk '{{print $1}}'", timeout=30).strip()
+    text = util.dev(f"cat {path}", timeout=60)
+    entries = re.findall(r'<string name="([^"]+)">(.*?)</string>', text, re.S)
+    tpl = None
+    for _k, v in entries:
+        j = json.loads(html.unescape(v))
+        if j.get("productId") == product:
+            tpl = j
+            break
+    if tpl is None:
+        raise util.DopsError(f"no template receipt for {product}")
+    rows = []
+    now = int(time.time() * 1000)
+    for i in range(count):
+        j = dict(tpl)
+        j["orderId"] = "GPA.%04d-%04d-%04d-%04d-%05d" % tuple(
+            random.randint(0, 9999) for _ in range(4)
+        ) + str(random.randint(0, 99999))
+        j["purchaseTime"] = now + i
+        key = "".join(random.choice(string.ascii_lowercase) for _ in range(500))
+        rows.append(f'<string name="{key}">{html.escape(json.dumps(j, separators=(",", ":")), quote=True)}</string>')
+    xml = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n<map>\n" + "\n".join(rows) + "\n</map>\n"
+    local = util.STATE / f"receipts-{pkg}.xml"
+    local.parent.mkdir(parents=True, exist_ok=True)
+    local.write_text(xml)
+    util.dev_push(local, path)
+    util.dev(f"chown {uid}:{gid} {path}; chmod 660 {path}")
+    if ctx:
+        util.dev(f"chcon '{ctx}' {path} 2>/dev/null || true")
+    return local
+
+```
+
+`lib/il2cpp.py`:
+
+```py
+"""IL2CPP dump orchestration: pull APK(s), extract metadata/libil2cpp, run Il2CppDumper."""
+from __future__ import annotations
+
+import os
+import subprocess
+import zipfile
+from pathlib import Path
+
+from . import util
+
+DUMPER = Path(os.environ.get(
+    "DOPS_IL2CPP_DUMPER",
+    str(Path.home() / ".local" / "share" / "droid-arsenal" / "Il2CppDumper" / "Il2CppDumper.dll"),
+))
+
+
+def _device_apks(pkg: str) -> list[str]:
+    out = util.dev(f"pm path {pkg}", timeout=60)
+    return [l.split(":", 1)[1].strip() for l in out.splitlines() if l.startswith("package:")]
+
+
+def _extract(apk: Path, dest: Path) -> tuple[Path | None, Path | None]:
+    meta = lib = None
+    with zipfile.ZipFile(apk) as z:
+        for name in z.namelist():
+            if name.endswith("assets/bin/Data/Managed/Metadata/global-metadata.dat"):
+                meta = dest / "global-metadata.dat"
+                meta.write_bytes(z.read(name))
+            elif name.endswith("lib/arm64-v8a/libil2cpp.so"):
+                lib = dest / "libil2cpp.so"
+                lib.write_bytes(z.read(name))
+    return meta, lib
+
+
+def dump(pkg: str, cfg: dict | None = None, apks: list[Path] | None = None, force_pull: bool = False) -> dict:
+    cfg = cfg or {}
+    work = util.STATE / "il2cpp" / pkg
+    work.mkdir(parents=True, exist_ok=True)
+    local_apks: list[Path] = []
+    if apks:
+        local_apks = apks
+    elif force_pull or not any(work.glob("*.apk")):
+        for i, remote in enumerate(_device_apks(pkg)):
+            dest = work / f"apk{i}-{remote.split('/')[-1]}"
+            util.dev_pull(remote, dest)
+            local_apks.append(dest)
+    else:
+        local_apks = sorted(work.glob("*.apk"))
+    meta = lib = None
+    for apk in local_apks:
+        m, l = _extract(apk, work)
+        meta = meta or m
+        lib = lib or l
+    if cfg.get("dump_meta") and not meta:
+        meta = Path(cfg["dump_meta"])
+    if cfg.get("dump_lib") and not lib:
+        lib = Path(cfg["dump_lib"])
+    if not meta or not lib:
+        raise util.DopsError("global-metadata.dat ou libil2cpp.so não encontrados nos APKs")
+    if not DUMPER.exists():
+        raise util.DopsError(f"Il2CppDumper não encontrado em {DUMPER} (defina DOPS_IL2CPP_DUMPER)")
+    outdir = work / "dump"
+    env = dict(os.environ, DOTNET_ROLL_FORWARD="LatestMajor")
+    proc = subprocess.run(
+        ["dotnet", str(DUMPER), str(lib), str(meta), str(outdir)],
+        env=env, capture_output=True, text=True, timeout=900,
+    )
+    found = list(outdir.glob("dump.cs")) or list(work.glob("dump.cs"))
+    # dumper antigo ignora o diretório e escreve no cwd; normaliza
+    if not found:
+        for cand in (Path.cwd() / "dump.cs", DUMPER.parent / "dump.cs"):
+            if cand.exists():
+                outdir.mkdir(parents=True, exist_ok=True)
+                cand.replace(outdir / "dump.cs")
+                found = [outdir / "dump.cs"]
+                break
+    if not found:
+        raise util.DopsError(
+            "dump falhou (metadata cifrada/protegida?).\n"
+            + (proc.stdout or "")[-500:] + (proc.stderr or "")[-500:]
+        )
+    return {"dump": str(found[0]), "metadata": str(meta), "libil2cpp": str(lib),
+            "outdir": str(outdir), "apks": [str(p) for p in local_apks]}
+
+```
+
+`lib/lsposed.py`:
+
+```py
+"""LSPosed 2.x control via lspctl (developer mode), with explicit DB fallback."""
+from __future__ import annotations
+
+import sqlite3
+import tempfile
+from pathlib import Path
+
+from . import util
+
+LSPCTL = "/data/adb/modules/zygisk_lsposed/lspctl"
+DB = "/data/adb/lspd/config/modules_config.db"
+DEV_ERR = "developer commands are only allowed from an ADB root shell"
+
+
+def _call(cmd: str) -> str:
+    try:
+        out = util.dev(f"{LSPCTL} {cmd} 2>&1", timeout=60)
+    except util.DopsError as e:
+        if DEV_ERR in str(e):
+            raise util.DopsError(
+                "lspctl developer commands exigem ADB root shell.\n"
+                "Opções: (a) adb TCP + 'adb shell su'; (b) UI do Manager; "
+                "(c) 'dops lsposed scope-db ... --reboot'."
+            ) from e
+        raise
+    if DEV_ERR in out:
+        raise util.DopsError(
+            "lspctl developer commands exigem ADB root shell.\n"
+            "Opções: (a) habilitar adb TCP e usar 'adb shell su'; "
+            "(b) usar a UI do Manager; (c) 'dops lsposed scope-db ... --reboot'."
+        )
+    return out.strip()
+
+
+def status() -> str:
+    return util.dev(f"{LSPCTL} status 2>&1", timeout=60).strip()
+
+
+def modules() -> list[str]:
+    return [l for l in _call("module list").splitlines() if l.strip()]
+
+
+def scope_list(module: str) -> list[str]:
+    out = _call(f"scope list {module} --user 0")
+    return [l.strip() for l in out.splitlines() if l.strip() and not l.lower().startswith(("package", "scope"))]
+
+
+def scope_add(module: str, pkg: str) -> str:
+    return _call(f"scope add {module} {pkg} --user 0")
+
+
+def scope_remove(module: str, pkg: str) -> str:
+    return _call(f"scope remove {module} {pkg} --user 0")
+
+
+def module_toggle(module: str, enable: bool, user: int = 0) -> str:
+    return _call(f"module {'enable' if enable else 'disable'} {module} --user {user}")
+
+
+def scope_db(module: str, pkg: str, add: bool = True, reboot: bool = False) -> str:
+    """Edit modules_config.db directly; requires reboot for lspd to reload scopes."""
+    local = Path(tempfile.mkdtemp()) / "modules_config.db"
+    util.dev(f"cp {DB} /sdcard/Download/.dops-modules.db; chmod 644 /sdcard/Download/.dops-modules.db", timeout=60)
+    if util.which("ponte"):
+        util.run(["ponte", "pull", "/sdcard/Download/.dops-modules.db", str(local)])
+    else:
+        util.run(["adb", "pull", "/sdcard/Download/.dops-modules.db", str(local)])
+    util.dev("rm -f /sdcard/Download/.dops-modules.db")
+    con = sqlite3.connect(local)
+    with con:
+        if add:
+            con.execute("insert or ignore into scope(module_pkg_name,app_pkg_name,user_id) values(?,?,0)", (module, pkg))
+            con.execute(
+                "insert or replace into modules_state(module_pkg_name,user_id,enabled,scope_request_blocked) values(?,0,1,0)",
+                (module,),
+            )
+        else:
+            con.execute("delete from scope where module_pkg_name=? and app_pkg_name=? and user_id=0", (module, pkg))
+    con.commit()
+    con.close()
+    uid = util.dev(f"stat -c %u {DB}", timeout=30).strip()
+    gid = util.dev(f"stat -c %g {DB}", timeout=30).strip()
+    ctx = util.dev(f"ls -Z {DB} | awk '{{print $1}}'", timeout=30).strip()
+    util.dev_push(local, DB)
+    util.dev(f"rm -f {DB}-wal {DB}-shm; chown {uid}:{gid} {DB}; chmod 600 {DB}")
+    if ctx:
+        util.dev(f"chcon '{ctx}' {DB} 2>/dev/null || true")
+    if reboot:
+        util.dev("nohup sh -c 'sleep 2; reboot' >/dev/null 2>&1 &", timeout=30)
+        return "db atualizado; device reiniciando"
+    return "db atualizado; reinicie o device para lspd reler o escopo"
+
+```
+
+`lib/mem.py`:
+
+```py
+"""Memory scan/edit passthrough to the existing `agm` tool."""
+from __future__ import annotations
+
+import os
+import subprocess
+import sys
+
+from . import util
+
+
+def agm(args: list[str], host: str | None = None) -> int:
+    tool = util.TOOLS / "agm"
+    if not tool.exists():
+        raise util.DopsError(f"agm not found at {tool} (set DOPS_TOOLS)")
+    env = dict(os.environ)
+    env["AGM_HOST"] = host or env.get("AGM_HOST", "127.0.0.1:27042")
+    argv = [util.PY, str(tool), *args]
+    if os.environ.get("DOPS_DRY_RUN"):
+        print("dry-run:", " ".join(argv))
+        return 0
+    return subprocess.call(argv, env=env)
+
+
+def note() -> str:
+    return (
+        "agm requer frida-server no device e um forward local:\n"
+        "  ponte root -- 'cd /data/local/tmp && setsid nohup ./.fs -l 0.0.0.0:27042 >.fs.log 2>&1 &'\n"
+        "  ponte forward --listen 127.0.0.1:27042 127.0.0.1:27042\n"
+        "  AGM_HOST=127.0.0.1:27042 dops mem scan <valor> --type int64 --package <pkg>"
+    )
+
+```
+
+`lib/mitm.py`:
+
+```py
+"""Transparent TLS interception with SNI dispatch: adb reverse + iptables + mitmproxy reverse."""
+from __future__ import annotations
+
+import json
+import os
+import shutil
+import signal
+import socket
+import subprocess
+import time
+from pathlib import Path
+
+from . import recon, util
+
+STATE = util.STATE / "mitm.json"
+TAG = "dops-mitm"
+DEFAULT_PORT = 8080
+
+
+def _uid(pkg: str, cfg: dict) -> int:
+    if cfg.get("uid"):
+        return int(cfg["uid"])
+    uid = recon.uid(pkg)
+    if uid is None:
+        raise util.DopsError("cannot resolve uid; set uid in targets/<pkg>.toml")
+    return uid
+
+
+def _rules(cfg: dict, hosts: list[str]) -> Path:
+    rules = {
+        "host": "",
+        "hosts": hosts,
+        "match_path": cfg.get("mitm", {}).get("match_path", ""),
+        "patch": cfg.get("mitm", {}).get("patch", {"result": 1}),
+    }
+    path = util.STATE / "mitm-rules.json"
+    util.write_json(path, rules)
+    return path
+
+
+def _free_port(preferred: int = 0) -> int:
+    for cand in (preferred, 0):
+        with socket.socket() as s:
+            try:
+                s.bind(("127.0.0.1", cand))
+                return s.getsockname()[1]
+            except OSError:
+                continue
+    raise util.DopsError("no free local port")
+
+
+def _mitmdump() -> str | None:
+    return shutil.which("mitmdump") or (
+        str(Path(util.PY).parent / "mitmdump") if (Path(util.PY).parent / "mitmdump").exists() else None
+    )
+
+
+def _ensure_adb() -> int | None:
+    """Make an adb-over-TCP device available (authorize host key), via ponte forward when needed."""
+    p = util.run(["adb", "devices"], timeout=20)
+    if b"\tdevice" in p.stdout:
+        return None
+    pub = Path.home() / ".android" / "adbkey.pub"
+    if pub.exists():
+        key = pub.read_text().strip()
+        util.dev("mkdir -p /data/misc/adb; touch /data/misc/adb/adb_keys")
+        util.dev(f"grep -qF '{key}' /data/misc/adb/adb_keys || echo '{key}' >> /data/misc/adb/adb_keys; chmod 640 /data/misc/adb/adb_keys; chown system:shell /data/misc/adb/adb_keys")
+    util.dev("setprop service.adb.tcp.port 5555; stop adbd; sleep 1; start adbd", timeout=40)
+    fwd = subprocess.Popen(["ponte", "forward", "--listen", "127.0.0.1:5555", "127.0.0.1:5555"],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    for _ in range(10):
+        time.sleep(1)
+        util.run(["adb", "connect", "127.0.0.1:5555"], timeout=15)
+        if b"\tdevice" in util.run(["adb", "devices"], timeout=15).stdout:
+            return fwd.pid
+    fwd.terminate()
+    raise util.DopsError("adb TCP indisponível (autorização/porta); use 'adb connect' manual")
+
+
+def enable(pkg: str, cfg: dict, host: str | None = None, port: int = DEFAULT_PORT, dry_run: bool = False) -> dict:
+    hosts = [host] if host else list(cfg.get("mitm", {}).get("hosts", []))
+    if not hosts:
+        raise util.DopsError("no host: pass --host or set [mitm].hosts in the target")
+    mitmdump = _mitmdump()
+    if not mitmdump and not dry_run:
+        raise util.DopsError("mitmdump not found (run bootstrap/install.sh)")
+    public = _free_port(port)
+    internal = _free_port(0)
+    uid = _uid(pkg, cfg)
+    rules = _rules(cfg, hosts)
+    addon = util.HOME / "mitm" / "addon.py"
+    dispatcher = util.HOME / "mitm" / "dispatch.py"
+    specs = [
+        f"-p tcp --dport 443 -m owner --uid-owner {uid} -m comment --comment {TAG} -j REDIRECT --to-ports {public}",
+    ]
+    disp_cfg = {"listen": public, "mitm": internal, "targets": hosts, "log": str(util.STATE / "dispatch.log")}
+    cmds = {
+        "mitmdump": [mitmdump or "mitmdump", "--mode", f"reverse:https://{hosts[0]}",
+                     "--listen-host", "127.0.0.1", "--listen-port", str(internal),
+                     "--set", "keep_host_header=true", "--scripts", str(addon)],
+        "dispatch": [util.PY, str(dispatcher)],
+    }
+    if dry_run:
+        return {"dry_run": True, "uid": uid, "public_port": public, "internal_port": internal,
+                "mitmdump": " ".join(cmds["mitmdump"]), "dispatch(env)": disp_cfg,
+                "iptables": [f"iptables -t nat -A OUTPUT {s}" for s in specs], "rules": str(rules)}
+
+    adb_proc = _ensure_adb()
+    util.host_adb(["reverse", f"tcp:{public}", f"tcp:{public}"])
+    for spec in specs:
+        for ipt in ("iptables", "ip6tables"):
+            try:
+                util.dev(f"{ipt} -t nat -A OUTPUT {spec}")
+            except util.DopsError:
+                pass
+    util.STATE.mkdir(parents=True, exist_ok=True)
+    env1 = dict(os.environ, DOPS_RULES=str(rules), DOPS_LOG=str(util.STATE / "mitm-requests.log"))
+    env2 = dict(os.environ, DOPS_DISPATCH=json.dumps(disp_cfg))
+    fh = open(util.STATE / "mitm.log", "ab")
+    p_mitm = subprocess.Popen(cmds["mitmdump"], env=env1, stdout=fh, stderr=fh, start_new_session=True)
+    p_disp = subprocess.Popen(cmds["dispatch"], env=env2, stdout=fh, stderr=fh, start_new_session=True)
+    util.write_json(STATE, {"pkg": pkg, "uid": uid, "hosts": hosts, "public": public, "internal": internal,
+                            "pid_mitm": p_mitm.pid, "pid_dispatch": p_disp.pid,
+                            "specs": specs, "rules": str(rules), "adb_forward": adb_proc})
+    return {"public_port": public, "internal_port": internal, "logs": [str(util.STATE / "mitm.log"),
+            str(util.STATE / "mitm-requests.log")], "rules": str(rules),
+            "ca": str(Path.home() / ".mitmproxy" / "mitmproxy-ca-cert.pem")}
+
+
+def disable() -> dict:
+    st = util.read_json(STATE, None)
+    if not st:
+        return {"status": "not-running"}
+    for key in ("pid_mitm", "pid_dispatch", "adb_forward"):
+        pid = st.get(key)
+        if pid:
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+    util.host_adb(["reverse", "--remove", f"tcp:{st['public']}"])
+    for spec in st.get("specs", []):
+        for ipt in ("iptables", "ip6tables"):
+            while True:
+                try:
+                    util.dev(f"{ipt} -t nat -D OUTPUT {spec}")
+                except util.DopsError:
+                    break
+    STATE.unlink(missing_ok=True)
+    return {"status": "stopped", "port": st["public"]}
+
+
+SYS_STORE = "/system/etc/security/cacerts"
+SYS_TMP = "/data/local/tmp/dops-cacerts"
+
+
+def install_ca_system() -> dict:
+    """Bind-mount a copy of the system CA store + mitmproxy CA (session-wide, reversible)."""
+    ca = Path.home() / ".mitmproxy" / "mitmproxy-ca-cert.pem"
+    if not ca.exists():
+        raise util.DopsError(f"{ca} missing; run mitmdump once")
+    if not shutil.which("openssl"):
+        raise util.DopsError("openssl needed to compute cert hash")
+    h = subprocess.run(["openssl", "x509", "-inform", "PEM", "-subject_hash_old", "-in", str(ca)],
+                       capture_output=True, text=True, check=True).stdout.splitlines()[0].strip()
+    util.dev(f"rm -rf {SYS_TMP}; cp -a {SYS_STORE} {SYS_TMP}", timeout=90)
+    util.dev_push(ca, f"{SYS_TMP}/{h}.0")
+    util.dev(f"chmod 644 {SYS_TMP}/{h}.0; chcon -R u:object_r:system_file:s0 {SYS_TMP}", timeout=60)
+    util.dev(f"nsenter -t 1 -m -- mount --bind {SYS_TMP} {SYS_STORE}", timeout=30)
+    # apps inherit the zygote mount namespace, not init's: mount there too
+    for z in ("zygote64", "zygote"):
+        try:
+            util.dev(f"for p in $(pidof {z}); do nsenter -t $p -m -- mount --bind {SYS_TMP} {SYS_STORE} 2>/dev/null; done", timeout=40)
+        except util.DopsError:
+            pass
+    if "ok" not in util.dev(f"test -f {SYS_STORE}/{h}.0 && echo ok", timeout=30):
+        raise util.DopsError("system CA mount not visible")
+    return {"system_ca": f"{SYS_STORE}/{h}.0", "note": "vale para processos novos; reinicie o app"}
+
+
+def unmount_ca_system() -> dict:
+    try:
+        for z in ("zygote64", "zygote"):
+            util.dev(f"for p in $(pidof {z}); do nsenter -t $p -m -- umount {SYS_STORE} 2>/dev/null; done", timeout=40)
+        util.dev(f"nsenter -t 1 -m -- umount {SYS_STORE}", timeout=30)
+        return {"status": "unmounted"}
+    except util.DopsError as e:
+        return {"status": "not-mounted-or-failed", "detail": str(e)}
+
+
+def ca_info() -> dict:
+    ca = Path.home() / ".mitmproxy" / "mitmproxy-ca-cert.pem"
+    return {"ca": str(ca), "exists": ca.exists(),
+            "install": "dops mitm ca --install (user) | --system (bind mount, sessão) | --unmount"}
+
+
+def install_ca() -> dict:
+    ca = Path.home() / ".mitmproxy" / "mitmproxy-ca-cert.pem"
+    if not ca.exists():
+        raise util.DopsError(f"{ca} missing; run mitmdump once")
+    if not shutil.which("openssl"):
+        raise util.DopsError("openssl needed to compute cert hash")
+    h = subprocess.run(["openssl", "x509", "-inform", "PEM", "-subject_hash_old", "-in", str(ca)],
+                       capture_output=True, text=True, check=True).stdout.splitlines()[0].strip()
+    dst = f"/data/misc/user/0/cacerts-added/{h}.0"
+    util.dev_push(ca, dst)
+    util.dev(f"chown system:system {dst}; chmod 644 {dst}")
+    return {"installed": dst, "note": "CA de usuário; apps target 34+ exigem trust module ou CA de sistema"}
+
+```
+
+`lib/recipe.py`:
+
+```py
+"""Declarative recipe runner: TOML steps -> dops subcommands."""
+from __future__ import annotations
+
+import shlex
+import subprocess
+import sys
+import tomllib
+from pathlib import Path
+
+from . import util
+
+RECIPES = util.HOME / "recipes"
+
+
+def load(name: str) -> dict:
+    path = RECIPES / f"{name}.toml"
+    if not path.exists():
+        raise util.DopsError(f"recipe not found: {path}")
+    with open(path, "rb") as f:
+        return tomllib.load(f)
+
+
+def run(name: str, target: str | None = None, dry_run: bool = False) -> int:
+    rec = load(name)
+    rc = 0
+    for step in rec.get("steps", []):
+        argv = [str(x).format(target=target or "", package=target or "") for x in step]
+        argv = [a for a in argv if a != ""]
+        print("+ dops " + " ".join(shlex.quote(a) for a in argv))
+        if dry_run:
+            continue
+        p = subprocess.run([sys.executable, str(util.HOME / "bin" / "dops"), *argv])
+        if p.returncode != 0:
+            rc = p.returncode
+            print(f"! step failed: {argv}")
+            if rec.get("stop_on_error", True):
+                break
+    return rc
+
+
+def listing() -> list[str]:
+    if not RECIPES.exists():
+        return []
+    return sorted(p.stem for p in RECIPES.glob("*.toml"))
+
+```
+
+`lib/recon.py`:
+
+```py
+"""Package recon: version, engine, native libs, storage layers."""
+from __future__ import annotations
+
+import re
+
+from . import util
+
+
+def uid(pkg: str) -> int | None:
+    try:
+        out = util.dev(f"dumpsys package {pkg} | grep -oE '(appId|userId)=[0-9]+' | head -1", timeout=60)
+        m = re.search(r"=(\d+)", out)
+        return int(m.group(1)) if m else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def apks(pkg: str) -> list[str]:
+    out = util.dev(f"pm path {pkg}", timeout=60)
+    return [l.split(":", 1)[1].strip() for l in out.splitlines() if l.startswith("package:")]
+
+
+def recon(pkg: str, cfg: dict | None = None) -> dict:
+    cfg = cfg or {}
+    paths = [f"/data/data/{pkg}", f"/data/data/{pkg}/files", f"/data/data/{pkg}/shared_prefs",
+             f"/sdcard/Android/data/{pkg}/files"]
+    cmd = "; ".join([
+        f"echo '@@META'; dumpsys package {pkg} | grep -E 'versionName|versionCode|firstInstallTime|lastUpdateTime'",
+        f"echo '@@UID'; dumpsys package {pkg} | grep -oE '(appId|userId)=[0-9]+' | head -1",
+        f"echo '@@APK'; pm path {pkg}",
+        f"echo '@@LIBS'; ls /data/app/*/{pkg}-*/lib/*/*.so 2>/dev/null | xargs -n1 basename 2>/dev/null",
+        "echo '@@LS0'; ls -la " + paths[0] + " 2>/dev/null",
+        "echo '@@LS1'; ls -la " + paths[1] + " 2>/dev/null",
+        "echo '@@LS2'; ls -la " + paths[2] + " 2>/dev/null",
+        "echo '@@LS3'; ls -la " + paths[3] + " 2>/dev/null",
+    ])
+    raw = util.dev(cmd, timeout=120)
+    sec: dict[str, list[str]] = {}
+    cur = None
+    for line in raw.splitlines():
+        if line.startswith("@@"):
+            cur = line[2:].strip()
+            sec[cur] = []
+        elif cur:
+            sec[cur].append(line)
+    info: dict = {"package": pkg, "meta": [l.strip() for l in sec.get("META", []) if l.strip()],
+                  "apks": [l.split(":", 1)[1].strip() for l in sec.get("APK", []) if l.startswith("package:")],
+                  "native_libs": sorted({l.strip() for l in sec.get("LIBS", []) if l.strip()})}
+    m = re.search(r"=(\d+)", "\n".join(sec.get("UID", [])))
+    info["uid"] = int(m.group(1)) if m else None
+    info["engine"] = _engine(info["native_libs"])
+    for i, key in enumerate(("data", "data_files", "prefs", "external")):
+        info[key] = [l.strip() for l in sec.get(f"LS{i}", []) if l.strip()]
+    info["save_paths"] = [util.expand(p, {"package": pkg}) for p in cfg.get("save_paths", [])]
+    return info
+
+
+def _engine(libs: list[str]) -> str:
+    if any("libil2cpp" in x for x in libs):
+        return "unity-il2cpp"
+    if any("libmono" in x for x in libs):
+        return "unity-mono"
+    if any("libflutter" in x for x in libs):
+        return "flutter"
+    if any("libreactnative" in x for x in libs):
+        return "react-native"
+    if any("libcocos" in x for x in libs):
+        return "cocos"
+    if any("libUE4" in x or "libUnreal" in x for x in libs):
+        return "unreal"
+    return "unknown"
+
+
+def _ls(path: str) -> list[str]:
+    try:
+        return [l.strip() for l in util.dev(f"ls -la {path} 2>/dev/null", timeout=60).splitlines() if l.strip()]
+    except Exception:  # noqa: BLE001
+        return []
+
+
+def render(info: dict) -> str:
+    lines = [f"package : {info['package']} (uid {info.get('uid')})", f"engine  : {info['engine']}"]
+    for m in info.get("meta", []):
+        lines.append("meta    : " + m)
+    lines.append("apks    : " + ", ".join(a.split("/")[-1] for a in info["apks"]))
+    if info.get("native_libs"):
+        lines.append("libs    : " + ", ".join(info["native_libs"][:12]) + (" ..." if len(info["native_libs"]) > 12 else ""))
+    for key in ("data", "data_files", "prefs", "external"):
+        if info.get(key):
+            lines.append(f"[{key}]")
+            lines += ["  " + x for x in info[key][:20]]
+    if info.get("save_paths"):
+        lines.append("[save_paths] " + ", ".join(info["save_paths"]))
+    return "\n".join(lines)
+
+```
+
+`lib/save.py`:
+
+```py
+"""Save-file sniffing: identify common Unity/Android save containers without game-specific code."""
+from __future__ import annotations
+
+import base64
+import binascii
+import math
+from pathlib import Path
+
+
+def entropy(data: bytes) -> float:
+    if not data:
+        return 0.0
+    freq = [0] * 256
+    for b in data:
+        freq[b] += 1
+    n = len(data)
+    return -sum((c / n) * math.log2(c / n) for c in freq if c)
+
+
+def sniff(path: Path) -> dict:
+    data = path.read_bytes()
+    info: dict = {"path": str(path), "size": len(data), "head": data[:16].hex(), "entropy": round(entropy(data[:4096]), 2)}
+    if data.lstrip().startswith((b"{", b"[")):
+        info.update(format="json", editable=True)
+        return info
+    if data.startswith(b"ENC1"):
+        body = data[5:]
+        info.update(format="actk-obscuredfile", editable=False)
+        try:
+            raw = base64.b64decode(body, validate=False)
+            info.update(cipher_len=len(raw), block_aligned=(len(raw) % 16 == 0), cipher_entropy=round(entropy(raw[:4096]), 2))
+        except binascii.Error:
+            info["note"] = "payload not base64"
+        info["hint"] = "ACTK ObscuredFile (AES); capture key/IV via runtime hook antes de editar"
+        return info
+    if data[:4] in (b"\x1f\x8b\x08\x00",) or data[:2] == b"\x1f\x8b":
+        info.update(format="gzip", editable=True)
+        return info
+    try:
+        raw = base64.b64decode(b"".join(data.split()), validate=True)
+        info.update(format="base64", decoded_len=len(raw), decoded_entropy=round(entropy(raw[:4096]), 2))
+        return info
+    except binascii.Error:
+        pass
+    if info["entropy"] < 6.5:
+        info.update(format="binary-low-entropy", hint="testar XOR de 1 byte / header fixo")
+    else:
+        info.update(format="binary-encrypted", hint="AES/DES provável; hook no primitivo de crypto")
+    return info
+
+
+def render(info: dict) -> str:
+    lines = [f"file    : {info['path']} ({info['size']} B, entropy {info['entropy']})",
+             f"format  : {info['format']}"]
+    for k in ("cipher_len", "block_aligned", "decoded_len", "decoded_entropy", "cipher_entropy"):
+        if k in info:
+            lines.append(f"{k:8}: {info[k]}")
+    if info.get("hint"):
+        lines.append("hint    : " + info["hint"])
+    return "\n".join(lines)
+
+```
+
+`lib/util.py`:
+
+```py
+"""Small shared helpers: device access, paths, target configs."""
+from __future__ import annotations
+
+import json
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+HOME = Path(__file__).resolve().parent.parent
+STATE = Path(os.environ.get("DOPS_STATE", HOME / "state"))
+TOOLS = Path(os.environ.get("DOPS_TOOLS", HOME / "tools"))
+PY = os.environ.get("DOPS_PY") or (
+    str(HOME / ".venv" / "bin" / "python")
+    if (HOME / ".venv" / "bin" / "python").exists()
+    else sys.executable
+)
+TARGETS = HOME / "targets"
+
+
+class DopsError(RuntimeError):
+    pass
+
+
+def which(name: str) -> str | None:
+    return shutil.which(name)
+
+
+def run(argv: list[str], timeout: int = 120, input: bytes | None = None) -> subprocess.CompletedProcess:
+    return subprocess.run(argv, capture_output=True, timeout=timeout, input=input)
+
+
+def out(argv: list[str], timeout: int = 120) -> str:
+    p = run(argv, timeout)
+    if p.returncode != 0:
+        raise DopsError(f"{argv[0]} rc={p.returncode}: {p.stderr.decode(errors='replace')[:400]}")
+    return p.stdout.decode(errors="replace")
+
+
+def ponte_ok() -> bool:
+    return which("ponte") is not None and run(["ponte", "status"], timeout=25).returncode == 0
+
+
+def adb_ok() -> bool:
+    return which("adb") is not None and run(["adb", "shell", "true"], timeout=15).returncode == 0
+
+
+def dev(cmd: str, timeout: int = 120, root: bool = True) -> str:
+    """Run a shell command on the device. Root shell when possible."""
+    if ponte_ok():
+        argv = ["ponte", "root", "--", cmd]
+    elif which("adb"):
+        argv = ["adb", "shell", ("su -c " + cmd) if root else cmd]
+    else:
+        raise DopsError("no device transport (ponte/adb)")
+    p = run(argv, timeout)
+    if p.returncode != 0:
+        detail = (p.stdout + p.stderr).decode(errors="replace").strip()
+        raise DopsError(f"device cmd failed rc={p.returncode}: {detail[:400]}")
+    return p.stdout.decode(errors="replace")
+
+
+def shell_quote(s: str) -> str:
+    return "'" + s.replace("'", "'\\''") + "'"
+
+
+def adb_device() -> bool:
+    if not which("adb"):
+        return False
+    p = run(["adb", "devices"], timeout=15)
+    return b"\tdevice" in p.stdout
+
+
+def dev_pull(remote: str, local: Path) -> None:
+    """Copy a device file to host (adb pull when available, else root-safe temp path)."""
+    local.parent.mkdir(parents=True, exist_ok=True)
+    if adb_device():
+        p = run(["adb", "pull", remote, str(local)], timeout=300)
+        if p.returncode == 0 and local.exists() and local.stat().st_size > 0:
+            return
+    tmp = f"/sdcard/Download/.dops-{os.getpid()}-{local.name}"
+    dev(f"cat {shell_quote(remote)} > {shell_quote(tmp)}")
+    if which("ponte"):
+        run(["ponte", "pull", tmp, str(local)])
+    else:
+        run(["adb", "pull", tmp, str(local)])
+    dev(f"rm -f {shell_quote(tmp)}")
+    if not local.exists() or local.stat().st_size == 0:
+        raise DopsError(f"pull failed: {remote}")
+
+
+def dev_push(local: Path, remote: str) -> None:
+    if adb_device():
+        p = run(["adb", "push", str(local), remote], timeout=300)
+        if p.returncode == 0:
+            return
+    tmp = f"/sdcard/Download/.dops-{os.getpid()}-{local.name}"
+    if which("ponte"):
+        run(["ponte", "push", str(local), tmp])
+    else:
+        run(["adb", "push", str(local), tmp])
+    dev(f"cat {shell_quote(tmp)} > {shell_quote(remote)}")
+    dev(f"rm -f {shell_quote(tmp)}")
+
+
+def host_adb(args: list[str], timeout: int = 60) -> subprocess.CompletedProcess:
+    return run(["adb", *args], timeout)
+
+
+def target(name: str):
+    import tomllib
+
+    path = TARGETS / f"{name}.toml"
+    if not path.exists():
+        raise DopsError(f"target not found: {path}")
+    with open(path, "rb") as f:
+        cfg = tomllib.load(f)
+    cfg.setdefault("package", name)
+    return cfg
+
+
+def expand(value: str, cfg: dict) -> str:
+    return value.format(**{k: v for k, v in cfg.items() if isinstance(v, (str, int))})
+
+
+def read_json(path: Path, default):
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return default
+
+
+def write_json(path: Path, data) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=1))
+
+```
+
+`mitm/addon.py`:
+
+```py
+"""mitmproxy addon: log requests and rewrite a matched JSON response.
+
+Env:
+  DOPS_RULES   path to rules JSON: {"host": "...", "match_path": "...", "patch": {...}}
+  DOPS_LOG     append request/response log
+  DOPS_CAPTURE_ONLY=1  never rewrite, only log
+"""
+from __future__ import annotations
+
+import json
+import os
+import time
+
+
+def _load_rules() -> dict:
+    path = os.environ.get("DOPS_RULES")
+    if not path or not os.path.exists(path):
+        return {"host": "", "match_path": "", "patch": {"result": 1}}
+    with open(path) as f:
+        return json.load(f)
+
+
+def _log(line: str) -> None:
+    path = os.environ.get("DOPS_LOG")
+    if not path:
+        return
+    with open(path, "a") as f:
+        f.write(f"{time.time():.3f} {line}\n")
+
+
+def patched_body(rules: dict, original: bytes | None) -> bytes:
+    """Build the forged body; keeps original JSON fields when parseable."""
+    try:
+        base = json.loads(original) if original else {}
+        if not isinstance(base, dict):
+            base = {}
+    except Exception:  # noqa: BLE001
+        base = {}
+    base.update(rules.get("patch") or {"result": 1})
+    return json.dumps(base, separators=(",", ":")).encode()
+
+
+def matches(rules: dict, host: str, path: str) -> bool:
+    want_host = rules.get("host") or ""
+    want_path = rules.get("match_path") or ""
+    return (not want_host or want_host in host) and (not want_path or want_path in path)
+
+
+def response(flow) -> None:  # noqa: ANN001 - mitmproxy hook
+    rules = _load_rules()
+    host = flow.request.pretty_host
+    _log(f"REQ {flow.request.method} https://{host}{flow.request.path}")
+    if not matches(rules, host, flow.request.path):
+        return
+    original = getattr(flow.response, "content", None) if flow.response else None
+    _log(f"RESP {getattr(flow.response, 'status_code', '?')} {original[:300]!r}" if original else "RESP empty")
+    if os.environ.get("DOPS_CAPTURE_ONLY") == "1":
+        return
+    from mitmproxy import http  # imported lazily so the module is unit-testable
+
+    flow.response = http.Response.make(
+        200,
+        patched_body(rules, original),
+        {"Content-Type": "application/json; charset=utf-8"},
+    )
+    _log("PATCHED " + patched_body(rules, original).decode())
+
+```
+
+`mitm/dispatch.py`:
+
+```py
+"""SNI dispatcher: TLS passthrough for everything except the configured host.
+
+iptables redirects the app's 443 to this listener. We peek the ClientHello SNI:
+- target host -> relay to mitmproxy reverse (which terminates TLS with our CA)
+- anything else -> raw TCP passthrough to the real host (no interception, no breakage)
+
+Env: DOPS_DISPATCH = {"listen": 0, "mitm": 8081, "targets": ["host", ...], "log": "path"}
+"""
+from __future__ import annotations
+
+import asyncio
+import json
+import os
+import ssl
+import struct
+import time
+
+CFG = json.loads(os.environ.get("DOPS_DISPATCH", "{}"))
+LOG = CFG.get("log")
+
+
+def log(msg: str) -> None:
+    line = f"{time.time():.3f} {msg}"
+    print(line, flush=True)
+    if LOG:
+        with open(LOG, "a") as f:
+            f.write(line + "\n")
+
+
+def parse_sni(data: bytes) -> str | None:
+    try:
+        if len(data) < 5 or data[0] != 0x16:  # handshake record
+            return None
+        p = 5
+        if data[p] != 1:  # ClientHello
+            return None
+        p += 4  # handshake header
+        p += 2 + 32  # version + random
+        sid = data[p]
+        p += 1 + sid
+        cs = struct.unpack("!H", data[p:p + 2])[0]
+        p += 2 + cs
+        comp = data[p]
+        p += 1 + comp
+        if p + 2 > len(data):
+            return None
+        ext_total = struct.unpack("!H", data[p:p + 2])[0]
+        p += 2
+        end = min(len(data), p + ext_total)
+        while p + 4 <= end:
+            et, el = struct.unpack("!HH", data[p:p + 4])
+            p += 4
+            if et == 0 and p + el <= end:
+                # server_name list
+                q = p + 2
+                while q + 3 <= p + el:
+                    nt = data[q]
+                    nl = struct.unpack("!H", data[q + 1:q + 3])[0]
+                    if nt == 0:
+                        return data[q + 3:q + 3 + nl].decode("ascii", "ignore")
+                    q += 3 + nl
+            p += el
+    except Exception:  # noqa: BLE001
+        return None
+    return None
+
+
+async def relay(a: asyncio.StreamReader, b: asyncio.StreamWriter) -> None:
+    try:
+        while data := await a.read(65536):
+            b.write(data)
+            await b.drain()
+    except Exception:  # noqa: BLE001
+        pass
+    finally:
+        try:
+            b.close()
+        except Exception:  # noqa: BLE001
+            pass
+
+
+async def handle(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    targets = set(CFG.get("targets", []))
+    try:
+        head = await asyncio.wait_for(reader.read(8192), timeout=5)
+    except Exception:  # noqa: BLE001
+        writer.close()
+        return
+    if not head:
+        writer.close()
+        return
+    sni = parse_sni(head)
+    if sni is None:
+        log("HEAD " + head[:24].hex())
+    target = bool(sni and any(t == sni or sni.endswith("." + t) for t in targets))
+    log(f"SNI={sni} target={target}")
+    try:
+        if target:
+            up_r, up_w = await asyncio.open_connection("127.0.0.1", CFG["mitm"])
+        else:
+            if not sni:
+                writer.close()
+                return
+            up_r, up_w = await asyncio.open_connection(sni, 443, ssl=None)
+        up_w.write(head)
+        await up_w.drain()
+    except Exception as e:  # noqa: BLE001
+        log(f"upstream ERR {e}")
+        writer.close()
+        return
+    await asyncio.gather(relay(reader, up_w), relay(up_r, writer))
+
+
+async def main() -> None:
+    server = await asyncio.start_server(handle, "0.0.0.0", int(CFG["listen"]))
+    log(f"dispatch listening {CFG['listen']} targets={CFG.get('targets')} mitm=127.0.0.1:{CFG['mitm']}")
+    async with server:
+        await server.serve_forever()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+```
+
+`recipes/iap-fkiab.toml`:
+
+```toml
+name = "iap-fkiab"
+description = "Escopo + estado do FakeBinder e recibos fake do alvo"
+steps = [
+  ["doctor"],
+  ["iap", "status", "{target}"],
+  ["iap", "scope", "{target}"],
+  ["evidence", "{target}", "--tag", "fkiab"],
+]
+
+```
+
+`recipes/iap-mitm.toml`:
+
+```toml
+name = "iap-mitm"
+description = "Intercepta a validação de IAP do alvo e reporta o estado"
+steps = [
+  ["doctor"],
+  ["iap", "status", "{target}"],
+  ["mitm", "enable", "{target}"],
+  ["evidence", "{target}", "--tag", "mitm-enabled"],
+]
+
+```
+
+`recipes/recon-save.toml`:
+
+```toml
+name = "recon-save"
+description = "Recon do pacote + backup antes de qualquer escrita"
+steps = [
+  ["recon", "{target}"],
+  ["backup", "{target}"],
+  ["evidence", "{target}", "--tag", "baseline"],
+]
+
+```
+
+`runbooks/README.md`:
+
+```md
+# Runbooks
+
+Ordem típica: `recon → backup → técnica → evidence → cleanup`.
+
+| runbook | quando |
+|---|---|
+| `recon.md` | antes de qualquer coisa; engine, storage, superfície |
+| `save.md` | estado local (moedas, flags); sniff e edição |
+| `memory.md` | valor vivo (contador/cache) que não está em arquivo |
+| `iap-fkiab.md` | billing fake (FakeBinder) e recibos do FKIAB |
+| `server-validated-iap.md` | grant vindo do servidor: forjar resposta no cliente, abort=exceção, campos obrigatórios |
+| `iap-mitm.md` | forjar a validação server-side de compras |
+| `rollback.md` | desmontar tudo e voltar ao estado inicial |
+
+Regras gerais:
+
+- Sempre `dops backup` antes de escrever; sempre `dops evidence` no resultado.
+- Jogo parado durante edição de arquivo; escrita in-place (preserva dono/SELinux).
+- Frida só durante a sessão; `dops cleanup` ao final.
+- MITM: uma sessão por host; iptables transitório; reboot = rollback garantido.
+
+```
+
+`runbooks/iap-fkiab.md`:
+
+```md
+# IAP — FKIAB (FakeBinder)
+
+Pré: FKIAB 1.8.1 (`com.fuck.iab`) instalado, LSPosed 2.x com escopo só no alvo.
+
+```bash
+dops iap status <pkg>          # instalado, injetado, escopo, scripts, recibos
+dops iap scope  <pkg>          # adiciona escopo via lspctl
+dops iap receipts <pkg>        # lista productId/orderId do store fake
+dops iap receipts <pkg> --clean
+dops iap script <pkg> --loader loader.js --payload b.js
+```
+
+Fluxo:
+
+1. Loja do app deve mostrar preço falso (`$0.00`) → FakeBinder ativo.
+2. `NonConsumable` (type=1) costuma conceder local mesmo com validação server-side falhando;
+   o app pode ANR no tap → `force-stop` + reabrir consolida o grant.
+3. Consumível (type=0) exige validação (MITM/patch).
+4. Ownership/entitlement fica no save do app: recibo fake novo não re-concede produto já owned.
+5. Não edite `fuck.iab.xml` à mão em produção; use `--clean` para parar replay no boot.
+6. GumJS do FKIAB só executa o texto salvo no editor; o arquivo em
+   `/data/data/com.fuck.iab/files/scripts/<pkg>.js` é cache. Use um loader que lê `b.js` do app.
+
+```
+
+`runbooks/iap-mitm.md`:
+
+```md
+# IAP — MITM da validação
+
+```bash
+dops mitm ca --install        # CA de usuário (apps target 34+ exigem trust module)
+dops mitm enable <pkg> --dry-run
+dops mitm enable <pkg>        # adb reverse + iptables (uid) + mitmdump reverse
+# comprar item barato e ver o request no log
+dops mitm disable             # remove iptables/reverse e mata o mitmdump
+```
+
+Como funciona:
+
+- `iptables -t nat OUTPUT --dport 443 -m owner --uid-owner <uid> -j REDIRECT --to-ports 8080`
+  só para o app alvo.
+- `adb reverse tcp:8080 tcp:8080` leva o tráfego ao mitmproxy no host.
+- mitmproxy em `reverse:https://<host>` apresenta cert do host e encaminha para o real.
+- `mitm/addon.py` casa host/path do `targets/<alvo>.toml` e aplica `patch` no JSON
+  (ex.: `result=1`). `DOPS_CAPTURE_ONLY=1` só loga.
+
+Resultado verificado (Cat Gunner, 2026-11-24): CA do mitmproxy no system store em **init e zygote**
+(`${SYS_STORE}` bind mount), app reiniciado → `Client TLS handshake failed ... tlsv1 alert access denied`.
+Conclusão: esse app **não usa a store do sistema** (CA embutida no Unity) ou faz pinning nativo.
+Sem hook/patch nativo, MITM não passa; pare e vá para codec/patch do cliente.
+
+Forge validado localmente: mitmproxy reverse + addon + `curl --cacert` → corpo reescrito com
+`result:1` (log `PATCHED`). O que falta é o app confiar na CA.
+
+Gates:
+
+1. Handshake falhou → o app não confia na CA (módulo de trust só cobre Java?) ou há pinning.
+2. Nada aparece no log → o app ignora proxy/redirect (lib própria); revise a regra/uid.
+3. Sucesso não concede → schema diferente; itere `patch` (campos `items`, `expires`, etc.).
+4. Anti-tamper: não use Frida/memory patch nessa sessão; `dops cleanup` ao final.
+
+```
+
+`runbooks/memory.md`:
+
+```md
+# Memória
+
+```bash
+# frida-server + forward (uma vez por sessão)
+ponte root -- 'cd /data/local/tmp && setsid nohup ./.fs -l 0.0.0.0:27042 >.fs.log 2>&1 &'
+ponte forward --listen 127.0.0.1:27042 127.0.0.1:27042
+
+dops mem scan <valor> --type int64 --package <pkg>
+dops mem next <novo> --mode eq|changed|gt|lt
+dops mem list --read
+dops mem write <addr> <valor>
+```
+
+Regras:
+
+- Contadores que mudam (idle/moeda) só são confiáveis com **variação controlada** + `next`.
+- Se o valor for `Obscured*` (ACTK), o scan acha só cópias; escrita não pega — pare e vá para
+  save/MITM.
+- Escreva no máximo em candidatos confirmados; o autosave do jogo consolida.
+- Uma sessão, um alvo; `dops cleanup` ao final (SELinux volta a Enforcing).
+
+```
+
+`runbooks/recon.md`:
+
+```md
+# Recon
+
+```bash
+dops recon <pkg>          # versão, engine, libs, data/prefs/external
+dops --json recon <pkg> > state/recon-<pkg>.json
+```
+
+Checklist:
+
+1. Engine (unity-il2cpp/mono, flutter, react-native, cocos, unreal).
+2. Onde o estado mora: `shared_prefs`, `files/`, `databases/`, `Android/data/<pkg>/files`.
+3. Proteções: libs do tipo `libpglarmor`, ACTK (metadata), Play Integrity/Firebase.
+4. Billing: `billingclient` no dex, Unity IAP no metadata, URLs de validação.
+5. Transporte de rede: hostnames no metadata/metadata strings (use APK + UnityPy).
+
+Artefatos: APK pull, `python -c 'import UnityPy'` para TextAssets (catálogos/configs),
+`strings` no metadata para literais (URLs, chaves, prefixos de save).
+
+```
+
+`runbooks/rollback.md`:
+
+```md
+# Rollback
+
+```bash
+dops mitm disable        # iptables + adb reverse + mitmdump
+dops cleanup             # + frida-server off + SELinux Enforcing
+dops restore <pkg> <backup.tar.gz>
+```
+
+Estado que permanece (remover manualmente se necessário):
+
+- CA de usuário em `/data/misc/user/0/cacerts-added/<hash>.0`.
+- Módulo LSPosed de trust instalado; escopo do FKIAB no alvo.
+- `state/` local (backups/evidências) — fora do git.
+
+Rollback garantido: `reboot` limpa iptables/redsocks e qualquer estado transitório de rede.
+Sempre confira `dops doctor` depois e guarde `dops evidence` do estado restaurado.
+
+```
+
+`runbooks/save.md`:
+
+```md
+# Save files
+
+```bash
+dops save sniff <arquivo>            # JSON, ENC1/ACTK, gzip, base64, binário
+dops restore ...                     # rollback
+```
+
+Fluxo:
+
+1. Localize o save (`dops recon`, `save_paths` do target).
+2. `sniff`: JSON → edição direta; `ENC1` → precisa de hook de crypto; gzip/base64 → decodificar.
+3. Para cifrado: rode um hook que logue chave/IV (`Chave/EIV` no primitivo), ou capture o
+   plaintext no load e reescreva pelo próprio app (memória) — nunca brute force.
+4. Jogo parado; escrita in-place; verifique em 3 níveis (decode → UI → restart e reabrir).
+5. `dops backup` antes; `dops evidence` depois.
+
+Notas:
+
+- Preserve prefixo/header/versão e padding; re-serialize igual ao original.
+- Valores absurdos (2^31-1) são flag; use o maior plausível.
+- Ownership/entitlements costumam ficar no mesmo blob do save (não em prefs).
+
+```
+
+`runbooks/server-validated-iap.md`:
+
+```md
+# IAP validado no servidor (cliente burlável por hook)
+
+Para jogos em que o grant **não** vem do Google Play, mas de um hit do backend do jogo
+(ex.: `CServerHits.ValidateShopPurchaseHit` / `EHit.ValidatePurchaseRequest`). FakeBinder sozinho
+só faz o preço virar `$0.00`; o servidor recusa o token fake e o cliente reverte (aqui:
+`EErrorState 15 = InvalidPurchaseValidation`, popup “Erro de conexão (ID:15)”, rollback no restart).
+
+## Classificar antes
+
+1. `dops il2cpp dump <pkg>` → `dump.cs`; procure `ValidateShopPurchase`, `PurchaseResponse`,
+   `CShop`, `CPurchasing`.
+2. Fluxo típico: `CPurchasing.BuyProductId` → billing → `CServerHits.ValidateXHit(EProductId,
+   token, onSuccess, onError)` → backend responde `CValidateXResponse { rewards, error, ... }`
+   → `CShop.ValidatePurchaseServer(response, ...)` aplica os rewards.
+3. Se o reward está na resposta do servidor, não existe “recibo válido local”: a rota é
+   **forjar a resposta no cliente** (hook) ou patch de código.
+
+## Rota: hook da validação (frida-il2cpp-bridge)
+
+```ts
+Il2Cpp.perform(() => {
+  Il2Cpp.installExceptionListener("all");      // abort vira stack de C# útil
+  const hits = findClass("Zombero.CServerHits");
+  const m = hits.method("ValidateShopPurchaseHit");
+  m.implementation = function (...args) {
+    const pid = args[0], cb = args[2] as Il2Cpp.Object;
+    const resp = buildValidateResponse(pid);   // preencher TODOS os campos aninhados
+    cb.method("Invoke").invoke(resp);          // executar na thread do hit
+  };
+});
+```
+
+Construção da resposta (lições):
+
+- `Cls.alloc()` + `field("...").value = ...`; **enums** via `obj.handle.add(0x11).writeU8(valor)`
+  (setter de enum lança “expected a pointer”).
+- Preencher **arrays vazios e objetos aninhados** que o cliente percorre:
+  `remainingAds` (`CTransportRemainingAd[]`), `modificatedQuests`, `nextQueuedRewards`,
+  `champions`/`boosters`/`rewards` (`CTransportRewardData`). Campo nulo = `NullReferenceException`
+  em `CLocalInfoRemainingAds.Replace` / `CShop.ValidatePurchaseServer`.
+- `error = EErrorState.Ok (1)` (raw write, 0x11 no `CHitResponseBase`).
+- Rewards: `CValidatePurchaseResponse.rewards` (`CTransportReward`) → `.reward`
+  (`CTransportRewardData`: softCurrency/hardCurrency/energy/holyWater/luckyWheelSpins/...).
+
+## “abort was called” não é ABI
+
+`abort was called` do bridge = **exceção C#** na chamada. Use
+`Il2Cpp.installExceptionListener("all")` e leia o stack; itere preenchendo campos até o callback
+completar. Só depois disso investigue thread (`csproto` de delegate: `method_ptr@0x10`,
+`invoke_impl@0x18`, `m_target@0x20`, `method_code@0x40`).
+
+Se invocar o delegate continuar inviável, hooke o **dispatch interno**
+(`CIncomingDataPreparer.DecodeIncomingHit` / lambda de `CServerClient.AddHit`) e substitua o
+`SHitWrapper` antes de o jogo chamar `onSuccess` sozinho.
+
+## Pegadinhas do alvo
+
+- Transação pendente no servidor: todo boot revalida e mostra ID15; limpar prefs do app não
+  resolve se o servidor guarda o estado. Conta nova (dados limpos) evita o pendente.
+- Moeda é espelhada no servidor; `GameGuardian`/scan de memória falha com valores obscured.
+- Protocolo binário próprio (`CClientSocket`/`CInPacket`, `ICrypt`): MITM HTTPS não se aplica.
+- ACTK: Frida só na sessão; prefira o hook mínimo e não deixe scripts residentes.
+- `Task.FromResult`/delegates: não fabricar Task; chame o callback com objeto completo.
+
+## Alternativas (ordem)
+
+1. Hook da validação com resposta fabricada (acima) — menor diff.
+2. Hook do dispatch interno (`DecodeIncomingHit`) — evita delegate externo.
+3. Patch inline do call-site de sucesso (maior risco de integridade).
+4. MITM **só** se a validação for HTTP(S) JSON (não é o caso de socket binário).
+
+```
+
+`targets/bloons-blitz.toml`:
+
+```toml
+package = "com.ninjakiwi.bloonsblitz"
+save_paths = ["/sdcard/Android/data/{package}/files"]
+receipt_prefs = "/data/data/{package}/shared_prefs/fuck.iab.xml"
+
+[mitm]
+hosts = ["us-central1-inapppurchasevalidation-c062c.cloudfunctions.net"]
+match_path = "/"
+patch = { result = 1 }
+
+```
+
+`targets/cat-gunner.toml`:
+
+```toml
+package = "com.Chodun.CatGunner"
+# uid: preencher com `dops recon` se o lookup falhar
+save_paths = ["/sdcard/Android/data/{package}/files/saves"]
+receipt_prefs = "/data/data/{package}/shared_prefs/fuck.iab.xml"
+
+# MITM bloqueado neste alvo: cliente recusa CA de sistema (store própria/pinning). Só codec/patch.
+[mitm]
+hosts = ["us-central1-inapppurchasevalidation-c062c.cloudfunctions.net"]
+match_path = "/verifyInAppPurchaseGoogleYooSud"
+patch = { result = 1 }
+
+```
+
+`targets/mob-control.toml`:
+
+```toml
+package = "com.vincentb.MobControl"
+save_paths = ["/sdcard/Android/data/{package}/files"]
+receipt_prefs = "/data/data/{package}/shared_prefs/fuck.iab.xml"
+
+[mitm]
+hosts = []
+match_path = ""
+patch = { status = 0 }
+
+```
+
+`targets/zombero.toml`:
+
+```toml
+package = "com.aldagames.zombero.bullet.hell"
+save_paths = ["/sdcard/Android/data/{package}/files/save", "/sdcard/Android/data/{package}/files"]
+receipt_prefs = "/data/data/{package}/shared_prefs/fuck.iab.xml"
+
+# IAP server-authoritative (CServerHits.ValidateShopPurchaseHit -> EHit 10/11),
+# protocolo binário próprio (CClientSocket/CInPacket); MITM HTTPS não se aplica.
+# Status 2026-11-24: bloqueado — hook da validação chega ao callback (após preencher
+# remainingAds/modificatedQuests), mas socket disposed/ACTK instabiliza; próxima rota =
+# hook do dispatch (CIncomingDataPreparer.DecodeIncomingHit). Runbook: server-validated-iap.md.
+[mitm]
+hosts = []
+match_path = ""
+patch = {}
+
+```
+
+`tests/test_units.py`:
+
+```py
+import base64
+import importlib.util
+import json
+import sys
+import tempfile
+import tomllib
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from lib import save, util  # noqa: E402
+
+
+def load_addon():
+    spec = importlib.util.spec_from_file_location("dops_addon", ROOT / "mitm" / "addon.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+class TestSniff(unittest.TestCase):
+    def test_json(self):
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+            f.write('{"coins": 1}')
+            p = Path(f.name)
+        info = save.sniff(p)
+        self.assertEqual(info["format"], "json")
+        self.assertTrue(info["editable"])
+
+    def test_enc1(self):
+        with tempfile.NamedTemporaryFile("wb", suffix=".save", delete=False) as f:
+            f.write(b"ENC1:" + base64.b64encode(b"\x00" * 64))
+            p = Path(f.name)
+        info = save.sniff(p)
+        self.assertEqual(info["format"], "actk-obscuredfile")
+        self.assertEqual(info["cipher_len"], 64)
+        self.assertTrue(info["block_aligned"])
+        self.assertFalse(info["editable"])
+
+
+class TestAddon(unittest.TestCase):
+    def test_matches(self):
+        addon = load_addon()
+        rules = {"host": "validador.example", "match_path": "/verify"}
+        self.assertTrue(addon.matches(rules, "validador.example", "/verify"))
+        self.assertFalse(addon.matches(rules, "outro.example", "/verify"))
+        self.assertFalse(addon.matches(rules, "validador.example", "/other"))
+
+    def test_patched_body_keeps_fields(self):
+        addon = load_addon()
+        rules = {"patch": {"result": 1}}
+        body = json.loads(addon.patched_body(rules, b'{"result":0,"error":"x"}'))
+        self.assertEqual(body["result"], 1)
+        self.assertEqual(body["error"], "x")
+
+    def test_patched_body_bad_json(self):
+        addon = load_addon()
+        body = json.loads(addon.patched_body({"patch": {"result": 1}}, b"not-json"))
+        self.assertEqual(body, {"result": 1})
+
+
+class TestTargets(unittest.TestCase):
+    def test_parse_all(self):
+        for path in (ROOT / "targets").glob("*.toml"):
+            with open(path, "rb") as f:
+                cfg = tomllib.load(f)
+            self.assertIn("package", cfg, str(path))
+            self.assertTrue(cfg["package"].count(".") >= 1, str(path))
+
+    def test_expand(self):
+        self.assertEqual(util.expand("/x/{package}/y", {"package": "a.b"}), "/x/a.b/y")
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+
+class TestMitm(unittest.TestCase):
+    def test_free_port(self):
+        import socket
+        from lib import mitm
+
+        port = mitm._free_port(0)
+        self.assertGreater(port, 0)
+        with socket.socket() as s:
+            s.bind(("127.0.0.1", port))
+
+
+class TestDispatcher(unittest.TestCase):
+    def test_parse_sni(self):
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("dops_dispatch", ROOT / "mitm" / "dispatch.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        data = (ROOT / "tests" / "fixtures" / "clienthello-example.bin").read_bytes()
+        self.assertEqual(mod.parse_sni(data), "example.com")
+
+```
+
+`tools/agm`:
+
+```
+#!/usr/bin/env python3
+"""agm - android game mod: scripted memory scan/edit over Frida (rooted device).
+
+Session model: a JSON state file keyed by target package, holding the last scan
+result set so refinement passes work across CLI invocations.
+
+  agm scan <value> [--type int32] [--package PKG] [--pid PID]
+  agm next <value> [--mode eq|gt|lt|changed|unchanged]
+  agm list [--max N] [--read]
+  agm write <index|addr> <value>
+  agm freeze <index|addr> <value>       (re-apply loop in this process)
+  agm reset
+"""
+import argparse
+import json
+import os
+import struct
+import sys
+import time
+
+import frida
+
+HOST = os.environ.get("AGM_HOST", "127.0.0.1:27042")
+STATE_DIR = os.environ.get("AGM_STATE", os.path.expanduser("~/.local/state/droid-arsenal/agm"))
+
+TYPES = {"int8": 1, "int16": 2, "int32": 4, "int64": 8, "float": 4, "double": 8}
+
+AGENT = r"""
+const TYPES = {int8:1,int16:2,int32:4,int64:8,float:4,double:8};
+
+function ranges() {
+  return Process.enumerateRanges('rw-').filter(r => {
+    if (r.size < 4096 || r.size > 2 * 1024 * 1024 * 1024) return false;
+    if (!r.file) return true;
+    // device/graphics mappings block or crash on large reads
+    return !/^\/(dev|dmabuf|memfd|system\/lib64\/libGLES|system\/vendor\/lib64\/libGLES)/.test(r.file);
+  });
+}
+
+function patternFor(value, type) {
+  const buf = new ArrayBuffer(8);
+  const dv = new DataView(buf);
+  switch (type) {
+    case 'int8': dv.setInt8(0, value); return hexEncode(buf, 1);
+    case 'int16': dv.setInt16(0, value, true); return hexEncode(buf, 2);
+    case 'int32': dv.setInt32(0, value, true); return hexEncode(buf, 4);
+    case 'int64': dv.setBigInt64(0, BigInt(value), true); return hexEncode(buf, 8);
+    case 'float': dv.setFloat32(0, value, true); return hexEncode(buf, 4);
+    case 'double': dv.setFloat64(0, value, true); return hexEncode(buf, 8);
+  }
+}
+
+function hexEncode(buf, n) {
+  const b = new Uint8Array(buf, 0, n);
+  let s = '';
+  for (let i = 0; i < n; i++) s += (b[i] < 16 ? '0' : '') + b[i].toString(16);
+  return s;
+}
+
+function readAt(addr, type) {
+  try {
+    switch (type) {
+      case 'int8': return addr.readS8();
+      case 'int16': return addr.readS16();
+      case 'int32': return addr.readS32();
+      case 'int64': return addr.readS64().valueOf();
+      case 'float': return addr.readFloat();
+      case 'double': return addr.readDouble();
+    }
+  } catch (e) { return null; }
+  return null;
+}
+
+function writeAt(addr, type, value) {
+  try {
+    switch (type) {
+      case 'int8': addr.writeS8(value); break;
+      case 'int16': addr.writeS16(value); break;
+      case 'int32': addr.writeS32(value); break;
+      case 'int64': addr.writeS64(value); break;
+      case 'float': addr.writeFloat(value); break;
+      case 'double': addr.writeDouble(value); break;
+    }
+    return true;
+  } catch (e) { return false; }
+}
+
+function scan(value, type, limit) {
+  const pattern = patternFor(value, type);
+  const out = [];
+  const CHUNK = 32 * 1024 * 1024;
+  for (const r of ranges()) {
+    const touches = r.size <= CHUNK ? [r] :
+      Array.from({ length: Math.ceil(r.size / CHUNK) }, (_, i) => ({
+        base: r.base.add(i * CHUNK), size: Math.min(CHUNK, r.size - i * CHUNK),
+      }));
+    for (const piece of touches) {
+      let found;
+      try { found = Memory.scanSync(piece.base, piece.size, pattern); } catch (e) { found = []; }
+      for (const m of found) {
+        out.push(m.address);
+        if (out.length >= limit) return out.map(a => a.toString());
+      }
+    }
+  }
+  return out.map(a => a.toString());
+}
+
+rpc.exports = {
+  ranges() { return ranges().map(r => [r.base.toString(), r.size]); },
+  scan: scan,
+  read(addr, type) { const v = readAt(ptr(addr), type); return v === null ? null : (typeof v === 'number' ? v : String(v)); },
+  readMany(addrs, type) { return addrs.map(a => { const v = readAt(ptr(a), type); return v === null ? null : v; }); },
+  write(addr, type, value) { return writeAt(ptr(addr), type, value); },
+  writeMany(addrs, type, value) { return addrs.map(a => writeAt(ptr(a), type, value)); },
+};
+"""
+
+
+def current_key(explicit):
+    if explicit:
+        return explicit
+    try:
+        with open(os.path.join(STATE_DIR, "_current")) as f:
+            return f.read().strip() or "default"
+    except Exception:
+        return "default"
+
+
+def state_path(key):
+    os.makedirs(STATE_DIR, exist_ok=True)
+    return os.path.join(STATE_DIR, key.replace("/", "_") + ".json")
+
+
+def load_state(key):
+    try:
+        with open(state_path(key)) as f:
+            return json.load(f)
+    except Exception:
+        return {"pid": None, "package": None, "type": None, "value": None, "addrs": []}
+
+
+def save_state(key, st):
+    os.makedirs(STATE_DIR, exist_ok=True)
+    with open(state_path(key), "w") as f:
+        json.dump(st, f)
+    with open(os.path.join(STATE_DIR, "_current"), "w") as f:
+        f.write(key)
+
+
+def pick_target(args, st):
+    dev = frida.get_device_manager().add_remote_device(HOST)
+    if args.pid:
+        return dev, args.pid
+    if args.package:
+        for p in dev.enumerate_processes():
+            if p.name == args.package:
+                return dev, p.pid
+        for a in dev.enumerate_applications():
+            if a.identifier == args.package:
+                if a.pid:
+                    return dev, a.pid
+                pid = dev.spawn([a.identifier])
+                time.sleep(1.0)
+                return dev, pid
+        sys.exit(f"agm: package {args.package} not running and not launchable")
+    if st.get("pid"):
+        return dev, st["pid"]
+    sys.exit("agm: no target (--pid or --package or previous scan)")
+
+
+def attach(args, st):
+    key = args.package or st.get("package") or str(args.pid)
+    st["package"] = args.package or st.get("package")
+    dev, pid = pick_target(args, st)
+    st["pid"] = pid
+    session = dev.attach(pid)
+    script = session.create_script(AGENT)
+    script.load()
+    return script.exports_sync, st, pid
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("cmd", choices=["scan", "next", "list", "write", "freeze", "reset", "ranges", "read"])
+    ap.add_argument("args", nargs="*")
+    ap.add_argument("--type", default=None, choices=list(TYPES))
+    ap.add_argument("--package")
+    ap.add_argument("--pid", type=int)
+    ap.add_argument("--mode", default="eq", choices=["eq", "gt", "lt", "changed", "unchanged"])
+    ap.add_argument("--max", type=int, default=5000)
+    a = ap.parse_args()
+
+    key = current_key(a.package); st = load_state(key)
+    if a.cmd == "reset":
+        st = {"pid": None, "package": key, "type": None, "value": None, "addrs": []}
+        save_state(key, st)
+        print("reset")
+        return
+
+    if a.cmd == "ranges":
+        ex, st, pid = attach(a, st)
+        save_state(key, st)
+        print(f"pid={pid} rw-ranges={len(ex.ranges())}")
+        return
+
+    typ = a.type or st.get("type") or "int32"
+
+    if a.cmd == "scan":
+        val = float(a.args[0]) if typ in ("float", "double") else int(a.args[0], 0)
+        ex, st, pid = attach(a, st)
+        addrs = ex.scan(val, typ, a.max)
+        st.update(type=typ, value=val, addrs=addrs, pid=pid)
+        save_state(key, st)
+        print(f"pid={pid} type={typ} value={val} hits={len(addrs)}{' (capped)' if len(addrs) >= a.max else ''}")
+        for i, ad in enumerate(addrs[:20]):
+            print(f"  [{i}] {ad}")
+        return
+
+    if a.cmd == "next":
+        val = float(a.args[0]) if typ in ("float", "double") else int(a.args[0], 0)
+        addrs = st.get("addrs") or []
+        if not addrs:
+            sys.exit("agm: empty result set; run scan first")
+        ex, st, pid = attach(a, st)
+        vals = ex.readMany(addrs, typ)
+        keep = []
+        for ad, cur in zip(addrs, vals):
+            if cur is None:
+                continue
+            ok = {
+                "eq": cur == val, "gt": cur > val, "lt": cur < val,
+                "changed": cur != st.get("value"), "unchanged": cur == st.get("value"),
+            }[a.mode]
+            if ok:
+                keep.append(ad)
+        st.update(value=val, addrs=keep, type=typ, pid=pid)
+        save_state(key, st)
+        print(f"mode={a.mode} value={val} remaining={len(keep)}/{len(addrs)}")
+        for i, ad in enumerate(keep[:20]):
+            print(f"  [{i}] {ad}")
+        return
+
+    if a.cmd == "list":
+        addrs = st.get("addrs") or []
+        print(f"pid={st.get('pid')} type={st.get('type')} value={st.get('value')} count={len(addrs)}")
+        if a.args and a.args[0] == "--read" or getattr(a, "read", False):
+            pass
+        for i, ad in enumerate(addrs[: a.max]):
+            print(f"  [{i}] {ad}")
+        return
+
+    if a.cmd == "read":
+        addrs = [x.strip() for x in a.args] or (st.get("addrs") or [])[: a.max]
+        ex, st, pid = attach(a, st)
+        save_state(key, st)
+        for ad, v in zip(addrs, ex.readMany(addrs, typ)):
+            print(f"{ad} = {v}")
+        return
+
+    if a.cmd in ("write", "freeze"):
+        target, val = a.args[0], a.args[1]
+        addrs = st.get("addrs") or []
+        if target.isdigit() and int(target) < len(addrs):
+            targets = [addrs[int(target)]]
+        elif target.startswith("all"):
+            targets = addrs
+        else:
+            targets = [target]
+        v = float(val) if typ in ("float", "double") else int(val, 0)
+        ex, st, pid = attach(a, st)
+        save_state(key, st)
+        res = ex.writeMany(targets, typ, v)
+        print(f"write {typ}={v} -> {sum(res)}/{len(targets)} ok")
+        if a.cmd == "freeze":
+            print("freezing (Ctrl-C to stop)")
+            try:
+                while True:
+                    ex.writeMany(targets, typ, v)
+                    time.sleep(0.25)
+            except KeyboardInterrupt:
+                print("unfrozen")
+
+
+if __name__ == "__main__":
+    main()
+
+```
