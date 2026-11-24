@@ -4051,6 +4051,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TeleParser](entities/teleparser.md) — Python Telegram chat/channel parser (Telethon; JSON/CSV/MongoDB; NLTK lemmatizer; IS forensics / OSINT)
 - [tim_apple](entities/tim-apple.md) — external CS2 cheat (Source 2 SDK / pattern scan; offset JSON bootstrap; kristofhracza + gmh5225 forks; cheat / game:cs2)
 - [timeLink](entities/timelink.md) — HanYolo1 Longshot fork; Switch AArch64 static recomp to Windows/Linux; Python nx2 lift; Horizon + NVN 2→Vulkan; Unicorn/SPIR-V checks; BYO-assets builder (Cheat / Source)
+- [tms-recomp](entities/tms-recomp.md) — *Tokyo Mirage Sessions #FE Encore* Switch AArch64 static recomp to native Windows/Linux (Python AArch64→C++ lifter; C++ Horizon HLE; NVN→Vulkan + DLSS/FSR; saves/mods; BYO dump; godofknife; Cheat / Source)
 - [Titled Gui CS2](entities/titled-gui-cs2.md) — external CS2 cheat framework (C#; ImGui overlay; Win32 memory; cs2-dumper offsets; ESP / aimbot / D3D11 chams; GPLv3; cheat / game:cs2)
 - [TLAC (Modern Local Anti-Cheat Reunioned)](entities/tlac-modern-local-anti-cheat-reunioned.md) — lightweight MIT-licensed Linux local anti-cheat (Rust + C eBPF/kernel module + Python ONNX; signature scan, self-integrity, HWID bans, Tokio IPC; Steam Deck; TuncorReUnion; Open Source Anti Cheat System)
 - [ThreatIntelligenceConsumer](entities/threat-intelligence-consumer.md) — Threat-Intelligence ETW consume without driver/PPL (Win11 24H2/25H2)
