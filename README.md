@@ -1015,6 +1015,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ling71671/open-reverselab [Agent-native RE lab with knowledge base, 100+ MCP tools, and APK/PE/game-cheating analysis workflows]
 - https://github.com/ReSo7200/molt-dex [Claude skill pipeline for Android APK reverse engineering and modding: apktool/smali workflow, DexKit and Xposed hooks, Frida, and obfuscation-aware analysis]
 - https://github.com/zhuyansen/awesome-ai-reverse-engineering [Curated AI-agent RE stack: Ghidra/IDA MCP servers, mobile tooling (jadx, Frida), agent skills, and security-graded open-source RE projects]
+- https://github.com/fission-systems/fission-plugin-api [Rust plugin SDK and cross-tool host to run IDA, Ghidra, Binary Ninja, and angr scripts against the Fission analysis engine with a versioned JSON-lines protocol]
 - https://github.com/2akouwu/reverify [AI-assisted reverse engineering with deterministic byte-level verification via MCP server and CLI]
 - https://github.com/dagoSte/reverseai [Static RE of untrusted PE/APK/JS in locked offline containers (Ghidra, JADX, LIEF, YARA-X) with byte-anchored verification and an MCP server for agents]
 - https://github.com/mytechnotalent/rea [Offline-first RE assistant with one-shot binary scan, native PE/ELF/Mach-O and JavaScript/Electron static inventory, local RAG, multi-agent harness, and MCP server]
@@ -4304,6 +4305,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game:Geometry Dash
 - https://github.com/gmh5225/gd-internal
 - https://github.com/ToldByNun/earlybuffering-gd [Geode mod (MIT) that buffers early jump input using shadow physics simulation for Geometry Dash 2.2081 timing assist]
+- https://github.com/Sasha-cyn/lolollbot [Geometry Dash replay bot and in-game cheat menu (C++/CMake mod sources)]
 
 > Game:8ball pool
 - https://github.com/gmh5225/Alaa-8ball-pool-source-exposed
@@ -4843,6 +4845,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/sr-star-trek/konzte-faceit [Published KONZTE GUARD client and Windows service source for Combat Master: kernel-setting checks, module/signature scans, guarded uploads, and documented detection surfaces]
 - https://github.com/urcool626/Level-Hash [Geode Geometry Dash mod that SHA-256 fingerprints levels to help detect level-edit cheating]
 - https://github.com/AliShe3a/VortexAC [Open-source CrossFire private-server anti-cheat with C++ client detections, SQL-backed session validation, server integration, and admin web dashboard]
+- https://github.com/kxdrsrt/OdinGuard [Modular open-source anti-cheat for Ragnarok Online (rAthena): signed client DLL, server module, Studio/CLI profiles, and server-authoritative detection rules]
 - https://github.com/yanndecaii/WIGPanel [Self-hosted SCP: Secret Laboratory (LabAPI) moderation panel with heuristic server-side anti-cheat (spinbot, silent aim, rapid-fire), ghost-bullet mitigation, and Discord RoleSync]
 - https://github.com/ui2506/Sunrise [SCP: Secret Laboratory server-side anti-cheat plugin with authoritative backtrack, anti-wallhack room visibility, and patches for silent aim, spinbot, and related exploits]
 - https://github.com/AvivShabtay/Stresser [Anti Virus in fact but also Anti Cheat]
@@ -4907,6 +4910,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/katze225/PowerAC [Open-source Paper/Folia plugin with embedded Java neural network for local aim-assist and AIM-module rotation detection]
 - https://github.com/voilecx/eigen [Paper/Folia ML combat anti-cheat: PacketEvents aim/movement feature streams, labelled combat windows, and backend dataset collection/inference]
 - https://github.com/OneLiteFeatherNET/Corvus [Velocity plugin plus Python ingest/score pipeline: PacketEvents capture, pseudonymised Parquet data lake, CPU ML cheating-likelihood scores for staff review (no auto-ban)]
+- https://github.com/epicclowds/Nexora [Self-hosted Velocity/Paper Minecraft network manager with dashboard moderation, player stats, and integrated anti-cheat rule engine and plugin API]
 - https://github.com/Alexramirezzz/TFG-AntiCheat-ServerSide [Paper/Spigot 1.18.2 thesis server-side anti-cheat with hardened plugin logic, labelled session ML timing pipeline, ONNX export, and fail-safe fallback to rule-based detection]
 - https://github.com/Kotsasmin/key-value-checker [Paper/Spigot Minecraft server plugin that detects installed cheat clients by scanning client translation keys (Meteor, Freecam, AutoTotem, etc.) via PacketEvents]
 - https://github.com/g4vrk/React [Paper/Folia Minecraft aim-assist anti-cheat using rotation heuristics and optional AI verdict server]
