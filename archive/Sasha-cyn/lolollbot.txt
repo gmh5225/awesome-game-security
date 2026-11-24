@@ -1,0 +1,2095 @@
+Project Path: arc_Sasha-cyn_lolollbot_jkl6_p92
+
+Source Tree:
+
+```txt
+arc_Sasha-cyn_lolollbot_jkl6_p92
+├── CMakeLists.txt
+├── mod.json
+└── src
+    ├── main.cpp
+    └── main.cpp.bak
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.21)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "iOS" OR IOS)
+    set(CMAKE_OSX_ARCHITECTURES "arm64")
+else()
+    set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+endif()
+
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
+project(lolollbot VERSION 1.0.0)
+
+# Add all source files inside src (recursively)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
+
+# Set up the mod binary
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
+
+if (NOT DEFINED ENV{GEODE_SDK})
+    message(FATAL_ERROR "Unable to find Geode SDK! Please define GEODE_SDK environment variable to point to Geode.")
+else()
+    message(STATUS "Found Geode: $ENV{GEODE_SDK}")
+endif()
+
+add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
+
+setup_geode_mod(${PROJECT_NAME})
+
+```
+
+`mod.json`:
+
+```json
+{
+  "geode": "6.0.0-beta.1",
+  "gd": {
+    "win": "2.2091",
+    "android": "2.2091",
+    "mac": "2.2091",
+    "ios": "2.2091"
+  },
+  "id": "sarkn1m.lolollbot",
+  "name": "lolollbot",
+  "version": "v1.0.0",
+  "developer": "Sarkn1m",
+  "description": "Macro bot for Geometry Dash (xDBot style)"
+}
+
+```
+
+`src/main.cpp`:
+
+```cpp
+#include <Geode/Geode.hpp>
+#include <Geode/modify/GameManager.hpp>
+#include <Geode/modify/MenuLayer.hpp>
+#include <Geode/modify/PlayLayer.hpp>
+#include <Geode/modify/PlayerObject.hpp>
+#include <Geode/modify/PauseLayer.hpp>
+#include <Geode/modify/CCKeyboardDispatcher.hpp>
+#include <Geode/modify/CCScheduler.hpp>
+#include <Geode/modify/FMODAudioEngine.hpp>
+#include <Geode/modify/CCDirector.hpp>
+#include <vector>
+#include <fstream>
+#include <filesystem>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <cstdint>
+#include <chrono>
+#include <thread>
+
+using namespace geode::prelude;
+
+// ============================================================================
+// СОСТОЯНИЕ И НАСТРОЙКИ LOLOLLBOT v1.0.3-beta.1 (MEGA HACK UI)
+// ============================================================================
+enum class BotMode {
+    Off = 0,
+    Record = 1,
+    Play = 2
+};
+
+enum class MenuTheme {
+    MegaHack = 0,
+    GeometryDash = 1,
+    Dark = 2,
+    Neon = 3
+};
+
+enum class PopupType {
+    None = 0,
+    BotSettings = 1,
+    FpsSettings = 2,
+    SpeedSettings = 3,
+    ThemeSettings = 4,
+    KeybindsSettings = 5
+};
+
+enum class KeybindTarget {
+    None = 0,
+    ToggleMenu = 1,
+    CycleBot = 2,
+    ToggleNoclip = 3,
+    ToggleSpeedhack = 4
+};
+
+struct BotAction {
+    int frame;
+    bool isPress;
+    bool isPlayer2;
+};
+
+struct CheckpointSnapshot {
+    int frame = 0;
+    size_t recordedCount = 0;
+};
+
+struct LolollBotState {
+    BotMode mode = BotMode::Off;
+    MenuTheme theme = MenuTheme::MegaHack;
+    PopupType activePopup = PopupType::None;
+
+    // Global cheats
+    bool fpsTpsEnabled = false;
+    int64_t targetFpsTps = 240;
+    bool speedhackEnabled = false;
+    float speedhack = 1.0f;
+    bool speedhackMusic = true;
+    bool practiceFix = true;
+    bool showClickCounter = true;
+    bool countStartClick = true;
+    bool unlockAllIcons = false;
+
+    // Player cheats
+    bool noclip = false;
+    bool noSpikes = false;
+    bool noMirror = false;
+    bool noSolids = false;
+    bool showTrajectory = false;
+    bool jumpHack = false;
+    bool forceTrail = false;
+    bool noTrail = false;
+
+    // Позиции перетаскиваемых окон Global и Player
+    CCPoint globalWinPos = CCPoint(130.f, 165.f);
+    CCPoint playerWinPos = CCPoint(340.f, 165.f);
+    bool positionsInitialized = false;
+
+    // Таймер кадров
+    std::chrono::high_resolution_clock::time_point lastFrameTime = std::chrono::high_resolution_clock::now();
+
+    int currentFrame = 0;
+    int attemptClicks = 0;
+    bool levelStarted = false;
+    size_t playbackCursor = 0;
+    int currentLevelKey = 0;
+
+    // Настраиваемые кейбинды
+    enumKeyCodes toggleKey = KEY_Alt;
+    enumKeyCodes botKey = KEY_None;
+    enumKeyCodes noclipKey = KEY_None;
+    enumKeyCodes speedKey = KEY_None;
+    KeybindTarget waitingForBind = KeybindTarget::None;
+
+    std::vector<BotAction> replayActions;
+    std::vector<CheckpointSnapshot> checkpoints;
+};
+
+static LolollBotState g_botState;
+static constexpr int64_t MAX_FPS_TPS = 1000000000000LL; // 1 триллион
+
+// ============================================================================
+// СОХРАНЕНИЕ / ЗАГРУЗКА МАКРОСОВ И НАСТРОЕК
+// ============================================================================
+static std::filesystem::path getSingleMacroFilePath() {
+    auto saveDir = Mod::get()->getSaveDir();
+    std::filesystem::path stdDir(saveDir.string());
+    std::error_code ec;
+    if (!std::filesystem::exists(stdDir, ec)) {
+        std::filesystem::create_directories(stdDir, ec);
+    }
+    return stdDir / "macros.lolbot";
+}
+
+static int getLevelKey(GJGameLevel* level) {
+    if (!level) return 0;
+    if (level->m_levelID.value() > 0) {
+        return level->m_levelID.value();
+    }
+    std::string name = level->m_levelName;
+    int hash = 0;
+    for (unsigned char c : name) {
+        hash = hash * 131 + c;
+    }
+    return hash == 0 ? 1 : -std::abs(hash);
+}
+
+static void saveMacroToSingleFile(int levelKey) {
+    if (levelKey == 0) return;
+    auto filePath = getSingleMacroFilePath();
+
+    struct StoredLevel {
+        int key;
+        std::vector<BotAction> actions;
+    };
+    std::vector<StoredLevel> allLevels;
+
+    if (std::filesystem::exists(filePath)) {
+        std::ifstream in(filePath, std::ios::binary);
+        char magic[4] = {};
+        int levelCount = 0;
+        if (in.read(magic, 4) && std::memcmp(magic, "LB01", 4) == 0 &&
+            in.read(reinterpret_cast<char*>(&levelCount), sizeof(levelCount))) {
+            for (int i = 0; i < levelCount; ++i) {
+                int k = 0;
+                uint32_t count = 0;
+                if (!in.read(reinterpret_cast<char*>(&k), sizeof(k)) ||
+                    !in.read(reinterpret_cast<char*>(&count), sizeof(count))) {
+                    break;
+                }
+                std::vector<BotAction> acts(count);
+                if (count > 0) {
+                    in.read(reinterpret_cast<char*>(acts.data()), count * sizeof(BotAction));
+                }
+                if (k != levelKey) {
+                    allLevels.push_back({ k, std::move(acts) });
+                }
+            }
+        }
+    }
+
+    if (!g_botState.replayActions.empty()) {
+        allLevels.push_back({ levelKey, g_botState.replayActions });
+    }
+
+    std::ofstream out(filePath, std::ios::binary | std::ios::trunc);
+    if (!out) return;
+
+    const char magic[4] = { 'L', 'B', '0', '1' };
+    int levelCount = static_cast<int>(allLevels.size());
+    out.write(magic, 4);
+    out.write(reinterpret_cast<const char*>(&levelCount), sizeof(levelCount));
+
+    for (const auto& item : allLevels) {
+        uint32_t count = static_cast<uint32_t>(item.actions.size());
+        out.write(reinterpret_cast<const char*>(&item.key), sizeof(item.key));
+        out.write(reinterpret_cast<const char*>(&count), sizeof(count));
+        if (count > 0) {
+            out.write(reinterpret_cast<const char*>(item.actions.data()), count * sizeof(BotAction));
+        }
+    }
+}
+
+static bool loadMacroFromSingleFile(int levelKey) {
+    g_botState.replayActions.clear();
+    if (levelKey == 0) return false;
+
+    auto filePath = getSingleMacroFilePath();
+    if (!std::filesystem::exists(filePath)) return false;
+
+    std::ifstream in(filePath, std::ios::binary);
+    char magic[4] = {};
+    int levelCount = 0;
+    if (!in.read(magic, 4) || std::memcmp(magic, "LB01", 4) != 0 ||
+        !in.read(reinterpret_cast<char*>(&levelCount), sizeof(levelCount))) {
+        return false;
+    }
+
+    for (int i = 0; i < levelCount; ++i) {
+        int k = 0;
+        uint32_t count = 0;
+        if (!in.read(reinterpret_cast<char*>(&k), sizeof(k)) ||
+            !in.read(reinterpret_cast<char*>(&count), sizeof(count))) {
+            return false;
+        }
+        if (k == levelKey) {
+            g_botState.replayActions.resize(count);
+            if (count > 0) {
+                in.read(reinterpret_cast<char*>(g_botState.replayActions.data()), count * sizeof(BotAction));
+            }
+            return true;
+        }
+        else if (count > 0) {
+            in.seekg(static_cast<std::streamoff>(count * sizeof(BotAction)), std::ios::cur);
+        }
+    }
+    return false;
+}
+
+static float getEffectiveSpeed() {
+    if (!g_botState.speedhackEnabled) return 1.0f;
+    return g_botState.speedhack;
+}
+
+static void syncFmodAudioSpeed() {
+    auto fmod = FMODAudioEngine::sharedEngine();
+    if (!fmod) return;
+
+    float targetPitch = 1.0f;
+    float effSpeed = getEffectiveSpeed();
+    if (PlayLayer::get() && g_botState.speedhackMusic && std::abs(effSpeed - 1.0f) > 0.001f) {
+        targetPitch = effSpeed;
+    }
+
+    if (fmod->m_globalChannel) {
+        fmod->m_globalChannel->setPitch(targetPitch);
+    }
+    if (fmod->m_backgroundMusicChannel) {
+        fmod->m_backgroundMusicChannel->setPitch(targetPitch);
+    }
+    if (fmod->m_system) {
+        FMOD::ChannelGroup* masterGroup = nullptr;
+        if (fmod->m_system->getMasterChannelGroup(&masterGroup) == FMOD_OK && masterGroup) {
+            masterGroup->setPitch(targetPitch);
+        }
+    }
+}
+
+static void applySpeedhack(float speed) {
+    g_botState.speedhack = std::clamp(speed, 0.1f, 3.0f);
+    Mod::get()->setSavedValue<float>("speedhack-value", g_botState.speedhack);
+    Mod::get()->setSavedValue<bool>("speedhack-enabled", g_botState.speedhackEnabled);
+    syncFmodAudioSpeed();
+}
+
+static void applyFpsTps() {
+    auto director = CCDirector::sharedDirector();
+    if (!director) return;
+
+    if (g_botState.fpsTpsEnabled && g_botState.targetFpsTps >= 30) {
+        g_botState.targetFpsTps = std::clamp(g_botState.targetFpsTps, static_cast<int64_t>(30), MAX_FPS_TPS);
+        director->setAnimationInterval(1.0 / 10000.0);
+        if (auto gm = GameManager::sharedState()) {
+            int clampedInt = static_cast<int>(std::min<int64_t>(g_botState.targetFpsTps, 2147483647LL));
+            gm->m_customFPSTarget = clampedInt;
+            gm->setGameVariable("0116", true);
+            gm->setGameVariable("0030", false);
+            gm->updateCustomFPS();
+        }
+    }
+    else {
+        if (auto gm = GameManager::sharedState()) {
+            gm->setGameVariable("0116", false);
+            gm->updateCustomFPS();
+        }
+    }
+    Mod::get()->setSavedValue<bool>("fps-tps-enabled", g_botState.fpsTpsEnabled);
+    Mod::get()->setSavedValue<int64_t>("fps-tps-value", g_botState.targetFpsTps);
+}
+
+static const char* getBotModeShort() {
+    switch (g_botState.mode) {
+    case BotMode::Off:    return "OFF";
+    case BotMode::Record: return "REC";
+    case BotMode::Play:   return "PLAY";
+    }
+    return "OFF";
+}
+
+static const char* getThemeName() {
+    switch (g_botState.theme) {
+    case MenuTheme::MegaHack:     return "MegaHack";
+    case MenuTheme::GeometryDash: return "GeometryDash";
+    case MenuTheme::Dark:         return "Dark";
+    case MenuTheme::Neon:         return "Neon";
+    }
+    return "MegaHack";
+}
+
+static void cycleBotMode() {
+    if (g_botState.mode == BotMode::Off) {
+        g_botState.mode = BotMode::Record;
+        g_botState.replayActions.clear();
+        g_botState.replayActions.reserve(65536);
+        g_botState.checkpoints.clear();
+    }
+    else if (g_botState.mode == BotMode::Record) {
+        g_botState.mode = BotMode::Play;
+        g_botState.playbackCursor = 0;
+    }
+    else {
+        g_botState.mode = BotMode::Off;
+    }
+}
+
+static std::string getKeyName(enumKeyCodes key) {
+    if (key == KEY_None || key == KEY_Unknown) return "None";
+    if (key == KEY_Alt || key == KEY_LeftMenu || key == KEY_RightMenu) return "Alt";
+    if (key == KEY_Shift || key == KEY_LeftShift || key == KEY_RightShift) return "Shift";
+    if (key == KEY_Control || key == KEY_LeftControl || key == KEY_RightContol) return "Ctrl";
+    if (key == KEY_Tab) return "Tab";
+    if (key == KEY_GraveAccent) return "~";
+    if (key == KEY_Insert) return "Insert";
+    if (key == KEY_Delete) return "Delete";
+    if (key == KEY_Home) return "Home";
+    if (key == KEY_End) return "End";
+    if (key >= KEY_F1 && key <= KEY_F12) {
+        return fmt::format("F{}", static_cast<int>(key - KEY_F1) + 1);
+    }
+    if (key >= KEY_A && key <= KEY_Z) {
+        char ch = static_cast<char>('A' + (key - KEY_A));
+        return std::string(1, ch);
+    }
+    if (key >= KEY_Zero && key <= KEY_Nine) {
+        char ch = static_cast<char>('0' + (key - KEY_Zero));
+        return std::string(1, ch);
+    }
+    return fmt::format("Key({})", static_cast<int>(key));
+}
+
+static enumKeyCodes normalizeKey(enumKeyCodes key) {
+    if (key == KEY_LeftMenu || key == KEY_RightMenu) return KEY_Alt;
+    if (key == KEY_LeftShift || key == KEY_RightShift) return KEY_Shift;
+    if (key == KEY_LeftControl || key == KEY_RightContol) return KEY_Control;
+    return key;
+}
+
+static void saveAllKeybinds() {
+    Mod::get()->setSavedValue<int>("toggle-key", static_cast<int>(g_botState.toggleKey));
+    Mod::get()->setSavedValue<int>("bot-key", static_cast<int>(g_botState.botKey));
+    Mod::get()->setSavedValue<int>("noclip-key", static_cast<int>(g_botState.noclipKey));
+    Mod::get()->setSavedValue<int>("speed-key", static_cast<int>(g_botState.speedKey));
+}
+
+static void loadSavedSettings() {
+    g_botState.toggleKey = normalizeKey(static_cast<enumKeyCodes>(
+        Mod::get()->getSavedValue<int>("toggle-key", static_cast<int>(KEY_Alt))
+        ));
+    g_botState.botKey = normalizeKey(static_cast<enumKeyCodes>(
+        Mod::get()->getSavedValue<int>("bot-key", static_cast<int>(KEY_None))
+        ));
+    g_botState.noclipKey = normalizeKey(static_cast<enumKeyCodes>(
+        Mod::get()->getSavedValue<int>("noclip-key", static_cast<int>(KEY_None))
+        ));
+    g_botState.speedKey = normalizeKey(static_cast<enumKeyCodes>(
+        Mod::get()->getSavedValue<int>("speed-key", static_cast<int>(KEY_None))
+        ));
+
+    int savedTheme = Mod::get()->getSavedValue<int>("menu-theme", 0);
+    g_botState.theme = static_cast<MenuTheme>(std::clamp(savedTheme, 0, 3));
+
+    g_botState.showClickCounter = Mod::get()->getSavedValue<bool>("show-click-counter", true);
+    g_botState.countStartClick = Mod::get()->getSavedValue<bool>("count-start-click", true);
+
+    g_botState.fpsTpsEnabled = Mod::get()->getSavedValue<bool>("fps-tps-enabled", false);
+    g_botState.targetFpsTps = std::clamp(
+        Mod::get()->getSavedValue<int64_t>("fps-tps-value", 240),
+        static_cast<int64_t>(30),
+        MAX_FPS_TPS
+    );
+    g_botState.speedhackEnabled = Mod::get()->getSavedValue<bool>("speedhack-enabled", false);
+    g_botState.speedhack = std::clamp(Mod::get()->getSavedValue<float>("speedhack-value", 1.0f), 0.1f, 3.0f);
+    g_botState.speedhackMusic = Mod::get()->getSavedValue<bool>("speedhack-music", true);
+
+    if (g_botState.fpsTpsEnabled) {
+        applyFpsTps();
+    }
+}
+
+// ============================================================================
+// ХУК НА UNLOCK ALL ICONS
+// ============================================================================
+class $modify(LolollGameManager, GameManager) {
+    bool isIconUnlocked(int id, IconType type) {
+        if (g_botState.unlockAllIcons) {
+            return true;
+        }
+        return GameManager::isIconUnlocked(id, type);
+    }
+
+    bool isColorUnlocked(int id, UnlockType type) {
+        if (g_botState.unlockAllIcons) {
+            return true;
+        }
+        return GameManager::isColorUnlocked(id, type);
+    }
+};
+
+// ============================================================================
+// ПЕРЕТАСКИВАЕМАЯ ПАНЕЛЬ В СТИЛЕ MEGA HACK (GLOBAL / PLAYER)
+// ============================================================================
+class MegaHackWindowNode : public CCNode {
+public:
+    CCLayerColor* m_bodyBg = nullptr;
+    CCLayerColor* m_headerBg = nullptr;
+    CCLabelBMFont* m_headerTitle = nullptr;
+    CCMenu* m_menu = nullptr;
+    float m_width = 176.f;
+    float m_height = 220.f;
+    float m_headerHeight = 20.f;
+
+    bool initWindow(const char* title, float width, float height) {
+        if (!CCNode::init()) return false;
+        m_width = width;
+        m_height = height;
+        this->setContentSize({ width, height });
+        this->setAnchorPoint({ 0.5f, 0.5f });
+
+        m_bodyBg = CCLayerColor::create({ 16, 18, 28, 215 }, width, height);
+        m_bodyBg->setPosition({ 0.f, 0.f });
+        this->addChild(m_bodyBg, 1);
+
+        m_headerBg = CCLayerColor::create({ 45, 95, 215, 245 }, width, m_headerHeight);
+        m_headerBg->setPosition({ 0.f, height - m_headerHeight });
+        this->addChild(m_headerBg, 2);
+
+        m_headerTitle = CCLabelBMFont::create(title, "bigFont.fnt");
+        m_headerTitle->setScale(0.42f);
+        m_headerTitle->setPosition({ width / 2.f, height - m_headerHeight / 2.f + 1.f });
+        this->addChild(m_headerTitle, 3);
+
+        m_menu = CCMenu::create();
+        m_menu->setPosition({ 0.f, 0.f });
+        this->addChild(m_menu, 4);
+
+        return true;
+    }
+
+    void applyTheme(MenuTheme theme) {
+        if (!m_bodyBg || !m_headerBg) return;
+        switch (theme) {
+        case MenuTheme::MegaHack:
+            m_bodyBg->setColor({ 16, 18, 28 });
+            m_bodyBg->setOpacity(215);
+            m_headerBg->setColor({ 45, 95, 215 });
+            m_headerBg->setOpacity(245);
+            break;
+        case MenuTheme::GeometryDash:
+            m_bodyBg->setColor({ 20, 35, 75 });
+            m_bodyBg->setOpacity(175);
+            m_headerBg->setColor({ 40, 175, 65 });
+            m_headerBg->setOpacity(235);
+            break;
+        case MenuTheme::Dark:
+            m_bodyBg->setColor({ 12, 12, 14 });
+            m_bodyBg->setOpacity(225);
+            m_headerBg->setColor({ 38, 38, 44 });
+            m_headerBg->setOpacity(245);
+            break;
+        case MenuTheme::Neon:
+            m_bodyBg->setColor({ 8, 22, 28 });
+            m_bodyBg->setOpacity(210);
+            m_headerBg->setColor({ 0, 185, 175 });
+            m_headerBg->setOpacity(240);
+            break;
+        }
+    }
+
+    bool isHeaderTouched(CCPoint worldPos) {
+        CCPoint local = this->convertToNodeSpace(worldPos);
+        return local.x >= 0.f && local.x <= m_width &&
+            local.y >= (m_height - m_headerHeight) && local.y <= m_height;
+    }
+};
+
+// ============================================================================
+// ГЛАВНЫЙ OVERLAY МЕНЮ LOLOLLBOT (MEGA HACK ДИЗАЙН + KEYBINDS)
+// ============================================================================
+class LolollBotMenuLayer : public FLAlertLayer {
+protected:
+    MegaHackWindowNode* m_globalWin = nullptr;
+    MegaHackWindowNode* m_playerWin = nullptr;
+
+    // Стандартный поп-ап настроек
+    CCNode* m_popupNode = nullptr;
+    CCLayerColor* m_popupBg = nullptr;
+    CCLabelBMFont* m_popupTitle = nullptr;
+    CCLabelBMFont* m_popupValueLabel = nullptr;
+    ButtonSprite* m_popupToggleBtnSprite = nullptr;
+    ButtonSprite* m_popupExtraBtnSprite = nullptr;
+
+    // Отдельное окно Keybinds (внутри меню)
+    CCNode* m_bindsNode = nullptr;
+    ButtonSprite* m_bindMenuBtnSpr = nullptr;
+    ButtonSprite* m_bindBotBtnSpr = nullptr;
+    ButtonSprite* m_bindNoclipBtnSpr = nullptr;
+    ButtonSprite* m_bindSpeedBtnSpr = nullptr;
+
+    // Перетаскивание окон мышью
+    MegaHackWindowNode* m_draggedWin = nullptr;
+    CCPoint m_dragOffset = CCPoint(0.f, 0.f);
+
+    // Метки строчек Global
+    CCLabelBMFont* m_lblBotMode = nullptr;
+    CCLabelBMFont* m_lblFps = nullptr;
+    CCLabelBMFont* m_lblSpeed = nullptr;
+    CCLabelBMFont* m_lblPracFix = nullptr;
+    CCLabelBMFont* m_lblClicks = nullptr;
+    CCLabelBMFont* m_lbl1stClick = nullptr;
+    CCLabelBMFont* m_lblUnlockIcons = nullptr;
+    CCLabelBMFont* m_lblTheme = nullptr;
+    CCLabelBMFont* m_lblKeybinds = nullptr;
+
+    // Метки строчек Player
+    CCLabelBMFont* m_lblNoclip = nullptr;
+    CCLabelBMFont* m_lblNoSpikes = nullptr;
+    CCLabelBMFont* m_lblNoMirror = nullptr;
+    CCLabelBMFont* m_lblNoSolids = nullptr;
+    CCLabelBMFont* m_lblTrajectory = nullptr;
+    CCLabelBMFont* m_lblJumpHack = nullptr;
+    CCLabelBMFont* m_lblForceTrail = nullptr;
+    CCLabelBMFont* m_lblNoTrail = nullptr;
+
+    CCLabelBMFont* addCompactRow(
+        MegaHackWindowNode* win,
+        int rowIndex,
+        const char* text,
+        SEL_MenuHandler toggleCallback,
+        SEL_MenuHandler gearCallback = nullptr
+    ) {
+        float y = win->m_height - win->m_headerHeight - 12.f - (rowIndex * 20.5f);
+
+        auto label = CCLabelBMFont::create(text, "chatFont.fnt");
+        label->setScale(0.65f);
+        label->setAnchorPoint({ 0.f, 0.5f });
+        label->setPosition({ 8.f, y });
+
+        auto item = CCMenuItemLabel::create(label, this, toggleCallback);
+        item->setAnchorPoint({ 0.f, 0.5f });
+        item->setPosition({ 8.f, y });
+        win->m_menu->addChild(item);
+
+        if (gearCallback) {
+            auto gearLbl = CCLabelBMFont::create("[...]", "chatFont.fnt");
+            gearLbl->setScale(0.62f);
+            gearLbl->setColor({ 150, 200, 255 });
+            auto gearBtn = CCMenuItemLabel::create(gearLbl, this, gearCallback);
+            gearBtn->setAnchorPoint({ 1.f, 0.5f });
+            gearBtn->setPosition({ win->m_width - 7.f, y });
+            win->m_menu->addChild(gearBtn);
+        }
+
+        return label;
+    }
+
+    bool init() override {
+        if (!FLAlertLayer::init(90)) {
+            return false;
+        }
+
+        this->setID("lolollbot-overlay-menu"_spr);
+        this->setTouchEnabled(true);
+
+        auto winSize = CCDirector::sharedDirector()->getWinSize();
+        if (!g_botState.positionsInitialized) {
+            g_botState.globalWinPos = CCPoint(winSize.width * 0.28f, winSize.height * 0.54f);
+            g_botState.playerWinPos = CCPoint(winSize.width * 0.62f, winSize.height * 0.54f);
+            g_botState.positionsInitialized = true;
+        }
+
+        // Верхняя плашка с названием и кнопкой закрытия
+        auto topBar = CCLayerColor::create({ 14, 16, 24, 210 }, 240.f, 20.f);
+        topBar->setPosition({ winSize.width / 2.f - 120.f, winSize.height - 24.f });
+        m_mainLayer->addChild(topBar, 10);
+
+        auto title = CCLabelBMFont::create("lolollbot v1.0.3-beta.1", "bigFont.fnt");
+        title->setScale(0.40f);
+        title->setPosition({ winSize.width / 2.f - 10.f, winSize.height - 14.f });
+        m_mainLayer->addChild(title, 11);
+
+        auto topMenu = CCMenu::create();
+        topMenu->setPosition({ 0.f, 0.f });
+        m_mainLayer->addChild(topMenu, 12);
+
+        auto closeLbl = CCLabelBMFont::create("[X]", "bigFont.fnt");
+        closeLbl->setScale(0.42f);
+        closeLbl->setColor({ 255, 95, 95 });
+        auto closeBtn = CCMenuItemLabel::create(closeLbl, this, menu_selector(LolollBotMenuLayer::onCloseBtn));
+        closeBtn->setPosition({ winSize.width / 2.f + 104.f, winSize.height - 14.f });
+        topMenu->addChild(closeBtn);
+
+        // ====================================================================
+        // ОКНО 1: GLOBAL (перетаскивается мышкой за шапку)
+        // ====================================================================
+        m_globalWin = new MegaHackWindowNode();
+        m_globalWin->initWindow("Global", 178.f, 212.f);
+        m_globalWin->autorelease();
+        m_globalWin->setPosition(g_botState.globalWinPos);
+        m_mainLayer->addChild(m_globalWin, 5);
+
+        m_lblBotMode = addCompactRow(m_globalWin, 0, "Bot: OFF",
+            menu_selector(LolollBotMenuLayer::onCycleBotMode),
+            menu_selector(LolollBotMenuLayer::onOpenBotPopup));
+
+        m_lblFps = addCompactRow(m_globalWin, 1, "FPS Bypass",
+            menu_selector(LolollBotMenuLayer::onToggleFps),
+            menu_selector(LolollBotMenuLayer::onOpenFpsPopup));
+
+        m_lblSpeed = addCompactRow(m_globalWin, 2, "Speedhack",
+            menu_selector(LolollBotMenuLayer::onToggleSpeed),
+            menu_selector(LolollBotMenuLayer::onOpenSpeedPopup));
+
+        m_lblPracFix = addCompactRow(m_globalWin, 3, "Practice Fix",
+            menu_selector(LolollBotMenuLayer::onTogglePracFix));
+
+        m_lblClicks = addCompactRow(m_globalWin, 4, "Click Counter",
+            menu_selector(LolollBotMenuLayer::onToggleClicks));
+
+        m_lbl1stClick = addCompactRow(m_globalWin, 5, "Count 1st Click",
+            menu_selector(LolollBotMenuLayer::onToggle1stClick));
+
+        m_lblUnlockIcons = addCompactRow(m_globalWin, 6, "Unlock All Icons",
+            menu_selector(LolollBotMenuLayer::onToggleUnlockIcons));
+
+        m_lblTheme = addCompactRow(m_globalWin, 7, "Theme: MegaHack",
+            menu_selector(LolollBotMenuLayer::onCycleTheme),
+            menu_selector(LolollBotMenuLayer::onOpenThemePopup));
+
+        m_lblKeybinds = addCompactRow(m_globalWin, 8, "Keybinds",
+            menu_selector(LolollBotMenuLayer::onOpenKeybindsPopup),
+            menu_selector(LolollBotMenuLayer::onOpenKeybindsPopup));
+
+        // ====================================================================
+        // ОКНО 2: PLAYER (перетаскивается мышкой за шапку)
+        // ====================================================================
+        m_playerWin = new MegaHackWindowNode();
+        m_playerWin->initWindow("Player", 178.f, 212.f);
+        m_playerWin->autorelease();
+        m_playerWin->setPosition(g_botState.playerWinPos);
+        m_mainLayer->addChild(m_playerWin, 5);
+
+        m_lblNoclip = addCompactRow(m_playerWin, 0, "Noclip",
+            menu_selector(LolollBotMenuLayer::onToggleNoclip));
+
+        m_lblNoSpikes = addCompactRow(m_playerWin, 1, "No Spikes",
+            menu_selector(LolollBotMenuLayer::onToggleNoSpikes));
+
+        m_lblNoMirror = addCompactRow(m_playerWin, 2, "No Mirror Portal",
+            menu_selector(LolollBotMenuLayer::onToggleNoMirror));
+
+        m_lblNoSolids = addCompactRow(m_playerWin, 3, "No Solids",
+            menu_selector(LolollBotMenuLayer::onToggleNoSolids));
+
+        m_lblTrajectory = addCompactRow(m_playerWin, 4, "Show Trajectory",
+            menu_selector(LolollBotMenuLayer::onToggleTrajectory));
+
+        m_lblJumpHack = addCompactRow(m_playerWin, 5, "Jump Hack",
+            menu_selector(LolollBotMenuLayer::onToggleJumpHack));
+
+        m_lblForceTrail = addCompactRow(m_playerWin, 6, "Force Trail",
+            menu_selector(LolollBotMenuLayer::onToggleForceTrail));
+
+        m_lblNoTrail = addCompactRow(m_playerWin, 7, "No Trail",
+            menu_selector(LolollBotMenuLayer::onToggleNoTrail));
+
+        auto autoCompLbl = CCLabelBMFont::create("> Instant Complete", "chatFont.fnt");
+        autoCompLbl->setScale(0.65f);
+        autoCompLbl->setColor({ 255, 215, 90 });
+        auto autoCompBtn = CCMenuItemLabel::create(autoCompLbl, this, menu_selector(LolollBotMenuLayer::onAutoComplete));
+        autoCompBtn->setAnchorPoint({ 0.f, 0.5f });
+        autoCompBtn->setPosition({ 8.f, m_playerWin->m_height - m_playerWin->m_headerHeight - 12.f - (8 * 20.5f) });
+        m_playerWin->m_menu->addChild(autoCompBtn);
+
+        // ====================================================================
+        // ВЫПАДАЮЩЕЕ МИНИ-ОКНО НАСТРОЕК (ПОП-АП)
+        // ====================================================================
+        m_popupNode = CCNode::create();
+        m_popupNode->setPosition({ winSize.width / 2.f, 48.f });
+        m_mainLayer->addChild(m_popupNode, 20);
+
+        m_popupBg = CCLayerColor::create({ 20, 24, 38, 242 }, 320.f, 66.f);
+        m_popupBg->setPosition({ -160.f, -33.f });
+        m_popupNode->addChild(m_popupBg, 1);
+
+        m_popupTitle = CCLabelBMFont::create("Settings", "bigFont.fnt");
+        m_popupTitle->setScale(0.36f);
+        m_popupTitle->setPosition({ 0.f, 22.f });
+        m_popupNode->addChild(m_popupTitle, 2);
+
+        m_popupValueLabel = CCLabelBMFont::create("", "chatFont.fnt");
+        m_popupValueLabel->setScale(0.70f);
+        m_popupValueLabel->setPosition({ 0.f, 5.f });
+        m_popupNode->addChild(m_popupValueLabel, 2);
+
+        auto popMenu = CCMenu::create();
+        popMenu->setPosition({ 0.f, 0.f });
+        m_popupNode->addChild(popMenu, 3);
+
+        auto minusSpr = ButtonSprite::create("-", "goldFont.fnt", "GJ_button_04.png", 0.52f);
+        auto minusBtn = CCMenuItemSpriteExtra::create(minusSpr, this, menu_selector(LolollBotMenuLayer::onPopupMinus));
+        minusBtn->setPosition({ -126.f, -14.f });
+        popMenu->addChild(minusBtn);
+
+        m_popupToggleBtnSprite = ButtonSprite::create("Action", "goldFont.fnt", "GJ_button_01.png", 0.48f);
+        auto toggleBtn = CCMenuItemSpriteExtra::create(m_popupToggleBtnSprite, this, menu_selector(LolollBotMenuLayer::onPopupMainAction));
+        toggleBtn->setPosition({ -44.f, -14.f });
+        popMenu->addChild(toggleBtn);
+
+        m_popupExtraBtnSprite = ButtonSprite::create("Extra", "goldFont.fnt", "GJ_button_02.png", 0.48f);
+        auto extraBtn = CCMenuItemSpriteExtra::create(m_popupExtraBtnSprite, this, menu_selector(LolollBotMenuLayer::onPopupExtraAction));
+        extraBtn->setPosition({ 48.f, -14.f });
+        popMenu->addChild(extraBtn);
+
+        auto plusSpr = ButtonSprite::create("+", "goldFont.fnt", "GJ_button_04.png", 0.52f);
+        auto plusBtn = CCMenuItemSpriteExtra::create(plusSpr, this, menu_selector(LolollBotMenuLayer::onPopupPlus));
+        plusBtn->setPosition({ 126.f, -14.f });
+        popMenu->addChild(plusBtn);
+
+        // ====================================================================
+        // ПАНЕЛЬ НАСТРОЙКИ KEYBINDS (4 ГОРЯЧИЕ КЛАВИШИ + СБРОС)
+        // ====================================================================
+        m_bindsNode = CCNode::create();
+        m_bindsNode->setPosition({ winSize.width / 2.f, 52.f });
+        m_mainLayer->addChild(m_bindsNode, 21);
+
+        auto bindsBg = CCLayerColor::create({ 18, 22, 34, 245 }, 430.f, 74.f);
+        bindsBg->setPosition({ -215.f, -37.f });
+        m_bindsNode->addChild(bindsBg, 1);
+
+        auto bindsTitle = CCLabelBMFont::create("Keybinds (Click button -> press key | ESC = clear)", "chatFont.fnt");
+        bindsTitle->setScale(0.68f);
+        bindsTitle->setColor({ 160, 215, 255 });
+        bindsTitle->setPosition({ 0.f, 24.f });
+        m_bindsNode->addChild(bindsTitle, 2);
+
+        auto bindsMenu = CCMenu::create();
+        bindsMenu->setPosition({ 0.f, 0.f });
+        m_bindsNode->addChild(bindsMenu, 3);
+
+        m_bindMenuBtnSpr = ButtonSprite::create("Menu: Alt", "goldFont.fnt", "GJ_button_01.png", 0.44f);
+        auto bindMenuBtn = CCMenuItemSpriteExtra::create(m_bindMenuBtnSpr, this, menu_selector(LolollBotMenuLayer::onBindMenuKey));
+        bindMenuBtn->setPosition({ -155.f, -8.f });
+        bindsMenu->addChild(bindMenuBtn);
+
+        m_bindBotBtnSpr = ButtonSprite::create("Bot: None", "goldFont.fnt", "GJ_button_04.png", 0.44f);
+        auto bindBotBtn = CCMenuItemSpriteExtra::create(m_bindBotBtnSpr, this, menu_selector(LolollBotMenuLayer::onBindBotKey));
+        bindBotBtn->setPosition({ -52.f, -8.f });
+        bindsMenu->addChild(bindBotBtn);
+
+        m_bindNoclipBtnSpr = ButtonSprite::create("Noclip: None", "goldFont.fnt", "GJ_button_04.png", 0.44f);
+        auto bindNoclipBtn = CCMenuItemSpriteExtra::create(m_bindNoclipBtnSpr, this, menu_selector(LolollBotMenuLayer::onBindNoclipKey));
+        bindNoclipBtn->setPosition({ 55.f, -8.f });
+        bindsMenu->addChild(bindNoclipBtn);
+
+        m_bindSpeedBtnSpr = ButtonSprite::create("Speed: None", "goldFont.fnt", "GJ_button_04.png", 0.44f);
+        auto bindSpeedBtn = CCMenuItemSpriteExtra::create(m_bindSpeedBtnSpr, this, menu_selector(LolollBotMenuLayer::onBindSpeedKey));
+        bindSpeedBtn->setPosition({ 160.f, -8.f });
+        bindsMenu->addChild(bindSpeedBtn);
+
+        refreshUI();
+        return true;
+    }
+
+    // Перетаскивание окон мышкой за верхнюю шапку
+    bool ccTouchBegan(CCTouch* touch, CCEvent* event) override {
+        CCPoint pos = touch->getLocation();
+        if (m_globalWin && m_globalWin->isHeaderTouched(pos)) {
+            m_draggedWin = m_globalWin;
+            m_dragOffset = ccpSub(m_globalWin->getPosition(), pos);
+            return true;
+        }
+        if (m_playerWin && m_playerWin->isHeaderTouched(pos)) {
+            m_draggedWin = m_playerWin;
+            m_dragOffset = ccpSub(m_playerWin->getPosition(), pos);
+            return true;
+        }
+        return FLAlertLayer::ccTouchBegan(touch, event);
+    }
+
+    void ccTouchMoved(CCTouch* touch, CCEvent* event) override {
+        if (m_draggedWin) {
+            CCPoint newPos = ccpAdd(touch->getLocation(), m_dragOffset);
+            m_draggedWin->setPosition(newPos);
+            if (m_draggedWin == m_globalWin) {
+                g_botState.globalWinPos = newPos;
+            }
+            else if (m_draggedWin == m_playerWin) {
+                g_botState.playerWinPos = newPos;
+            }
+            return;
+        }
+        FLAlertLayer::ccTouchMoved(touch, event);
+    }
+
+    void ccTouchEnded(CCTouch* touch, CCEvent* event) override {
+        if (m_draggedWin) {
+            m_draggedWin = nullptr;
+            return;
+        }
+        FLAlertLayer::ccTouchEnded(touch, event);
+    }
+
+    void keyBackClicked() override {
+        closeMenu();
+    }
+
+public:
+    static void styleToggleLabel(CCLabelBMFont* lbl, bool enabled) {
+        if (!lbl) return;
+        lbl->setColor(enabled ? ccColor3B{ 110, 255, 130 } : ccColor3B{ 225, 228, 235 });
+    }
+
+    void refreshUI() {
+        if (m_globalWin) m_globalWin->applyTheme(g_botState.theme);
+        if (m_playerWin) m_playerWin->applyTheme(g_botState.theme);
+
+        // Global items
+        if (m_lblBotMode) {
+            std::string s = fmt::format("Bot Mode: {}", getBotModeShort());
+            m_lblBotMode->setString(s.c_str());
+            styleToggleLabel(m_lblBotMode, g_botState.mode != BotMode::Off);
+        }
+        if (m_lblFps) {
+            std::string s = g_botState.fpsTpsEnabled
+                ? fmt::format("FPS: {}", g_botState.targetFpsTps)
+                : "FPS Bypass";
+            m_lblFps->setString(s.c_str());
+            styleToggleLabel(m_lblFps, g_botState.fpsTpsEnabled);
+        }
+        if (m_lblSpeed) {
+            std::string s = g_botState.speedhackEnabled
+                ? fmt::format("Speed: {:.2f}x", g_botState.speedhack)
+                : "Speedhack";
+            m_lblSpeed->setString(s.c_str());
+            styleToggleLabel(m_lblSpeed, g_botState.speedhackEnabled);
+        }
+        styleToggleLabel(m_lblPracFix, g_botState.practiceFix);
+        styleToggleLabel(m_lblClicks, g_botState.showClickCounter);
+        styleToggleLabel(m_lbl1stClick, g_botState.countStartClick);
+        styleToggleLabel(m_lblUnlockIcons, g_botState.unlockAllIcons);
+        if (m_lblTheme) {
+            std::string s = fmt::format("Theme: {}", getThemeName());
+            m_lblTheme->setString(s.c_str());
+        }
+        if (m_lblKeybinds) {
+            styleToggleLabel(m_lblKeybinds, g_botState.activePopup == PopupType::KeybindsSettings);
+        }
+
+        // Player items
+        styleToggleLabel(m_lblNoclip, g_botState.noclip);
+        styleToggleLabel(m_lblNoSpikes, g_botState.noSpikes);
+        styleToggleLabel(m_lblNoMirror, g_botState.noMirror);
+        styleToggleLabel(m_lblNoSolids, g_botState.noSolids);
+        styleToggleLabel(m_lblTrajectory, g_botState.showTrajectory);
+        styleToggleLabel(m_lblJumpHack, g_botState.jumpHack);
+        styleToggleLabel(m_lblForceTrail, g_botState.forceTrail);
+        styleToggleLabel(m_lblNoTrail, g_botState.noTrail);
+
+        // Стандартный поп-ап настроек
+        bool showStandardPopup = (g_botState.activePopup != PopupType::None &&
+            g_botState.activePopup != PopupType::KeybindsSettings);
+        if (m_popupNode) {
+            m_popupNode->setVisible(showStandardPopup);
+            if (g_botState.activePopup == PopupType::BotSettings) {
+                m_popupTitle->setString("Bot Replay Settings");
+                std::string val = fmt::format("Mode: {} | Actions: {}", getBotModeShort(), g_botState.replayActions.size());
+                m_popupValueLabel->setString(val.c_str());
+                m_popupToggleBtnSprite->setString("Cycle Mode");
+                m_popupExtraBtnSprite->setString("Save Macro");
+            }
+            else if (g_botState.activePopup == PopupType::FpsSettings) {
+                m_popupTitle->setString("FPS / TPS Bypass (up to 1T)");
+                std::string val = fmt::format("Status: {} | Target: {} FPS",
+                    g_botState.fpsTpsEnabled ? "ON" : "OFF", g_botState.targetFpsTps);
+                m_popupValueLabel->setString(val.c_str());
+                m_popupToggleBtnSprite->setString(g_botState.fpsTpsEnabled ? "Disable" : "Enable");
+                m_popupExtraBtnSprite->setString("x2 FPS");
+            }
+            else if (g_botState.activePopup == PopupType::SpeedSettings) {
+                m_popupTitle->setString("Speedhack & Music Sync");
+                std::string val = fmt::format("Speed: {:.2f}x | Music Sync: {}",
+                    g_botState.speedhack, g_botState.speedhackMusic ? "ON" : "OFF");
+                m_popupValueLabel->setString(val.c_str());
+                m_popupToggleBtnSprite->setString(g_botState.speedhackEnabled ? "Spd: ON" : "Spd: OFF");
+                m_popupExtraBtnSprite->setString(g_botState.speedhackMusic ? "Music: ON" : "Music: OFF");
+            }
+            else if (g_botState.activePopup == PopupType::ThemeSettings) {
+                m_popupTitle->setString("Menu Theme");
+                std::string val = fmt::format("Current Theme: {}", getThemeName());
+                m_popupValueLabel->setString(val.c_str());
+                m_popupToggleBtnSprite->setString("Next Theme");
+                m_popupExtraBtnSprite->setString("Keybinds");
+            }
+        }
+
+        // Окно Keybinds
+        if (m_bindsNode) {
+            m_bindsNode->setVisible(g_botState.activePopup == PopupType::KeybindsSettings);
+            if (m_bindMenuBtnSpr) {
+                std::string s = (g_botState.waitingForBind == KeybindTarget::ToggleMenu)
+                    ? "Menu: [...]"
+                    : fmt::format("Menu: {}", getKeyName(g_botState.toggleKey));
+                m_bindMenuBtnSpr->setString(s.c_str());
+            }
+            if (m_bindBotBtnSpr) {
+                std::string s = (g_botState.waitingForBind == KeybindTarget::CycleBot)
+                    ? "Bot: [...]"
+                    : fmt::format("Bot: {}", getKeyName(g_botState.botKey));
+                m_bindBotBtnSpr->setString(s.c_str());
+            }
+            if (m_bindNoclipBtnSpr) {
+                std::string s = (g_botState.waitingForBind == KeybindTarget::ToggleNoclip)
+                    ? "Noclip: [...]"
+                    : fmt::format("Noclip: {}", getKeyName(g_botState.noclipKey));
+                m_bindNoclipBtnSpr->setString(s.c_str());
+            }
+            if (m_bindSpeedBtnSpr) {
+                std::string s = (g_botState.waitingForBind == KeybindTarget::ToggleSpeedhack)
+                    ? "Speed: [...]"
+                    : fmt::format("Speed: {}", getKeyName(g_botState.speedKey));
+                m_bindSpeedBtnSpr->setString(s.c_str());
+            }
+        }
+    }
+
+    void closeMenu() {
+        g_botState.waitingForBind = KeybindTarget::None;
+        this->removeFromParentAndCleanup(true);
+    }
+
+    void onCloseBtn(CCObject*) { closeMenu(); }
+
+    // Global callbacks
+    void onCycleBotMode(CCObject*) { cycleBotMode(); refreshUI(); }
+    void onToggleFps(CCObject*) { g_botState.fpsTpsEnabled = !g_botState.fpsTpsEnabled; applyFpsTps(); refreshUI(); }
+    void onToggleSpeed(CCObject*) {
+        g_botState.speedhackEnabled = !g_botState.speedhackEnabled;
+        applySpeedhack(g_botState.speedhack);
+        refreshUI();
+    }
+    void onTogglePracFix(CCObject*) { g_botState.practiceFix = !g_botState.practiceFix; refreshUI(); }
+    void onToggleClicks(CCObject*) {
+        g_botState.showClickCounter = !g_botState.showClickCounter;
+        Mod::get()->setSavedValue<bool>("show-click-counter", g_botState.showClickCounter);
+        refreshUI();
+    }
+    void onToggle1stClick(CCObject*) {
+        g_botState.countStartClick = !g_botState.countStartClick;
+        Mod::get()->setSavedValue<bool>("count-start-click", g_botState.countStartClick);
+        refreshUI();
+    }
+    void onToggleUnlockIcons(CCObject*) { g_botState.unlockAllIcons = !g_botState.unlockAllIcons; refreshUI(); }
+    void onCycleTheme(CCObject*) {
+        int next = (static_cast<int>(g_botState.theme) + 1) % 4;
+        g_botState.theme = static_cast<MenuTheme>(next);
+        Mod::get()->setSavedValue<int>("menu-theme", next);
+        refreshUI();
+    }
+
+    // Open Popups
+    void togglePopup(PopupType type) {
+        g_botState.waitingForBind = KeybindTarget::None;
+        g_botState.activePopup = (g_botState.activePopup == type) ? PopupType::None : type;
+        refreshUI();
+    }
+    void onOpenBotPopup(CCObject*) { togglePopup(PopupType::BotSettings); }
+    void onOpenFpsPopup(CCObject*) { togglePopup(PopupType::FpsSettings); }
+    void onOpenSpeedPopup(CCObject*) { togglePopup(PopupType::SpeedSettings); }
+    void onOpenThemePopup(CCObject*) { togglePopup(PopupType::ThemeSettings); }
+    void onOpenKeybindsPopup(CCObject*) { togglePopup(PopupType::KeybindsSettings); }
+
+    // Keybind buttons
+    void onBindMenuKey(CCObject*) { g_botState.waitingForBind = KeybindTarget::ToggleMenu; refreshUI(); }
+    void onBindBotKey(CCObject*) { g_botState.waitingForBind = KeybindTarget::CycleBot; refreshUI(); }
+    void onBindNoclipKey(CCObject*) { g_botState.waitingForBind = KeybindTarget::ToggleNoclip; refreshUI(); }
+    void onBindSpeedKey(CCObject*) { g_botState.waitingForBind = KeybindTarget::ToggleSpeedhack; refreshUI(); }
+
+    // Popup controls
+    void onPopupMinus(CCObject*) {
+        if (g_botState.activePopup == PopupType::FpsSettings) {
+            g_botState.fpsTpsEnabled = true;
+            g_botState.targetFpsTps = std::max<int64_t>(60, g_botState.targetFpsTps - 60);
+            applyFpsTps();
+        }
+        else if (g_botState.activePopup == PopupType::SpeedSettings) {
+            g_botState.speedhackEnabled = true;
+            applySpeedhack(std::max(0.10f, g_botState.speedhack - 0.25f));
+        }
+        refreshUI();
+    }
+
+    void onPopupPlus(CCObject*) {
+        if (g_botState.activePopup == PopupType::FpsSettings) {
+            g_botState.fpsTpsEnabled = true;
+            g_botState.targetFpsTps = std::min<int64_t>(MAX_FPS_TPS, g_botState.targetFpsTps + 60);
+            applyFpsTps();
+        }
+        else if (g_botState.activePopup == PopupType::SpeedSettings) {
+            g_botState.speedhackEnabled = true;
+            applySpeedhack(std::min(3.00f, g_botState.speedhack + 0.25f));
+        }
+        refreshUI();
+    }
+
+    void onPopupMainAction(CCObject*) {
+        if (g_botState.activePopup == PopupType::BotSettings) {
+            cycleBotMode();
+        }
+        else if (g_botState.activePopup == PopupType::FpsSettings) {
+            g_botState.fpsTpsEnabled = !g_botState.fpsTpsEnabled;
+            applyFpsTps();
+        }
+        else if (g_botState.activePopup == PopupType::SpeedSettings) {
+            g_botState.speedhackEnabled = !g_botState.speedhackEnabled;
+            applySpeedhack(g_botState.speedhack);
+        }
+        else if (g_botState.activePopup == PopupType::ThemeSettings) {
+            onCycleTheme(nullptr);
+            return;
+        }
+        refreshUI();
+    }
+
+    void onPopupExtraAction(CCObject*) {
+        if (g_botState.activePopup == PopupType::BotSettings) {
+            saveMacroToSingleFile(g_botState.currentLevelKey);
+        }
+        else if (g_botState.activePopup == PopupType::FpsSettings) {
+            g_botState.fpsTpsEnabled = true;
+            g_botState.targetFpsTps = std::min<int64_t>(MAX_FPS_TPS, g_botState.targetFpsTps * 2);
+            applyFpsTps();
+        }
+        else if (g_botState.activePopup == PopupType::SpeedSettings) {
+            g_botState.speedhackMusic = !g_botState.speedhackMusic;
+            Mod::get()->setSavedValue<bool>("speedhack-music", g_botState.speedhackMusic);
+            syncFmodAudioSpeed();
+        }
+        else if (g_botState.activePopup == PopupType::ThemeSettings) {
+            togglePopup(PopupType::KeybindsSettings);
+            return;
+        }
+        refreshUI();
+    }
+
+    // Player callbacks
+    void onToggleNoclip(CCObject*) { g_botState.noclip = !g_botState.noclip; refreshUI(); }
+    void onToggleNoSpikes(CCObject*) { g_botState.noSpikes = !g_botState.noSpikes; refreshUI(); }
+    void onToggleNoMirror(CCObject*) { g_botState.noMirror = !g_botState.noMirror; refreshUI(); }
+    void onToggleNoSolids(CCObject*) { g_botState.noSolids = !g_botState.noSolids; refreshUI(); }
+    void onToggleTrajectory(CCObject*) { g_botState.showTrajectory = !g_botState.showTrajectory; refreshUI(); }
+    void onToggleJumpHack(CCObject*) { g_botState.jumpHack = !g_botState.jumpHack; refreshUI(); }
+    void onToggleForceTrail(CCObject*) { g_botState.forceTrail = !g_botState.forceTrail; refreshUI(); }
+    void onToggleNoTrail(CCObject*) { g_botState.noTrail = !g_botState.noTrail; refreshUI(); }
+
+    void onAutoComplete(CCObject*) {
+        if (auto pl = PlayLayer::get()) {
+            closeMenu();
+            Loader::get()->queueInMainThread([pl]() {
+                if (PlayLayer::get() == pl && !pl->m_hasCompletedLevel) {
+                    if (pl->m_isPaused) {
+                        pl->resume();
+                    }
+                    bool prevNoclip = g_botState.noclip;
+                    g_botState.noclip = true;
+                    pl->levelComplete();
+                    g_botState.noclip = prevNoclip;
+                }
+                });
+        }
+    }
+
+    static LolollBotMenuLayer* create() {
+        auto ret = new LolollBotMenuLayer();
+        if (ret && ret->init()) {
+            ret->autorelease();
+            return ret;
+        }
+        CC_SAFE_DELETE(ret);
+        return nullptr;
+    }
+};
+
+static LolollBotMenuLayer* getOpenMenu() {
+    auto scene = CCDirector::sharedDirector()->getRunningScene();
+    if (!scene) return nullptr;
+    return typeinfo_cast<LolollBotMenuLayer*>(scene->getChildByID("lolollbot-overlay-menu"_spr));
+}
+
+static void toggleLolollBotMenu() {
+    if (auto existing = getOpenMenu()) {
+        existing->closeMenu();
+        return;
+    }
+
+    if (auto menuLayer = LolollBotMenuLayer::create()) {
+        menuLayer->show();
+    }
+}
+
+// ============================================================================
+// ХУК НА CCDIRECTOR — СТАБИЛЬНЫЙ FPS LIMITER
+// ============================================================================
+class $modify(LolollDirector, CCDirector) {
+    void drawScene() {
+        if (g_botState.fpsTpsEnabled && g_botState.targetFpsTps >= 30) {
+            using clock = std::chrono::high_resolution_clock;
+            auto targetDuration = std::chrono::nanoseconds(1000000000LL / g_botState.targetFpsTps);
+            auto now = clock::now();
+            auto elapsed = now - g_botState.lastFrameTime;
+
+            if (elapsed < targetDuration) {
+                auto remaining = targetDuration - elapsed;
+                if (remaining > std::chrono::milliseconds(2)) {
+                    std::this_thread::sleep_for(remaining - std::chrono::milliseconds(1));
+                }
+                while (clock::now() - g_botState.lastFrameTime < targetDuration) {
+                }
+            }
+            g_botState.lastFrameTime = clock::now();
+        }
+        CCDirector::drawScene();
+    }
+};
+
+// ============================================================================
+// ХУК НА CCSCHEDULER — SPEEDHACK + ПОСТОЯННАЯ СИНХРОНИЗАЦИЯ MUSIC SPEEDHACK
+// ============================================================================
+class $modify(LolollScheduler, CCScheduler) {
+    void update(float dt) {
+        if (PlayLayer::get()) {
+            syncFmodAudioSpeed();
+            float effSpeed = getEffectiveSpeed();
+            if (std::abs(effSpeed - 1.0f) > 0.001f) {
+                dt *= effSpeed;
+            }
+        }
+        CCScheduler::update(dt);
+    }
+};
+
+// ============================================================================
+// ХУК НА КЛАВИАТУРУ (ВСЕ НАСТРАИВАЕМЫЕ КЕЙБИНДЫ)
+// ============================================================================
+class $modify(LolollKeyboardDispatcher, CCKeyboardDispatcher) {
+    bool dispatchKeyboardMSG(enumKeyCodes key, bool isKeyDown, bool isKeyRepeat, double timestamp) {
+        if (isKeyDown && !isKeyRepeat) {
+            enumKeyCodes normKey = normalizeKey(key);
+
+            if (g_botState.waitingForBind != KeybindTarget::None) {
+                if (normKey != KEY_Unknown && normKey != KEY_None) {
+                    enumKeyCodes assigned = (normKey == KEY_Escape) ? KEY_None : normKey;
+                    switch (g_botState.waitingForBind) {
+                    case KeybindTarget::ToggleMenu:
+                        if (assigned != KEY_None) g_botState.toggleKey = assigned;
+                        break;
+                    case KeybindTarget::CycleBot:
+                        g_botState.botKey = assigned;
+                        break;
+                    case KeybindTarget::ToggleNoclip:
+                        g_botState.noclipKey = assigned;
+                        break;
+                    case KeybindTarget::ToggleSpeedhack:
+                        g_botState.speedKey = assigned;
+                        break;
+                    default:
+                        break;
+                    }
+                    saveAllKeybinds();
+                    g_botState.waitingForBind = KeybindTarget::None;
+                    if (auto menu = getOpenMenu()) {
+                        menu->refreshUI();
+                    }
+                }
+                return true;
+            }
+
+            if (g_botState.toggleKey != KEY_None && normKey == normalizeKey(g_botState.toggleKey)) {
+                toggleLolollBotMenu();
+                return true;
+            }
+            if (g_botState.botKey != KEY_None && normKey == normalizeKey(g_botState.botKey)) {
+                cycleBotMode();
+                if (auto menu = getOpenMenu()) menu->refreshUI();
+                return true;
+            }
+            if (g_botState.noclipKey != KEY_None && normKey == normalizeKey(g_botState.noclipKey)) {
+                g_botState.noclip = !g_botState.noclip;
+                if (auto menu = getOpenMenu()) menu->refreshUI();
+                return true;
+            }
+            if (g_botState.speedKey != KEY_None && normKey == normalizeKey(g_botState.speedKey)) {
+                g_botState.speedhackEnabled = !g_botState.speedhackEnabled;
+                applySpeedhack(g_botState.speedhack);
+                if (auto menu = getOpenMenu()) menu->refreshUI();
+                return true;
+            }
+        }
+        return CCKeyboardDispatcher::dispatchKeyboardMSG(key, isKeyDown, isKeyRepeat, timestamp);
+    }
+};
+
+// ============================================================================
+// ХУК НА MENULAYER И PAUSELAYER — КНОПКА LB
+// ============================================================================
+class $modify(LolollMainMenuLayer, MenuLayer) {
+    bool init() {
+        if (!MenuLayer::init()) {
+            return false;
+        }
+
+        auto winSize = CCDirector::sharedDirector()->getWinSize();
+        auto menu = CCMenu::create();
+        menu->setID("lolollbot-main-menu-btn"_spr);
+        menu->setPosition({ 32.f, winSize.height - 32.f });
+
+        auto spr = ButtonSprite::create("LB", "goldFont.fnt", "GJ_button_01.png", 0.6f);
+        auto btn = CCMenuItemSpriteExtra::create(
+            spr, this, menu_selector(LolollMainMenuLayer::onOpenLolollBot)
+        );
+        menu->addChild(btn);
+
+        this->addChild(menu, 100);
+        return true;
+    }
+
+    void onOpenLolollBot(CCObject*) {
+        toggleLolollBotMenu();
+    }
+};
+
+class $modify(LolollPauseLayer, PauseLayer) {
+    void customSetup() {
+        PauseLayer::customSetup();
+
+        auto winSize = CCDirector::sharedDirector()->getWinSize();
+        auto menu = CCMenu::create();
+        menu->setID("lolollbot-pause-corner-menu"_spr);
+        menu->setPosition({ 32.f, winSize.height - 32.f });
+
+        auto openSprite = ButtonSprite::create("LB", "goldFont.fnt", "GJ_button_01.png", 0.6f);
+        auto openBtn = CCMenuItemSpriteExtra::create(
+            openSprite, this, menu_selector(LolollPauseLayer::onOpenLolollBot)
+        );
+        menu->addChild(openBtn);
+
+        this->addChild(menu, 100);
+    }
+
+    void onOpenLolollBot(CCObject*) {
+        toggleLolollBotMenu();
+    }
+};
+
+// ============================================================================
+// ХУК НА PLAYLAYER (ФИКС СЧЁТЧИКА КЛИКОВ И ПОЛНОГО СКРЫТИЯ ПЛАШКИ)
+// ============================================================================
+class $modify(LolollPlayLayer, PlayLayer) {
+    struct Fields {
+        CCLabelBMFont* clickLabel = nullptr;
+    };
+
+    void updateClickCounterUI() {
+        if (!m_fields->clickLabel) return;
+        m_fields->clickLabel->setVisible(g_botState.showClickCounter);
+        if (g_botState.showClickCounter) {
+            std::string txt = fmt::format("Clicks: {}", g_botState.attemptClicks);
+            m_fields->clickLabel->setString(txt.c_str());
+        }
+    }
+
+    bool init(GJGameLevel * level, bool dontCreateObjects) {
+        if (!PlayLayer::init(level, dontCreateObjects)) {
+            return false;
+        }
+
+        g_botState.currentLevelKey = getLevelKey(level);
+        g_botState.replayActions.reserve(65536);
+        loadMacroFromSingleFile(g_botState.currentLevelKey);
+
+        g_botState.currentFrame = 0;
+        g_botState.attemptClicks = 0;
+        g_botState.levelStarted = false;
+        g_botState.playbackCursor = 0;
+        g_botState.checkpoints.clear();
+
+        syncFmodAudioSpeed();
+        if (g_botState.fpsTpsEnabled) {
+            applyFpsTps();
+        }
+
+        auto winSize = CCDirector::sharedDirector()->getWinSize();
+        m_fields->clickLabel = CCLabelBMFont::create("Clicks: 0", "bigFont.fnt");
+        m_fields->clickLabel->setID("lolollbot-click-counter"_spr);
+        m_fields->clickLabel->setScale(0.38f);
+        m_fields->clickLabel->setOpacity(180);
+        m_fields->clickLabel->setAnchorPoint({ 0.f, 1.f });
+        m_fields->clickLabel->setPosition({ 8.f, winSize.height - 6.f });
+        m_fields->clickLabel->setVisible(g_botState.showClickCounter);
+        this->addChild(m_fields->clickLabel, 100);
+
+        return true;
+    }
+
+    void destroyPlayer(PlayerObject * player, GameObject * object) {
+        if (g_botState.noclip) {
+            return;
+        }
+        PlayLayer::destroyPlayer(player, object);
+    }
+
+    void toggleFlipped(bool p0, bool p1) {
+        if (g_botState.noMirror) {
+            return;
+        }
+        PlayLayer::toggleFlipped(p0, p1);
+    }
+
+    void storeCheckpoint(CheckpointObject * checkpoint) {
+        PlayLayer::storeCheckpoint(checkpoint);
+        if (g_botState.practiceFix && this->m_isPracticeMode) {
+            g_botState.checkpoints.push_back({
+                g_botState.currentFrame,
+                g_botState.replayActions.size()
+                });
+        }
+    }
+
+    void removeCheckpoint(bool first) {
+        PlayLayer::removeCheckpoint(first);
+        if (g_botState.practiceFix && !g_botState.checkpoints.empty()) {
+            g_botState.checkpoints.pop_back();
+        }
+    }
+
+    void resetLevel() {
+        PlayLayer::resetLevel();
+        syncFmodAudioSpeed();
+
+        if (g_botState.practiceFix && this->m_isPracticeMode && !g_botState.checkpoints.empty()) {
+            const auto& cp = g_botState.checkpoints.back();
+            g_botState.currentFrame = cp.frame;
+
+            if (g_botState.mode == BotMode::Record && cp.recordedCount <= g_botState.replayActions.size()) {
+                g_botState.replayActions.resize(cp.recordedCount);
+                g_botState.replayActions.push_back({ cp.frame, false, false });
+                g_botState.replayActions.push_back({ cp.frame, false, true });
+            }
+
+            g_botState.playbackCursor = 0;
+            while (
+                g_botState.playbackCursor < g_botState.replayActions.size() &&
+                g_botState.replayActions[g_botState.playbackCursor].frame < g_botState.currentFrame
+                ) {
+                g_botState.playbackCursor++;
+            }
+            updateClickCounterUI();
+            return;
+        }
+
+        g_botState.currentFrame = 0;
+        g_botState.attemptClicks = 0;
+        g_botState.levelStarted = false;
+        g_botState.playbackCursor = 0;
+        g_botState.checkpoints.clear();
+        updateClickCounterUI();
+
+        if (g_botState.mode == BotMode::Record) {
+            g_botState.replayActions.clear();
+        }
+    }
+
+    void startGame() {
+        PlayLayer::startGame();
+        g_botState.levelStarted = true;
+        syncFmodAudioSpeed();
+    }
+
+    void levelComplete() {
+        PlayLayer::levelComplete();
+        if (g_botState.mode == BotMode::Record && !g_botState.replayActions.empty()) {
+            saveMacroToSingleFile(g_botState.currentLevelKey);
+            g_botState.mode = BotMode::Play;
+        }
+    }
+
+    void onQuit() {
+        PlayLayer::onQuit();
+        if (auto fmod = FMODAudioEngine::sharedEngine()) {
+            if (fmod->m_globalChannel) fmod->m_globalChannel->setPitch(1.0f);
+            if (fmod->m_backgroundMusicChannel) fmod->m_backgroundMusicChannel->setPitch(1.0f);
+            if (fmod->m_system) {
+                FMOD::ChannelGroup* masterGroup = nullptr;
+                if (fmod->m_system->getMasterChannelGroup(&masterGroup) == FMOD_OK && masterGroup) {
+                    masterGroup->setPitch(1.0f);
+                }
+            }
+        }
+    }
+
+    void postUpdate(float dt) {
+        PlayLayer::postUpdate(dt);
+
+        if (this->m_player1) {
+            if (g_botState.forceTrail) this->m_player1->activateStreak();
+            if (g_botState.noTrail) this->m_player1->deactivateStreak(true);
+        }
+
+        updateClickCounterUI();
+
+        if (m_hasCompletedLevel || m_isPaused) {
+            return;
+        }
+
+        g_botState.currentFrame++;
+
+        if (g_botState.mode == BotMode::Play) {
+            while (
+                g_botState.playbackCursor < g_botState.replayActions.size() &&
+                g_botState.replayActions[g_botState.playbackCursor].frame <= g_botState.currentFrame
+                ) {
+                const auto& action = g_botState.replayActions[g_botState.playbackCursor];
+                if (action.frame == g_botState.currentFrame) {
+                    auto targetPlayer = action.isPlayer2 ? this->m_player2 : this->m_player1;
+                    if (targetPlayer) {
+                        if (action.isPress) {
+                            targetPlayer->pushButton(PlayerButton::Jump);
+                        }
+                        else {
+                            targetPlayer->releaseButton(PlayerButton::Jump);
+                        }
+                    }
+                }
+                g_botState.playbackCursor++;
+            }
+        }
+    }
+};
+
+// ============================================================================
+// ХУК НА PLAYEROBJECT (НАДЁЖНЫЙ ПОДСЧЁТ КЛИКОВ БЕЗ ПОТЕРЬ)
+// ============================================================================
+class $modify(LolollPlayerObject, PlayerObject) {
+    bool collidedWithObject(float dt, GameObject * object, cocos2d::CCRect rect, bool skipCheck) {
+        if (object) {
+            auto type = object->m_objectType;
+            if ((g_botState.noclip || g_botState.noSpikes) &&
+                (type == GameObjectType::Hazard || type == GameObjectType::AnimatedHazard)) {
+                return false;
+            }
+            if (g_botState.noSolids &&
+                (type == GameObjectType::Solid || type == GameObjectType::Slope)) {
+                return false;
+            }
+        }
+        return PlayerObject::collidedWithObject(dt, object, rect, skipCheck);
+    }
+
+    bool pushButton(PlayerButton button) {
+        if (g_botState.jumpHack && button == PlayerButton::Jump) {
+            this->m_isOnGround = true;
+        }
+
+        auto pl = PlayLayer::get();
+        if (pl && this == pl->m_player1 && button == PlayerButton::Jump && !pl->m_hasCompletedLevel) {
+            if (g_botState.countStartClick || g_botState.levelStarted) {
+                g_botState.attemptClicks++;
+            }
+        }
+
+        if (g_botState.mode == BotMode::Record) {
+            g_botState.replayActions.push_back({
+                g_botState.currentFrame,
+                true,
+                this->m_isSecondPlayer
+                });
+        }
+        return PlayerObject::pushButton(button);
+    }
+
+    bool releaseButton(PlayerButton button) {
+        if (g_botState.mode == BotMode::Record) {
+            g_botState.replayActions.push_back({
+                g_botState.currentFrame,
+                false,
+                this->m_isSecondPlayer
+                });
+        }
+        return PlayerObject::releaseButton(button);
+    }
+};
+
+$on_mod(Loaded) {
+    loadSavedSettings();
+}
+```
+
+`src/main.cpp.bak`:
+
+```bak
+#include <Geode/Geode.hpp>
+#include <Geode/modify/PlayLayer.hpp>
+#include <Geode/modify/PlayerObject.hpp>
+#include <Geode/modify/PauseLayer.hpp>
+#include <Geode/modify/CCKeyboardDispatcher.hpp>
+#include <vector>
+#include <fstream>
+#include <filesystem>
+#include <algorithm>
+
+using namespace geode::prelude;
+
+enum class BotMode {
+    Off = 0,
+    Record = 1,
+    Play = 2
+};
+
+struct BotAction {
+    int frame;
+    bool isPress;
+    bool isPlayer2;
+};
+
+struct CheckpointSnapshot {
+    int frame = 0;
+    size_t recordedCount = 0;
+};
+
+struct LolollBotState {
+    BotMode mode = BotMode::Off;
+    bool noclip = false;
+    bool practiceFix = true;
+    float speedhack = 1.0f;
+
+    int currentFrame = 0;
+    size_t playbackCursor = 0;
+    std::string currentMacroFile;
+
+    std::vector<BotAction> replayActions;
+    std::vector<CheckpointSnapshot> checkpoints;
+};
+
+static LolollBotState g_botState;
+
+static std::filesystem::path getMacrosFolder() {
+    auto folder = Mod::get()->getSaveDir() / "macros";
+    std::error_code ec;
+    if (!std::filesystem::exists(folder, ec)) {
+        std::filesystem::create_directories(folder, ec);
+    }
+    return folder;
+}
+
+static std::filesystem::path getMacroPathForLevel(GJGameLevel* level) {
+    auto folder = getMacrosFolder();
+    int id = level ? level->m_levelID.value() : 0;
+    std::string fileName = (id > 0)
+        ? fmt::format("level_{}.lolbot", id)
+        : fmt::format("local_{}.lolbot", level ? level->m_levelName : "unknown");
+
+    for (char& c : fileName) {
+        if (c == '/' || c == '\\' || c == ':' || c == '*' || c == '?' || c == '"' || c == '<' || c == '>' || c == '|') {
+            c = '_';
+        }
+    }
+    return folder / fileName;
+}
+
+static void saveMacroToDisk(const std::filesystem::path& path) {
+    if (path.empty() || g_botState.replayActions.empty()) {
+        return;
+    }
+    std::ofstream out(path, std::ios::binary | std::ios::trunc);
+    if (!out.is_open()) {
+        return;
+    }
+
+    size_t count = g_botState.replayActions.size();
+    out.write(reinterpret_cast<const char*>(&count), sizeof(count));
+    out.write(reinterpret_cast<const char*>(g_botState.replayActions.data()), count * sizeof(BotAction));
+    out.close();
+}
+
+static void loadMacroFromDisk(const std::filesystem::path& path) {
+    g_botState.replayActions.clear();
+    std::error_code ec;
+    if (path.empty() || !std::filesystem::exists(path, ec)) {
+        return;
+    }
+
+    std::ifstream in(path, std::ios::binary);
+    if (!in.is_open()) {
+        return;
+    }
+
+    size_t count = 0;
+    in.read(reinterpret_cast<char*>(&count), sizeof(count));
+    if (count > 0 && count < 5000000) {
+        g_botState.replayActions.resize(count);
+        in.read(reinterpret_cast<char*>(g_botState.replayActions.data()), count * sizeof(BotAction));
+    }
+    in.close();
+}
+
+static const char* getBotButtonText() {
+    switch (g_botState.mode) {
+        case BotMode::Record:
+            return "Bot: REC";
+        case BotMode::Play:
+            return "Bot: PLAY";
+        default:
+            return "Bot: OFF";
+    }
+}
+
+static std::string getSpeedText() {
+    return fmt::format("Speed: {:.2f}x", g_botState.speedhack);
+}
+
+static void applySpeedhack(float speed) {
+    g_botState.speedhack = speed;
+    CCDirector::sharedDirector()->getScheduler()->setTimeScale(speed);
+}
+
+static void cycleBotMode() {
+    if (g_botState.mode == BotMode::Off) {
+        g_botState.mode = BotMode::Record;
+        g_botState.replayActions.clear();
+        g_botState.checkpoints.clear();
+    } else if (g_botState.mode == BotMode::Record) {
+        g_botState.mode = BotMode::Play;
+        if (!g_botState.currentMacroFile.empty()) {
+            saveMacroToDisk(g_botState.currentMacroFile);
+        }
+    } else {
+        g_botState.mode = BotMode::Off;
+    }
+}
+
+class LolollBotPopup : public geode::Popup<> {
+protected:
+    CCLabelBMFont* m_statusLabel = nullptr;
+    CCLabelBMFont* m_speedLabel = nullptr;
+    ButtonSprite* m_modeBtnSprite = nullptr;
+    ButtonSprite* m_noclipBtnSprite = nullptr;
+    ButtonSprite* m_pracBtnSprite = nullptr;
+
+    bool setup() override {
+        this->setTitle("lolollbot [Beta]");
+        this->setID("lolollbot-main-popup"_spr);
+
+        auto winSize = m_mainLayer->getContentSize();
+
+        m_statusLabel = CCLabelBMFont::create("", "chatFont.fnt");
+        m_statusLabel->setScale(0.75f);
+        m_statusLabel->setPosition({ winSize.width / 2.f, winSize.height - 48.f });
+        m_mainLayer->addChild(m_statusLabel);
+
+        auto menu = CCMenu::create();
+        menu->setPosition({ 0.f, 0.f });
+        m_mainLayer->addChild(menu);
+
+        m_modeBtnSprite = ButtonSprite::create(getBotButtonText(), "goldFont.fnt", "GJ_button_01.png", 0.75f);
+        auto modeBtn = CCMenuItemSpriteExtra::create(
+            m_modeBtnSprite, this, menu_selector(LolollBotPopup::onCycleMode)
+        );
+        modeBtn->setPosition({ winSize.width / 2.f - 78.f, winSize.height - 92.f });
+        menu->addChild(modeBtn);
+
+        auto saveSprite = ButtonSprite::create("Save Macro", "goldFont.fnt", "GJ_button_04.png", 0.75f);
+        auto saveBtn = CCMenuItemSpriteExtra::create(
+            saveSprite, this, menu_selector(LolollBotPopup::onSaveMacro)
+        );
+        saveBtn->setPosition({ winSize.width / 2.f + 78.f, winSize.height - 92.f });
+        menu->addChild(saveBtn);
+
+        m_noclipBtnSprite = ButtonSprite::create("Noclip: OFF", "goldFont.fnt", "GJ_button_04.png", 0.72f);
+        auto noclipBtn = CCMenuItemSpriteExtra::create(
+            m_noclipBtnSprite, this, menu_selector(LolollBotPopup::onToggleNoclip)
+        );
+        noclipBtn->setPosition({ winSize.width / 2.f - 78.f, winSize.height - 134.f });
+        menu->addChild(noclipBtn);
+
+        m_pracBtnSprite = ButtonSprite::create("PracFix: ON", "goldFont.fnt", "GJ_button_04.png", 0.72f);
+        auto pracBtn = CCMenuItemSpriteExtra::create(
+            m_pracBtnSprite, this, menu_selector(LolollBotPopup::onTogglePracticeFix)
+        );
+        pracBtn->setPosition({ winSize.width / 2.f + 78.f, winSize.height - 134.f });
+        menu->addChild(pracBtn);
+
+        auto minusSprite = ButtonSprite::create("-0.25x", "goldFont.fnt", "GJ_button_04.png", 0.65f);
+        auto minusBtn = CCMenuItemSpriteExtra::create(
+            minusSprite, this, menu_selector(LolollBotPopup::onSpeedDown)
+        );
+        minusBtn->setPosition({ winSize.width / 2.f - 95.f, winSize.height - 176.f });
+        menu->addChild(minusBtn);
+
+        m_speedLabel = CCLabelBMFont::create(getSpeedText().c_str(), "goldFont.fnt");
+        m_speedLabel->setScale(0.65f);
+        m_speedLabel->setPosition({ winSize.width / 2.f, winSize.height - 176.f });
+        m_mainLayer->addChild(m_speedLabel);
+
+        auto plusSprite = ButtonSprite::create("+0.25x", "goldFont.fnt", "GJ_button_04.png", 0.65f);
+        auto plusBtn = CCMenuItemSpriteExtra::create(
+            plusSprite, this, menu_selector(LolollBotPopup::onSpeedUp)
+        );
+        plusBtn->setPosition({ winSize.width / 2.f + 95.f, winSize.height - 176.f });
+        menu->addChild(plusBtn);
+
+        auto autoCompleteSprite = ButtonSprite::create("Auto-Complete Level", "goldFont.fnt", "GJ_button_05.png", 0.75f);
+        auto autoCompleteBtn = CCMenuItemSpriteExtra::create(
+            autoCompleteSprite, this, menu_selector(LolollBotPopup::onAutoComplete)
+        );
+        autoCompleteBtn->setPosition({ winSize.width / 2.f, 36.f });
+        menu->addChild(autoCompleteBtn);
+
+        refreshUI();
+        return true;
+    }
+
+    void refreshUI() {
+        if (m_modeBtnSprite) {
+            m_modeBtnSprite->setString(getBotButtonText());
+        }
+        if (m_noclipBtnSprite) {
+            m_noclipBtnSprite->setString(g_botState.noclip ? "Noclip: ON" : "Noclip: OFF");
+        }
+        if (m_pracBtnSprite) {
+            m_pracBtnSprite->setString(g_botState.practiceFix ? "PracFix: ON" : "PracFix: OFF");
+        }
+        if (m_speedLabel) {
+            m_speedLabel->setString(getSpeedText().c_str());
+        }
+        if (m_statusLabel) {
+            std::string info = fmt::format(
+                "Actions: {} | Frame: {} | Folder: macros/",
+                g_botState.replayActions.size(),
+                g_botState.currentFrame
+            );
+            m_statusLabel->setString(info.c_str());
+        }
+    }
+
+    void onCycleMode(CCObject*) {
+        cycleBotMode();
+        refreshUI();
+    }
+
+    void onSaveMacro(CCObject*) {
+        if (!g_botState.currentMacroFile.empty()) {
+            saveMacroToDisk(g_botState.currentMacroFile);
+        }
+        refreshUI();
+    }
+
+    void onToggleNoclip(CCObject*) {
+        g_botState.noclip = !g_botState.noclip;
+        refreshUI();
+    }
+
+    void onTogglePracticeFix(CCObject*) {
+        g_botState.practiceFix = !g_botState.practiceFix;
+        refreshUI();
+    }
+
+    void onSpeedDown(CCObject*) {
+        float next = std::max(0.10f, g_botState.speedhack - 0.25f);
+        applySpeedhack(next);
+        refreshUI();
+    }
+
+    void onSpeedUp(CCObject*) {
+        float next = std::min(3.00f, g_botState.speedhack + 0.25f);
+        applySpeedhack(next);
+        refreshUI();
+    }
+
+    void onAutoComplete(CCObject*) {
+        if (auto playLayer = PlayLayer::get()) {
+            this->onClose(nullptr);
+            playLayer->levelComplete();
+        }
+    }
+
+public:
+    static LolollBotPopup* create() {
+        auto ret = new LolollBotPopup();
+        if (ret && ret->initAnchored(340.f, 240.f)) {
+            ret->autorelease();
+            return ret;
+        }
+        CC_SAFE_DELETE(ret);
+        return nullptr;
+    }
+};
+
+static void toggleLolollBotMenu() {
+    auto scene = CCDirector::sharedDirector()->getRunningScene();
+    if (!scene) {
+        return;
+    }
+
+    if (auto existingPopup = typeinfo_cast<LolollBotPopup*>(scene->getChildByID("lolollbot-main-popup"_spr))) {
+        existingPopup->removeFromParentAndCleanup(true);
+        return;
+    }
+
+    if (auto popup = LolollBotPopup::create()) {
+        popup->show();
+    }
+}
+
+class $modify(LolollKeyboardDispatcher, CCKeyboardDispatcher) {
+    bool dispatchKeyboardMSG(enumKeyCodes key, bool down, bool repeat) {
+        if (down && !repeat && (key == KEY_LeftAlt || key == KEY_RightAlt)) {
+            toggleLolollBotMenu();
+            return true;
+        }
+        return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down, repeat);
+    }
+};
+
+class $modify(LolollPauseLayer, PauseLayer) {
+    void customSetup() {
+        PauseLayer::customSetup();
+
+        auto winSize = CCDirector::sharedDirector()->getWinSize();
+
+        auto menu = CCMenu::create();
+        menu->setID("lolollbot-pause-corner-menu"_spr);
+        menu->setPosition({ 28.f, winSize.height - 28.f });
+
+        auto openSprite = ButtonSprite::create("LB", "goldFont.fnt", "GJ_button_01.png", 0.55f);
+        auto openBtn = CCMenuItemSpriteExtra::create(
+            openSprite, this, menu_selector(LolollPauseLayer::onOpenLolollBot)
+        );
+        openBtn->setID("lolollbot-open-btn"_spr);
+        menu->addChild(openBtn);
+
+        this->addChild(menu, 100);
+    }
+
+    void onOpenLolollBot(CCObject*) {
+        toggleLolollBotMenu();
+    }
+};
+
+class $modify(LolollPlayLayer, PlayLayer) {
+    bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
+        if (!PlayLayer::init(level, useReplay, dontCreateObjects)) {
+            return false;
+        }
+
+        auto macroPath = getMacroPathForLevel(level);
+        g_botState.currentMacroFile = macroPath.string();
+        loadMacroFromDisk(macroPath);
+
+        g_botState.currentFrame = 0;
+        g_botState.playbackCursor = 0;
+        g_botState.checkpoints.clear();
+        applySpeedhack(g_botState.speedhack);
+
+        return true;
+    }
+
+    void destroyPlayer(PlayerObject* player, GameObject* object) {
+        if (g_botState.noclip && object != m_anticheatSpike) {
+            return;
+        }
+        PlayLayer::destroyPlayer(player, object);
+    }
+
+    void storeCheckpoint(CheckpointObject* checkpoint) {
+        PlayLayer::storeCheckpoint(checkpoint);
+        if (g_botState.practiceFix && this->m_isPracticeMode) {
+            g_botState.checkpoints.push_back({
+                g_botState.currentFrame,
+                g_botState.replayActions.size()
+            });
+        }
+    }
+
+    void removeCheckpoint(bool first) {
+        PlayLayer::removeCheckpoint(first);
+        if (g_botState.practiceFix && !g_botState.checkpoints.empty()) {
+            g_botState.checkpoints.pop_back();
+        }
+    }
+
+    void resetLevel() {
+        PlayLayer::resetLevel();
+
+        if (g_botState.practiceFix && this->m_isPracticeMode && !g_botState.checkpoints.empty()) {
+            const auto& cp = g_botState.checkpoints.back();
+            g_botState.currentFrame = cp.frame;
+
+            if (g_botState.mode == BotMode::Record && cp.recordedCount <= g_botState.replayActions.size()) {
+                g_botState.replayActions.resize(cp.recordedCount);
+                g_botState.replayActions.push_back({ cp.frame, false, false });
+                g_botState.replayActions.push_back({ cp.frame, false, true });
+            }
+
+            g_botState.playbackCursor = 0;
+            while (
+                g_botState.playbackCursor < g_botState.replayActions.size() &&
+                g_botState.replayActions[g_botState.playbackCursor].frame < g_botState.currentFrame
+            ) {
+                g_botState.playbackCursor++;
+            }
+            return;
+        }
+
+        g_botState.currentFrame = 0;
+        g_botState.playbackCursor = 0;
+        g_botState.checkpoints.clear();
+
+        if (g_botState.mode == BotMode::Record) {
+            g_botState.replayActions.clear();
+        }
+    }
+
+    void levelComplete() {
+        PlayLayer::levelComplete();
+        if (g_botState.mode == BotMode::Record && !g_botState.replayActions.empty()) {
+            if (!g_botState.currentMacroFile.empty()) {
+                saveMacroToDisk(g_botState.currentMacroFile);
+            }
+            g_botState.mode = BotMode::Play;
+        }
+    }
+
+    void onQuit() {
+        applySpeedhack(1.0f);
+        PlayLayer::onQuit();
+    }
+
+    void postUpdate(float dt) {
+        PlayLayer::postUpdate(dt);
+
+        if (m_hasCompletedLevel || m_isPaused) {
+            return;
+        }
+
+        g_botState.currentFrame++;
+
+        if (g_botState.mode == BotMode::Play) {
+            while (
+                g_botState.playbackCursor < g_botState.replayActions.size() &&
+                g_botState.replayActions[g_botState.playbackCursor].frame <= g_botState.currentFrame
+            ) {
+                const auto& action = g_botState.replayActions[g_botState.playbackCursor];
+                if (action.frame == g_botState.currentFrame) {
+                    if (action.isPress) {
+                        this->pushButton(1, !action.isPlayer2);
+                    } else {
+                        this->releaseButton(1, !action.isPlayer2);
+                    }
+                }
+                g_botState.playbackCursor++;
+            }
+        }
+    }
+};
+
+class $modify(LolollPlayerObject, PlayerObject) {
+    bool pushButton(PlayerButton button) {
+        if (g_botState.mode == BotMode::Record) {
+            g_botState.replayActions.push_back({
+                g_botState.currentFrame,
+                true,
+                this->m_isSecondPlayer
+            });
+        }
+        return PlayerObject::pushButton(button);
+    }
+
+    bool releaseButton(PlayerButton button) {
+        if (g_botState.mode == BotMode::Record) {
+            g_botState.replayActions.push_back({
+                g_botState.currentFrame,
+                false,
+                this->m_isSecondPlayer
+            });
+        }
+        return PlayerObject::releaseButton(button);
+    }
+};
+
+$on_mod(Loaded) {
+    getMacrosFolder();
+}
+
+```
