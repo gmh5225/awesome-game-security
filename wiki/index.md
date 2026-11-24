@@ -4476,6 +4476,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WSA Kernel Build](entities/wsa-kernel-build.md) — Docker-based WSA Linux kernel build environment (x86_64/arm64 cross-compilation; reproducible local/CI builds; custom kernel testing/instrumentation; KiruyaMomochi; Cheat Build WSA Kernel with Docker)
 - [WSA Kernel SU](entities/wsa-kernel-su.md) — kernel module for `/system/xbin/su` on WSA/Android kernels (syscall hooks; credential/SELinux root; optional stealth; LSPosed; Cheat WSA with KernelSU)
 - [WSA Linux Kernel](entities/wsa-linux-kernel.md) — WSA Linux kernel mirror + build automation (stock + KernelSU branches; GitHub Actions x86_64/arm64; reproducible kernel customization; WSA-Community)
+- [WSA Next](entities/wsa-next.md) — AOSP Android 15 images for Microsoft WSA 2407 on Win11 (C++23 installer; Google Play; ARM ndk_translation; Windows Hello–gated stealth root helper `0`; wesmar)
 - [WSAPatch](entities/wsapatch.md) — WSA MSIX patcher for Win10/older Win11 (version-check + Hyper-V bypass; sideload; cinit)
 - [WSA PacMan](entities/wsa-pacman.md) — Flutter/Dart GUI WSA package manager (APK/XAPK sideload, metadata, upgrade/downgrade; alesimula)
 - [wsb-detect](entities/wsb-detect.md) — Windows Sandbox fingerprint C library (LloydLabs; modular process/username/device-path/DNS/registry/timing checks; combinable by false-positive tolerance; anti-analysis / environment-awareness research; Windows Sandbox ("WSB"))
