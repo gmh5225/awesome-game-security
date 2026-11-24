@@ -34,4 +34,4 @@ On-server heuristic + ops tooling on Paper/Folia—beside modular plugins such a
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[bs-anticheat]] · [[h-ac]] · [[grim]] · [[pluginskers-shield]] · [[thorium-minecraft-plugin]] · [[detector-operations]] · [[minecraft-anticheat-list]]
+[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[nexora]] · [[bs-anticheat]] · [[h-ac]] · [[grim]] · [[pluginskers-shield]] · [[thorium-minecraft-plugin]] · [[detector-operations]] · [[minecraft-anticheat-list]]
