@@ -865,6 +865,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/april-ivy/Apwil [Rust Windows gamehacking library, internal & external; process/memory/module/scan/hook/render/syscall/input/window]
 - https://github.com/Omega172/OmegaWare-Framework [Multi-engine internal cheat framework (Unity/Unreal/generic) with D3D11/D3D12 hooking, ImGui UI, feature plugins, and config system]
 - https://github.com/rdbo/libmem [Cross-platform game hacking library (memory, hooking, injection) for C/C++/Rust/Python]
+- https://github.com/qb-0/pymew [Python external cheat library for cross-platform process memory access and a target-attached overlay render loop on Windows and Linux]
 - https://github.com/WangXuan95/Xilinx-FPGA-PCIe-XDMA-Tutorial [DMA Tutorial]
 - https://github.com/NetKingJ/awesome-android-security [Android (Samsung) Security Research References]
 - https://github.com/savagedamage/android-security-wizard [Integrated Android security research corpus (SKILL.md + 20 companions) covering native RE, Frida/Shizuku instrumentation, commercial protector bypass, kernel exploit methodology, and malware triage]
@@ -5007,6 +5008,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [This is the Anti Cheat System for Knight Online Gamesoft vversion](https://github.com/luisfelipe18/GamesoftACS)
 - [User-mode C++ Anti-Cheat written for German Roleplay Server GVMP.de](https://github.com/divodeuxsevres/gvmp-anticheat)
 - https://github.com/ricardoofnl/open.mp-anticheat [Native open.mp C++ component that detects client mods via self-memory reads vs known cheat signatures]
+- https://github.com/AmirrezaJaberi/FIREAC [Free FiveM anti-cheat resource with client and server checks for ESX, QBCore, and standalone servers, plus admin tooling]
 - https://github.com/adem-hosni/AtomicShieldClient [Multi-layered FiveM anti-cheat client with tray agent, manual-map loader, and runtime guards]
 - https://github.com/Dead-Scripts/Dead_antiCheat [FiveM server-side Lua anti-cheat detecting noclip, spectate abuse, fake chat, and blacklisted prop spawns with Discord webhook logging]
 - https://github.com/MitologicoDev/mf_antiesp [Standalone FiveM client resource that conceals occluded players with NetworkConcealPlayer so ESP cheats cannot draw through walls]
