@@ -27,7 +27,7 @@ Gamers and support staff troubleshooting Windows 10/11 launch blocks from anti-c
 
 ## Positioning
 
-Listed under **Anti Cheat** beside platform-trust tooling such as [[sewindows]] and dual-boot Secure Boot helpers such as [[omarchy-boot-manager]] and the Arch/DIY enrollment guide [[arch-linux-secure-boot-guide]].
+Listed under **Anti Cheat** beside platform-trust tooling such as [[sewindows]], tournament pre-play verifiers such as [[kevar-integrity-checker]], and dual-boot Secure Boot helpers such as [[omarchy-boot-manager]] and the Arch/DIY enrollment guide [[arch-linux-secure-boot-guide]].
 
 ## Links
 
@@ -35,4 +35,4 @@ Listed under **Anti Cheat** beside platform-trust tooling such as [[sewindows]] 
 
 ## Related
 
-[[hvci]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[omarchy-boot-manager]]
+[[hvci]] · [[kevar-integrity-checker]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[omarchy-boot-manager]]
