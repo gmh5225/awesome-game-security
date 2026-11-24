@@ -1941,6 +1941,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/long_night
 - https://github.com/gmh5225/IdaThemer
 - https://github.com/PoP-Lin/IDAPro-MuiLs [Modern Windows UI theme plugin for IDA Pro 9.3 with scoped Qt styling, live preview, and persistent appearance settings]
+- https://github.com/shwetsoni/idanime [Twelve anime IDA Pro 9.x color themes plus an IDAPython/PySide6 plugin for background art in disassembly, pseudocode, and graph views]
 
 > IDA Plugins
 - https://github.com/gmh5225/ida-plugins [List of IDA Plugins]
@@ -5602,6 +5603,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 ## Windows Security Features
 - https://github.com/fsquirt/SEWindows [TPM-based verifier for CPU virtualization, IOMMU, Secure Boot, VBS/HVCI, DSE, and vulnerable driver blocklist — local PCR replay and remote attestation]
+- https://github.com/windowsthumbsupsvg/kevar-integrity-checker [Open-source Windows checker for tournament hosts to verify Secure Boot, Kernel DMA Protection, HVCI, and TPM 2.0 before competitive play]
 - https://github.com/CodeMaxx/windows-runtime-attestation-report [C++ sample calling GetRuntimeAttestationReport to dump signed driver and kernel hotpatch attestation reports (VBS/HVCI)]
 - https://github.com/yardenshafir/cet-research [CET]
 - https://github.com/gmh5225/CET-win10 [CET]
