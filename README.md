@@ -5621,6 +5621,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/cinit/WSAPatch [Make WSA run on Windows 10]
 - https://github.com/MustardChef/WSABuilds
 - https://github.com/LSPosed/WSA-Kernel-SU [WSA with KernelSU]
+- https://github.com/wesmar/wsa-next [AOSP Android 15 images for Microsoft WSA 2407 on Windows 11 — C++23 installer, Google Play, ARM64 ndk_translation, root via Windows Hello]
 
 ## Windows Emulator
 - https://github.com/brunodev85/winlator [Android application for running Windows applications with Wine and Box86/Box64]
