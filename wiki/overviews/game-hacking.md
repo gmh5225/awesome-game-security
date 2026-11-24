@@ -108,6 +108,7 @@ sources:
   - wiki/sources/descriptions/S12cybersecurity__FrankensteinAPCInjection.md
   - wiki/sources/descriptions/S12cybersecurity__RWXFinder.md
   - wiki/sources/descriptions/Schich__Lucky-Spark.md
+  - wiki/sources/descriptions/Sasha-cyn__lolollbot.md
   - wiki/sources/descriptions/Saxmason__Interic-Fortnite-External-Cheat.md
   - wiki/sources/descriptions/Saxmason__Subzero-Fortnite-Cheat.md
   - wiki/sources/descriptions/CasualX__apexdream.md
@@ -3051,6 +3052,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Educational AssaultCube internals such as [[simple-ac-internal-cheat]] (C++20; Detours DX hooks / ImGui / ESP / aimbot / offset chains; local learning) illustrate a controlled open-source FPS internal lane. (source: wiki/sources/descriptions/s7shvets7s__simple_ac_internal_cheat.md)
 - Rust Direct2D ESP overlay DLL [[ac-esp]] (jerryshell; i686 injectable `cdylib`; fixed-offset entity reads + world-to-screen boxes for AssaultCube 1.3.0.2; injection notes + overlay unit tests; Cheat / game:assault cube) complements C++ internal samples in the same learning lane. (source: wiki/sources/descriptions/jerryshell__ac-esp.md) (source: wiki/sources/README-categories.md)
 - Geode timing-assist mod [[earlybuffering-gd]] (ToldByNun; shadow-physics early jump buffer for Geometry Dash 2.2081; planner + optional per-level learning; client-side assist / hooking study beside integrity mods such as [[level-hash]]; Cheat / game:geometry dash) (source: wiki/sources/descriptions/ToldByNun__earlybuffering-gd.md) (source: wiki/sources/README-categories.md)
+- Geode macro bot [[lolollbot]] (Sasha-cyn; xDBot-style frame-accurate click record/replay; PlayLayer/PlayerObject hooks; per-level macro persistence + practice checkpoint rewind; overlay with noclip/speedhack/FPS-TPS cheats; client-side spike-death validation interaction study; Cheat / game:geometry dash) (source: wiki/sources/descriptions/Sasha-cyn__lolollbot.md)
 - Educational AssaultCube externals such as [[external-esp-hack-assaultcube]] (gmh5225; GDI overlay; RPM entity boxes / names / health; beginner external ESP) complement that lane with a no-inject overlay path on the same learning title. (source: wiki/sources/descriptions/gmh5225__external-esp-hack-assaultcube.md)
 - Educational AssaultCube externals such as [[voltclient]] (TheHeadphonesAreNeeded; C++; DX11 Dear ImGui transparent overlay; RPM/WPM on `ac_client.exe` v1.3.0.2 offsets; ESP boxes / health bars / tracers / FOV circle + smoothed FOV aimbot; cheat / game:assault cube [External]) extend that lane with a GPU-composited DX11 external beside GDI samples. (source: wiki/sources/descriptions/TheHeadphonesAreNeeded__VoltClient.md)
 - Educational AssaultCube cheat samples such as [[assault-cube-cheat]] (gmh5225; C++; modding / memory analysis; cheat / game:assault cube) extend the same learning-title lane beside internal and external AssaultCube references. (source: wiki/sources/descriptions/gmh5225__AssaultCubeCheat.md)

@@ -10,10 +10,11 @@ sources:
   - wiki/sources/descriptions/Ajitha-2001__aimguard.md
   - wiki/sources/descriptions/multiplayeragent__chompchomp-io.md
   - wiki/sources/descriptions/ToldByNun__earlybuffering-gd.md
+  - wiki/sources/descriptions/Sasha-cyn__lolollbot.md
   - wiki/sources/descriptions/kyzoeth__bitgeist.md
   - wiki/sources/descriptions/DMN-Software__dmn_minigame.md
   - wiki/sources/descriptions/eric-rolph__serverless-time-trial-racing-game.md
-updated: 2026-11-23
+updated: 2026-11-24
 confidence: high
 ---
 
@@ -85,6 +86,8 @@ Browser `.io` reference [[chompchomp-io]] narrows the client protocol to validat
 
 Geode timing-assist mod [[earlybuffering-gd]] holds slightly early jump presses until an internal **shadow physics** tick still classifies release as safe—label emitted jump events **client-reported**; the planner, buffer state machine, and optional per-level learning run entirely on the client with no server corroboration of raw HID timing or shadow-tick decisions. (source: wiki/sources/descriptions/ToldByNun__earlybuffering-gd.md)
 
+Geode macro bot [[lolollbot]] records frame-aligned clicks during record mode and **re-injects** them on playback through PlayLayer/input hooks—label replayed inputs **client-injected**; per-level macro files and practice checkpoint rewinds are entirely local, with no independent timing or HID attestation beside in-game checks such as spike-based death validation. (source: wiki/sources/descriptions/Sasha-cyn__lolollbot.md)
+
 Browser retro speedrun platform [[bitgeist]] ingests **60 Hz run-length-encoded joypad logs** as **client-reported** submit payloads, samples player position and finish state from **emulated Libretro WASM RAM** on the client, and promotes leaderboard acceptance only after a **headless deterministic WASM replay** reproduces movement against game-specific rules (wall climbs, air dashes)—treat verified replay outcomes as **server-derived** integrity evidence, not raw client RAM reads. (source: wiki/sources/descriptions/kyzoeth__bitgeist.md)
 
 Async sim-racing reference [[serverless-time-trial-racing-game]] treats **Ed25519-signed steering/throttle input logs** as **client-reported** evidence, runs the same **400 Hz Box3D WASM** kernel on the native client and on a **Cloudflare Worker** referee, and accepts leaderboard lap times only when replay **state hashes** match and telemetry heuristics pass—label validated lap times **server-derived**, not client finish timestamps. (source: wiki/sources/descriptions/eric-rolph__serverless-time-trial-racing-game.md)
@@ -93,4 +96,4 @@ Embeddable minigame suite [[dmn-minigame]] accepts only **tick-aligned input log
 
 ## Related
 
-[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[chompchomp-io]] · [[earlybuffering-gd]] · [[bitgeist]] · [[serverless-time-trial-racing-game]] · [[dmn-minigame]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[chompchomp-io]] · [[earlybuffering-gd]] · [[lolollbot]] · [[bitgeist]] · [[serverless-time-trial-racing-game]] · [[dmn-minigame]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
