@@ -1108,7 +1108,8 @@ sources:
   - wiki/sources/descriptions/Dezmonius__bodycam-eac-driver-fixes.md
   - wiki/sources/descriptions/eric-rolph__serverless-time-trial-racing-game.md
   - wiki/sources/descriptions/acidvegas__acid-maze.md
-updated: 2026-11-23
+  - wiki/sources/descriptions/kxdrsrt__OdinGuard.md
+updated: 2026-11-24
 confidence: high
 ---
 
@@ -1329,6 +1330,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 - [[betashield]] — C++/Boost client-side AC protection (integrity checking, process monitoring, tamper detection; Boost.Asio networking; cross-platform Boost utilities; open-source AC system lane; JackBro) (source: wiki/sources/descriptions/JackBro__BetaShield.md)
 - [[cheatguard]] — Rust engine-agnostic loaded-module scanner (JSON signature ruleset; weighted signals—known cheat names, suspicious paths, unsigned modules, module-count anomalies; Win32 module enum; deterministic 0–100 CLEAN/SUSPICIOUS/MALICIOUS JSON report; library + CLI; blue-team process-integrity / custom AC forensics; JUS7205) (source: wiki/sources/descriptions/JUS7205__cheatguard.md)
 - [[oblivion-6]] — **Oblivion Hack Shield** client/server MMO anti-cheat (Hansel38; VS C++ client DLL: anti-debug, injection/IAT hooks, overlays, file/signature/self-integrity, cross-process heuristics, anti-suspend; server heartbeat/HWID/ban lists, remote kick/block, Win+Linux builds, obfuscated secrets, logging/deployment helpers; Open Source Anti Cheat System) (source: wiki/sources/descriptions/Hansel38__Oblivion-6.md)
+- [[odinguard]] — modular open-source RO / **rAthena** AC (kxdrsrt; signed 32-bit guard DLL + ijl15 proxy; Studio/`og` CLI profiles; X25519 + XChaCha20-Poly1305 wire encryption, signature packs, server-authoritative honeypots/rate limits/ban waves; Open Source Anti Cheat System / game:ro) (source: wiki/sources/descriptions/kxdrsrt__OdinGuard.md)
 - [[tlac-modern-local-anti-cheat-reunioned]] — lightweight open-source local anti-cheat for Linux (Rust + C eBPF/kernel module + Python ONNX; user-space wildcard memory signature scan, SHA256 self-integrity, HWID bans, Tokio local IPC; optional eBPF tracepoints on open/exec/ptrace/clone; behavioral anomaly detection; MIT-licensed; Steam Deck; TuncorReUnion; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md)
 - [[ausp-3ds-fhg]] — Nintendo 3DS homebrew drop-in C library (SlabyLol; libctru/citro2d/citro3d; process memory-query walk + byte signatures for NTR/3GX/CTRPluginFramework/Luma plugin loaders; no SD/filesystem access; citro2d splash + configurable warning UI/callback/exit; optional Nimbus/Pretendo benign list; Open Source Anti Cheat System / Nintendo 3DS) beside other lightweight in-process signature scanners. (source: wiki/sources/descriptions/SlabyLol__AUSP-3DS-FHG.md)
 - [[vigil]] — Rust eBPF Linux-native anti-cheat (BPF ELF loading, perf events, CLI, client–server distributed monitoring; kernel-level event tracing and threat detection; TOSTcRa; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TOSTcRa__vigil.md)
