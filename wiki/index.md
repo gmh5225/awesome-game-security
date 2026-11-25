@@ -4361,6 +4361,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Voidmaw](entities/voidmaw.md) — VEH + PAGE_GUARD code-hiding (AV/AC page-protection research)
 - [VEN0m-Ransomware](entities/ven0m-ransomware.md) — BYOVD via iMFForceDelete.sys (IObit; AV/EDR evasion)
 - [venom](entities/venom.md) — Linux kernel rootkit hooking (LKM hooks; cheat / linux kernel explorer)
+- [Velox](entities/velox.md) — Rust Xbox Series compatibility layer for Windows (unaltered x86-64 Series PE/DLL; GPU bytecode→DXIL + cache; pluggable GPU/audio/input default D3D12; sandbox + HTTP telemetry; plugin hooks; BCPack/Zlib streaming; preservation/modding/RE; DirectX / Windows Emulator)
 - [veridiff](entities/veridiff.md) — dynamic branch-divergence engine; Frida Stalker dual-trace; Python + Rust identical APIs; LCP basic-block diff + Capstone disassembly; OLLVM CFF resync + warm-up; x86/ARM64 branch classification; license/anti-cheat branch pinpointing (Veridiff; Cheat / Frida / DBI)
 - [vermagic](entities/vermagic.md) — change Linux LKM vermagic / CRCs (cheat / RE tools)
 - [Vesta](entities/vesta.md) — open-source external CS2 cheat (Read1dno; C++23; no inject/kernel driver; RPM + DX11 overlay ESP/chams; aim/trigger; grenade prediction; Lua 5.4 web-radar API; ballistics simulation; cheat / game:cs2 [External])

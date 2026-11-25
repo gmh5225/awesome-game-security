@@ -20,4 +20,4 @@ The workspace covers PE loading, import thunks, GPU command and descriptor handl
 
 ## Related
 
-[[xenia]] · [[nxbox]] · [[overviews/graphics-api]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]
+[[velox]] · [[xenia]] · [[nxbox]] · [[overviews/graphics-api]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]

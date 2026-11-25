@@ -398,6 +398,7 @@ sources:
   - wiki/sources/descriptions/effcol__wiz3D.md
   - wiki/sources/descriptions/ocornut__imgui_test_engine.md
   - wiki/sources/descriptions/zorde23__kyty-gpu-hybrid.md
+  - wiki/sources/descriptions/ajendras__velox.md
   - wiki/sources/descriptions/MESIA-Unified__MESIA-Unified.md
 updated: 2026-11-25
 confidence: high
@@ -546,6 +547,7 @@ Windows documents `SwapBuffers` through GDI; do not assume a similarly named wra
 - QEMU/KVM Windows guest graphics labs such as [[vmlab-win3d]] (VMLabDev; WDDM/Venus stack build/validation; GPU passthrough + virtio/virgl; signed drivers + Mesa OpenGL + D3D12 + Vulkan; Docker/cross-compile packaging; automated D3D9–12/OpenGL/Vulkan acceptance on Win10/11 AMD/NVIDIA hosts including commercial games; fence/DMA/DWM/dmabuf/Secure Boot pinning experiments; isolated full-stack graphics + display-driver study for AC/RE; Windows Emulator) complement in-guest capture/profiler tooling when reproducing WDDM behavior in VMs. (source: wiki/sources/descriptions/VMLabDev__vmlab-win3d.md) Paravirtual stacks such as acceleration3/[[accel-virt]] (extended virtio-gpu-av-pci; guest DXGI/DXGK **avgpu.sys** + D3D9–12/Vulkan/OpenGL/OpenCL usermode drivers with host GPU execution; guest RAM lending; session record/replay and API trace/inspect; overlay-path probes; virtio command-stream fuzz corpora; Win11 QEMU/KVM lab for driver/API capture and layered-device study beside passthrough labs) extend the same VM graphics research lane. (source: wiki/sources/descriptions/acceleration3__accel-virt.md)
 - PS5 guest→host hybrid GPU via [[kyty-gpu-hybrid]] (Kyty fork; guest PM4 command processor + tiling/PSSR paths; host Vulkan renderer from SPIR-V tooling, compute tiler shaders, resource caches; Rust cross-install pipeline-share server; SDL3/ImGui front end—emulator GPU stack study beside full VM labs; not Present-hook overlay research) (source: wiki/sources/descriptions/zorde23__kyty-gpu-hybrid.md)
 - Xbox Series native retail x86-64 title execution on Windows via [[mesia-unified]] (MESIA-Unified; Rust; re-hosted Win32 process—not full-machine emulation; D3D12X/DirectStorage/XAudio/GameInput HLE; title shader→host DXIL with disk cache; PC D3D12 SM6.6/mesh-shader path; PE/thunk/GPU descriptor + format-parser study; optional frame capture/DRED diagnostics; console DXGI/D3D12 compatibility RE—not Present-hook overlay research) (source: wiki/sources/descriptions/MESIA-Unified__MESIA-Unified.md)
+- Series retail PE without full CPU emulation via [[velox]] (ajendras; Rust; unmodified x86-64 PE/DLL in sandboxed controlled process; console GPU bytecode→DXIL + disk cache; pluggable GPU/audio/input backends with D3D12 default; memory isolation/page guards/API whitelist; Axum HTTP FPS/memory telemetry + remote commands; dynamic plugins on frame/input/shader without binary patches; BCPack/Zlib parallel asset streaming; preservation/modding/test harness—not Present-hook overlay research) (source: wiki/sources/descriptions/ajendras__velox.md)
 
 ## Related concepts
 
