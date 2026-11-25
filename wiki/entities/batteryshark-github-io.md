@@ -12,7 +12,7 @@ confidence: medium
 
 Jekyll-powered GitHub Pages site serving as the canonical home for long-form security research and reverse-engineering articles. Coverage spans game hacking, classic PC compatibility patching, Windows internals, hardware dongle and arcade platform teardowns, and practical tooling walkthroughs—often illustrated with embedded Python snippets and IDA-oriented disassembly notes. Posts are organized by fixed topics and multi-part series, including a Masterpiece sequence on consolizing PC games and newer work on kernel debugging with QEMU-GDB and AI security governance. (source: wiki/sources/descriptions/batteryshark__batteryshark.github.io.md)
 
-Long-form writeup archive rather than a runnable tool or curated link index; complements courseware such as [[mytechnotalent-reverse-engineering]], cheatsheets such as [[gamehacking-cheatsheet]], and title-specific RE indexes such as [[game-reversing]].
+Long-form writeup archive rather than a runnable tool or curated link index; complements the same author’s per-game utility collection [[batteryshark-game-hacking]], courseware such as [[mytechnotalent-reverse-engineering]], cheatsheets such as [[gamehacking-cheatsheet]], and title-specific RE indexes such as [[game-reversing]].
 
 ## Notable themes
 
