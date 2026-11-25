@@ -2109,6 +2109,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Duntss/IDA-ZVM-Disassembler [Zeus VM bytecode processor + loader for IDA Pro, from OALabs ZVM]
 - https://github.com/NoneShell/IDAComments [a IDA plugin helps you to manage your IDA Comments]
 - https://github.com/emoose/idaxex [Xbox360/Xenon loader plugin for IDA 9]
+- https://github.com/nico-posada/idagba [IDA Pro 9.1+ loader and plugin for Game Boy Advance ROMs: GBA memory map, I/O register names, startup-to-main flow, BIOS/stub call recovery, and library signatures]
 - https://github.com/Goatman13/ida_vmx128_helper [IDA plugin that corrects misinterpreted VMX128 A-register operands in Xbox 360 (PowerPC Xenon) binaries during disassembly]
 - https://github.com/junron/auto-enum [automatically identify and set enums for standard functions]
 - https://github.com/ViRb3/swift-ida [IDA plugin to aid with Swift reverse engineering]
@@ -4400,6 +4401,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ablanchard-dev/dexcheck [Read-only PC forensics check for Call of Duty / Warzone screen-share vetting. Reads execution and existence traces that survive deletion of the binary and reboots (Prefetch, BAM/DAM, UserAssist, Shimcache, PCA, raw USN journal), plus DMA/PCIe hardware, HWID spoof indicators, kernel driver signatures and Code Integrity refusals. Never writes to the machine. PowerShell 5.1, 40 probes, double-click launcher.]
 - https://github.com/dybeky/custos [Read-only Windows forensic desktop scanner for game-server vetting: prefetch, BAM, registry, DNS cache, and other execution traces matched against known cheat fingerprints, with exportable reports.]
 - https://github.com/Krimziee/SecureBootCheck [Read-only PowerShell diagnostic that explains why Secure Boot or TPM 2.0 blocks kernel anti-cheat titles and gives step-by-step fixes without modifying the system]
+- https://github.com/ab1bas0/ab1bas-gamecheck [Read-only PowerShell crash and anti-cheat diagnostics (FACEIT, Vanguard, EAC, BattlEye): Windows logs, TPM/Secure Boot/HVCI checks; no admin rights or network]
 - https://github.com/arioofarmani/iG-Windows-Tuner [Auditable PowerShell/WPF Windows 11 competitive-gaming tuner with reversible snapshots, security hardening, and per-anti-cheat readiness checks without disabling VBS, TPM, or Defender]
 
 > Stress Testing
@@ -5683,6 +5685,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 ## GameCube/Wii
 - https://github.com/ioncodes/gecko [A cross-platform GameCube/Wii emulator and debugger written in Rust]
+- https://github.com/simplysanatori/gc-wii-game-fixes [Curated Dolphin catalog of widescreen patches, AR/cheat codes, game INI tweaks, Riivolution mods, and texture packs for GameCube and Wii (links only, no rehosting)]
 
 ## Nintendo 3DS
 - https://github.com/Hydr8gon/3Beans [Low-level (LLE) 3DS emulator: full OS boot, boot9/boot11/nand dumps, software/hardware GPU rendering]
