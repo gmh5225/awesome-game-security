@@ -1,0 +1,4441 @@
+Project Path: arc_IntaktoFT_IntaktoFT_yevflqx8
+
+Source Tree:
+
+```txt
+arc_IntaktoFT_IntaktoFT_yevflqx8
+├── CHANGELOG.md
+├── LICENSE
+├── NOTICE
+├── README.md
+├── SECURITY.md
+├── TEST_RESULTS.md
+├── build.gradle.kts
+├── docs
+│   ├── checks
+│   │   ├── README.md
+│   │   ├── app-integrity.md
+│   │   └── instrumentation.md
+│   ├── guides
+│   │   ├── build.md
+│   │   └── integration.md
+│   └── release-notes
+│       └── v0.3.1.md
+├── gradle
+│   ├── libs.versions.toml
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── jitpack.yml
+├── native
+│   ├── CMakeLists.txt
+│   └── android
+│       ├── common.cpp
+│       ├── common.h
+│       ├── got_plt.cpp
+│       ├── got_plt.h
+│       ├── hook_bytes.cpp
+│       ├── hook_bytes.h
+│       ├── hook_dest.cpp
+│       ├── hook_dest.h
+│       ├── jni_bridge.cpp
+│       ├── memory_libs.cpp
+│       ├── memory_libs.h
+│       ├── opcode_scan.cpp
+│       ├── opcode_scan.h
+│       ├── root_path.cpp
+│       ├── root_path.h
+│       ├── tamper_scan.cpp
+│       ├── tamper_scan.h
+│       ├── uprobe_scan.cpp
+│       └── uprobe_scan.h
+├── sdk
+│   ├── build.gradle.kts
+│   ├── consumer-rules.pro
+│   └── src
+│       ├── main
+│       │   ├── AndroidManifest.xml
+│       │   └── kotlin
+│       │       └── io
+│       │           └── github
+│       │               └── areyougarou
+│       │                   └── intakto
+│       │                       ├── ApkSignature.kt
+│       │                       ├── CloneProbe.kt
+│       │                       ├── Intakto.kt
+│       │                       ├── IntaktoInitProvider.kt
+│       │                       ├── NativeCore.kt
+│       │                       ├── Probe.kt
+│       │                       └── TamperProbe.kt
+│       └── test
+│           └── kotlin
+│               └── io
+│                   └── github
+│                       └── areyougarou
+│                           └── intakto
+│                               └── JvmCheckTest.kt
+├── settings.gradle.kts
+└── unity
+    ├── Editor
+    │   ├── IntaktoFTDependencies.xml
+    │   └── IntaktoFTDependencies.xml.meta
+    ├── Editor.meta
+    ├── README.md
+    ├── README.md.meta
+    ├── Runtime
+    │   ├── Intakto.cs
+    │   ├── Intakto.cs.meta
+    │   ├── IntaktoFT.asmdef
+    │   └── IntaktoFT.asmdef.meta
+    ├── Runtime.meta
+    ├── package.json
+    └── package.json.meta
+
+```
+
+`CHANGELOG.md`:
+
+```md
+# Changelog
+
+All notable changes to the free tier. The public interface is still settling, so this
+tracks it as it moves. Dates are ISO (year-month-day).
+
+## 0.3.1 (2026-11-25)
+
+### Changed
+- The automatic start runs after `Application.onCreate`: it is posted to the main thread. SDKs
+  your app sets up there (hook libraries, crash handlers) are in place before the checks read
+  memory. With ByteHook, ShadowHook and Sentry in the app, `GOT_PLT_INTEGRITY` read INCONCLUSIVE in
+  1 to 7 of 20 cold starts before, and in none after.
+- `UPROBE_RESIDUE` reads only IntaktoFT's own code and libc's, as
+  [the instrumentation checks page](docs/checks/instrumentation.md) says. It read all of the app's
+  native code, so its time grew with the app.
+
+### Fixed
+- `OPCODE_TRAMPOLINE` catches hooks that jump through a register with `RET` (`LDR` or `ADRP`, then
+  `RET Xn`), the shape Frida 17.27.4's Gadget and FreeDaah write when their code sits far from the
+  hooked function. It read CLEAN on them.
+- A thread that loads and unloads libraries nonstop no longer stalls the run. Libraries are found
+  in the memory map instead of through the loader, which holds a lock while it loads.
+- A region or call target that another thread unmapped after the run read the memory map is
+  judged by a fresh map, not counted as suspect.
+- `GOT_PLT_INTEGRITY` takes 0.6 to 2.8 ms per run instead of 16 to 25 ms (Pixel 3a, Pixel 6,
+  Nothing Phone 2a).
+
+### Docs
+- Corrected the 0.2.0 entry on `CLV_PKGNAME_MISMATCH`: with no build-time package name it reads
+  INCONCLUSIVE, as it shipped.
+
+## 0.3.0 (2026-11-15)
+
+### Breaking
+- The repository moved to `github.com/IntaktoFT/IntaktoFT`, so the JitPack coordinate is now
+  `com.github.IntaktoFT:IntaktoFT:v0.3.0`. GitHub redirects the old address.
+- IntaktoFT never closes the app. It hands the result to your code, which decides what a catch
+  means. `Mode` (`BLOCK`, `REPORT`) is removed with the "Security check" notice screen
+  (`NoticeActivity`) and its manifest entry.
+- `Verdict` (`PASS`, `BLOCK`) is removed. `Report.verdict` is now a `Status`: DETECTED if any
+  signal is DETECTED, else INCONCLUSIVE if any signal is INCONCLUSIVE, else CLEAN. A run with a
+  check that could not answer no longer reads PASS.
+- `Report.enforced` is renamed `Report.detected`. It still holds the DETECTED signals.
+- `check(context, mode, onResult)` is now `check(context, onResult)`. It hands you the latest
+  finished result; a call made before the first run ends waits for that run.
+
+### Added
+- The checks start by themselves when the app's main process starts, through a `ContentProvider`
+  in the library's manifest (`IntaktoInitProvider`). No `Application` class or manifest change is
+  needed. To turn it off, remove the provider with `tools:node="remove"`; the first `check()` call
+  then starts the run. Other processes of the app start their run on their first `check()` call.
+- `Intakto.recheck(context, onResult)` runs the checks again and hands you the new result, for
+  moments such as login or payment.
+- Unity package (`unity/`, installed from `https://github.com/IntaktoFT/IntaktoFT.git?path=unity`):
+  `Intakto.Check(onResult)` and `Intakto.Recheck(onResult)` from C#.
+
+### Changed
+- `Report.elapsedMs` is the run's own time, from its start to its last check, so a cached result
+  keeps the time of the run that made it.
+
+## 0.2.1 (2026-10-31)
+
+### Changed
+- `Intakto.check` is now callable from Java the same way as from Kotlin: `Intakto.check(this)`. Added
+  `@JvmStatic` and `@JvmOverloads`, so Java sees a static method and the optional `mode`/`onResult`
+  arguments. The result callback is now a `ReportCallback` single-method interface instead of a Kotlin
+  function type, so a Java lambda needs no `Unit.INSTANCE`. Kotlin callers are unaffected.
+- The library is built for Java 11 instead of Java 17, so projects set to Java 11 compatibility
+  (including Android Studio's default new-project settings) can use it. The library is pure Kotlin and
+  uses no Java 17 API, so only the class-file version changed.
+
+### Docs
+- Rewrote the integration guide: a from-scratch setup (the `Application` class and the manifest
+  `android:name`, with a note that a missing `android:name` makes the check silently never run),
+  version-catalog and Groovy dependency forms, a default-mode callback example, an API table, and a
+  note that x86 emulators run 8 of the 12 checks.
+- Added `TEST_RESULTS.md` and pointed the README and integration-guide results links at it.
+- Corrected three 0.2.0 entries below that did not match the shipped behaviour: the `Mode.BLOCK`
+  notice, the native-library packaging (all four chips ship as normal `jni/` libraries), and the
+  `CHECK_STALLED`/`CHECK_FAILED` status (INCONCLUSIVE, which never closes the app).
+
+## 0.2.0 (2026-10-31)
+
+### Breaking
+- The library is renamed from BlackHex to Intakto. The entry object `BlackHex` is now `Intakto`,
+  and the native library file is `libintakto.so`. The GitHub repository is now
+  `areyougarou/IntaktoFT`; the old addresses redirect. Install through JitPack:
+  `com.github.areyougarou:IntaktoFT:v0.2.0`.
+- The code package is renamed from `rasp.sdk` to `io.github.areyougarou.intakto`. Update your imports.
+- `Signal.category` and `Signal.severity` (free-text strings) are removed. Use `Signal.group`
+  (`APP_INTEGRITY`, `INSTRUMENTATION`).
+- The free tier now answers two questions only: were the app files changed, and is running code
+  hooked. Every `ROOT_*`, `EMU_*` and `CROM_*` check is removed with its group: honest users have
+  rooted phones, emulators and custom systems, so these are not grounds to stop an app.
+- `Policy` and its per-group toggles are removed. One setting replaces them: `Mode.BLOCK` (the
+  default: Intakto stops the app on any DETECTED signal) or `Mode.REPORT` (Intakto never stops
+  the app and hands the report to the callback).
+- `check(context, mode, onResult)` returns at once and delivers the report on the main thread. The
+  mode and the callback are optional, so the whole setup is `Intakto.check(this)`. The blocking
+  `val report = BlackHex.check(context, policy)` is removed.
+- `BlackHex.baseline { }` is removed with every value in it (`packageName`, `resources`,
+  `nativeLib`, `dexCrc`, `signers`). There is nothing to paste or configure.
+- `Signal.certainty` is removed. A check that cannot get an answer reads INCONCLUSIVE, with details
+  starting `could not verify`, and never closes the app. Only a DETECTED signal makes the verdict BLOCK.
+- Checks removed: `TAMPER_NATIVELIB`, `TAMPER_RESOURCES`, `CLV_DEX_CRC` (they needed pasted
+  build-time values and could not match a Play install); `TAMPER_SIGNER` and
+  `CLV_SIGCERT_MISMATCH` (they needed a pasted signer); `CLV_CGROUP_UID_MISMATCH`,
+  `CLV_AM_SINGLETON_PROXY`, `CLV_MAPS_ENGINE_STRING`, `ELF_IN_ANON`, `MAPS_INTEGRITY` and
+  `ART_ENTRYPOINT_INTEGRITY` (honest phones can show them); `NAMED_LINKER_EXPORTS` (it matched only
+  five fixed Frida function names).
+- `HOOK_BYTES_DIRECT` and `HOOK_BYTES_MEM` are merged into `HOOK_BYTES`.
+
+### Added
+- `FRIDA_AGENT_IN_MEMORY`: flags a library loaded from memory (anonymous memory or a memfd) whose own
+  export table holds `frida_agent_main`, the entry point of Frida's agent, which is how frida-server
+  loads it. It replaces the removed `ELF_IN_ANON`, which flagged any library in that memory and
+  so could fire on honest apps that unpack their own libraries there (packers, anti-cheat).
+- `DISGUISED_LIBRARY_IN_MEMORY`: flags a library loaded from a memfd named as the system's own memory
+  (ART's `jit-cache`, `dalvik`, and the like), which never holds a library. Frida builds that rename the
+  agent's entry, so `FRIDA_AGENT_IN_MEMORY` misses them, hide their agent this way (Florida and its
+  builds, Rusda, strongR-frida, phantom-frida, FreeDaah).
+- Zero-paste setup. The package name is read from a manifest value Android fills in at build
+  time, and the signer from Android, so the developer configures nothing.
+- `Mode.BLOCK` shows a short "Security check" notice naming what was detected, then stops the app when
+  the user dismisses it: it closes the app's tasks (which removes them from the recent-apps list) and
+  ends its process.
+- `TAMPER_APK_CONTENT`: verifies each installed APK file (base and every split) against the
+  signature block inside that file, and against the signer Android reports. It finds the real
+  base.apk from the process memory map and reads it below the Java layer, so a tool that points
+  the app at a clean copy does not fool it.
+- `TAMPER_PUBLIC_KEY`: flags an app signed with a key anyone can download, the public AOSP test
+  keys and the keys that ship inside common re-signing tools, matched by exact SHA-256.
+- One package carries native code for all four chip types (arm64-v8a, armeabi-v7a, x86_64, x86), each
+  shipped as a normal `jni/<abi>/libintakto.so` library. A check built for one chip type is left out of
+  the report on the others.
+- `CHECK_STALLED` and `CHECK_FAILED`: a run that made no progress for 5 s, or that could not run. Both
+  read INCONCLUSIVE, so on their own they never close the app; only a DETECTED signal does.
+- An app that Google Play installs while it downloads (Android 12 and later) is checked once the
+  download finishes. The 5 s stall limit does not count while it waits.
+
+### Changed
+- One run happens at a time. Calls made during a run share it, and each keeps its own mode.
+- `TAMPER_SIGNING_BLOCK` and `TAMPER_APK_CONTENT` accept the file when any of its v2, v3 or v3.1
+  signing entries carries a signer Android reports, so a key-rotated app is not flagged after an
+  Android upgrade. Both are left out for an app that ships inside the system image.
+- `TAMPER_PUBLIC_KEY` is reported on debuggable builds too.
+- `CLV_PKGNAME_MISMATCH` reads INCONCLUSIVE, instead of disappearing, when the build-time package name
+  is missing from the manifest.
+- The APK files are hashed again in every new app process; nothing is cached across app starts.
+- Fixed APK and device facts are read once per process and reused.
+- Repackaging-tool markers are matched by file name inside any folder, and read from the real APK
+  below the Java layer, so App Cloner and LSPatch are caught where the old match missed them.
+- `LIB_FROM_ROOT_PATH` no longer counts every root module loaded into the app, because Zygisk loaders
+  such as ReZygisk load every enabled module into every app. A module counts only if it is LSPosed,
+  Vector or ZygiskFrida, which unload themselves from every app they do not hook. Code from
+  `/data/local/tmp`, or from `/data/adb` outside the modules folder, still reads DETECTED.
+- `HOOK_BYTES`, `OPCODE_TRAMPOLINE` and `GOT_PLT_INTEGRITY` read INCONCLUSIVE, not DETECTED, for a
+  hook they cannot follow to any library: it proves a hook, not who placed it. A hook that lands in
+  a library outside the app's install folder still reads DETECTED.
+
+### Fixed
+- The hook checks follow a jump into a library's padding. The kernel's page-size compat shows that
+  padding as its own `---p [page size compat]` line whatever its real access, and ShadowHook writes
+  its jump there in libc on the Nothing Phone 2a, so an honest ShadowHook app was closed there.
+- A crafted signing block could crash the native parser on 32-bit ARM or make it loop forever.
+- The ZIP end record is found the way Android finds it, so a fake one inside the ZIP comment is
+  ignored.
+- The APK file checks read only files in the folders Android installs apps into, so an
+  app-writable copy is never used.
+- Memory checks now work in release builds. They read the app's own memory through a pipe, so a
+  whole family of checks that silently read nothing on shipped builds now runs.
+- A native check that cannot read the process memory map reports `could not verify`, instead of a
+  false CLEAN.
+- `HOOK_BYTES` and `OPCODE_TRAMPOLINE` compare a suspected jump against the same bytes in the
+  library file on disk, so a jump that ships in the original library is not reported.
+- Memory-map paths are kept in full.
+- The native library is linked for 16 KB memory pages. A failed native load reports `NATIVE_CORE`
+  instead of crashing the app, and the next call tries the load, and the APK file check, again.
+
+### Security of the build
+- Reproducible native build: build-machine paths are mapped out of the build id, so the same source
+  produces a byte-identical library (on a Linux x86-64 host).
+
+```
+
+`LICENSE`:
+
+```
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or Derivative
+          Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright 2026 areyougarou
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+```
+
+`NOTICE`:
+
+```
+IntaktoFT
+Copyright 2026 areyougarou
+
+This product includes software developed by areyougarou.
+Based on IntaktoFT (https://github.com/IntaktoFT/IntaktoFT).
+
+Licensed under the Apache License, Version 2.0. See the LICENSE file.
+
+```
+
+`README.md`:
+
+```md
+> [!IMPORTANT]
+> **Why IntaktoFT?**
+>
+> Protecting your app doesn't have to be a nightmare.
+>
+> Every day, a new adblock gets released, a new cheat, a new Frida method. All free and open source.
+> Meanwhile, cybersecurity giants gatekeep protection behind absurd prices.
+>
+> The only options for indie developers are to lose to attackers, or to shrink their margins.
+>
+> Unfair? I agree.
+>
+> This is why we're releasing IntaktoFT.
+
+## ~ IntaktoFT
+
+Free Android RASP (runtime application self-protection) library. The free tier is open source.\
+It answers two questions: were your app's files changed (repackaging), and is someone hooking the running code (instrumentation)?\
+It hands the answer to your code. It never closes your app.
+
+## ~ What it offers and will never change
+
+1. **It doesn't collect data**
+
+   Sending data to third parties requires you to fill in the Google Play data form, provide privacy contracts, ask for your users' permission...\
+   We don't collect data, so none of that headache.
+2. **Effortless setup**
+
+   Add one dependency line, and the checks start with your app.\
+   One call, `Intakto.check(this) { report -> ... }`, hands you the answer.\
+   No API key, no dashboard, no sign-up. Everything IntaktoFT needs is already inside your APK.
+3. **Riskless**
+
+   We use checks that produce zero false positives, crashes or slowdown.\
+   Every check is tested across devices, Android versions and app types ([where we test it](#tested-on)).\
+   If a check fires, someone is trying to harm your app.
+4. **Free**
+
+   Apache 2.0, commercial apps included, no account, no device limit.
+
+
+## ~ Who is this for
+- **Indie developers** who want anti-mod and tamper detection without a sales call or a server bill.
+- **Game studios** losing money to cheats and to paid content unlocked for free.
+- **Free, ad-supported apps** whose only income is the ads a modded copy strips out.
+
+
+## ~ Why is it open source? Can't the attackers break into it?
+The free tier is transparent and accessible, so that you can see what gets added to your app.\
+But for the attacker knowing the defense is not enough, they need actual efforts and knowledge to break into it. And some of the checks are not easy to fool.\
+Multiple apps who adopted IntaktoFT reported us that, even with the open sourced version, they noticed a visible reduction in offensive behavior.\
+The paid tier is closed and obfuscated and is aimed at fighting profitable frauds and mass attacks. Not information you need, but the shareholders forced me to state it loud and clear.
+
+
+## ~ Why no root, emulator or VPN checks?
+Because most users who have them are not harmful. You'd end up losing real traffic witch-hunting a weak signal.\
+Those checks are a liability, not a feature.\
+Instead we only look for repackaging and instrumentation: attacks beyond any reasonable doubt.
+
+
+## ~ How is IntaktoFT different from other free RASPs?
+Other free RASPs collect data from your users' phones. Their root and hook checks have flagged genuine users.\
+IntaktoFT flags only users who are actively harming your app, from values that prove instrumentation or repackaging. We don't chase weak signals or witch-hunt real users.\
+A specialist beats a generalist. Google won by showing only results. Facing third-stage lung cancer, you would pick the oncologist who treats exactly that.\
+So IntaktoFT stays narrow on purpose: zero false positives, retested against every new release of the tools below, and nothing sent anywhere.
+
+
+## ~ What IntaktoFT catches
+
+**To validate IntaktoFT, we measured it against all available off-the-shelf tools an attacker can use to break into your app.**
+
+Most tools not listed here are forks or wrappers of the same engines: Frida, Xposed-style frameworks such as LSPosed, and repackagers such as LSPatch.
+
+| Tool | Engine it runs | Check that catches it | How |
+|---|---|---|---|
+| frida-server 17.23.3 | Frida 17.23.3 agent | `FRIDA_AGENT_IN_MEMORY` | its agent, loaded from memory, exports `frida_agent_main` |
+| frida-inject 17.23.3 | Frida 17.23.3 agent | `FRIDA_AGENT_IN_MEMORY` | same |
+| StealthFrida 1.0 | Frida 17.8.2 agent | `FRIDA_AGENT_IN_MEMORY` | same |
+| Morphida 17.24.3 | Frida 17.24.3 agent | `FRIDA_AGENT_IN_MEMORY` | same |
+| Florida 17.9.1 | Frida 17.9.1 agent | `DISGUISED_LIBRARY_IN_MEMORY` | its agent sits in a memfd named `jit-cache` |
+| florida-zygisk 17.24.3 | Frida 17.24.3 agent | `DISGUISED_LIBRARY_IN_MEMORY` | same |
+| MagiskHluda 17.6.2 | Frida 17.6.2 agent | `DISGUISED_LIBRARY_IN_MEMORY` | same |
+| Rusda 17.23.1 | Frida 17.23.1 agent | `DISGUISED_LIBRARY_IN_MEMORY` | same |
+| strongR-frida 16.5.6 | Frida 16.5.6 agent | `DISGUISED_LIBRARY_IN_MEMORY` | same |
+| FreeDaah 17.19.0 | Frida 17.19.0 agent | `DISGUISED_LIBRARY_IN_MEMORY` | same |
+| phantom-frida 17.16.4 | Frida 17.16.4 agent | `DISGUISED_LIBRARY_IN_MEMORY` | its agent sits in a memfd named `jit-code-cache` |
+| Frida Gadget 17.23.3, added to the APK | Frida 17.23.3 gadget | `OPCODE_TRAMPOLINE` | when it hooks a watched system function: a jump at the function's start that the file on disk does not have |
+| ReShift 1.2.1 | Frida 17.27.4 gadget | `OPCODE_TRAMPOLINE` | same |
+| ZygiskFrida 1.9.0 | Frida gadget | `LIB_FROM_ROOT_PATH` | its loader runs from its root module folder |
+| LSPosed (Vector) | Xposed-style framework | `LIB_FROM_ROOT_PATH` | its loader runs from its own root module folder, which it loads only into the apps it targets |
+| LSPatch | repackager | `TAMPER_PUBLIC_KEY` and `TAMPER_REPACKAGER`; at signature-bypass level 1 or 2 also `TAMPER_APK_CONTENT` and `TAMPER_SIGNING_BLOCK` | the rebuilt APK no longer matches the signer Android has on file, and it carries LSPatch's own files |
+
+Every result, with the phone and Android build it ran on: [test results](TEST_RESULTS.md).\
+After implementing IntaktoFT, attacking your app will only be possible through custom work, which considerably raises the attacker's entry barrier and cost.
+
+
+## ~ Get started
+
+IntaktoFT needs `minSdk 26` (Android 8.0) or higher. Add JitPack and the library:
+
+```kotlin
+// settings.gradle.kts, inside dependencyResolutionManagement { repositories { ... } }
+maven { url = uri("https://jitpack.io") }
+
+// app/build.gradle.kts, inside dependencies { ... }
+implementation("com.github.IntaktoFT:IntaktoFT:v0.3.1")
+```
+
+The checks start by themselves when your app starts. Read the answer from any Activity:
+
+```kotlin
+Intakto.check(this) { report ->
+    if (report.verdict == Status.DETECTED) {
+        // your call: log it, tell your server, or close the app
+    }
+}
+```
+
+- [Integration guide](docs/guides/integration.md): reading the result, apps with several processes, turning off the automatic start, and cost.
+- [Unity guide](unity/README.md): add IntaktoFT to a Unity game and call it from C#.
+- [Build from source](docs/guides/build.md).
+
+
+<a id="tested-on"></a>
+## ~ Where we test it
+
+Our main goal during production was to aim for 0% disruption caused to real users (false positives, crashes, slowdowns, issues of any kind).\
+To achieve that, IntaktoFT has been (and keeps on being) tested on a vast number of devices: Android 10 to 17, all major phone manufacturers, custom ROMs, all app types.\
+We allowed honest debugging apps that ship their own hooking SDKs, such as ShadowHook and ByteHook, so you can add IntaktoFT next to the SDKs you already use.\
+The result is zero false positives. Like a spam filter that never buries a genuine email, IntaktoFT never flags a genuine user.
+
+
+## ~ Who is this not for
+Apps suffering fake accounts, bonus abuse, referral farming, automation and MITM.\
+These issues mostly affect fintech, crypto, web3, social media, dating, online gambling and betting, e-commerce and marketplaces, ticketing and resale, streaming, gig and delivery, loyalty and rewards programs, MMORPGs and competitive games.\
+Even though IntaktoFT still visibly reduces these attack classes (mostly performed through instrumentation), a more specialized and protected solution is suggested.\
+If you're among these, the Intakto paid tier is built for you: a separate, closed product. No paid code lives in this repo.
+
+
+## ~ What it checks for
+
+- [How to read a result](docs/checks/README.md): CLEAN, DETECTED or INCONCLUSIVE, and what each one tells your code.
+- [App integrity](docs/checks/app-integrity.md): the installed app files are intact, signed by the key Android reports for the app, and not renamed or cloned.
+- [Instrumentation](docs/checks/instrumentation.md): someone is hooking or injecting code into your running app.
+
+IntaktoFT actively hunts only for values that can be confirmed without server verdicts.\
+Device fingerprint, promo abuse and coordinated actions are **not included** in the free tier because they would violate this exact principle.
+
+```
+
+`SECURITY.md`:
+
+```md
+# Security policy
+
+## Report a vulnerability privately
+
+Found a way past IntaktoFT, or a way to make it close or crash an honest app? Please don't open a public issue. A public issue hands the attack to everyone before adopters can update.
+
+Report it here instead: open the **Security** tab of this repo, then **Report a vulnerability**. Only the maintainer can read it.
+
+Please include:
+- what an attacker gets: for example a hook the checks miss, a repackaged APK that reads CLEAN, or a crash you can trigger in a host app;
+- the steps, the tool and its version, and the phone model and Android build;
+- the smallest proof you have. A log excerpt or a short script is enough.
+
+## What happens next
+
+We reply within 7 days, and agree on a fix and a disclosure date with you. If you want credit, you get it. Please keep the details private until the fixed version is out, so adopters can update first.
+
+## Which versions get fixes
+
+Only the latest one. IntaktoFT is still before 1.0. Before you report, check that the problem still happens on the newest tag on [JitPack](https://jitpack.io/#IntaktoFT/IntaktoFT).
+
+## What's in scope
+
+This repo: the `sdk` module and the native code in `native/`. That means anything that lets an attacker tamper with or hook an app without IntaktoFT reporting it, and anything that makes IntaktoFT close or crash an honest app.
+
+Not in scope: the paid tier, which has its own channel, and attempts to trick the maintainer.
+
+```
+
+`TEST_RESULTS.md`:
+
+```md
+# Test results
+
+If IntaktoFT flags an honest user, you lose that user. So here is every test we ran: the phone, the Android version, and what happened. What it doesn't catch is listed too, at the end.
+
+The checks tested here are the ones in v0.3.1, which changed two of them: `OPCODE_TRAMPOLINE` catches one more hook shape, and `UPROBE_RESIDUE` reads less of the app's code. The lab phones, our own phones and the attack tools were re-run on v0.3.1; the rest was measured on earlier versions. Last updated 2026-11-25.
+
+## Thirteen Google lab phones: honest app clean, modified copy flagged
+
+Firebase Test Lab is Google's service that runs your app on real phones in Google's own lab. On each phone we ran two apps, one after the other: our honest test app, and a copy of it modified with LSPatch, a free tool that rewrites and re-signs an APK.
+
+| Maker | Phone | Android | Honest app | Modified copy |
+|---|---|---|---|---|
+| Samsung | Galaxy S9 | 10 | clean, 10 of 10 runs | flagged, 5 of 5 |
+| Motorola | moto g(30) | 12 | clean, 10 of 10 | flagged, 5 of 5 |
+| OPPO | CPH2195 | 13 | clean, 10 of 10 | flagged, 5 of 5 |
+| Xiaomi | Xiaomi 14 | 15 | clean, 10 of 10 | flagged, 5 of 5 |
+| Google | Pixel 11 | 17 | clean, 10 of 10 | flagged, 5 of 5 |
+| Google | virtual phone | 9 | clean, 10 of 10 | flagged, 5 of 5 |
+| Google | virtual phone | 10 | clean, 10 of 10 | flagged, 5 of 5 |
+| Google | virtual phone | 11 | clean, 10 of 10 | flagged, 5 of 5 |
+| Google | virtual phone | 12 | clean, 10 of 10 | flagged, 5 of 5 |
+| Google | virtual phone | 13 | clean, 10 of 10 | flagged, 5 of 5 |
+| Google | virtual phone | 15 | clean, 10 of 10 | flagged, 5 of 5 |
+| Google | virtual phone | 16 | clean, 10 of 10 | flagged, 5 of 5 |
+| Google | virtual phone, 16 KB pages | 17 | clean, 10 of 10 | didn't start: LSPatch's own loader fails on 16 KB pages |
+
+Zero false flags, and the honest app never crashed. `TAMPER_PUBLIC_KEY` and `TAMPER_REPACKAGER` caught every modified copy that started.
+
+## v0.3.0 on a Pixel 3a: the result reaches your code, and the app stays open
+
+v0.3.0 starts the checks by itself and never closes the app. We tested that on a Pixel 3a (Android 12) with a test app that has no `Application` class and reads the result from its first screen.
+
+| Test | Result |
+|---|---|
+| Honest app, result read 3 s after launch | clean on all 12 checks; the run had already finished, so the result came back at once |
+| Started under Frida 17.23.3 | caught (`FRIDA_AGENT_IN_MEMORY`); the app stayed open |
+| Frida attached after the app started | `check()` gave the start-up result, clean; `recheck()` caught it (`FRIDA_AGENT_IN_MEMORY`); the app stayed open |
+| A copy modified with LSPatch | caught (`TAMPER_PUBLIC_KEY`, `TAMPER_REPACKAGER`); the app stayed open |
+| A second process of the same app | no checks ran there until its first `check()` call, which started its own run: clean |
+| Automatic start turned off | nothing ran until the first `check()` call: clean |
+
+## Apps installed from Google Play read clean
+
+Google Play changes every app it delivers. It signs the app with Google's key, splits it into pieces, and adds a stamp. If our checks took that for tampering, every honest user would be flagged.
+- We installed our test app the way Play does: split into pieces, re-signed with a second key, with a stamp added. Clean, 3 of 3 runs on two phones.
+- We took 58 files from 13 real apps installed from Play on our phones, and ran our file checks on each one. All 58 read clean.
+- The native library meets Play's 16 KB page rule, so Play won't block your update. It also ran clean on a 16 KB emulator.
+- Updating the app over an older version, and archiving then restoring it on Android 16: clean.
+
+## Popular SDKs in the same app cause no false alarm
+
+Crash reporters and performance tools hook native code, much like an attacker does. We put these in one app, on a Nothing Phone 2a (Android 16) and a Pixel 6a (Android 17): Firebase Crashlytics with NDK, Firebase Performance, Sentry with NDK, Google Mobile Ads, AppsFlyer and the Facebook SDK. All clean, 20 runs per phone.
+- ShadowHook and ByteHook, two hooking libraries that apps ship to watch their own code: clean. The checks see their hooks and mark them as the app's own.
+- A Flutter app and a React Native app: clean, and the app stayed open.
+- Work profile, Private Space, a clone profile and a second user, on the Pixel 6a: clean.
+
+## Frida gets caught on our own phones
+
+| Test | Result |
+|---|---|
+| Honest app, 54 runs on three phones (Nothing Phone 2a, Pixel 6a, Pixel 3a) | clean |
+| Frida hooking a native system function | caught every time (`FRIDA_AGENT_IN_MEMORY`, `OPCODE_TRAMPOLINE`) |
+| Frida replacing a Java method | caught once Frida's agent was in memory (`FRIDA_AGENT_IN_MEMORY`) |
+
+## A developer's first hour brings no false alarm and no crash
+
+| What the developer does | Result |
+|---|---|
+| Runs the app with a debugger attached | clean |
+| Uses Android Studio's live tools (Apply Changes, the profilers, Layout Inspector), which load an agent into the app. We loaded the same kind of agent (JVMTI) and had it watch every method | clean, the app never closed |
+| Runs it on emulators, including an arm64-only app on an x86 emulator through ARM translation | clean |
+| Runs their own unit tests (Robolectric) and device tests | pass. In unit tests there's no phone, so the checks report "could not confirm", never a false flag |
+| Builds with Groovy files, an older toolchain (AGP 8.1), R8 full mode, or for an Android 8.0 phone | builds and runs clean |
+
+## It doesn't crash your app
+
+We ran every check 1,000 times in a row with a memory-error detector on (HWASan), from 8 threads at once, and from 2 processes at once. Then 3,000 times while measuring memory: it didn't grow. Then with the phone almost out of memory. No crash.
+
+## It doesn't slow your app down
+
+IntaktoFT adds about 540 KB to your app on arm64 phones. The checks run on their own background thread, so your app's start time doesn't change: on a Pixel 6, the median cold start was 95 ms without IntaktoFT and 90 ms with it. Android's StrictMode, which reports slow work on the main thread, found nothing.
+
+## What the free tier doesn't catch
+
+- A copy rebuilt by hand and signed with a new key passes the file checks. So does anything the attacker packs into that copy, such as a renamed Frida Gadget that hooks Java code. We tested this with standard tools (apktool, apksigner). Telling a new key from yours needs a server check, which the paid tier adds.
+- A hook placed only inside your app's own native code, with no Frida agent in memory, isn't caught.
+- On x86 emulators, 8 of the 12 checks run. The four hook checks are written for the arm64 chips in real phones. Test on a real phone for the full set.
+
+## Every tool in the README's table was caught again on this release
+
+We re-ran the attack tools from the README's table against these checks. 15 of the 16 were caught live, each by the check the README names:
+- 10 Frida builds, including ones that rename or hide Frida's agent, such as StealthFrida and strongR-frida: caught by `FRIDA_AGENT_IN_MEMORY` or `DISGUISED_LIBRARY_IN_MEMORY`.
+- ReShift 1.2.1, which now loads Frida's Gadget instead of its agent: caught by `OPCODE_TRAMPOLINE`.
+- The Frida Gadget in its standard setup (its own file name, hooking native code): caught by `OPCODE_TRAMPOLINE` and the file checks.
+- LSPatch: caught by `TAMPER_PUBLIC_KEY` and `TAMPER_REPACKAGER`.
+- ZygiskFrida and LSPosed (Vector): caught by `LIB_FROM_ROOT_PATH`.
+
+The honest app read clean on all seven test phones. One row wasn't a live catch. FreeDaah's agent crashes the app it attaches to, so the attack ends there; it hides the same way as the Frida builds above, which were caught.
+
+```
+
+`build.gradle.kts`:
+
+```kts
+plugins {
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.vanniktech.mavenPublish) apply false
+    alias(libs.plugins.cyclonedx.bom) apply false
+}
+
+```
+
+`docs/checks/README.md`:
+
+```md
+# How to read a result
+
+[Back to the README](../../README.md)
+
+Every check answers one of three ways.
+CLEAN: it looked and found nothing wrong.
+DETECTED: it looked and found a real problem.
+INCONCLUSIVE: it could not get an answer (a read failed or came back empty).
+
+IntaktoFT never closes the app: your code reads each signal's status and decides. The report's
+verdict is DETECTED if any check is DETECTED, else INCONCLUSIVE if any check is INCONCLUSIVE, else
+CLEAN. So CLEAN always means every check really looked. The accepted cost is that an attacker with
+root who blocks the reads a check needs gets INCONCLUSIVE from that check, not DETECTED.
+
+A check is left out of the report only for a fact known before anything is read: the two APK
+file checks for an app that ships inside the system image, and the 4 instrumentation checks built
+only for arm64 phones (other chip types skip them). Left out means less coverage, not a clean
+result.
+
+```
+
+`docs/checks/app-integrity.md`:
+
+```md
+# App integrity checks
+
+[Back to the README](../../README.md)
+
+**App integrity**: the installed app files are intact, signed by the key Android reports for the
+app, and not renamed or cloned.
+
+| Id | DETECTED means |
+|---|---|
+| `TAMPER_APK_CONTENT` | An installed APK file (the base or any split) no longer matches its own signature, or no signing entry in it carries a signer Android reports for the app. |
+| `TAMPER_SIGNING_BLOCK` | No signing entry inside base.apk, read by native code with direct system calls, carries a signer Android reports for this app. So Android's answer, or the file, was faked or swapped. |
+| `TAMPER_PUBLIC_KEY` | The app is signed with a key anyone can download: a public AOSP test key, or a key that ships inside a common re-signing tool (uber-apk-signer and others). |
+| `TAMPER_REPACKAGER` | The APK holds files left by LSPatch or App Cloner. |
+| `CLV_PKGNAME_MISMATCH` | The running package name differs from the application id written into the manifest when the app was built, so the app was renamed or cloned. |
+
+Three more app-integrity results are INCONCLUSIVE, not DETECTED, so they never make the verdict DETECTED on
+their own: `NATIVE_CORE` (the native library did not load, so the native checks could not run),
+`CHECK_STALLED` (no check made progress for 5 s, or an earlier run is stuck) and `CHECK_FAILED`
+(the run could not start, or it stopped with an error).
+
+```
+
+`docs/checks/instrumentation.md`:
+
+```md
+# Instrumentation checks
+
+[Back to the README](../../README.md)
+
+**Instrumentation**: someone is hooking or injecting code into your running app.
+
+| Id | DETECTED means |
+|---|---|
+| `FRIDA_AGENT_IN_MEMORY` | A library loaded from memory, not from a file, exports `frida_agent_main`, the entry point of Frida's agent. |
+| `DISGUISED_LIBRARY_IN_MEMORY` | A library is loaded from a memfd (a file that lives only in memory) named like the system's own memory, such as ART's `jit-cache`, which never holds a library. |
+| `LIB_FROM_ROOT_PATH` | Code runs from a file in `/data/local/tmp` (where files pushed over ADB live) or `/data/adb` (where root modules live). A root module counts only if it is LSPosed (Vector) or ZygiskFrida: they load only into the apps they hook. Other modules load into every app, so they say nothing about yours. |
+| `HOOK_BYTES` | A watched system function (`open`, `read`, `mmap`, `dlopen`, `dlsym` and others) begins with the `LDR X16` trampoline older Frida versions write, in memory, not the real code on disk. arm64 only. |
+| `OPCODE_TRAMPOLINE` | A wider list of sensitive functions (adding `connect`, `ptrace`, `kill` and others) is checked for a jump or a breakpoint that the library file on disk does not have. arm64 only. |
+| `GOT_PLT_INTEGRITY` | A function address table (GOT/PLT) in this library, libc or the Android runtime points outside any library file. arm64 only. |
+| `UPROBE_RESIDUE` | Kernel tracing breakpoints (uprobes) sit in this library's code or in libc's code. arm64 only. |
+
+`HOOK_BYTES`, `OPCODE_TRAMPOLINE` and `GOT_PLT_INTEGRITY` follow each hook to the code it jumps to. A hook that lands in a library shipped inside your APK is your own and reads CLEAN. A hook they cannot follow to any library reads INCONCLUSIVE: it proves a hook, not who placed it.
+
+One case is flagged on purpose: a hooking library your app downloads into its data folder and loads at run time, instead of shipping it inside the APK. Nothing signs that folder, so a hook that lands there could be anyone's.
+
+```
+
+`docs/guides/build.md`:
+
+```md
+# Build
+
+[Back to the README](../../README.md)
+
+Android library module (`:sdk`), `minSdk 26`, `compileSdk 35`. One AAR carries the native
+library for all four chip types (arm64-v8a, armeabi-v7a, x86 and x86_64) in `jni/`, so Play
+delivers each phone only its own copy. Requires the Android NDK (see `sdk/build.gradle.kts` for
+the pinned version).
+
+```
+./gradlew :sdk:assembleRelease
+```
+
+```
+
+`docs/guides/integration.md`:
+
+```md
+# Integration guide
+
+[Back to the README](../../README.md)
+
+Adding IntaktoFT takes one dependency line. Reading its answer takes one call.
+
+**Requirements.** IntaktoFT needs `minSdk 26` (Android 8.0) or higher. It is built for Java 11, so it
+works in projects set to Java 11 or higher, which includes Android Studio's default new-project
+settings. It needs the Kotlin Gradle plugin 1.9 or higher.
+
+## Step 1: add JitPack and the dependency
+
+The exact coordinate is `com.github.IntaktoFT:IntaktoFT:v0.3.1`. Keep the `v`.
+
+Kotlin DSL:
+
+```kotlin
+// settings.gradle.kts, inside dependencyResolutionManagement { repositories { ... } }
+maven { url = uri("https://jitpack.io") }
+
+// app/build.gradle.kts, inside dependencies { ... }
+implementation("com.github.IntaktoFT:IntaktoFT:v0.3.1")
+```
+
+Version catalog (`gradle/libs.versions.toml`), the style new Android Studio projects use:
+
+```toml
+[libraries]
+intaktoft = { module = "com.github.IntaktoFT:IntaktoFT", version = "v0.3.1" }
+```
+
+```kotlin
+// app/build.gradle.kts
+implementation(libs.intaktoft)
+```
+
+Groovy DSL. Write the JitPack line with `url =`, not `url '...'`, which Gradle 8.13 warns it will
+remove in Gradle 10:
+
+```groovy
+// settings.gradle, inside dependencyResolutionManagement { repositories { ... } }
+maven { url = 'https://jitpack.io' }
+
+// app/build.gradle, inside dependencies { ... }
+implementation 'com.github.IntaktoFT:IntaktoFT:v0.3.1'
+```
+
+## Step 2: read the result
+
+The checks start by themselves when your app starts, on an IntaktoFT thread. You need no
+`Application` class and no manifest change. Read the result with one call, from any Activity, your
+`Application` class, or anywhere else you have a `Context`:
+
+```kotlin
+import io.github.areyougarou.intakto.Intakto
+import io.github.areyougarou.intakto.Status
+
+Intakto.check(this) { report ->
+    when (report.verdict) {
+        Status.DETECTED -> handleCatch(report.detected)   // a check found tampering or a hook
+        Status.INCONCLUSIVE -> {}                         // a check could not confirm: not a catch
+        Status.CLEAN -> {}                                // every check looked and found nothing
+    }
+}
+```
+
+The same call in Java. The callback is a single-method interface, so a plain lambda works, with no
+`Unit.INSTANCE` to return:
+
+```java
+Intakto.check(this, report -> {
+    if (report.getVerdict() == Status.DETECTED) handleCatch(report.getDetected());
+});
+```
+
+IntaktoFT never closes your app and never shows anything to the user. Your code decides what a
+catch means: log it, send it to your server, turn off a feature, or close the app. Without a
+`check()` call the checks still run, but nothing visible happens, because the result has nowhere
+to go.
+
+On an x86 or x86_64 emulator, 8 of the 12 checks run. The 4 hook checks are written for arm64 phone
+chips and do nothing on an emulator's x86 chip, so an emulator cannot show a hook, but it also never
+raises a false alarm there. For the full set of checks, run on a real arm64 phone.
+
+## How the result reaches you
+
+- `check()` hands you the latest finished result. A call made before the first run ends gets the
+  result when that run ends; a call made after gets it at once.
+- `recheck()` runs the checks again and hands you the new result. Use it at sensitive moments
+  (login, payment): a tool attached after your app started shows up only in a later run. Calls made
+  while a run is going share that run, so a report can hold results from checks that finished
+  before the call.
+- The callback runs on the main thread, after `check()` returns. Never block the main thread
+  waiting for it: it would never arrive.
+- `report.verdict` is DETECTED if any signal is DETECTED, else INCONCLUSIVE if any signal is
+  INCONCLUSIVE, else CLEAN. So CLEAN always means every check looked and found nothing.
+- `report.signals`: every signal with its id, group, status, details and time in microseconds
+  (`micros`). INCONCLUSIVE means the check could not confirm, with the reason in `details`.
+- `report.detected`: the DETECTED signals only.
+- If `context` is an Activity, or a context wrapped around one, and that Activity is finishing or
+  destroyed when the result is ready, the callback is not called. After a screen rotation, call
+  `check()` again from the new screen. Pass the application context to always get the callback.
+- If no check makes progress for 5 s, the report holds the signals finished so far plus
+  `CHECK_STALLED` (status INCONCLUSIVE). A check missing from that report did not finish; it was
+  not left out. Hashing the APK files counts as progress, so a large app is not cut off for its
+  size. If a run has made no progress for 5 s, a new call that has to wait for it gets
+  `CHECK_STALLED` alone at once.
+- Cost of one run (`Report.elapsedMs`, from the run's start to its last check), on our test phones
+  (Android 12 to 17). A 1.5 MB app: 26 to 221 ms for the first run in an app process and 26 to
+  162 ms for later runs. A 159 MB app: 112 to 284 ms for the first run and 40 to 161 ms for later
+  runs. With the phone's file cache emptied, as on the first launch after a reboot, the first run
+  took 546 to 559 ms on a Pixel 3a (Android 12) and 355 to 379 ms on a Pixel 7a (Android 16). We
+  measured these on v0.2.1, whose checks are the same, from the call to the result.
+
+## Apps with more than one process
+
+The automatic start is a `ContentProvider` in IntaktoFT's manifest, the way Firebase starts.
+Android creates it only in your app's main process. A process you declare with `android:process`
+(for example a `:sync` service) runs no checks until code in that process calls `check()` or
+`recheck()`; that first call starts the run there. Each process has its own run and its own
+result.
+
+## Turn off the automatic start
+
+Add this inside `<application>` in your app's `AndroidManifest.xml`, with
+`xmlns:tools="http://schemas.android.com/tools"` on the `<manifest>` tag:
+
+```xml
+<provider
+    android:name="io.github.areyougarou.intakto.IntaktoInitProvider"
+    android:authorities="${applicationId}.intaktoft"
+    tools:node="remove" />
+```
+
+Then nothing runs until your first `check()` call, which starts the run.
+
+## API reference
+
+| Name | Shape | Notes |
+|---|---|---|
+| `Intakto.check` | `check(context: Context, onResult: ReportCallback = {})` | The latest finished result; waits for the first run if none has finished. Callable from Java as `Intakto.check(...)`. |
+| `Intakto.recheck` | `recheck(context: Context, onResult: ReportCallback = {})` | Runs the checks again and hands you the new result. |
+| `ReportCallback` | `fun onReport(report: Report)` | A single-method interface, so a Kotlin or Java lambda works. |
+| `Report` | `signals: List<Signal>`, `verdict: Status`, `detected: List<Signal>`, `elapsedMs: Long` | `detected` is the DETECTED signals. |
+| `Signal` | `id: String`, `group: Group`, `status: Status`, `details: String`, `micros: Long` | One check's result. |
+| `Status` | `CLEAN`, `DETECTED`, `INCONCLUSIVE` | A signal's status, and the report's verdict. |
+| `Group` | `APP_INTEGRITY`, `INSTRUMENTATION` | Which family a signal belongs to. |
+
+Every result, with the phone and Android build it ran on: [test results](../../TEST_RESULTS.md).
+
+## Google Play Data safety
+
+IntaktoFT adds nothing to your app's Data safety form. It collects no data. Every check runs on the phone and reads only your own app's files and memory. Nothing is sent anywhere.
+
+```
+
+`docs/release-notes/v0.3.1.md`:
+
+```md
+IntaktoFT 0.3.1 catches the hooks Frida 17.27's Gadget writes, which 0.3.0 missed, and starts after your app's own SDKs are set up.
+
+- `OPCODE_TRAMPOLINE` catches hooks that jump with `RET` through a register, the shape Frida 17.27.4's Gadget and FreeDaah write.
+- The checks start after `Application.onCreate`, so hook libraries and crash handlers your app sets up there no longer make `GOT_PLT_INTEGRITY` read INCONCLUSIVE.
+- A thread that loads and unloads libraries nonstop no longer stalls the run.
+- `GOT_PLT_INTEGRITY` takes 0.6 to 2.8 ms instead of 16 to 25 ms.
+- SHA-256 checksums and an SBOM are attached below.
+
+```kotlin
+implementation("com.github.IntaktoFT:IntaktoFT:v0.3.1")
+```
+
+Full list: [CHANGELOG.md](https://github.com/IntaktoFT/IntaktoFT/blob/main/CHANGELOG.md)
+
+```
+
+`gradle.properties`:
+
+```properties
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+kotlin.code.style=official
+android.nonTransitiveRClass=true
+org.gradle.caching=true
+
+```
+
+`gradle/libs.versions.toml`:
+
+```toml
+[versions]
+agp = "8.7.3"
+cyclonedx = "3.5.1"
+junit = "4.13.2"
+kotlin = "1.9.25"
+mavenPublish = "0.30.0"
+robolectric = "4.14.1"
+
+[libraries]
+junit = { module = "junit:junit", version.ref = "junit" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+
+[plugins]
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
+cyclonedx-bom = { id = "org.cyclonedx.bom", version.ref = "cyclonedx" }
+
+```
+
+`gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.13-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`gradlew`:
+
+```
+#!/bin/sh
+
+#
+# Copyright © 2015-2021 the original authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+app_path=$0
+
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+# shellcheck disable=SC2034
+APP_BASE_NAME=${0##*/}
+APP_HOME=$( cd "${APP_HOME:-./}" > /dev/null && pwd -P ) || exit
+
+MAX_FD=maximum
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        JAVACMD=$JAVA_HOME/jre/sh/java
+    else
+        JAVACMD=$JAVA_HOME/bin/java
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD=java
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+fi
+
+if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
+    case $MAX_FD in #(
+      max*)
+        # shellcheck disable=SC2039,SC3045
+        MAX_FD=$( ulimit -H -n ) ||
+            warn "Could not query maximum file descriptor limit"
+    esac
+    case $MAX_FD in  #(
+      '' | soft) :;; #(
+      *)
+        # shellcheck disable=SC2039,SC3045
+        ulimit -n "$MAX_FD" ||
+            warn "Could not set maximum file descriptor limit to $MAX_FD"
+    esac
+fi
+
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
+    CLASSPATH=$( cygpath --path --mixed "$CLASSPATH" )
+
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
+
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
+        fi
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
+    done
+fi
+
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -classpath "$CLASSPATH" \
+        org.gradle.wrapper.GradleWrapperMain \
+        "$@"
+
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
+
+```
+
+`jitpack.yml`:
+
+```yml
+jdk:
+  - openjdk17
+before_install:
+  - sdk install java 17.0.21.0+9-tem
+  - sdk use java 17.0.21.0+9-tem
+
+```
+
+`native/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.22.1)
+project(intakto CXX)
+
+add_library(intakto SHARED
+    android/jni_bridge.cpp
+    android/common.cpp
+    android/hook_bytes.cpp
+    android/memory_libs.cpp
+    android/root_path.cpp
+    android/got_plt.cpp
+    android/uprobe_scan.cpp
+    android/opcode_scan.cpp
+    android/tamper_scan.cpp
+    android/hook_dest.cpp)
+
+target_include_directories(intakto PRIVATE android)
+target_compile_options(intakto PRIVATE -std=c++17 -O2 -fvisibility=hidden -fvisibility-inlines-hidden
+    -ffile-prefix-map=${CMAKE_SOURCE_DIR}=native -ffile-prefix-map=${CMAKE_BINARY_DIR}=build -ffile-prefix-map=${ANDROID_NDK}=ndk)
+target_link_options(intakto PRIVATE -Wl,--exclude-libs,ALL -Wl,-z,max-page-size=16384)
+target_link_libraries(intakto dl)
+
+```
+
+`native/android/common.cpp`:
+
+```cpp
+#include "common.h"
+#include <algorithm>
+#include <cstring>
+#include <cstdio>
+#include <cerrno>
+#include <fcntl.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+std::string g_own_process_name;
+std::vector<VmaEntry> g_maps;
+std::string g_expected_signers;
+std::string g_own_package;
+int g_target_sdk = 0;
+
+void init_own_process_name() {
+    int fd = open("/proc/self/cmdline", O_RDONLY);
+    if (fd < 0) return;
+    char buf[256] = {};
+    ssize_t n = read(fd, buf, sizeof(buf) - 1);
+    close(fd);
+    if (n > 0) g_own_process_name = buf;
+}
+
+bool is_own_vma(const std::string& path) {
+    if (g_own_process_name.empty() || path.empty()) return false;
+    return path.find(g_own_process_name) != std::string::npos;
+}
+
+namespace {
+
+bool skip_ws(const char*& p, const char* e) {
+    const char* s = p;
+    while (p < e && (*p == ' ' || *p == '\t')) p++;
+    return p > s;
+}
+
+bool number(const char*& p, const char* e, int base, uint64_t& v) {
+    const char* s = p;
+    v = 0;
+    for (; p < e; p++) {
+        unsigned d;
+        if (*p >= '0' && *p <= '9') d = (unsigned)(*p - '0');
+        else if (base == 16 && *p >= 'a' && *p <= 'f') d = (unsigned)(*p - 'a' + 10);
+        else if (base == 16 && *p >= 'A' && *p <= 'F') d = (unsigned)(*p - 'A' + 10);
+        else break;
+        v = v * (uint64_t)base + d;
+    }
+    return p > s;
+}
+
+// One maps line: "start-end perms offset major:minor inode [path]". false = not a maps line.
+bool parse_maps_line(const char* p, const char* e, VmaEntry& v) {
+    uint64_t major = 0, minor = 0, inode = 0;
+    if (!number(p, e, 16, v.start) || p >= e || *p++ != '-' || !number(p, e, 16, v.end) || !skip_ws(p, e)) return false;
+    size_t n = 0;
+    while (p < e && *p != ' ' && *p != '\t' && n < sizeof(v.perms) - 1) v.perms[n++] = *p++;
+    v.perms[n] = 0;
+    if (n == 0 || !skip_ws(p, e) || !number(p, e, 16, v.offset) || !skip_ws(p, e)) return false;
+    if (!number(p, e, 16, major) || p >= e || *p++ != ':' || !number(p, e, 16, minor)) return false;
+    if (!skip_ws(p, e) || !number(p, e, 10, inode)) return false;
+    skip_ws(p, e);
+    const char* q = p;
+    while (q < e && *q != '\r') q++;
+    v.path.assign(p, (size_t)(q - p));
+    return true;
+}
+
+}
+
+// Reads the whole map with large reads, then parses each line by hand: sscanf cost as much as the
+// kernel's own work, and twice as much on a slow core.
+std::vector<VmaEntry> read_maps() {
+    std::vector<VmaEntry> result;
+    int fd = open("/proc/self/maps", O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return result;
+    std::string text;
+    size_t len = 0;
+    text.resize(256 * 1024);
+    for (;;) {
+        if (text.size() - len < 64 * 1024) text.resize(text.size() * 2);
+        ssize_t n = read(fd, &text[len], text.size() - len);
+        if (n < 0 && errno == EINTR) continue;
+        if (n <= 0) break;
+        len += (size_t)n;
+    }
+    close(fd);
+    result.reserve(len / 100);
+    const char* p = text.data();
+    const char* end = p + len;
+    while (p < end) {
+        const char* nl = static_cast<const char*>(memchr(p, '\n', (size_t)(end - p)));
+        const char* e = nl ? nl : end;
+        VmaEntry v{};
+        if (parse_maps_line(p, e, v)) result.push_back(std::move(v));
+        p = e + 1;
+    }
+    auto by_start = [](const VmaEntry& a, const VmaEntry& b) { return a.start < b.start; };
+    if (!std::is_sorted(result.begin(), result.end(), by_start)) std::sort(result.begin(), result.end(), by_start);
+    return result;
+}
+
+const VmaEntry* vma_for(const std::vector<VmaEntry>& maps, uint64_t a) {
+    auto it = std::upper_bound(maps.begin(), maps.end(), a, [](uint64_t x, const VmaEntry& v) { return x < v.start; });
+    if (it == maps.begin()) return nullptr;
+    --it;
+    return a < it->end ? &*it : nullptr;
+}
+
+bool maps_available() { return !g_maps.empty(); }
+
+static int g_mem_pipe[2] = {-1, -1};
+
+static bool mem_pipe_open(int fds[2]) {
+    return pipe2(fds, O_CLOEXEC | O_NONBLOCK) == 0;
+}
+
+void mem_run_begin() {
+    if (g_mem_pipe[0] < 0 && !mem_pipe_open(g_mem_pipe)) {
+        g_mem_pipe[0] = g_mem_pipe[1] = -1;
+    }
+}
+
+void mem_run_end() {
+    if (g_mem_pipe[0] >= 0) {
+        close(g_mem_pipe[0]);
+        close(g_mem_pipe[1]);
+        g_mem_pipe[0] = g_mem_pipe[1] = -1;
+    }
+}
+
+ssize_t safe_read_mem_n(uintptr_t addr, void* out, size_t len) {
+    int local[2] = {-1, -1};
+    bool use_run = g_mem_pipe[0] >= 0;
+    int* fds = g_mem_pipe;
+    if (!use_run) {
+        if (!mem_pipe_open(local)) return -1;
+        fds = local;
+    }
+    uint8_t* dst = static_cast<uint8_t*>(out);
+    size_t done = 0;
+    bool torn = false;
+    while (done < len) {
+        size_t chunk = len - done;
+        if (chunk > 4096) chunk = 4096;
+        // System calls by number, not libc's write() and read(): a hook on those two could hand every check
+        // clean bytes.
+        ssize_t w = (ssize_t)syscall(__NR_write, fds[1], reinterpret_cast<const void*>(addr + done), chunk);
+        if (w <= 0) break;
+        ssize_t got = 0;
+        while (got < w) {
+            ssize_t rd = (ssize_t)syscall(__NR_read, fds[0], dst + done + got, (size_t)(w - got));
+            if (rd <= 0) break;
+            got += rd;
+        }
+        done += (size_t)got;
+        if (got < w) { torn = true; break; }
+        if (w < (ssize_t)chunk) break;
+    }
+    if (use_run) {
+        if (torn) { mem_run_end(); mem_run_begin(); }
+    } else {
+        close(local[0]);
+        close(local[1]);
+    }
+    return (ssize_t)done;
+}
+
+bool safe_read_mem(uintptr_t addr, void* out, size_t len) {
+    return safe_read_mem_n(addr, out, len) == (ssize_t)len;
+}
+
+size_t read_disk_bytes_for_addr(uintptr_t addr, void* out, size_t len) {
+    const VmaEntry* v = vma_for(addr);
+    if (!v || v->path.empty() || v->path[0] == '[') return 0;
+    if (v->path.find("memfd:") != std::string::npos) return 0;
+    int fd = open(v->path.c_str(), O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return 0;
+    off64_t off = (off64_t)(v->offset + (addr - v->start));  // off_t is 32-bit on 32-bit ABIs
+    ssize_t n = pread64(fd, out, len, off);
+    close(fd);
+    return n > 0 ? (size_t)n : 0;
+}
+
+std::string json_escape(const std::string& s) {
+    std::string out;
+    out.reserve(s.size() + 8);
+    for (char c : s) {
+        switch (c) {
+            case '"':  out += "\\\""; break;
+            case '\\': out += "\\\\"; break;
+            case '\n': out += "\\n";  break;
+            case '\r': out += "\\r";  break;
+            case '\t': out += "\\t";  break;
+            default:
+                // Control bytes and every byte 0x7F and above become \u00XX, so the text handed to
+                // NewStringUTF is plain ASCII: CheckJNI (on in debuggable builds and emulators) aborts
+                // the app on a half-cut UTF-8 byte in a path or memfd name.
+                if ((unsigned char)c < 0x20 || (unsigned char)c >= 0x7F) {
+                    char buf[8];
+                    snprintf(buf, sizeof(buf), "\\u%04x", (unsigned char)c);
+                    out += buf;
+                } else {
+                    out += c;
+                }
+        }
+    }
+    return out;
+}
+
+
+```
+
+`native/android/common.h`:
+
+```h
+#pragma once
+#include <string>
+#include <vector>
+#include <cstdint>
+#include <sys/types.h>
+
+#define STATUS_CLEAN          0
+#define STATUS_DETECTED       1
+#define STATUS_INCONCLUSIVE   2
+#define STATUS_NOT_APPLICABLE 3
+
+struct NativeResult {
+    int status = STATUS_INCONCLUSIVE;
+    std::string details;
+};
+
+struct VmaEntry {
+    uint64_t start;
+    uint64_t end;
+    uint64_t offset;
+    char perms[8];
+    std::string path;
+
+    bool readable()    const { return perms[0] == 'r'; }
+    bool executable()  const { return perms[2] == 'x'; }
+    bool anonymous()   const { return path.empty() || path[0] == '['; }
+    uint64_t size()    const { return end - start; }
+};
+
+std::vector<VmaEntry> read_maps();
+extern std::vector<VmaEntry> g_maps;
+bool maps_available();
+const VmaEntry* vma_for(const std::vector<VmaEntry>& maps, uint64_t a);
+inline const VmaEntry* vma_for(uint64_t a) { return vma_for(g_maps, a); }
+
+bool safe_read_mem(uintptr_t addr, void* out, size_t len);
+ssize_t safe_read_mem_n(uintptr_t addr, void* out, size_t len);
+void mem_run_begin();
+void mem_run_end();
+size_t read_disk_bytes_for_addr(uintptr_t addr, void* out, size_t len);
+
+std::string json_escape(const std::string& s);
+
+extern std::string g_own_process_name;
+void  init_own_process_name();
+bool  is_own_vma(const std::string& path);
+
+extern std::string g_expected_signers;
+extern std::string g_own_package;
+extern int g_target_sdk;
+
+#define FRIDA_TRAMPOLINE_INSN 0x58000050u
+
+#if defined(__aarch64__)
+#define INTAKTO_ABI "arm64-v8a"
+#elif defined(__arm__)
+#define INTAKTO_ABI "armeabi-v7a"
+#elif defined(__x86_64__)
+#define INTAKTO_ABI "x86_64"
+#elif defined(__i386__)
+#define INTAKTO_ABI "x86"
+#else
+#define INTAKTO_ABI "unknown"
+#endif
+
+inline NativeResult not_built_for_abi() {
+    return { STATUS_NOT_APPLICABLE, std::string("not built for this chip type (") + INTAKTO_ABI + ")" };
+}
+
+```
+
+`native/android/got_plt.cpp`:
+
+```cpp
+#include "got_plt.h"
+#include "hook_dest.h"
+#include <link.h>
+#include <elf.h>
+#include <algorithm>
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <cstdio>
+#include <cstring>
+
+#if defined(__aarch64__)
+
+extern "C" const ElfW(Ehdr) __ehdr_start __attribute__((visibility("hidden")));
+
+namespace {
+
+uint64_t g_vdso_s = 0, g_vdso_e = 0;
+void find_vdso() {
+    g_vdso_s = g_vdso_e = 0;
+    for (const auto& v : g_maps)
+        if (v.path.find("vdso") != std::string::npos || v.path.find("vvar") != std::string::npos) {
+            if (!g_vdso_s || v.start < g_vdso_s) g_vdso_s = v.start;
+            if (v.end > g_vdso_e) g_vdso_e = v.end;
+        }
+}
+
+struct Mod { uintptr_t base, jmprel, strtab, symtab; size_t n; std::string name; };
+
+struct Walk {
+    std::vector<Mod> mods;
+    int modules = 0;
+    mutable std::vector<VmaEntry> fresh;
+};
+
+enum { TARGET_FINE, TARGET_SUSPECT, TARGET_APP_HOOK, TARGET_UNTRACED };
+
+int target_kind(const Walk& w, uintptr_t target, std::string& where) {
+    if (g_vdso_s && target >= g_vdso_s && target < g_vdso_e) return TARGET_FINE;
+    const VmaEntry* v = vma_for(target);
+    if (!v) {
+        // Missing from the run's snapshot: another thread may have mapped it since. Only a target a fresh
+        // map still lacks is suspect.
+        if (w.fresh.empty()) w.fresh = read_maps();
+        v = vma_for(w.fresh, target);
+    }
+    if (v) {
+        const std::string& p = v->path;
+        if (p.rfind("/data/adb/", 0) == 0 || p.find("/data/local/tmp/") != std::string::npos) { where = p; return TARGET_SUSPECT; }
+        if (!p.empty() && p[0] != '[') {
+            if (p.find("memfd:") == std::string::npos) return TARGET_FINE;
+            if (p.find("jit-cache") != std::string::npos || p.find("code-cache") != std::string::npos) return TARGET_FINE;
+        }
+        where = p.empty() ? "[anon]" : p;
+        if (v->anonymous()) {
+            std::string to;
+            HookOwner owner = hook_owner(target, to);
+            if (owner == HOOK_APP_OWN) { where = to; return TARGET_APP_HOOK; }
+            where += ", lands in " + to;
+            // Not traced to any library: a hook, but not proof of who placed it.
+            if (owner == HOOK_UNRESOLVED) return TARGET_UNTRACED;
+        }
+        return TARGET_SUSPECT;
+    }
+    where = "[unmapped]";
+    return TARGET_SUSPECT;
+}
+
+// A library file that is only mapped as data (never loaded) is skipped: no executable segment of that
+// file sits where its code would load, and its call table holds unrelocated values that would read as
+// hooks.
+bool read_mod(uintptr_t hdr, const std::string& path, Mod& m) {
+    ElfW(Ehdr) eh;
+    if (!safe_read_mem(hdr, &eh, sizeof(eh)) || memcmp(eh.e_ident, ELFMAG, SELFMAG) != 0 ||
+        eh.e_machine != EM_AARCH64 || eh.e_phnum == 0 || eh.e_phnum > 64) return false;
+    ElfW(Phdr) ph[64];
+    if (!safe_read_mem(hdr + eh.e_phoff, ph, eh.e_phnum * sizeof(ElfW(Phdr)))) return false;
+    uintptr_t base = 0, dyn = 0, code = 0;
+    bool have = false;
+    for (int i = 0; i < eh.e_phnum; i++) {
+        if (ph[i].p_type == PT_LOAD && ph[i].p_offset == 0) { base = hdr - (uintptr_t)ph[i].p_vaddr; have = true; }
+        if (ph[i].p_type == PT_LOAD && (ph[i].p_flags & PF_X) && !code) code = (uintptr_t)ph[i].p_vaddr;
+        if (ph[i].p_type == PT_DYNAMIC) dyn = (uintptr_t)ph[i].p_vaddr;
+    }
+    if (!have || !dyn) return false;
+    if (!path.empty()) {
+        const VmaEntry* x = vma_for(base + code);
+        if (!code || !x || !x->executable() || x->path != path) return false;
+    }
+
+    uintptr_t jmprel = 0, strtab = 0, symtab = 0;
+    size_t pltrelsz = 0; long pltrel = 0;
+    for (int i = 0; i < 512; i++) {
+        ElfW(Dyn) d;
+        if (!safe_read_mem(base + dyn + i * sizeof(d), &d, sizeof(d)) || d.d_tag == DT_NULL) break;
+        switch (d.d_tag) {
+            case DT_JMPREL:   jmprel   = base + d.d_un.d_ptr; break;
+            case DT_PLTRELSZ: pltrelsz = d.d_un.d_val;        break;
+            case DT_PLTREL:   pltrel   = d.d_un.d_val;        break;
+            case DT_STRTAB:   strtab   = base + d.d_un.d_ptr; break;
+            case DT_SYMTAB:   symtab   = base + d.d_un.d_ptr; break;
+            default: break;
+        }
+    }
+    if (!jmprel || !pltrelsz || pltrel != DT_RELA) return false;
+    size_t n = pltrelsz / sizeof(ElfW(Rela));
+    if (n > 8192) n = 8192;
+    m = {base, jmprel, strtab, symtab, n, path.empty() ? "libintakto.so" : path};
+    return true;
+}
+
+// Found in the memory map, not with dl_iterate_phdr: that waits for the loader's lock, which a thread
+// loading libraries nonstop can hold past the stall limit.
+void find_mods(Walk& w) {
+    std::vector<uintptr_t> seen;
+    auto add = [&](uintptr_t hdr, const std::string& path) {
+        if (std::find(seen.begin(), seen.end(), hdr) != seen.end()) return;
+        Mod m;
+        if (!read_mod(hdr, path, m)) return;
+        seen.push_back(hdr);
+        w.modules++;
+        w.mods.push_back(m);
+    };
+    add((uintptr_t)&__ehdr_start, "");
+    for (const auto& v : g_maps) {
+        if (v.anonymous() || v.perms[0] != 'r') continue;
+        const char* b = strrchr(v.path.c_str(), '/');
+        b = b ? b + 1 : v.path.c_str();
+        if (strcmp(b, "libc.so") == 0 || strcmp(b, "libart.so") == 0) add(v.start, v.path);
+    }
+}
+
+struct Ctx { int checked = 0, hits = 0, modules = 0, untraced = 0; std::string detail, own, untraced_detail; };
+
+// One library's call table. The relocation table and the table of slots are each read in one go
+// rather than about 4,000 reads of 8 or 24 bytes; a slot outside what that read returned is read alone.
+void scan(const Walk& w, const Mod& m, Ctx* c) {
+    const char* mod = !m.name.empty() ? m.name.c_str() : "[self]";
+    const char* modb = strrchr(mod, '/'); modb = modb ? modb + 1 : mod;
+
+    std::vector<ElfW(Rela)> rel(m.n);
+    ssize_t got = safe_read_mem_n(m.jmprel, rel.data(), m.n * sizeof(ElfW(Rela)));
+    size_t nrel = got > 0 ? (size_t)got / sizeof(ElfW(Rela)) : 0;  // stops at the first unreadable entry
+    uintptr_t lo = UINTPTR_MAX, hi = 0;
+    for (size_t i = 0; i < nrel; i++) {
+        if (ELF64_R_TYPE(rel[i].r_info) != R_AARCH64_JUMP_SLOT) continue;
+        lo = std::min(lo, (uintptr_t)rel[i].r_offset);
+        hi = std::max(hi, (uintptr_t)rel[i].r_offset + sizeof(uintptr_t));
+    }
+    std::vector<uintptr_t> slots;
+    ssize_t sgot = 0;
+    if (lo < hi && hi - lo <= 1u << 20) {
+        slots.resize((hi - lo + sizeof(uintptr_t) - 1) / sizeof(uintptr_t));
+        sgot = safe_read_mem_n(m.base + lo, slots.data(), hi - lo);
+    }
+
+    for (size_t i = 0; i < nrel; i++) {
+        const ElfW(Rela)& rr = rel[i];
+        if (ELF64_R_TYPE(rr.r_info) != R_AARCH64_JUMP_SLOT) continue;
+
+        uintptr_t target = 0;
+        size_t at = (size_t)rr.r_offset - lo;
+        if (sgot > 0 && at + sizeof(target) <= (size_t)sgot) memcpy(&target, (const char*)slots.data() + at, sizeof(target));
+        else if (!safe_read_mem(m.base + rr.r_offset, &target, sizeof(target))) continue;
+        if (target == 0) continue;
+        c->checked++;
+
+        std::string where;
+        int kind = target_kind(w, target, where);
+        if (kind == TARGET_FINE) continue;
+
+        std::string sym = "?";
+        if (m.symtab && m.strtab) {
+            ElfW(Sym) s;
+            uint32_t si = (uint32_t)ELF64_R_SYM(rr.r_info);
+            if (safe_read_mem(m.symtab + (size_t)si * sizeof(ElfW(Sym)), &s, sizeof(s))) {
+                char nbuf[96] = {0};
+                if (safe_read_mem_n(m.strtab + s.st_name, nbuf, sizeof(nbuf) - 1) > 0) sym = nbuf;
+            }
+        }
+        if (kind == TARGET_APP_HOOK) { c->own += std::string(" ") + modb + ":" + sym + "->" + where; continue; }
+        char line[256];
+        snprintf(line, sizeof(line), "  %s: %s -> %llx ", modb, sym.c_str(), (unsigned long long)target);
+        if (kind == TARGET_UNTRACED) { if (c->untraced++ < 64) c->untraced_detail += line + where + "\n"; continue; }
+        c->hits++;
+        c->detail += line + where + "\n";
+        if (c->hits >= 64) break;
+    }
+}
+
+}
+
+NativeResult check_got_plt_integrity() {
+    NativeResult r;
+    if (!maps_available()) return {STATUS_INCONCLUSIVE, "process memory map unavailable (empty /proc/self/maps snapshot); cannot judge"};
+    find_vdso();
+    Ctx c;
+    uint32_t probe;
+    if (!safe_read_mem((uintptr_t)&check_got_plt_integrity, &probe, sizeof(probe))) {
+        r.status = STATUS_INCONCLUSIVE; r.details = "self-memory read unavailable";
+        return r;
+    }
+    Walk w;
+    find_mods(w);
+    c.modules = w.modules;
+    for (const Mod& m : w.mods) {
+        if (c.hits >= 64) break;
+        scan(w, m, &c);
+    }
+    if (c.checked == 0) {
+        r.status = STATUS_INCONCLUSIVE;
+        char h[96]; snprintf(h, sizeof(h), "no GOT/PLT slot could be read (modules=%d)", c.modules);
+        r.details = h;
+        return r;
+    }
+
+    char head[96];
+    snprintf(head, sizeof(head), "checked=%d hits=%d\n", c.checked, c.hits);
+    if (c.hits == 0 && c.untraced > 0) {
+        r.status = STATUS_INCONCLUSIVE;
+        r.details = std::string("could not verify: ") + head + "untraced=" + std::to_string(c.untraced) +
+                    ", GOT/PLT target(s) in unnamed code not traced to the code that placed them:\n" + c.untraced_detail;
+        return r;
+    }
+    r.status = c.hits > 0 ? STATUS_DETECTED : STATUS_CLEAN;
+    r.details = std::string(head) + (c.hits ? c.detail + c.untraced_detail : "no GOT/PLT target outside a file-backed module (own lib+libc+libart)" +
+                (c.own.empty() ? std::string() : "; hooked by the app's own library:" + c.own));
+
+    return r;
+}
+
+#else
+
+NativeResult check_got_plt_integrity() { return not_built_for_abi(); }
+
+#endif
+
+```
+
+`native/android/got_plt.h`:
+
+```h
+#pragma once
+#include "common.h"
+
+NativeResult check_got_plt_integrity();
+
+```
+
+`native/android/hook_bytes.cpp`:
+
+```cpp
+#include "hook_bytes.h"
+#include "hook_dest.h"
+#include <dlfcn.h>
+#include <cstring>
+#include <sstream>
+#include <vector>
+
+#if defined(__aarch64__)
+
+struct HookTarget {
+    const char* sym;
+    const char* lib;
+};
+
+static const HookTarget HOOK_TARGETS[] = {
+    { "open",           nullptr },
+    { "openat",         nullptr },
+    { "read",           nullptr },
+    { "write",          nullptr },
+    { "mmap",           nullptr },
+    { "munmap",         nullptr },
+    { "mprotect",       nullptr },
+    { "pthread_create", nullptr },
+    { "dlopen",         nullptr },
+    { "dlsym",          nullptr },
+    { nullptr, nullptr }
+};
+
+struct ByteCheck {
+    const char* sym;
+    uint32_t insn;
+    uintptr_t addr;
+    bool read_ok;
+    bool is_trampoline;
+    bool stock;
+};
+
+static const std::vector<uintptr_t>& hook_addrs() {
+    static const std::vector<uintptr_t> addrs = [] {
+        std::vector<uintptr_t> a;
+        for (const auto* t = HOOK_TARGETS; t->sym; ++t) a.push_back((uintptr_t)dlsym(RTLD_DEFAULT, t->sym));
+        return a;
+    }();
+    return addrs;
+}
+
+static ByteCheck read_hook_bytes(const char* sym, uintptr_t addr) {
+    ByteCheck r{};
+    r.sym = sym;
+    if (!addr) return r;
+    r.addr = addr;
+
+    uint32_t w[4];
+    if (safe_read_mem_n(r.addr, w, sizeof(w)) != (ssize_t)sizeof(w)) return r;
+    r.read_ok = true;
+    r.insn = w[0];
+    r.is_trampoline = (w[0] == FRIDA_TRAMPOLINE_INSN);
+    if (r.is_trampoline) {
+        uint32_t disk[4];
+        size_t dn = read_disk_bytes_for_addr(r.addr, disk, sizeof(disk));
+        r.stock = (dn >= sizeof(disk) && memcmp(w, disk, sizeof(disk)) == 0);
+    }
+    return r;
+}
+
+NativeResult check_hook_bytes() {
+    std::ostringstream d;
+    std::ostringstream u;
+    std::string own;
+    int readable = 0, hooked = 0, untraced = 0;
+    const auto& addrs = hook_addrs();
+    for (size_t i = 0; HOOK_TARGETS[i].sym; ++i) {
+        auto c = read_hook_bytes(HOOK_TARGETS[i].sym, addrs[i]);
+        if (!c.read_ok) continue;
+        readable++;
+        if (c.is_trampoline && !c.stock) {
+            std::string where;
+            HookOwner owner = hook_owner(c.addr, where);
+            if (owner == HOOK_APP_OWN) { own += std::string(" ") + c.sym + "->" + where; continue; }
+            // Not traced to any library: a hook, but not proof of who placed it.
+            std::ostringstream& out = owner == HOOK_UNRESOLVED ? u : d;
+            (owner == HOOK_UNRESOLVED ? untraced : hooked)++;
+            out << "  " << c.sym << "() @0x" << std::hex << c.addr
+                << " insn0=0x" << c.insn << " (LDR X16,[PC,#8] trampoline, differs from on-disk library), lands in " << where << "\n";
+        }
+    }
+    if (readable == 0) return {STATUS_INCONCLUSIVE, "no watched function readable (self-memory read failed)"};
+    if (hooked == 0 && untraced > 0)
+        return {STATUS_INCONCLUSIVE, "could not verify: " + std::to_string(untraced) +
+                                     " hooked function(s), not traced to the code that placed the hook:\n" + u.str()};
+    if (hooked == 0)
+        return {STATUS_CLEAN, "no ARM64 trampoline (LDR X16,[PC,#8] = 0x58000050) differing from the on-disk library (readable=" + std::to_string(readable) + ")" +
+                              (own.empty() ? "" : "; hooked by the app's own library:" + own)};
+    return {STATUS_DETECTED, std::to_string(hooked) + " hooked function(s):\n" + d.str() + u.str()};
+}
+
+#else
+
+NativeResult check_hook_bytes() { return not_built_for_abi(); }
+
+#endif
+
+```
+
+`native/android/hook_bytes.h`:
+
+```h
+#pragma once
+#include "common.h"
+
+NativeResult check_hook_bytes();
+
+```
+
+`native/android/hook_dest.cpp`:
+
+```cpp
+#include "hook_dest.h"
+#include <elf.h>
+#include <link.h>
+#include <algorithm>
+#include <cctype>
+#include <cstdio>
+#include <cstring>
+#include <vector>
+
+#if defined(__aarch64__)
+
+namespace {
+
+const size_t MAX_HOPS = 16;
+const size_t HOP_INSNS = 128;
+
+int64_t sext(uint64_t v, int bits) { return (int64_t)(v << (64 - bits)) >> (64 - bits); }
+
+std::string lower(std::string s) {
+    for (auto& c : s) c = (char)tolower((unsigned char)c);
+    return s;
+}
+
+// The kernel's page-size compat (pgsize_migration.c, init_pad_vma) prints the padding at the end of a
+// library segment as its own "[page size compat]" line, always "---p" whatever its real access. It is
+// still memory of the segment printed before it, and a hooker can write an island there (ShadowHook
+// does, in libc's padding on the Nothing Phone 2a). Returns that segment, or nullptr.
+const char* const PAD_NAME = "[page size compat]";
+
+const VmaEntry* padded_segment(const VmaEntry* pad) {
+    for (int i = 0; i < 4 && pad && pad->path == PAD_NAME; i++) {
+        const VmaEntry* prev = nullptr;
+        for (const auto& v : g_maps)
+            if (v.end == pad->start) { prev = &v; break; }
+        pad = prev;
+    }
+    return pad && pad->path != PAD_NAME ? pad : nullptr;
+}
+
+bool is_system(const std::string& p) {
+    for (const char* r : {"/system/", "/apex/", "/vendor/", "/product/", "/system_ext/", "/odm/"})
+        if (p.rfind(r, 0) == 0) return true;
+    return false;
+}
+
+// Code of this app: its APK files and the native libraries unpacked from them, which live under the
+// install folder /data/app/.../<package>-<id>/ (or /mnt/expand/.../<package>-<id>/). These are exactly
+// the files TAMPER_APK_CONTENT matches against the developer's signature, so a hook that lands in them
+// is the developer's own code. The private data folder (/data/data/<package>/,
+// /data/user[_de]/<n>/<package>/) is NOT trusted: the app can write there while it runs, so a library
+// there is not proven to come from the signed APK. An abuser with root could drop a renamed Frida agent
+// into it and pass every hook check, so a hook landing there must still read foreign.
+bool is_app_own(const std::string& p) {
+    if (g_own_package.empty()) return false;
+    return (p.rfind("/data/app/", 0) == 0 || p.rfind("/mnt/expand/", 0) == 0)
+        && p.find("/" + g_own_package + "-") != std::string::npos;
+}
+
+// DT_SONAME of the library whose ELF header is mapped at `base`, read from memory.
+std::string soname_at(uintptr_t base) {
+    ElfW(Ehdr) eh;
+    if (!safe_read_mem(base, &eh, sizeof(eh)) || memcmp(eh.e_ident, ELFMAG, SELFMAG) != 0) return "";
+    uintptr_t bias = 0, dyn = 0;
+    bool first = true;
+    for (int i = 0; i < eh.e_phnum && i < 64; i++) {
+        ElfW(Phdr) ph;
+        if (!safe_read_mem(base + eh.e_phoff + i * sizeof(ph), &ph, sizeof(ph))) return "";
+        if (ph.p_type == PT_LOAD && first) { bias = base - (ph.p_vaddr & ~(uintptr_t)0xFFF); first = false; }
+        if (ph.p_type == PT_DYNAMIC) dyn = ph.p_vaddr;
+    }
+    if (!dyn) return "";
+    uintptr_t strtab = 0, name = 0;
+    bool named = false;
+    for (int i = 0; i < 512; i++) {
+        ElfW(Dyn) d;
+        if (!safe_read_mem(bias + dyn + i * sizeof(d), &d, sizeof(d)) || d.d_tag == DT_NULL) break;
+        if (d.d_tag == DT_STRTAB) strtab = d.d_un.d_ptr;
+        if (d.d_tag == DT_SONAME) { name = d.d_un.d_val; named = true; }
+    }
+    char buf[96] = {};
+    if (!strtab || !named || safe_read_mem_n(bias + strtab + name, buf, sizeof(buf) - 1) <= 0) return "";
+    return buf;
+}
+
+// Frida Gadget keeps the SONAME libfrida-gadget-raw.so even when its file is renamed. The ELF header is
+// found in the memory map, not with dladdr(), which waits for the loader's lock.
+bool frida_lib(const VmaEntry* v, std::string& name) {
+    std::string so;
+    for (size_t j = (size_t)(v - g_maps.data()) + 1; j-- > 0 && g_maps[j].path == v->path;) {
+        uint32_t magic;
+        if (safe_read_mem(g_maps[j].start, &magic, sizeof(magic)) && memcmp(&magic, ELFMAG, SELFMAG) == 0) { so = soname_at(g_maps[j].start); break; }
+    }
+    const std::string& file = v->path;
+    name = so.empty() ? file.substr(file.rfind('/') + 1) : so;
+    return lower(so).find("frida") != std::string::npos || lower(file).find("frida") != std::string::npos;
+}
+
+// Code addresses the instructions at `pc` branch to or load (B/BL, LDR literal, ADRP+ADD/LDR/BR/RET),
+// up to the first B, BR or RET.
+void next_hops(uintptr_t pc, std::vector<uintptr_t>& out) {
+    uint32_t w[HOP_INSNS];
+    ssize_t n = safe_read_mem_n(pc, w, sizeof(w)) / 4;
+    for (ssize_t i = 0; i < n; i++) {
+        uint32_t x = w[i];
+        uintptr_t p = pc + (uintptr_t)i * 4;
+        uint64_t v;
+        if ((x & 0x7C000000u) == 0x14000000u) {
+            out.push_back(p + sext(x & 0x3FFFFFFu, 26) * 4);
+            if (!(x & 0x80000000u)) return;
+        } else if ((x & 0xFF000000u) == 0x58000000u) {
+            if (safe_read_mem(p + sext((x >> 5) & 0x7FFFFu, 19) * 4, &v, sizeof(v))) out.push_back(v);
+        } else if ((x & 0x9F000000u) == 0x90000000u && i + 1 < n) {
+            uint64_t page = (p & ~(uintptr_t)0xFFF) + sext((((x >> 5) & 0x7FFFFu) << 2) | ((x >> 29) & 3), 21) * 4096;
+            uint32_t y = w[i + 1], rd = x & 31;
+            if (((y >> 5) & 31) != rd) continue;
+            if ((y & 0xFFC00000u) == 0x91000000u) out.push_back(page + ((y >> 10) & 0xFFF));
+            else if ((y & 0xFFC00000u) == 0xF9400000u && safe_read_mem(page + ((y >> 10) & 0xFFF) * 8, &v, sizeof(v))) out.push_back(v);
+            else if ((y & 0xFFFFFC1Fu) == 0xD61F0000u || (y & 0xFFFFFC1Fu) == 0xD65F0000u) out.push_back(page);
+        } else if ((x & 0xFFFFFC1Fu) == 0xD61F0000u || (x & 0xFFFFFC1Fu) == 0xD65F0000u) {
+            return;
+        }
+    }
+}
+
+}
+
+HookOwner hook_owner(uintptr_t addr, std::string& where) {
+    std::vector<uintptr_t> todo{addr}, seen;
+    std::string own, trace;
+    for (size_t k = 0; k < todo.size() && seen.size() < MAX_HOPS; k++) {
+        uintptr_t a = todo[k];
+        if (std::find(seen.begin(), seen.end(), a) != seen.end()) continue;
+        seen.push_back(a);
+        const VmaEntry* v = vma_for(a);
+        if (seen.size() <= 6) {
+            uint32_t w[4] = {};
+            safe_read_mem_n(a, w, sizeof(w));
+            char t[160];
+            snprintf(t, sizeof(t), " %llx[%s %s]%08x.%08x.%08x.%08x", (unsigned long long)a, v ? v->perms : "-",
+                     v ? v->path.substr(0, 40).c_str() : "unmapped", w[0], w[1], w[2], w[3]);
+            trace += t;
+        }
+        // A padding line's real access is not shown; a branch only lands there if it runs.
+        bool pad = v && v->path == PAD_NAME;
+        if (pad) v = padded_segment(v);
+        if (!v || (!pad && !v->executable())) continue;
+        if (k > 0 && !v->anonymous()) {
+            if (is_system(v->path)) {
+                // Code that differs from the library file was written there by a hooker (an island in
+                // the library's own pages or its padding): follow it like generated code. Unchanged
+                // code is a landing.
+                uint32_t mem[4], disk[4];
+                if (!pad && safe_read_mem(a, mem, sizeof(mem)) && read_disk_bytes_for_addr(a, disk, sizeof(disk)) == sizeof(disk) &&
+                    memcmp(mem, disk, sizeof(mem)) == 0) continue;
+            } else {
+                std::string name;
+                bool frida = frida_lib(v, name);
+                if (is_app_own(v->path) && !frida) { if (own.empty()) own = name; continue; }
+                where = frida ? "Frida library " + name + " (" + v->path + ")" : v->path;
+                return HOOK_FOREIGN;
+            }
+        }
+        next_hops(a, todo);
+    }
+    if (!own.empty()) { where = own; return HOOK_APP_OWN; }
+    where = "no library code reached; hops:" + trace;
+    return HOOK_UNRESOLVED;
+}
+
+#else
+
+HookOwner hook_owner(uintptr_t, std::string& where) { where = "not built for this chip type"; return HOOK_UNRESOLVED; }
+
+#endif
+
+```
+
+`native/android/hook_dest.h`:
+
+```h
+#pragma once
+#include "common.h"
+
+enum HookOwner { HOOK_UNRESOLVED, HOOK_FOREIGN, HOOK_APP_OWN };
+
+// Follows a hook from `addr` (a hooked function's entry, or a code pointer found in a function
+// table) through the jumps and code pointers of generated code, to the first code that belongs to
+// a file other than a system library. HOOK_APP_OWN: that code is a library installed with this app
+// (the developer's own hooking SDK), and not Frida. HOOK_FOREIGN: it is anywhere else, or Frida
+// packed into the app. HOOK_UNRESOLVED: no such code within a few hops. `where` names the code.
+HookOwner hook_owner(uintptr_t addr, std::string& where);
+
+```
+
+`native/android/jni_bridge.cpp`:
+
+```cpp
+#include <jni.h>
+#include <string>
+#include <ctime>
+#include "common.h"
+#include "hook_bytes.h"
+#include "memory_libs.h"
+#include "root_path.h"
+#include "got_plt.h"
+#include "uprobe_scan.h"
+#include "opcode_scan.h"
+#include "tamper_scan.h"
+
+namespace {
+
+long now_us() {
+    timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return t.tv_sec * 1000000L + t.tv_nsec / 1000;
+}
+
+std::string jstr(JNIEnv* env, jstring s) {
+    const char* c = s ? env->GetStringUTFChars(s, nullptr) : nullptr;
+    std::string out = c ? c : "";
+    if (c) env->ReleaseStringUTFChars(s, c);
+    return out;
+}
+
+struct Check { const char* id; NativeResult (*fn)(); const char* group; };
+
+const Check CHECKS[] = {
+    {"HOOK_BYTES",               check_hook_bytes,           "INSTRUMENTATION"},
+    {"LIB_FROM_ROOT_PATH",       check_lib_from_root_path,   "INSTRUMENTATION"},
+    {"FRIDA_AGENT_IN_MEMORY",    check_frida_agent_in_memory, "INSTRUMENTATION"},
+    {"DISGUISED_LIBRARY_IN_MEMORY", check_disguised_library, "INSTRUMENTATION"},
+    {"GOT_PLT_INTEGRITY",        check_got_plt_integrity,    "INSTRUMENTATION"},
+    {"UPROBE_RESIDUE",           check_uprobe_residue,       "INSTRUMENTATION"},
+    {"OPCODE_TRAMPOLINE",        check_opcode_trampoline,    "INSTRUMENTATION"},
+    {"TAMPER_SIGNING_BLOCK",     check_tamper_signing_block, "APP_INTEGRITY"},
+};
+
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_io_github_areyougarou_intakto_NativeCore_open(JNIEnv* env, jclass, jstring path) {
+    const char* p = env->GetStringUTFChars(path, nullptr);
+    if (!p) return -1;
+    int fd = raw_open(p);
+    env->ReleaseStringUTFChars(path, p);
+    return fd;
+}
+
+// The first check() reads the map here, to find the APK, a few milliseconds before run() would read it
+// again (both on the Intakto thread). run() takes this snapshot instead of reading the map twice.
+static bool g_maps_fresh = false;
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_io_github_areyougarou_intakto_NativeCore_apkPath(JNIEnv* env, jclass, jstring pkg) {
+    g_maps = read_maps();
+    g_maps_fresh = true;
+    std::string p = own_apk_path(g_maps, jstr(env, pkg));
+    return p.empty() ? nullptr : env->NewStringUTF(p.c_str());
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_io_github_areyougarou_intakto_NativeCore_run(JNIEnv* env, jclass core, jstring signers, jstring pkg, jint targetSdk) {
+    jmethodID started = env->GetStaticMethodID(core, "started", "(Ljava/lang/String;)V");
+    if (env->ExceptionCheck()) { env->ExceptionClear(); started = nullptr; }
+    init_own_process_name();
+    if (!g_maps_fresh) g_maps = read_maps();
+    g_maps_fresh = false;
+    mem_run_begin();
+    g_expected_signers = jstr(env, signers);
+    g_own_package = jstr(env, pkg);
+    g_target_sdk = targetSdk;
+    std::string json = "[";
+    for (const Check& c : CHECKS) {
+        if (started) {
+            if (jstring id = env->NewStringUTF(c.id)) {
+                env->CallStaticVoidMethod(core, started, id);
+                env->DeleteLocalRef(id);
+            }
+            if (env->ExceptionCheck()) env->ExceptionClear();
+        }
+        long t0 = now_us();
+        NativeResult r = c.fn();
+        long us = now_us() - t0;
+        if (json.size() > 1) json += ",";
+        json += std::string("{\"id\":\"") + c.id + "\",\"group\":\"" + c.group +
+                "\",\"status\":" + std::to_string(r.status) +
+                ",\"us\":" + std::to_string(us) + ",\"details\":\"" + json_escape(r.details) + "\"}";
+    }
+    json += "]";
+    mem_run_end();
+    return env->NewStringUTF(json.c_str());
+}
+
+```
+
+`native/android/memory_libs.cpp`:
+
+```cpp
+#include "memory_libs.h"
+#include <cstdint>
+#include <cstring>
+#include <cstdio>
+#include <string>
+#include <elf.h>
+#include <link.h>
+#include <unistd.h>
+
+namespace {
+
+// Frida's agent library (libfrida-agent-raw.so, which frida-server loads into the app from a memfd)
+// exports this entry point, and Frida's loader finds the agent by it. Only Frida's agent exports it.
+// A build that renames it (Florida exports `main`) or a gadget (it exports nothing) gets past this
+// check: a miss is allowed, a false alarm is not.
+const char kAgentEntry[] = "frida_agent_main";
+
+#if defined(__LP64__)
+const unsigned char kOwnClass = ELFCLASS64;
+#else
+const unsigned char kOwnClass = ELFCLASS32;
+#endif
+
+enum Lookup { NOT_FOUND, FOUND, UNREADABLE };
+
+// Names the system gives its own memory: ART's JIT cache and heaps, the linker's and the allocator's
+// memory, thread stacks. None of these regions holds a library image. Florida and its builds, Rusda,
+// strongR-frida and FreeDaah load their agent from a memfd named jit-cache, phantom-frida from one
+// named jit-code-cache.
+// [vdso] is not in the list: it is the kernel's own library.
+const char* const kSystemNames[] = {"jit-cache", "code-cache", "dalvik", ".art", "linker_alloc", "scudo", "stack"};
+
+const char* system_name(const std::string& p) {
+    for (const char* n : kSystemNames)
+        if (p.find(n) != std::string::npos) return n;
+    return nullptr;
+}
+
+// Memory with no file behind it: anonymous, [anon:<name>], or a memfd (a file that lives only in memory).
+bool memory_only(const std::string& p) {
+    return p.empty() || p[0] == '[' || p.find("memfd:") != std::string::npos;
+}
+
+bool is_candidate_region(const VmaEntry& v) {
+    return memory_only(v.path) && !system_name(v.path) && v.path.find("vdso") == std::string::npos;
+}
+
+template <typename T> bool rd(uintptr_t a, T& out) { return safe_read_mem(a, &out, sizeof(out)); }
+
+// One library image in memory, located from its own ELF header. Every address the lookup reads
+// must fall inside the image, so the name can only come from this library's own tables.
+struct Image {
+    uintptr_t bias = 0, lo = 0, hi = 0;
+    uintptr_t strtab = 0, symtab = 0, gnu_hash = 0, hash = 0;
+    uint64_t strsz = 0;
+    bool inside(uintptr_t a, uint64_t len) const { return a >= lo && a < hi && len <= hi - a; }
+    uintptr_t at(ElfW(Addr) p) const { return p < bias ? bias + p : p; }
+};
+
+Lookup check_sym(const Image& im, uint32_t idx) {
+    ElfW(Sym) s;
+    uintptr_t a = im.symtab + (uintptr_t)idx * sizeof(s);
+    if (!im.inside(a, sizeof(s)) || !rd(a, s)) return UNREADABLE;
+    if (s.st_name >= im.strsz) return UNREADABLE;
+    char name[sizeof(kAgentEntry)];
+    ssize_t n = safe_read_mem_n(im.strtab + s.st_name, name, sizeof(name));
+    if (n <= 0) return UNREADABLE;
+    if (memcmp(name, kAgentEntry, (size_t)n) != 0) return NOT_FOUND;
+    if ((size_t)n < sizeof(name)) return UNREADABLE;
+    unsigned bind = s.st_info >> 4;
+    bool exported = s.st_shndx != SHN_UNDEF && (bind == STB_GLOBAL || bind == STB_WEAK);
+    return exported ? FOUND : NOT_FOUND;
+}
+
+// The same lookup the dynamic linker runs for dlsym(): a name the linker can export is found here.
+Lookup gnu_lookup(const Image& im) {
+    uint32_t hdr[4];
+    if (!im.inside(im.gnu_hash, sizeof(hdr)) || !safe_read_mem(im.gnu_hash, hdr, sizeof(hdr))) return UNREADABLE;
+    uint32_t nbuckets = hdr[0], symoffset = hdr[1];
+    if (nbuckets == 0) return NOT_FOUND;
+    uint32_t h = 5381;
+    for (const char* c = kAgentEntry; *c; c++) h = h * 33 + (uint8_t)*c;
+    uintptr_t buckets = im.gnu_hash + sizeof(hdr) + (uintptr_t)hdr[2] * sizeof(ElfW(Addr));
+    uintptr_t chain = buckets + (uintptr_t)nbuckets * 4;
+    uint32_t idx;
+    uintptr_t b = buckets + (uintptr_t)(h % nbuckets) * 4;
+    if (!im.inside(b, 4) || !rd(b, idx)) return UNREADABLE;
+    if (idx < symoffset) return NOT_FOUND;
+    for (int guard = 0; guard < 65536; guard++, idx++) {
+        uint32_t ch;
+        uintptr_t c = chain + (uintptr_t)(idx - symoffset) * 4;
+        if (!im.inside(c, 4) || !rd(c, ch)) return UNREADABLE;
+        if ((ch | 1) == (h | 1)) {
+            Lookup r = check_sym(im, idx);
+            if (r != NOT_FOUND) return r;
+        }
+        if (ch & 1) return NOT_FOUND;
+    }
+    return UNREADABLE;
+}
+
+Lookup sysv_lookup(const Image& im) {
+    uint32_t hdr[2];
+    if (!im.inside(im.hash, sizeof(hdr)) || !safe_read_mem(im.hash, hdr, sizeof(hdr))) return UNREADABLE;
+    uint32_t nbucket = hdr[0], nchain = hdr[1];
+    if (nbucket == 0) return NOT_FOUND;
+    uint32_t h = 0;
+    for (const char* c = kAgentEntry; *c; c++) {
+        h = (h << 4) + (uint8_t)*c;
+        uint32_t g = h & 0xf0000000u;
+        if (g) h ^= g >> 24;
+        h &= ~g;
+    }
+    uintptr_t bucket = im.hash + sizeof(hdr), chain = bucket + (uintptr_t)nbucket * 4;
+    uint32_t idx;
+    uintptr_t b = bucket + (uintptr_t)(h % nbucket) * 4;
+    if (!im.inside(b, 4) || !rd(b, idx)) return UNREADABLE;
+    for (int guard = 0; idx != 0 && guard < 65536; guard++) {
+        if (idx >= nchain) return UNREADABLE;
+        Lookup r = check_sym(im, idx);
+        if (r != NOT_FOUND) return r;
+        uintptr_t c = chain + (uintptr_t)idx * 4;
+        if (!im.inside(c, 4) || !rd(c, idx)) return UNREADABLE;
+    }
+    return idx == 0 ? NOT_FOUND : UNREADABLE;
+}
+
+// Called for a region that starts with an ELF header of this process's class. FOUND means it is a
+// library image laid out the way the linker loads one; `im` then holds its bounds and `dyn` its
+// dynamic table's program header.
+Lookup library_image(const VmaEntry& v, const ElfW(Ehdr)& eh, Image& im, ElfW(Phdr)& dyn) {
+    if (eh.e_phentsize != sizeof(ElfW(Phdr)) || eh.e_phnum == 0 || eh.e_phnum > 128) return NOT_FOUND;
+    if (eh.e_phoff + (uint64_t)eh.e_phnum * sizeof(ElfW(Phdr)) > v.size()) return NOT_FOUND;
+    ElfW(Phdr) ph[128];
+    if (!safe_read_mem((uintptr_t)(v.start + eh.e_phoff), ph, eh.e_phnum * sizeof(ElfW(Phdr)))) return UNREADABLE;
+
+    const ElfW(Phdr)* first = nullptr;
+    const ElfW(Phdr)* d = nullptr;
+    uint64_t end = 0;
+    for (unsigned i = 0; i < eh.e_phnum; i++) {
+        if (ph[i].p_type == PT_DYNAMIC) d = &ph[i];
+        if (ph[i].p_type != PT_LOAD) continue;
+        if (!first) first = &ph[i];
+        if ((uint64_t)ph[i].p_vaddr + ph[i].p_memsz > end) end = (uint64_t)ph[i].p_vaddr + ph[i].p_memsz;
+    }
+    // No dynamic table means no exports. The header must sit at the start of the first loaded
+    // segment, as it does in every library the linker loads.
+    if (!d || !first || first->p_offset != 0) return NOT_FOUND;
+
+    uintptr_t page = (uintptr_t)getpagesize();
+    uintptr_t base = (uintptr_t)first->p_vaddr & ~(page - 1);
+    if (v.start < base) return NOT_FOUND;
+    im.bias = (uintptr_t)v.start - base;
+    im.lo = (uintptr_t)v.start;
+    im.hi = im.bias + (uintptr_t)end;
+    if (im.hi <= im.lo) return NOT_FOUND;
+    dyn = *d;
+    return FOUND;
+}
+
+Lookup agent_exported(Image& im, const ElfW(Phdr)& dyn) {
+    ElfW(Dyn) d[256];
+    uintptr_t da = im.bias + (uintptr_t)dyn.p_vaddr;
+    size_t want = dyn.p_memsz < sizeof(d) ? (size_t)dyn.p_memsz : sizeof(d);
+    if (!im.inside(da, want)) return UNREADABLE;
+    ssize_t got = safe_read_mem_n(da, d, want);
+    if (got < (ssize_t)sizeof(ElfW(Dyn))) return UNREADABLE;
+    for (size_t i = 0; i < (size_t)got / sizeof(ElfW(Dyn)) && d[i].d_tag != DT_NULL; i++) {
+        switch (d[i].d_tag) {
+            case DT_STRTAB:   im.strtab   = im.at(d[i].d_un.d_ptr); break;
+            case DT_SYMTAB:   im.symtab   = im.at(d[i].d_un.d_ptr); break;
+            case DT_STRSZ:    im.strsz    = d[i].d_un.d_val; break;
+            case DT_GNU_HASH: im.gnu_hash = im.at(d[i].d_un.d_ptr); break;
+            case DT_HASH:     im.hash     = im.at(d[i].d_un.d_ptr); break;
+        }
+    }
+    if (!im.strtab || !im.symtab || (!im.gnu_hash && !im.hash)) return NOT_FOUND;
+    if (!im.inside(im.strtab, im.strsz)) return UNREADABLE;
+    return im.gnu_hash ? gnu_lookup(im) : sysv_lookup(im);
+}
+
+std::string region_line(const VmaEntry& v) {
+    char line[320];
+    snprintf(line, sizeof(line), "  %llx-%llx %s %s\n", (unsigned long long)v.start,
+             (unsigned long long)v.end, v.perms, v.path.empty() ? "[anon]" : v.path.c_str());
+    return line;
+}
+
+// Another thread can unmap or replace a region after the run's map snapshot. An unreadable region counts
+// only if a fresh map still shows it unchanged, or if the fresh map cannot be read.
+bool still_mapped(const VmaEntry& v, std::vector<VmaEntry>& fresh) {
+    if (fresh.empty()) fresh = read_maps();
+    if (fresh.empty()) return true;
+    for (const auto& f : fresh)
+        if (f.start == v.start && f.end == v.end && strcmp(f.perms, v.perms) == 0 && f.path == v.path) return true;
+    return false;
+}
+
+// An empty map or a failed read of our own code means the walk would see nothing: never CLEAN.
+const char* cannot_judge(const void* own_code) {
+    if (!maps_available()) return "process memory map unavailable (empty /proc/self/maps snapshot); cannot judge";
+    uint32_t probe;
+    if (!safe_read_mem((uintptr_t)own_code, &probe, sizeof(probe))) return "self-memory read unavailable";
+    return nullptr;
+}
+
+}
+
+NativeResult check_frida_agent_in_memory() {
+    if (const char* why = cannot_judge((const void*)&check_frida_agent_in_memory)) return {STATUS_INCONCLUSIVE, why};
+
+    int images = 0, unreadable = 0, vanished = 0;
+    std::string unread;
+    std::vector<VmaEntry> fresh;
+    // A small library can map its first file page twice (code, then read-only data), so its header
+    // shows at the start of two regions. Regions inside an image already read belong to it.
+    uintptr_t image_hi = 0;
+    for (const auto& v : g_maps) {
+        if (v.start < image_hi) continue;
+        if (!v.readable() || !is_candidate_region(v) || is_own_vma(v.path)) continue;
+        ElfW(Ehdr) eh;
+        if (v.size() < sizeof(eh) || !rd((uintptr_t)v.start, eh)) continue;
+        if (memcmp(eh.e_ident, ELFMAG, SELFMAG) != 0 || eh.e_ident[EI_CLASS] != kOwnClass) continue;
+        images++;
+        Image im;
+        ElfW(Phdr) dyn;
+        Lookup r = library_image(v, eh, im, dyn);
+        if (r == FOUND) {
+            image_hi = im.hi;
+            r = agent_exported(im, dyn);
+        }
+        switch (r) {
+            case FOUND:
+                return {STATUS_DETECTED, std::string("library loaded from memory exports Frida's agent entry ") +
+                                         kAgentEntry + ":\n" + region_line(v)};
+            case UNREADABLE:
+                if (!still_mapped(v, fresh)) { vanished++; break; }
+                if (++unreadable <= 4) unread += region_line(v);
+                break;
+            case NOT_FOUND:
+                break;
+        }
+    }
+    if (unreadable > 0)
+        return {STATUS_INCONCLUSIVE, "export table unreadable for " + std::to_string(unreadable) +
+                                     " library image(s) in unnamed memory:\n" + unread};
+    return {STATUS_CLEAN, std::to_string(images) + " library image(s) in unnamed memory; none exports " + kAgentEntry +
+                          (vanished ? "; " + std::to_string(vanished) + " unmapped during the scan" : "")};
+}
+
+// Only memfds are read: a loader that goes through the linker maps the library from a file, and every
+// disguised agent seen so far is a memfd. ART's own anonymous regions run to hundreds per process.
+NativeResult check_disguised_library() {
+    if (const char* why = cannot_judge((const void*)&check_disguised_library)) return {STATUS_INCONCLUSIVE, why};
+
+    int regions = 0, unreadable = 0, vanished = 0;
+    std::string unread;
+    std::vector<VmaEntry> fresh;
+    for (const auto& v : g_maps) {
+        if (v.path.find("memfd:") == std::string::npos || !v.readable()) continue;
+        const char* name = system_name(v.path);
+        if (!name || is_own_vma(v.path)) continue;
+        regions++;
+        ElfW(Ehdr) eh;
+        if (v.size() < sizeof(eh) || !rd((uintptr_t)v.start, eh)) continue;
+        if (memcmp(eh.e_ident, ELFMAG, SELFMAG) != 0 || eh.e_ident[EI_CLASS] != kOwnClass) continue;
+        Image im;
+        ElfW(Phdr) dyn;
+        switch (library_image(v, eh, im, dyn)) {
+            case FOUND:
+                return {STATUS_DETECTED, std::string("library image in memory named as the system's own (") + name +
+                                         "), which never holds a library:\n" + region_line(v)};
+            case UNREADABLE:
+                if (!still_mapped(v, fresh)) { vanished++; break; }
+                if (++unreadable <= 4) unread += region_line(v);
+                break;
+            case NOT_FOUND:
+                break;
+        }
+    }
+    if (unreadable > 0)
+        return {STATUS_INCONCLUSIVE, "program headers unreadable for " + std::to_string(unreadable) +
+                                     " library header(s) in memfds named as the system's own:\n" + unread};
+    return {STATUS_CLEAN, std::to_string(regions) + " memfd region(s) named as the system's own memory; none holds a library image" +
+                          (vanished ? "; " + std::to_string(vanished) + " unmapped during the scan" : "")};
+}
+
+```
+
+`native/android/memory_libs.h`:
+
+```h
+#pragma once
+#include "common.h"
+
+NativeResult check_frida_agent_in_memory();
+NativeResult check_disguised_library();
+
+```
+
+`native/android/opcode_scan.cpp`:
+
+```cpp
+#include "opcode_scan.h"
+#include "hook_dest.h"
+#include <dlfcn.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <vector>
+
+#if defined(__aarch64__)
+
+namespace {
+
+const char* const SENSITIVE_FNS[] = {
+    "open", "openat", "read", "write", "close", "mmap", "munmap", "mprotect",
+    "dlopen", "dlsym", "connect", "ptrace", "kill", "sigaction",
+    "pthread_create", "__system_property_get", nullptr
+};
+
+inline bool is_b(uint32_t i)      { return (i & 0xFC000000u) == 0x14000000u; }
+inline bool is_br(uint32_t i)     { return (i & 0xFFFFFC1Fu) == 0xD61F0000u || ((i & 0xFFFFFC1Fu) == 0xD65F0000u && ((i >> 5) & 31) != 30); }
+inline bool is_brk(uint32_t i)    { return (i & 0xFFE0001Fu) == 0xD4200000u; }
+inline bool is_ldr_lit(uint32_t i){ return (i & 0xFF000000u) == 0x58000000u; }
+inline bool is_adrp(uint32_t i)   { return (i & 0x9F000000u) == 0x90000000u; }
+inline bool is_landing_pad(uint32_t i) {
+    return i == 0xD503245Fu || i == 0xD503249Fu || i == 0xD50324DFu ||
+           i == 0xD503241Fu || i == 0xD503233Fu || i == 0xD503237Fu;
+}
+
+bool b_escapes_module(const uint32_t* w, uintptr_t p) {
+    int32_t imm = (int32_t)(w[0] << 6) >> 6;
+    uint64_t target = p + (int64_t)imm * 4;
+    const VmaEntry* src = vma_for(p);
+    const VmaEntry* dst = vma_for(target);
+    if (!src) return false;
+    return dst != src;
+}
+
+const char* classify(const uint32_t* w, uintptr_t p) {
+    if (is_brk(w[0])) return "BRK/breakpoint at entry";
+    if (is_br(w[0]))  return "indirect-branch (BR/RET) trampoline at entry";
+    if (is_b(w[0]) && b_escapes_module(w, p)) return "direct-branch (B) escaping module";
+    if (is_ldr_lit(w[0]) && (is_br(w[1]) || is_br(w[2]))) return "literal-load + BR/RET trampoline";
+    if (is_adrp(w[0]) && (is_br(w[1]) || is_br(w[2]))) return "ADRP + BR/RET trampoline";
+    return nullptr;
+}
+
+}
+
+NativeResult check_opcode_trampoline() {
+    static const std::vector<void*> addrs = [] {
+        std::vector<void*> a;
+        for (const char* const* s = SENSITIVE_FNS; *s; ++s) a.push_back(dlsym(RTLD_DEFAULT, *s));
+        return a;
+    }();
+    NativeResult r;
+    int resolved = 0, readable = 0, hooked = 0, untraced = 0;
+    std::string detail, own, untraced_detail;
+    for (size_t i = 0; SENSITIVE_FNS[i]; ++i) {
+        const char* const* s = &SENSITIVE_FNS[i];
+        void* p = addrs[i];
+        if (!p) continue;
+        resolved++;
+        uint32_t w[6];
+        if (safe_read_mem_n((uintptr_t)p, w, sizeof(w)) != (ssize_t)sizeof(w)) continue;
+        readable++;
+        int bi = is_landing_pad(w[0]) ? 1 : 0;
+        const char* why = classify(w + bi, (uintptr_t)p + (uintptr_t)bi * 4);
+        if (!why) continue;
+        uint32_t disk[6];
+        size_t need = (size_t)(bi + 3) * 4;
+        size_t dn = read_disk_bytes_for_addr((uintptr_t)p, disk, sizeof(disk));
+        if (dn >= need && memcmp(w, disk, need) == 0) continue;
+        std::string where;
+        HookOwner owner = hook_owner((uintptr_t)p + (uintptr_t)bi * 4, where);
+        if (owner == HOOK_APP_OWN) {
+            own += std::string(" ") + *s + "->" + where;
+            continue;
+        }
+        const VmaEntry* v = vma_for((uintptr_t)p);
+        bool filebacked = v && !v->path.empty() && v->path[0] != '[' && v->path.find("memfd:") == std::string::npos;
+        char line[256];
+        snprintf(line, sizeof(line), "  %s @%p insn0=0x%08x: %s (%s), lands in ", *s, p, w[bi], why,
+                 filebacked ? "differs from on-disk library" : "code not backed by a file");
+        // A hook the follower cannot trace to any library proves a hook, not who placed it.
+        if (owner == HOOK_UNRESOLVED) { untraced++; untraced_detail += line + where + "\n"; continue; }
+        hooked++;
+        detail += line + where + "\n";
+    }
+
+    std::string raw = "resolved=" + std::to_string(resolved) +
+                      " readable=" + std::to_string(readable) +
+                      " hooked=" + std::to_string(hooked) +
+                      " untraced=" + std::to_string(untraced);
+    if (readable == 0) {
+        r.status = STATUS_INCONCLUSIVE;
+        r.details = "self-memory read failed on all watched fns (" + raw + ")";
+    } else if (hooked > 0) {
+        r.status = STATUS_DETECTED;
+        r.details = raw + "\n" + detail + untraced_detail;
+    } else if (untraced > 0) {
+        r.status = STATUS_INCONCLUSIVE;
+        r.details = "could not verify: hooked, but not traced to the code that placed the hook (" + raw + ")\n" + untraced_detail;
+    } else {
+        r.status = STATUS_CLEAN;
+        r.details = "no entry-prologue trampoline differing from the on-disk library (" + raw + ")" +
+                    (own.empty() ? "" : "; hooked by the app's own library:" + own);
+    }
+
+    return r;
+}
+
+#else
+
+NativeResult check_opcode_trampoline() { return not_built_for_abi(); }
+
+#endif
+
+```
+
+`native/android/opcode_scan.h`:
+
+```h
+#pragma once
+#include "common.h"
+
+NativeResult check_opcode_trampoline();
+
+```
+
+`native/android/root_path.cpp`:
+
+```cpp
+#include "root_path.h"
+#include <cstdio>
+#include <cstring>
+#include <string>
+
+namespace {
+
+// Zygisk loaders map every enabled module into every app, and ReZygisk keeps any module that does
+// not ask to be unloaded, so a module library alone only says a root tool is installed. These
+// modules unload themselves from every app they do not hook: in our memory, they target this app.
+const char* const kModulesDir = "/data/adb/modules/";
+const char* const kTargetingModules[] = {"zygisk_lsposed", "riru_lsposed", "zygisk_vector", "zygiskfrida"};
+
+std::string module_id(const std::string& p) {
+    size_t b = strlen(kModulesDir), e = p.find('/', b);
+    return p.rfind(kModulesDir, 0) == 0 && e != std::string::npos ? p.substr(b, e - b) : std::string();
+}
+
+bool targeting_module(const std::string& id) {
+    for (const char* m : kTargetingModules)
+        if (id == m) return true;
+    return false;
+}
+}
+
+NativeResult check_lib_from_root_path() {
+    NativeResult r;
+    if (!maps_available()) return {STATUS_INCONCLUSIVE, "process memory map unavailable (empty /proc/self/maps snapshot); cannot judge"};
+    int hits = 0;
+    std::string detail, present;
+    for (const auto& v : g_maps) {
+        if (!v.executable()) continue;
+        const std::string& p = v.path;
+        if (p.empty() || p[0] == '[') continue;
+        if (is_own_vma(p)) continue;
+        bool tmp = p.find("/data/local/tmp/") != std::string::npos;
+        if (!tmp && p.rfind("/data/adb/", 0) != 0) continue;
+        std::string id = tmp ? std::string() : module_id(p);
+        if (!id.empty() && !targeting_module(id)) {
+            if (present.find(" " + id + " ") == std::string::npos) present += " " + id + " ";
+            continue;
+        }
+        hits++;
+        char line[256];
+        snprintf(line, sizeof(line), "  %llx-%llx %s %s\n",
+                 (unsigned long long)v.start, (unsigned long long)v.end, v.perms, p.c_str());
+        detail += line;
+        if (hits >= 32) break;
+    }
+
+    r.status = hits > 0 ? STATUS_DETECTED : STATUS_CLEAN;
+    r.details = hits > 0 ? std::string("exec lib(s) from root/temp path:\n") + detail
+                         : "no exec lib mapped from /data/adb or /data/local/tmp";
+    if (!present.empty()) r.details += "\nnot counted, root modules loaded into every app:" + present;
+
+    return r;
+}
+
+```
+
+`native/android/root_path.h`:
+
+```h
+#pragma once
+#include "common.h"
+
+NativeResult check_lib_from_root_path();
+
+```
+
+`native/android/tamper_scan.cpp`:
+
+```cpp
+#include "tamper_scan.h"
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/syscall.h>
+#include <algorithm>
+#include <cctype>
+#include <cstdint>
+#include <cstring>
+#include <string>
+#include <vector>
+
+namespace {
+
+struct Sha256 {
+    uint32_t h[8]; uint64_t len; uint8_t buf[64]; size_t n;
+    void init() {
+        h[0]=0x6a09e667;h[1]=0xbb67ae85;h[2]=0x3c6ef372;h[3]=0xa54ff53a;
+        h[4]=0x510e527f;h[5]=0x9b05688c;h[6]=0x1f83d9ab;h[7]=0x5be0cd19;
+        len=0;n=0;
+    }
+    static uint32_t ror(uint32_t x,int r){return (x>>r)|(x<<(32-r));}
+    void block(const uint8_t* p){
+        static const uint32_t K[64]={
+            0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+            0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+            0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+            0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+            0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+            0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+            0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+            0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2};
+        uint32_t w[64];
+        for(int i=0;i<16;i++) w[i]=(p[i*4]<<24)|(p[i*4+1]<<16)|(p[i*4+2]<<8)|p[i*4+3];
+        for(int i=16;i<64;i++){
+            uint32_t s0=ror(w[i-15],7)^ror(w[i-15],18)^(w[i-15]>>3);
+            uint32_t s1=ror(w[i-2],17)^ror(w[i-2],19)^(w[i-2]>>10);
+            w[i]=w[i-16]+s0+w[i-7]+s1;
+        }
+        uint32_t a=h[0],b=h[1],c=h[2],d=h[3],e=h[4],f=h[5],g=h[6],hh=h[7];
+        for(int i=0;i<64;i++){
+            uint32_t S1=ror(e,6)^ror(e,11)^ror(e,25);
+            uint32_t ch=(e&f)^((~e)&g);
+            uint32_t t1=hh+S1+ch+K[i]+w[i];
+            uint32_t S0=ror(a,2)^ror(a,13)^ror(a,22);
+            uint32_t maj=(a&b)^(a&c)^(b&c);
+            uint32_t t2=S0+maj;
+            hh=g;g=f;f=e;e=d+t1;d=c;c=b;b=a;a=t1+t2;
+        }
+        h[0]+=a;h[1]+=b;h[2]+=c;h[3]+=d;h[4]+=e;h[5]+=f;h[6]+=g;h[7]+=hh;
+    }
+    void update(const uint8_t* p,size_t l){
+        len+=l;
+        while(l){ size_t k=64-n; if(k>l)k=l; memcpy(buf+n,p,k); n+=k; p+=k; l-=k;
+            if(n==64){ block(buf); n=0; } }
+    }
+    std::string hex(){
+        uint64_t bits=len*8; uint8_t pad=0x80; update(&pad,1);
+        uint8_t z=0; while(n!=56) update(&z,1);
+        uint8_t be[8]; for(int i=0;i<8;i++) be[i]=(uint8_t)(bits>>(56-i*8)); update(be,8);
+        static const char* hx="0123456789abcdef"; std::string out; out.reserve(64);
+        for(int i=0;i<8;i++) for(int j=3;j>=0;j--){ uint8_t v=(uint8_t)(h[i]>>(j*8)); out+=hx[v>>4]; out+=hx[v&0xf]; }
+        return out;
+    }
+};
+
+std::string sha256_hex(const uint8_t* p,size_t n){ Sha256 s; s.init(); s.update(p,n); return s.hex(); }
+
+}
+
+int raw_open(const char* path){ return (int)syscall(__NR_openat, AT_FDCWD, path, O_RDONLY | O_CLOEXEC | O_LARGEFILE, 0); }
+namespace {
+
+void raw_close(int fd){ syscall(__NR_close, fd); }
+int64_t raw_size(int fd){ return (int64_t)syscall(__NR_lseek, fd, 0, SEEK_END); }
+
+bool raw_pread(int fd, void* buf, size_t len, int64_t off){
+    uint8_t* p=(uint8_t*)buf; size_t got=0;
+    while(got<len){
+        int64_t at=off+(int64_t)got;
+#if defined(__arm__)  // ARM EABI passes a 64-bit syscall argument in an even register pair: pad one word
+        long n=syscall(__NR_pread64, fd, p+got, len-got, 0, (uint32_t)at, (uint32_t)((uint64_t)at>>32));
+#else
+        long n=syscall(__NR_pread64, fd, p+got, len-got, at);
+#endif
+        if(n<=0) return false; got+=(size_t)n;
+    }
+    return true;
+}
+
+bool rd_u32(const std::string& b,size_t off,uint32_t& v){
+    if(off+4>b.size()) return false;
+    const uint8_t* p=(const uint8_t*)b.data()+off;
+    v=(uint32_t)p[0]|((uint32_t)p[1]<<8)|((uint32_t)p[2]<<16)|((uint32_t)p[3]<<24); return true;
+}
+bool rd_u64(const std::string& b,size_t off,uint64_t& v){
+    if(off+8>b.size()) return false;
+    const uint8_t* p=(const uint8_t*)b.data()+off; v=0;
+    for(int i=0;i<8;i++) v|=((uint64_t)p[i])<<(8*i); return true;
+}
+
+}
+
+namespace {
+
+bool installer_path(const std::string& p){
+    if(p.compare(0,10,"/data/app/")==0) return true;
+    size_t u=p.find('/',12);
+    return p.compare(0,12,"/mnt/expand/")==0 && u!=std::string::npos && p.compare(u,5,"/app/")==0;
+}
+
+bool fits(size_t off, uint64_t len, size_t end){ return off<=end && len<=end-off; }
+
+void entry_certs(const std::string& val, std::vector<std::string>& out){
+    uint32_t u;
+    if(!rd_u32(val,0,u) || !fits(4,u,val.size())) return;
+    size_t q=4, end=4+(size_t)u;
+    while(fits(q,4,end)){
+        if(!rd_u32(val,q,u) || !fits(q+4,u,end)) return;
+        size_t s=q+4, s_end=s+u; q=s_end;
+        if(!rd_u32(val,s,u) || !fits(s+4,u,s_end)) return;
+        size_t sd=s+4, sd_end=sd+u;
+        if(!rd_u32(val,sd,u) || !fits(sd+4,u,sd_end)) return;
+        size_t c=sd+4+u; uint32_t c0;
+        if(!fits(c,8,sd_end) || !rd_u32(val,c+4,c0) || !fits(c+8,c0,sd_end)) return;
+        out.push_back(sha256_hex((const uint8_t*)val.data()+c+8, c0));
+    }
+}
+
+}
+
+std::string own_apk_path(const std::vector<VmaEntry>& maps, const std::string& pkg){
+    const std::string seg="/"+pkg+"-", base="/base.apk";
+    if(pkg.empty()) return "";
+    for(const auto& v : maps)
+        if(v.path.size()>base.size() && v.path.compare(v.path.size()-base.size(),base.size(),base)==0 &&
+           installer_path(v.path) && v.path.find(seg)!=std::string::npos) return v.path;
+    return "";
+}
+
+struct Signer { std::vector<std::string> certs; std::string err; bool v1_only = false; };
+
+static Signer parse_own_signer(){
+    Signer s;
+    std::string apk=own_apk_path(g_maps, g_own_package);
+    if(apk.empty()){ s.err="installed base.apk not found among the app's mapped files"; return s; }
+
+    int fd=raw_open(apk.c_str());
+    if(fd<0){ s.err="open(base.apk) failed - cannot judge"; return s; }
+    int64_t fsz=raw_size(fd);
+    if(fsz<22){ raw_close(fd); s.err="apk too small - cannot judge"; return s; }
+
+    size_t tail = (size_t)(fsz < 65557 ? fsz : 65557);
+    std::string buf; buf.resize(tail);
+    if(!raw_pread(fd, &buf[0], tail, fsz-(int64_t)tail)){ raw_close(fd); s.err="tail read failed"; return s; }
+    long eocd=-1;
+    for(long i=(long)tail-22;i>=0;i--)
+        if((uint8_t)buf[i]==0x50&&(uint8_t)buf[i+1]==0x4b&&(uint8_t)buf[i+2]==0x05&&(uint8_t)buf[i+3]==0x06 &&
+           (size_t)i+22+((uint8_t)buf[i+20]|((size_t)(uint8_t)buf[i+21]<<8))==tail){ eocd=i; break; }
+    if(eocd<0){ raw_close(fd); s.err="no ZIP end record - not judging"; return s; }
+    uint32_t cd_off, cd_size; rd_u32(buf,(size_t)eocd+16,cd_off); rd_u32(buf,(size_t)eocd+12,cd_size);
+    if((uint64_t)cd_off+cd_size!=(uint64_t)(fsz-(int64_t)tail+eocd) || cd_off<32){ raw_close(fd); s.err="unexpected ZIP layout - not judging"; return s; }
+
+    uint8_t foot[24];
+    if(!raw_pread(fd, foot, 24, (int64_t)cd_off-24)){ raw_close(fd); s.err="footer read failed"; return s; }
+    if(memcmp(foot+8,"APK Sig Block 42",16)!=0){ raw_close(fd); s.v1_only=true; return s; }
+    uint64_t blk=0, head=0; for(int i=0;i<8;i++) blk|=((uint64_t)foot[i])<<(8*i);
+    if(blk<24 || blk>16*1024*1024 || (uint64_t)cd_off<blk+8){ raw_close(fd); s.err="implausible signing-block size"; return s; }
+    if(!raw_pread(fd, &head, 8, (int64_t)cd_off-(int64_t)blk-8) || head!=blk){ raw_close(fd); s.err="signing block sizes do not match"; return s; }
+
+    int64_t pairs_off=(int64_t)cd_off-(int64_t)blk;
+    size_t pairs_len=(size_t)(blk-24);
+    std::string pairs; pairs.resize(pairs_len);
+    if(!raw_pread(fd, &pairs[0], pairs_len, pairs_off)){ raw_close(fd); s.err="pairs read failed"; return s; }
+    raw_close(fd);
+
+    size_t pos=0;
+    while(pos+12<=pairs.size()){
+        uint64_t plen; if(!rd_u64(pairs,pos,plen)) break;
+        if(plen<4 || !fits(pos+8,plen,pairs.size())) break;
+        uint32_t id; if(!rd_u32(pairs,pos+8,id)){ break; }
+        if(id==0x7109871au || id==0xf05368c0u || id==0x1b93ad61u) entry_certs(pairs.substr(pos+12,(size_t)plen-4), s.certs);
+        pos+=8+(size_t)plen;
+    }
+    if(s.certs.empty()) s.err="no parseable v2/v3 signer cert - not judging";
+    return s;
+}
+
+NativeResult check_tamper_signing_block(){
+    static Signer cached;
+    if(cached.certs.empty()) cached=parse_own_signer();
+    if(cached.v1_only)
+        return g_target_sdk>=30
+            ? NativeResult{STATUS_DETECTED, "no v2/v3 signing block: the APK is signed with v1 only, which Android refuses for targetSdkVersion "+std::to_string(g_target_sdk)}
+            : NativeResult{STATUS_INCONCLUSIVE, "signed with v1 only, which Android accepts below targetSdkVersion 30; this check reads only v2/v3 signers"};
+    if(cached.certs.empty()) return {STATUS_INCONCLUSIVE, cached.err};
+    NativeResult r;
+
+    std::vector<std::string> expected; std::string cur;
+    for(size_t i=0;i<=g_expected_signers.size();i++){
+        char c = i<g_expected_signers.size() ? g_expected_signers[i] : ',';
+        if(c==','){ if(!cur.empty()) expected.push_back(cur); cur.clear(); }
+        else if(c!=':' && c!=' ') cur += (char)tolower((unsigned char)c);
+    }
+    if(expected.empty()){ r.status=STATUS_INCONCLUSIVE; r.details="no signer from Android to compare"; return r; }
+    std::string listed, file;
+    for(const auto& c : cached.certs){
+        if(std::find(expected.begin(), expected.end(), c)!=expected.end()){
+            r.status=STATUS_CLEAN; r.details="a signing entry in the file carries the signer Android reports: "+c.substr(0,16)+"..."; return r;
+        }
+        file += c.substr(0,16)+"... ";
+    }
+    for(const auto& p : expected) listed += p.substr(0,16)+"... ";
+    r.status=STATUS_DETECTED; r.details="no signing entry in the file carries the signer Android reports: file="+file+"android="+listed;
+    return r;
+}
+
+```
+
+`native/android/tamper_scan.h`:
+
+```h
+#pragma once
+#include "common.h"
+
+NativeResult check_tamper_signing_block();
+int raw_open(const char* path);
+std::string own_apk_path(const std::vector<VmaEntry>& maps, const std::string& pkg);
+
+```
+
+`native/android/uprobe_scan.cpp`:
+
+```cpp
+#include "uprobe_scan.h"
+#include <algorithm>
+#include <cstdint>
+#include <cstring>
+#include <cstdio>
+#include <string>
+#include <elf.h>
+#include <link.h>
+
+#if defined(__aarch64__)
+
+extern "C" const ElfW(Ehdr) __ehdr_start __attribute__((visibility("hidden")));
+
+namespace {
+
+// This library's code, from its own ELF header: loaded straight from the APK, it shows in the map as
+// base.apk, like every other library of the app.
+bool own_code(uint64_t& lo, uint64_t& hi) {
+    uintptr_t hdr = (uintptr_t)&__ehdr_start;
+    ElfW(Ehdr) eh;
+    if (!safe_read_mem(hdr, &eh, sizeof(eh)) || eh.e_phnum == 0 || eh.e_phnum > 64) return false;
+    ElfW(Phdr) ph[64];
+    if (!safe_read_mem(hdr + eh.e_phoff, ph, eh.e_phnum * sizeof(ElfW(Phdr)))) return false;
+    uintptr_t base = 0;
+    bool have = false;
+    for (int i = 0; i < eh.e_phnum; i++)
+        if (ph[i].p_type == PT_LOAD && ph[i].p_offset == 0) { base = hdr - (uintptr_t)ph[i].p_vaddr; have = true; }
+    for (int i = 0; i < eh.e_phnum && have; i++)
+        if (ph[i].p_type == PT_LOAD && (ph[i].p_flags & PF_X)) {
+            lo = base + ph[i].p_vaddr;
+            hi = lo + ph[i].p_memsz;
+            return true;
+        }
+    return false;
+}
+
+constexpr uint32_t BRK_UPROBE = 0xD42000A0u;
+
+bool ends_with(const std::string& s, const char* suf) {
+    size_t n = strlen(suf);
+    return s.size() >= n && s.compare(s.size() - n, n, suf) == 0;
+}
+
+bool scan_region(uint64_t start, uint64_t end, uint64_t& hit) {
+    const size_t CH = 65536;
+    static uint8_t buf[CH];
+    uint64_t cap = start + (24u << 20);
+    if (end > cap) end = cap;
+    for (uint64_t off = start; off < end; ) {
+        size_t want = (end - off < CH) ? (size_t)(end - off) : CH;
+        ssize_t got = safe_read_mem_n(off, buf, want);
+        if (got <= 0) break;
+        size_t g = (size_t)got & ~3u;
+        for (size_t i = 0; i + 4 <= g; i += 4) {
+            uint32_t w; std::memcpy(&w, buf + i, 4);
+            if (w == BRK_UPROBE) { hit = off + i; return true; }
+        }
+        off += want;
+        if (got < (ssize_t)want) break;
+    }
+    return false;
+}
+
+}
+
+NativeResult check_uprobe_residue() {
+    NativeResult r;
+    if (!maps_available()) return {STATUS_INCONCLUSIVE, "process memory map unavailable (empty /proc/self/maps snapshot); cannot judge"};
+    int hits = 0;
+    std::string detail;
+
+    for (const auto& v : g_maps)
+        if (v.path.find("[uprobes]") != std::string::npos) {
+            hits++;
+            char line[128];
+            snprintf(line, sizeof(line), "  [uprobes] VMA @ %llx-%llx\n",
+                     (unsigned long long)v.start, (unsigned long long)v.end);
+            detail += line;
+            break;
+        }
+
+    uint64_t own_lo = 0, own_hi = 0;
+    if (!own_code(own_lo, own_hi)) {
+        r.status = hits ? STATUS_DETECTED : STATUS_INCONCLUSIVE;
+        r.details = hits ? detail : "self-memory read unavailable";
+        return r;
+    }
+
+    int scanned = 0;
+    for (const auto& v : g_maps) {
+        if (!v.executable()) continue;
+        const std::string& p = v.path;
+        if (p.empty() || p[0] == '[') continue;
+        uint64_t s = v.start, e = v.end;
+        if (v.start < own_hi && v.end > own_lo) { s = std::max(s, own_lo); e = std::min(e, own_hi); }
+        else if (!ends_with(p, "/libc.so")) continue;
+        scanned++;
+        uint64_t hit = 0;
+        if (scan_region(s, e, hit)) {
+            hits++;
+            char line[192];
+            snprintf(line, sizeof(line), "  BRK#0x5 @ %llx in %s\n",
+                     (unsigned long long)hit, p.c_str());
+            detail += line;
+        }
+    }
+
+    char head[96];
+    snprintf(head, sizeof(head), "regions_scanned=%d hits=%d\n", scanned, hits);
+    r.status = hits > 0 ? STATUS_DETECTED : STATUS_CLEAN;
+    r.details = std::string(head) + (hits ? detail : "no uprobe BRK#0x5 in own/libc .text, no [uprobes] VMA");
+
+    return r;
+}
+
+#else
+
+NativeResult check_uprobe_residue() { return not_built_for_abi(); }
+
+#endif
+
+```
+
+`native/android/uprobe_scan.h`:
+
+```h
+#pragma once
+#include "common.h"
+
+NativeResult check_uprobe_residue();
+
+```
+
+`sdk/build.gradle.kts`:
+
+```kts
+import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
+import com.vanniktech.maven.publish.SonatypeHost
+
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.vanniktech.mavenPublish)
+    alias(libs.plugins.cyclonedx.bom)
+    signing
+}
+
+android {
+    namespace = "io.github.areyougarou.intakto"
+    compileSdk = 35
+    ndkVersion = "27.2.12479018"
+
+    defaultConfig {
+        minSdk = 26
+        consumerProguardFiles("consumer-rules.pro")
+        externalNativeBuild { cmake { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") } }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("../native/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+
+    // Java 11 bytecode (not 17) so adopter projects on Java 11 compatibility -- including Android
+    // Studio's default new-project template -- can consume the library. The SDK is pure Kotlin and
+    // uses no Java 17 APIs, so this only lowers the class-file version, from 61 to 55.
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions { jvmTarget = "11" }
+}
+
+dependencies {
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+}
+
+// SBOM for the release page: every library an app pulls in with IntaktoFT (the release runtime
+// classpath: kotlin-stdlib and what it brings), named by the coordinate adopters use on JitPack.
+// CI passes the tag as -PreleaseTag; a local run without it labels the version "unspecified".
+tasks.cyclonedxDirectBom {
+    includeConfigs = listOf("releaseRuntimeClasspath")
+    componentGroup = "com.github.IntaktoFT"
+    componentName = "IntaktoFT"
+    componentVersion = providers.gradleProperty("releaseTag").getOrElse("unspecified")
+}
+
+mavenPublishing {
+    configure(AndroidSingleVariantLibrary("release", sourcesJar = true, publishJavadocJar = true))
+    coordinates("io.github.areyougarou", "intakto", "0.3.1")
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    if (providers.gradleProperty("signing.gnupg.keyName").isPresent) {
+        signAllPublications()
+    }
+    pom {
+        name.set("IntaktoFT")
+        description.set("Lightweight Android RASP (runtime app self-protection) library - free tier.")
+        url.set("https://github.com/IntaktoFT/IntaktoFT")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id.set("areyougarou")
+                name.set("areyougarou")
+            }
+        }
+        scm {
+            url.set("https://github.com/IntaktoFT/IntaktoFT")
+            connection.set("scm:git:https://github.com/IntaktoFT/IntaktoFT.git")
+            developerConnection.set("scm:git:ssh://git@github.com/IntaktoFT/IntaktoFT.git")
+        }
+    }
+}
+
+signing {
+    useGpgCmd()
+}
+
+```
+
+`sdk/consumer-rules.pro`:
+
+```pro
+-keep class io.github.areyougarou.intakto.NativeCore { native <methods>; static void started(java.lang.String); }
+
+```
+
+`sdk/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <meta-data android:name="io.github.areyougarou.intakto.applicationId" android:value="${applicationId}" />
+        <provider
+            android:name="io.github.areyougarou.intakto.IntaktoInitProvider"
+            android:authorities="${applicationId}.intaktoft"
+            android:exported="false" />
+    </application>
+</manifest>
+
+```
+
+`sdk/src/main/kotlin/io/github/areyougarou/intakto/ApkSignature.kt`:
+
+```kt
+package io.github.areyougarou.intakto
+
+import java.io.ByteArrayInputStream
+import java.io.EOFException
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.channels.FileChannel
+import java.security.KeyFactory
+import java.security.MessageDigest
+import java.security.Signature
+import java.security.cert.CertificateFactory
+import java.security.spec.MGF1ParameterSpec
+import java.security.spec.PSSParameterSpec
+import java.security.spec.X509EncodedKeySpec
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
+
+internal class ApkVerdict(val status: Status, val signer: String?, val detail: String)
+
+internal object ApkSignature {
+
+    private const val V2 = 0x7109871a
+    private const val V3 = 0xf05368c0.toInt()
+    private const val V31 = 0x1b93ad61
+    private const val CHUNK = 1 shl 20
+
+    private class Alg(val id: Int, val jca: String, val key: String, val digest: String, val pss: PSSParameterSpec? = null)
+
+    private val algs = listOf(
+        Alg(0x0103, "SHA256withRSA", "RSA", "SHA-256"),
+        Alg(0x0201, "SHA256withECDSA", "EC", "SHA-256"),
+        Alg(0x0101, "SHA256withRSA/PSS", "RSA", "SHA-256", PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 32, 1)),
+        Alg(0x0301, "SHA256withDSA", "DSA", "SHA-256"),
+        Alg(0x0104, "SHA512withRSA", "RSA", "SHA-512"),
+        Alg(0x0202, "SHA512withECDSA", "EC", "SHA-512"),
+        Alg(0x0102, "SHA512withRSA/PSS", "RSA", "SHA-512", PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 64, 1)),
+    )
+
+    fun verify(f: FileChannel, known: Set<String>, targetSdk: Int): ApkVerdict {
+        if (known.isEmpty()) return ApkVerdict(Status.INCONCLUSIVE, null, "could not verify: no signer from Android to compare")
+        val (eocd, eocdOff) = endRecord(f) ?: return ApkVerdict(Status.INCONCLUSIVE, null, "could not verify: no ZIP end record")
+        val cdOff = le32(eocd, 16).toLong() and 0xffffffffL
+        val cdSize = le32(eocd, 12).toLong() and 0xffffffffL
+        if (cdOff + cdSize != eocdOff || cdOff < 32) return ApkVerdict(Status.INCONCLUSIVE, null, "could not verify: unexpected ZIP layout")
+        val foot = read(f, cdOff - 24, 24)
+        if (String(foot, 8, 16, Charsets.US_ASCII) != "APK Sig Block 42") return if (targetSdk >= 30)
+            ApkVerdict(Status.DETECTED, null, "no v2/v3 signing block: the APK is signed with v1 only, which Android refuses for targetSdkVersion $targetSdk")
+        else ApkVerdict(Status.INCONCLUSIVE, null, "could not verify: signed with v1 only, which Android accepts below targetSdkVersion 30; this check reads only v2/v3 signers")
+        val blockSize = ByteBuffer.wrap(foot).order(ByteOrder.LITTLE_ENDIAN).long
+        if (blockSize < 24 || blockSize > 16L * CHUNK || blockSize + 8 > cdOff)
+            return ApkVerdict(Status.INCONCLUSIVE, null, "could not verify: implausible signing block size")
+        val blockStart = cdOff - blockSize - 8
+        val head = read(f, blockStart, 8)
+        if (le(head).long != blockSize) return ApkVerdict(Status.INCONCLUSIVE, null, "could not verify: signing block sizes do not match")
+        val pairs = read(f, blockStart + 8, (blockSize - 24).toInt())
+        val blocks = try { idValues(pairs) } catch (t: RuntimeException) {
+            return ApkVerdict(Status.INCONCLUSIVE, null, "could not verify: unparseable signing block")
+        }
+        val entries = try {
+            listOf(V31 to "v3.1", V3 to "v3", V2 to "v2").flatMap { (id, scheme) -> blocks[id]?.let { entries(it, scheme, id != V2) }.orEmpty() }
+        } catch (t: RuntimeException) {
+            return ApkVerdict(Status.INCONCLUSIVE, null, "could not verify: unparseable signer")
+        }
+        if (entries.isEmpty()) return ApkVerdict(Status.INCONCLUSIVE, null, "could not verify: no v2/v3 signer")
+        val e = entries.firstOrNull { it.signer in known } ?: return ApkVerdict(Status.DETECTED, entries.first().signer,
+            "no signing entry in the file carries a signer Android reports: file=${entries.joinToString(",") { it.signer.take(16) }} " +
+                "android=${known.joinToString(",") { it.take(16) }}")
+        val (scheme, signedData, sigs, publicKey, digests, certDer, signer) = e
+        val alg = algs.firstOrNull { a -> a.id in sigs }
+            ?: return ApkVerdict(Status.INCONCLUSIVE, null, "could not verify: $scheme: no supported signature algorithm")
+        val key = KeyFactory.getInstance(alg.key).generatePublic(X509EncodedKeySpec(publicKey))
+        val ok = Signature.getInstance(alg.jca).run {
+            initVerify(key)
+            alg.pss?.let { setParameter(it) }
+            update(signedData)
+            verify(sigs.getValue(alg.id))
+        }
+        if (!ok) return ApkVerdict(Status.DETECTED, signer, "$scheme: signature over the signed data is invalid")
+        val cert = CertificateFactory.getInstance("X.509").generateCertificate(ByteArrayInputStream(certDer))
+        if (!cert.publicKey.encoded.contentEquals(publicKey))
+            return ApkVerdict(Status.DETECTED, signer, "$scheme: certificate does not carry the signing key")
+        val expected = digests[alg.id] ?: return ApkVerdict(Status.INCONCLUSIVE, signer, "could not verify: $scheme: no content digest")
+        val actual = contentDigest(f, alg.digest, blockStart, cdOff, eocdOff, eocd)
+        if (!actual.contentEquals(expected))
+            return ApkVerdict(Status.DETECTED, signer, "$scheme: file contents differ from what was signed")
+        return ApkVerdict(Status.CLEAN, signer, "$scheme: contents match the signature, signer ${signer.take(16)}")
+    }
+
+    fun entryNames(f: FileChannel): List<String> {
+        val (eocd, eocdOff) = requireNotNull(endRecord(f)) { "no ZIP end record" }
+        val cdOff = le32(eocd, 16).toLong() and 0xffffffffL
+        require(cdOff + (le32(eocd, 12).toLong() and 0xffffffffL) == eocdOff) { "unexpected ZIP layout" }
+        val cd = le(read(f, cdOff, le32(eocd, 12)))
+        val names = ArrayList<String>()
+        while (cd.remaining() >= 46 && cd.getInt(cd.position()) == 0x02014b50) {
+            val p = cd.position()
+            val n = cd.getShort(p + 28).toInt() and 0xffff
+            names += String(ByteArray(n).also { cd.position(p + 46); cd.get(it) }, Charsets.UTF_8)
+            cd.position(p + 46 + n + (cd.getShort(p + 30).toInt() and 0xffff) + (cd.getShort(p + 32).toInt() and 0xffff))
+        }
+        require("AndroidManifest.xml" in names) { "no AndroidManifest.xml in the ZIP directory" }
+        return names
+    }
+
+    private fun endRecord(f: FileChannel): Pair<ByteArray, Long>? {
+        val size = f.size()
+        val tail = read(f, size - minOf(size, 65557L), minOf(size, 65557L).toInt())
+        val e = (tail.size - 22 downTo 0).firstOrNull {
+            le32(tail, it) == 0x06054b50 && it + 22 + ((tail[it + 20].toInt() and 0xff) or ((tail[it + 21].toInt() and 0xff) shl 8)) == tail.size
+        } ?: return null
+        return tail.copyOfRange(e, tail.size) to size - tail.size + e
+    }
+
+    private data class Entry(
+        val scheme: String, val signedData: ByteArray, val sigs: Map<Int, ByteArray>, val publicKey: ByteArray,
+        val digests: Map<Int, ByteArray>, val cert: ByteArray, val signer: String,
+    )
+
+    private fun entries(value: ByteArray, scheme: String, v3: Boolean): List<Entry> {
+        val out = ArrayList<Entry>()
+        val signers = le(value).lp()
+        while (signers.hasRemaining()) {
+            val s = signers.lp()
+            val signedData = s.lp().bytes()
+            if (v3) { s.int; s.int }
+            val sigs = HashMap<Int, ByteArray>()
+            val ss = s.lp()
+            while (ss.hasRemaining()) { val one = ss.lp(); sigs[one.int] = one.lp().bytes() }
+            val publicKey = s.lp().bytes()
+            val sd = le(signedData)
+            val digests = HashMap<Int, ByteArray>()
+            val ds = sd.lp()
+            while (ds.hasRemaining()) { val d = ds.lp(); digests[d.int] = d.lp().bytes() }
+            val cs = sd.lp()
+            if (!cs.hasRemaining()) continue
+            val cert = cs.lp().bytes()
+            out += Entry(scheme, signedData, sigs, publicKey, digests, cert, hex(MessageDigest.getInstance("SHA-256").digest(cert)))
+        }
+        return out
+    }
+
+    private fun idValues(pairs: ByteArray): Map<Int, ByteArray> {
+        val b = le(pairs)
+        val out = HashMap<Int, ByteArray>()
+        while (b.remaining() >= 12) {
+            val len = b.long
+            require(len in 4..b.remaining().toLong())
+            val id = b.int
+            out[id] = ByteArray((len - 4).toInt()).also { b.get(it) }
+        }
+        return out
+    }
+
+    private fun contentDigest(ch: FileChannel, alg: String, blockStart: Long, cdOff: Long, eocdOff: Long, eocd: ByteArray): ByteArray {
+        val patched = eocd.copyOf().also { le(it).putInt(16, blockStart.toInt()) }
+        val chunks = listOf(0L to blockStart, cdOff to eocdOff).flatMap { (a, b) ->
+            (a until b step CHUNK.toLong()).map { it to minOf(CHUNK.toLong(), b - it).toInt() }
+        }
+        val out = arrayOfNulls<ByteArray>(chunks.size)
+        val next = AtomicInteger()
+        val threads = minOf(Runtime.getRuntime().availableProcessors(), 4)
+        val pool = Executors.newFixedThreadPool(threads)
+        try {
+            pool.invokeAll(List(threads) {
+                Callable {
+                    val md = MessageDigest.getInstance(alg)
+                    val buf = ByteBuffer.allocateDirect(CHUNK)
+                    while (true) {
+                        val i = next.getAndIncrement()
+                        if (i >= chunks.size) break
+                        val (pos, n) = chunks[i]
+                        buf.clear().limit(n)
+                        fill(ch, buf, pos).flip()
+                        out[i] = chunk(md, buf)
+                        progress()
+                    }
+                }
+            }).forEach { it.get() }
+        } finally { pool.shutdown() }
+        val top = MessageDigest.getInstance(alg)
+        top.update(0x5a.toByte()); top.update(u32(chunks.size + 1))
+        out.forEach { top.update(it!!) }
+        top.update(chunk(MessageDigest.getInstance(alg), ByteBuffer.wrap(patched)))
+        return top.digest()
+    }
+
+    private fun chunk(md: MessageDigest, data: ByteBuffer): ByteArray {
+        md.update(0xa5.toByte()); md.update(u32(data.remaining())); md.update(data)
+        return md.digest()
+    }
+
+    private fun fill(ch: FileChannel, b: ByteBuffer, pos: Long): ByteBuffer {
+        while (b.hasRemaining()) if (ch.read(b, pos + b.position()) < 0) throw EOFException()
+        return b
+    }
+
+    private fun read(ch: FileChannel, pos: Long, n: Int): ByteArray = fill(ch, ByteBuffer.allocate(n), pos).array()
+
+    private fun le(b: ByteArray): ByteBuffer = ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN)
+
+    private fun ByteBuffer.lp(): ByteBuffer {
+        val n = int
+        require(n in 0..remaining())
+        val s = slice().order(ByteOrder.LITTLE_ENDIAN)
+        s.limit(n)
+        position(position() + n)
+        return s
+    }
+
+    private fun ByteBuffer.bytes(): ByteArray = ByteArray(remaining()).also { get(it) }
+
+    private fun le32(b: ByteArray, off: Int): Int = ByteBuffer.wrap(b, off, 4).order(ByteOrder.LITTLE_ENDIAN).int
+
+    private fun u32(v: Int): ByteArray = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(v).array()
+
+}
+
+```
+
+`sdk/src/main/kotlin/io/github/areyougarou/intakto/CloneProbe.kt`:
+
+```kt
+package io.github.areyougarou.intakto
+
+import android.content.Context
+import android.content.pm.PackageManager
+
+internal object CloneProbe {
+
+    fun collect(ctx: Context): List<Signal> = listOf(
+        timedSignal("CLV_PKGNAME_MISMATCH", Group.APP_INTEGRITY) { pkgName(ctx) },
+    )
+
+    private fun buildTimeId(ctx: Context): String? = try {
+        @Suppress("DEPRECATION")
+        ctx.packageManager.getApplicationInfo(ctx.packageName, PackageManager.GET_META_DATA)
+            .metaData?.getString("io.github.areyougarou.intakto.applicationId")?.takeIf { '$' !in it && '{' !in it }
+    } catch (_: Throwable) { null }
+
+    private fun pkgName(ctx: Context): Pair<Status, String> {
+        val expected = buildTimeId(ctx) ?: return Status.INCONCLUSIVE to "could not verify: no build-time package name in the app manifest"
+        val pkg = ctx.packageName
+        return (if (pkg != expected) Status.DETECTED else Status.CLEAN) to "pkg=$pkg expected=$expected"
+    }
+}
+
+```
+
+`sdk/src/main/kotlin/io/github/areyougarou/intakto/Intakto.kt`:
+
+```kt
+package io.github.areyougarou.intakto
+
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.Process
+import org.json.JSONArray
+import java.lang.ref.WeakReference
+import java.util.concurrent.Executors
+
+enum class Status {
+    /** The check looked and found nothing wrong. */
+    CLEAN,
+
+    /** The check looked and found a real problem. */
+    DETECTED,
+
+    /**
+     * The check could not get an answer (a read failed, an empty read, an error, the native core did
+     * not load, or the run did not finish). Never reported as CLEAN, so the host can tell "could not
+     * confirm" apart from a check that really looked.
+     */
+    INCONCLUSIVE,
+}
+
+enum class Group { APP_INTEGRITY, INSTRUMENTATION }
+
+data class Signal(
+    val id: String,
+    val group: Group,
+    val status: Status,
+    val details: String,
+    val micros: Long,
+)
+
+/**
+ * One run's result. [verdict] is DETECTED if any signal is DETECTED, else INCONCLUSIVE if any signal
+ * is INCONCLUSIVE (or there are none), else CLEAN. [detected] holds the DETECTED signals.
+ */
+data class Report(
+    val signals: List<Signal>,
+    val verdict: Status,
+    val detected: List<Signal>,
+    val elapsedMs: Long,
+)
+
+/**
+ * The result callback. A `fun interface` (single-abstract-method), so a Kotlin trailing lambda and a
+ * plain Java lambda both work: `Intakto.check(this) { report -> ... }` in Kotlin, and
+ * `Intakto.check(this, report -> { ... })` in Java with no `Unit.INSTANCE` to return.
+ */
+fun interface ReportCallback {
+    fun onReport(report: Report)
+}
+
+object Intakto {
+
+    private const val STALL_MS = 5000L
+    private val main = Handler(Looper.getMainLooper())
+    private val lock = Any()
+    private var running: Run? = null
+    private var last: Report? = null
+
+    // One long-lived thread runs every check. A new run is only queued when none is running, so a stuck
+    // run never has later runs waiting behind it: those calls report CHECK_STALLED.
+    private val worker = Executors.newSingleThreadExecutor { r -> Thread(r, "Intakto").apply { isDaemon = true } }
+
+    private class Run {
+        val t0 = System.nanoTime()
+        private val signals = ArrayList<Signal>()
+        val waiting = ArrayList<Waiter>()
+        fun add(s: List<Signal>) = synchronized(this) { signals += s; progress() }
+        fun snapshot(): List<Signal> = synchronized(this) { signals.toList() }
+    }
+
+    private class Waiter(val run: Run, val screen: WeakReference<Activity>?, var onResult: ReportCallback?) : Runnable {
+        override fun run() {
+            val idle = (System.nanoTime() - lastProgress) / 1_000_000
+            val waiting = synchronized(lock) { if (idle >= STALL_MS) run.waiting.remove(this) else this in run.waiting }
+            when {
+                !waiting -> {}
+                idle < STALL_MS -> main.postDelayed(this, STALL_MS - idle)
+                else -> deliver(this, toReport(run.snapshot() + stalled("no check made progress for $STALL_MS ms " +
+                    (if (current.isEmpty()) "(before the first check)" else "(stuck in $current)") +
+                    "; only the signals that finished are listed"), run.t0))
+            }
+        }
+    }
+
+    // @JvmStatic + @JvmOverloads so Java callers can write Intakto.check(this) or the full form. Without
+    // them, Kotlin's default arguments are not visible to Java and the object method is only reachable
+    // as Intakto.INSTANCE.check(...).
+
+    /**
+     * Hands [onResult] the latest finished result, on the main thread. Before the first run ends, it
+     * waits for that run. In a process where no run started (see IntaktoInitProvider), it starts one.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun check(context: Context, onResult: ReportCallback = ReportCallback {}) = request(context, false, onResult)
+
+    /** Like [check], but waits for a new run (or the one in progress) instead of the latest result. */
+    @JvmStatic
+    @JvmOverloads
+    fun recheck(context: Context, onResult: ReportCallback = ReportCallback {}) = request(context, true, onResult)
+
+    // Called by IntaktoInitProvider when the process starts.
+    internal fun start(context: Context) {
+        val run = synchronized(lock) { if (running != null || last != null) null else begin() }
+        if (run != null) launch(context.applicationContext ?: context, run)
+    }
+
+    private fun request(context: Context, fresh: Boolean, onResult: ReportCallback) {
+        val app = context.applicationContext ?: context
+        val screen = activity(context)?.let { WeakReference(it) }
+        var cached: Report?
+        var idleMs = 0L
+        var start = false
+        val w = synchronized(lock) {
+            cached = if (fresh) null else last
+            val current = running
+            if (current != null) idleMs = (System.nanoTime() - lastProgress) / 1_000_000
+            if (cached != null || idleMs >= STALL_MS) null
+            else Waiter(current ?: begin().also { start = true }, screen, onResult).also { it.run.waiting += it }
+        }
+        if (w == null) {
+            val r = cached ?: toReport(listOf(stalled("an earlier run has made no progress for $idleMs ms; no checks ran for this call")), System.nanoTime())
+            main.post { if (alive(screen)) onResult.onReport(r) }
+            return
+        }
+        main.postDelayed(w, STALL_MS)
+        if (start) launch(app, w.run)
+    }
+
+    // Under lock.
+    private fun begin(): Run = Run().also { running = it; current = ""; progress() }
+
+    private fun launch(app: Context, run: Run) {
+        try {
+            worker.execute {
+                try { collect(app, run) } catch (t: Throwable) { run.add(listOf(failed(t))) }
+                finish(run)
+            }
+        } catch (t: Throwable) {
+            run.add(listOf(failed(t)))
+            finish(run)
+        }
+    }
+
+    private fun finish(run: Run) {
+        val r = toReport(run.snapshot(), run.t0)
+        val done = synchronized(lock) {
+            if (running === run) running = null
+            last = r
+            run.waiting.toList().also { run.waiting.clear() }
+        }
+        main.post { done.forEach { deliver(it, r) } }
+    }
+
+    private fun toReport(signals: List<Signal>, t0: Long): Report {
+        val detected = signals.filter { it.status == Status.DETECTED }
+        val verdict = when {
+            detected.isNotEmpty() -> Status.DETECTED
+            signals.isEmpty() || signals.any { it.status == Status.INCONCLUSIVE } -> Status.INCONCLUSIVE
+            else -> Status.CLEAN
+        }
+        return Report(signals, verdict, detected, (System.nanoTime() - t0) / 1_000_000)
+    }
+
+    private fun failed(t: Throwable) = Signal("CHECK_FAILED", Group.APP_INTEGRITY, Status.INCONCLUSIVE,
+        "could not verify: the run stopped early: ${t.javaClass.simpleName}: ${t.message}", 0)
+
+    private fun stalled(detail: String) = Signal("CHECK_STALLED", Group.APP_INTEGRITY, Status.INCONCLUSIVE, "could not verify: $detail", 0)
+
+    private tailrec fun activity(c: Context?): Activity? = when (c) {
+        is Activity -> c
+        is ContextWrapper -> activity(c.baseContext)
+        else -> null
+    }
+
+    private fun alive(screen: WeakReference<Activity>?) =
+        screen == null || screen.get().let { it != null && !it.isFinishing && !it.isDestroyed }
+
+    private fun deliver(w: Waiter, report: Report) {
+        main.removeCallbacks(w)
+        val onResult = w.onResult ?: return
+        w.onResult = null
+        if (alive(w.screen)) onResult.onReport(report)
+    }
+
+    private fun collect(context: Context, run: Run) {
+        TamperProbe.awaitPlayDownload(context)
+        val loadError = NativeCore.load()
+        TamperProbe.startContentCheck(context)
+        run.add(nativeSignals(context, loadError))
+        run.add(CloneProbe.collect(context))
+        run.add(TamperProbe.collect(context))
+    }
+
+    private const val NOT_APPLICABLE = 3
+
+    private fun nativeSignals(context: Context, loadError: Throwable?): List<Signal> {
+        val t0 = System.nanoTime()
+        val failure = loadError ?: try {
+            val arr = JSONArray(NativeCore.run(
+                TamperProbe.androidSigners(context).joinToString(",").ifEmpty { null },
+                context.packageName, context.applicationInfo.targetSdkVersion))
+            val systemImage = TamperProbe.systemImage(context)
+            return (0 until arr.length()).mapNotNull { i ->
+                val o = arr.getJSONObject(i)
+                val code = o.getInt("status")
+                if (code == NOT_APPLICABLE || systemImage && o.getString("id") == "TAMPER_SIGNING_BLOCK") return@mapNotNull null
+                require(code in 0..2) { "unknown native status $code" }
+                Signal(
+                    id = o.getString("id"),
+                    group = Group.valueOf(o.getString("group")),
+                    // native status: 0 = clean, 1 = a real catch, 2 = could not get an answer.
+                    status = when (code) { 0 -> Status.CLEAN; 1 -> Status.DETECTED; else -> Status.INCONCLUSIVE },
+                    details = (if (code == 2) "could not verify: " else "") + o.getString("details"),
+                    micros = o.getLong("us"),
+                )
+            }
+        } catch (t: Throwable) { t }
+        val details = "could not verify: native checks did not run: ${failure.javaClass.simpleName}: ${failure.message}" +
+            " abis=${Build.SUPPORTED_ABIS.joinToString(",")} is64=${Process.is64Bit()}"
+        return listOf(Signal("NATIVE_CORE", Group.APP_INTEGRITY, Status.INCONCLUSIVE, details, (System.nanoTime() - t0) / 1000))
+    }
+}
+
+```
+
+`sdk/src/main/kotlin/io/github/areyougarou/intakto/IntaktoInitProvider.kt`:
+
+```kt
+package io.github.areyougarou.intakto
+
+import android.content.ContentProvider
+import android.content.ContentValues
+import android.database.Cursor
+import android.net.Uri
+import android.os.Handler
+import android.os.Looper
+
+/**
+ * Starts the checks in the app's main process, so the app needs no setup code. The start is posted to
+ * the main thread so it runs after Application.onCreate: SDKs the app sets up there (hooks, crash
+ * handlers) are in place before the checks read memory.
+ */
+internal class IntaktoInitProvider : ContentProvider() {
+    override fun onCreate(): Boolean {
+        try {
+            val app = context ?: return true
+            Handler(Looper.getMainLooper()).post { try { Intakto.start(app) } catch (_: Throwable) {} }
+        } catch (_: Throwable) {}
+        return true
+    }
+
+    override fun query(uri: Uri, projection: Array<String>?, selection: String?, selectionArgs: Array<String>?, sortOrder: String?): Cursor? = null
+    override fun getType(uri: Uri): String? = null
+    override fun insert(uri: Uri, values: ContentValues?): Uri? = null
+    override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int = 0
+    override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<String>?): Int = 0
+}
+
+```
+
+`sdk/src/main/kotlin/io/github/areyougarou/intakto/NativeCore.kt`:
+
+```kt
+package io.github.areyougarou.intakto
+
+internal object NativeCore {
+    @Volatile private var loaded = false
+
+    @JvmStatic external fun run(signers: String?, pkg: String, targetSdk: Int): String
+
+    @JvmStatic external fun open(path: String): Int
+
+    @JvmStatic external fun apkPath(pkg: String): String?
+
+    @JvmStatic fun started(id: String) { io.github.areyougarou.intakto.started(id) }
+
+    @Synchronized
+    fun load(): Throwable? {
+        if (loaded) return null
+        return try { System.loadLibrary("intakto"); loaded = true; null } catch (t: Throwable) { t }
+    }
+}
+
+```
+
+`sdk/src/main/kotlin/io/github/areyougarou/intakto/Probe.kt`:
+
+```kt
+package io.github.areyougarou.intakto
+
+internal inline fun timedSignal(
+    id: String,
+    group: Group,
+    block: () -> Pair<Status, String>,
+): Signal {
+    started(id)
+    val t0 = System.nanoTime()
+    val (st, det) = try { block() } catch (t: Throwable) {
+        Status.INCONCLUSIVE to "could not verify: probe error: ${t.message}"
+    }
+    return Signal(id, group, st, det, (System.nanoTime() - t0) / 1000)
+}
+
+@Volatile internal var lastProgress = 0L
+
+// The check that started last, named in a stall report. A stall means no check started or finished for
+// STALL_MS, so a long run on a busy phone is not a stall.
+@Volatile internal var current = ""
+
+internal fun progress() { lastProgress = System.nanoTime() }
+
+internal fun started(id: String) { current = id; progress() }
+
+internal fun hex(b: ByteArray): String = b.joinToString("") { "%02x".format(it) }
+
+```
+
+`sdk/src/main/kotlin/io/github/areyougarou/intakto/TamperProbe.kt`:
+
+```kt
+package io.github.areyougarou.intakto
+
+import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.content.pm.LauncherApps
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.ParcelFileDescriptor
+import android.os.Process
+import java.io.File
+import java.security.MessageDigest
+
+internal object TamperProbe {
+
+    private class Signers(val current: List<String>, val history: List<String>)
+
+    private var signerCerts: Signers? = null
+    private var contentWorker: Thread? = null
+    @Volatile private var contentResults: List<Pair<String, ApkVerdict>>? = null
+    private var repackaged: List<String>? = null
+    private var baseApk: String? = null
+
+    private val installerDir = Regex("/data/app/.+|/mnt/expand/[^/]+/app/.+")
+    private val publicKeys = setOf(
+        "a40da80a59d170caa950cf15c18c454d47a39b26989d8b640ecd745ba71bf5dc",
+        "c8a2e9bccf597c2fb6dc66bee293fc13f2fc47ec77bc6b2b0d52c11f51192ab8",
+        "28bbfe4a7b97e74681dc55c2fbb6ccb8d6c74963733f6af6ae74d8c3a6e879fd",
+        "465983f7791f2abeb43ea2cbdc7f21a8260b72bc08a55c839fc1a43bc741a81e",
+        "e1dbadce60dc080d15b58a014b0dcf9400e24de23fa00b287a5a982bfebda2ee",
+        "abf21f9e2af1d881cc673fddcefa6ed9c269a437bd64b279cf45844cfd589126",
+        "a6ccc500ff0e7421200eb66a7fe174ef1b00e52ca91727070cbedf061ff76c35",
+        "fae9122a8721d6e2a196d2224dffcf773c9127e2bb956cbddb40b009192ffdfd",
+        "ce7b2b47ae2b7552c8f92cc29124279883041fb623a5f194a82c9bf15d492aa0",
+        "1e08a903aef9c3a721510b64ec764d01d3d094eb954161b62544ea8f187b5953",
+        "c081890cf2a1adf13e56d7b50a4f3d8edb35b7c46d6ccc732dd997b7e433be1d",
+        "f67430285c020c72fbeaa81870b42c79bcc159b08be2ddd83789d0eae68215fd",
+        "698cabd10a4f3bfe6073a4dc8435fe7538cee01d234d13a3070aa42a6dbf6013",
+        "6215f00baa4bf18bab5792fc796bfc5555917240f14f7c7e672d956888d75c96",
+        "7b19ed7f0a76ce4898a0b439b84a0df0585efed1fbc970c828f525e94254f67d",
+        "492682f877607ee99df2ddd2bd5953fd727bdf6e19d397de9dbbafd582bcad75",
+    )
+
+    fun collect(ctx: Context): List<Signal> {
+        // An app built into the system image is served from /system, outside the folders these checks
+        // read, so both are left out for it. That is a fixed fact from ApplicationInfo flags, known
+        // before any file is read; a failed read never switches a check off.
+        val systemImage = systemImage(ctx)
+        return listOfNotNull(
+            timedSignal("TAMPER_PUBLIC_KEY", Group.APP_INTEGRITY) { publicKey(ctx) },
+            if (systemImage) null
+            else timedSignal("TAMPER_REPACKAGER", Group.APP_INTEGRITY) { repackager(ctx) },
+            if (systemImage) null
+            else timedSignal("TAMPER_APK_CONTENT", Group.APP_INTEGRITY) { apkContent(ctx) },
+        )
+    }
+
+    // Set once the install is known to be complete. Neither fact can change while this process lives
+    // (an update restarts it), so later runs skip the two system calls.
+    @Volatile private var downloadComplete = false
+
+    fun awaitPlayDownload(ctx: Context) {
+        if (downloadComplete || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        try {
+            if (ctx.packageManager.getInstallSourceInfo(ctx.packageName).initiatingPackageName != "com.android.vending") {
+                downloadComplete = true
+                return
+            }
+            val apps = ctx.getSystemService(LauncherApps::class.java)
+            while ((apps.getActivityList(ctx.packageName, Process.myUserHandle()).firstOrNull()?.loadingProgress ?: 1f) < 1f) {
+                progress()
+                Thread.sleep(500)
+            }
+            downloadComplete = true
+        } catch (_: Exception) {}
+    }
+
+    fun startContentCheck(ctx: Context) {
+        if (contentWorker != null || systemImage(ctx)) return
+        try {
+            val files = listOf(baseApk(ctx)) + ctx.applicationInfo.splitSourceDirs.orEmpty()
+            val known = androidSigners(ctx).toSet()
+            val targetSdk = ctx.applicationInfo.targetSdkVersion
+            contentWorker = Thread {
+                contentResults = try { verifyAll(files, known, targetSdk) } catch (t: Throwable) {
+                    listOf("apk" to ApkVerdict(Status.INCONCLUSIVE, null, "could not verify: ${t.javaClass.simpleName}: ${t.message}"))
+                }
+            }.apply { isDaemon = true; start() }
+        } catch (t: Throwable) {
+            contentResults = listOf("apk" to ApkVerdict(Status.INCONCLUSIVE, null, "could not verify: the APK file check could not start: ${t.javaClass.simpleName}: ${t.message}"))
+        }
+    }
+
+    private fun baseApk(ctx: Context): String = baseApk
+        ?: (NativeCore.apkPath(ctx.packageName) ?: ctx.applicationInfo.sourceDir).also { baseApk = it }
+
+    private fun installed(path: String): String = path.also {
+        require(installerDir.matches(it) && "/../" !in it) { "$it is not in a folder Android installs apps into" }
+    }
+
+    fun systemImage(ctx: Context): Boolean = ctx.applicationInfo.flags.let {
+        it and ApplicationInfo.FLAG_SYSTEM != 0 && it and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP == 0
+    }
+
+    fun androidSigners(ctx: Context): List<String> = try {
+        signers(ctx).run { current + history }.distinct()
+    } catch (_: Throwable) { emptyList() }
+
+    private fun signers(ctx: Context): Signers =
+        signerCerts ?: readSigner(ctx).also { if (it.current.isNotEmpty()) signerCerts = it }
+
+    private fun apkContent(ctx: Context): Pair<Status, String> {
+        val s = signers(ctx)
+        if (s.current.isEmpty()) return Status.INCONCLUSIVE to "could not verify: no signer cert from Android"
+        contentWorker?.join()
+        val results = contentResults ?: return Status.INCONCLUSIVE to "could not verify: the APK file check did not start"
+        // DETECTED first. Otherwise, if any file could not be checked, INCONCLUSIVE (not CLEAN): a file
+        // we could not read is not a file that matched.
+        results.firstOrNull { it.second.status == Status.DETECTED }?.let { (n, v) -> return Status.DETECTED to "$n: ${v.detail}" }
+        results.firstOrNull { it.second.status == Status.INCONCLUSIVE }?.let { (n, v) -> return Status.INCONCLUSIVE to "$n: ${v.detail}" }
+        return Status.CLEAN to "files=${results.size} match their signatures; ${results.first().second.detail}"
+    }
+
+    private fun verifyAll(files: List<String>, signers: Set<String>, targetSdk: Int): List<Pair<String, ApkVerdict>> = files.map { path ->
+        File(path).name to ParcelFileDescriptor.AutoCloseInputStream(ParcelFileDescriptor.adoptFd(NativeCore.open(installed(path))))
+            .use { ApkSignature.verify(it.channel, signers, targetSdk) }
+    }
+
+    private fun publicKey(ctx: Context): Pair<Status, String> {
+        val s = signers(ctx)
+        if (s.current.isEmpty()) return Status.INCONCLUSIVE to "could not verify: no signer cert"
+        val known = s.current.firstOrNull { it in publicKeys }
+            ?: return Status.CLEAN to "signer is not a publicly known key"
+        return Status.DETECTED to "signed with a publicly known key: ${known.take(16)}"
+    }
+
+    private fun readSigner(ctx: Context): Signers {
+        val pm = ctx.packageManager
+        val (current, history) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val info = pm.getPackageInfo(ctx.packageName, PackageManager.GET_SIGNING_CERTIFICATES).signingInfo
+                ?: return Signers(emptyList(), emptyList())
+            val history = if (info.hasMultipleSigners()) emptyList() else info.signingCertificateHistory.orEmpty().toList()
+            info.apkContentsSigners.orEmpty().toList() to history
+        } else {
+            @Suppress("DEPRECATION")
+            pm.getPackageInfo(ctx.packageName, PackageManager.GET_SIGNATURES).signatures.orEmpty().toList() to emptyList()
+        }
+        return Signers(current.map { certHex(it) }, history.map { certHex(it) })
+    }
+
+    private fun certHex(sig: android.content.pm.Signature): String =
+        hex(MessageDigest.getInstance("SHA-256").digest(sig.toByteArray()))
+
+    private fun repackager(ctx: Context): Pair<Status, String> {
+        val hits = repackaged ?: repackagerHits(baseApk(ctx)).also { repackaged = it }
+        return if (hits.isNotEmpty()) Status.DETECTED to "repackager artifacts: $hits"
+        else Status.CLEAN to "no repackager artifacts"
+    }
+
+    private fun repackagerHits(src: String): List<String> {
+        val markers = listOf(
+            "assets/lspatch/", "liblspatch.so",
+            "libfrida-gadget.so", "libfrida-gadget.config.so",
+            "libappcloner.so",
+        )
+        return ParcelFileDescriptor.AutoCloseInputStream(ParcelFileDescriptor.adoptFd(NativeCore.open(installed(src))))
+            .use { ApkSignature.entryNames(it.channel) }
+            .filter { n -> markers.any { n.startsWith(it) || n.endsWith("/$it") } }
+    }
+}
+
+```
+
+`sdk/src/test/kotlin/io/github/areyougarou/intakto/JvmCheckTest.kt`:
+
+```kt
+package io.github.areyougarou.intakto
+
+import android.os.Looper
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotSame
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
+
+// An adopter's unit tests run on a JVM with no phone and no native library. There, check() must not
+// throw, must report the native checks as "could not confirm" (INCONCLUSIVE), must never report a
+// catch, and the overall verdict must be INCONCLUSIVE, never CLEAN.
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
+class JvmCheckTest {
+
+    private fun await(call: ((Report) -> Unit) -> Unit): Report {
+        var report: Report? = null
+        call { report = it }
+        // The checks run on IntaktoFT's own thread and post the result to the main looper, which
+        // Robolectric runs only when asked.
+        val deadline = System.nanoTime() + 10_000_000_000
+        while (report == null && System.nanoTime() < deadline) {
+            Thread.sleep(50)
+            shadowOf(Looper.getMainLooper()).idle()
+        }
+        return report ?: throw AssertionError("no report within 10 s")
+    }
+
+    @Test
+    fun checkOnTheJvmIsInconclusiveAndNeverDetects() {
+        val app = RuntimeEnvironment.getApplication()
+        val r = await { cb -> Intakto.check(app) { cb(it) } }
+        println("JVM report: verdict=${r.verdict} " + r.signals.joinToString(" ") { "${it.id}=${it.status}" })
+        assertEquals(Status.INCONCLUSIVE, r.signals.single { it.id == "NATIVE_CORE" }.status)
+        assertTrue("a check reported DETECTED: ${r.detected}", r.detected.isEmpty())
+        assertEquals(Status.INCONCLUSIVE, r.verdict)
+
+        // A later check() gets the same finished result; recheck() runs again.
+        assertSame(r, await { cb -> Intakto.check(app) { cb(it) } })
+        val again = await { cb -> Intakto.recheck(app) { cb(it) } }
+        assertNotSame(r, again)
+        assertEquals(Status.INCONCLUSIVE, again.verdict)
+        assertSame(again, await { cb -> Intakto.check(app) { cb(it) } })
+    }
+}
+
+```
+
+`settings.gradle.kts`:
+
+```kts
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "intakto"
+include(":sdk")
+
+```
+
+`unity/Editor.meta`:
+
+```meta
+fileFormatVersion: 2
+guid: 1a0eaec89b624c7a82cdcefff73701b2
+folderAsset: yes
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+
+```
+
+`unity/Editor/IntaktoFTDependencies.xml`:
+
+```xml
+<!-- Read by External Dependency Manager for Unity (EDM4U): it adds the IntaktoFT Android library,
+     and the Kotlin standard library it needs, to the Android build. Keep the version equal to the
+     Android release this package wraps. -->
+<dependencies>
+  <androidPackages>
+    <androidPackage spec="com.github.IntaktoFT:IntaktoFT:v0.3.1">
+      <repositories>
+        <repository>https://jitpack.io</repository>
+      </repositories>
+    </androidPackage>
+  </androidPackages>
+</dependencies>
+
+```
+
+`unity/Editor/IntaktoFTDependencies.xml.meta`:
+
+```meta
+fileFormatVersion: 2
+guid: 46c445d2c7804cf8aa952c715062f520
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+
+```
+
+`unity/README.md`:
+
+```md
+# IntaktoFT for Unity
+
+Catch modded copies of your Android game, and players running Frida on it, without blocking an honest player.\
+This package adds the IntaktoFT Android library to a Unity project and lets your C# code read its result.\
+What it catches, and how we test that honest phones never trip it: the [main README](../README.md).
+
+## Setup takes three steps
+
+1. **Get External Dependency Manager for Unity (EDM4U).** It downloads the Android library into your build.\
+   Most ad and Firebase SDKs already install it: if your menu has `Assets > External Dependency Manager`, skip this step.\
+   Otherwise, install it from [its GitHub page](https://github.com/googlesamples/unity-jar-resolver).
+2. **Add this package.** Open `Window > Package Manager`, click `+`, pick "Add package from git URL" ("Install package from git URL" in Unity 6), and paste:
+   ```
+   https://github.com/IntaktoFT/IntaktoFT.git?path=unity
+   ```
+3. **Set the minimum Android version to 8.0.** In `Project Settings > Player > Android > Other Settings`, set `Minimum API Level` to 26 or higher.\
+   With a lower setting, the Android build stops with a `minSdkVersion` error.
+
+The checks then start by themselves when the game starts. Read the result with one call, for example in a script in your first scene:
+
+```csharp
+using IntaktoFT;
+using UnityEngine;
+
+public class Protect : MonoBehaviour
+{
+    void Awake() => Intakto.Check(report =>
+    {
+        if (report.Verdict == Status.Detected)
+            foreach (var s in report.Signals)
+                if (s.Status == Status.Detected) Debug.Log("IntaktoFT caught " + s.Id + ": " + s.Details);
+    });
+}
+```
+
+## IntaktoFT never closes the game
+
+Your code decides what a catch means: log it, send it to your game server, or end the session.\
+`Verdict` is `Detected` when a check proved the game was modded or hooked.\
+It is `Inconclusive` when a check could not get an answer, so `Clean` always means every check looked.
+
+`Check` hands you the latest finished result, so a call after the first run ends gets it at once.\
+`Recheck` runs the checks again. Use it at moments that matter, such as a ranked match or a purchase: a tool attached after the game started shows up only in a later run.
+
+Call `Check` from Unity's main thread (`Awake`, `Start`, `Update`): the result then arrives on Unity's main thread too, so it can call any Unity API.\
+In the Editor and on other platforms, `Check` runs nothing and reports `Inconclusive` with no signals.
+
+## A missing library never crashes the game
+
+If EDM4U did not add the Android library, `Check` reports one `CHECK_FAILED` signal with status `Inconclusive`, and the game keeps running.\
+To fix it, run `Assets > External Dependency Manager > Android Resolver > Force Resolve`, then build again.
+
+```
+
+`unity/README.md.meta`:
+
+```meta
+fileFormatVersion: 2
+guid: 12b1f534042348f6981971a08178b7a2
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+
+```
+
+`unity/Runtime.meta`:
+
+```meta
+fileFormatVersion: 2
+guid: 01d3c9718f3a4f26985dd7ba3f40a9c4
+folderAsset: yes
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+
+```
+
+`unity/Runtime/Intakto.cs`:
+
+```cs
+// C# entry point for the IntaktoFT Android library. The library starts its checks by itself when the
+// game starts; this reads the result through the same calls an Android app makes,
+// io.github.areyougarou.intakto.Intakto.check(context, callback) and recheck(context, callback), and
+// turns the Kotlin Report into plain C# objects. The checks themselves all run in the Android library.
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using UnityEngine;
+
+namespace IntaktoFT
+{
+    /// <summary>Clean: looked, found nothing. Detected: a proven catch. Inconclusive: could not get an
+    /// answer. Also the report's verdict: Detected if any signal is, else Inconclusive if any signal is
+    /// (or there are none), else Clean.</summary>
+    public enum Status { Clean, Detected, Inconclusive }
+
+    public sealed class Signal
+    {
+        public string Id;
+        /// <summary>APP_INTEGRITY or INSTRUMENTATION.</summary>
+        public string Group;
+        public Status Status;
+        public string Details;
+    }
+
+    public sealed class Report
+    {
+        public Status Verdict;
+        public IReadOnlyList<Signal> Signals;
+        public long ElapsedMs;
+    }
+
+    public static class Intakto
+    {
+        /// <summary>
+        /// Hands onResult the latest finished result; before the first run ends, it waits for that run.
+        /// Call it from Unity's main thread; onResult then runs on Unity's main thread too. In the Editor
+        /// and on other platforms it checks nothing and reports Inconclusive with no signals.
+        /// </summary>
+        public static void Check(Action<Report> onResult) => Call("check", onResult);
+
+        /// <summary>Like Check, but runs the checks again and hands onResult the new result.</summary>
+        public static void Recheck(Action<Report> onResult) => Call("recheck", onResult);
+
+        static void Call(string method, Action<Report> onResult)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            var unity = SynchronizationContext.Current;
+            try
+            {
+                using (var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using (var activity = player.GetStatic<AndroidJavaObject>("currentActivity"))
+                using (var sdk = new AndroidJavaClass("io.github.areyougarou.intakto.Intakto"))
+                    sdk.CallStatic(method, activity, new Callback(onResult, unity));
+            }
+            catch (Exception e)
+            {
+                // Most often the Android library is missing because EDM4U did not resolve it.
+                Deliver(onResult, unity, Failed("the IntaktoFT Android library did not run", e));
+            }
+#else
+            onResult?.Invoke(new Report { Verdict = Status.Inconclusive, Signals = Array.Empty<Signal>() });
+#endif
+        }
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+        sealed class Callback : AndroidJavaProxy
+        {
+            readonly Action<Report> onResult;
+            readonly SynchronizationContext unity;
+
+            public Callback(Action<Report> onResult, SynchronizationContext unity)
+                : base("io.github.areyougarou.intakto.ReportCallback")
+            {
+                this.onResult = onResult;
+                this.unity = unity;
+            }
+
+            // The library calls this on Android's main thread, not Unity's: read the Java report here,
+            // then hand the C# copy to Unity's thread.
+            public void onReport(AndroidJavaObject report)
+            {
+                if (onResult == null) return;
+                Report r;
+                try { r = Read(report); }
+                catch (Exception e) { r = Failed("could not read the Android report", e); }
+                Deliver(onResult, unity, r);
+            }
+
+            static Report Read(AndroidJavaObject report)
+            {
+                var signals = new List<Signal>();
+                using (var list = report.Call<AndroidJavaObject>("getSignals"))
+                    for (int i = 0, n = list.Call<int>("size"); i < n; i++)
+                        using (var s = list.Call<AndroidJavaObject>("get", i))
+                            signals.Add(new Signal
+                            {
+                                Id = s.Call<string>("getId"),
+                                Group = Name(s, "getGroup"),
+                                Status = Parse(Name(s, "getStatus")),
+                                Details = s.Call<string>("getDetails"),
+                            });
+                return new Report
+                {
+                    Verdict = Parse(Name(report, "getVerdict")),
+                    Signals = signals,
+                    ElapsedMs = report.Call<long>("getElapsedMs"),
+                };
+            }
+
+            static Status Parse(string name) => (Status)Enum.Parse(typeof(Status), name, true);
+
+            static string Name(AndroidJavaObject o, string getter)
+            {
+                using (var e = o.Call<AndroidJavaObject>(getter)) return e.Call<string>("name");
+            }
+        }
+
+        // Same rule as the library: a failure is reported as "could not confirm", never as Clean.
+        static Report Failed(string what, Exception e) => new Report
+        {
+            Verdict = Status.Inconclusive,
+            Signals = new[] { new Signal { Id = "CHECK_FAILED", Group = "APP_INTEGRITY", Status = Status.Inconclusive,
+                Details = "could not verify: " + what + ": " + e.Message } },
+        };
+
+        static void Deliver(Action<Report> onResult, SynchronizationContext unity, Report report)
+        {
+            if (onResult == null) return;
+            if (unity != null) unity.Post(_ => onResult(report), null);
+            else onResult(report);
+        }
+#endif
+    }
+}
+
+```
+
+`unity/Runtime/Intakto.cs.meta`:
+
+```meta
+fileFormatVersion: 2
+guid: a6f688d92673467083474099a8d62c2d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+
+```
+
+`unity/Runtime/IntaktoFT.asmdef`:
+
+```asmdef
+{
+  "name": "IntaktoFT",
+  "rootNamespace": "IntaktoFT",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "autoReferenced": true
+}
+
+```
+
+`unity/Runtime/IntaktoFT.asmdef.meta`:
+
+```meta
+fileFormatVersion: 2
+guid: 08bc68f1c1ef46d4b17adcd32db2f13c
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+
+```
+
+`unity/package.json`:
+
+```json
+{
+  "name": "io.github.areyougarou.intaktoft",
+  "version": "0.3.1",
+  "displayName": "IntaktoFT",
+  "description": "Free Android library that catches repackaged (modded) copies of your game and Frida or hooking tools while it runs. Collects no data.",
+  "unity": "2021.3",
+  "license": "Apache-2.0",
+  "documentationUrl": "https://github.com/IntaktoFT/IntaktoFT/tree/main/unity",
+  "author": { "name": "areyougarou", "url": "https://github.com/areyougarou" },
+  "keywords": ["android", "anti-cheat", "anti-tamper", "anti-mod", "frida", "rasp", "security"]
+}
+
+```
+
+`unity/package.json.meta`:
+
+```meta
+fileFormatVersion: 2
+guid: ef374ae5446d4dbe8bfd5d64d4cf5e5d
+PackageManifestImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+
+```
