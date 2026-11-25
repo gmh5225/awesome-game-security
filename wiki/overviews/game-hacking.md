@@ -2067,6 +2067,7 @@ sources:
   - wiki/sources/descriptions/kxdrsrt__OdinGuard.md
   - wiki/sources/descriptions/AmirrezaJaberi__FIREAC.md
   - wiki/sources/descriptions/zezindozap__android-game-hacking.md
+  - wiki/sources/descriptions/simplysanatori__gc-wii-game-fixes.md
 updated: 2026-11-25
 confidence: high
 ---
@@ -3210,7 +3211,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Multi-system retro emulator [[bizhawk]] (TASEmulators; C#/.NET + native C/C++ cores; TAStudio movie editing, Lua memory/input scripting, RAM search/watch, hex editor, CPU debuggers/disassemblers, trace logging, savestates/rewind, Game Genie/GameShark decoders; NES/SNES/GB/GBA/Genesis/N64/DS/PlayStation/MAME arcade; deterministic frame-by-frame control for TAS authors, cheat testing, and retro game internals RE) sits in the console retro-emulator lane beside [[feather-gb]] and [[kevboy]]. (source: wiki/sources/descriptions/TASEmulators__BizHawk.md)
 - Retro handheld theme asset packs such as [[retro-game-console-icons]] (KyleBing; multi-size PNG retro console icons; TrimUI/Miyoo theme pipelines; editor tooling + emulation content/modding for handheld UI) sit beside that console retro-emulator lane. (source: wiki/sources/descriptions/KyleBing__retro-game-console-icons.md)
 - Cycle-accurate Rust GB/GBC emulator [[gecko]] (CPU/PPU/APU; wgpu render; desktop library GUI) sits in the console `Game Boy` lane—README miscategorizes it under `GameCube/Wii`. (source: wiki/sources/descriptions/ioncodes__gecko.md)
-- Curated Dolphin GC/Wii fix catalog simplysanatori/gc-wii-game-fixes (widescreen patches, AR/cheat codes, game INI tweaks, Riivolution mods, texture-pack links only—no rehosting; GameCube/Wii ~**2** with [[gecko]] emulator) parallels [[3ds-game-fixes]] for retail graphics/cheat metadata workflows. (source: wiki/sources/README-categories.md)
+- Curated Dolphin GC/Wii fix catalog [[gc-wii-game-fixes]] (simplysanatori; JSON disc-ID entries; Gecko/AR/on-frame codes, Dolphin INI, Riivolution mods, HD texture metadata; Python-validated machine-readable catalogs; link-only third-party assets; GameCube/Wii ~**2** with [[gecko]] emulator) parallels [[3ds-game-fixes]] for retail graphics/cheat metadata workflows. (source: wiki/sources/descriptions/simplysanatori__gc-wii-game-fixes.md) (source: wiki/sources/README-categories.md)
 - GBA cartridge RE in Ghidra via [[gba-ghidra-loader]] (region/IO map + header entry point) sits in the console `Game Boy` / Cheat Ghidra Plugins lane. (source: wiki/sources/descriptions/pudii__gba-ghidra-loader.md)
 - Game Boy DMG cartridge RE in Ghidra via [[ghidradboy]] (Gekkio; Kotlin/Java; Sharp SM83 Sleigh; banked/unbanked ROM loading, boot ROM variants, memory map blocks, hardware register symbols; retro game binary analysis / low-level firmware research) sits in the same console `Game Boy` / Cheat Ghidra Plugins lane beside [[gba-ghidra-loader]]. (source: wiki/sources/descriptions/Gekkio__GhidraBoy.md)
 - Analogue Pocket GB/GBC openFPGA cheat deployment via [[openfpga-gbc-cheats-ui]] (Python/tkinter; libretro cheat DB browse; Game Genie/GameShark parse; `.cht` SD-card write; CPU-read vs RAM-write safety flags; CLI ROM compare-byte verify) sits in the console `Game Boy` lane for retro hardware cheat workflows. (source: wiki/sources/descriptions/kroy-the-rabbit__openfpga-GBC-cheats-ui.md)
