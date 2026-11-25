@@ -28,6 +28,8 @@ import urllib.error
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from description_paths import NON_REPO_ROUTES, archive_path
+
 README_PATH = "README.md"
 ARCHIVE_DIR = "archive"
 GITHUB_REPO_PATTERN = re.compile(
@@ -149,6 +151,8 @@ def extract_github_repos(text: str) -> list[tuple[str, str]]:
         repo = repo.rstrip(".,;:")
         if owner == "gmh5225" and repo == "awesome-game-security":
             continue
+        if owner.casefold() in NON_REPO_ROUTES:
+            continue
         key = (owner.lower(), repo.lower())
         if key not in seen:
             seen.add(key)
@@ -205,7 +209,7 @@ def git_commit_and_push(archive_dir: Path, count: int, push_retries: int = 5) ->
             capture_output=True,
         )
     except subprocess.CalledProcessError as e:
-        print(f"  [GIT ERROR] commit: {e.stderr.decode().strip()[:200] if e.stderr else e}")
+        print(f"  [GIT ERROR] commit: {e.stderr.decode('utf-8', errors='replace').strip()[:200] if e.stderr else e}")
         return
 
     for attempt in range(1, push_retries + 1):
@@ -214,7 +218,7 @@ def git_commit_and_push(archive_dir: Path, count: int, push_retries: int = 5) ->
             print(f"  [GIT] Committed and pushed {count} archive(s)")
             return
         except subprocess.CalledProcessError as e:
-            err = e.stderr.decode().strip() if e.stderr else str(e)
+            err = e.stderr.decode("utf-8", errors="replace").strip() if e.stderr else str(e)
 
             # File too large for GitHub (LFS rejection) — undo this commit
             # and delete oversized files so they don't pollute future commits.
@@ -239,7 +243,7 @@ def git_commit_and_push(archive_dir: Path, count: int, push_retries: int = 5) ->
                         check=True, capture_output=True,
                     )
                 except subprocess.CalledProcessError as re_err:
-                    re_msg = re_err.stderr.decode().strip()[:200] if re_err.stderr else str(re_err)
+                    re_msg = re_err.stderr.decode("utf-8", errors="replace").strip()[:200] if re_err.stderr else str(re_err)
                     print(f"  [GIT ERROR] rebase failed: {re_msg}")
                     subprocess.run(["git", "rebase", "--abort"], capture_output=True)
                     subprocess.run(["git", "reset", "HEAD~1"], capture_output=True)
@@ -291,10 +295,10 @@ def archive_repo(
     status: OK | SKIP | FAIL | TIMEOUT | TOOLARGE
     """
     slug = f"{owner}/{repo}"
-    out_dir = archive_dir / owner
-    out_file = out_dir / f"{repo}.txt"
+    out_file = archive_path(owner, repo, archive_dir=archive_dir)
+    out_dir = out_file.parent
 
-    if skip_existing and out_file.exists():
+    if skip_existing and out_file.is_file():
         return (slug, "SKIP", "")
 
     clone_url = f"https://github.com/{owner}/{repo}.git"
@@ -564,7 +568,7 @@ def main() -> None:
     # "--limit N" means "process N repos that still need archiving".
     if args.skip_existing:
         pending = [(o, r) for o, r in repos
-                   if not (archive_dir / o / f"{r}.txt").exists()]
+                   if not archive_path(o, r, archive_dir=archive_dir).is_file()]
         skipped_upfront = len(repos) - len(pending)
         if skipped_upfront:
             print(f"Already archived    : {skipped_upfront} (skipped)")
@@ -579,7 +583,7 @@ def main() -> None:
         for owner, repo in repos:
             # After pre-filtering, everything here is either TODO or re-archive
             flag = "TODO" if args.skip_existing else (
-                "SKIP" if (archive_dir / owner / f"{repo}.txt").exists() else "TODO"
+                "SKIP" if archive_path(owner, repo, archive_dir=archive_dir).is_file() else "TODO"
             )
             print(f"  [{flag}] {owner}/{repo}")
         return

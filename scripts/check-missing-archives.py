@@ -12,6 +12,8 @@ import re
 import argparse
 from pathlib import Path
 
+from description_paths import NON_REPO_ROUTES, archive_path
+
 ROOT_DIR          = Path(__file__).resolve().parent.parent
 README_PATH       = ROOT_DIR / "README.md"
 ARCHIVE_DIR       = ROOT_DIR / "archive"
@@ -54,7 +56,7 @@ def extract_repos_with_categories(text: str) -> list[tuple[str, str, str]]:
         owner, repo = m.group(1), m.group(2).rstrip(".,;:")
         if owner == "gmh5225" and repo == "awesome-game-security":
             continue
-        if owner == "stars":           # github.com/stars/... is not a repo
+        if owner.casefold() in NON_REPO_ROUTES:
             continue
         key = (owner.lower(), repo.lower())
         if key in seen:
@@ -65,7 +67,7 @@ def extract_repos_with_categories(text: str) -> list[tuple[str, str, str]]:
 
 
 def is_archived(owner: str, repo: str) -> bool:
-    return (ARCHIVE_DIR / owner / f"{repo}.txt").exists()
+    return archive_path(owner, repo, archive_dir=ARCHIVE_DIR).is_file()
 
 
 def main() -> None:

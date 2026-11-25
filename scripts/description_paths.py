@@ -9,6 +9,14 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 ARCHIVE_DIR = ROOT_DIR / "archive"
 DESC_DIR = ROOT_DIR / "description"
 
+NON_REPO_ROUTES = frozenset({
+    "stars", "topics", "orgs", "organizations", "users", "sponsors",
+    "collections", "settings", "features", "marketplace", "login", "signup",
+    "search", "about", "enterprise", "security", "site", "notifications",
+    "new", "apps", "codespaces", "pulls", "issues", "discussions", "explore",
+    "events", "trending", "customer-stories",
+})
+
 
 def _case_insensitive_child(parent: Path, name: str) -> Path | None:
     if not parent.is_dir():
@@ -67,11 +75,18 @@ def description_lang_path(owner: str, repo: str, lang: str) -> Path:
     return description_dir(owner, repo) / f"description_{lang}.txt"
 
 
-def archive_path(owner: str, repo: str) -> Path:
-    o, r = canonical_repo_slug(owner, repo)
-    owner_dir = ARCHIVE_DIR / o
-    if owner_dir.is_dir():
+def archive_path(owner: str, repo: str, archive_dir: Path | None = None) -> Path:
+    if archive_dir is None or archive_dir == ARCHIVE_DIR:
+        o, r = canonical_repo_slug(owner, repo)
+        base_dir = ARCHIVE_DIR
+    else:
+        o, r = owner, repo
+        base_dir = archive_dir
+
+    owner_dir = _case_insensitive_child(base_dir, o)
+    if owner_dir and owner_dir.is_dir():
         matches = _matching_archives(owner_dir, r)
         if matches:
             return matches[0]
-    return ARCHIVE_DIR / o / f"{r}.txt"
+        return owner_dir / f"{r}.txt"
+    return base_dir / o / f"{r}.txt"
