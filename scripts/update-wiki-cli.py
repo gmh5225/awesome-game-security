@@ -67,8 +67,12 @@ SKILL_TOPICS: tuple[str, ...] = (
     "dma-attack",
     "game-engine",
     "game-hacking",
+    "game-server-security",
+    "game-supply-chain-security",
     "graphics-api",
+    "linux-platform-security",
     "mobile-security",
+    "research-rigor",
     "reverse-engineering",
     "windows-kernel",
 )
