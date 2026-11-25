@@ -44,7 +44,8 @@ sources:
   - wiki/sources/descriptions/tamcdonald42__legacy-recreated.md
   - wiki/sources/descriptions/ILFforever__YW4Recomp.md
   - wiki/sources/descriptions/Revivedx__SavageWindRecomp.md
-updated: 2026-11-24
+  - wiki/sources/descriptions/orca-zhang__unpack.md
+updated: 2026-11-25
 confidence: high
 ---
 
@@ -96,7 +97,7 @@ Win32 PE preservation workbenches such as [[legacy-recreated]] (tamcdonald42; *S
 
 Windows PE32 relink harnesses such as xshxdex98/[[openmcm2]] (*Motocross Madness 2*; fixed-base MSVC 6.0 image; Ghidra export + assembly/link verification) keep **retail sections byte-for-byte** while selectively replacing routines with ported C that must match retail behavior; optional DirectDraw tracing compares renderer calls against the original path. (source: wiki/sources/descriptions/xshxdex98__OpenMCM2.md)
 
-BGT/NVGT blind-audio-game toolkits such as [[bgt-decomp-tools]] (KamiKitsune420; Python) chain **PE overlay** extraction through **AES-256-CBC** and **LZ77** before AngelScript disassembly/lift—engine readers use **trial decryption** and **self-verifying format checks** so static pack recovery is not accepted until decrypted layouts parse cleanly; optional **UPX** runtime unpack and Ghidra headless extend opcode tables when shipped binaries add packers. (source: wiki/sources/descriptions/KamiKitsune420__bgt-decomp-tools.md)
+BGT/NVGT blind-audio-game toolkits such as [[bgt-decomp-tools]] (KamiKitsune420; Python) chain **PE overlay** extraction through **AES-256-CBC** and **LZ77** before AngelScript disassembly/lift—engine readers use **trial decryption** and **self-verifying format checks** so static pack recovery is not accepted until decrypted layouts parse cleanly; optional **UPX** runtime unpack and Ghidra headless extend opcode tables when shipped binaries add packers. (source: wiki/sources/descriptions/KamiKitsune420__bgt-decomp-tools.md) Non-executing packer ID and layered static unpack via [[unpack]] (orca-zhang; recursive decode; PE structure/EP repair when full unpack fails) keeps **static** PE claims separate from runtime-generated code paths. (source: wiki/sources/descriptions/orca-zhang__unpack.md)
 
 Win32 PE32 static recompilation such as [[nfsu2recomp]] (TalhaMudo; *Need for Speed: Underground 2* x86→ARM64 macOS; ahead-of-time lift to C plus Win32/D3D9 runtime translation) separates **static discovery** (PE relocation recovery, recursive function discovery, indirect-call dispatch tables) from **runtime fidelity** claims about HLE shortcuts (e.g. D3DX effect framework)—label which API paths are fully lifted vs emulated before treating the native build as a reference port. (source: wiki/sources/descriptions/TalhaMudo__NFSU2Recomp.md)
 
