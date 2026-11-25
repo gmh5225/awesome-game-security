@@ -4911,6 +4911,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/TheMille-Dev/AntiGuard [Self-contained Paper/Purpur Minecraft anti-cheat plugin with Fly/Speed/Reach/KillAura checks, embedded SQLite storage, and built-in web dashboard plus REST API]
 - https://github.com/donnie1337/AntiCheatPlus [Paper Minecraft anti-cheat and punishment plugin with movement, combat, block, x-ray, and killaura decoy checks plus ban/warn GUI]
 - https://github.com/ImNotVirgola/VirgolaAntiCheat [Paper 1.21.11 Minecraft anti-cheat plugin with modular movement/combat/packet checks (fly, speed, killaura, scaffold, bad packets), PacketEvents, staff GUI, and Discord alerts]
+- https://github.com/ImNotGemsDc/Vectra-AntiCheat [Paper 1.21 Minecraft server anti-cheat plugin with movement, combat, and interaction checks, violation levels, and staff alert commands]
 - https://github.com/wepposs/WepAC [Paper/Spigot 1.21+ server anti-cheat combining heuristic movement/combat/packet checks with an online-learning MLP, inline Netty sniffing, and movement physics simulation]
 - https://github.com/lino9999/LinoAC [Experimental open-source Spigot/Paper Minecraft anti-cheat (1.21.11–26.3) with PacketEvents monitoring, movement/combat checks, staff alerts, and punishment waves]
 - https://github.com/m3rMAX/HeroAntiCheat [Open-source Paper/Purpur 1.21.11 server anti-cheat plugin (Java 21+) with CI build artifacts and configurable heuristics]
