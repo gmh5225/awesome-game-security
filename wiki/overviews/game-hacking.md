@@ -2068,6 +2068,7 @@ sources:
   - wiki/sources/descriptions/AmirrezaJaberi__FIREAC.md
   - wiki/sources/descriptions/zezindozap__android-game-hacking.md
   - wiki/sources/descriptions/simplysanatori__gc-wii-game-fixes.md
+  - wiki/sources/descriptions/Nico-Posada__IDAGBA.md
 updated: 2026-11-25
 confidence: high
 ---
@@ -3213,6 +3214,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Cycle-accurate Rust GB/GBC emulator [[gecko]] (CPU/PPU/APU; wgpu render; desktop library GUI) sits in the console `Game Boy` lane—README miscategorizes it under `GameCube/Wii`. (source: wiki/sources/descriptions/ioncodes__gecko.md)
 - Curated Dolphin GC/Wii fix catalog [[gc-wii-game-fixes]] (simplysanatori; JSON disc-ID entries; Gecko/AR/on-frame codes, Dolphin INI, Riivolution mods, HD texture metadata; Python-validated machine-readable catalogs; link-only third-party assets; GameCube/Wii ~**2** with [[gecko]] emulator) parallels [[3ds-game-fixes]] for retail graphics/cheat metadata workflows. (source: wiki/sources/descriptions/simplysanatori__gc-wii-game-fixes.md) (source: wiki/sources/README-categories.md)
 - GBA cartridge RE in Ghidra via [[gba-ghidra-loader]] (region/IO map + header entry point) sits in the console `Game Boy` / Cheat Ghidra Plugins lane. (source: wiki/sources/descriptions/pudii__gba-ghidra-loader.md)
+- GBA ROM and multiboot static analysis in IDA Pro via [[idagba]] (Nico-Posada; Python loader+plugin for IDA 9.1+; GBA memory map, I/O labels, devkitARM startup→`main`, ROM-to-RAM copies at load, toolchain signature libraries, BIOS SWI and Thumb stub recovery; cartridge/homebrew/link-cable multiboot; Cheat / Game Boy) sits in the same console `Game Boy` / IDA Plugins lane beside [[gba-ghidra-loader]]. (source: wiki/sources/descriptions/Nico-Posada__IDAGBA.md)
 - Game Boy DMG cartridge RE in Ghidra via [[ghidradboy]] (Gekkio; Kotlin/Java; Sharp SM83 Sleigh; banked/unbanked ROM loading, boot ROM variants, memory map blocks, hardware register symbols; retro game binary analysis / low-level firmware research) sits in the same console `Game Boy` / Cheat Ghidra Plugins lane beside [[gba-ghidra-loader]]. (source: wiki/sources/descriptions/Gekkio__GhidraBoy.md)
 - Analogue Pocket GB/GBC openFPGA cheat deployment via [[openfpga-gbc-cheats-ui]] (Python/tkinter; libretro cheat DB browse; Game Genie/GameShark parse; `.cht` SD-card write; CPU-read vs RAM-write safety flags; CLI ROM compare-byte verify) sits in the console `Game Boy` lane for retro hardware cheat workflows. (source: wiki/sources/descriptions/kroy-the-rabbit__openfpga-GBC-cheats-ui.md)
 - Local-first ROM/disc patch and cheat-code baking via [[rom-weaver]] (Rust CLI + offline WASM PWA; 21 patch formats + CHD/RVZ containers; checksum verify, multi-patch chains, trim/restore; cheat / RE Tools) sits in the retro-console RE lane beside [[openfpga-gbc-cheats-ui]]. (source: wiki/sources/descriptions/rom-weaver__rom-weaver.md)

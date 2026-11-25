@@ -2146,6 +2146,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-genpatch](entities/ida-genpatch.md) — IDA PatchGen: export grouped patched bytes, disassembly, C# SinglePatchHunk (Alt-F8; cheat / IDA Plugins)
 - [ida-gpt](entities/ida-gpt.md) — IDAPython ChatGPT helper (function descriptions + auto-rename variables/locations/symbols; writes comments/identifiers into IDA DB; cheat / IDA Plugins / [ChatGPT])
 - [IDA-Assistant](entities/ida-assistant.md) — IDA Pro Claude-3 chat assistant (cheat / IDA Plugins)
+- [idagba](entities/idagba.md) — Nico-Posada; Python IDA Pro 9.1+ GBA ROM/multiboot loader+plugin; memory map, I/O labels, devkitARM startup→main, ROM-to-RAM copies, BIOS/stub recovery, toolchain siglibs; cartridge/homebrew/multiboot; Cheat / Game Boy
 - [idanime](entities/idanime.md) — shwetsoni; twelve anime IDA Pro 9.x CSS themes + PySide6 graph background art; CustomIDAMemo text views; lighten/darken HiDPI blend; Win/Linux/macOS; Cheat / IDA themes
 - [ida-ios-helper](entities/ida-ios-helper.md) — IDA plugin for iOS reversing (vtable symbols required)
 - [ida-kcpp](entities/ida-kcpp.md) — IDAPython: C++ virtual-call resolution for iOS kernelcaches (ida_kernelcache hierarchy; vcall xrefs; cheat / IDA Plugins)
