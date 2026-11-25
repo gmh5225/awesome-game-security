@@ -399,6 +399,7 @@ sources:
   - wiki/sources/descriptions/ocornut__imgui_test_engine.md
   - wiki/sources/descriptions/zorde23__kyty-gpu-hybrid.md
   - wiki/sources/descriptions/ajendras__velox.md
+  - wiki/sources/descriptions/fxceless__victory-fork.md
   - wiki/sources/descriptions/MESIA-Unified__MESIA-Unified.md
 updated: 2026-11-25
 confidence: high
@@ -548,6 +549,7 @@ Windows documents `SwapBuffers` through GDI; do not assume a similarly named wra
 - PS5 guest→host hybrid GPU via [[kyty-gpu-hybrid]] (Kyty fork; guest PM4 command processor + tiling/PSSR paths; host Vulkan renderer from SPIR-V tooling, compute tiler shaders, resource caches; Rust cross-install pipeline-share server; SDL3/ImGui front end—emulator GPU stack study beside full VM labs; not Present-hook overlay research) (source: wiki/sources/descriptions/zorde23__kyty-gpu-hybrid.md)
 - Xbox Series native retail x86-64 title execution on Windows via [[mesia-unified]] (MESIA-Unified; Rust; re-hosted Win32 process—not full-machine emulation; D3D12X/DirectStorage/XAudio/GameInput HLE; title shader→host DXIL with disk cache; PC D3D12 SM6.6/mesh-shader path; PE/thunk/GPU descriptor + format-parser study; optional frame capture/DRED diagnostics; console DXGI/D3D12 compatibility RE—not Present-hook overlay research) (source: wiki/sources/descriptions/MESIA-Unified__MESIA-Unified.md)
 - Series retail PE without full CPU emulation via [[velox]] (ajendras; Rust; unmodified x86-64 PE/DLL in sandboxed controlled process; console GPU bytecode→DXIL + disk cache; pluggable GPU/audio/input backends with D3D12 default; memory isolation/page guards/API whitelist; Axum HTTP FPS/memory telemetry + remote commands; dynamic plugins on frame/input/shader without binary patches; BCPack/Zlib parallel asset streaming; preservation/modding/test harness—not Present-hook overlay research) (source: wiki/sources/descriptions/ajendras__velox.md)
+- VIctory downstream fork via [[victory-fork]] (fxceless; GPL WIP of Marvisak VIctory; Rust workspace—PE loader, Xbox runtime HLE, console asset decoders; D3D12 with on-demand console shader→DXIL recompile; GPU/memory/rendering fixes for in-world playback and frame stability on real hardware; tracks upstream; BYO game files; Series platform + graphics-pipeline translation RE—not Present-hook overlay research) (source: wiki/sources/descriptions/fxceless__victory-fork.md)
 
 ## Related concepts
 
