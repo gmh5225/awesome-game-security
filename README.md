@@ -1004,6 +1004,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/mathewsbinny/bf1943-tool-suite [Open-source Frostbite tooling for Battlefield 1943: level inspection, DBX/FBRB/terrain format read-diff-rebuild, navmesh generation, and bot simulation (Xenia-compatible)]
 - https://github.com/mathewsbinny/bfbc2-tool-suite [Python/Rust BFBC2 modding suite: 3D map inspector, NavKit, DBX/FBRB diff and rebuild, crash reader, and bot/map test harness]
 - https://github.com/jlagedo/dreams-to-reality-re [Reverse-engineering research toolkit for Dreams to Reality (1997): Python asset decoders, Ghidra scripts, format documentation, and a Babylon.js viewer—tools only, no copyrighted game data]
+- https://github.com/batteryshark/game-hacking [Console and PC game RE toolkit: script disassemblers, archive/format tools, SSF CHD loader patch (DLL injection), and translation patch workflows—BYO game files]
 - https://github.com/tamcdonald42/legacy-recreated [Ghidra decompilation workbench and notes for Septerra Core 1.04 toward readable C without redistributing game data]
 - https://github.com/formix/sre-re [Solar Realms Elite 0.994b (DOS BBS) RE: Ghidra toolchain, decoded .II save formats, and recovered game rules toward a Linux remake]
 - https://github.com/chaossource/menace-reverse-engineering [Reverse engineering and SDL2 C++ port of 1988 Amiga game Menace: annotated disassemblies, asset extraction tooling, and a working rebuild]
