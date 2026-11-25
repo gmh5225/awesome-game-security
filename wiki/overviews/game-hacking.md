@@ -1418,6 +1418,7 @@ sources:
   - wiki/sources/descriptions/damanoreshkan-beep__rtl8852au-userspace.md
   - wiki/sources/descriptions/emilyinure__solace-csgo.md
   - wiki/sources/descriptions/emrewyt__apex-re.md
+  - wiki/sources/descriptions/erkamyaman__rea-games.md
   - wiki/sources/descriptions/Calvin-LLC__nvidia-overlay-hijack.md
   - wiki/sources/descriptions/gmh5225__NVIDIA-OVERLAY.md
   - wiki/sources/descriptions/gmh5225__nvidia-overlay-hijack.md
@@ -2435,6 +2436,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - C#/.NET x64dbg MCP plugin via [[x64dbgmcpserver]] (AgentSmithers; MCP-compatible HTTP interface; self-hosted listener; memory/disasm/register/label/automation commands; AI-assisted RE and scripted game security analysis; Cheat Debugging / agent-RE lane) (source: wiki/sources/descriptions/AgentSmithers__x64DbgMCPServer.md)
 - Curated AI-agent RE stack catalog via [[awesome-ai-reverse-engineering]] (zhuyansen; ~122 vetted MCP servers and mobile tooling entries with security grades + JSON metadata; Ghidra/IDA/BN/r2/x64dbg, jadx/Frida, agent skills; Cheat / RE Tools) (source: wiki/sources/descriptions/zhuyansen__awesome-ai-reverse-engineering.md)
 - Installable game-oriented RE agent skill via [[apex-re]] (emrewyt; skill + prompt library; zero-dependency Python triage/signature/memory-diff/VM-trace helpers; Unreal/Unity IL2CPP/Godot/.NET and VMProtect/OLLVM guides; five-layer verification; Ghidra/IDA/Frida; Claude Code/Cursor/Codex; Cheat / RE Tools) (source: wiki/sources/descriptions/emrewyt__apex-re.md)
+- Open-source game logic RE via [[rea-games]] (erkamyaman; Node.js record harness fixes clocks/RNG; behavior specs; clean-room ports in JS/Rust Bevy/Godot GDScript must match recorded traces via JSON verify protocol; GAME.md agent workflow; Cheat / Guide) (source: wiki/sources/descriptions/erkamyaman__rea-games.md)
 - Agent-native integrated RE lab via [[open-reverselab]] (LING71671; Python; 180+ technique articles + 100+ MCP automation tools; knowledge router maps signals to attack chains; Ghidra/Frida/x64dbg/jadx; web CTF, Android APK/DEX, Windows PE, crypto, game cheating/AC boards; authorized binary/malware/game-protection investigation; Cheat agent-RE lane) (source: wiki/sources/descriptions/LING71671__open-reverselab.md)
 - UnknownCheats forum knowledge retrieval via [[uc-mcp]] (0111-0222; Python read-only MCP; session-cookie keyword search, thread read, subforum browse, page fetch, and health check; UTC staleness labels; curl_cffi Cloudflare bypass + vBulletin parse; rate limits + URL guards + SQLite cache; Claude Code/Cursor; Cheat agent-RE / community-knowledge lane) (source: wiki/sources/descriptions/0111-0222__uc-mcp.md)
 - AI-assisted RE with deterministic byte-level verification via [[reverify]] (2akouwu; MCP server + CLI; pairs LLM analysis with auditable byte-level checks; Cheat RE Tools) (source: wiki/sources/README-categories.md)
