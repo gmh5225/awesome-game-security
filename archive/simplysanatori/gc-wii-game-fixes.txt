@@ -1,0 +1,3661 @@
+Project Path: arc_simplysanatori_gc-wii-game-fixes_vxb5fvcs
+
+Source Tree:
+
+```txt
+arc_simplysanatori_gc-wii-game-fixes_vxb5fvcs
+├── AGENTS.md
+├── LICENSE
+├── README.md
+├── catalog
+│   ├── mods.json
+│   └── textures.json
+├── docs
+│   └── USER_GUIDE.md
+├── entries
+│   ├── mods
+│   │   ├── G4BE08.json
+│   │   ├── G8ME01.json
+│   │   ├── GAFE01.json
+│   │   ├── GALE01.json
+│   │   ├── GEDE01.json
+│   │   ├── GFZE01.json
+│   │   ├── GKYE01.json
+│   │   ├── GLME01.json
+│   │   ├── GM4E01.json
+│   │   ├── GM8E01.json
+│   │   ├── GMSE01.json
+│   │   ├── GP7E01.json
+│   │   ├── GPVE01.json
+│   │   ├── GQSEAF.json
+│   │   ├── GSAE01.json
+│   │   ├── GSNE8P.json
+│   │   ├── GZ2E01.json
+│   │   ├── GZLE01.json
+│   │   ├── RMCE01.json
+│   │   ├── RMCP01.json
+│   │   ├── RMGE01.json
+│   │   ├── RZTE01.json
+│   │   ├── SLSEXJ.json
+│   │   └── SOUE01.json
+│   └── textures
+│       ├── G2ME01.json
+│       ├── G8ME01.json
+│       ├── GFEE01.json
+│       ├── GFZE01.json
+│       ├── GKYE01.json
+│       ├── GLME01.json
+│       ├── GMSE01.json
+│       ├── GP7E01.json
+│       ├── GPVE01.json
+│       ├── GSAE01.json
+│       ├── GZ2E01.json
+│       ├── RM3E01.json
+│       ├── RMCE01.json
+│       ├── RMGE01.json
+│       ├── SB4E01.json
+│       ├── SF8E01.json
+│       ├── SLSEXJ.json
+│       ├── SMNE01.json
+│       └── SX4E01.json
+├── games
+└── tools
+    └── build.py
+
+```
+
+`AGENTS.md`:
+
+```md
+# AGENTS.md
+
+Technical detail kept out of the README: how the repo is laid out and how a fix or an entry is added. The layout follows [3ds-game-fixes](https://github.com/simplysanatori/3ds-game-fixes) wherever the systems allow it.
+
+## Layout
+
+```
+entries/mods/<game id>.json        mods, patches and cheats of one game (a list of entries)
+entries/textures/<game id>.json    texture packs of one game (a list of entries)
+catalog/mods.json                  built from entries/ by tools/build.py; what an app reads
+catalog/textures.json              the same for texture packs
+games/<game>-<region>/             our own fixes: README.md, AGENTS.md, the code file, images/
+docs/USER_GUIDE.md                 how codes, mods and texture packs are installed
+tools/build.py                     checks every entry and writes catalog/
+```
+
+- Folder names are lowercase, with the region last.
+- A game is named by its 6-character game ID (`GFEE01`). An entry file is named after its first one.
+- Texture packs and other people's mods are never in this repo: they are downloaded from their authors.
+
+## An entry (both lists)
+
+| Field | |
+|---|---|
+| `id` | `[a-z0-9-]`, unique |
+| `name` | what the list shows: short, title case, no game name |
+| `title` | the game's name |
+| `game_ids` | every 6-character game ID it works on |
+| `revisions` | optional: the disc revisions it works on (`[0]`). Codes nearly always need it |
+| `author`, `author_url` | as the source credits them |
+| `licence` | as stated by the author, else `Not stated` |
+| `homepage` | the page the entry came from |
+| `updated` | `YYYY-MM` or `YYYY-MM-DD` |
+| `notes` | one or two short sentences: what it does, what it needs |
+| `verified` | true only when tested here: booted, with before/after pictures of the same scene. Default false |
+| `recommended` | the maintainer's pick. Default false |
+
+## mods.json: `kind`
+
+- `codes`: `code_type` (`gecko`, `ar` or `onframe`) and `lines`, the code as Dolphin's game INIs have it. Optional `settings`.
+- `builtin`: a code Dolphin ships in its own game INI: `code_type` and `code_name`, exactly as there, without the `$` and the `[author]`.
+- `settings`: only `settings`.
+- `riivolution`: `source` (below) and `xml`, the path pattern of the Riivolution XML inside the download.
+
+`category`: `widescreen`, `framerate`, `fix`, `graphics`, `controls`, `gameplay`, `cheat`, `translation`, `mod`.
+
+`aspect`: `16:9` for anything that makes the picture wide. A GameCube widescreen code also needs `{"section": "Video_Settings", "key": "SuggestedAspectRatio", "value": "1"}` in `settings` (Force 16:9), or the picture stays 4:3.
+
+`settings`: `{"section", "key", "value"}`. Allowed: `Video_Settings` (`wideScreenHack`, `SuggestedAspectRatio`, `AspectRatio`, `SafeTextureCacheColorSamples`), `Video_Hacks` (any key), `Video_Enhancements` (`ForceTextureFiltering`, `DisableCopyFilter`, `ArbitraryMipmapDetection`), `Core` (`CPUThread`, `SyncGPU`, `FPRF`, `MMU`, `Overclock`, `OverclockEnable`).
+
+## textures.json
+
+`source` or `parts` (a list, joined in order), `size` (bytes), `sha256` (optional), `format` (`zip`, `7z`, `rar`), `layout`: `single` (the folder that holds the textures, wrapper folders are dropped) or `variants` (its folders are choices), `textures` (`png` or `dds`), `downloads` (optional count).
+
+## `source`
+
+```
+{"type": "github_release", "repo": "owner/name", "tag": "latest", "asset_pattern": "Name-*.zip"}
+{"type": "github_repo_path", "repo": "owner/name", "ref": "main", "path": "dir/"}
+{"type": "gamebanana", "mod": 12345, "file_pattern": "*.zip"}
+{"type": "gdrive", "file_id": "..."}
+{"type": "gdrive_folder", "folder_id": "...", "file_pattern": "*.zip"}
+{"type": "mega", "link": "https://mega.nz/file/<handle>#<key>"}
+{"type": "https", "url": "https://..."}
+{"type": "link"}                     can only be opened in a browser (homepage)
+```
+
+## Rules
+
+- Open every address before adding an entry. No guesses: no page, no entry.
+- Codes: copied exactly, with their revision. Where the source gives none, `notes` say so.
+- Other people's work: link to the author. A file is copied here only with the author's permission or a licence that allows it. Codes are credited.
+- No game files, and nothing that carries a game's own data.
+
+## How this was made
+
+I started this project and used AI (Claude) to speed up development. I write, review and fix code by hand all the way through, keep the AI's work checked and reined in, and aim to keep the patches as lightweight as possible.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 simplysanatori
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# GameCube and Wii Game Fixes
+
+Widescreen patches, fixes, cheats, mods and texture packs for GameCube and Wii games in Dolphin. The sister repository of [3DS Game Fixes](https://github.com/simplysanatori/3ds-game-fixes) and [DS and GBA Game Fixes](https://github.com/simplysanatori/ds-gba-game-fixes).
+
+## What is here
+
+- 40 entries in [catalog/mods.json](catalog/mods.json): cheats, patches, game settings and 3 mods
+- 24 texture packs in [catalog/textures.json](catalog/textures.json)
+- Our own fixes, one folder per game under `games/` (none yet)
+
+Nothing is rehosted. Texture packs and mods are downloaded from where their authors keep them.
+
+## Use it
+
+The [user guide](docs/USER_GUIDE.md) has the steps for Dolphin.
+
+Entries are listed as their authors describe them. None is verified here yet.
+
+## Requirements
+
+- Your own copy of the game, in the region and revision the entry names
+
+## More
+
+- [User guide](docs/USER_GUIDE.md): codes, texture packs and Riivolution mods by hand
+- [AGENTS.md](AGENTS.md): the entry format and the rules, for developers and AI agents
+
+## Support
+
+https://ko-fi.com/sana748653
+
+## Licence
+
+MIT, for the list and the fixes made here. Linked work by other people keeps its own licence. Codes are credited to their authors.
+
+## How this was made
+
+I started this project and used AI (Claude) to speed up development. I write, review and fix code by hand all the way through, keep the AI's work checked and reined in, and aim to keep the patches as lightweight as possible.
+
+```
+
+`catalog/mods.json`:
+
+```json
+{
+ "schema": 1,
+ "mods": [
+  {
+   "id": "re4-gc-no-letterbox-gameplay",
+   "name": "No Letterbox in gameplay",
+   "title": "Resident Evil 4",
+   "game_ids": [
+    "G4BE08"
+   ],
+   "author": "jrupinski",
+   "author_url": "https://github.com/jrupinski",
+   "licence": "Not stated",
+   "homepage": "https://github.com/jrupinski/RE4-gamecube-letterbox-patch",
+   "updated": "2026-11-22",
+   "kind": "codes",
+   "category": "graphics",
+   "code_type": "gecko",
+   "lines": [
+    "0611BB8C 00000014",
+    "28000030 41820050",
+    "5409EEFA 7D69E02E",
+    "5D6B0001 00000000",
+    "040FA860 70090000",
+    "04165E88 700B0000",
+    "041789A8 70090000",
+    "04178DC8 70090000",
+    "0417CADC 70090000",
+    "04182FD4 70090000",
+    "041EBB2C 00000000",
+    "06171B40 0000001C",
+    "80090170 81895020",
+    "558C8FFE 7C006378",
+    "3180FFFF 7D6C0110",
+    "88030002 00000000"
+   ],
+   "notes": "Removes the bars in gameplay only. Menus, inventory, cutscenes and movies keep them. Gecko code from the author's dolphin/G4BE08.ini; the same author also has xdelta patches."
+  },
+  {
+   "id": "re4-gc-no-letterbox-cutscenes",
+   "name": "No Letterbox in gameplay and cutscenes",
+   "title": "Resident Evil 4",
+   "game_ids": [
+    "G4BE08"
+   ],
+   "author": "jrupinski",
+   "author_url": "https://github.com/jrupinski",
+   "licence": "Not stated",
+   "homepage": "https://github.com/jrupinski/RE4-gamecube-letterbox-patch",
+   "updated": "2026-11-22",
+   "kind": "codes",
+   "category": "graphics",
+   "code_type": "gecko",
+   "lines": [
+    "0611BB8C 00000014",
+    "28000030 41820050",
+    "5409EEFA 7D69E02E",
+    "5D6B0001 00000000",
+    "040FA860 70090000",
+    "04165E88 700B0000",
+    "041789A8 70090000",
+    "04178DC8 70090000",
+    "0417CADC 70090000",
+    "04182FD4 70090000",
+    "041EBB2C 00000000",
+    "06171B40 0000004C",
+    "80090170 81895018",
+    "3140FFFF 7D6A0110",
+    "558CA7FE 7D6B6078",
+    "81895020 558C8FFE",
+    "7D6B6378 88030002",
+    "7C005800 4D820020",
+    "99630002 200B0002",
+    "3D20801F C009E830",
+    "98030000 D0030004",
+    "4E800020 00000000"
+   ],
+   "notes": "Removes the bars in gameplay and in-engine cutscenes. Menus, inventory and movies keep them. Gecko code from the author's dolphin/G4BE08.ini; the same author also has xdelta patches."
+  },
+  {
+   "id": "re4-gc-no-letterbox-all",
+   "name": "No Letterbox anywhere",
+   "title": "Resident Evil 4",
+   "game_ids": [
+    "G4BE08"
+   ],
+   "author": "jrupinski",
+   "author_url": "https://github.com/jrupinski",
+   "licence": "Not stated",
+   "homepage": "https://github.com/jrupinski/RE4-gamecube-letterbox-patch",
+   "updated": "2026-11-22",
+   "kind": "codes",
+   "category": "graphics",
+   "code_type": "gecko",
+   "lines": [
+    "0611BB8C 00000014",
+    "28000030 41820050",
+    "5409EEFA 7D69E02E",
+    "5D6B0001 00000000",
+    "040FA860 70090000",
+    "04165E88 700B0000",
+    "041789A8 70090000",
+    "04178DC8 70090000",
+    "0417CADC 70090000",
+    "04182FD4 70090000",
+    "041EBB2C 00000000",
+    "04171B4C 60000000"
+   ],
+   "notes": "Removes the bars everywhere, including menus and movies. Full 4:3 512x448 frame. Gecko code from the author's dolphin/G4BE08.ini; the same author also has xdelta patches."
+  },
+  {
+   "id": "ttyd-169-normal-hud",
+   "name": "16:9 Normal HUD",
+   "title": "Paper Mario: The Thousand-Year Door",
+   "game_ids": [
+    "G8ME01"
+   ],
+   "author": "Dolphin built-in",
+   "licence": "Not stated",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Paper_Mario:_The_Thousand-Year_Door",
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "16:9 Aspect Ratio Fix - Normal HUD",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "wideScreenHack",
+     "value": "False"
+    },
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ],
+   "notes": "Pick one of the four 16:9 fixes. Keep Widescreen Hack off; the built-in hack clips the picture."
+  },
+  {
+   "id": "ttyd-169-centered-hud",
+   "name": "16:9 Centered HUD",
+   "title": "Paper Mario: The Thousand-Year Door",
+   "game_ids": [
+    "G8ME01"
+   ],
+   "author": "Dolphin built-in",
+   "licence": "Not stated",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Paper_Mario:_The_Thousand-Year_Door",
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "16:9 Aspect Ratio Fix - Centered HUD",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "wideScreenHack",
+     "value": "False"
+    },
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ],
+   "notes": "Pick one of the four 16:9 fixes. Keep Widescreen Hack off; the built-in hack clips the picture."
+  },
+  {
+   "id": "ttyd-169-stretched-hud",
+   "name": "16:9 Stretched HUD",
+   "title": "Paper Mario: The Thousand-Year Door",
+   "game_ids": [
+    "G8ME01"
+   ],
+   "author": "Dolphin built-in",
+   "licence": "Not stated",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Paper_Mario:_The_Thousand-Year_Door",
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "16:9 Aspect Ratio Fix - Stretched HUD",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "wideScreenHack",
+     "value": "False"
+    },
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ],
+   "notes": "Pick one of the four 16:9 fixes. Keep Widescreen Hack off. The wiki says it also speeds up Shhwonk Fortress."
+  },
+  {
+   "id": "ttyd-169-centered-letterbox",
+   "name": "16:9 Centered HUD, Letterboxed",
+   "title": "Paper Mario: The Thousand-Year Door",
+   "game_ids": [
+    "G8ME01"
+   ],
+   "author": "Dolphin built-in",
+   "licence": "Not stated",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Paper_Mario:_The_Thousand-Year_Door",
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "16:9 Aspect Ratio Fix - Centered HUD with letterboxing",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "wideScreenHack",
+     "value": "False"
+    },
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ],
+   "notes": "Pick one of the four 16:9 fixes. Keep Widescreen Hack off. Leaves letterboxing; the wiki says it also speeds up Shhwonk Fortress."
+  },
+  {
+   "id": "animal-crossing-gc-16-9-widescreen",
+   "name": "16:9 Widescreen",
+   "title": "Animal Crossing",
+   "game_ids": [
+    "GAFE01"
+   ],
+   "author": "Not stated",
+   "licence": "Not stated",
+   "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GAFE01.ini",
+   "updated": "2026-11-24",
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "16:9 Widescreen",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ],
+   "notes": "Dolphin's own 16:9 code, shipped in its game settings file. Also sets Force 16:9, which the picture needs to be widened."
+  },
+  {
+   "id": "melee-proper-16-9-widescreen",
+   "name": "Proper 16:9 Widescreen",
+   "title": "Super Smash Bros. Melee",
+   "game_ids": [
+    "GALE01"
+   ],
+   "revisions": [
+    0,
+    2
+   ],
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "Proper 16:9 Widescreen Support",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ],
+   "author": "Dan Salvato, mirrorbender",
+   "licence": "Creative Commons Attribution Share Alike (Dolphin wiki)",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Super_Smash_Bros._Melee",
+   "updated": "2026-11-24",
+   "notes": "Ships with Dolphin in the Gecko section of the rev 0 and rev 2 INIs. Force 16:9 is set with it. Use either this or Widescreen Support v1.2, not both."
+  },
+  {
+   "id": "melee-widescreen-support-v1-2",
+   "name": "Widescreen Support v1.2",
+   "title": "Super Smash Bros. Melee",
+   "game_ids": [
+    "GALE01"
+   ],
+   "revisions": [
+    2
+   ],
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "ar",
+   "code_name": "Widescreen Support v1.2",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ],
+   "author": "Dan Salvato",
+   "licence": "Creative Commons Attribution Share Alike (Dolphin wiki)",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Super_Smash_Bros._Melee",
+   "updated": "2026-11-24",
+   "notes": "Ships with Dolphin in the ActionReplay section of the rev 2 INI. Force 16:9 is set with it. Use either this or Proper 16:9 Widescreen, not both."
+  },
+  {
+   "id": "eternal-darkness-fix-startup-hang",
+   "name": "Fix Startup Hang",
+   "title": "Eternal Darkness",
+   "game_ids": [
+    "GEDE01"
+   ],
+   "author": "Not stated",
+   "licence": "Not stated",
+   "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GEDE01.ini",
+   "updated": "2026-11-24",
+   "kind": "builtin",
+   "category": "fix",
+   "code_type": "onframe",
+   "code_name": "Fix startup hang",
+   "notes": "Dolphin's own patch, shipped in its game settings file. Fixes a hang at startup."
+  },
+  {
+   "id": "fzero-gx-ax-mode",
+   "name": "AX Mode",
+   "title": "F-Zero GX",
+   "game_ids": [
+    "GFZE01"
+   ],
+   "author": "Ralf",
+   "licence": "Not stated",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=F-Zero_GX",
+   "updated": "2026-11-24",
+   "notes": "Turns on AX mode, with the AX cups and tracks. Dolphin ships this code for GFZE01.",
+   "kind": "builtin",
+   "category": "gameplay",
+   "code_type": "gecko",
+   "code_name": "Activate AX Mode (Version 8)"
+  },
+  {
+   "id": "fzero-gx-safe-cursor-credits",
+   "name": "Emblem Editor and Credits Fix",
+   "title": "F-Zero GX",
+   "game_ids": [
+    "GFZE01"
+   ],
+   "author": "Dolphin wiki contributors",
+   "licence": "CC BY-SA (Dolphin wiki)",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=F-Zero_GX",
+   "updated": "2026-11-24",
+   "notes": "Texture Cache Accuracy Safe fixes the Emblem Editor cursor. Store EFB copies to texture off fixes the sepia end credits on Master.",
+   "kind": "settings",
+   "category": "fix",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SafeTextureCacheColorSamples",
+     "value": "512"
+    },
+    {
+     "section": "Video_Hacks",
+     "key": "EFBToTextureEnable",
+     "value": "False"
+    }
+   ]
+  },
+  {
+   "id": "kirby-air-ride-widescreen",
+   "name": "16:9 Widescreen",
+   "title": "Kirby Air Ride",
+   "game_ids": [
+    "GKYE01"
+   ],
+   "author": "Dolphin Emulator",
+   "licence": "Not stated",
+   "homepage": "https://raw.githubusercontent.com/dolphin-emu/dolphin/master/Data/Sys/GameSettings/GKYE01.ini",
+   "updated": "2026-11-24",
+   "notes": "Dolphin's built-in 16:9 code for GKYE01. Dolphin's file gives no disc revision. Needs Force 16:9 (set here too).",
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "16:9 Widescreen",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ]
+  },
+  {
+   "id": "luigis-dual-core-off",
+   "name": "Dual Core Off",
+   "title": "Luigi's Mansion",
+   "game_ids": [
+    "GLME01"
+   ],
+   "author": "Dolphin wiki contributors",
+   "licence": "CC BY-SA 3.0 (wiki page licence)",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Luigi%27s_Mansion",
+   "kind": "settings",
+   "category": "fix",
+   "settings": [
+    {
+     "section": "Core",
+     "key": "CPUThread",
+     "value": "False"
+    }
+   ],
+   "notes": "Turn Dual Core off. Stops Luigi's model corrupting in the intro cutscene. The wiki lists it as the only non-default setting."
+  },
+  {
+   "id": "mkdd-16-9-widescreen",
+   "name": "16:9 Widescreen",
+   "title": "Mario Kart: Double Dash!!",
+   "game_ids": [
+    "GM4E01",
+    "GM4P01"
+   ],
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "16:9 Widescreen v2",
+   "author": "Ralf, Kester",
+   "licence": "Not stated",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Mario_Kart:_Double_Dash!!",
+   "updated": "2026-11",
+   "notes": "Dolphin's built-in 16:9 code for the USA and European discs. Also sets Force 16:9.",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ]
+  },
+  {
+   "id": "mkdd-reduced-blur",
+   "name": "Reduced Nintendo Blur",
+   "title": "Mario Kart: Double Dash!!",
+   "game_ids": [
+    "GM4E01",
+    "GM4P01"
+   ],
+   "kind": "builtin",
+   "category": "graphics",
+   "code_type": "ar",
+   "code_name": "Reduced Nintendo Blur",
+   "author": "Not stated",
+   "licence": "Not stated",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Mario_Kart:_Double_Dash!!",
+   "updated": "2026-11",
+   "notes": "Dolphin's built-in Action Replay code that reduces the Nintendo blur effect. Listed in the GM4E01 and GM4P01 game INIs."
+  },
+  {
+   "id": "prime-rain-fix",
+   "name": "Rain Corruption Fix",
+   "title": "Metroid Prime",
+   "game_ids": [
+    "GM8E01"
+   ],
+   "kind": "settings",
+   "category": "fix",
+   "settings": [
+    {
+     "section": "Video_Hacks",
+     "key": "EFBToTextureEnable",
+     "value": "False"
+    }
+   ],
+   "author": "Not stated",
+   "licence": "Creative Commons Attribution Share Alike (Dolphin wiki page)",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Metroid_Prime_(GC)",
+   "updated": "2026-11",
+   "notes": "Fixes black-line corruption in rain. Turns off Store EFB Copies to Texture Only. The wiki gives no revision."
+  },
+  {
+   "id": "sms-widescreen",
+   "name": "Widescreen",
+   "title": "Super Mario Sunshine",
+   "game_ids": [
+    "GMSE01"
+   ],
+   "kind": "builtin",
+   "code_type": "gecko",
+   "code_name": "Widescreen",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ],
+   "author": "gamemasterplc",
+   "licence": "Not stated",
+   "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GMSE01.ini",
+   "notes": "Dolphin's built-in 16:9 code for the USA release. Also sets Force 16:9 in the game settings."
+  },
+  {
+   "id": "sms-60fps",
+   "name": "60 FPS",
+   "title": "Super Mario Sunshine",
+   "game_ids": [
+    "GMSE01"
+   ],
+   "kind": "builtin",
+   "code_type": "gecko",
+   "code_name": "60FPS",
+   "category": "framerate",
+   "author": "gamemasterplc",
+   "licence": "Not stated",
+   "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GMSE01.ini",
+   "notes": "Dolphin's built-in 60 FPS code for the USA release."
+  },
+  {
+   "id": "sms-superstar",
+   "name": "Superstar",
+   "title": "Super Mario Sunshine",
+   "game_ids": [
+    "GMSE01"
+   ],
+   "kind": "riivolution",
+   "source": {
+    "type": "link"
+   },
+   "category": "mod",
+   "author": "TheMagicCactus, Augs, Epicwade",
+   "licence": "CC BY-NC-ND 4.0",
+   "homepage": "https://gamebanana.com/mods/555255",
+   "updated": "2024-11-12",
+   "notes": "Difficulty hack that reworks the original levels and adds new content. The GameBanana file links to another download; install steps not checked."
+  },
+  {
+   "id": "mp7-16-9-widescreen",
+   "name": "16:9 Widescreen",
+   "title": "Mario Party 7",
+   "game_ids": [
+    "GP7E01"
+   ],
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "16:9 Widescreen",
+   "author": "Not stated",
+   "licence": "Not stated",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Mario_Party_7",
+   "updated": "2026-11",
+   "notes": "Dolphin's built-in 16:9 code for the USA disc. Also sets Force 16:9.",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ]
+  },
+  {
+   "id": "pikmin2-169-widescreen",
+   "name": "16:9 Widescreen",
+   "title": "Pikmin 2",
+   "game_ids": [
+    "GPVE01"
+   ],
+   "author": "Dolphin built-in",
+   "licence": "Not stated",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Pikmin_2",
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "16:9 Widescreen",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ],
+   "notes": "Dolphin's built-in 16:9 code. Forces 16:9 so the picture is not stuck at 4:3."
+  },
+  {
+   "id": "pikmin2-60-fps",
+   "name": "60 FPS",
+   "title": "Pikmin 2",
+   "game_ids": [
+    "GPVE01"
+   ],
+   "author": "Dolphin built-in",
+   "licence": "Not stated",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Pikmin_2",
+   "kind": "builtin",
+   "category": "framerate",
+   "code_type": "gecko",
+   "code_name": "60 FPS",
+   "notes": "Dolphin's built-in 60 FPS code. Cutscenes switch back to 30 FPS and return to 60 after."
+  },
+  {
+   "id": "tales-of-symphonia-gc-16-9-widescreen",
+   "name": "16:9 Widescreen",
+   "title": "Tales of Symphonia",
+   "game_ids": [
+    "GQSEAF"
+   ],
+   "author": "gamemasterplc",
+   "licence": "Not stated",
+   "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GQSEAF.ini",
+   "updated": "2026-11-24",
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "16:9 Widescreen",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ],
+   "notes": "Shipped in Dolphin's game settings file, credited to gamemasterplc there. Also sets Force 16:9, which the picture needs to be widened."
+  },
+  {
+   "id": "tales-of-symphonia-gc-remove-blur",
+   "name": "Remove Blur",
+   "title": "Tales of Symphonia",
+   "game_ids": [
+    "GQSEAF"
+   ],
+   "author": "Not stated",
+   "licence": "Not stated",
+   "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GQSEAF.ini",
+   "updated": "2026-11-24",
+   "kind": "builtin",
+   "category": "graphics",
+   "code_type": "gecko",
+   "code_name": "Remove Blur",
+   "notes": "Dolphin's own code, shipped in its game settings file. Turns off the blur filter."
+  },
+  {
+   "id": "star-fox-viwidth-fix",
+   "name": "viWidth 704 Aspect Ratio Fix",
+   "title": "Star Fox Adventures",
+   "game_ids": [
+    "GSAE01"
+   ],
+   "revisions": [
+    0,
+    1
+   ],
+   "author": "Not stated",
+   "licence": "Not stated",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Star_Fox_Adventures",
+   "updated": "2026-11-24",
+   "notes": "Shipped by Dolphin. Raises viWidth from 660 to 704. Dolphin ships different addresses for revision 0 and revision 1.",
+   "kind": "builtin",
+   "category": "fix",
+   "code_type": "ar",
+   "code_name": "viWidth 704 Aspect Ratio Fix"
+  },
+  {
+   "id": "star-fox-efb-texture-off",
+   "name": "EFB Copies to Texture Off",
+   "title": "Star Fox Adventures",
+   "game_ids": [
+    "GSAE01"
+   ],
+   "author": "Dolphin wiki contributors",
+   "licence": "CC BY-SA (Dolphin wiki)",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Star_Fox_Adventures",
+   "updated": "2026-11-24",
+   "notes": "Needed for correct glow effects. Glow renders poorly with this option on, on every backend.",
+   "kind": "settings",
+   "category": "fix",
+   "settings": [
+    {
+     "section": "Video_Hacks",
+     "key": "EFBToTextureEnable",
+     "value": "False"
+    }
+   ]
+  },
+  {
+   "id": "sonic-adventure-2-battle-16-9-widescreen",
+   "name": "16:9 Widescreen",
+   "title": "Sonic Adventure 2: Battle",
+   "game_ids": [
+    "GSNE8P"
+   ],
+   "author": "Not stated",
+   "licence": "Not stated",
+   "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GSNE8P.ini",
+   "updated": "2026-11-24",
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "ar",
+   "code_name": "16:9 Widescreen",
+   "notes": "Dolphin's own Action Replay code, shipped in its game settings file.",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ]
+  },
+  {
+   "id": "sonic-adventure-2-battle-60hz-aspect-fix",
+   "name": "60Hz Aspect Ratio Fix",
+   "title": "Sonic Adventure 2: Battle",
+   "game_ids": [
+    "GSNE8P"
+   ],
+   "author": "Not stated",
+   "licence": "Not stated",
+   "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GSNE8P.ini",
+   "updated": "2026-11-24",
+   "kind": "builtin",
+   "category": "fix",
+   "code_type": "ar",
+   "code_name": "60Hz Aspect Ratio Fix",
+   "notes": "Dolphin's own Action Replay code, shipped in its game settings file."
+  },
+  {
+   "id": "tp-gc-widescreen-v2",
+   "name": "16:9 Widescreen v2",
+   "title": "The Legend of Zelda: Twilight Princess",
+   "game_ids": [
+    "GZ2E01"
+   ],
+   "author": "Ralf",
+   "licence": "Not stated",
+   "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GZ2E01.ini",
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "16:9 Widescreen v2",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ],
+   "notes": "Dolphin's built-in 16:9 code for the GameCube version. Its settings also force the 16:9 aspect ratio."
+  },
+  {
+   "id": "ww-gc-widescreen",
+   "name": "16:9 Widescreen",
+   "title": "The Legend of Zelda: The Wind Waker",
+   "game_ids": [
+    "GZLE01"
+   ],
+   "author": "Not stated",
+   "licence": "Not stated",
+   "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GZLE01.ini",
+   "kind": "builtin",
+   "category": "widescreen",
+   "aspect": "16:9",
+   "code_type": "gecko",
+   "code_name": "16:9 Widescreen",
+   "settings": [
+    {
+     "section": "Video_Settings",
+     "key": "SuggestedAspectRatio",
+     "value": "1"
+    }
+   ],
+   "notes": "Dolphin's built-in 16:9 code for the GameCube version. Its settings also force the 16:9 aspect ratio."
+  },
+  {
+   "id": "ww-remove-distance-blur",
+   "name": "Remove Distance Blur",
+   "title": "The Legend of Zelda: The Wind Waker",
+   "game_ids": [
+    "GZLE01"
+   ],
+   "author": "Not stated",
+   "licence": "Not stated",
+   "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GZLE01.ini",
+   "kind": "builtin",
+   "category": "graphics",
+   "code_type": "ar",
+   "code_name": "Remove Distance Blur",
+   "notes": "Dolphin's built-in code that removes the distance blur effect."
+  },
+  {
+   "id": "mkw-force-30fps-usa",
+   "name": "Force 30 FPS",
+   "title": "Mario Kart Wii",
+   "game_ids": [
+    "RMCE01"
+   ],
+   "kind": "builtin",
+   "category": "framerate",
+   "code_type": "gecko",
+   "code_name": "Force 30 FPS",
+   "author": "Nick Reynolds",
+   "licence": "Creative Commons Attribution Share Alike (Dolphin wiki page licence line)",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Mario_Kart_Wii",
+   "updated": "2026-11-24",
+   "notes": "Ships with Dolphin in this game's INI. Forces 30 FPS in all modes. Do not use with the 60 FPS in Multiplayer code."
+  },
+  {
+   "id": "mkw-force-30fps-pal",
+   "name": "Force 30 FPS",
+   "title": "Mario Kart Wii",
+   "game_ids": [
+    "RMCP01"
+   ],
+   "kind": "builtin",
+   "category": "framerate",
+   "code_type": "gecko",
+   "code_name": "Force 30 FPS",
+   "author": "Nick Reynolds",
+   "licence": "Creative Commons Attribution Share Alike (Dolphin wiki page licence line)",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Mario_Kart_Wii",
+   "updated": "2026-11-24",
+   "notes": "Ships with Dolphin in this game's INI. Forces 30 FPS in all modes. Do not use with the 60 FPS in Multiplayer code."
+  },
+  {
+   "id": "smg-no-gravity",
+   "name": "No Gravity Edition",
+   "title": "Super Mario Galaxy",
+   "game_ids": [
+    "RMGE01"
+   ],
+   "kind": "riivolution",
+   "source": {
+    "type": "link"
+   },
+   "category": "mod",
+   "author": "SPG64",
+   "licence": "CC BY-NC-ND 4.0",
+   "homepage": "https://gamebanana.com/mods/149765",
+   "updated": "2021-02-27",
+   "notes": "Removes every gravity area from the original game, so slopes no longer count as slopes. The download is a .rar on GameBanana; install steps not checked."
+  },
+  {
+   "id": "superstar-galaxy",
+   "name": "Superstar",
+   "title": "Super Mario Galaxy",
+   "game_ids": [
+    "RMGE01"
+   ],
+   "kind": "riivolution",
+   "source": {
+    "type": "link"
+   },
+   "category": "mod",
+   "author": "TheMagicCactus, KOBuS, LariVille, Master Luma",
+   "licence": "CC BY-NC-ND 4.0",
+   "homepage": "https://gamebanana.com/mods/555156",
+   "updated": "2024-11-12",
+   "notes": "Difficulty hack with twisted levels, new levels and 65 new stars. The GameBanana file links to another download; install steps not checked."
+  },
+  {
+   "id": "wsr-force-linear-vertex-rounding",
+   "name": "Fix IR Banding and UI Edges",
+   "title": "Wii Sports Resort",
+   "game_ids": [
+    "RZTE01"
+   ],
+   "kind": "settings",
+   "category": "fix",
+   "settings": [
+    {
+     "section": "Video_Enhancements",
+     "key": "ForceTextureFiltering",
+     "value": "2"
+    },
+    {
+     "section": "Video_Hacks",
+     "key": "VertexRounding",
+     "value": "True"
+    }
+   ],
+   "author": "Dolphin wiki contributors",
+   "licence": "Creative Commons Attribution Share Alike (Dolphin wiki page licence line)",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Wii_Sports_Resort",
+   "updated": "2026-11-24",
+   "notes": "Fixes banding and misaligned 2D UI above 1x internal resolution. Value 2 is Force Linear. The wiki gives no region or revision."
+  },
+  {
+   "id": "last-story-immediate-xfb",
+   "name": "Immediately Present XFB",
+   "title": "The Last Story",
+   "game_ids": [
+    "SLSEXJ"
+   ],
+   "author": "Dolphin wiki contributors",
+   "licence": "CC BY-SA (Dolphin wiki)",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=The_Last_Story",
+   "updated": "2026-11-24",
+   "notes": "Removes the green line across the bottom of the screen.",
+   "kind": "settings",
+   "category": "fix",
+   "settings": [
+    {
+     "section": "Video_Hacks",
+     "key": "CapImmediateXFB",
+     "value": "True"
+    }
+   ]
+  },
+  {
+   "id": "skyward-sword-linear-filtering",
+   "name": "Force Linear Texture Filtering",
+   "title": "The Legend of Zelda: Skyward Sword",
+   "game_ids": [
+    "SOUE01"
+   ],
+   "author": "Dolphin wiki contributors",
+   "licence": "CC BY-SA (Dolphin wiki)",
+   "homepage": "https://wiki.dolphin-emu.org/index.php?title=Skyward_Sword",
+   "updated": "2026-11-24",
+   "notes": "Fixes banding when the internal resolution is above 1x.",
+   "kind": "settings",
+   "category": "fix",
+   "settings": [
+    {
+     "section": "Video_Enhancements",
+     "key": "ForceTextureFiltering",
+     "value": "2"
+    }
+   ]
+  }
+ ]
+}
+
+```
+
+`catalog/textures.json`:
+
+```json
+{
+ "schema": 1,
+ "packs": [
+  {
+   "id": "prime2-gravity-suit-beam-hd-interface",
+   "name": "Gravity Suit, Beams and HD Interface",
+   "title": "Metroid Prime 2: Echoes",
+   "game_ids": [
+    "G2ME01"
+   ],
+   "author": "MegaManZX2245",
+   "licence": "Creative Commons Attribution-NonCommercial-NoDerivs 4.0",
+   "homepage": "https://gamebanana.com/mods/649522",
+   "updated": "2026-02",
+   "source": {
+    "type": "gamebanana",
+    "mod": 649522,
+    "file_pattern": "metroid_prime_2_echoes_gravity_suit_colors_mp1-mp3_beam_textures_metroid_prime_hd_interface_text.zip"
+   },
+   "size": 7122007,
+   "format": "zip",
+   "layout": "single",
+   "textures": "png",
+   "notes": "Gravity Suit colours, Metroid Prime 1 beam textures and HD interface textures for Prime 2. The zip holds one G2ME01 folder of PNGs."
+  },
+  {
+   "id": "ttyd-hd-texture-pack",
+   "name": "HD Texture Pack v2.5",
+   "title": "Paper Mario: The Thousand-Year Door",
+   "game_ids": [
+    "G8ME01"
+   ],
+   "author": "Invader",
+   "licence": "Not stated",
+   "homepage": "https://forums.dolphin-emu.org/Thread-paper-mario-ttyd-hd-texture-pack-v2-5-may-9th-2024",
+   "source": {
+    "type": "link"
+   },
+   "textures": "dds",
+   "notes": "Download from the thread: DDS pack recommended, PNG legacy pack also there. Size and archive type not stated."
+  },
+  {
+   "id": "path-of-radiance-hd-thorn",
+   "name": "HD Textures (Thorn)",
+   "title": "Fire Emblem: Path of Radiance",
+   "game_ids": [
+    "GFEE01"
+   ],
+   "source": {
+    "type": "gdrive",
+    "file_id": "1uclRYNWV4-bvI-4i5wOr3bSBJ3zFxohU"
+   },
+   "size": 1878929765,
+   "format": "rar",
+   "layout": "single",
+   "textures": "dds",
+   "author": "Thorn",
+   "licence": "Not stated",
+   "homepage": "https://forums.dolphin-emu.org/Thread-fire-emblem-path-of-radiance-hd-texture-pack",
+   "updated": "2020-12",
+   "notes": "For 4:3 only: at 16:9 backgrounds and portraits stretch. Upscaled textures for the US disc. Author's settings: 3x internal, 2x MSAA, no texture filtering."
+  },
+  {
+   "id": "fzero-gx-hd-venomalia",
+   "name": "F-Zero GX HD (DDS-BC7)",
+   "title": "F-Zero GX",
+   "game_ids": [
+    "GFZE01"
+   ],
+   "author": "Venomalia",
+   "licence": "Not stated",
+   "homepage": "https://forums.dolphin-emu.org/Thread-f-zero-gx-hd-05-01-2022",
+   "updated": "2026-11-24",
+   "notes": "DDS-BC7 textures. Download is on MEGA. The author says modified copies may be shared.",
+   "source": {
+    "type": "link"
+   },
+   "textures": "dds"
+  },
+  {
+   "id": "kirby-air-ride-uhd-textures",
+   "name": "UHD Textures (City Trial)",
+   "title": "Kirby Air Ride",
+   "game_ids": [
+    "GKYE01"
+   ],
+   "author": "quinton-ashley",
+   "author_url": "https://github.com/quinton-ashley",
+   "licence": "Not stated",
+   "homepage": "https://github.com/qashto/Kirby_Air_Ride_UHD_Texture_Pack",
+   "updated": "2017-04",
+   "notes": "Retextures for the City Trial city area, about 8x original size, per the README. Parts are credited to Dolphin Forum members there. Files are DDS.",
+   "source": {
+    "type": "github_release",
+    "repo": "qashto/Kirby_Air_Ride_UHD_Texture_Pack",
+    "tag": "v1.0.0",
+    "asset_pattern": "GKY.7z"
+   },
+   "format": "7z",
+   "layout": "single",
+   "textures": "dds",
+   "size": 27653889,
+   "sha256": "7c5f2782a34233182dba59d1d4ae7af13bc7bddf53e4e36976c37f129c6e4ea9"
+  },
+  {
+   "id": "luigis-hd-texture-pack",
+   "name": "HD Texture Pack (2020)",
+   "title": "Luigi's Mansion",
+   "game_ids": [
+    "GLME01"
+   ],
+   "author": "Your Pal Fox",
+   "licence": "Not stated",
+   "homepage": "https://forums.dolphin-emu.org/Thread-luigi-s-mansion-hd-texture-pack",
+   "source": {
+    "type": "link"
+   },
+   "notes": "5x upscale with hand edits. Latest download in the thread is dated 11/8/20. Format and size not stated."
+  },
+  {
+   "id": "sms-uhd-texture-pack",
+   "name": "UHD Texture Pack",
+   "title": "Super Mario Sunshine",
+   "game_ids": [
+    "GMSE01"
+   ],
+   "source": {
+    "type": "github_release",
+    "repo": "qashto/Super_Mario_Sunshine_UHD_Texture_Pack",
+    "tag": "latest",
+    "asset_pattern": "GMS.7z"
+   },
+   "size": 986431331,
+   "format": "7z",
+   "layout": "single",
+   "textures": "dds",
+   "downloads": 141676,
+   "author": "qashto and razius",
+   "author_url": "https://github.com/qashto",
+   "licence": "Not stated",
+   "homepage": "https://github.com/qashto/Super_Mario_Sunshine_UHD_Texture_Pack",
+   "updated": "2020-05-09",
+   "notes": "Upscales and retextures for the whole game. The README says to use the DDS BC7 version. Turn on Load Custom Textures in the Advanced graphics settings."
+  },
+  {
+   "id": "mp7-hd-textures",
+   "name": "MP7 HD Textures",
+   "title": "Mario Party 7",
+   "game_ids": [
+    "GP7E01"
+   ],
+   "source": {
+    "type": "github_release",
+    "repo": "Najatski/mp7-hd",
+    "tag": "v0.3.0-beta",
+    "asset_pattern": "0.3.0-MP7HD.zip"
+   },
+   "size": 1081029675,
+   "format": "zip",
+   "layout": "single",
+   "textures": "png",
+   "author": "Najatski",
+   "author_url": "https://github.com/Najatski",
+   "licence": "Not stated",
+   "homepage": "https://github.com/Najatski/mp7-hd",
+   "updated": "2024-07",
+   "notes": "AI-upscaled 4x textures, partly done (the README lists Grand Canal and Pagoda Peak as finished). The author calls the project dormant. Put the GP7E folder in Dolphin's Load/Textures folder."
+  },
+  {
+   "id": "pikmin2-4k-henriko",
+   "name": "4K Texture Pack",
+   "title": "Pikmin 2",
+   "game_ids": [
+    "GPVE01"
+   ],
+   "author": "Henriko Magnifico",
+   "licence": "Not stated",
+   "homepage": "https://henrikomagnifico.com/pikmin-2-4k-texture-pack",
+   "source": {
+    "type": "link"
+   },
+   "notes": "Standard and post-processing editions. Only NTSC textures are modified. Works with other mods that do not change the same textures."
+  },
+  {
+   "id": "star-fox-hd-cyb3rtr0n",
+   "name": "HD Texture Pack (DDS)",
+   "title": "Star Fox Adventures",
+   "game_ids": [
+    "GSAE01"
+   ],
+   "author": "CYB3RTR0N",
+   "licence": "Not stated",
+   "homepage": "https://forums.dolphin-emu.org/Thread-star-fox-adventures-hd-texture-pack",
+   "updated": "2026-11-24",
+   "notes": "DDS textures on MEGA. The thread mentions an optional beta pack. Credits Krystal Archive, StarFox.org and razius.",
+   "source": {
+    "type": "link"
+   }
+  },
+  {
+   "id": "tpde-plus-2-1",
+   "name": "Definitive Edition+ 2.1",
+   "title": "The Legend of Zelda: Twilight Princess",
+   "game_ids": [
+    "GZ2E01"
+   ],
+   "author": "Gossip Geist",
+   "author_url": "https://gamebanana.com/members/5489840",
+   "licence": "CC BY-NC-ND 4.0",
+   "homepage": "https://gamebanana.com/mods/714018",
+   "updated": "2026-09-20",
+   "notes": "HD DDS texture pack for the GameCube version. Four GameBanana parts: merge parts 2 to 4 into the main folder, then put it in the GZ2 texture folder.",
+   "parts": [
+    {
+     "type": "gamebanana",
+     "mod": 714018,
+     "file_pattern": "tpde_21_-_part_1_main.7z"
+    },
+    {
+     "type": "gamebanana",
+     "mod": 714018,
+     "file_pattern": "tpde_21_-_part_2.7z"
+    },
+    {
+     "type": "gamebanana",
+     "mod": 714018,
+     "file_pattern": "tpde_21_-_part_3.7z"
+    },
+    {
+     "type": "gamebanana",
+     "mod": 714018,
+     "file_pattern": "tpde_21_-_part_4.7z"
+    }
+   ],
+   "size": 5350469003,
+   "format": "7z",
+   "layout": "single",
+   "textures": "dds",
+   "downloads": 31872
+  },
+  {
+   "id": "tp-720p-dds",
+   "name": "720p DDS Pack",
+   "title": "The Legend of Zelda: Twilight Princess",
+   "game_ids": [
+    "GZ2E01",
+    "RZDE01"
+   ],
+   "author": "HenrikoMagnifico",
+   "author_url": "https://forums.dolphin-emu.org/User-henrikomagnifico",
+   "licence": "Not stated",
+   "homepage": "https://github.com/FHArchive/ZeldaTwilightPrincess720p",
+   "updated": "2020-10-18",
+   "notes": "Unofficial 720p DDS version of HenrikoMagnifico's texture pack, from the FHArchive release. Install as its README says; the folder has GZ2 and RZD marker files.",
+   "source": {
+    "type": "github_release",
+    "repo": "FHArchive/ZeldaTwilightPrincess720p",
+    "tag": "1.0.5_0",
+    "asset_pattern": "TwilightPrincess720p.7z"
+   },
+   "size": 342889473,
+   "format": "7z",
+   "layout": "single",
+   "textures": "dds"
+  },
+  {
+   "id": "prime3-gravity-suit-ped-hd-interface",
+   "name": "Gravity Suit, PED Suit and HD Interface",
+   "title": "Metroid Prime 3: Corruption",
+   "game_ids": [
+    "RM3E01"
+   ],
+   "author": "MegaManZX2245",
+   "licence": "Creative Commons Attribution-NonCommercial-NoDerivs 4.0",
+   "homepage": "https://gamebanana.com/mods/659441",
+   "updated": "2026-03",
+   "source": {
+    "type": "gamebanana",
+    "mod": 659441,
+    "file_pattern": "metroid_prime_3_corruption_gravity_suit_colors_ped_suit_50_reverse_metroid_prime_trilogy_hd_inte.zip"
+   },
+   "size": 3769259,
+   "format": "zip",
+   "layout": "single",
+   "textures": "png",
+   "notes": "Gravity Suit colours, a reversed 50% PED Suit and HD interface textures for Prime 3. The zip holds one RM3E01 folder of PNGs."
+  },
+  {
+   "id": "mkwii-reloaded",
+   "name": "MKWii Reloaded HD",
+   "title": "Mario Kart Wii",
+   "game_ids": [
+    "RMCE01",
+    "RMCP01"
+   ],
+   "source": {
+    "type": "github_release",
+    "repo": "GhostlyDark/MKWii-Reloaded",
+    "tag": "latest",
+    "asset_pattern": "mkwii-reloaded-*-dds.7z"
+   },
+   "size": 409942972,
+   "format": "7z",
+   "layout": "single",
+   "textures": "dds",
+   "author": "GhostlyDark",
+   "author_url": "https://github.com/GhostlyDark",
+   "licence": "Not stated",
+   "homepage": "https://github.com/GhostlyDark/MKWii-Reloaded",
+   "updated": "2025-03-22",
+   "notes": "HD texture pack for Mario Kart Wii, DDS, v0.2.0 release. Credits the Matteoki and Rmed24 HD pack. The author names no region."
+  },
+  {
+   "id": "mkw-hd-remaster-moukrea",
+   "name": "Mario Kart Wii HD Remaster (Forum)",
+   "title": "Mario Kart Wii",
+   "game_ids": [
+    "RMCE01",
+    "RMCP01"
+   ],
+   "source": {
+    "type": "link"
+   },
+   "author": "Moukrea",
+   "licence": "Not stated",
+   "homepage": "https://forums.dolphin-emu.org/Thread-mario-kart-wii-hd-remaster",
+   "updated": "2019-02-07",
+   "notes": "Dolphin forum thread; the download is a Google Drive archive. Format and size not stated. The post says the pack is no longer in progress."
+  },
+  {
+   "id": "mkw-hd-remaster-koolkreate",
+   "name": "Mario Kart Wii HD Remaster (GameBanana)",
+   "title": "Mario Kart Wii",
+   "game_ids": [
+    "RMCE01",
+    "RMCP01"
+   ],
+   "source": {
+    "type": "link"
+   },
+   "size": 425745337,
+   "format": "7z",
+   "author": "koolkreate",
+   "licence": "CC BY-NC-ND 4.0",
+   "homepage": "https://gamebanana.com/mods/49179",
+   "updated": "2020-09-20",
+   "notes": "Two 7z downloads on GameBanana (main file 426 MB). Contents not opened here. Non-commercial, no derivatives licence."
+  },
+  {
+   "id": "glxy-repaint",
+   "name": "GLXY Repaint",
+   "title": "Super Mario Galaxy",
+   "game_ids": [
+    "RMGE01"
+   ],
+   "source": {
+    "type": "github_release",
+    "repo": "KramerRepaints/GLXY",
+    "tag": "latest",
+    "asset_pattern": "Dolphin.Custom.Textures.zip"
+   },
+   "size": 878839015,
+   "format": "zip",
+   "layout": "single",
+   "textures": "png",
+   "downloads": 64,
+   "author": "KramerRepaints",
+   "author_url": "https://github.com/KramerRepaints",
+   "licence": "Not stated",
+   "homepage": "https://github.com/KramerRepaints/GLXY",
+   "updated": "2026-06-03",
+   "notes": "Full repaint with about 1800 textures, new dialogue and a new story. The File.Edits.zip download (audio and video) is not covered here."
+  },
+  {
+   "id": "smg63-4k-texture-pack",
+   "name": "4K Texture Pack",
+   "title": "Super Mario Galaxy 2",
+   "game_ids": [
+    "SB4E01"
+   ],
+   "source": {
+    "type": "link"
+   },
+   "author": "iZePlayzYT",
+   "author_url": "https://github.com/iZePlayzYT",
+   "licence": "Not stated",
+   "homepage": "https://github.com/iZePlayzYT/SuperMarioGalaxy63-TexturePack",
+   "updated": "2026-05-04",
+   "notes": "4K textures made for Super Mario Galaxy 63; the README says they also work on the original game. Use the DDS folder in game. The PNG folder is for editing only."
+  },
+  {
+   "id": "dkcr-hd-textures",
+   "name": "HD Textures v1.4",
+   "title": "Donkey Kong Country Returns",
+   "game_ids": [
+    "SF8E01"
+   ],
+   "author": "CTCaer",
+   "licence": "Author allows reuse as a base for another pack with credit and a PM (forum post)",
+   "homepage": "https://forums.dolphin-emu.org/Thread-wii-fhd-donkey-kong-country-returns-hd-textures-mod-v1-4",
+   "source": {
+    "type": "link"
+   },
+   "format": "7z",
+   "layout": "single",
+   "textures": "png",
+   "notes": "All-regions HD pack, v1.4. PNG (lossless) 7z is the one listed here; a DXT5 DDS 7z is also on the thread. Needs a 7-Zip with LZMA2 support.",
+   "updated": "2017-02-17"
+  },
+  {
+   "id": "last-story-uhd-lunarecho21",
+   "name": "UHD Texture Pack",
+   "title": "The Last Story",
+   "game_ids": [
+    "SLSEXJ"
+   ],
+   "author": "lunarEcho21",
+   "licence": "Not stated",
+   "homepage": "https://forums.dolphin-emu.org/Thread-the-last-story-uhd-texture-pack",
+   "updated": "2026-11-24",
+   "notes": "UHD textures on MEGA in two parts (4.0 GB and 2.86 GB) plus a 4.6 MB patch. The author says to unzip, and does not name the format.",
+   "source": {
+    "type": "link"
+   }
+  },
+  {
+   "id": "last-story-hd-gui-matrix2525",
+   "name": "HD GUI+ Texture Pack",
+   "title": "The Last Story",
+   "game_ids": [
+    "SLSEXJ"
+   ],
+   "author": "Matrix2525",
+   "licence": "Not stated",
+   "homepage": "https://forums.dolphin-emu.org/Thread-the-last-story-hd-gui-texture-pack",
+   "updated": "2026-11-24",
+   "notes": "Interface textures, as DDS (recommended by the author) or PNG, on MEGA. Version 1.0 from 2015. The author gives no further updates and asks for credit.",
+   "source": {
+    "type": "link"
+   }
+  },
+  {
+   "id": "last-story-hd-themriron2",
+   "name": "HD Texture Pack (Beta 2)",
+   "title": "The Last Story",
+   "game_ids": [
+    "SLSEXJ"
+   ],
+   "author": "themriron2",
+   "licence": "Not stated",
+   "homepage": "https://forums.dolphin-emu.org/Thread-the-last-story-hd-texture-pack",
+   "updated": "2026-11-24",
+   "notes": "Beta 2 is DDS, from February 2020, on Google Drive. The wiki calls the pack abandoned. The first post's link is out of date.",
+   "source": {
+    "type": "link"
+   }
+  },
+  {
+   "id": "nsmbw-hd-textures",
+   "name": "HD Texture Pack v2.81",
+   "title": "New Super Mario Bros. Wii",
+   "game_ids": [
+    "SMNE01"
+   ],
+   "author": "Bighead",
+   "licence": "Not stated",
+   "homepage": "https://forums.dolphin-emu.org/showthread.php?tid=36005",
+   "source": {
+    "type": "link"
+   },
+   "format": "7z",
+   "layout": "single",
+   "textures": "dds",
+   "notes": "DDS (uncompressed) main pack, v2.81, from the forum thread linked by the Dolphin wiki. A PNG 7z is also on the thread. File size not stated.",
+   "updated": "2023-09-19"
+  },
+  {
+   "id": "xenoblade-hd-bighead",
+   "name": "HD Texture Pack v8.52",
+   "title": "Xenoblade Chronicles",
+   "game_ids": [
+    "SX4E01"
+   ],
+   "author": "Bighead",
+   "licence": "Not stated",
+   "homepage": "https://forums.dolphin-emu.org/showthread.php?tid=35298",
+   "updated": "2018-08-21",
+   "notes": "Version 8.52. Core textures are DDS, with Google Drive, MediaFire and MEGA mirrors. Needs Dolphin 5.0-6199 or newer. Archives are password protected; the password is on the thread.",
+   "source": {
+    "type": "link"
+   }
+  }
+ ]
+}
+
+```
+
+`docs/USER_GUIDE.md`:
+
+```md
+# User guide
+
+How to use an entry in Dolphin.
+
+## Codes
+
+1. Right-click the game, **Properties**.
+2. **Gecko Codes** or **AR Codes**: tick the code. For one that is not there, **Add New Code** and paste its lines.
+3. **Config > General > Enable Cheats** must be on.
+
+A code is for one region, and often one revision, of a game. The game list shows the game ID: `GFEE01` is the USA disc, `GFEP01` the European one.
+
+## Widescreen on GameCube
+
+Use the game's 16:9 code and set **Graphics > Aspect Ratio** to **Force 16:9** for that game. Where there is no code, **Graphics > Enhancements > Widescreen Hack** does it for most games. Things at the sides may pop in and out.
+
+## Texture packs
+
+1. Unpack the pack into `Load/Textures/<game ID>/` in Dolphin's user folder.
+2. Turn on **Graphics > Advanced > Load Custom Textures**.
+
+DDS packs load faster and take less memory than PNG ones.
+
+## Riivolution mods
+
+Right-click the game, **Start with Riivolution Patches**, and open the mod's XML file.
+
+```
+
+`entries/mods/G4BE08.json`:
+
+```json
+[
+ {
+  "id": "re4-gc-no-letterbox-gameplay",
+  "name": "No Letterbox in gameplay",
+  "title": "Resident Evil 4",
+  "game_ids": [
+   "G4BE08"
+  ],
+  "author": "jrupinski",
+  "author_url": "https://github.com/jrupinski",
+  "licence": "Not stated",
+  "homepage": "https://github.com/jrupinski/RE4-gamecube-letterbox-patch",
+  "updated": "2026-11-22",
+  "kind": "codes",
+  "category": "graphics",
+  "code_type": "gecko",
+  "lines": [
+   "0611BB8C 00000014",
+   "28000030 41820050",
+   "5409EEFA 7D69E02E",
+   "5D6B0001 00000000",
+   "040FA860 70090000",
+   "04165E88 700B0000",
+   "041789A8 70090000",
+   "04178DC8 70090000",
+   "0417CADC 70090000",
+   "04182FD4 70090000",
+   "041EBB2C 00000000",
+   "06171B40 0000001C",
+   "80090170 81895020",
+   "558C8FFE 7C006378",
+   "3180FFFF 7D6C0110",
+   "88030002 00000000"
+  ],
+  "notes": "Removes the bars in gameplay only. Menus, inventory, cutscenes and movies keep them. Gecko code from the author's dolphin/G4BE08.ini; the same author also has xdelta patches."
+ },
+ {
+  "id": "re4-gc-no-letterbox-cutscenes",
+  "name": "No Letterbox in gameplay and cutscenes",
+  "title": "Resident Evil 4",
+  "game_ids": [
+   "G4BE08"
+  ],
+  "author": "jrupinski",
+  "author_url": "https://github.com/jrupinski",
+  "licence": "Not stated",
+  "homepage": "https://github.com/jrupinski/RE4-gamecube-letterbox-patch",
+  "updated": "2026-11-22",
+  "kind": "codes",
+  "category": "graphics",
+  "code_type": "gecko",
+  "lines": [
+   "0611BB8C 00000014",
+   "28000030 41820050",
+   "5409EEFA 7D69E02E",
+   "5D6B0001 00000000",
+   "040FA860 70090000",
+   "04165E88 700B0000",
+   "041789A8 70090000",
+   "04178DC8 70090000",
+   "0417CADC 70090000",
+   "04182FD4 70090000",
+   "041EBB2C 00000000",
+   "06171B40 0000004C",
+   "80090170 81895018",
+   "3140FFFF 7D6A0110",
+   "558CA7FE 7D6B6078",
+   "81895020 558C8FFE",
+   "7D6B6378 88030002",
+   "7C005800 4D820020",
+   "99630002 200B0002",
+   "3D20801F C009E830",
+   "98030000 D0030004",
+   "4E800020 00000000"
+  ],
+  "notes": "Removes the bars in gameplay and in-engine cutscenes. Menus, inventory and movies keep them. Gecko code from the author's dolphin/G4BE08.ini; the same author also has xdelta patches."
+ },
+ {
+  "id": "re4-gc-no-letterbox-all",
+  "name": "No Letterbox anywhere",
+  "title": "Resident Evil 4",
+  "game_ids": [
+   "G4BE08"
+  ],
+  "author": "jrupinski",
+  "author_url": "https://github.com/jrupinski",
+  "licence": "Not stated",
+  "homepage": "https://github.com/jrupinski/RE4-gamecube-letterbox-patch",
+  "updated": "2026-11-22",
+  "kind": "codes",
+  "category": "graphics",
+  "code_type": "gecko",
+  "lines": [
+   "0611BB8C 00000014",
+   "28000030 41820050",
+   "5409EEFA 7D69E02E",
+   "5D6B0001 00000000",
+   "040FA860 70090000",
+   "04165E88 700B0000",
+   "041789A8 70090000",
+   "04178DC8 70090000",
+   "0417CADC 70090000",
+   "04182FD4 70090000",
+   "041EBB2C 00000000",
+   "04171B4C 60000000"
+  ],
+  "notes": "Removes the bars everywhere, including menus and movies. Full 4:3 512x448 frame. Gecko code from the author's dolphin/G4BE08.ini; the same author also has xdelta patches."
+ }
+]
+
+```
+
+`entries/mods/G8ME01.json`:
+
+```json
+[
+ {
+  "id": "ttyd-169-normal-hud",
+  "name": "16:9 Normal HUD",
+  "title": "Paper Mario: The Thousand-Year Door",
+  "game_ids": [
+   "G8ME01"
+  ],
+  "author": "Dolphin built-in",
+  "licence": "Not stated",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Paper_Mario:_The_Thousand-Year_Door",
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "16:9 Aspect Ratio Fix - Normal HUD",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "wideScreenHack",
+    "value": "False"
+   },
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ],
+  "notes": "Pick one of the four 16:9 fixes. Keep Widescreen Hack off; the built-in hack clips the picture."
+ },
+ {
+  "id": "ttyd-169-centered-hud",
+  "name": "16:9 Centered HUD",
+  "title": "Paper Mario: The Thousand-Year Door",
+  "game_ids": [
+   "G8ME01"
+  ],
+  "author": "Dolphin built-in",
+  "licence": "Not stated",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Paper_Mario:_The_Thousand-Year_Door",
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "16:9 Aspect Ratio Fix - Centered HUD",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "wideScreenHack",
+    "value": "False"
+   },
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ],
+  "notes": "Pick one of the four 16:9 fixes. Keep Widescreen Hack off; the built-in hack clips the picture."
+ },
+ {
+  "id": "ttyd-169-stretched-hud",
+  "name": "16:9 Stretched HUD",
+  "title": "Paper Mario: The Thousand-Year Door",
+  "game_ids": [
+   "G8ME01"
+  ],
+  "author": "Dolphin built-in",
+  "licence": "Not stated",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Paper_Mario:_The_Thousand-Year_Door",
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "16:9 Aspect Ratio Fix - Stretched HUD",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "wideScreenHack",
+    "value": "False"
+   },
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ],
+  "notes": "Pick one of the four 16:9 fixes. Keep Widescreen Hack off. The wiki says it also speeds up Shhwonk Fortress."
+ },
+ {
+  "id": "ttyd-169-centered-letterbox",
+  "name": "16:9 Centered HUD, Letterboxed",
+  "title": "Paper Mario: The Thousand-Year Door",
+  "game_ids": [
+   "G8ME01"
+  ],
+  "author": "Dolphin built-in",
+  "licence": "Not stated",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Paper_Mario:_The_Thousand-Year_Door",
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "16:9 Aspect Ratio Fix - Centered HUD with letterboxing",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "wideScreenHack",
+    "value": "False"
+   },
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ],
+  "notes": "Pick one of the four 16:9 fixes. Keep Widescreen Hack off. Leaves letterboxing; the wiki says it also speeds up Shhwonk Fortress."
+ }
+]
+
+```
+
+`entries/mods/GAFE01.json`:
+
+```json
+[
+ {
+  "id": "animal-crossing-gc-16-9-widescreen",
+  "name": "16:9 Widescreen",
+  "title": "Animal Crossing",
+  "game_ids": [
+   "GAFE01"
+  ],
+  "author": "Not stated",
+  "licence": "Not stated",
+  "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GAFE01.ini",
+  "updated": "2026-11-24",
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "16:9 Widescreen",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ],
+  "notes": "Dolphin's own 16:9 code, shipped in its game settings file. Also sets Force 16:9, which the picture needs to be widened."
+ }
+]
+
+```
+
+`entries/mods/GALE01.json`:
+
+```json
+[
+ {
+  "id": "melee-proper-16-9-widescreen",
+  "name": "Proper 16:9 Widescreen",
+  "title": "Super Smash Bros. Melee",
+  "game_ids": [
+   "GALE01"
+  ],
+  "revisions": [
+   0,
+   2
+  ],
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "Proper 16:9 Widescreen Support",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ],
+  "author": "Dan Salvato, mirrorbender",
+  "licence": "Creative Commons Attribution Share Alike (Dolphin wiki)",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Super_Smash_Bros._Melee",
+  "updated": "2026-11-24",
+  "notes": "Ships with Dolphin in the Gecko section of the rev 0 and rev 2 INIs. Force 16:9 is set with it. Use either this or Widescreen Support v1.2, not both."
+ },
+ {
+  "id": "melee-widescreen-support-v1-2",
+  "name": "Widescreen Support v1.2",
+  "title": "Super Smash Bros. Melee",
+  "game_ids": [
+   "GALE01"
+  ],
+  "revisions": [
+   2
+  ],
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "ar",
+  "code_name": "Widescreen Support v1.2",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ],
+  "author": "Dan Salvato",
+  "licence": "Creative Commons Attribution Share Alike (Dolphin wiki)",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Super_Smash_Bros._Melee",
+  "updated": "2026-11-24",
+  "notes": "Ships with Dolphin in the ActionReplay section of the rev 2 INI. Force 16:9 is set with it. Use either this or Proper 16:9 Widescreen, not both."
+ }
+]
+
+```
+
+`entries/mods/GEDE01.json`:
+
+```json
+[
+ {
+  "id": "eternal-darkness-fix-startup-hang",
+  "name": "Fix Startup Hang",
+  "title": "Eternal Darkness",
+  "game_ids": [
+   "GEDE01"
+  ],
+  "author": "Not stated",
+  "licence": "Not stated",
+  "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GEDE01.ini",
+  "updated": "2026-11-24",
+  "kind": "builtin",
+  "category": "fix",
+  "code_type": "onframe",
+  "code_name": "Fix startup hang",
+  "notes": "Dolphin's own patch, shipped in its game settings file. Fixes a hang at startup."
+ }
+]
+
+```
+
+`entries/mods/GFZE01.json`:
+
+```json
+[
+ {
+  "id": "fzero-gx-ax-mode",
+  "name": "AX Mode",
+  "title": "F-Zero GX",
+  "game_ids": [
+   "GFZE01"
+  ],
+  "author": "Ralf",
+  "licence": "Not stated",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=F-Zero_GX",
+  "updated": "2026-11-24",
+  "notes": "Turns on AX mode, with the AX cups and tracks. Dolphin ships this code for GFZE01.",
+  "kind": "builtin",
+  "category": "gameplay",
+  "code_type": "gecko",
+  "code_name": "Activate AX Mode (Version 8)"
+ },
+ {
+  "id": "fzero-gx-safe-cursor-credits",
+  "name": "Emblem Editor and Credits Fix",
+  "title": "F-Zero GX",
+  "game_ids": [
+   "GFZE01"
+  ],
+  "author": "Dolphin wiki contributors",
+  "licence": "CC BY-SA (Dolphin wiki)",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=F-Zero_GX",
+  "updated": "2026-11-24",
+  "notes": "Texture Cache Accuracy Safe fixes the Emblem Editor cursor. Store EFB copies to texture off fixes the sepia end credits on Master.",
+  "kind": "settings",
+  "category": "fix",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SafeTextureCacheColorSamples",
+    "value": "512"
+   },
+   {
+    "section": "Video_Hacks",
+    "key": "EFBToTextureEnable",
+    "value": "False"
+   }
+  ]
+ }
+]
+
+```
+
+`entries/mods/GKYE01.json`:
+
+```json
+[
+ {
+  "id": "kirby-air-ride-widescreen",
+  "name": "16:9 Widescreen",
+  "title": "Kirby Air Ride",
+  "game_ids": [
+   "GKYE01"
+  ],
+  "author": "Dolphin Emulator",
+  "licence": "Not stated",
+  "homepage": "https://raw.githubusercontent.com/dolphin-emu/dolphin/master/Data/Sys/GameSettings/GKYE01.ini",
+  "updated": "2026-11-24",
+  "notes": "Dolphin's built-in 16:9 code for GKYE01. Dolphin's file gives no disc revision. Needs Force 16:9 (set here too).",
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "16:9 Widescreen",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ]
+ }
+]
+
+```
+
+`entries/mods/GLME01.json`:
+
+```json
+[
+ {
+  "id": "luigis-dual-core-off",
+  "name": "Dual Core Off",
+  "title": "Luigi's Mansion",
+  "game_ids": [
+   "GLME01"
+  ],
+  "author": "Dolphin wiki contributors",
+  "licence": "CC BY-SA 3.0 (wiki page licence)",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Luigi%27s_Mansion",
+  "kind": "settings",
+  "category": "fix",
+  "settings": [
+   {
+    "section": "Core",
+    "key": "CPUThread",
+    "value": "False"
+   }
+  ],
+  "notes": "Turn Dual Core off. Stops Luigi's model corrupting in the intro cutscene. The wiki lists it as the only non-default setting."
+ }
+]
+
+```
+
+`entries/mods/GM4E01.json`:
+
+```json
+[
+ {
+  "id": "mkdd-16-9-widescreen",
+  "name": "16:9 Widescreen",
+  "title": "Mario Kart: Double Dash!!",
+  "game_ids": [
+   "GM4E01",
+   "GM4P01"
+  ],
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "16:9 Widescreen v2",
+  "author": "Ralf, Kester",
+  "licence": "Not stated",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Mario_Kart:_Double_Dash!!",
+  "updated": "2026-11",
+  "notes": "Dolphin's built-in 16:9 code for the USA and European discs. Also sets Force 16:9.",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ]
+ },
+ {
+  "id": "mkdd-reduced-blur",
+  "name": "Reduced Nintendo Blur",
+  "title": "Mario Kart: Double Dash!!",
+  "game_ids": [
+   "GM4E01",
+   "GM4P01"
+  ],
+  "kind": "builtin",
+  "category": "graphics",
+  "code_type": "ar",
+  "code_name": "Reduced Nintendo Blur",
+  "author": "Not stated",
+  "licence": "Not stated",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Mario_Kart:_Double_Dash!!",
+  "updated": "2026-11",
+  "notes": "Dolphin's built-in Action Replay code that reduces the Nintendo blur effect. Listed in the GM4E01 and GM4P01 game INIs."
+ }
+]
+
+```
+
+`entries/mods/GM8E01.json`:
+
+```json
+[
+ {
+  "id": "prime-rain-fix",
+  "name": "Rain Corruption Fix",
+  "title": "Metroid Prime",
+  "game_ids": [
+   "GM8E01"
+  ],
+  "kind": "settings",
+  "category": "fix",
+  "settings": [
+   {
+    "section": "Video_Hacks",
+    "key": "EFBToTextureEnable",
+    "value": "False"
+   }
+  ],
+  "author": "Not stated",
+  "licence": "Creative Commons Attribution Share Alike (Dolphin wiki page)",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Metroid_Prime_(GC)",
+  "updated": "2026-11",
+  "notes": "Fixes black-line corruption in rain. Turns off Store EFB Copies to Texture Only. The wiki gives no revision."
+ }
+]
+
+```
+
+`entries/mods/GMSE01.json`:
+
+```json
+[
+ {
+  "id": "sms-widescreen",
+  "name": "Widescreen",
+  "title": "Super Mario Sunshine",
+  "game_ids": [
+   "GMSE01"
+  ],
+  "kind": "builtin",
+  "code_type": "gecko",
+  "code_name": "Widescreen",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ],
+  "author": "gamemasterplc",
+  "licence": "Not stated",
+  "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GMSE01.ini",
+  "notes": "Dolphin's built-in 16:9 code for the USA release. Also sets Force 16:9 in the game settings."
+ },
+ {
+  "id": "sms-60fps",
+  "name": "60 FPS",
+  "title": "Super Mario Sunshine",
+  "game_ids": [
+   "GMSE01"
+  ],
+  "kind": "builtin",
+  "code_type": "gecko",
+  "code_name": "60FPS",
+  "category": "framerate",
+  "author": "gamemasterplc",
+  "licence": "Not stated",
+  "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GMSE01.ini",
+  "notes": "Dolphin's built-in 60 FPS code for the USA release."
+ },
+ {
+  "id": "sms-superstar",
+  "name": "Superstar",
+  "title": "Super Mario Sunshine",
+  "game_ids": [
+   "GMSE01"
+  ],
+  "kind": "riivolution",
+  "source": {
+   "type": "link"
+  },
+  "category": "mod",
+  "author": "TheMagicCactus, Augs, Epicwade",
+  "licence": "CC BY-NC-ND 4.0",
+  "homepage": "https://gamebanana.com/mods/555255",
+  "updated": "2024-11-12",
+  "notes": "Difficulty hack that reworks the original levels and adds new content. The GameBanana file links to another download; install steps not checked."
+ }
+]
+
+```
+
+`entries/mods/GP7E01.json`:
+
+```json
+[
+ {
+  "id": "mp7-16-9-widescreen",
+  "name": "16:9 Widescreen",
+  "title": "Mario Party 7",
+  "game_ids": [
+   "GP7E01"
+  ],
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "16:9 Widescreen",
+  "author": "Not stated",
+  "licence": "Not stated",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Mario_Party_7",
+  "updated": "2026-11",
+  "notes": "Dolphin's built-in 16:9 code for the USA disc. Also sets Force 16:9.",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ]
+ }
+]
+
+```
+
+`entries/mods/GPVE01.json`:
+
+```json
+[
+ {
+  "id": "pikmin2-169-widescreen",
+  "name": "16:9 Widescreen",
+  "title": "Pikmin 2",
+  "game_ids": [
+   "GPVE01"
+  ],
+  "author": "Dolphin built-in",
+  "licence": "Not stated",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Pikmin_2",
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "16:9 Widescreen",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ],
+  "notes": "Dolphin's built-in 16:9 code. Forces 16:9 so the picture is not stuck at 4:3."
+ },
+ {
+  "id": "pikmin2-60-fps",
+  "name": "60 FPS",
+  "title": "Pikmin 2",
+  "game_ids": [
+   "GPVE01"
+  ],
+  "author": "Dolphin built-in",
+  "licence": "Not stated",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Pikmin_2",
+  "kind": "builtin",
+  "category": "framerate",
+  "code_type": "gecko",
+  "code_name": "60 FPS",
+  "notes": "Dolphin's built-in 60 FPS code. Cutscenes switch back to 30 FPS and return to 60 after."
+ }
+]
+
+```
+
+`entries/mods/GQSEAF.json`:
+
+```json
+[
+ {
+  "id": "tales-of-symphonia-gc-16-9-widescreen",
+  "name": "16:9 Widescreen",
+  "title": "Tales of Symphonia",
+  "game_ids": [
+   "GQSEAF"
+  ],
+  "author": "gamemasterplc",
+  "licence": "Not stated",
+  "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GQSEAF.ini",
+  "updated": "2026-11-24",
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "16:9 Widescreen",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ],
+  "notes": "Shipped in Dolphin's game settings file, credited to gamemasterplc there. Also sets Force 16:9, which the picture needs to be widened."
+ },
+ {
+  "id": "tales-of-symphonia-gc-remove-blur",
+  "name": "Remove Blur",
+  "title": "Tales of Symphonia",
+  "game_ids": [
+   "GQSEAF"
+  ],
+  "author": "Not stated",
+  "licence": "Not stated",
+  "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GQSEAF.ini",
+  "updated": "2026-11-24",
+  "kind": "builtin",
+  "category": "graphics",
+  "code_type": "gecko",
+  "code_name": "Remove Blur",
+  "notes": "Dolphin's own code, shipped in its game settings file. Turns off the blur filter."
+ }
+]
+
+```
+
+`entries/mods/GSAE01.json`:
+
+```json
+[
+ {
+  "id": "star-fox-viwidth-fix",
+  "name": "viWidth 704 Aspect Ratio Fix",
+  "title": "Star Fox Adventures",
+  "game_ids": [
+   "GSAE01"
+  ],
+  "revisions": [
+   0,
+   1
+  ],
+  "author": "Not stated",
+  "licence": "Not stated",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Star_Fox_Adventures",
+  "updated": "2026-11-24",
+  "notes": "Shipped by Dolphin. Raises viWidth from 660 to 704. Dolphin ships different addresses for revision 0 and revision 1.",
+  "kind": "builtin",
+  "category": "fix",
+  "code_type": "ar",
+  "code_name": "viWidth 704 Aspect Ratio Fix"
+ },
+ {
+  "id": "star-fox-efb-texture-off",
+  "name": "EFB Copies to Texture Off",
+  "title": "Star Fox Adventures",
+  "game_ids": [
+   "GSAE01"
+  ],
+  "author": "Dolphin wiki contributors",
+  "licence": "CC BY-SA (Dolphin wiki)",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Star_Fox_Adventures",
+  "updated": "2026-11-24",
+  "notes": "Needed for correct glow effects. Glow renders poorly with this option on, on every backend.",
+  "kind": "settings",
+  "category": "fix",
+  "settings": [
+   {
+    "section": "Video_Hacks",
+    "key": "EFBToTextureEnable",
+    "value": "False"
+   }
+  ]
+ }
+]
+
+```
+
+`entries/mods/GSNE8P.json`:
+
+```json
+[
+ {
+  "id": "sonic-adventure-2-battle-16-9-widescreen",
+  "name": "16:9 Widescreen",
+  "title": "Sonic Adventure 2: Battle",
+  "game_ids": [
+   "GSNE8P"
+  ],
+  "author": "Not stated",
+  "licence": "Not stated",
+  "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GSNE8P.ini",
+  "updated": "2026-11-24",
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "ar",
+  "code_name": "16:9 Widescreen",
+  "notes": "Dolphin's own Action Replay code, shipped in its game settings file.",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ]
+ },
+ {
+  "id": "sonic-adventure-2-battle-60hz-aspect-fix",
+  "name": "60Hz Aspect Ratio Fix",
+  "title": "Sonic Adventure 2: Battle",
+  "game_ids": [
+   "GSNE8P"
+  ],
+  "author": "Not stated",
+  "licence": "Not stated",
+  "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GSNE8P.ini",
+  "updated": "2026-11-24",
+  "kind": "builtin",
+  "category": "fix",
+  "code_type": "ar",
+  "code_name": "60Hz Aspect Ratio Fix",
+  "notes": "Dolphin's own Action Replay code, shipped in its game settings file."
+ }
+]
+
+```
+
+`entries/mods/GZ2E01.json`:
+
+```json
+[
+ {
+  "id": "tp-gc-widescreen-v2",
+  "name": "16:9 Widescreen v2",
+  "title": "The Legend of Zelda: Twilight Princess",
+  "game_ids": [
+   "GZ2E01"
+  ],
+  "author": "Ralf",
+  "licence": "Not stated",
+  "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GZ2E01.ini",
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "16:9 Widescreen v2",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ],
+  "notes": "Dolphin's built-in 16:9 code for the GameCube version. Its settings also force the 16:9 aspect ratio."
+ }
+]
+
+```
+
+`entries/mods/GZLE01.json`:
+
+```json
+[
+ {
+  "id": "ww-gc-widescreen",
+  "name": "16:9 Widescreen",
+  "title": "The Legend of Zelda: The Wind Waker",
+  "game_ids": [
+   "GZLE01"
+  ],
+  "author": "Not stated",
+  "licence": "Not stated",
+  "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GZLE01.ini",
+  "kind": "builtin",
+  "category": "widescreen",
+  "aspect": "16:9",
+  "code_type": "gecko",
+  "code_name": "16:9 Widescreen",
+  "settings": [
+   {
+    "section": "Video_Settings",
+    "key": "SuggestedAspectRatio",
+    "value": "1"
+   }
+  ],
+  "notes": "Dolphin's built-in 16:9 code for the GameCube version. Its settings also force the 16:9 aspect ratio."
+ },
+ {
+  "id": "ww-remove-distance-blur",
+  "name": "Remove Distance Blur",
+  "title": "The Legend of Zelda: The Wind Waker",
+  "game_ids": [
+   "GZLE01"
+  ],
+  "author": "Not stated",
+  "licence": "Not stated",
+  "homepage": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/GameSettings/GZLE01.ini",
+  "kind": "builtin",
+  "category": "graphics",
+  "code_type": "ar",
+  "code_name": "Remove Distance Blur",
+  "notes": "Dolphin's built-in code that removes the distance blur effect."
+ }
+]
+
+```
+
+`entries/mods/RMCE01.json`:
+
+```json
+[
+ {
+  "id": "mkw-force-30fps-usa",
+  "name": "Force 30 FPS",
+  "title": "Mario Kart Wii",
+  "game_ids": [
+   "RMCE01"
+  ],
+  "kind": "builtin",
+  "category": "framerate",
+  "code_type": "gecko",
+  "code_name": "Force 30 FPS",
+  "author": "Nick Reynolds",
+  "licence": "Creative Commons Attribution Share Alike (Dolphin wiki page licence line)",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Mario_Kart_Wii",
+  "updated": "2026-11-24",
+  "notes": "Ships with Dolphin in this game's INI. Forces 30 FPS in all modes. Do not use with the 60 FPS in Multiplayer code."
+ }
+]
+
+```
+
+`entries/mods/RMCP01.json`:
+
+```json
+[
+ {
+  "id": "mkw-force-30fps-pal",
+  "name": "Force 30 FPS",
+  "title": "Mario Kart Wii",
+  "game_ids": [
+   "RMCP01"
+  ],
+  "kind": "builtin",
+  "category": "framerate",
+  "code_type": "gecko",
+  "code_name": "Force 30 FPS",
+  "author": "Nick Reynolds",
+  "licence": "Creative Commons Attribution Share Alike (Dolphin wiki page licence line)",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Mario_Kart_Wii",
+  "updated": "2026-11-24",
+  "notes": "Ships with Dolphin in this game's INI. Forces 30 FPS in all modes. Do not use with the 60 FPS in Multiplayer code."
+ }
+]
+
+```
+
+`entries/mods/RMGE01.json`:
+
+```json
+[
+ {
+  "id": "smg-no-gravity",
+  "name": "No Gravity Edition",
+  "title": "Super Mario Galaxy",
+  "game_ids": [
+   "RMGE01"
+  ],
+  "kind": "riivolution",
+  "source": {
+   "type": "link"
+  },
+  "category": "mod",
+  "author": "SPG64",
+  "licence": "CC BY-NC-ND 4.0",
+  "homepage": "https://gamebanana.com/mods/149765",
+  "updated": "2021-02-27",
+  "notes": "Removes every gravity area from the original game, so slopes no longer count as slopes. The download is a .rar on GameBanana; install steps not checked."
+ },
+ {
+  "id": "superstar-galaxy",
+  "name": "Superstar",
+  "title": "Super Mario Galaxy",
+  "game_ids": [
+   "RMGE01"
+  ],
+  "kind": "riivolution",
+  "source": {
+   "type": "link"
+  },
+  "category": "mod",
+  "author": "TheMagicCactus, KOBuS, LariVille, Master Luma",
+  "licence": "CC BY-NC-ND 4.0",
+  "homepage": "https://gamebanana.com/mods/555156",
+  "updated": "2024-11-12",
+  "notes": "Difficulty hack with twisted levels, new levels and 65 new stars. The GameBanana file links to another download; install steps not checked."
+ }
+]
+
+```
+
+`entries/mods/RZTE01.json`:
+
+```json
+[
+ {
+  "id": "wsr-force-linear-vertex-rounding",
+  "name": "Fix IR Banding and UI Edges",
+  "title": "Wii Sports Resort",
+  "game_ids": [
+   "RZTE01"
+  ],
+  "kind": "settings",
+  "category": "fix",
+  "settings": [
+   {
+    "section": "Video_Enhancements",
+    "key": "ForceTextureFiltering",
+    "value": "2"
+   },
+   {
+    "section": "Video_Hacks",
+    "key": "VertexRounding",
+    "value": "True"
+   }
+  ],
+  "author": "Dolphin wiki contributors",
+  "licence": "Creative Commons Attribution Share Alike (Dolphin wiki page licence line)",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Wii_Sports_Resort",
+  "updated": "2026-11-24",
+  "notes": "Fixes banding and misaligned 2D UI above 1x internal resolution. Value 2 is Force Linear. The wiki gives no region or revision."
+ }
+]
+
+```
+
+`entries/mods/SLSEXJ.json`:
+
+```json
+[
+ {
+  "id": "last-story-immediate-xfb",
+  "name": "Immediately Present XFB",
+  "title": "The Last Story",
+  "game_ids": [
+   "SLSEXJ"
+  ],
+  "author": "Dolphin wiki contributors",
+  "licence": "CC BY-SA (Dolphin wiki)",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=The_Last_Story",
+  "updated": "2026-11-24",
+  "notes": "Removes the green line across the bottom of the screen.",
+  "kind": "settings",
+  "category": "fix",
+  "settings": [
+   {
+    "section": "Video_Hacks",
+    "key": "CapImmediateXFB",
+    "value": "True"
+   }
+  ]
+ }
+]
+
+```
+
+`entries/mods/SOUE01.json`:
+
+```json
+[
+ {
+  "id": "skyward-sword-linear-filtering",
+  "name": "Force Linear Texture Filtering",
+  "title": "The Legend of Zelda: Skyward Sword",
+  "game_ids": [
+   "SOUE01"
+  ],
+  "author": "Dolphin wiki contributors",
+  "licence": "CC BY-SA (Dolphin wiki)",
+  "homepage": "https://wiki.dolphin-emu.org/index.php?title=Skyward_Sword",
+  "updated": "2026-11-24",
+  "notes": "Fixes banding when the internal resolution is above 1x.",
+  "kind": "settings",
+  "category": "fix",
+  "settings": [
+   {
+    "section": "Video_Enhancements",
+    "key": "ForceTextureFiltering",
+    "value": "2"
+   }
+  ]
+ }
+]
+
+```
+
+`entries/textures/G2ME01.json`:
+
+```json
+[
+ {
+  "id": "prime2-gravity-suit-beam-hd-interface",
+  "name": "Gravity Suit, Beams and HD Interface",
+  "title": "Metroid Prime 2: Echoes",
+  "game_ids": [
+   "G2ME01"
+  ],
+  "author": "MegaManZX2245",
+  "licence": "Creative Commons Attribution-NonCommercial-NoDerivs 4.0",
+  "homepage": "https://gamebanana.com/mods/649522",
+  "updated": "2026-02",
+  "source": {
+   "type": "gamebanana",
+   "mod": 649522,
+   "file_pattern": "metroid_prime_2_echoes_gravity_suit_colors_mp1-mp3_beam_textures_metroid_prime_hd_interface_text.zip"
+  },
+  "size": 7122007,
+  "format": "zip",
+  "layout": "single",
+  "textures": "png",
+  "notes": "Gravity Suit colours, Metroid Prime 1 beam textures and HD interface textures for Prime 2. The zip holds one G2ME01 folder of PNGs."
+ }
+]
+
+```
+
+`entries/textures/G8ME01.json`:
+
+```json
+[
+ {
+  "id": "ttyd-hd-texture-pack",
+  "name": "HD Texture Pack v2.5",
+  "title": "Paper Mario: The Thousand-Year Door",
+  "game_ids": [
+   "G8ME01"
+  ],
+  "author": "Invader",
+  "licence": "Not stated",
+  "homepage": "https://forums.dolphin-emu.org/Thread-paper-mario-ttyd-hd-texture-pack-v2-5-may-9th-2024",
+  "source": {
+   "type": "link"
+  },
+  "textures": "dds",
+  "notes": "Download from the thread: DDS pack recommended, PNG legacy pack also there. Size and archive type not stated."
+ }
+]
+
+```
+
+`entries/textures/GFEE01.json`:
+
+```json
+[
+ {
+  "id": "path-of-radiance-hd-thorn",
+  "name": "HD Textures (Thorn)",
+  "title": "Fire Emblem: Path of Radiance",
+  "game_ids": [
+   "GFEE01"
+  ],
+  "source": {
+   "type": "gdrive",
+   "file_id": "1uclRYNWV4-bvI-4i5wOr3bSBJ3zFxohU"
+  },
+  "size": 1878929765,
+  "format": "rar",
+  "layout": "single",
+  "textures": "dds",
+  "author": "Thorn",
+  "licence": "Not stated",
+  "homepage": "https://forums.dolphin-emu.org/Thread-fire-emblem-path-of-radiance-hd-texture-pack",
+  "updated": "2020-12",
+  "notes": "For 4:3 only: at 16:9 backgrounds and portraits stretch. Upscaled textures for the US disc. Author's settings: 3x internal, 2x MSAA, no texture filtering."
+ }
+]
+
+```
+
+`entries/textures/GFZE01.json`:
+
+```json
+[
+ {
+  "id": "fzero-gx-hd-venomalia",
+  "name": "F-Zero GX HD (DDS-BC7)",
+  "title": "F-Zero GX",
+  "game_ids": [
+   "GFZE01"
+  ],
+  "author": "Venomalia",
+  "licence": "Not stated",
+  "homepage": "https://forums.dolphin-emu.org/Thread-f-zero-gx-hd-05-01-2022",
+  "updated": "2026-11-24",
+  "notes": "DDS-BC7 textures. Download is on MEGA. The author says modified copies may be shared.",
+  "source": {
+   "type": "link"
+  },
+  "textures": "dds"
+ }
+]
+
+```
+
+`entries/textures/GKYE01.json`:
+
+```json
+[
+ {
+  "id": "kirby-air-ride-uhd-textures",
+  "name": "UHD Textures (City Trial)",
+  "title": "Kirby Air Ride",
+  "game_ids": [
+   "GKYE01"
+  ],
+  "author": "quinton-ashley",
+  "author_url": "https://github.com/quinton-ashley",
+  "licence": "Not stated",
+  "homepage": "https://github.com/qashto/Kirby_Air_Ride_UHD_Texture_Pack",
+  "updated": "2017-04",
+  "notes": "Retextures for the City Trial city area, about 8x original size, per the README. Parts are credited to Dolphin Forum members there. Files are DDS.",
+  "source": {
+   "type": "github_release",
+   "repo": "qashto/Kirby_Air_Ride_UHD_Texture_Pack",
+   "tag": "v1.0.0",
+   "asset_pattern": "GKY.7z"
+  },
+  "format": "7z",
+  "layout": "single",
+  "textures": "dds",
+  "size": 27653889,
+  "sha256": "7c5f2782a34233182dba59d1d4ae7af13bc7bddf53e4e36976c37f129c6e4ea9"
+ }
+]
+
+```
+
+`entries/textures/GLME01.json`:
+
+```json
+[
+ {
+  "id": "luigis-hd-texture-pack",
+  "name": "HD Texture Pack (2020)",
+  "title": "Luigi's Mansion",
+  "game_ids": [
+   "GLME01"
+  ],
+  "author": "Your Pal Fox",
+  "licence": "Not stated",
+  "homepage": "https://forums.dolphin-emu.org/Thread-luigi-s-mansion-hd-texture-pack",
+  "source": {
+   "type": "link"
+  },
+  "notes": "5x upscale with hand edits. Latest download in the thread is dated 11/8/20. Format and size not stated."
+ }
+]
+
+```
+
+`entries/textures/GMSE01.json`:
+
+```json
+[
+ {
+  "id": "sms-uhd-texture-pack",
+  "name": "UHD Texture Pack",
+  "title": "Super Mario Sunshine",
+  "game_ids": [
+   "GMSE01"
+  ],
+  "source": {
+   "type": "github_release",
+   "repo": "qashto/Super_Mario_Sunshine_UHD_Texture_Pack",
+   "tag": "latest",
+   "asset_pattern": "GMS.7z"
+  },
+  "size": 986431331,
+  "format": "7z",
+  "layout": "single",
+  "textures": "dds",
+  "downloads": 141676,
+  "author": "qashto and razius",
+  "author_url": "https://github.com/qashto",
+  "licence": "Not stated",
+  "homepage": "https://github.com/qashto/Super_Mario_Sunshine_UHD_Texture_Pack",
+  "updated": "2020-05-09",
+  "notes": "Upscales and retextures for the whole game. The README says to use the DDS BC7 version. Turn on Load Custom Textures in the Advanced graphics settings."
+ }
+]
+
+```
+
+`entries/textures/GP7E01.json`:
+
+```json
+[
+ {
+  "id": "mp7-hd-textures",
+  "name": "MP7 HD Textures",
+  "title": "Mario Party 7",
+  "game_ids": [
+   "GP7E01"
+  ],
+  "source": {
+   "type": "github_release",
+   "repo": "Najatski/mp7-hd",
+   "tag": "v0.3.0-beta",
+   "asset_pattern": "0.3.0-MP7HD.zip"
+  },
+  "size": 1081029675,
+  "format": "zip",
+  "layout": "single",
+  "textures": "png",
+  "author": "Najatski",
+  "author_url": "https://github.com/Najatski",
+  "licence": "Not stated",
+  "homepage": "https://github.com/Najatski/mp7-hd",
+  "updated": "2024-07",
+  "notes": "AI-upscaled 4x textures, partly done (the README lists Grand Canal and Pagoda Peak as finished). The author calls the project dormant. Put the GP7E folder in Dolphin's Load/Textures folder."
+ }
+]
+
+```
+
+`entries/textures/GPVE01.json`:
+
+```json
+[
+ {
+  "id": "pikmin2-4k-henriko",
+  "name": "4K Texture Pack",
+  "title": "Pikmin 2",
+  "game_ids": [
+   "GPVE01"
+  ],
+  "author": "Henriko Magnifico",
+  "licence": "Not stated",
+  "homepage": "https://henrikomagnifico.com/pikmin-2-4k-texture-pack",
+  "source": {
+   "type": "link"
+  },
+  "notes": "Standard and post-processing editions. Only NTSC textures are modified. Works with other mods that do not change the same textures."
+ }
+]
+
+```
+
+`entries/textures/GSAE01.json`:
+
+```json
+[
+ {
+  "id": "star-fox-hd-cyb3rtr0n",
+  "name": "HD Texture Pack (DDS)",
+  "title": "Star Fox Adventures",
+  "game_ids": [
+   "GSAE01"
+  ],
+  "author": "CYB3RTR0N",
+  "licence": "Not stated",
+  "homepage": "https://forums.dolphin-emu.org/Thread-star-fox-adventures-hd-texture-pack",
+  "updated": "2026-11-24",
+  "notes": "DDS textures on MEGA. The thread mentions an optional beta pack. Credits Krystal Archive, StarFox.org and razius.",
+  "source": {
+   "type": "link"
+  }
+ }
+]
+
+```
+
+`entries/textures/GZ2E01.json`:
+
+```json
+[
+ {
+  "id": "tpde-plus-2-1",
+  "name": "Definitive Edition+ 2.1",
+  "title": "The Legend of Zelda: Twilight Princess",
+  "game_ids": [
+   "GZ2E01"
+  ],
+  "author": "Gossip Geist",
+  "author_url": "https://gamebanana.com/members/5489840",
+  "licence": "CC BY-NC-ND 4.0",
+  "homepage": "https://gamebanana.com/mods/714018",
+  "updated": "2026-09-20",
+  "notes": "HD DDS texture pack for the GameCube version. Four GameBanana parts: merge parts 2 to 4 into the main folder, then put it in the GZ2 texture folder.",
+  "parts": [
+   {
+    "type": "gamebanana",
+    "mod": 714018,
+    "file_pattern": "tpde_21_-_part_1_main.7z"
+   },
+   {
+    "type": "gamebanana",
+    "mod": 714018,
+    "file_pattern": "tpde_21_-_part_2.7z"
+   },
+   {
+    "type": "gamebanana",
+    "mod": 714018,
+    "file_pattern": "tpde_21_-_part_3.7z"
+   },
+   {
+    "type": "gamebanana",
+    "mod": 714018,
+    "file_pattern": "tpde_21_-_part_4.7z"
+   }
+  ],
+  "size": 5350469003,
+  "format": "7z",
+  "layout": "single",
+  "textures": "dds",
+  "downloads": 31872
+ },
+ {
+  "id": "tp-720p-dds",
+  "name": "720p DDS Pack",
+  "title": "The Legend of Zelda: Twilight Princess",
+  "game_ids": [
+   "GZ2E01",
+   "RZDE01"
+  ],
+  "author": "HenrikoMagnifico",
+  "author_url": "https://forums.dolphin-emu.org/User-henrikomagnifico",
+  "licence": "Not stated",
+  "homepage": "https://github.com/FHArchive/ZeldaTwilightPrincess720p",
+  "updated": "2020-10-18",
+  "notes": "Unofficial 720p DDS version of HenrikoMagnifico's texture pack, from the FHArchive release. Install as its README says; the folder has GZ2 and RZD marker files.",
+  "source": {
+   "type": "github_release",
+   "repo": "FHArchive/ZeldaTwilightPrincess720p",
+   "tag": "1.0.5_0",
+   "asset_pattern": "TwilightPrincess720p.7z"
+  },
+  "size": 342889473,
+  "format": "7z",
+  "layout": "single",
+  "textures": "dds"
+ }
+]
+
+```
+
+`entries/textures/RM3E01.json`:
+
+```json
+[
+ {
+  "id": "prime3-gravity-suit-ped-hd-interface",
+  "name": "Gravity Suit, PED Suit and HD Interface",
+  "title": "Metroid Prime 3: Corruption",
+  "game_ids": [
+   "RM3E01"
+  ],
+  "author": "MegaManZX2245",
+  "licence": "Creative Commons Attribution-NonCommercial-NoDerivs 4.0",
+  "homepage": "https://gamebanana.com/mods/659441",
+  "updated": "2026-03",
+  "source": {
+   "type": "gamebanana",
+   "mod": 659441,
+   "file_pattern": "metroid_prime_3_corruption_gravity_suit_colors_ped_suit_50_reverse_metroid_prime_trilogy_hd_inte.zip"
+  },
+  "size": 3769259,
+  "format": "zip",
+  "layout": "single",
+  "textures": "png",
+  "notes": "Gravity Suit colours, a reversed 50% PED Suit and HD interface textures for Prime 3. The zip holds one RM3E01 folder of PNGs."
+ }
+]
+
+```
+
+`entries/textures/RMCE01.json`:
+
+```json
+[
+ {
+  "id": "mkwii-reloaded",
+  "name": "MKWii Reloaded HD",
+  "title": "Mario Kart Wii",
+  "game_ids": [
+   "RMCE01",
+   "RMCP01"
+  ],
+  "source": {
+   "type": "github_release",
+   "repo": "GhostlyDark/MKWii-Reloaded",
+   "tag": "latest",
+   "asset_pattern": "mkwii-reloaded-*-dds.7z"
+  },
+  "size": 409942972,
+  "format": "7z",
+  "layout": "single",
+  "textures": "dds",
+  "author": "GhostlyDark",
+  "author_url": "https://github.com/GhostlyDark",
+  "licence": "Not stated",
+  "homepage": "https://github.com/GhostlyDark/MKWii-Reloaded",
+  "updated": "2025-03-22",
+  "notes": "HD texture pack for Mario Kart Wii, DDS, v0.2.0 release. Credits the Matteoki and Rmed24 HD pack. The author names no region."
+ },
+ {
+  "id": "mkw-hd-remaster-moukrea",
+  "name": "Mario Kart Wii HD Remaster (Forum)",
+  "title": "Mario Kart Wii",
+  "game_ids": [
+   "RMCE01",
+   "RMCP01"
+  ],
+  "source": {
+   "type": "link"
+  },
+  "author": "Moukrea",
+  "licence": "Not stated",
+  "homepage": "https://forums.dolphin-emu.org/Thread-mario-kart-wii-hd-remaster",
+  "updated": "2019-02-07",
+  "notes": "Dolphin forum thread; the download is a Google Drive archive. Format and size not stated. The post says the pack is no longer in progress."
+ },
+ {
+  "id": "mkw-hd-remaster-koolkreate",
+  "name": "Mario Kart Wii HD Remaster (GameBanana)",
+  "title": "Mario Kart Wii",
+  "game_ids": [
+   "RMCE01",
+   "RMCP01"
+  ],
+  "source": {
+   "type": "link"
+  },
+  "size": 425745337,
+  "format": "7z",
+  "author": "koolkreate",
+  "licence": "CC BY-NC-ND 4.0",
+  "homepage": "https://gamebanana.com/mods/49179",
+  "updated": "2020-09-20",
+  "notes": "Two 7z downloads on GameBanana (main file 426 MB). Contents not opened here. Non-commercial, no derivatives licence."
+ }
+]
+
+```
+
+`entries/textures/RMGE01.json`:
+
+```json
+[
+ {
+  "id": "glxy-repaint",
+  "name": "GLXY Repaint",
+  "title": "Super Mario Galaxy",
+  "game_ids": [
+   "RMGE01"
+  ],
+  "source": {
+   "type": "github_release",
+   "repo": "KramerRepaints/GLXY",
+   "tag": "latest",
+   "asset_pattern": "Dolphin.Custom.Textures.zip"
+  },
+  "size": 878839015,
+  "format": "zip",
+  "layout": "single",
+  "textures": "png",
+  "downloads": 64,
+  "author": "KramerRepaints",
+  "author_url": "https://github.com/KramerRepaints",
+  "licence": "Not stated",
+  "homepage": "https://github.com/KramerRepaints/GLXY",
+  "updated": "2026-06-03",
+  "notes": "Full repaint with about 1800 textures, new dialogue and a new story. The File.Edits.zip download (audio and video) is not covered here."
+ }
+]
+
+```
+
+`entries/textures/SB4E01.json`:
+
+```json
+[
+ {
+  "id": "smg63-4k-texture-pack",
+  "name": "4K Texture Pack",
+  "title": "Super Mario Galaxy 2",
+  "game_ids": [
+   "SB4E01"
+  ],
+  "source": {
+   "type": "link"
+  },
+  "author": "iZePlayzYT",
+  "author_url": "https://github.com/iZePlayzYT",
+  "licence": "Not stated",
+  "homepage": "https://github.com/iZePlayzYT/SuperMarioGalaxy63-TexturePack",
+  "updated": "2026-05-04",
+  "notes": "4K textures made for Super Mario Galaxy 63; the README says they also work on the original game. Use the DDS folder in game. The PNG folder is for editing only."
+ }
+]
+
+```
+
+`entries/textures/SF8E01.json`:
+
+```json
+[
+ {
+  "id": "dkcr-hd-textures",
+  "name": "HD Textures v1.4",
+  "title": "Donkey Kong Country Returns",
+  "game_ids": [
+   "SF8E01"
+  ],
+  "author": "CTCaer",
+  "licence": "Author allows reuse as a base for another pack with credit and a PM (forum post)",
+  "homepage": "https://forums.dolphin-emu.org/Thread-wii-fhd-donkey-kong-country-returns-hd-textures-mod-v1-4",
+  "source": {
+   "type": "link"
+  },
+  "format": "7z",
+  "layout": "single",
+  "textures": "png",
+  "notes": "All-regions HD pack, v1.4. PNG (lossless) 7z is the one listed here; a DXT5 DDS 7z is also on the thread. Needs a 7-Zip with LZMA2 support.",
+  "updated": "2017-02-17"
+ }
+]
+
+```
+
+`entries/textures/SLSEXJ.json`:
+
+```json
+[
+ {
+  "id": "last-story-uhd-lunarecho21",
+  "name": "UHD Texture Pack",
+  "title": "The Last Story",
+  "game_ids": [
+   "SLSEXJ"
+  ],
+  "author": "lunarEcho21",
+  "licence": "Not stated",
+  "homepage": "https://forums.dolphin-emu.org/Thread-the-last-story-uhd-texture-pack",
+  "updated": "2026-11-24",
+  "notes": "UHD textures on MEGA in two parts (4.0 GB and 2.86 GB) plus a 4.6 MB patch. The author says to unzip, and does not name the format.",
+  "source": {
+   "type": "link"
+  }
+ },
+ {
+  "id": "last-story-hd-gui-matrix2525",
+  "name": "HD GUI+ Texture Pack",
+  "title": "The Last Story",
+  "game_ids": [
+   "SLSEXJ"
+  ],
+  "author": "Matrix2525",
+  "licence": "Not stated",
+  "homepage": "https://forums.dolphin-emu.org/Thread-the-last-story-hd-gui-texture-pack",
+  "updated": "2026-11-24",
+  "notes": "Interface textures, as DDS (recommended by the author) or PNG, on MEGA. Version 1.0 from 2015. The author gives no further updates and asks for credit.",
+  "source": {
+   "type": "link"
+  }
+ },
+ {
+  "id": "last-story-hd-themriron2",
+  "name": "HD Texture Pack (Beta 2)",
+  "title": "The Last Story",
+  "game_ids": [
+   "SLSEXJ"
+  ],
+  "author": "themriron2",
+  "licence": "Not stated",
+  "homepage": "https://forums.dolphin-emu.org/Thread-the-last-story-hd-texture-pack",
+  "updated": "2026-11-24",
+  "notes": "Beta 2 is DDS, from February 2020, on Google Drive. The wiki calls the pack abandoned. The first post's link is out of date.",
+  "source": {
+   "type": "link"
+  }
+ }
+]
+
+```
+
+`entries/textures/SMNE01.json`:
+
+```json
+[
+ {
+  "id": "nsmbw-hd-textures",
+  "name": "HD Texture Pack v2.81",
+  "title": "New Super Mario Bros. Wii",
+  "game_ids": [
+   "SMNE01"
+  ],
+  "author": "Bighead",
+  "licence": "Not stated",
+  "homepage": "https://forums.dolphin-emu.org/showthread.php?tid=36005",
+  "source": {
+   "type": "link"
+  },
+  "format": "7z",
+  "layout": "single",
+  "textures": "dds",
+  "notes": "DDS (uncompressed) main pack, v2.81, from the forum thread linked by the Dolphin wiki. A PNG 7z is also on the thread. File size not stated.",
+  "updated": "2023-09-19"
+ }
+]
+
+```
+
+`entries/textures/SX4E01.json`:
+
+```json
+[
+ {
+  "id": "xenoblade-hd-bighead",
+  "name": "HD Texture Pack v8.52",
+  "title": "Xenoblade Chronicles",
+  "game_ids": [
+   "SX4E01"
+  ],
+  "author": "Bighead",
+  "licence": "Not stated",
+  "homepage": "https://forums.dolphin-emu.org/showthread.php?tid=35298",
+  "updated": "2018-08-21",
+  "notes": "Version 8.52. Core textures are DDS, with Google Drive, MediaFire and MEGA mirrors. Needs Dolphin 5.0-6199 or newer. Archives are password protected; the password is on the thread.",
+  "source": {
+   "type": "link"
+  }
+ }
+]
+
+```
+
+`tools/build.py`:
+
+```py
+#!/usr/bin/env python3
+"""Check every entry and write catalog/mods.json and catalog/textures.json.
+--fetch also opens every homepage and source. FILE... checks only those files and writes nothing."""
+import argparse
+import json
+import pathlib
+import re
+import sys
+import urllib.request
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+KINDS = {"codes", "builtin", "settings", "riivolution"}
+CATEGORIES = {"widescreen", "framerate", "fix", "graphics", "controls", "gameplay", "cheat",
+              "translation", "mod"}
+SETTINGS = {
+    "Video_Settings": {"wideScreenHack", "SuggestedAspectRatio", "AspectRatio",
+                       "SafeTextureCacheColorSamples"},
+    "Video_Hacks": None,
+    "Video_Enhancements": {"ForceTextureFiltering", "DisableCopyFilter",
+                           "ArbitraryMipmapDetection"},
+    "Core": {"CPUThread", "SyncGPU", "FPRF", "MMU", "Overclock", "OverclockEnable"},
+}
+SOURCES = {"github_release": ["repo", "tag", "asset_pattern"],
+           "github_repo_path": ["repo", "ref", "path"], "gamebanana": ["mod"],
+           "gdrive": ["file_id"], "gdrive_folder": ["folder_id", "file_pattern"],
+           "mega": ["link"], "https": ["url"], "link": []}
+COMMON = {"id": str, "name": str, "title": str, "game_ids": list, "author": str, "licence": str,
+          "homepage": str, "notes": str}
+OPTIONAL = {"revisions", "author_url", "updated", "verified", "recommended", "version"}
+MOD = {"kind", "category", "aspect", "settings", "code_type", "lines", "code_name", "source", "xml"}
+TEX = {"source", "parts", "size", "sha256", "format", "layout", "textures", "downloads", "folder"}
+HEX = re.compile(r"^[0-9A-Fa-f]{8} [0-9A-Fa-f]{8}$")
+ONFRAME = re.compile(
+    r"^0x[0-9A-Fa-f]{8}:(byte|word|dword):0x[0-9A-Fa-f]{1,8}(:0x[0-9A-Fa-f]{1,8})?$")
+URL = re.compile(r"^https?://\S+$")
+
+
+def check_source(source, bad):
+    kind = source.get("type")
+    if kind not in SOURCES:
+        bad(f"source type {kind}")
+        return
+    for key in SOURCES[kind]:
+        if key not in source:
+            bad(f"source {kind} needs {key}")
+    for key in ("url", "link"):
+        if key in source and not source[key].startswith("https://"):
+            bad(f"source {key} must be https")
+    if ".." in str(source.get("path", "")):
+        bad("source path")
+
+
+def check(entry, textures, bad):
+    for key, kind in COMMON.items():
+        if not isinstance(entry.get(key), kind) or not entry[key]:
+            bad(f"{key} is missing or not a {kind.__name__}")
+            return
+    for key in entry.keys() - COMMON.keys() - OPTIONAL - (TEX if textures else MOD):
+        bad(f"unknown field {key}")
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", entry["id"]):
+        bad("id must be [a-z0-9-]")
+    for game in entry["game_ids"]:
+        if not re.fullmatch(r"[A-Z0-9]{6}", game):
+            bad(f"game ID {game}")
+    if not URL.match(entry["homepage"]):
+        bad("homepage is not an address")
+    if entry.get("updated") and not re.fullmatch(r"\d{4}-\d{2}(-\d{2})?", entry["updated"]):
+        bad("updated must be YYYY-MM or YYYY-MM-DD")
+    if len(entry["notes"]) > 300:
+        bad("notes are over 300 characters")
+    if len(entry["name"]) > 48:
+        bad("name is over 48 characters")
+
+    linked = (entry.get("source") or {}).get("type") == "link"
+    if textures:
+        for source in entry.get("parts") or [entry.get("source") or {}]:
+            check_source(source, bad)
+        if not linked and entry.get("format") not in ("zip", "7z", "rar"):
+            bad("format must be zip, 7z or rar")
+        if entry.get("layout", "single") not in ("single", "variants"):
+            bad("layout")
+        if not linked and entry.get("textures") not in ("png", "dds"):
+            bad("textures must be png or dds")
+        return
+
+    kind = entry.get("kind")
+    if kind not in KINDS:
+        bad(f"kind {kind}")
+        return
+    if entry.get("category") not in CATEGORIES:
+        bad(f"category {entry.get('category')}")
+    for setting in entry.get("settings", []):
+        allowed = SETTINGS.get(setting.get("section"), set())
+        if allowed is not None and setting.get("key") not in allowed:
+            bad(f"setting {setting.get('section')}/{setting.get('key')} is not allowed")
+        if not isinstance(setting.get("value"), str):
+            bad("a setting's value must be a string")
+    if kind == "settings" and not entry.get("settings"):
+        bad("no settings")
+    if kind in ("codes", "builtin") and entry.get("code_type") not in ("gecko", "ar", "onframe"):
+        bad("code_type")
+    if kind == "codes":
+        lines = entry.get("lines") or []
+        if not lines:
+            bad("no lines")
+        for line in lines:
+            if not (ONFRAME if entry.get("code_type") == "onframe" else HEX).match(line):
+                bad(f"code line {line!r}")
+    if kind == "builtin" and not entry.get("code_name"):
+        bad("no code_name")
+    if kind == "riivolution":
+        check_source(entry.get("source") or {}, bad)
+        if not linked and not entry.get("xml"):
+            bad("no xml")
+    if entry.get("category") == "widescreen" and entry.get("aspect") != "16:9":
+        bad("a widescreen entry needs aspect 16:9")
+    if entry.get("category") == "widescreen" and entry["game_ids"][0][0] == "G":
+        if not any(x.get("key") in ("SuggestedAspectRatio", "AspectRatio") and x["value"] == "1"
+                   for x in entry.get("settings", [])):
+            bad("a GameCube widescreen entry needs SuggestedAspectRatio 1")
+
+
+def address(source):
+    kind = source.get("type")
+    if kind == "github_release":
+        return f"https://github.com/{source['repo']}/releases"
+    if kind == "github_repo_path":
+        return f"https://github.com/{source['repo']}"
+    if kind == "gamebanana":
+        return f"https://gamebanana.com/mods/{source['mod']}"
+    if kind == "gdrive":
+        return f"https://drive.google.com/file/d/{source['file_id']}/view"
+    if kind == "gdrive_folder":
+        return f"https://drive.google.com/drive/folders/{source['folder_id']}"
+    if kind == "https":
+        return source["url"]
+    return None
+
+
+def opens(url):
+    request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    try:
+        with urllib.request.urlopen(request, timeout=20) as reply:
+            reply.read(400)
+            return reply.status, ""
+    except Exception as error:  # every failure is reported the same way
+        return getattr(error, "code", None), str(error)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--fetch", action="store_true")
+    parser.add_argument("files", nargs="*")
+    args = parser.parse_args()
+
+    errors, ids, count = [], set(), 0
+    out = {"mods": [], "textures": []}
+    files = [pathlib.Path(f).resolve() for f in args.files]
+    for path in files or sorted(ROOT.glob("entries/*/*.json")):
+        try:
+            entries = json.loads(path.read_text())
+        except ValueError as error:
+            errors.append(f"{path.name}: {error}")
+            continue
+        for entry in entries:
+            count += 1
+            name = entry.get("id", "?")
+            check(entry, path.parent.name == "textures",
+                  lambda text, name=name: errors.append(f"{name}: {text}"))
+            if name in ids:
+                errors.append(f"{name}: used twice")
+            ids.add(name)
+            out[path.parent.name].append(entry)
+            if not args.fetch:
+                continue
+            urls = [entry.get("homepage")]
+            urls += [address(s) for s in entry.get("parts") or [entry.get("source") or {}]]
+            for url in filter(None, urls):
+                status, why = opens(url)
+                if status != 200:
+                    errors.append(f"{name}: {url} answered {status} {why[:80]}")
+
+    for error in errors:
+        print("ERROR", error)
+    print(f"{count} entries, {len(errors)} errors")
+    if errors:
+        sys.exit(1)
+    if not args.files:
+        for kind, key in (("mods", "mods"), ("textures", "packs")):
+            (ROOT / "catalog" / f"{kind}.json").write_text(
+                json.dumps({"schema": 1, key: out[kind]}, indent=1, ensure_ascii=False) + "\n")
+
+
+main()
+
+```
