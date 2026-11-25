@@ -4608,6 +4608,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/hasherezade/mal_unpack_drv
 - https://github.com/horsicq/XVolkolak [Qt/CLI PE unpacker-emulator using XEmulUnpacker to single-step packer stubs to OEP; UPX, ASPack, MPRESS, and 18+ other packers]
 - https://github.com/anpa1200/Unpacker [Modular PE/ELF packer detection and unpacking pipeline for UPX, ASPack, Themida, and VMProtect]
+- https://github.com/orca-zhang/unpack [Rust PE packer inspector/unpacker (CLI, library, Go SDK) for 22+ packers with layered decode and static recovery without executing samples]
 - https://github.com/strazzere/android-unpacker [Android]
 - https://github.com/strazzere/secneo-gadget [Frida/TypeScript gadgets to debug, dump, and dissect SecNeo-protected Android apps]
 
