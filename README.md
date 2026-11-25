@@ -752,6 +752,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ShyVortex/dlss-unlocked [DirectX 12 DLL wrapper unlocking DLSS-G, multi-frame generation, and DLSS-NR on RTX 20xx/30xx/40xx in supported games (Windows and Proton)]
 - https://github.com/mesia-unified/mesia-unified [Rust Xbox Series DXGI/D3D12 compatibility layer for Windows (D3D12X HLE, DXIL translation, DirectStorage) enabling native Series builds on PC GPUs]
 - https://github.com/ajendras/velox [Rust native compatibility layer that loads unaltered Xbox Series PE binaries on Windows with pluggable GPU/audio/input backends, default sandboxing, and HTTP monitoring]
+- https://github.com/fxceless/victory-fork [GPL fork of Marvisak VIctory for Xbox Series titles on Windows—D3D12 backend, shader recompiler fixes, and perf tuning; BYO game files]
 - https://github.com/BUNNY-19C/DLSSG-30s-manager [WPF manager for per-game dlssg_for_sm86 deployment on RTX 30 (SM86), with backups, restore, and automatic kernel anti-cheat detection that blocks unsafe installs]
 - https://github.com/REDPOWAR/D2GI [DirectDraw7/D3D7 to D3D9 wrapper for Hard Truck 2 (King of the Road) — modern resolutions, MSAA, anisotropic filtering, graphics fixes, widescreen hooks]
 - https://github.com/aleko2144/KoTR_Modern_Patch [King of the Road / Hard Truck 2 ASI patch — collision, camera, physics, AI traffic, trailer and UI fixes; complements D2GI; ModUtils + Ultimate ASI Loader]
