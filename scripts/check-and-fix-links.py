@@ -12,6 +12,8 @@ import urllib.request
 import urllib.error
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from description_paths import NON_REPO_ROUTES
+
 README_PATH = "README.md"
 FALLBACK_USER = "gmh5225"
 GITHUB_REPO_PATTERN = re.compile(
@@ -76,6 +78,8 @@ def extract_github_urls(text: str) -> list[str]:
     seen = set()
     urls = []
     for user, repo in matches:
+        if user.casefold() in NON_REPO_ROUTES:
+            continue
         # Strip trailing punctuation from repo name
         repo = repo.rstrip(".,;:")
         url = f"https://github.com/{user}/{repo}"
@@ -138,10 +142,12 @@ def apply_replacements(text: str, replacements: dict[str, str]) -> str:
             repl_user = repl_parts[3]
             orig_repo = orig_parts[4]
             repl_repo = repl_parts[4]
-            # Replace only this specific user/repo combo
-            old_str = f"github.com/{orig_user}/{orig_repo}"
-            new_str = f"github.com/{repl_user}/{repl_repo}"
-            text = text.replace(old_str, new_str)
+            # Anchor the repo slug end so owner/foo does not rewrite owner/foobar or owner/foo.js
+            pattern = re.compile(
+                rf"github\.com/{re.escape(orig_user)}/{re.escape(orig_repo)}"
+                rf"(?![A-Za-z0-9_-]|\.[A-Za-z0-9._-])"
+            )
+            text = pattern.sub(lambda _: f"github.com/{repl_user}/{repl_repo}", text)
     return text
 
 

@@ -29,7 +29,7 @@ import argparse
 import requests
 from pathlib import Path
 
-from description_paths import normalize_repo_slug
+from description_paths import description_en_path, normalize_repo_slug
 
 # ── constants ──────────────────────────────────────────────────────────────────
 CURSOR_API_BASE   = "https://api.cursor.com/v0"
@@ -71,7 +71,9 @@ def list_archived_repos() -> list[tuple[str, str]]:
 
 
 def needs_description(owner: str, repo: str) -> bool:
-    return not (DESC_DIR / owner / repo / "description_en.txt").exists()
+    owner, repo = normalize_repo_slug(owner, repo)
+    path = description_en_path(owner, repo)
+    return not (path.is_file() and path.stat().st_size > 0)
 
 
 def build_batch_prompt(batch: list[tuple[str, str]]) -> str:
