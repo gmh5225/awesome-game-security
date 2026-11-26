@@ -34,4 +34,4 @@ Complements [[app-manager]] and [[file-explorer]] interactive backup UIs with mo
 
 ## Related
 
-[[overviews/mobile-security]] · [[magisk]] · [[kernelsu]] · [[apatch]] · [[app-manager]] · [[copyapp]]
+[[overviews/mobile-security]] · [[vd-google]] · [[magisk]] · [[kernelsu]] · [[apatch]] · [[app-manager]] · [[copyapp]]
