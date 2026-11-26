@@ -1633,6 +1633,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sshserver-magisk](entities/sshserver-magisk.md) — Magisk/KernelSU/APatch module; musl-static arm64 Dropbear SSH+SFTP from boot; Ed25519/RSA + SHA-512 passwd; sshserverctl; TCP keepalives; headless root shell/file transfer without Termux (Ayoubvvch; cheat / Magisk)
 - [Frida-RS](entities/frida-rs.md) — KernelSU module wrapping official frida-server; Rust supervisor + Material 3 WebUI; multi-ABI; loopback + token-gated TCP (MiChongs)
 - [Frida-Scripts](entities/frida-scripts.md) — Frida JS/Python scripts (editor tooling / hooking; cheat / Frida)
+- [vraj002-frida-scripts](entities/vraj002-frida-scripts.md) — Curated Frida 16–17 JS for hardened Android/iOS clients: root/emulator/Frida masking, Play Integrity hooks, Conscrypt/OkHttp/Flutter TLS bypass, iOS jailbreak/pinning helpers (vraj002; cheat / Frida; slug disambiguated from [[frida-scripts]])
 - [frida-seccomp](entities/frida-seccomp.md) — Android syscall tracing/hooking (Frida + seccomp trap; SVC capture, stack/reg args; Python orchestration + CModule; Abbbbbi)
 - [frida-smali-trace](entities/frida-smali-trace.md) — Frida ART smali instruction tracer (SeeFlowerX; JS/TS agents; interpreter-path hooks; execution logs; IDA offset prep; Android RE / runtime behavior; cheat / Smali trace)
 - [frida-stealth](entities/frida-stealth.md) — AsenOsen Frida stealth patch set; Android fingerprint reduction (ports, sockets, thread names, loop labels, frida-core/frida-gum markers; patch files + build instructions; anti-instrumentation RE)
