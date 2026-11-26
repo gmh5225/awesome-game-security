@@ -1,0 +1,4766 @@
+Project Path: arc_NotExenis_Medal-Overlay-Framework_cb71d3kz
+
+Source Tree:
+
+```txt
+arc_NotExenis_Medal-Overlay-Framework_cb71d3kz
+├── README.md
+├── bridge
+│   ├── mof-bridge.js
+│   ├── mof-helper.cs
+│   └── mof-renderer.js
+├── patcher
+│   └── patch.js
+└── sdk
+    ├── cpp
+    │   └── mof.h
+    └── python
+        └── mof.py
+
+```
+
+`README.md`:
+
+```md
+# MOF — Medal Overlay Framework
+
+A stealth overlay framework that renders through Medal.tv's whitelisted in-game overlay. Medal's overlay window is trusted by major anti-cheat systems (EAC, BattlEye, Vanguard), making it an ideal rendering surface for ESP, crosshairs, menus, and other visual overlays.
+
+MOF patches Medal's Electron app to inject a bridge that creates a named pipe server. External processes connect over the pipe and send draw commands which render on Medal's overlay canvas — appearing as Medal itself to anti-cheat.
+
+## Architecture
+
+```
+  Your Program (Python/C++)
+       │  Named Pipe (per-machine derived name)
+       ▼
+  ext-host.js            ← Injected into Medal's Electron main process
+       │  executeJavaScript()
+       ▼
+  overlay-ctrl.js        ← Runs in Medal's overlay BrowserWindow
+       │  Canvas 2D + DOM
+       ▼
+  Medal Overlay Window   ← Whitelisted by anti-cheat
+```
+
+## Features
+
+### Drawing Primitives
+- Text (aligned, outlined, bold, custom font)
+- Rectangles, filled rectangles, rounded rectangles
+- Lines, circles, corner boxes
+- Gradient rectangles (linear, radial, multi-stop)
+- Arcs and pie slices
+- Bezier curves (quadratic + cubic)
+- Polygons (arbitrary points, fill + stroke)
+- Text wrapping (word-break, max width, background)
+- Image rendering (base64 PNG cache, spritesheet crop, rotation, opacity)
+
+### Game Overlays
+- ESP boxes (box/corner style, name, health bar, distance, info text)
+- Crosshair (configurable size, gap, thickness, dot, outline)
+- Snap lines, FOV circles
+- Bone/skeleton rendering (joints + connections)
+- Watermarks, progress bars
+
+### Animation System
+- **Fade** — smoothstep alpha transition
+- **Pulse** — sine-wave alpha oscillation
+- **Slide** — smoothstep position translation
+- **Blink** — duty-cycle on/off
+- Attachable to any draw command via `anim` property
+
+### Interactive Menu System
+- Opens with INSERT key (configurable)
+- Tabs, toggles, sliders, selects, buttons, color pickers, labels, separators
+- Style customization (opacity, accent color, width, font size, border radius, compact mode)
+- Multi-client support (multiple programs can register menus simultaneously)
+- Draggable panels, ESC to close
+- Event callbacks for menu changes and actions
+
+### Draw Layers
+- All commands support a `layer` property for z-ordering
+- Commands sorted by layer before rendering (default layer = 0)
+- Higher layers draw on top
+
+### Stealth
+- Per-machine pipe name derived from hardware identity (not static/scannable)
+- Bridge files deployed with innocuous names inside the asar
+- No log files written to disk
+- Helper executable cleaned up on exit
+- Obfuscated global variables and DOM element IDs
+- Legacy patch detection and cleanup
+
+## Requirements
+
+- **Medal.tv** installed (Electron 44+)
+- **Node.js** 18+ (for the patcher)
+- **@electron/asar**: `npm install -g @electron/asar`
+- **Python 3.7+** (for Python SDK) or **C++17 + Windows SDK** (for C++ SDK)
+- **.NET Framework 4.x** (for helper compilation — present on all modern Windows)
+
+## Installation
+
+```bash
+# 1. Close Medal completely
+
+# 2. Install asar tool
+npm install -g @electron/asar
+
+# 3. Run the patcher
+cd patcher
+node patch.js
+
+# 4. Start Medal — the bridge auto-loads
+
+# 5. Run your overlay program
+cd ../examples
+python advanced_draw_test.py
+```
+
+### Patcher Commands
+
+```bash
+node patch.js              # Patch Medal (default)
+node patch.js --unpatch    # Remove the patch
+node patch.js --status     # Check patch status
+node patch.js --watch      # Patch + auto-repatch on Medal updates
+```
+
+## SDK — Python
+
+```python
+from mof import Overlay, Colors, rgba, Menu, Tab, Toggle, Slider, Select
+
+overlay = Overlay()
+overlay.connect()
+
+# Screen size is auto-detected from the overlay
+print(f"Screen: {overlay.screen_width}x{overlay.screen_height}")
+
+# Draw (using context manager for frame batching)
+with overlay.frame() as o:
+    o.draw_crosshair()
+    o.draw_esp(100, 200, 50, 100, name="Player", health=0.75)
+    o.draw_text(10, 10, "Hello", Colors.GREEN, 16)
+
+# Rounded rect with gradient
+with overlay.frame() as o:
+    o.draw_gradient_rect(50, 50, 200, 80,
+        stops=[[0, rgba(255, 0, 100)], [1, rgba(0, 100, 255)]],
+        angle=0, radius=12)
+
+# Animated text
+with overlay.frame() as o:
+    o.draw_with_anim(
+        {"type": "text", "x": 100, "y": 50, "text": "Alert!",
+         "color": Colors.RED, "size": 18, "outline": True},
+        overlay.anim_pulse(period=1000, min_alpha=0.3, max_alpha=1.0))
+
+# Bone skeleton
+joints = [[100, 50], [100, 70], [80, 65], [120, 65], ...]
+connections = [[0, 1], [1, 2], [1, 3], ...]
+with overlay.frame() as o:
+    o.draw_bones(joints, connections, color=Colors.CYAN, thickness=2)
+
+# Interactive menu
+menu = Menu("My Overlay", [
+    Tab("Settings", [
+        Toggle("esp_enabled", "ESP", True),
+        Slider("esp_distance", "Max Distance", 200, 10, 500),
+        Select("esp_style", "Box Style", "corner", ["box", "corner"]),
+    ]),
+])
+overlay.set_menu(menu)
+
+@overlay.on_menu_change
+def on_change(item_id, value):
+    print(f"{item_id} = {value}")
+```
+
+### Python Drawing Methods
+
+| Method | Description |
+|--------|-------------|
+| `draw_text(x, y, text, ...)` | Text with outline, alignment, bold |
+| `draw_rect(x, y, w, h, ...)` | Stroke rectangle |
+| `draw_filled_rect(x, y, w, h, ...)` | Filled rectangle |
+| `draw_line(x1, y1, x2, y2, ...)` | Line segment |
+| `draw_circle(x, y, r, ...)` | Circle (stroke or filled) |
+| `draw_esp(x, y, w, h, ...)` | ESP box with name, health, distance |
+| `draw_crosshair(...)` | Configurable crosshair |
+| `draw_corner_box(x, y, w, h, ...)` | Corner-style box |
+| `draw_watermark(text, ...)` | Background + text watermark |
+| `draw_bar(x, y, w, h, progress, ...)` | Progress bar |
+| `draw_rounded_rect(x, y, w, h, radius, ...)` | Rounded rectangle |
+| `draw_gradient_rect(x, y, w, h, stops, ...)` | Gradient fill (linear/radial) |
+| `draw_arc(x, y, r, start, end, ...)` | Arc or pie slice |
+| `draw_bezier(x1, y1, x2, y2, cx1, cy1, ...)` | Bezier curve |
+| `draw_polygon(points, ...)` | Arbitrary polygon |
+| `draw_text_wrapped(x, y, text, max_width, ...)` | Word-wrapping text |
+| `load_image(key, base64_data)` | Pre-cache a PNG image |
+| `draw_image(key, x, y, ...)` | Draw cached image |
+| `draw_bones(joints, connections, ...)` | Skeleton rendering |
+
+### Animation Helpers
+
+```python
+Overlay.anim_fade(duration=500, from_alpha=0, to_alpha=1)
+Overlay.anim_pulse(period=1000, min_alpha=0.3, max_alpha=1.0)
+Overlay.anim_slide(duration=300, from_x=0, from_y=-50)
+Overlay.anim_blink(period=500, duty=0.5)
+```
+
+Attach to any command with `draw_with_anim(cmd_dict, anim)`.
+
+## SDK — C++
+
+Header-only. Just `#include "mof.h"`.
+
+```cpp
+#include "mof.h"
+
+mof::Overlay overlay;
+overlay.connect();
+overlay.identify("my-overlay");
+
+// Frame guard (RAII — auto begin/end)
+{
+    auto frame = overlay.frame();
+    overlay.draw_crosshair();
+    overlay.draw_esp(100, 200, 50, 100, { .name = "Player", .health = 0.75f });
+    overlay.draw_text(10, 10, "Hello", mof::colors::green, 16);
+}
+
+// Gradient
+{
+    auto frame = overlay.frame();
+    overlay.draw_gradient_rect(50, 50, 200, 80,
+        {{0, mof::rgba(255, 0, 100)}, {1, mof::rgba(0, 100, 255)}},
+        0, "linear", 12);
+}
+
+// Menu
+auto menu = mof::Menu("My Overlay", {
+    mof::Tab("Aimbot", {
+        mof::Toggle("aim_on", "Enabled", true),
+        mof::Slider("aim_fov", "FOV", 120, 1, 360),
+    }),
+});
+overlay.set_menu(menu);
+
+overlay.on_menu_change([](const std::string& id, const mof::Value& val) {
+    printf("%s changed\n", id.c_str());
+});
+
+// Render loop
+while (true) {
+    auto frame = overlay.frame();
+    overlay.draw_crosshair();
+    std::this_thread::sleep_for(std::chrono::milliseconds(16));
+}
+```
+
+## Color Format
+
+Colors are packed as `ARGB` uint32: `(alpha << 24) | (red << 16) | (green << 8) | blue`.
+
+```python
+from mof import rgba, Colors
+
+custom = rgba(255, 128, 0)           # Orange, full alpha
+semi   = rgba(255, 0, 0, 128)       # Red, 50% alpha
+white  = Colors.WHITE                # Predefined
+```
+
+```cpp
+uint32_t custom = mof::rgba(255, 128, 0);
+uint32_t semi   = mof::rgba(255, 0, 0, 128);
+uint32_t white  = mof::colors::white;
+```
+
+### Predefined Colors
+
+`WHITE`, `BLACK`, `RED`, `GREEN`, `BLUE`, `YELLOW`, `CYAN`, `MAGENTA`, `ORANGE`, `PURPLE`, `ENEMY` (red), `TEAM` (green), `BONE` (cyan)
+
+## Pipe Protocol
+
+Communication is newline-delimited JSON over a Windows named pipe.
+
+**Client → Bridge:**
+```json
+{"type": "begin_frame"}
+{"type": "text", "x": 100, "y": 50, "text": "Hello", "color": 4294967295, "size": 14}
+{"type": "esp", "x": 100, "y": 200, "w": 50, "h": 100, "name": "Player"}
+{"type": "end_frame"}
+{"type": "set_menu", "menu": {"title": "My Menu", "tabs": [...]}}
+{"type": "identify", "name": "my-program"}
+```
+
+**Bridge → Client:**
+```json
+{"type": "welcome", "clientId": 0, "version": "4.0.0", "screen": {"width": 2560, "height": 1440}}
+{"type": "menu_toggle", "open": true}
+{"type": "menu_change", "id": "aim_fov", "value": 120}
+```
+
+## Project Structure
+
+```
+medal-overlay-framework/
+├── patcher/
+│   └── patch.js                # Medal patcher (extract/inject/repack asar)
+├── bridge/
+│   ├── mof-bridge.js           # Pipe server + overlay manager (deployed as ext-host.js)
+│   ├── mof-renderer.js         # Canvas renderer + menu UI (deployed as overlay-ctrl.js)
+│   └── mof-helper.cs           # Native Win32 helper (deployed as host-svc.cs)
+├── sdk/
+│   ├── python/
+│   │   └── mof.py              # Python SDK
+│   └── cpp/
+│       └── mof.h               # C++ SDK (header-only)
+└── examples/
+    ├── draw_test.py             # Basic drawing demo
+    ├── menu_test.py             # Interactive menu demo
+    ├── menu_demo.py             # Menu + ESP demo
+    └── advanced_draw_test.py    # Phase 3 demo (gradients, bones, animations)
+```
+
+## How It Works
+
+1. **Patcher** extracts Medal's `app.asar`, injects `require('./ext-host')` into `main.min.js`, copies bridge files with stealth names, repacks the asar.
+
+2. **Bridge** (`ext-host.js`) runs inside Medal's Electron main process. It discovers Medal's overlay BrowserWindow, force-shows it, injects the renderer code via `executeJavaScript()`, and creates a named pipe server for external connections.
+
+3. **Renderer** (`overlay-ctrl.js`) runs in the overlay's renderer process. It creates a full-screen canvas and processes draw commands pushed from the bridge. When menu mode is active, it renders interactive DOM menus and captures input events.
+
+4. **Helper** (`host-svc.cs` → `MedalOverlayHost.exe`) is a compiled C# binary that provides native Win32 functionality: mouse state polling at 120Hz and a low-level mouse hook (`WH_MOUSE_LL`) that captures clicks during menu mode so they only reach the overlay.
+
+5. **SDKs** connect to the named pipe, send draw commands as JSON, and receive events (screen size, menu changes, hotkey state). The pipe name is derived deterministically from machine identity so both sides compute it independently.
+
+## License
+
+For educational and research purposes only.
+
+```
+
+`bridge/mof-bridge.js`:
+
+```js
+/**
+ * Extension Host v4.0 - Medal overlay bridge
+ */
+(function () {
+    'use strict';
+
+    if (global.__extHostReady) return;
+    global.__extHostReady = true;
+
+    const net = require('net');
+    const fs = require('fs');
+    const path = require('path');
+    const crypto = require('crypto');
+    const { BrowserWindow, globalShortcut, app } = require('electron');
+
+    // ── Pipe Name Derivation ────────────────────────────────────
+    // Deterministic per-machine pipe name. Same algorithm in SDKs.
+
+    function derivePipeName() {
+        const seed = (process.env.COMPUTERNAME || '') + (process.env.USERNAME || '') + 'medal-ext-v2';
+        const hash = crypto.createHash('md5').update(seed).digest('hex').slice(0, 12);
+        return '\\\\.\\pipe\\MedalExtHost-' + hash;
+    }
+
+    const PIPE_NAME = derivePipeName();
+
+    // ── File References (patcher renames these on deploy) ────────
+
+    const RENDERER_FILE = 'mof-renderer.js';
+    const HELPER_SRC_FILE = 'mof-helper.cs';
+    const HELPER_EXE_NAME = 'MedalOverlayHost.exe';
+    const HELPER_EXE = path.join(require('os').tmpdir(), HELPER_EXE_NAME);
+
+    // ── Configuration ────────────────────────────────────────────
+
+    const config = {
+        menuHotkey: 'Insert',
+        version: '4.0.0',
+    };
+
+    // ── Logging (console only, no file artifacts) ────────────────
+
+    function log(msg) {
+        const ts = new Date().toISOString().slice(11, 23);
+        console.log(`[${ts}] ${msg}`);
+    }
+
+    function logError(msg) {
+        console.error(`ERR: ${msg}`);
+    }
+
+    // ── Native Helper Compilation ─────────────────────────────────
+
+    let helperExists = false;
+
+    (function compileHelper() {
+        try {
+            const srcInAsar = path.join(__dirname, HELPER_SRC_FILE);
+            const tmpSrc = path.join(require('os').tmpdir(), HELPER_SRC_FILE);
+
+            let srcContent;
+            try { srcContent = fs.readFileSync(srcInAsar, 'utf-8'); } catch(e) {
+                logError('Helper source not found');
+                return;
+            }
+
+            // Skip compile if exe exists and source hash matches
+            if (fs.existsSync(HELPER_EXE) && fs.existsSync(tmpSrc)) {
+                const existing = fs.readFileSync(tmpSrc, 'utf-8');
+                if (existing === srcContent) { helperExists = true; return; }
+            }
+
+            fs.writeFileSync(tmpSrc, srcContent, 'utf-8');
+
+            const csc = 'C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe';
+            if (!fs.existsSync(csc)) {
+                logError('csc.exe not found');
+                return;
+            }
+            const { execFileSync } = require('child_process');
+            execFileSync(csc, [
+                '/nologo', '/optimize', '/target:exe',
+                '/out:' + HELPER_EXE, tmpSrc
+            ], { timeout: 10000, stdio: 'pipe', windowsHide: true });
+            helperExists = true;
+            log('Helper compiled');
+        } catch(e) {
+            logError('Helper compilation failed: ' + e.message);
+            try { helperExists = fs.existsSync(HELPER_EXE); } catch(e2) {}
+        }
+    })();
+
+    // ── Renderer Code Loading ────────────────────────────────────
+
+    let rendererCode = null;
+    try {
+        const rendererPath = path.join(__dirname, RENDERER_FILE);
+        rendererCode = fs.readFileSync(rendererPath, 'utf-8');
+        log(`Renderer loaded (${rendererCode.length}b)`);
+    } catch (e) {
+        logError(`Renderer not found: ${e.message}`);
+        rendererCode = `console.error('Renderer file not found');`;
+    }
+
+    // ── Overlay State ────────────────────────────────────────────
+
+    let overlayWindows = [];
+    let discoveryInterval = null;
+    let overlaySize = { width: 0, height: 0 };
+
+    // ── Menu State ───────────────────────────────────────────────
+
+    let menuOpen = false;
+    let clientMenus = {};
+
+    // ── Overlay Window Discovery ─────────────────────────────────
+
+    function findOverlayWindows() {
+        const allWindows = BrowserWindow.getAllWindows();
+        const found = [];
+
+        for (const win of allWindows) {
+            if (win.isDestroyed()) continue;
+            let title, url;
+            try {
+                title = win.getTitle();
+                url = win.webContents.getURL();
+            } catch(e) { continue; }
+
+            if (title === 'Medal Overlay' || (url && url.includes('overlay.min.html'))) {
+                found.push({
+                    window: win,
+                    id: win.id,
+                    rendererReady: false,
+                });
+            }
+        }
+        return found;
+    }
+
+    function injectRenderer(entry) {
+        const win = entry.window;
+        if (win.isDestroyed()) return;
+
+        log(`Overlay found id=${win.id}`);
+
+        if (!win.isVisible()) {
+            try {
+                win.setIgnoreMouseEvents(true, { forward: true });
+                win.setSkipTaskbar(true);
+                win.setAlwaysOnTop(true, 'screen-saver');
+                win.showInactive();
+            } catch(e) {
+                logError(`Show overlay failed: ${e.message}`);
+            }
+        }
+
+        try {
+            const { screen } = require('electron');
+            const display = screen.getPrimaryDisplay();
+            const { x, y, width, height } = display.bounds;
+            const currentBounds = win.getBounds();
+            if (currentBounds.width !== width || currentBounds.height !== height ||
+                currentBounds.x !== x || currentBounds.y !== y) {
+                win.setBounds({ x, y, width, height });
+                log(`Overlay resized: ${width}x${height}`);
+            }
+        } catch(e) {
+            logError(`Resize failed: ${e.message}`);
+        }
+
+        try {
+            const bounds = win.getBounds();
+            overlaySize = { width: bounds.width, height: bounds.height };
+        } catch(e) {}
+
+        win.webContents.executeJavaScript(rendererCode).then(() => {
+            log(`Renderer injected win=${win.id}`);
+            setTimeout(() => {
+                entry.rendererReady = true;
+                if (!entry._inputForwarding) {
+                    entry._inputForwarding = true;
+                    setupInputForwarding(entry);
+                }
+                broadcastEvent({ type: 'overlay_ready', ...overlaySize });
+            }, 1500);
+        }).catch((err) => {
+            logError(`Renderer inject failed: ${err.message}`);
+            entry.rendererReady = true;
+        });
+
+        win.webContents.on('did-finish-load', () => {
+            log(`Overlay reloaded, re-injecting`);
+            entry.rendererReady = false;
+            menuOpen = false;
+            if (!win.isVisible()) {
+                try { win.setIgnoreMouseEvents(true, { forward: true }); win.showInactive(); } catch(e) {}
+            }
+            win.webContents.executeJavaScript(rendererCode).then(() => {
+                setTimeout(() => {
+                    entry.rendererReady = true;
+                    if (!entry._inputForwarding) {
+                        entry._inputForwarding = true;
+                        setupInputForwarding(entry);
+                    }
+                    pushMenusToRenderer();
+                }, 1500);
+            }).catch(() => { entry.rendererReady = true; });
+        });
+
+        const visCheck = setInterval(() => {
+            if (win.isDestroyed()) { clearInterval(visCheck); return; }
+            if (!win.isVisible() && entry.rendererReady) {
+                try {
+                    if (menuOpen) {
+                        win.setIgnoreMouseEvents(false);
+                    } else {
+                        win.setIgnoreMouseEvents(true, { forward: true });
+                    }
+                    win.showInactive();
+                } catch(e) {}
+            }
+            try {
+                const b = win.getBounds();
+                if (b.width !== overlaySize.width || b.height !== overlaySize.height) {
+                    overlaySize = { width: b.width, height: b.height };
+                    broadcastEvent({ type: 'resize', ...overlaySize });
+                }
+            } catch(e) {}
+        }, 1000);
+
+        win.on('closed', () => {
+            log(`Overlay closed id=${win.id}`);
+            clearInterval(visCheck);
+            overlayWindows = overlayWindows.filter(e => e.id !== entry.id);
+            menuOpen = false;
+            broadcastEvent({ type: 'overlay_closed' });
+        });
+    }
+
+    function discoverOverlays() {
+        const found = findOverlayWindows();
+        for (const entry of found) {
+            if (!overlayWindows.find(e => e.id === entry.id)) {
+                overlayWindows.push(entry);
+                injectRenderer(entry);
+            }
+        }
+    }
+
+    discoveryInterval = setInterval(discoverOverlays, 2000);
+    setTimeout(discoverOverlays, 500);
+
+    // ── Mouse Input Forwarding ──────────────────────────────────
+
+    let mouseForwardInterval = null;
+
+    function startMouseForwarding() {
+        if (mouseForwardInterval) return;
+        if (!helperExists) {
+            try { helperExists = fs.existsSync(HELPER_EXE); } catch(e) {}
+        }
+        if (!helperExists) {
+            logError('Mouse forwarding: helper not found');
+            return;
+        }
+
+        const mouseProc = require('child_process').spawn(HELPER_EXE, ['mousemon'], {
+            stdio: ['pipe', 'pipe', 'ignore'],
+            windowsHide: true,
+        });
+
+        let lWasDown = false, rWasDown = false;
+
+        mouseProc.stdout.on('data', (data) => {
+            if (!menuOpen) return;
+            const lines = data.toString().trim().split('\n');
+            const last = lines[lines.length - 1].trim().split(',');
+            if (last.length < 4) return;
+            const x = parseInt(last[0], 10);
+            const y = parseInt(last[1], 10);
+            const lDown = last[2] === '1';
+            const rDown = last[3] === '1';
+
+            for (const entry of overlayWindows) {
+                if (entry.window.isDestroyed() || !entry.rendererReady) continue;
+                const wc = entry.window.webContents;
+
+                try { wc.sendInputEvent({ type: 'mouseMove', x, y }); } catch(e) {}
+
+                if (lDown && !lWasDown) {
+                    try { wc.sendInputEvent({ type: 'mouseDown', x, y, button: 'left', clickCount: 1 }); } catch(e) {}
+                } else if (!lDown && lWasDown) {
+                    try { wc.sendInputEvent({ type: 'mouseUp', x, y, button: 'left' }); } catch(e) {}
+                }
+
+                if (rDown && !rWasDown) {
+                    try { wc.sendInputEvent({ type: 'mouseDown', x, y, button: 'right', clickCount: 1 }); } catch(e) {}
+                } else if (!rDown && rWasDown) {
+                    try { wc.sendInputEvent({ type: 'mouseUp', x, y, button: 'right' }); } catch(e) {}
+                }
+            }
+
+            lWasDown = lDown;
+            rWasDown = rDown;
+        });
+
+        mouseProc.on('exit', () => { mouseForwardInterval = null; });
+        mouseForwardInterval = mouseProc;
+    }
+
+    function stopMouseForwarding() {
+        if (mouseForwardInterval && mouseForwardInterval.kill) {
+            mouseForwardInterval.kill();
+        }
+        mouseForwardInterval = null;
+    }
+
+    function mouseCommand(cmd) {
+        if (mouseForwardInterval && mouseForwardInterval.stdin) {
+            try { mouseForwardInterval.stdin.write(cmd + '\n'); } catch(e) {}
+        }
+    }
+
+    function setMenuMode(open) {
+        if (menuOpen === open) return;
+        menuOpen = open;
+
+        for (const entry of overlayWindows) {
+            if (entry.window.isDestroyed()) continue;
+            try {
+                entry.window.setIgnoreMouseEvents(true, { forward: true });
+            } catch(e) {}
+        }
+
+        if (open) {
+            startMouseForwarding();
+        }
+
+        mouseCommand(open ? 'grab' : 'release');
+
+        if (open) {
+            pushMenusToRenderer();
+        }
+
+        execOnOverlays(`window.__extMenuMode && window.__extMenuMode(${open})`);
+
+        broadcastEvent({ type: 'menu_toggle', open });
+        log(`Menu: ${open ? 'OPEN' : 'CLOSED'}`);
+    }
+
+    function toggleMenu() {
+        setMenuMode(!menuOpen);
+    }
+
+    function pushMenusToRenderer() {
+        const menus = Object.entries(clientMenus).map(([cid, def]) => ({
+            clientId: parseInt(cid),
+            ...def,
+        }));
+        execOnOverlays(`window.__extSetMenus && window.__extSetMenus(${JSON.stringify(menus)})`);
+    }
+
+    // ── Hotkey Registration ──────────────────────────────────────
+
+    let hotkeyRegistered = false;
+
+    function registerHotkey() {
+        if (hotkeyRegistered) return;
+        try {
+            const ok = globalShortcut.register(config.menuHotkey, toggleMenu);
+            if (ok) {
+                hotkeyRegistered = true;
+                log(`Hotkey: ${config.menuHotkey}`);
+            }
+        } catch(e) {}
+    }
+
+    function unregisterHotkey() {
+        if (!hotkeyRegistered) return;
+        try {
+            globalShortcut.unregister(config.menuHotkey);
+            hotkeyRegistered = false;
+        } catch(e) {}
+    }
+
+    if (app.isReady()) {
+        registerHotkey();
+    } else {
+        app.whenReady().then(registerHotkey);
+    }
+
+    // ── Client Management ────────────────────────────────────────
+
+    const clients = new Map();
+    let clientIdCounter = 0;
+
+    class ClientState {
+        constructor(id, socket) {
+            this.id = id;
+            this.socket = socket;
+            this.buffer = Buffer.alloc(0);
+            this.buildingFrame = [];
+            this.currentFrame = [];
+            this.inFrame = false;
+            this.name = `client-${id}`;
+        }
+    }
+
+    function sendToClient(client, data) {
+        try {
+            client.socket.write(JSON.stringify(data) + '\n');
+        } catch(e) {}
+    }
+
+    function broadcastEvent(event) {
+        for (const [id, client] of clients) {
+            sendToClient(client, event);
+        }
+    }
+
+    // ── Overlay Execution Helpers ────────────────────────────────
+
+    function execOnOverlays(code) {
+        for (const entry of overlayWindows) {
+            if (entry.rendererReady && !entry.window.isDestroyed()) {
+                try {
+                    entry.window.webContents.executeJavaScript(code, true).catch(() => {});
+                } catch(e) {}
+            }
+        }
+    }
+
+    function broadcastToOverlays(data) {
+        execOnOverlays(`window.__extPush && window.__extPush(${JSON.stringify(data)})`);
+    }
+
+    // ── Command Processing ───────────────────────────────────────
+
+    function processClientMessage(client, msg) {
+        switch (msg.type) {
+            case 'begin_frame':
+                client.inFrame = true;
+                client.buildingFrame = [];
+                break;
+
+            case 'end_frame':
+                client.inFrame = false;
+                client.currentFrame = client.buildingFrame;
+                client.buildingFrame = [];
+                broadcastToOverlays({
+                    clientId: client.id,
+                    type: 'frame',
+                    commands: client.currentFrame,
+                });
+                break;
+
+            case 'identify':
+                client.name = msg.name || client.name;
+                log(`Client ${client.id}: ${client.name}`);
+                break;
+
+            case 'get_screen':
+                sendToClient(client, { type: 'screen_size', ...overlaySize });
+                break;
+
+            case 'menu_open':
+                setMenuMode(true);
+                break;
+
+            case 'menu_close':
+                setMenuMode(false);
+                break;
+
+            case 'menu_toggle':
+                toggleMenu();
+                break;
+
+            case 'set_menu': {
+                clientMenus[client.id] = msg.menu;
+                pushMenusToRenderer();
+                break;
+            }
+
+            case 'clear_menu': {
+                delete clientMenus[client.id];
+                pushMenusToRenderer();
+                break;
+            }
+
+            case 'set_menu_style': {
+                execOnOverlays(`window.__extMenuStyle && window.__extMenuStyle(${JSON.stringify(msg.style || {})})`);
+                break;
+            }
+
+            case 'set_hotkey': {
+                if (msg.key) {
+                    unregisterHotkey();
+                    config.menuHotkey = msg.key;
+                    registerHotkey();
+                    broadcastEvent({ type: 'hotkey_changed', key: config.menuHotkey });
+                }
+                break;
+            }
+
+            case 'config':
+                broadcastToOverlays({
+                    clientId: client.id,
+                    type: 'config',
+                    config: msg,
+                });
+                break;
+
+            default:
+                if (client.inFrame) {
+                    client.buildingFrame.push(msg);
+                } else {
+                    client.currentFrame = [msg];
+                    broadcastToOverlays({
+                        clientId: client.id,
+                        type: 'frame',
+                        commands: client.currentFrame,
+                    });
+                }
+                break;
+        }
+    }
+
+    // ── Input Event Forwarding ──────────────────────────────────
+
+    function setupInputForwarding(entry) {
+        if (entry.window.isDestroyed()) return;
+
+        let pollHandle = null;
+        let lastPollRate = 0;
+
+        function doPoll() {
+            if (entry.window.isDestroyed()) { if (pollHandle) clearInterval(pollHandle); return; }
+
+            const targetRate = menuOpen ? 16 : 500;
+            if (targetRate !== lastPollRate) {
+                lastPollRate = targetRate;
+                if (pollHandle) clearInterval(pollHandle);
+                pollHandle = setInterval(doPoll, targetRate);
+            }
+
+            entry.window.webContents.executeJavaScript(
+                `(function() {
+                    const q = window.__extInputQ || [];
+                    window.__extInputQ = [];
+                    return q;
+                })()`
+            ).then((events) => {
+                if (!events || !events.length) return;
+                for (const evt of events) {
+                    if (evt.type === 'menu_close_request') {
+                        setMenuMode(false);
+                    }
+                    broadcastEvent(evt);
+                }
+            }).catch(() => {});
+        }
+
+        pollHandle = setInterval(doPoll, 16);
+        lastPollRate = 16;
+
+        entry.window.on('closed', () => { if (pollHandle) clearInterval(pollHandle); });
+    }
+
+    // ── Named Pipe Server ────────────────────────────────────────
+
+    const server = net.createServer((socket) => {
+        const clientId = clientIdCounter++;
+        const client = new ClientState(clientId, socket);
+        clients.set(clientId, client);
+
+        log(`Client ${clientId} connected`);
+
+        const welcome = {
+            type: 'welcome',
+            clientId,
+            version: config.version,
+            overlayReady: overlayWindows.some(e => e.rendererReady),
+            menuOpen,
+            menuHotkey: config.menuHotkey,
+            screen: overlaySize,
+        };
+        sendToClient(client, welcome);
+
+        socket.on('data', (data) => {
+            client.buffer = Buffer.concat([client.buffer, data]);
+
+            let idx;
+            while ((idx = client.buffer.indexOf(0x0A)) !== -1) {
+                const line = client.buffer.slice(0, idx).toString('utf-8').trim();
+                client.buffer = client.buffer.slice(idx + 1);
+                if (!line.length) continue;
+                try {
+                    processClientMessage(client, JSON.parse(line));
+                } catch (e) {}
+            }
+
+            if (client.buffer.length > 1024 * 1024) {
+                logError(`Client ${clientId} buffer overflow`);
+                client.buffer = Buffer.alloc(0);
+            }
+        });
+
+        socket.on('close', () => {
+            log(`Client ${clientId} disconnected`);
+            clients.delete(clientId);
+            if (clientMenus[clientId]) {
+                delete clientMenus[clientId];
+                pushMenusToRenderer();
+            }
+            broadcastToOverlays({ clientId, type: 'client_disconnect' });
+        });
+
+        socket.on('error', (err) => {
+            if (err.code !== 'ECONNRESET' && err.code !== 'EPIPE') {
+                logError(`Client ${clientId}: ${err.message}`);
+            }
+        });
+    });
+
+    server.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            logError('Pipe in use, retrying...');
+            setTimeout(() => {
+                const probe = net.connect(PIPE_NAME, () => { probe.end(); });
+                probe.on('error', () => {
+                    server.listen(PIPE_NAME);
+                });
+            }, 1000);
+        } else {
+            logError(`Server: ${err.message}`);
+        }
+    });
+
+    server.listen(PIPE_NAME, () => {
+        log(`Pipe: ${PIPE_NAME}`);
+    });
+
+    // ── Late Input Setup ────────────────────────────────────────
+
+    setTimeout(() => {
+        for (const entry of overlayWindows) {
+            if (!entry._inputForwarding) {
+                entry._inputForwarding = true;
+                setupInputForwarding(entry);
+            }
+        }
+    }, 3000);
+
+    const discoveryWithInput = setInterval(() => {
+        const found = findOverlayWindows();
+        for (const entry of found) {
+            const existing = overlayWindows.find(e => e.id === entry.id);
+            if (existing && existing.rendererReady && !existing._inputForwarding) {
+                existing._inputForwarding = true;
+                setupInputForwarding(existing);
+            }
+        }
+    }, 5000);
+
+    // ── Cleanup ──────────────────────────────────────────────────
+
+    function cleanup() {
+        mouseCommand('release');
+        stopMouseForwarding();
+        clearInterval(discoveryInterval);
+        clearInterval(discoveryWithInput);
+        unregisterHotkey();
+        for (const [id, client] of clients) {
+            try { client.socket.end(); } catch(e) {}
+        }
+        try { server.close(); } catch(e) {}
+
+        // Clean temp artifacts
+        try { fs.unlinkSync(HELPER_EXE); } catch(e) {}
+        try { fs.unlinkSync(path.join(require('os').tmpdir(), HELPER_SRC_FILE)); } catch(e) {}
+    }
+
+    process.on('exit', cleanup);
+    try { app.on('before-quit', cleanup); } catch(e) {}
+
+    log('Bridge ready');
+})();
+
+```
+
+`bridge/mof-helper.cs`:
+
+```cs
+// Overlay Host Service — compiled at startup, runs windowless.
+// Modes:
+//   mousemon  — polls mouse state, writes "x,y,L,R\n" to stdout at ~120Hz.
+//               Reads stdin for commands:
+//                 grab    — install low-level mouse hook that eats click messages
+//                 release — remove the hook, let clicks through normally
+//   passthrough on|off — one-shot: toggle WS_EX_TRANSPARENT on "Medal Overlay"
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+
+class OverlayHost {
+    // ── Win32 Imports ──────────────────────────────────────────
+    [DllImport("user32.dll")] static extern short GetAsyncKeyState(int vKey);
+    [DllImport("user32.dll")] static extern bool GetCursorPos(out POINT p);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    static extern IntPtr FindWindowW(string cls, string title);
+    [DllImport("user32.dll")] static extern int GetWindowLong(IntPtr h, int i);
+    [DllImport("user32.dll")] static extern int SetWindowLong(IntPtr h, int i, int v);
+
+    delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam);
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern IntPtr SetWindowsHookEx(int idHook, LowLevelMouseProc lpfn, IntPtr hMod, uint dwThreadId);
+    [DllImport("user32.dll")] static extern bool UnhookWindowsHookEx(IntPtr hhk);
+    [DllImport("user32.dll")] static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+    static extern IntPtr GetModuleHandle(string lpModuleName);
+
+    [DllImport("user32.dll")]
+    static extern bool PeekMessage(out MSG msg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax, uint wRemoveMsg);
+    [DllImport("user32.dll")] static extern bool TranslateMessage(ref MSG msg);
+    [DllImport("user32.dll")] static extern IntPtr DispatchMessage(ref MSG msg);
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct POINT { public int X, Y; }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct MSG {
+        public IntPtr hwnd;
+        public uint message;
+        public IntPtr wParam;
+        public IntPtr lParam;
+        public uint time;
+        public POINT pt;
+    }
+
+    const int WS_EX_TRANSPARENT = 0x20;
+    const int GWL_EXSTYLE = -20;
+    const int WH_MOUSE_LL = 14;
+
+    const int WM_LBUTTONDOWN = 0x201;
+    const int WM_LBUTTONUP   = 0x202;
+    const int WM_RBUTTONDOWN = 0x204;
+    const int WM_RBUTTONUP   = 0x205;
+    const int WM_MBUTTONDOWN = 0x207;
+    const int WM_MBUTTONUP   = 0x208;
+    const int WM_XBUTTONDOWN = 0x20B;
+    const int WM_XBUTTONUP   = 0x20C;
+    const int WM_MOUSEWHEEL  = 0x20A;
+
+    static volatile bool grabbing = false;
+    static IntPtr hookId = IntPtr.Zero;
+    static LowLevelMouseProc hookDelegate = HookCallback;
+
+    static void Main(string[] args) {
+        if (args.Length < 1) return;
+
+        switch (args[0]) {
+            case "mousemon":
+                RunMouseMonitor();
+                break;
+            case "passthrough":
+                if (args.Length > 1)
+                    SetPassthrough(args[1] == "on");
+                break;
+        }
+    }
+
+    static void RunMouseMonitor() {
+        var stdinThread = new Thread(() => {
+            try {
+                string line;
+                while ((line = Console.ReadLine()) != null) {
+                    line = line.Trim();
+                    if (line == "grab") grabbing = true;
+                    else if (line == "release") grabbing = false;
+                }
+            } catch {}
+        });
+        stdinThread.IsBackground = true;
+        stdinThread.Start();
+
+        hookId = SetWindowsHookEx(WH_MOUSE_LL, hookDelegate,
+            GetModuleHandle(null), 0);
+
+        var stdout = Console.OpenStandardOutput();
+        var buf = new byte[64];
+
+        while (true) {
+            MSG msg;
+            while (PeekMessage(out msg, IntPtr.Zero, 0, 0, 1)) {
+                TranslateMessage(ref msg);
+                DispatchMessage(ref msg);
+            }
+
+            POINT p;
+            GetCursorPos(out p);
+            int l = (GetAsyncKeyState(1) & 0x8000) != 0 ? 1 : 0;
+            int r = (GetAsyncKeyState(2) & 0x8000) != 0 ? 1 : 0;
+            string line = p.X + "," + p.Y + "," + l + "," + r + "\n";
+            int len = Encoding.ASCII.GetBytes(line, 0, line.Length, buf, 0);
+            stdout.Write(buf, 0, len);
+            stdout.Flush();
+
+            Thread.Sleep(8);
+        }
+    }
+
+    static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam) {
+        if (nCode >= 0 && grabbing) {
+            int msg = wParam.ToInt32();
+            if (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP ||
+                msg == WM_RBUTTONDOWN || msg == WM_RBUTTONUP ||
+                msg == WM_MBUTTONDOWN || msg == WM_MBUTTONUP ||
+                msg == WM_XBUTTONDOWN || msg == WM_XBUTTONUP ||
+                msg == WM_MOUSEWHEEL) {
+                return (IntPtr)1;
+            }
+        }
+        return CallNextHookEx(hookId, nCode, wParam, lParam);
+    }
+
+    static void SetPassthrough(bool enable) {
+        IntPtr h = FindWindowW(null, "Medal Overlay");
+        if (h == IntPtr.Zero) return;
+        int ex = GetWindowLong(h, GWL_EXSTYLE);
+        if (enable)
+            SetWindowLong(h, GWL_EXSTYLE, ex | WS_EX_TRANSPARENT);
+        else
+            SetWindowLong(h, GWL_EXSTYLE, ex & ~WS_EX_TRANSPARENT);
+    }
+}
+
+```
+
+`bridge/mof-renderer.js`:
+
+```js
+/**
+ * Overlay Renderer v4.0 - Injected into Medal's overlay BrowserWindow
+ *
+ * Two layers:
+ *   1. Canvas (z-index max)   — ESP, crosshair, drawing primitives (pointer-events: none)
+ *   2. Menu DOM (z-index max-1) — interactive HTML menus when menu mode is active
+ */
+(function () {
+    'use strict';
+
+    if (window.__extRendererReady) return;
+    window.__extRendererReady = true;
+
+    // ── Canvas Setup ──────────────────────────────────────────────
+
+    const canvas = document.createElement('canvas');
+    canvas.id = 'medal-ext-canvas';
+    canvas.style.cssText = [
+        'position: fixed',
+        'top: 0',
+        'left: 0',
+        'width: 100vw',
+        'height: 100vh',
+        'pointer-events: none',
+        'z-index: 2147483647',
+        'image-rendering: pixelated',
+    ].join(';');
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d', { alpha: true });
+
+    function resize() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(window.innerWidth * dpr);
+        canvas.height = Math.floor(window.innerHeight * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const W = () => window.innerWidth;
+    const H = () => window.innerHeight;
+
+    // ── Menu DOM Container ────────────────────────────────────────
+
+    const menuContainer = document.createElement('div');
+    menuContainer.id = 'medal-ext-menu';
+    menuContainer.style.cssText = [
+        'position: fixed',
+        'top: 0',
+        'left: 0',
+        'width: 100vw',
+        'height: 100vh',
+        'z-index: 2147483646',
+        'pointer-events: none',
+        'display: none',
+        'font-family: Inter, Segoe UI, sans-serif',
+    ].join(';');
+    document.body.appendChild(menuContainer);
+
+    // ── Custom Cursor (visible during menu mode) ──────────────────
+
+    const cursorEl = document.createElement('div');
+    cursorEl.id = 'medal-ext-cursor';
+    cursorEl.style.cssText = [
+        'position: fixed',
+        'top: 0', 'left: 0',
+        'width: 20px', 'height: 20px',
+        'z-index: 2147483647',
+        'pointer-events: none',
+        'display: none',
+    ].join(';');
+    cursorEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 2L3 17L7.5 12.5L11.5 19L14 18L10 11L16 11L3 2Z" fill="white" stroke="black" stroke-width="1"/>
+    </svg>`;
+    document.body.appendChild(cursorEl);
+
+    document.addEventListener('mousemove', (e) => {
+        if (!menuMode) return;
+        cursorEl.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+    }, true);
+
+    // ── Menu State ────────────────────────────────────────────────
+
+    let menuMode = false;
+    let menuDefinitions = [];
+    let activeTab = 0;
+    let activeClientIdx = 0;
+
+    const menuStyle = {
+        opacity: 0.95,
+        accentColor: '#4466ff',
+        width: 420,
+        fontSize: 12,
+        borderRadius: 8,
+        compact: false,
+    };
+
+    window.__extMenuStyle = function(style) {
+        if (!style) return;
+        if (typeof style.opacity === 'number') menuStyle.opacity = Math.max(0.1, Math.min(1, style.opacity));
+        if (typeof style.accentColor === 'string') menuStyle.accentColor = style.accentColor;
+        if (typeof style.width === 'number') menuStyle.width = Math.max(240, Math.min(800, style.width));
+        if (typeof style.fontSize === 'number') menuStyle.fontSize = Math.max(8, Math.min(24, style.fontSize));
+        if (typeof style.borderRadius === 'number') menuStyle.borderRadius = Math.max(0, Math.min(24, style.borderRadius));
+        if (typeof style.compact === 'boolean') menuStyle.compact = style.compact;
+        if (menuMode) renderMenu();
+    };
+
+    window.__extInputQ = [];
+
+    function queueInput(evt) {
+        window.__extInputQ.push(evt);
+    }
+
+    // ── Menu Mode Toggle ──────────────────────────────────────────
+
+    window.__extMenuMode = function(open) {
+        try {
+            menuMode = open;
+            menuContainer.style.display = open ? 'block' : 'none';
+            menuContainer.style.pointerEvents = open ? 'auto' : 'none';
+
+            const medalRoot = document.getElementById('root');
+            if (medalRoot) {
+                medalRoot.style.pointerEvents = open ? 'none' : '';
+            }
+
+            cursorEl.style.display = open ? 'block' : 'none';
+
+            if (open) {
+                renderMenu();
+                queueInput({ type: 'menu_opened' });
+            } else {
+                queueInput({ type: 'menu_closed' });
+            }
+        } catch(e) {
+            window.__extErr = 'menuMode: ' + e.message + ' | ' + e.stack;
+        }
+    };
+
+    // ── Menu Definition ─────────────────────────────────────────
+
+    window.__extSetMenus = function(menus) {
+        try {
+            menuDefinitions = menus || [];
+            window.__extMenuCount = menuDefinitions.length;
+            if (menuMode) renderMenu();
+        } catch(e) {
+            window.__extErr = 'setMenus: ' + e.message;
+        }
+    };
+
+    // ── Menu Rendering ────────────────────────────────────────────
+
+    function renderMenu() {
+        menuContainer.innerHTML = '';
+
+        if (menuDefinitions.length === 0) {
+            renderEmptyMenu();
+            return;
+        }
+
+        const def = menuDefinitions[activeClientIdx] || menuDefinitions[0];
+        if (!def) return;
+
+        const ac = menuStyle.accentColor;
+        const acRgb = hexToRgb(ac);
+        const bgAlpha = menuStyle.opacity;
+
+        const panel = el('div', {
+            style: `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: ${menuStyle.width}px;
+                max-height: 70vh;
+                background: rgba(15, 15, 20, ${bgAlpha});
+                border: 1px solid rgba(${acRgb}, 0.3);
+                border-radius: ${menuStyle.borderRadius}px;
+                color: #fff;
+                overflow: hidden;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+                user-select: none;
+            `
+        });
+
+        const pad = menuStyle.compact ? '7px 12px' : '10px 16px';
+        const titleBar = el('div', {
+            style: `
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: ${pad};
+                background: rgba(40, 40, 60, 0.9);
+                border-bottom: 1px solid rgba(${acRgb}, 0.2);
+            `
+        });
+        titleBar.appendChild(el('span', {
+            textContent: def.title || 'Menu',
+            style: `font-size: ${menuStyle.fontSize + 2}px; font-weight: 600; color: ${ac};`
+        }));
+        titleBar.appendChild(el('span', {
+            textContent: '[INSERT] to close',
+            style: 'font-size: 10px; color: #666;'
+        }));
+        panel.appendChild(titleBar);
+
+        if (menuDefinitions.length > 1) {
+            const clientBar = el('div', {
+                style: 'display:flex; gap:4px; padding:6px 12px; background:rgba(30,30,45,0.8); border-bottom:1px solid rgba(80,80,120,0.2);'
+            });
+            menuDefinitions.forEach((d, i) => {
+                const btn = el('div', {
+                    textContent: d.title || `Client ${d.clientId}`,
+                    style: `
+                        padding: 4px 10px; border-radius: 4px; font-size: ${menuStyle.fontSize - 1}px; cursor: pointer;
+                        background: ${i === activeClientIdx ? `rgba(${acRgb},0.3)` : 'rgba(40,40,60,0.5)'};
+                        color: ${i === activeClientIdx ? ac : '#888'};
+                    `
+                });
+                btn.addEventListener('click', () => {
+                    activeClientIdx = i;
+                    activeTab = 0;
+                    renderMenu();
+                });
+                clientBar.appendChild(btn);
+            });
+            panel.appendChild(clientBar);
+        }
+
+        const tabs = def.tabs || [{ name: 'Settings', items: def.items || [] }];
+        if (tabs.length > 1) {
+            const tabBar = el('div', {
+                style: 'display:flex; gap:2px; padding:8px 12px 0; background:rgba(20,20,30,0.5);'
+            });
+            tabs.forEach((tab, i) => {
+                const tabEl = el('div', {
+                    textContent: tab.name,
+                    style: `
+                        padding: 6px 14px; border-radius: 4px 4px 0 0; font-size: ${menuStyle.fontSize}px; cursor: pointer;
+                        background: ${i === activeTab ? 'rgba(50,50,80,0.8)' : 'transparent'};
+                        color: ${i === activeTab ? '#fff' : '#888'};
+                        border-bottom: ${i === activeTab ? `2px solid ${ac}` : '2px solid transparent'};
+                    `
+                });
+                tabEl.addEventListener('click', () => {
+                    activeTab = i;
+                    renderMenu();
+                });
+                tabBar.appendChild(tabEl);
+            });
+            panel.appendChild(tabBar);
+        }
+
+        const currentTab = tabs[activeTab] || tabs[0];
+        const itemsContainer = el('div', {
+            style: 'padding: 8px 12px; max-height: 50vh; overflow-y: auto;'
+        });
+
+        const items = currentTab.items || [];
+        for (const item of items) {
+            itemsContainer.appendChild(renderMenuItem(def.clientId, item));
+        }
+
+        panel.appendChild(itemsContainer);
+        menuContainer.appendChild(panel);
+
+        makeDraggable(panel, titleBar);
+    }
+
+    function renderEmptyMenu() {
+        const acRgb = hexToRgb(menuStyle.accentColor);
+        const panel = el('div', {
+            style: `
+                position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                padding: 24px 32px; background: rgba(15,15,20,${menuStyle.opacity}); border: 1px solid rgba(${acRgb},0.3);
+                border-radius: ${menuStyle.borderRadius}px; color: #888; text-align: center; font-size: 13px;
+            `
+        });
+        panel.appendChild(el('div', { textContent: 'Menu', style: `font-size:16px; color:${menuStyle.accentColor}; margin-bottom:8px; font-weight:600;` }));
+        panel.appendChild(el('div', { textContent: 'No menus registered.' }));
+        panel.appendChild(el('div', { textContent: 'Use overlay.set_menu() from your client.', style: 'color:#666; font-size:11px; margin-top:4px;' }));
+        panel.appendChild(el('div', { textContent: 'Press INSERT to close', style: 'color:#555; font-size:10px; margin-top:12px;' }));
+        menuContainer.appendChild(panel);
+    }
+
+    function renderMenuItem(clientId, item) {
+        const itemPad = menuStyle.compact ? '5px 6px' : '7px 8px';
+        const row = el('div', {
+            style: `
+                display: flex; align-items: center; justify-content: space-between;
+                padding: ${itemPad}; margin: 2px 0; border-radius: 4px;
+                background: rgba(30, 30, 45, 0.5);
+            `
+        });
+        const label = el('span', {
+            textContent: item.label || item.id,
+            style: `font-size: ${menuStyle.fontSize}px; color: #ccc;`
+        });
+        row.appendChild(label);
+
+        switch (item.type) {
+            case 'toggle': {
+                const toggle = el('div', {
+                    style: `
+                        width: 36px; height: 18px; border-radius: 9px; cursor: pointer; position: relative;
+                        background: ${item.value ? menuStyle.accentColor : '#333'};
+                        transition: background 0.15s;
+                    `
+                });
+                const knob = el('div', {
+                    style: `
+                        width: 14px; height: 14px; border-radius: 7px; background: #fff;
+                        position: absolute; top: 2px;
+                        left: ${item.value ? '20px' : '2px'};
+                        transition: left 0.15s;
+                    `
+                });
+                toggle.appendChild(knob);
+                toggle.addEventListener('click', () => {
+                    item.value = !item.value;
+                    queueInput({ type: 'menu_change', clientId, id: item.id, value: item.value });
+                    renderMenu();
+                });
+                row.appendChild(toggle);
+                break;
+            }
+
+            case 'slider': {
+                const right = el('div', { style: 'display:flex; align-items:center; gap:8px;' });
+                const valDisplay = el('span', {
+                    textContent: (typeof item.value === 'number' ? item.value.toFixed(item.step && item.step < 1 ? 1 : 0) : item.value),
+                    style: 'font-size: 11px; color: #aaa; min-width: 32px; text-align: right;'
+                });
+                const slider = document.createElement('input');
+                slider.type = 'range';
+                slider.min = item.min ?? 0;
+                slider.max = item.max ?? 100;
+                slider.step = item.step ?? 1;
+                slider.value = item.value ?? 50;
+                slider.style.cssText = `width:120px; accent-color:${menuStyle.accentColor}; height:4px; cursor:pointer;`;
+                slider.addEventListener('input', () => {
+                    const v = parseFloat(slider.value);
+                    item.value = v;
+                    valDisplay.textContent = v.toFixed(item.step && item.step < 1 ? 1 : 0);
+                    queueInput({ type: 'menu_change', clientId, id: item.id, value: v });
+                });
+                right.appendChild(slider);
+                right.appendChild(valDisplay);
+                row.appendChild(right);
+                break;
+            }
+
+            case 'select': {
+                const sel = document.createElement('select');
+                sel.style.cssText = `
+                    background: #222; color: #ccc; border: 1px solid #444; border-radius: 3px;
+                    padding: 2px 6px; font-size: 11px; cursor: pointer;
+                `;
+                for (const opt of (item.options || [])) {
+                    const o = document.createElement('option');
+                    o.value = opt;
+                    o.textContent = opt;
+                    if (opt === item.value) o.selected = true;
+                    sel.appendChild(o);
+                }
+                sel.addEventListener('change', () => {
+                    item.value = sel.value;
+                    queueInput({ type: 'menu_change', clientId, id: item.id, value: sel.value });
+                });
+                row.appendChild(sel);
+                break;
+            }
+
+            case 'button': {
+                const btnRgb = hexToRgb(menuStyle.accentColor);
+                const btn = el('div', {
+                    textContent: item.text || 'Click',
+                    style: `
+                        padding: 3px 12px; background: rgba(${btnRgb},0.2); border: 1px solid rgba(${btnRgb},0.3);
+                        border-radius: 3px; font-size: ${menuStyle.fontSize - 1}px; color: ${menuStyle.accentColor}; cursor: pointer;
+                    `
+                });
+                btn.addEventListener('click', () => {
+                    queueInput({ type: 'menu_action', clientId, id: item.id });
+                });
+                btn.addEventListener('mouseenter', () => { btn.style.background = `rgba(${btnRgb},0.35)`; });
+                btn.addEventListener('mouseleave', () => { btn.style.background = `rgba(${btnRgb},0.2)`; });
+                row.appendChild(btn);
+                break;
+            }
+
+            case 'color': {
+                const swatch = el('div', {
+                    style: `
+                        width: 24px; height: 18px; border-radius: 3px; cursor: pointer;
+                        background: ${item.value || '#ff0000'};
+                        border: 1px solid rgba(255,255,255,0.2);
+                    `
+                });
+                const input = document.createElement('input');
+                input.type = 'color';
+                input.value = item.value || '#ff0000';
+                input.style.cssText = 'position:absolute; opacity:0; width:0; height:0;';
+                swatch.addEventListener('click', () => input.click());
+                input.addEventListener('input', () => {
+                    item.value = input.value;
+                    swatch.style.background = input.value;
+                    queueInput({ type: 'menu_change', clientId, id: item.id, value: input.value });
+                });
+                row.appendChild(swatch);
+                row.appendChild(input);
+                break;
+            }
+
+            case 'label': {
+                row.style.background = 'transparent';
+                label.style.color = item.color || '#666';
+                label.style.fontSize = '11px';
+                break;
+            }
+
+            case 'separator': {
+                row.innerHTML = '';
+                row.style.cssText = 'height:1px; margin:4px 0; background:rgba(100,100,150,0.2);';
+                break;
+            }
+
+            default:
+                break;
+        }
+
+        row.addEventListener('mouseenter', () => {
+            if (item.type !== 'separator' && item.type !== 'label') {
+                row.style.background = 'rgba(40,40,65,0.7)';
+            }
+        });
+        row.addEventListener('mouseleave', () => {
+            if (item.type !== 'separator' && item.type !== 'label') {
+                row.style.background = 'rgba(30,30,45,0.5)';
+            }
+        });
+
+        return row;
+    }
+
+    // ── Mouse Event Forwarding ────────────────────────────────────
+
+    menuContainer.addEventListener('mousemove', (e) => {
+        if (!menuMode) return;
+        queueInput({ type: 'mouse_move', x: e.clientX, y: e.clientY });
+    });
+
+    menuContainer.addEventListener('click', (e) => {
+        if (!menuMode) return;
+        queueInput({ type: 'mouse_click', x: e.clientX, y: e.clientY, button: 0 });
+    });
+
+    menuContainer.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (!menuMode) return;
+        queueInput({ type: 'mouse_click', x: e.clientX, y: e.clientY, button: 2 });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (menuMode && e.key === 'Escape') {
+            window.__extMenuMode(false);
+            queueInput({ type: 'menu_close_request' });
+        }
+        if (menuMode) {
+            queueInput({ type: 'key_down', key: e.key, code: e.code, ctrl: e.ctrlKey, shift: e.shiftKey, alt: e.altKey });
+        }
+    });
+
+    // ── DOM Helpers ───────────────────────────────────────────────
+
+    function hexToRgb(hex) {
+        const h = hex.replace('#', '');
+        const r = parseInt(h.substring(0, 2), 16) || 0;
+        const g = parseInt(h.substring(2, 4), 16) || 0;
+        const b = parseInt(h.substring(4, 6), 16) || 0;
+        return `${r},${g},${b}`;
+    }
+
+    function el(tag, props) {
+        const e = document.createElement(tag);
+        if (props) {
+            for (const [k, v] of Object.entries(props)) {
+                if (k === 'style') e.style.cssText = v;
+                else if (k === 'textContent') e.textContent = v;
+                else e.setAttribute(k, v);
+            }
+        }
+        return e;
+    }
+
+    function makeDraggable(panel, handle) {
+        let dragging = false, ox = 0, oy = 0;
+        handle.style.cursor = 'move';
+        handle.addEventListener('mousedown', (e) => {
+            dragging = true;
+            const rect = panel.getBoundingClientRect();
+            ox = e.clientX - rect.left;
+            oy = e.clientY - rect.top;
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            panel.style.position = 'absolute';
+            panel.style.left = (e.clientX - ox) + 'px';
+            panel.style.top = (e.clientY - oy) + 'px';
+            panel.style.transform = 'none';
+        });
+        document.addEventListener('mouseup', () => { dragging = false; });
+    }
+
+    // ── Frame Queue ─────────────────────────────────────────────
+
+    const clientFrames = {};
+
+    window.__extPendingFrames = [];
+
+    window.__extPush = function(frame) {
+        if (frame.type === 'client_disconnect') {
+            delete clientFrames[frame.clientId];
+            return;
+        }
+        if (frame.type === 'frame' && frame.commands) {
+            clientFrames[frame.clientId] = frame.commands;
+        }
+    };
+
+    // ── Color Parsing ────────────────────────────────────────────
+
+    function parseColor(val) {
+        if (typeof val === 'string') return val;
+        if (typeof val !== 'number') return 'rgba(255,255,255,1)';
+        const a = ((val >>> 24) & 0xFF) / 255;
+        const r = (val >> 16) & 0xFF;
+        const g = (val >> 8) & 0xFF;
+        const b = val & 0xFF;
+        return `rgba(${r},${g},${b},${a.toFixed(3)})`;
+    }
+
+    // ── Image Cache ──────────────────────────────────────────────
+
+    const imageCache = {};
+
+    window.__extLoadImg = function(key, base64data) {
+        if (imageCache[key]) return;
+        const img = new Image();
+        imageCache[key] = { img, ready: false };
+        img.onload = () => { imageCache[key].ready = true; };
+        img.onerror = () => { delete imageCache[key]; };
+        img.src = base64data.startsWith('data:') ? base64data : ('data:image/png;base64,' + base64data);
+    };
+
+    // ── Animation System ────────────────────────────────────────
+
+    const animState = {};
+
+    function applyAnimation(cmd) {
+        const a = cmd.anim;
+        if (!a) return false;
+
+        const key = cmd._animKey || (a.type + '_' + (cmd.type || '') + '_' + (cmd.x || 0) + '_' + (cmd.y || 0));
+        if (!animState[key]) animState[key] = { startTime: performance.now() };
+        const elapsed = performance.now() - animState[key].startTime;
+
+        switch (a.type) {
+            case 'fade': {
+                const dur = a.duration || 500;
+                const from = a.from ?? 0;
+                const to = a.to ?? 1;
+                const t = Math.min(1, elapsed / dur);
+                const eased = t * t * (3 - 2 * t);
+                ctx.globalAlpha = from + (to - from) * eased;
+                return true;
+            }
+            case 'pulse': {
+                const period = a.period || 1000;
+                const min = a.min ?? 0.3;
+                const max = a.max ?? 1.0;
+                const phase = (elapsed % period) / period;
+                const v = 0.5 + 0.5 * Math.sin(phase * Math.PI * 2);
+                ctx.globalAlpha = min + (max - min) * v;
+                return true;
+            }
+            case 'slide': {
+                const dur = a.duration || 300;
+                const t = Math.min(1, elapsed / dur);
+                const eased = t * t * (3 - 2 * t);
+                const dx = (a.fromX || 0) * (1 - eased);
+                const dy = (a.fromY || 0) * (1 - eased);
+                ctx.translate(dx, dy);
+                return true;
+            }
+            case 'blink': {
+                const period = a.period || 500;
+                const duty = a.duty ?? 0.5;
+                const phase = (elapsed % period) / period;
+                if (phase > duty) ctx.globalAlpha = 0;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ── Drawing Primitives ───────────────────────────────────────
+
+    function drawText(cmd) {
+        const x = cmd.x || 0, y = cmd.y || 0;
+        const text = cmd.text || '';
+        const size = cmd.size || 14;
+        const bold = cmd.bold ? 'bold ' : '';
+        const font = cmd.font || 'Inter, Segoe UI, sans-serif';
+        ctx.font = `${bold}${size}px ${font}`;
+        ctx.textAlign = cmd.align || 'left';
+        ctx.textBaseline = 'top';
+
+        if (cmd.outline !== false) {
+            ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+            ctx.lineWidth = 3;
+            ctx.lineJoin = 'round';
+            ctx.strokeText(text, x, y);
+        }
+
+        ctx.fillStyle = parseColor(cmd.color);
+        ctx.fillText(text, x, y);
+    }
+
+    function drawRect(cmd) {
+        ctx.strokeStyle = parseColor(cmd.color);
+        ctx.lineWidth = cmd.thickness || 1;
+        ctx.strokeRect(cmd.x, cmd.y, cmd.w, cmd.h);
+    }
+
+    function drawFilledRect(cmd) {
+        ctx.fillStyle = parseColor(cmd.color);
+        ctx.fillRect(cmd.x, cmd.y, cmd.w, cmd.h);
+    }
+
+    function drawLine(cmd) {
+        ctx.strokeStyle = parseColor(cmd.color);
+        ctx.lineWidth = cmd.thickness || 1;
+        ctx.beginPath();
+        ctx.moveTo(cmd.x1, cmd.y1);
+        ctx.lineTo(cmd.x2, cmd.y2);
+        ctx.stroke();
+    }
+
+    function drawCircle(cmd) {
+        ctx.beginPath();
+        ctx.arc(cmd.x, cmd.y, cmd.r || 10, 0, Math.PI * 2);
+        if (cmd.filled) {
+            ctx.fillStyle = parseColor(cmd.color);
+            ctx.fill();
+        } else {
+            ctx.strokeStyle = parseColor(cmd.color);
+            ctx.lineWidth = cmd.thickness || 1;
+            ctx.stroke();
+        }
+    }
+
+    function drawCornerBox(cmd) {
+        const { x, y, w, h } = cmd;
+        const color = parseColor(cmd.color);
+        const lw = cmd.thickness || 2;
+        const len = Math.min(w, h) * 0.25;
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lw;
+        ctx.beginPath();
+        ctx.moveTo(x, y + len); ctx.lineTo(x, y); ctx.lineTo(x + len, y);
+        ctx.moveTo(x + w - len, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + len);
+        ctx.moveTo(x + w, y + h - len); ctx.lineTo(x + w, y + h); ctx.lineTo(x + w - len, y + h);
+        ctx.moveTo(x + len, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + h - len);
+        ctx.stroke();
+    }
+
+    function drawESP(cmd) {
+        const { x, y, w, h, style, name, health, distance, info } = cmd;
+        const color = parseColor(cmd.color);
+
+        if (style === 'corner') {
+            drawCornerBox({ ...cmd, color: cmd.color });
+        } else {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = cmd.thickness || 2;
+            ctx.strokeRect(x, y, w, h);
+        }
+
+        if (name) {
+            drawText({ x: x + w / 2, y: y - 16, text: name, color: cmd.color, size: 12, align: 'center', outline: true });
+        }
+
+        if (typeof health === 'number' && health >= 0) {
+            const barW = 4, barH = h;
+            const barX = x - barW - 2;
+            const filled = barH * Math.min(1, Math.max(0, health));
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(barX, y, barW, barH);
+            const r = health < 0.5 ? 255 : Math.round(255 * (1 - health) * 2);
+            const g = health > 0.5 ? 255 : Math.round(255 * health * 2);
+            ctx.fillStyle = `rgb(${r},${g},0)`;
+            ctx.fillRect(barX, y + barH - filled, barW, filled);
+        }
+
+        if (typeof distance === 'number' && distance >= 0) {
+            drawText({ x: x + w / 2, y: y + h + 2, text: `${Math.round(distance)}m`, color: 0xFFCCCCCC, size: 10, align: 'center', outline: true });
+        }
+
+        if (info) {
+            const iy = (typeof distance === 'number' && distance >= 0) ? y + h + 14 : y + h + 2;
+            drawText({ x: x + w / 2, y: iy, text: info, color: 0xFFAAAAFF, size: 10, align: 'center', outline: true });
+        }
+    }
+
+    function drawCrosshair(cmd) {
+        const cx = cmd.x >= 0 ? cmd.x : W() / 2;
+        const cy = cmd.y >= 0 ? cmd.y : H() / 2;
+        const size = cmd.size || 10;
+        const gap = cmd.gap || 4;
+        const lw = cmd.thickness || 1;
+        const color = parseColor(cmd.color);
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lw;
+
+        if (cmd.outline) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+            ctx.lineWidth = lw + 2;
+            drawCrosshairLines(ctx, cx, cy, size, gap);
+            ctx.restore();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lw;
+        }
+
+        drawCrosshairLines(ctx, cx, cy, size, gap);
+
+        if (cmd.dot) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(cx, cy, lw, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function drawCrosshairLines(c, cx, cy, size, gap) {
+        c.beginPath();
+        c.moveTo(cx - gap - size, cy); c.lineTo(cx - gap, cy);
+        c.moveTo(cx + gap, cy); c.lineTo(cx + gap + size, cy);
+        c.moveTo(cx, cy - gap - size); c.lineTo(cx, cy - gap);
+        c.moveTo(cx, cy + gap); c.lineTo(cx, cy + gap + size);
+        c.stroke();
+    }
+
+    // ── Advanced Primitives ─────────────────────────────────────
+
+    function drawRoundedRect(cmd) {
+        const { x, y, w, h } = cmd;
+        const r = Math.min(cmd.radius || 8, w / 2, h / 2);
+        const color = parseColor(cmd.color);
+
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+
+        if (cmd.filled !== false) {
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+        if (cmd.thickness || !cmd.filled) {
+            ctx.strokeStyle = cmd.strokeColor ? parseColor(cmd.strokeColor) : color;
+            ctx.lineWidth = cmd.thickness || 1;
+            ctx.stroke();
+        }
+    }
+
+    function drawGradientRect(cmd) {
+        const { x, y, w, h } = cmd;
+        let grad;
+
+        if (cmd.gradientType === 'radial') {
+            const cx = x + w / 2, cy = y + h / 2;
+            const r = Math.max(w, h) / 2;
+            grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cmd.gradientRadius || r);
+        } else {
+            if (cmd.x2 !== undefined && cmd.y2 !== undefined) {
+                grad = ctx.createLinearGradient(cmd.x1 || x, cmd.y1 || y, cmd.x2, cmd.y2);
+            } else {
+                const angle = (cmd.angle || 0) * Math.PI / 180;
+                const dx = Math.cos(angle) * w;
+                const dy = Math.sin(angle) * h;
+                grad = ctx.createLinearGradient(x, y, x + dx, y + dy);
+            }
+        }
+
+        const stops = cmd.stops || [[0, cmd.color || 0xFFFF0000], [1, cmd.color2 || 0xFF0000FF]];
+        for (const [pos, col] of stops) {
+            grad.addColorStop(pos, parseColor(col));
+        }
+
+        const r = cmd.radius || 0;
+        if (r > 0) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+            ctx.fillStyle = grad;
+            ctx.fill();
+        } else {
+            ctx.fillStyle = grad;
+            ctx.fillRect(x, y, w, h);
+        }
+    }
+
+    function drawArc(cmd) {
+        const cx = cmd.x || 0, cy = cmd.y || 0;
+        const r = cmd.r || cmd.radius || 50;
+        const startAngle = (cmd.startAngle || 0) * Math.PI / 180;
+        const endAngle = (cmd.endAngle || 360) * Math.PI / 180;
+        const color = parseColor(cmd.color);
+
+        ctx.beginPath();
+        if (cmd.pie) {
+            ctx.moveTo(cx, cy);
+        }
+        ctx.arc(cx, cy, r, startAngle, endAngle, !!cmd.ccw);
+        if (cmd.pie) {
+            ctx.closePath();
+        }
+
+        if (cmd.filled || cmd.pie) {
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+        if (!cmd.filled || cmd.thickness) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = cmd.thickness || 1;
+            ctx.stroke();
+        }
+    }
+
+    function drawBezier(cmd) {
+        const color = parseColor(cmd.color);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = cmd.thickness || 1;
+        ctx.beginPath();
+        ctx.moveTo(cmd.x1, cmd.y1);
+
+        if (cmd.cx2 !== undefined && cmd.cy2 !== undefined) {
+            ctx.bezierCurveTo(cmd.cx1, cmd.cy1, cmd.cx2, cmd.cy2, cmd.x2, cmd.y2);
+        } else {
+            ctx.quadraticCurveTo(cmd.cx1 || cmd.cx, cmd.cy1 || cmd.cy, cmd.x2, cmd.y2);
+        }
+        ctx.stroke();
+    }
+
+    function drawPolygon(cmd) {
+        const pts = cmd.points;
+        if (!pts || pts.length < 2) return;
+
+        const color = parseColor(cmd.color);
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (let i = 1; i < pts.length; i++) {
+            ctx.lineTo(pts[i][0], pts[i][1]);
+        }
+        ctx.closePath();
+
+        if (cmd.filled) {
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+        if (!cmd.filled || cmd.thickness) {
+            ctx.strokeStyle = cmd.strokeColor ? parseColor(cmd.strokeColor) : color;
+            ctx.lineWidth = cmd.thickness || 1;
+            ctx.stroke();
+        }
+    }
+
+    function drawTextWrapped(cmd) {
+        const x = cmd.x || 0, y = cmd.y || 0;
+        const text = cmd.text || '';
+        const maxWidth = cmd.maxWidth || 200;
+        const lineHeight = cmd.lineHeight || (cmd.size || 14) * 1.4;
+        const size = cmd.size || 14;
+        const bold = cmd.bold ? 'bold ' : '';
+        const font = cmd.font || 'Inter, Segoe UI, sans-serif';
+
+        ctx.font = `${bold}${size}px ${font}`;
+        ctx.textAlign = cmd.align || 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = parseColor(cmd.color);
+
+        const words = text.split(' ');
+        let line = '';
+        let currentY = y;
+        const lines = [];
+
+        for (const word of words) {
+            const testLine = line ? line + ' ' + word : word;
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > maxWidth && line) {
+                lines.push(line);
+                line = word;
+            } else {
+                line = testLine;
+            }
+        }
+        if (line) lines.push(line);
+
+        if (cmd.bgColor) {
+            const bgPad = cmd.bgPad || 4;
+            const totalH = lines.length * lineHeight + bgPad * 2;
+            let maxW = 0;
+            for (const l of lines) { maxW = Math.max(maxW, ctx.measureText(l).width); }
+            ctx.fillStyle = parseColor(cmd.bgColor);
+            ctx.fillRect(x - bgPad, y - bgPad, maxW + bgPad * 2, totalH);
+            ctx.fillStyle = parseColor(cmd.color);
+        }
+
+        for (const l of lines) {
+            if (cmd.outline !== false) {
+                ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+                ctx.lineWidth = 3;
+                ctx.lineJoin = 'round';
+                ctx.strokeText(l, x, currentY);
+            }
+            ctx.fillStyle = parseColor(cmd.color);
+            ctx.fillText(l, x, currentY);
+            currentY += lineHeight;
+        }
+    }
+
+    function drawImage(cmd) {
+        const key = cmd.key || cmd.id;
+        if (!key) return;
+
+        if (cmd.data && !imageCache[key]) {
+            window.__extLoadImg(key, cmd.data);
+        }
+
+        const entry = imageCache[key];
+        if (!entry || !entry.ready) return;
+
+        const img = entry.img;
+        const x = cmd.x || 0, y = cmd.y || 0;
+
+        const sx = cmd.sx || 0;
+        const sy = cmd.sy || 0;
+        const sw = cmd.sw || img.naturalWidth;
+        const sh = cmd.sh || img.naturalHeight;
+
+        const dw = cmd.w || sw;
+        const dh = cmd.h || sh;
+
+        ctx.save();
+
+        if (cmd.rotation) {
+            const rcx = x + dw / 2;
+            const rcy = y + dh / 2;
+            ctx.translate(rcx, rcy);
+            ctx.rotate(cmd.rotation * Math.PI / 180);
+            ctx.translate(-rcx, -rcy);
+        }
+
+        if (typeof cmd.opacity === 'number') {
+            ctx.globalAlpha *= cmd.opacity;
+        }
+
+        ctx.drawImage(img, sx, sy, sw, sh, x, y, dw, dh);
+
+        ctx.restore();
+    }
+
+    function drawBones(cmd) {
+        const joints = cmd.joints;
+        const connections = cmd.connections;
+        const boneColor = parseColor(cmd.color || 0xFF00FFFF);
+        const jointColor = parseColor(cmd.jointColor || cmd.color || 0xFF00FFFF);
+        const thickness = cmd.thickness || 2;
+        const jointRadius = cmd.jointRadius || 3;
+
+        if (!joints || !joints.length) return;
+
+        if (connections && connections.length) {
+            ctx.strokeStyle = boneColor;
+            ctx.lineWidth = thickness;
+            ctx.beginPath();
+            for (const [a, b] of connections) {
+                if (joints[a] && joints[b]) {
+                    ctx.moveTo(joints[a][0], joints[a][1]);
+                    ctx.lineTo(joints[b][0], joints[b][1]);
+                }
+            }
+            ctx.stroke();
+        }
+
+        if (cmd.showJoints !== false) {
+            ctx.fillStyle = jointColor;
+            for (const [jx, jy] of joints) {
+                ctx.beginPath();
+                ctx.arc(jx, jy, jointRadius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+    }
+
+    // ── Command Dispatch ─────────────────────────────────────────
+
+    function executeCommand(cmd) {
+        const hasAnim = cmd.anim;
+        if (hasAnim) ctx.save();
+        const animated = hasAnim ? applyAnimation(cmd) : false;
+
+        switch (cmd.type) {
+            case 'text':            drawText(cmd); break;
+            case 'rect':            drawRect(cmd); break;
+            case 'filled_rect':     drawFilledRect(cmd); break;
+            case 'line':            drawLine(cmd); break;
+            case 'circle':          drawCircle(cmd); break;
+            case 'corner_box':      drawCornerBox(cmd); break;
+            case 'esp':             drawESP(cmd); break;
+            case 'crosshair':       drawCrosshair(cmd); break;
+            case 'rounded_rect':    drawRoundedRect(cmd); break;
+            case 'gradient_rect':   drawGradientRect(cmd); break;
+            case 'arc':             drawArc(cmd); break;
+            case 'bezier':          drawBezier(cmd); break;
+            case 'polygon':         drawPolygon(cmd); break;
+            case 'text_wrapped':    drawTextWrapped(cmd); break;
+            case 'image':           drawImage(cmd); break;
+            case 'bones':           drawBones(cmd); break;
+            case 'load_image':      {
+                if (cmd.key && cmd.data) window.__extLoadImg(cmd.key, cmd.data);
+                break;
+            }
+            default: break;
+        }
+
+        if (hasAnim) ctx.restore();
+    }
+
+    // ── Render Loop ──────────────────────────────────────────────
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const pending = window.__extPendingFrames;
+        if (pending && pending.length > 0) {
+            for (const frame of pending) {
+                window.__extPush(frame);
+            }
+            window.__extPendingFrames = [];
+        }
+
+        const allCmds = [];
+        for (const clientId in clientFrames) {
+            const commands = clientFrames[clientId];
+            if (!commands) continue;
+            for (const cmd of commands) {
+                allCmds.push(cmd);
+            }
+        }
+
+        allCmds.sort((a, b) => (a.layer || 0) - (b.layer || 0));
+
+        for (const cmd of allCmds) {
+            try { executeCommand(cmd); } catch (e) {}
+        }
+
+        if (menuMode) {
+            ctx.save();
+            const iRgb = hexToRgb(menuStyle.accentColor);
+            ctx.fillStyle = `rgba(${iRgb}, 0.15)`;
+            ctx.fillRect(0, 0, W(), 2);
+            ctx.fillRect(0, H() - 2, W(), 2);
+            ctx.fillRect(0, 0, 2, H());
+            ctx.fillRect(W() - 2, 0, 2, H());
+            ctx.restore();
+        }
+
+        requestAnimationFrame(render);
+    }
+
+    requestAnimationFrame(render);
+})();
+
+```
+
+`patcher/patch.js`:
+
+```js
+/**
+ * MOF Patcher - Patches Medal installation to load the overlay bridge
+ *
+ * Supports both old (app-X/resources/app/) and new (current/resources/app.asar) Medal layouts.
+ *
+ * Usage:
+ *   node patch.js              Patch Medal (auto-detects layout)
+ *   node patch.js --unpatch    Remove the patch
+ *   node patch.js --status     Check patch status
+ *   node patch.js --watch      Patch and watch for Medal updates (auto-repatch)
+ */
+
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const { execFileSync } = require('child_process');
+
+// ── Configuration ────────────────────────────────────────────
+
+const MEDAL_BASE = path.join(os.homedir(), 'AppData', 'Local', 'Medal');
+const BRIDGE_DIR = path.join(__dirname, '..', 'bridge');
+
+// Stealth: deployed filenames differ from source
+const DEPLOY_NAME = 'ext-host';
+const INJECT_LINE = `try{require('./${DEPLOY_NAME}')}catch(e){};`;
+const INJECT_MARKER = '/* ext-v2 */';
+
+// Source → deployed file mapping
+const FILE_MAP = {
+    'mof-bridge.js':   'ext-host.js',
+    'mof-renderer.js': 'overlay-ctrl.js',
+    'mof-helper.cs':   'host-svc.cs',
+};
+
+// String replacements applied to bridge source during deploy
+const BRIDGE_REPLACEMENTS = [
+    // File references: bridge loads renderer and helper by filename
+    ["'mof-renderer.js'", "'overlay-ctrl.js'"],
+    ["'mof-helper.cs'",   "'host-svc.cs'"],
+];
+
+// ── Utility ──────────────────────────────────────────────────
+
+function log(msg) { console.log(`[Patcher] ${msg}`); }
+function error(msg) { console.error(`[Patcher] ERROR: ${msg}`); }
+function success(msg) { console.log(`[Patcher] OK: ${msg}`); }
+
+// ── Asar Helpers ─────────────────────────────────────────────
+
+let _asarModule = null;
+
+function getAsarModule() {
+    if (_asarModule) return _asarModule;
+
+    const candidates = [
+        path.join(os.homedir(), 'AppData', 'Roaming', 'npm', 'node_modules', '@electron', 'asar', 'lib', 'asar.js'),
+    ];
+
+    for (const p of candidates) {
+        if (fs.existsSync(p)) {
+            _asarModule = p;
+            return p;
+        }
+    }
+
+    error('@electron/asar not found. Install it: npm install -g @electron/asar');
+    return null;
+}
+
+async function extractAsar(asarPath, destDir) {
+    const asarLib = getAsarModule();
+    if (!asarLib) return false;
+
+    const script = path.join(os.tmpdir(), 'ext-asar-extract.mjs');
+    const src = asarPath.replace(/\\/g, '/');
+    const dst = destDir.replace(/\\/g, '/');
+    fs.writeFileSync(script, `
+import { extractAll } from 'file:///${asarLib.replace(/\\/g, '/')}';
+extractAll('${src}', '${dst}');
+    `.trim());
+    execFileSync(process.execPath, [script], { stdio: 'pipe' });
+    try { fs.unlinkSync(script); } catch(e) {}
+    return true;
+}
+
+async function packAsar(srcDir, asarPath, unpackGlob) {
+    const asarLib = getAsarModule();
+    if (!asarLib) return false;
+
+    const script = path.join(os.tmpdir(), 'ext-asar-pack.mjs');
+    const src = srcDir.replace(/\\/g, '/');
+    const dst = asarPath.replace(/\\/g, '/');
+    fs.writeFileSync(script, `
+import { createPackageWithOptions } from 'file:///${asarLib.replace(/\\/g, '/')}';
+await createPackageWithOptions('${src}', '${dst}', { unpack: '${unpackGlob}' });
+    `.trim());
+    execFileSync(process.execPath, [script], { stdio: 'pipe' });
+    try { fs.unlinkSync(script); } catch(e) {}
+    return true;
+}
+
+// ── Medal Detection ──────────────────────────────────────────
+
+function detectMedalLayout() {
+    if (!fs.existsSync(MEDAL_BASE)) {
+        error(`Medal directory not found: ${MEDAL_BASE}`);
+        return null;
+    }
+
+    // ── New layout: current/resources/app.asar ──
+    const currentAsar = path.join(MEDAL_BASE, 'current', 'resources', 'app.asar');
+    if (fs.existsSync(currentAsar)) {
+        return {
+            type: 'asar',
+            asarPath: currentAsar,
+            asarBackup: currentAsar + '.bak',
+            extractDir: path.join(MEDAL_BASE, 'current', 'resources', 'app-extracted'),
+            resourcesDir: path.join(MEDAL_BASE, 'current', 'resources'),
+            unpackGlob: '{lib/binding/**,node_modules/velopack/**,src/assets/**}',
+        };
+    }
+
+    // ── Old layout: app-*/resources/app/ ──
+    const entries = fs.readdirSync(MEDAL_BASE, { withFileTypes: true });
+    const versions = [];
+
+    for (const entry of entries) {
+        if (!entry.isDirectory()) continue;
+        const match = entry.name.match(/^app-(\d+\.\d+\.\d+)$/);
+        if (!match) continue;
+
+        const appDir = path.join(MEDAL_BASE, entry.name, 'resources', 'app');
+        const mainJs = path.join(appDir, 'main.min.js');
+
+        if (fs.existsSync(mainJs)) {
+            versions.push({
+                type: 'unpacked',
+                version: match[1],
+                dir: entry.name,
+                appDir,
+                mainJs,
+                fullPath: path.join(MEDAL_BASE, entry.name),
+            });
+        }
+    }
+
+    if (versions.length > 0) {
+        versions.sort((a, b) => {
+            const pa = a.version.split('.').map(Number);
+            const pb = b.version.split('.').map(Number);
+            for (let i = 0; i < 3; i++) {
+                if (pa[i] !== pb[i]) return pb[i] - pa[i];
+            }
+            return 0;
+        });
+        return versions[0];
+    }
+
+    error('No Medal installation found');
+    return null;
+}
+
+// ── Patching ─────────────────────────────────────────────────
+
+function isPatchApplied(mainJsPath) {
+    const content = fs.readFileSync(mainJsPath, 'utf-8');
+    // Check for current marker OR legacy marker
+    return content.includes(INJECT_MARKER) || content.includes('/* MOF-INJECTED */');
+}
+
+function removeLegacyPatch(content) {
+    // Strip old-style injection if present
+    const legacyMarker = '/* MOF-INJECTED */';
+    const legacyRequire = `try{require('./mof-bridge')}catch(e){console.error('[MOF] Bridge load failed:',e.message)};`;
+    content = content.replace(legacyMarker + legacyRequire + '\n', '');
+    content = content.replace(legacyMarker, '');
+    return content;
+}
+
+function injectIntoMainJs(mainJsPath) {
+    let content = fs.readFileSync(mainJsPath, 'utf-8');
+
+    if (content.includes(INJECT_MARKER)) {
+        log('main.min.js already patched');
+        return true;
+    }
+
+    // Remove legacy patch if present
+    content = removeLegacyPatch(content);
+
+    // Backup
+    const backupPath = mainJsPath + '.bak';
+    if (!fs.existsSync(backupPath)) {
+        fs.copyFileSync(mainJsPath, backupPath);
+        log(`Backed up original: ${path.basename(backupPath)}`);
+    }
+
+    const patched = `${INJECT_MARKER}${INJECT_LINE}\n${content}`;
+    fs.writeFileSync(mainJsPath, patched, 'utf-8');
+    log('Injected loader into main.min.js');
+    return true;
+}
+
+function copyBridgeFiles(destDir) {
+    for (const [srcFile, dstFile] of Object.entries(FILE_MAP)) {
+        const srcPath = path.join(BRIDGE_DIR, srcFile);
+        if (!fs.existsSync(srcPath)) {
+            error(`Bridge file not found: ${srcPath}`);
+            return false;
+        }
+
+        let content = fs.readFileSync(srcPath, 'utf-8');
+
+        // Apply string replacements to bridge source
+        if (srcFile === 'mof-bridge.js') {
+            for (const [find, replace] of BRIDGE_REPLACEMENTS) {
+                content = content.split(find).join(replace);
+            }
+        }
+
+        fs.writeFileSync(path.join(destDir, dstFile), content, 'utf-8');
+        log(`Deployed ${srcFile} → ${dstFile}`);
+    }
+
+    // Also clean up any legacy files from previous versions
+    for (const legacy of ['mof-bridge.js', 'mof-renderer.js', 'mof-helper.cs']) {
+        const lp = path.join(destDir, legacy);
+        if (fs.existsSync(lp)) {
+            fs.unlinkSync(lp);
+            log(`Removed legacy file: ${legacy}`);
+        }
+    }
+
+    return true;
+}
+
+async function patchAsar(layout) {
+    log(`Patching Medal (asar layout)`);
+
+    // 1. Backup original asar
+    if (!fs.existsSync(layout.asarBackup)) {
+        fs.copyFileSync(layout.asarPath, layout.asarBackup);
+        log('Backed up original app.asar');
+    }
+
+    // 2. Extract
+    log('Extracting app.asar...');
+    if (fs.existsSync(layout.extractDir)) {
+        fs.rmSync(layout.extractDir, { recursive: true, force: true });
+    }
+    if (!await extractAsar(layout.asarPath, layout.extractDir)) return false;
+    log('Extracted');
+
+    // 3. Copy bridge files (with renames and string replacements)
+    if (!copyBridgeFiles(layout.extractDir)) return false;
+
+    // 4. Inject into main.min.js
+    const mainJs = path.join(layout.extractDir, 'main.min.js');
+    if (!fs.existsSync(mainJs)) {
+        error(`main.min.js not found in extracted asar`);
+        return false;
+    }
+    injectIntoMainJs(mainJs);
+
+    // 5. Repack
+    log('Repacking app.asar...');
+    if (!await packAsar(layout.extractDir, layout.asarPath, layout.unpackGlob)) return false;
+    log('Repacked');
+
+    success('Medal patched successfully');
+    return true;
+}
+
+function patchUnpacked(layout) {
+    log(`Patching Medal ${layout.version} (unpacked layout)`);
+
+    if (!copyBridgeFiles(layout.appDir)) return false;
+    injectIntoMainJs(layout.mainJs);
+
+    success(`Medal ${layout.version} patched successfully`);
+    return true;
+}
+
+async function unpatch() {
+    const layout = detectMedalLayout();
+    if (!layout) return;
+
+    if (layout.type === 'asar') {
+        if (fs.existsSync(layout.asarBackup)) {
+            fs.copyFileSync(layout.asarBackup, layout.asarPath);
+            fs.unlinkSync(layout.asarBackup);
+            log('Restored original app.asar from backup');
+        } else {
+            log('No asar backup found, extracting to remove patch...');
+            if (fs.existsSync(layout.extractDir)) {
+                const mainJs = path.join(layout.extractDir, 'main.min.js');
+                const backup = mainJs + '.bak';
+                if (fs.existsSync(backup)) {
+                    fs.copyFileSync(backup, mainJs);
+                    fs.unlinkSync(backup);
+                }
+                // Remove all deployed files
+                for (const dstFile of Object.values(FILE_MAP)) {
+                    const fp = path.join(layout.extractDir, dstFile);
+                    if (fs.existsSync(fp)) fs.unlinkSync(fp);
+                }
+                await packAsar(layout.extractDir, layout.asarPath, layout.unpackGlob);
+            }
+        }
+        if (fs.existsSync(layout.extractDir)) {
+            fs.rmSync(layout.extractDir, { recursive: true, force: true });
+        }
+        success('Medal unpatched (asar)');
+    } else {
+        const backupPath = layout.mainJs + '.bak';
+        if (fs.existsSync(backupPath)) {
+            fs.copyFileSync(backupPath, layout.mainJs);
+            fs.unlinkSync(backupPath);
+            log('Restored original main.min.js');
+        } else if (isPatchApplied(layout.mainJs)) {
+            let content = fs.readFileSync(layout.mainJs, 'utf-8');
+            content = content.replace(INJECT_MARKER + INJECT_LINE + '\n', '');
+            content = removeLegacyPatch(content);
+            fs.writeFileSync(layout.mainJs, content, 'utf-8');
+            log('Removed injection from main.min.js');
+        }
+        for (const dstFile of Object.values(FILE_MAP)) {
+            const fp = path.join(layout.appDir, dstFile);
+            if (fs.existsSync(fp)) { fs.unlinkSync(fp); log(`Removed ${dstFile}`); }
+        }
+        // Also clean legacy names
+        for (const f of ['mof-bridge.js', 'mof-renderer.js', 'mof-helper.cs']) {
+            const fp = path.join(layout.appDir, f);
+            if (fs.existsSync(fp)) { fs.unlinkSync(fp); log(`Removed legacy ${f}`); }
+        }
+        success(`Medal ${layout.version} unpatched`);
+    }
+}
+
+function showStatus() {
+    const layout = detectMedalLayout();
+    if (!layout) return;
+
+    console.log('');
+    if (layout.type === 'asar') {
+        console.log('  Medal (asar layout)');
+        console.log(`    Directory:  current/`);
+        console.log(`    Asar:       ${fs.existsSync(layout.asarPath) ? 'Present' : 'Missing'}`);
+        console.log(`    Backup:     ${fs.existsSync(layout.asarBackup) ? 'Exists' : 'None'}`);
+
+        const extractedMain = path.join(layout.extractDir, 'main.min.js');
+        if (fs.existsSync(extractedMain)) {
+            const patched = isPatchApplied(extractedMain);
+            const bridge = fs.existsSync(path.join(layout.extractDir, FILE_MAP['mof-bridge.js']));
+            const renderer = fs.existsSync(path.join(layout.extractDir, FILE_MAP['mof-renderer.js']));
+            console.log(`    Patched:    ${patched ? 'YES' : 'NO'} (from extracted dir)`);
+            console.log(`    Bridge:     ${bridge ? 'Present' : 'Missing'}`);
+            console.log(`    Renderer:   ${renderer ? 'Present' : 'Missing'}`);
+        } else {
+            console.log(`    Patched:    ${fs.existsSync(layout.asarBackup) ? 'YES (backup exists)' : '? Unknown'}`);
+        }
+    } else {
+        console.log(`  Medal ${layout.version} (unpacked layout)`);
+        console.log(`    Directory:  ${layout.dir}`);
+        const patched = isPatchApplied(layout.mainJs);
+        const bridge = fs.existsSync(path.join(layout.appDir, FILE_MAP['mof-bridge.js']));
+        const renderer = fs.existsSync(path.join(layout.appDir, FILE_MAP['mof-renderer.js']));
+        console.log(`    Patched:    ${patched ? 'YES' : 'NO'}`);
+        console.log(`    Bridge:     ${bridge ? 'Present' : 'Missing'}`);
+        console.log(`    Renderer:   ${renderer ? 'Present' : 'Missing'}`);
+    }
+    console.log('');
+}
+
+// ── Watch ────────────────────────────────────────────────────
+
+function watchForUpdates() {
+    log('Watching for Medal updates... (Ctrl+C to stop)\n');
+
+    let lastAsarMtime = 0;
+    const layout = detectMedalLayout();
+    if (layout && layout.type === 'asar') {
+        try { lastAsarMtime = fs.statSync(layout.asarPath).mtimeMs; } catch(e) {}
+    }
+
+    setInterval(async () => {
+        const current = detectMedalLayout();
+        if (!current) return;
+
+        if (current.type === 'asar') {
+            try {
+                const mtime = fs.statSync(current.asarPath).mtimeMs;
+                if (mtime !== lastAsarMtime) {
+                    log('Medal update detected, re-patching...');
+                    lastAsarMtime = mtime;
+                    await new Promise(r => setTimeout(r, 5000));
+                    await patchAsar(current);
+                    lastAsarMtime = fs.statSync(current.asarPath).mtimeMs;
+                }
+            } catch(e) {}
+        } else {
+            const mainJs = current.mainJs;
+            if (!isPatchApplied(mainJs)) {
+                log(`Patch missing, re-patching...`);
+                patchUnpacked(current);
+            }
+        }
+    }, 10000);
+}
+
+// ── CLI ──────────────────────────────────────────────────────
+
+async function main() {
+    const args = process.argv.slice(2);
+    const command = args[0] || '--patch';
+
+    switch (command) {
+        case '--patch':
+        case 'patch': {
+            const layout = detectMedalLayout();
+            if (!layout) process.exit(1);
+
+            let ok;
+            if (layout.type === 'asar') {
+                ok = await patchAsar(layout);
+            } else {
+                ok = patchUnpacked(layout);
+            }
+            if (!ok) process.exit(1);
+            console.log('\nRestart Medal for the patch to take effect.');
+            break;
+        }
+
+        case '--unpatch':
+        case 'unpatch': {
+            await unpatch();
+            console.log('\nRestart Medal to complete unpatching.');
+            break;
+        }
+
+        case '--status':
+        case 'status': {
+            showStatus();
+            break;
+        }
+
+        case '--watch':
+        case 'watch': {
+            const layout = detectMedalLayout();
+            if (layout) {
+                if (layout.type === 'asar') {
+                    await patchAsar(layout);
+                } else if (!isPatchApplied(layout.mainJs)) {
+                    patchUnpacked(layout);
+                }
+            }
+            watchForUpdates();
+            break;
+        }
+
+        case '--help':
+        case 'help':
+        default:
+            console.log(`
+Medal Overlay Framework - Patcher
+
+Usage:
+  node patch.js [command]
+
+Commands:
+  --patch       Patch Medal (default, auto-detects layout)
+  --unpatch     Remove the patch
+  --status      Show patch status
+  --watch       Patch and watch for Medal updates (auto-repatch)
+  --help        Show this help
+
+Requires: npm install -g @electron/asar (for asar-based Medal installs)
+`);
+            break;
+    }
+}
+
+main().catch(e => { error(e.message); process.exit(1); });
+
+```
+
+`sdk/cpp/mof.h`:
+
+```h
+/**
+ * Medal Overlay Framework - C++ SDK v4.0
+ *
+ * Header-only library. Connect to the overlay bridge pipe and draw overlays
+ * through Medal's whitelisted in-game overlay. Supports interactive
+ * menus with tabs, toggles, sliders, selects, buttons, color pickers.
+ *
+ * Usage:
+ *   #include "mof.h"
+ *
+ *   mof::Overlay overlay;
+ *   overlay.connect();
+ *   overlay.identify("my-cheat");
+ *
+ *   // Define a menu (opens with INSERT in-game)
+ *   auto menu = mof::Menu("My Cheat", {
+ *       mof::Tab("Aimbot", {
+ *           mof::Toggle("aim_on", "Enabled", true),
+ *           mof::Slider("aim_fov", "FOV", 120, 1, 360),
+ *           mof::Select("aim_bone", "Bone", "head", {"head", "neck", "chest"}),
+ *       }),
+ *       mof::Tab("ESP", {
+ *           mof::Toggle("esp_box", "Boxes", true),
+ *           mof::Slider("esp_dist", "Max Distance", 200, 10, 500),
+ *       }),
+ *   });
+ *   overlay.set_menu(menu);
+ *
+ *   // Handle menu changes
+ *   overlay.on_menu_change([](const std::string& id, const mof::Value& val) {
+ *       printf("%s = %s\n", id.c_str(), val.to_string().c_str());
+ *   });
+ *
+ *   // Render loop
+ *   while (true) {
+ *       auto frame = overlay.frame();   // RAII begin/end
+ *       overlay.draw_text(100, 100, "Hello", mof::colors::green, 16);
+ *       overlay.draw_esp(x, y, w, h, { .name = "Player", .health = 0.75f });
+ *   }
+ *
+ * Requirements: Windows SDK, C++17
+ * No external dependencies.
+ */
+
+#pragma once
+
+#ifndef MOF_SDK_H
+#define MOF_SDK_H
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <wincrypt.h>
+
+#pragma comment(lib, "advapi32.lib")
+
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <vector>
+#include <mutex>
+#include <atomic>
+#include <thread>
+#include <chrono>
+#include <functional>
+#include <initializer_list>
+
+namespace mof {
+
+// ── Pipe Name Derivation ────────────────────────────────────
+// Deterministic per-machine pipe name. Must match bridge algorithm.
+
+namespace detail {
+    inline std::string md5hex12(const std::string& input) {
+        HCRYPTPROV hProv = 0;
+        HCRYPTHASH hHash = 0;
+        BYTE hash[16] = {};
+
+        CryptAcquireContextA(&hProv, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
+        CryptCreateHash(hProv, CALG_MD5, 0, 0, &hHash);
+        CryptHashData(hHash, reinterpret_cast<const BYTE*>(input.c_str()),
+                       static_cast<DWORD>(input.size()), 0);
+        DWORD hashLen = 16;
+        CryptGetHashParam(hHash, HP_HASHVAL, hash, &hashLen, 0);
+        CryptDestroyHash(hHash);
+        CryptReleaseContext(hProv, 0);
+
+        char hex[25];
+        for (int i = 0; i < 6; i++)
+            snprintf(hex + i * 2, 3, "%02x", hash[i]);
+        return std::string(hex, 12);
+    }
+} // forward declare detail
+
+inline std::string derive_pipe_name() {
+    char cn[256] = {}, un[256] = {};
+    GetEnvironmentVariableA("COMPUTERNAME", cn, sizeof(cn));
+    GetEnvironmentVariableA("USERNAME", un, sizeof(un));
+    std::string seed = std::string(cn) + un + "medal-ext-v2";
+    return "\\\\.\\pipe\\MedalExtHost-" + detail::md5hex12(seed);
+}
+
+// ── Color Helpers ────────────────────────────────────────────
+
+constexpr uint32_t rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) {
+    return (uint32_t(a) << 24) | (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b);
+}
+
+constexpr uint32_t rgb(uint8_t r, uint8_t g, uint8_t b) { return rgba(r, g, b, 255); }
+
+namespace colors {
+    constexpr uint32_t white       = rgba(255, 255, 255);
+    constexpr uint32_t black       = rgba(0, 0, 0);
+    constexpr uint32_t red         = rgba(255, 0, 0);
+    constexpr uint32_t green       = rgba(0, 255, 0);
+    constexpr uint32_t blue        = rgba(0, 0, 255);
+    constexpr uint32_t yellow      = rgba(255, 255, 0);
+    constexpr uint32_t cyan        = rgba(0, 255, 255);
+    constexpr uint32_t magenta     = rgba(255, 0, 255);
+    constexpr uint32_t orange      = rgba(255, 165, 0);
+    constexpr uint32_t pink        = rgba(255, 105, 180);
+    constexpr uint32_t purple      = rgba(128, 0, 128);
+    constexpr uint32_t gray        = rgba(128, 128, 128);
+    constexpr uint32_t transparent = rgba(0, 0, 0, 0);
+
+    constexpr uint32_t enemy       = rgba(255, 50, 50);
+    constexpr uint32_t team        = rgba(50, 255, 50);
+    constexpr uint32_t visible     = rgba(255, 255, 0);
+    constexpr uint32_t hidden      = rgba(255, 0, 0);
+    constexpr uint32_t bone        = rgba(255, 255, 255);
+    constexpr uint32_t crosshair   = rgba(0, 255, 0);
+}
+
+// ── ESP Config ───────────────────────────────────────────────
+
+struct ESPConfig {
+    const char* name       = nullptr;
+    float       health     = -1.0f;
+    float       distance   = -1.0f;
+    const char* info       = nullptr;
+    const char* style      = "corner";
+    uint32_t    color      = colors::enemy;
+    uint32_t    nameColor  = colors::white;
+    float       thickness  = 2.0f;
+};
+
+struct CrosshairConfig {
+    float    x         = -1;
+    float    y         = -1;
+    float    size      = 10;
+    float    gap       = 4;
+    float    thickness = 1;
+    uint32_t color     = colors::crosshair;
+    bool     dot       = false;
+    bool     outline   = true;
+};
+
+// ── Value (variant for menu events) ──────────────────────────
+
+struct Value {
+    enum Type { None, Bool, Number, String } type = None;
+    bool        b = false;
+    double      n = 0;
+    std::string s;
+
+    Value() = default;
+    Value(bool v)               : type(Bool),   b(v) {}
+    Value(int v)                : type(Number), n(v) {}
+    Value(float v)              : type(Number), n(v) {}
+    Value(double v)             : type(Number), n(v) {}
+    Value(const char* v)        : type(String), s(v ? v : "") {}
+    Value(const std::string& v) : type(String), s(v) {}
+
+    bool   as_bool()   const { return type == Bool ? b : (type == Number ? n != 0 : !s.empty()); }
+    double as_number() const { return type == Number ? n : (type == Bool ? (b ? 1.0 : 0.0) : 0.0); }
+    int    as_int()    const { return static_cast<int>(as_number()); }
+    float  as_float()  const { return static_cast<float>(as_number()); }
+
+    std::string to_string() const {
+        switch (type) {
+            case Bool:   return b ? "true" : "false";
+            case Number: { char buf[32]; snprintf(buf, 32, "%g", n); return buf; }
+            case String: return s;
+            default:     return "";
+        }
+    }
+};
+
+// ── Menu Item Types ──────────────────────────────────────────
+
+struct MenuItem {
+    std::string id;
+    std::string type;
+    std::string label;
+    Value       value;    // Toggle: bool, Slider: number, Select/Color: string
+    double      min = 0, max = 100, step = 1;
+    std::vector<std::string> options; // Select
+    std::string text;     // Button text
+    std::string color;    // Label color
+
+    std::string to_json() const {
+        std::string j = "{";
+        auto add_str = [&](const char* k, const std::string& v) {
+            if (v.empty()) return;
+            if (j.back() != '{') j += ',';
+            j += '"'; j += k; j += "\":\""; j += json_escape(v); j += '"';
+        };
+        auto add_num = [&](const char* k, double v) {
+            if (j.back() != '{') j += ',';
+            char buf[32]; snprintf(buf, 32, "%g", v);
+            j += '"'; j += k; j += "\":"; j += buf;
+        };
+        auto add_bool = [&](const char* k, bool v) {
+            if (j.back() != '{') j += ',';
+            j += '"'; j += k; j += "\":"; j += v ? "true" : "false";
+        };
+
+        add_str("id", id);
+        add_str("type", type);
+        add_str("label", label);
+
+        if (type == "toggle")     add_bool("value", value.as_bool());
+        else if (type == "slider") {
+            add_num("value", value.as_number());
+            add_num("min", min); add_num("max", max); add_num("step", step);
+        }
+        else if (type == "select") {
+            add_str("value", value.s);
+            if (!options.empty()) {
+                if (j.back() != '{') j += ',';
+                j += "\"options\":[";
+                for (size_t i = 0; i < options.size(); ++i) {
+                    if (i) j += ',';
+                    j += '"'; j += json_escape(options[i]); j += '"';
+                }
+                j += ']';
+            }
+        }
+        else if (type == "color")  add_str("value", value.s);
+        else if (type == "button") add_str("text", text);
+        else if (type == "label")  add_str("color", color);
+
+        j += '}';
+        return j;
+    }
+
+private:
+    static std::string json_escape(const std::string& s) {
+        std::string out;
+        out.reserve(s.size());
+        for (char c : s) {
+            switch (c) {
+                case '"':  out += "\\\""; break;
+                case '\\': out += "\\\\"; break;
+                case '\n': out += "\\n";  break;
+                case '\r': out += "\\r";  break;
+                case '\t': out += "\\t";  break;
+                default:   out += c;      break;
+            }
+        }
+        return out;
+    }
+};
+
+// ── Item Constructors ────────────────────────────────────────
+
+inline MenuItem Toggle(const char* id, const char* label, bool value = false) {
+    return { id, "toggle", label, Value(value) };
+}
+
+inline MenuItem Slider(const char* id, const char* label, double value,
+                       double min = 0, double max = 100, double step = 1) {
+    MenuItem m; m.id = id; m.type = "slider"; m.label = label;
+    m.value = Value(value); m.min = min; m.max = max; m.step = step;
+    return m;
+}
+
+inline MenuItem Select(const char* id, const char* label, const char* value,
+                       std::initializer_list<const char*> options) {
+    MenuItem m; m.id = id; m.type = "select"; m.label = label;
+    m.value = Value(value);
+    for (auto o : options) m.options.emplace_back(o);
+    return m;
+}
+
+inline MenuItem Button(const char* id, const char* label, const char* text = "Click") {
+    MenuItem m; m.id = id; m.type = "button"; m.label = label; m.text = text;
+    return m;
+}
+
+inline MenuItem ColorPicker(const char* id, const char* label, const char* value = "#ff0000") {
+    return { id, "color", label, Value(value) };
+}
+
+inline MenuItem Label(const char* text, const char* color = "#666") {
+    MenuItem m; m.type = "label"; m.label = text; m.color = color;
+    return m;
+}
+
+inline MenuItem Separator() {
+    return { "", "separator", "" };
+}
+
+// ── Tab / Menu ───────────────────────────────────────────────
+
+struct Tab {
+    std::string            name;
+    std::vector<MenuItem>  items;
+
+    Tab() = default;
+    Tab(const char* name, std::initializer_list<MenuItem> items)
+        : name(name), items(items) {}
+
+    std::string to_json() const {
+        std::string j = "{\"name\":\"" + name + "\",\"items\":[";
+        for (size_t i = 0; i < items.size(); ++i) {
+            if (i) j += ',';
+            j += items[i].to_json();
+        }
+        j += "]}";
+        return j;
+    }
+};
+
+struct Menu {
+    std::string       title;
+    std::vector<Tab>  tabs;
+
+    Menu() = default;
+
+    Menu(const char* title, std::initializer_list<Tab> tabs)
+        : title(title), tabs(tabs) {}
+
+    /// Flat menu (single "Settings" tab)
+    Menu(const char* title, std::initializer_list<MenuItem> items)
+        : title(title) {
+        tabs.push_back(Tab{"Settings", items});
+    }
+
+    MenuItem* get(const std::string& id) {
+        for (auto& tab : tabs)
+            for (auto& item : tab.items)
+                if (item.id == id) return &item;
+        return nullptr;
+    }
+
+    void set_value(const std::string& id, const Value& v) {
+        if (auto* m = get(id)) m->value = v;
+    }
+
+    std::string to_json() const {
+        std::string j = "{\"title\":\"" + title + "\",\"tabs\":[";
+        for (size_t i = 0; i < tabs.size(); ++i) {
+            if (i) j += ',';
+            j += tabs[i].to_json();
+        }
+        j += "]}";
+        return j;
+    }
+};
+
+// ── Internal JSON Parsing (minimal, no dependencies) ─────────
+
+namespace detail {
+
+// Skip whitespace, return current char
+inline char peek(const char*& p) {
+    while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r') ++p;
+    return *p;
+}
+
+inline std::string parse_string(const char*& p) {
+    if (*p != '"') return "";
+    ++p;
+    std::string s;
+    while (*p && *p != '"') {
+        if (*p == '\\') {
+            ++p;
+            switch (*p) {
+                case '"':  s += '"';  break;
+                case '\\': s += '\\'; break;
+                case 'n':  s += '\n'; break;
+                case 'r':  s += '\r'; break;
+                case 't':  s += '\t'; break;
+                default:   s += *p;   break;
+            }
+        } else {
+            s += *p;
+        }
+        ++p;
+    }
+    if (*p == '"') ++p;
+    return s;
+}
+
+inline Value parse_value(const char*& p) {
+    peek(p);
+    if (*p == '"') return Value(parse_string(p));
+    if (*p == 't') { p += 4; return Value(true); }
+    if (*p == 'f') { p += 5; return Value(false); }
+    if (*p == 'n') { p += 4; return Value(); }
+    // Number
+    char* end;
+    double d = strtod(p, &end);
+    p = end;
+    return Value(d);
+}
+
+// Parse a flat JSON object into key-value pairs
+struct JsonObj {
+    struct KV { std::string key; Value val; };
+    std::vector<KV> items;
+
+    Value get(const char* key, Value def = {}) const {
+        for (auto& kv : items)
+            if (kv.key == key) return kv.val;
+        return def;
+    }
+    std::string get_str(const char* key) const { return get(key).s; }
+    double      get_num(const char* key) const { return get(key).as_number(); }
+    bool        get_bool(const char* key) const { return get(key).as_bool(); }
+};
+
+inline JsonObj parse_obj(const char*& p) {
+    JsonObj obj;
+    peek(p);
+    if (*p != '{') return obj;
+    ++p;
+    while (peek(p) && *p != '}') {
+        if (*p == ',') { ++p; continue; }
+        std::string key = parse_string(p);
+        peek(p);
+        if (*p == ':') ++p;
+        peek(p);
+        // Handle nested objects/arrays as raw string (skip balanced)
+        if (*p == '{' || *p == '[') {
+            char open = *p, close = (*p == '{') ? '}' : ']';
+            int depth = 1; const char* start = p; ++p;
+            while (*p && depth > 0) {
+                if (*p == open) ++depth;
+                else if (*p == close) --depth;
+                else if (*p == '"') { parse_string(p); continue; }
+                ++p;
+            }
+            obj.items.push_back({key, Value(std::string(start, p))});
+        } else {
+            obj.items.push_back({key, parse_value(p)});
+        }
+    }
+    if (*p == '}') ++p;
+    return obj;
+}
+
+inline JsonObj parse(const std::string& json) {
+    const char* p = json.c_str();
+    return parse_obj(p);
+}
+
+class JsonWriter {
+    std::string buf_;
+public:
+    JsonWriter() { buf_.reserve(256); buf_ += '{'; }
+
+    JsonWriter& add(const char* key, int val) {
+        comma(); buf_ += '"'; buf_ += key; buf_ += "\":"; buf_ += std::to_string(val); return *this;
+    }
+    JsonWriter& add(const char* key, float val) {
+        comma(); buf_ += '"'; buf_ += key; buf_ += "\":";
+        char num[32]; snprintf(num, 32, "%.2f", val); buf_ += num; return *this;
+    }
+    JsonWriter& add(const char* key, uint32_t val) {
+        comma(); buf_ += '"'; buf_ += key; buf_ += "\":"; buf_ += std::to_string(val); return *this;
+    }
+    JsonWriter& add(const char* key, bool val) {
+        comma(); buf_ += '"'; buf_ += key; buf_ += "\":"; buf_ += val ? "true" : "false"; return *this;
+    }
+    JsonWriter& add(const char* key, const char* val) {
+        if (!val) return *this;
+        comma(); buf_ += '"'; buf_ += key; buf_ += "\":\"";
+        for (const char* p = val; *p; ++p) {
+            switch (*p) {
+                case '"':  buf_ += "\\\""; break;
+                case '\\': buf_ += "\\\\"; break;
+                case '\n': buf_ += "\\n";  break;
+                default:   buf_ += *p;     break;
+            }
+        }
+        buf_ += '"'; return *this;
+    }
+    JsonWriter& add(const char* key, const std::string& val) { return add(key, val.c_str()); }
+
+    /// Add a pre-formatted JSON value (array, object, raw number string)
+    JsonWriter& add_raw(const char* key, const std::string& raw_json) {
+        comma(); buf_ += '"'; buf_ += key; buf_ += "\":"; buf_ += raw_json; return *this;
+    }
+
+    std::string finish() { buf_ += "}\n"; return std::move(buf_); }
+private:
+    void comma() { if (buf_.back() != '{') buf_ += ','; }
+};
+
+} // namespace detail
+
+// ── Overlay Class ────────────────────────────────────────────
+
+class Overlay {
+public:
+    // Public state (populated from welcome message)
+    int         client_id      = -1;
+    int         screen_width   = 0;
+    int         screen_height  = 0;
+    bool        overlay_ready  = false;
+    bool        menu_open      = false;
+    std::string menu_hotkey    = "Insert";
+
+    float cx() const { return screen_width  / 2.0f; }
+    float cy() const { return screen_height / 2.0f; }
+
+    // Callback types
+    using MenuToggleCb  = std::function<void(bool open)>;
+    using MenuChangeCb  = std::function<void(const std::string& id, const Value& value)>;
+    using MenuActionCb  = std::function<void(const std::string& id)>;
+
+    Overlay() = default;
+    ~Overlay() { disconnect(); }
+
+    Overlay(const Overlay&) = delete;
+    Overlay& operator=(const Overlay&) = delete;
+
+    // ── Connection ──────────────────────────────────────────
+
+    bool connect(int timeout_ms = 5000, const char* pipe_name = nullptr) {
+        std::lock_guard<std::mutex> lock(write_mutex_);
+        if (connected_) return true;
+
+        std::string pname = pipe_name ? std::string(pipe_name) : derive_pipe_name();
+
+        auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeout_ms);
+
+        while (std::chrono::steady_clock::now() < deadline) {
+            pipe_ = CreateFileA(pname.c_str(), GENERIC_READ | GENERIC_WRITE,
+                                0, nullptr, OPEN_EXISTING, 0, nullptr);
+
+            if (pipe_ != INVALID_HANDLE_VALUE) {
+                DWORD mode = PIPE_READMODE_BYTE;
+                SetNamedPipeHandleState(pipe_, &mode, nullptr, nullptr);
+                connected_ = true;
+
+                // Read welcome message (synchronous, before reader thread starts)
+                std::string welcome_str = read_line();
+                if (!welcome_str.empty()) {
+                    auto w = detail::parse(welcome_str);
+                    client_id      = static_cast<int>(w.get_num("clientId"));
+                    overlay_ready  = w.get_bool("overlayReady");
+                    menu_open      = w.get_bool("menuOpen");
+                    menu_hotkey    = w.get_str("menuHotkey");
+                    auto screen_raw = w.get("screen").s;
+                    if (!screen_raw.empty()) {
+                        auto scr = detail::parse(screen_raw);
+                        screen_width  = static_cast<int>(scr.get_num("width"));
+                        screen_height = static_cast<int>(scr.get_num("height"));
+                    }
+                }
+
+                // Start background reader
+                running_ = true;
+                reader_thread_ = std::thread(&Overlay::reader_loop, this);
+                return true;
+            }
+
+            DWORD err = GetLastError();
+            if (err == ERROR_PIPE_BUSY)
+                WaitNamedPipeA(pname.c_str(), 1000);
+            else
+                std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        }
+        return false;
+    }
+
+    void disconnect() {
+        running_ = false;
+        {
+            std::lock_guard<std::mutex> lock(write_mutex_);
+            if (pipe_ != INVALID_HANDLE_VALUE) {
+                CloseHandle(pipe_);
+                pipe_ = INVALID_HANDLE_VALUE;
+            }
+            connected_ = false;
+        }
+        if (reader_thread_.joinable())
+            reader_thread_.join();
+    }
+
+    bool is_connected() const { return connected_; }
+
+    bool ensure_connected(int timeout_ms = 1000) {
+        if (connected_) return true;
+        return connect(timeout_ms);
+    }
+
+    void identify(const char* name) {
+        send(detail::JsonWriter().add("type", "identify").add("name", name).finish());
+    }
+
+    // ── Menu API ────────────────────────────────────────────
+
+    void set_menu(const Menu& menu) {
+        std::string msg = "{\"type\":\"set_menu\",\"menu\":" + menu.to_json() + "}\n";
+        send(msg);
+    }
+
+    void clear_menu() {
+        send("{\"type\":\"clear_menu\"}\n");
+    }
+
+    void update_menu(const Menu& menu) {
+        set_menu(menu); // re-push
+    }
+
+    void open_menu() {
+        send("{\"type\":\"menu_open\"}\n");
+    }
+
+    void close_menu() {
+        send("{\"type\":\"menu_close\"}\n");
+    }
+
+    void toggle_menu() {
+        send("{\"type\":\"menu_toggle\"}\n");
+    }
+
+    void set_hotkey(const char* key) {
+        send(detail::JsonWriter().add("type", "set_hotkey").add("key", key).finish());
+    }
+
+    /**
+     * Set menu appearance. Supported keys:
+     *   opacity      (float)  — 0.1-1.0
+     *   accentColor  (string) — hex e.g. "#ff4466"
+     *   width        (int)    — 240-800
+     *   fontSize     (int)    — 8-24
+     *   borderRadius (int)    — 0-24
+     *   compact      (bool)
+     */
+    void set_menu_style(std::initializer_list<std::pair<const char*, Value>> props) {
+        std::string j = "{\"type\":\"set_menu_style\",\"style\":{";
+        bool first = true;
+        for (auto& [k, v] : props) {
+            if (!first) j += ',';
+            j += '"'; j += k; j += "\":";
+            switch (v.type) {
+                case Value::Bool:   j += v.b ? "true" : "false"; break;
+                case Value::Number: { char buf[32]; snprintf(buf, 32, "%g", v.n); j += buf; } break;
+                case Value::String: j += '"'; j += v.s; j += '"'; break;
+                default: j += "null"; break;
+            }
+            first = false;
+        }
+        j += "}}\n";
+        send(j);
+    }
+
+    // ── Event Callbacks ─────────────────────────────────────
+
+    void on_menu_toggle(MenuToggleCb cb)  { on_toggle_cb_  = std::move(cb); }
+    void on_menu_change(MenuChangeCb cb)  { on_change_cb_  = std::move(cb); }
+    void on_menu_action(MenuActionCb cb)  { on_action_cb_  = std::move(cb); }
+
+    // ── Frame Management ────────────────────────────────────
+
+    void begin_frame() { send("{\"type\":\"begin_frame\"}\n"); }
+    void end_frame()   { send("{\"type\":\"end_frame\"}\n"); }
+
+    /// RAII frame scope: auto begin/end
+    class FrameGuard {
+        Overlay& o_;
+    public:
+        explicit FrameGuard(Overlay& o) : o_(o) { o_.begin_frame(); }
+        ~FrameGuard() { o_.end_frame(); }
+        FrameGuard(const FrameGuard&) = delete;
+    };
+
+    [[nodiscard]] FrameGuard frame() { return FrameGuard(*this); }
+
+    // ── Drawing Primitives ──────────────────────────────────
+
+    void draw_text(float x, float y, const char* text,
+                   uint32_t color = colors::white, float size = 14.0f,
+                   const char* align = "left", bool outline = true, bool bold = false) {
+        send(detail::JsonWriter()
+            .add("type", "text").add("x", x).add("y", y)
+            .add("text", text).add("color", color).add("size", size)
+            .add("align", align).add("outline", outline).add("bold", bold)
+            .finish());
+    }
+
+    void draw_rect(float x, float y, float w, float h,
+                   uint32_t color = colors::white, float thickness = 1.0f) {
+        send(detail::JsonWriter()
+            .add("type", "rect").add("x", x).add("y", y).add("w", w).add("h", h)
+            .add("color", color).add("thickness", thickness).finish());
+    }
+
+    void draw_filled_rect(float x, float y, float w, float h, uint32_t color = colors::white) {
+        send(detail::JsonWriter()
+            .add("type", "filled_rect").add("x", x).add("y", y).add("w", w).add("h", h)
+            .add("color", color).finish());
+    }
+
+    void draw_line(float x1, float y1, float x2, float y2,
+                   uint32_t color = colors::white, float thickness = 1.0f) {
+        send(detail::JsonWriter()
+            .add("type", "line").add("x1", x1).add("y1", y1).add("x2", x2).add("y2", y2)
+            .add("color", color).add("thickness", thickness).finish());
+    }
+
+    void draw_circle(float x, float y, float radius,
+                     uint32_t color = colors::white, float thickness = 1.0f, bool filled = false) {
+        send(detail::JsonWriter()
+            .add("type", "circle").add("x", x).add("y", y).add("r", radius)
+            .add("color", color).add("thickness", thickness).add("filled", filled).finish());
+    }
+
+    void draw_corner_box(float x, float y, float w, float h,
+                         uint32_t color = colors::enemy, float thickness = 2.0f) {
+        send(detail::JsonWriter()
+            .add("type", "corner_box").add("x", x).add("y", y).add("w", w).add("h", h)
+            .add("color", color).add("thickness", thickness).finish());
+    }
+
+    // ── High-Level Drawing ──────────────────────────────────
+
+    void draw_esp(float x, float y, float w, float h, const ESPConfig& cfg = {}) {
+        auto json = detail::JsonWriter()
+            .add("type", "esp").add("x", x).add("y", y).add("w", w).add("h", h)
+            .add("color", cfg.color).add("thickness", cfg.thickness).add("style", cfg.style);
+        if (cfg.name)        json.add("name", cfg.name);
+        if (cfg.nameColor != colors::white) json.add("nameColor", cfg.nameColor);
+        if (cfg.health >= 0) json.add("health", cfg.health);
+        if (cfg.distance >= 0) json.add("distance", cfg.distance);
+        if (cfg.info)        json.add("info", cfg.info);
+        send(json.finish());
+    }
+
+    void draw_crosshair(const CrosshairConfig& cfg = {}) {
+        auto json = detail::JsonWriter()
+            .add("type", "crosshair").add("size", cfg.size).add("gap", cfg.gap)
+            .add("thickness", cfg.thickness).add("color", cfg.color)
+            .add("dot", cfg.dot).add("outline", cfg.outline);
+        if (cfg.x >= 0) json.add("x", cfg.x);
+        if (cfg.y >= 0) json.add("y", cfg.y);
+        send(json.finish());
+    }
+
+    void draw_snapline(float target_x, float target_y,
+                       uint32_t color = colors::enemy, float thickness = 1.0f) {
+        draw_line(cx(), cy(), target_x, target_y, color, thickness);
+    }
+
+    void draw_fov_circle(float radius, uint32_t color = rgba(255, 255, 255, 80),
+                         float thickness = 1.0f) {
+        draw_circle(cx(), cy(), radius, color, thickness);
+    }
+
+    void draw_watermark(const char* text, float x = 10, float y = 10,
+                        uint32_t text_color = colors::white,
+                        uint32_t bg_color = rgba(0, 0, 0, 180)) {
+        float tw = static_cast<float>(strlen(text)) * 7.0f + 12.0f;
+        draw_filled_rect(x - 4, y - 2, tw, 18, bg_color);
+        draw_text(x, y, text, text_color, 13.0f);
+    }
+
+    void draw_bar(float x, float y, float w, float h,
+                  float progress, uint32_t fg = colors::green,
+                  uint32_t bg = rgba(0, 0, 0, 170), bool vertical = false) {
+        draw_filled_rect(x, y, w, h, bg);
+        float p = progress < 0 ? 0 : (progress > 1 ? 1 : progress);
+        if (vertical) {
+            float filled = h * p;
+            draw_filled_rect(x, y + h - filled, w, filled, fg);
+        } else {
+            draw_filled_rect(x, y, w * p, h, fg);
+        }
+    }
+
+    // ── Phase 3: Advanced Drawing ──────────────────────────────
+
+    void draw_rounded_rect(float x, float y, float w, float h,
+                           float radius = 8.0f, uint32_t color = colors::white,
+                           bool filled = true, float thickness = 1.0f, int layer = 0) {
+        auto json = detail::JsonWriter()
+            .add("type", "rounded_rect").add("x", x).add("y", y)
+            .add("w", w).add("h", h).add("radius", radius)
+            .add("color", color).add("filled", filled).add("thickness", thickness);
+        if (layer) json.add("layer", layer);
+        send(json.finish());
+    }
+
+    /// Gradient stop: { position (0-1), ARGB color }
+    struct GradientStop {
+        float    pos;
+        uint32_t color;
+    };
+
+    void draw_gradient_rect(float x, float y, float w, float h,
+                            const std::vector<GradientStop>& stops,
+                            float angle = 0, const char* gradient_type = "linear",
+                            float radius = 0, int layer = 0) {
+        // Serialize stops as [[pos, color], ...]
+        std::string stops_json = "[";
+        for (size_t i = 0; i < stops.size(); ++i) {
+            if (i) stops_json += ',';
+            char buf[64]; snprintf(buf, 64, "[%.2f,%u]", stops[i].pos, stops[i].color);
+            stops_json += buf;
+        }
+        stops_json += ']';
+
+        auto json = detail::JsonWriter()
+            .add("type", "gradient_rect").add("x", x).add("y", y)
+            .add("w", w).add("h", h).add("angle", angle)
+            .add("gradientType", gradient_type).add("radius", radius);
+        json.add_raw("stops", stops_json);
+        if (layer) json.add("layer", layer);
+        send(json.finish());
+    }
+
+    void draw_arc(float x, float y, float radius,
+                  float start_angle = 0, float end_angle = 360,
+                  uint32_t color = colors::white, float thickness = 1.0f,
+                  bool filled = false, bool pie = false, int layer = 0) {
+        auto json = detail::JsonWriter()
+            .add("type", "arc").add("x", x).add("y", y).add("r", radius)
+            .add("startAngle", start_angle).add("endAngle", end_angle)
+            .add("color", color).add("thickness", thickness)
+            .add("filled", filled).add("pie", pie);
+        if (layer) json.add("layer", layer);
+        send(json.finish());
+    }
+
+    void draw_bezier(float x1, float y1, float x2, float y2,
+                     float cx1, float cy1,
+                     float cx2 = -1, float cy2 = -1,
+                     uint32_t color = colors::white, float thickness = 1.0f, int layer = 0) {
+        auto json = detail::JsonWriter()
+            .add("type", "bezier").add("x1", x1).add("y1", y1)
+            .add("x2", x2).add("y2", y2).add("cx1", cx1).add("cy1", cy1)
+            .add("color", color).add("thickness", thickness);
+        if (cx2 >= 0 && cy2 >= 0) { json.add("cx2", cx2).add("cy2", cy2); }
+        if (layer) json.add("layer", layer);
+        send(json.finish());
+    }
+
+    /// Points: flat array of [x,y] pairs
+    void draw_polygon(const std::vector<std::pair<float,float>>& points,
+                      uint32_t color = colors::white, bool filled = false,
+                      float thickness = 1.0f, int layer = 0) {
+        std::string pts = "[";
+        for (size_t i = 0; i < points.size(); ++i) {
+            if (i) pts += ',';
+            char buf[48]; snprintf(buf, 48, "[%.1f,%.1f]", points[i].first, points[i].second);
+            pts += buf;
+        }
+        pts += ']';
+
+        auto json = detail::JsonWriter()
+            .add("type", "polygon").add("color", color)
+            .add("filled", filled).add("thickness", thickness);
+        json.add_raw("points", pts);
+        if (layer) json.add("layer", layer);
+        send(json.finish());
+    }
+
+    void draw_text_wrapped(float x, float y, const char* text,
+                           float max_width = 200, uint32_t color = colors::white,
+                           float size = 14.0f, bool bold = false, bool outline = true,
+                           int layer = 0) {
+        auto json = detail::JsonWriter()
+            .add("type", "text_wrapped").add("x", x).add("y", y)
+            .add("text", text).add("maxWidth", max_width)
+            .add("color", color).add("size", size)
+            .add("bold", bold).add("outline", outline);
+        if (layer) json.add("layer", layer);
+        send(json.finish());
+    }
+
+    /// Pre-load a base64-encoded image into the renderer cache
+    void load_image(const char* key, const char* base64_data) {
+        auto json = detail::JsonWriter()
+            .add("type", "load_image").add("key", key).add("data", base64_data);
+        send(json.finish());
+    }
+
+    void draw_image(const char* key, float x, float y,
+                    float w = -1, float h = -1,
+                    float rotation = 0, float opacity = 1.0f,
+                    int layer = 0) {
+        auto json = detail::JsonWriter()
+            .add("type", "image").add("key", key).add("x", x).add("y", y)
+            .add("rotation", rotation).add("opacity", opacity);
+        if (w > 0) json.add("w", w);
+        if (h > 0) json.add("h", h);
+        if (layer) json.add("layer", layer);
+        send(json.finish());
+    }
+
+    /// Draw a skeleton from joint positions and bone connections
+    void draw_bones(const std::vector<std::pair<float,float>>& joints,
+                    const std::vector<std::pair<int,int>>& connections,
+                    uint32_t color = colors::bone, float thickness = 2.0f,
+                    float joint_radius = 3.0f, bool show_joints = true, int layer = 0) {
+        std::string j_str = "[";
+        for (size_t i = 0; i < joints.size(); ++i) {
+            if (i) j_str += ',';
+            char buf[48]; snprintf(buf, 48, "[%.1f,%.1f]", joints[i].first, joints[i].second);
+            j_str += buf;
+        }
+        j_str += ']';
+
+        std::string c_str = "[";
+        for (size_t i = 0; i < connections.size(); ++i) {
+            if (i) c_str += ',';
+            char buf[32]; snprintf(buf, 32, "[%d,%d]", connections[i].first, connections[i].second);
+            c_str += buf;
+        }
+        c_str += ']';
+
+        auto json = detail::JsonWriter()
+            .add("type", "bones").add("color", color)
+            .add("thickness", thickness).add("jointRadius", joint_radius)
+            .add("showJoints", show_joints);
+        json.add_raw("joints", j_str).add_raw("connections", c_str);
+        if (layer) json.add("layer", layer);
+        send(json.finish());
+    }
+
+    // ── Animation Helpers ──────────────────────────────────────
+    // Build anim JSON strings to embed in draw commands via add_raw("anim", ...)
+
+    static std::string anim_fade(float duration = 500, float from = 0, float to = 1) {
+        char buf[128]; snprintf(buf, 128, "{\"type\":\"fade\",\"duration\":%.0f,\"from\":%.2f,\"to\":%.2f}", duration, from, to);
+        return buf;
+    }
+
+    static std::string anim_pulse(float period = 1000, float min_a = 0.3f, float max_a = 1.0f) {
+        char buf[128]; snprintf(buf, 128, "{\"type\":\"pulse\",\"period\":%.0f,\"min\":%.2f,\"max\":%.2f}", period, min_a, max_a);
+        return buf;
+    }
+
+    static std::string anim_slide(float duration = 300, float from_x = 0, float from_y = 0) {
+        char buf[128]; snprintf(buf, 128, "{\"type\":\"slide\",\"duration\":%.0f,\"fromX\":%.1f,\"fromY\":%.1f}", duration, from_x, from_y);
+        return buf;
+    }
+
+    static std::string anim_blink(float period = 500, float duty = 0.5f) {
+        char buf[64]; snprintf(buf, 64, "{\"type\":\"blink\",\"period\":%.0f,\"duty\":%.2f}", period, duty);
+        return buf;
+    }
+
+private:
+    HANDLE            pipe_          = INVALID_HANDLE_VALUE;
+    std::mutex        write_mutex_;
+    std::atomic<bool> connected_     = false;
+    std::atomic<bool> running_       = false;
+    std::thread       reader_thread_;
+
+    MenuToggleCb      on_toggle_cb_;
+    MenuChangeCb      on_change_cb_;
+    MenuActionCb      on_action_cb_;
+
+    // ── Send ────────────────────────────────────────────────
+
+    bool send(const std::string& data) {
+        std::lock_guard<std::mutex> lock(write_mutex_);
+        if (!connected_ || pipe_ == INVALID_HANDLE_VALUE) return false;
+
+        DWORD written = 0;
+        BOOL ok = WriteFile(pipe_, data.c_str(), static_cast<DWORD>(data.size()), &written, nullptr);
+        if (!ok || written != data.size()) {
+            DWORD err = GetLastError();
+            if (err == ERROR_BROKEN_PIPE || err == ERROR_NO_DATA || err == ERROR_PIPE_NOT_CONNECTED) {
+                CloseHandle(pipe_);
+                pipe_ = INVALID_HANDLE_VALUE;
+                connected_ = false;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    // ── Receive ─────────────────────────────────────────────
+
+    std::string read_line() {
+        // Read until \n from pipe, using PeekNamedPipe first
+        std::string line;
+        char buf[1];
+        DWORD avail = 0, read = 0;
+
+        for (;;) {
+            if (!PeekNamedPipe(pipe_, nullptr, 0, nullptr, &avail, nullptr) || avail == 0) {
+                if (line.empty()) return "";
+                Sleep(1);
+                continue;
+            }
+            if (!ReadFile(pipe_, buf, 1, &read, nullptr) || read == 0) return line;
+            if (buf[0] == '\n') return line;
+            line += buf[0];
+        }
+    }
+
+    void reader_loop() {
+        char buf[4096];
+        std::string accum;
+
+        while (running_ && connected_) {
+            DWORD avail = 0;
+            if (!PeekNamedPipe(pipe_, nullptr, 0, nullptr, &avail, nullptr)) {
+                // Pipe error
+                connected_ = false;
+                break;
+            }
+
+            if (avail == 0) {
+                Sleep(5);
+                continue;
+            }
+
+            DWORD read = 0;
+            DWORD toRead = avail < sizeof(buf) ? avail : sizeof(buf) - 1;
+            if (!ReadFile(pipe_, buf, toRead, &read, nullptr) || read == 0) {
+                connected_ = false;
+                break;
+            }
+
+            accum.append(buf, read);
+
+            // Process complete lines
+            size_t pos;
+            while ((pos = accum.find('\n')) != std::string::npos) {
+                std::string line = accum.substr(0, pos);
+                accum.erase(0, pos + 1);
+
+                if (line.empty()) continue;
+                dispatch_event(line);
+            }
+        }
+    }
+
+    void dispatch_event(const std::string& json_str) {
+        auto obj = detail::parse(json_str);
+        std::string type = obj.get_str("type");
+
+        if (type == "menu_toggle") {
+            bool open = obj.get_bool("open");
+            menu_open = open;
+            if (on_toggle_cb_) on_toggle_cb_(open);
+        }
+        else if (type == "menu_change") {
+            std::string id = obj.get_str("id");
+            Value val = obj.get("value");
+            if (on_change_cb_) on_change_cb_(id, val);
+        }
+        else if (type == "menu_action") {
+            std::string id = obj.get_str("id");
+            if (on_action_cb_) on_action_cb_(id);
+        }
+        else if (type == "screen_size" || type == "overlay_ready") {
+            int w = static_cast<int>(obj.get_num("width"));
+            int h = static_cast<int>(obj.get_num("height"));
+            if (w > 0 && h > 0) { screen_width = w; screen_height = h; }
+            if (type == "overlay_ready") overlay_ready = true;
+        }
+        else if (type == "overlay_closed") {
+            overlay_ready = false;
+        }
+        else if (type == "hotkey_changed") {
+            menu_hotkey = obj.get_str("key");
+        }
+    }
+};
+
+// ── Global Instance ─────────────────────────────────────────
+
+inline Overlay& get() {
+    static Overlay instance;
+    return instance;
+}
+
+} // namespace mof
+
+#endif // MOF_SDK_H
+
+```
+
+`sdk/python/mof.py`:
+
+```py
+"""
+Medal Overlay Framework - Python SDK v4.0
+
+Connect to the overlay bridge pipe and draw overlays through Medal's
+whitelisted in-game overlay. Supports interactive menus via INSERT hotkey.
+
+Usage:
+    from mof import Overlay, Colors, rgba, Menu, Tab, Toggle, Slider
+
+    overlay = Overlay()
+    overlay.connect()
+
+    menu = Menu("My Cheat", [
+        Tab("Aimbot", [
+            Toggle("aim_enabled", "Enabled", True),
+            Slider("aim_fov", "FOV", 120, 1, 360),
+        ]),
+    ])
+    overlay.set_menu(menu)
+
+    @overlay.on_menu_change
+    def on_change(item_id, value):
+        print(f"{item_id} = {value}")
+
+Requirements: Python 3.7+, Windows only (named pipes)
+No external dependencies.
+"""
+
+import json
+import time
+import hashlib
+import os
+import getpass
+import threading
+from typing import Optional, List, Any, Callable
+
+import ctypes
+import ctypes.wintypes
+
+kernel32 = ctypes.windll.kernel32
+
+# Win32 constants
+GENERIC_READ = 0x80000000
+GENERIC_WRITE = 0x40000000
+OPEN_EXISTING = 3
+PIPE_READMODE_BYTE = 0
+FILE_FLAG_OVERLAPPED = 0x40000000
+INVALID_HANDLE_VALUE = ctypes.wintypes.HANDLE(-1).value
+ERROR_PIPE_BUSY = 231
+ERROR_NO_DATA = 232
+ERROR_PIPE_NOT_CONNECTED = 233
+ERROR_BROKEN_PIPE = 109
+ERROR_MORE_DATA = 234
+
+# PeekNamedPipe prototype
+kernel32.PeekNamedPipe.argtypes = [
+    ctypes.wintypes.HANDLE,  # hNamedPipe
+    ctypes.c_void_p,         # lpBuffer
+    ctypes.wintypes.DWORD,   # nBufferSize
+    ctypes.POINTER(ctypes.wintypes.DWORD),  # lpBytesRead
+    ctypes.POINTER(ctypes.wintypes.DWORD),  # lpTotalBytesAvail
+    ctypes.POINTER(ctypes.wintypes.DWORD),  # lpBytesLeftThisMessage
+]
+kernel32.PeekNamedPipe.restype = ctypes.wintypes.BOOL
+
+def _derive_pipe_name():
+    """Derive per-machine pipe name. Must match bridge algorithm."""
+    seed = (os.environ.get('COMPUTERNAME', '') +
+            os.environ.get('USERNAME', '') + 'medal-ext-v2')
+    h = hashlib.md5(seed.encode()).hexdigest()[:12]
+    return r'\\.\pipe\MedalExtHost-' + h
+
+PIPE_NAME = _derive_pipe_name()
+
+
+# ── Colors ────────────────────────────────────────────────────
+
+def rgba(r: int, g: int, b: int, a: int = 255) -> int:
+    return (a << 24) | (r << 16) | (g << 8) | b
+
+
+def rgb(r: int, g: int, b: int) -> int:
+    return rgba(r, g, b, 255)
+
+
+class Colors:
+    WHITE       = rgba(255, 255, 255)
+    BLACK       = rgba(0, 0, 0)
+    RED         = rgba(255, 0, 0)
+    GREEN       = rgba(0, 255, 0)
+    BLUE        = rgba(0, 0, 255)
+    YELLOW      = rgba(255, 255, 0)
+    CYAN        = rgba(0, 255, 255)
+    MAGENTA     = rgba(255, 0, 255)
+    ORANGE      = rgba(255, 165, 0)
+    PINK        = rgba(255, 105, 180)
+    PURPLE      = rgba(128, 0, 128)
+    GRAY        = rgba(128, 128, 128)
+    TRANSPARENT = rgba(0, 0, 0, 0)
+
+    ENEMY       = rgba(255, 50, 50)
+    TEAM        = rgba(50, 255, 50)
+    VISIBLE     = rgba(255, 255, 0)
+    HIDDEN      = rgba(255, 0, 0)
+    BONE        = rgba(255, 255, 255)
+    CROSSHAIR   = rgba(0, 255, 0)
+
+
+# ── Menu Definition Classes ───────────────────────────────────
+
+class MenuItem:
+    """Base class for menu items."""
+    def __init__(self, id: str, type: str, label: str, **kwargs):
+        self.id = id
+        self.type = type
+        self.label = label
+        self.extra = kwargs
+
+    def to_dict(self) -> dict:
+        d = {"id": self.id, "type": self.type, "label": self.label}
+        d.update(self.extra)
+        return d
+
+
+class Toggle(MenuItem):
+    def __init__(self, id: str, label: str, value: bool = False):
+        super().__init__(id, "toggle", label, value=value)
+        self.value = value
+
+
+class Slider(MenuItem):
+    def __init__(self, id: str, label: str, value: float = 50,
+                 min: float = 0, max: float = 100, step: float = 1):
+        super().__init__(id, "slider", label, value=value, min=min, max=max, step=step)
+        self.value = value
+
+
+class Select(MenuItem):
+    def __init__(self, id: str, label: str, value: str = "",
+                 options: List[str] = None):
+        super().__init__(id, "select", label, value=value, options=options or [])
+        self.value = value
+
+
+class Button(MenuItem):
+    def __init__(self, id: str, label: str, text: str = "Click"):
+        super().__init__(id, "button", label, text=text)
+
+
+class ColorPicker(MenuItem):
+    def __init__(self, id: str, label: str, value: str = "#ff0000"):
+        super().__init__(id, "color", label, value=value)
+        self.value = value
+
+
+class Label(MenuItem):
+    def __init__(self, label: str, color: str = "#666"):
+        super().__init__("", "label", label, color=color)
+
+
+class Separator(MenuItem):
+    def __init__(self):
+        super().__init__("", "separator", "")
+
+
+class Tab:
+    def __init__(self, name: str, items: List[MenuItem]):
+        self.name = name
+        self.items = items
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "items": [item.to_dict() for item in self.items],
+        }
+
+
+class Menu:
+    def __init__(self, title: str, tabs: List[Tab] = None, items: List[MenuItem] = None):
+        """
+        Create a menu definition.
+
+        Either pass tabs (for a tabbed menu) or items (for a flat menu).
+        If items is passed without tabs, a single "Settings" tab is created.
+        """
+        self.title = title
+        if tabs:
+            self.tabs = tabs
+        elif items:
+            self.tabs = [Tab("Settings", items)]
+        else:
+            self.tabs = []
+
+        # Build a flat lookup of all items by id
+        self._items = {}
+        for tab in self.tabs:
+            for item in tab.items:
+                if item.id:
+                    self._items[item.id] = item
+
+    def get(self, item_id: str) -> Optional[MenuItem]:
+        """Get a menu item by id."""
+        return self._items.get(item_id)
+
+    def get_value(self, item_id: str, default=None):
+        """Get the current value of a menu item."""
+        item = self._items.get(item_id)
+        if item and hasattr(item, 'value'):
+            return item.value
+        return default
+
+    def set_value(self, item_id: str, value):
+        """Set the value of a menu item (local only, doesn't push to overlay)."""
+        item = self._items.get(item_id)
+        if item and hasattr(item, 'value'):
+            item.value = value
+
+    def to_dict(self) -> dict:
+        return {
+            "title": self.title,
+            "tabs": [tab.to_dict() for tab in self.tabs],
+        }
+
+
+# ── Overlay Class ─────────────────────────────────────────────
+
+class Overlay:
+    def __init__(self, pipe_name: str = PIPE_NAME):
+        self._pipe = None
+        self._pipe_name = pipe_name
+        self._connected = False
+        self._lock = threading.Lock()
+        self._read_thread = None
+        self._running = False
+
+        # Populated from bridge welcome / events
+        self.client_id: int = -1
+        self.screen_width: int = 0
+        self.screen_height: int = 0
+        self.overlay_ready: bool = False
+        self.menu_open: bool = False
+        self.menu_hotkey: str = "Insert"
+
+        # Menu
+        self._menu: Optional[Menu] = None
+
+        # Event callbacks
+        self._on_resize = None
+        self._on_overlay_ready = None
+        self._on_overlay_closed = None
+        self._on_menu_toggle = None
+        self._on_menu_change_cb = None
+        self._on_menu_action_cb = None
+        self._on_mouse_move = None
+        self._on_mouse_click = None
+        self._on_key_down = None
+
+    def connect(self, timeout: float = 5.0) -> bool:
+        deadline = time.monotonic() + timeout
+
+        while time.monotonic() < deadline:
+            handle = kernel32.CreateFileA(
+                self._pipe_name.encode('ascii'),
+                GENERIC_READ | GENERIC_WRITE,
+                0, None, OPEN_EXISTING, 0, None,
+            )
+
+            if handle != INVALID_HANDLE_VALUE:
+                self._pipe = handle
+                self._connected = True
+
+                welcome = self._read_message()
+                if welcome:
+                    self.client_id = welcome.get('clientId', -1)
+                    self.overlay_ready = welcome.get('overlayReady', False)
+                    self.menu_open = welcome.get('menuOpen', False)
+                    self.menu_hotkey = welcome.get('menuHotkey', 'Insert')
+                    screen = welcome.get('screen', {})
+                    self.screen_width = screen.get('width', 0)
+                    self.screen_height = screen.get('height', 0)
+
+                self._running = True
+                self._read_thread = threading.Thread(target=self._reader_loop, daemon=True)
+                self._read_thread.start()
+
+                return True
+
+            err = kernel32.GetLastError()
+            if err == ERROR_PIPE_BUSY:
+                kernel32.WaitNamedPipeA(self._pipe_name.encode('ascii'), 1000)
+            else:
+                time.sleep(0.2)
+
+        return False
+
+    def disconnect(self):
+        self._running = False
+        with self._lock:
+            if self._pipe is not None:
+                kernel32.CloseHandle(self._pipe)
+                self._pipe = None
+            self._connected = False
+
+    @property
+    def is_connected(self) -> bool:
+        return self._connected
+
+    @property
+    def cx(self) -> float:
+        return self.screen_width / 2
+
+    @property
+    def cy(self) -> float:
+        return self.screen_height / 2
+
+    def ensure_connected(self, timeout: float = 1.0) -> bool:
+        if self._connected:
+            return True
+        return self.connect(timeout)
+
+    def identify(self, name: str):
+        self._send({"type": "identify", "name": name})
+
+    def request_screen_size(self):
+        self._send({"type": "get_screen"})
+
+    # ── Menu API ──────────────────────────────────────────────
+
+    def set_menu(self, menu: Menu):
+        """Register a menu definition with the overlay. Shows in INSERT menu."""
+        self._menu = menu
+        self._send({"type": "set_menu", "menu": menu.to_dict()})
+
+    def clear_menu(self):
+        """Remove this client's menu from the overlay."""
+        self._menu = None
+        self._send({"type": "clear_menu"})
+
+    def update_menu(self):
+        """Re-push the current menu definition (after changing values)."""
+        if self._menu:
+            self._send({"type": "set_menu", "menu": self._menu.to_dict()})
+
+    def open_menu(self):
+        """Programmatically open the menu."""
+        self._send({"type": "menu_open"})
+
+    def close_menu(self):
+        """Programmatically close the menu."""
+        self._send({"type": "menu_close"})
+
+    def toggle_menu(self):
+        """Programmatically toggle the menu."""
+        self._send({"type": "menu_toggle"})
+
+    def set_hotkey(self, key: str):
+        """Change the menu toggle hotkey (Electron accelerator format)."""
+        self._send({"type": "set_hotkey", "key": key})
+
+    def set_menu_style(self, **kwargs):
+        """
+        Set menu appearance properties. Supported keys:
+            opacity      (float)  — Panel background opacity, 0.1 - 1.0
+            accentColor  (str)    — Accent color hex, e.g. '#ff4466'
+            width        (int)    — Panel width in px, 240 - 800
+            fontSize     (int)    — Base font size in px, 8 - 24
+            borderRadius (int)    — Corner radius in px, 0 - 24
+            compact      (bool)   — Compact item padding
+        """
+        self._send({"type": "set_menu_style", "style": kwargs})
+
+    # ── Event Callbacks ───────────────────────────────────────
+
+    def on_resize(self, callback):
+        """callback(width, height)"""
+        self._on_resize = callback
+
+    def on_overlay_ready(self, callback):
+        """callback()"""
+        self._on_overlay_ready = callback
+
+    def on_overlay_closed(self, callback):
+        """callback()"""
+        self._on_overlay_closed = callback
+
+    def on_menu_toggle(self, callback):
+        """callback(open: bool) — decorator-compatible."""
+        self._on_menu_toggle = callback
+        return callback
+
+    def on_menu_change(self, callback):
+        """callback(item_id: str, value) — called when user changes a menu item. Decorator-compatible."""
+        self._on_menu_change_cb = callback
+        return callback
+
+    def on_menu_action(self, callback):
+        """callback(item_id: str) — called when user clicks a button. Decorator-compatible."""
+        self._on_menu_action_cb = callback
+        return callback
+
+    def on_mouse(self, callback):
+        """callback(event_type: str, x: int, y: int, button: int) — mouse events in menu mode."""
+        self._on_mouse_move = callback
+        self._on_mouse_click = callback
+        return callback
+
+    def on_key(self, callback):
+        """callback(key: str, code: str, ctrl: bool, shift: bool, alt: bool)"""
+        self._on_key_down = callback
+        return callback
+
+    # ── Frame Management ──────────────────────────────────────
+
+    def begin_frame(self):
+        self._send({"type": "begin_frame"})
+
+    def end_frame(self):
+        self._send({"type": "end_frame"})
+
+    class _FrameContext:
+        def __init__(self, overlay):
+            self._overlay = overlay
+        def __enter__(self):
+            self._overlay.begin_frame()
+            return self._overlay
+        def __exit__(self, *args):
+            self._overlay.end_frame()
+
+    def frame(self):
+        return self._FrameContext(self)
+
+    # ── Drawing Primitives ────────────────────────────────────
+
+    def draw_text(self, x: float, y: float, text: str,
+                  color: int = Colors.WHITE, size: float = 14,
+                  align: str = "left", outline: bool = True,
+                  bold: bool = False, font: str = None, layer: int = 0):
+        cmd = {"type": "text", "x": x, "y": y, "text": text,
+               "color": color, "size": size, "align": align,
+               "outline": outline, "bold": bold}
+        if font: cmd["font"] = font
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    def draw_rect(self, x: float, y: float, w: float, h: float,
+                  color: int = Colors.WHITE, thickness: float = 1, layer: int = 0):
+        cmd = {"type": "rect", "x": x, "y": y, "w": w, "h": h,
+               "color": color, "thickness": thickness}
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    def draw_filled_rect(self, x: float, y: float, w: float, h: float,
+                         color: int = Colors.WHITE, layer: int = 0):
+        cmd = {"type": "filled_rect", "x": x, "y": y, "w": w, "h": h,
+               "color": color}
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    def draw_line(self, x1: float, y1: float, x2: float, y2: float,
+                  color: int = Colors.WHITE, thickness: float = 1, layer: int = 0):
+        cmd = {"type": "line", "x1": x1, "y1": y1, "x2": x2, "y2": y2,
+               "color": color, "thickness": thickness}
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    def draw_circle(self, x: float, y: float, radius: float,
+                    color: int = Colors.WHITE, thickness: float = 1,
+                    filled: bool = False, layer: int = 0):
+        cmd = {"type": "circle", "x": x, "y": y, "r": radius,
+               "color": color, "thickness": thickness, "filled": filled}
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    def draw_corner_box(self, x: float, y: float, w: float, h: float,
+                        color: int = Colors.ENEMY, thickness: float = 2):
+        self._send({"type": "corner_box", "x": x, "y": y, "w": w, "h": h,
+                     "color": color, "thickness": thickness})
+
+    # ── High-Level Drawing ────────────────────────────────────
+
+    def draw_esp(self, x: float, y: float, w: float, h: float,
+                 name: str = None, health: float = -1, distance: float = -1,
+                 info: str = None, color: int = Colors.ENEMY,
+                 style: str = "corner", thickness: float = 2):
+        cmd = {"type": "esp", "x": x, "y": y, "w": w, "h": h,
+               "color": color, "style": style, "thickness": thickness}
+        if name is not None: cmd["name"] = name
+        if health >= 0: cmd["health"] = max(0.0, min(1.0, health))
+        if distance >= 0: cmd["distance"] = distance
+        if info is not None: cmd["info"] = info
+        self._send(cmd)
+
+    def draw_crosshair(self, size: float = 10, gap: float = 4,
+                       thickness: float = 1, color: int = Colors.CROSSHAIR,
+                       dot: bool = False, outline: bool = True,
+                       x: float = -1, y: float = -1):
+        cmd = {"type": "crosshair", "size": size, "gap": gap,
+               "thickness": thickness, "color": color,
+               "dot": dot, "outline": outline}
+        if x >= 0: cmd["x"] = x
+        if y >= 0: cmd["y"] = y
+        self._send(cmd)
+
+    def draw_snapline(self, target_x: float, target_y: float,
+                      color: int = Colors.ENEMY, thickness: float = 1,
+                      origin: str = "center"):
+        ox = self.cx
+        oy = self.cy if origin == "center" else self.screen_height
+        self.draw_line(ox, oy, target_x, target_y, color, thickness)
+
+    def draw_watermark(self, text: str, x: float = 10, y: float = 10,
+                       text_color: int = Colors.WHITE,
+                       bg_color: int = rgba(0, 0, 0, 180), layer: int = 0):
+        tw = len(text) * 7 + 12
+        self.draw_filled_rect(x - 4, y - 2, tw, 18, bg_color, layer=layer)
+        self.draw_text(x, y, text, text_color, 13, layer=layer)
+
+    def draw_fov_circle(self, radius: float, color: int = rgba(255, 255, 255, 80),
+                        thickness: float = 1):
+        self.draw_circle(self.cx, self.cy, radius, color, thickness)
+
+    def draw_bar(self, x: float, y: float, w: float, h: float,
+                 progress: float, fg_color: int = Colors.GREEN,
+                 bg_color: int = rgba(0, 0, 0, 170), vertical: bool = False):
+        self.draw_filled_rect(x, y, w, h, bg_color)
+        p = max(0.0, min(1.0, progress))
+        if vertical:
+            filled = h * p
+            self.draw_filled_rect(x, y + h - filled, w, filled, fg_color)
+        else:
+            self.draw_filled_rect(x, y, w * p, h, fg_color)
+
+    # ── Phase 3: Advanced Drawing ──────────────────────────────
+
+    def draw_rounded_rect(self, x: float, y: float, w: float, h: float,
+                          radius: float = 8, color: int = Colors.WHITE,
+                          filled: bool = True, thickness: float = 1,
+                          stroke_color: int = None, layer: int = 0):
+        cmd = {"type": "rounded_rect", "x": x, "y": y, "w": w, "h": h,
+               "radius": radius, "color": color, "filled": filled,
+               "thickness": thickness}
+        if stroke_color is not None: cmd["strokeColor"] = stroke_color
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    def draw_gradient_rect(self, x: float, y: float, w: float, h: float,
+                           stops: list = None, angle: float = 0,
+                           gradient_type: str = "linear", radius: float = 0,
+                           layer: int = 0):
+        """Draw a gradient-filled rectangle.
+
+        Args:
+            stops: List of [position, color] pairs, e.g. [[0, Colors.RED], [1, Colors.BLUE]]
+            angle: Gradient angle in degrees (0=right, 90=down) for linear
+            gradient_type: "linear" or "radial"
+            radius: Corner radius for rounded gradient rect
+        """
+        cmd = {"type": "gradient_rect", "x": x, "y": y, "w": w, "h": h,
+               "angle": angle, "gradientType": gradient_type, "radius": radius}
+        if stops: cmd["stops"] = stops
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    def draw_arc(self, x: float, y: float, radius: float,
+                 start_angle: float = 0, end_angle: float = 360,
+                 color: int = Colors.WHITE, thickness: float = 1,
+                 filled: bool = False, pie: bool = False, layer: int = 0):
+        """Draw an arc or pie slice. Angles in degrees."""
+        cmd = {"type": "arc", "x": x, "y": y, "r": radius,
+               "startAngle": start_angle, "endAngle": end_angle,
+               "color": color, "thickness": thickness,
+               "filled": filled, "pie": pie}
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    def draw_bezier(self, x1: float, y1: float, x2: float, y2: float,
+                    cx1: float = None, cy1: float = None,
+                    cx2: float = None, cy2: float = None,
+                    color: int = Colors.WHITE, thickness: float = 1,
+                    layer: int = 0):
+        """Draw a bezier curve. One control point = quadratic, two = cubic."""
+        cmd = {"type": "bezier", "x1": x1, "y1": y1, "x2": x2, "y2": y2,
+               "color": color, "thickness": thickness}
+        if cx1 is not None: cmd["cx1"] = cx1
+        if cy1 is not None: cmd["cy1"] = cy1
+        if cx2 is not None: cmd["cx2"] = cx2
+        if cy2 is not None: cmd["cy2"] = cy2
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    def draw_polygon(self, points: list, color: int = Colors.WHITE,
+                     filled: bool = False, thickness: float = 1,
+                     stroke_color: int = None, layer: int = 0):
+        """Draw a polygon from a list of [x, y] points."""
+        cmd = {"type": "polygon", "points": points, "color": color,
+               "filled": filled, "thickness": thickness}
+        if stroke_color is not None: cmd["strokeColor"] = stroke_color
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    def draw_text_wrapped(self, x: float, y: float, text: str,
+                          max_width: float = 200, color: int = Colors.WHITE,
+                          size: float = 14, line_height: float = None,
+                          bold: bool = False, align: str = "left",
+                          outline: bool = True, bg_color: int = None,
+                          layer: int = 0):
+        """Draw text with word wrapping."""
+        cmd = {"type": "text_wrapped", "x": x, "y": y, "text": text,
+               "maxWidth": max_width, "color": color, "size": size,
+               "bold": bold, "align": align, "outline": outline}
+        if line_height is not None: cmd["lineHeight"] = line_height
+        if bg_color is not None: cmd["bgColor"] = bg_color
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    def load_image(self, key: str, data: str):
+        """Pre-load a base64-encoded image into the renderer cache.
+
+        Args:
+            key: Unique identifier for this image
+            data: Base64-encoded PNG/JPEG data (or full data: URI)
+        """
+        self._send({"type": "load_image", "key": key, "data": data})
+
+    def draw_image(self, key: str, x: float, y: float,
+                   w: float = None, h: float = None,
+                   sx: float = None, sy: float = None,
+                   sw: float = None, sh: float = None,
+                   rotation: float = 0, opacity: float = 1.0,
+                   data: str = None, layer: int = 0):
+        """Draw a cached image (or load+draw with inline data).
+
+        Args:
+            key: Image cache key (from load_image, or auto-loaded if data is given)
+            x, y: Position
+            w, h: Destination size (None = original size)
+            sx, sy, sw, sh: Source rect for spritesheet crops
+            rotation: Rotation in degrees
+            opacity: 0.0 - 1.0
+            data: Optional base64 data to auto-load on first draw
+        """
+        cmd = {"type": "image", "key": key, "x": x, "y": y,
+               "rotation": rotation, "opacity": opacity}
+        if w is not None: cmd["w"] = w
+        if h is not None: cmd["h"] = h
+        if sx is not None: cmd["sx"] = sx
+        if sy is not None: cmd["sy"] = sy
+        if sw is not None: cmd["sw"] = sw
+        if sh is not None: cmd["sh"] = sh
+        if data: cmd["data"] = data
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    def draw_bones(self, joints: list, connections: list,
+                   color: int = Colors.BONE, joint_color: int = None,
+                   thickness: float = 2, joint_radius: float = 3,
+                   show_joints: bool = True, layer: int = 0):
+        """Draw a skeleton from joint positions and bone connections.
+
+        Args:
+            joints: List of [x, y] joint positions
+            connections: List of [joint_idx_a, joint_idx_b] pairs
+            color: Bone line color
+            joint_color: Joint dot color (defaults to bone color)
+            thickness: Bone line thickness
+            joint_radius: Joint dot radius
+            show_joints: Whether to draw joint dots
+        """
+        cmd = {"type": "bones", "joints": joints, "connections": connections,
+               "color": color, "thickness": thickness,
+               "jointRadius": joint_radius, "showJoints": show_joints}
+        if joint_color is not None: cmd["jointColor"] = joint_color
+        if layer: cmd["layer"] = layer
+        self._send(cmd)
+
+    # ── Animation Helpers ─────────────────────────────────────
+
+    @staticmethod
+    def anim_fade(duration: float = 500, from_alpha: float = 0,
+                  to_alpha: float = 1) -> dict:
+        """Create a fade animation dict to attach to any draw command."""
+        return {"type": "fade", "duration": duration, "from": from_alpha, "to": to_alpha}
+
+    @staticmethod
+    def anim_pulse(period: float = 1000, min_alpha: float = 0.3,
+                   max_alpha: float = 1.0) -> dict:
+        """Create a pulse (breathing) animation dict."""
+        return {"type": "pulse", "period": period, "min": min_alpha, "max": max_alpha}
+
+    @staticmethod
+    def anim_slide(duration: float = 300, from_x: float = 0,
+                   from_y: float = 0) -> dict:
+        """Create a slide-in animation dict."""
+        return {"type": "slide", "duration": duration, "fromX": from_x, "fromY": from_y}
+
+    @staticmethod
+    def anim_blink(period: float = 500, duty: float = 0.5) -> dict:
+        """Create a blink animation dict."""
+        return {"type": "blink", "period": period, "duty": duty}
+
+    # Convenience: attach anim to any draw command via _send override
+    def draw_text_anim(self, x: float, y: float, text: str,
+                       anim: dict, **kwargs):
+        """draw_text with animation attached."""
+        cmd = {"type": "text", "x": x, "y": y, "text": text, "anim": anim}
+        cmd.update(kwargs)
+        self._send(cmd)
+
+    def draw_with_anim(self, cmd: dict, anim: dict):
+        """Send any draw command dict with an animation attached."""
+        cmd["anim"] = anim
+        self._send(cmd)
+
+    # ── Internal ──────────────────────────────────────────────
+
+    def _read_message(self) -> Optional[dict]:
+        if not self._pipe:
+            return None
+        buf = ctypes.create_string_buffer(4096)
+        read = ctypes.wintypes.DWORD(0)
+        ok = kernel32.ReadFile(self._pipe, buf, 4095, ctypes.byref(read), None)
+        if ok and read.value > 0:
+            try:
+                text = buf.value[:read.value].decode('utf-8').strip()
+                return json.loads(text)
+            except Exception:
+                pass
+        return None
+
+    def _reader_loop(self):
+        """Background thread reading events from the bridge.
+
+        Uses PeekNamedPipe to check for data before calling ReadFile,
+        preventing deadlock with concurrent WriteFile on the same handle.
+        """
+        partial = b''
+        while self._running and self._connected:
+            try:
+                pipe = self._pipe
+                if pipe is None:
+                    break
+
+                # Check if there's data available (non-blocking)
+                avail = ctypes.wintypes.DWORD(0)
+                ok = kernel32.PeekNamedPipe(pipe, None, 0, None, ctypes.byref(avail), None)
+                if not ok:
+                    err = kernel32.GetLastError()
+                    if err in (ERROR_BROKEN_PIPE, ERROR_NO_DATA, ERROR_PIPE_NOT_CONNECTED):
+                        self._connected = False
+                        break
+                    time.sleep(0.01)
+                    continue
+
+                if avail.value == 0:
+                    time.sleep(0.005)  # 5ms poll interval
+                    continue
+
+                # Data available — read it
+                to_read = min(avail.value, 4095)
+                buf = ctypes.create_string_buffer(to_read + 1)
+                read = ctypes.wintypes.DWORD(0)
+                ok = kernel32.ReadFile(pipe, buf, to_read, ctypes.byref(read), None)
+                if not ok or read.value == 0:
+                    err = kernel32.GetLastError()
+                    if err in (ERROR_BROKEN_PIPE, ERROR_NO_DATA, ERROR_PIPE_NOT_CONNECTED):
+                        self._connected = False
+                        break
+                    continue
+
+                partial += buf.value[:read.value]
+                while b'\n' in partial:
+                    line, partial = partial.split(b'\n', 1)
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        msg = json.loads(line.decode('utf-8'))
+                        self._handle_event(msg)
+                    except Exception:
+                        pass
+            except Exception:
+                time.sleep(0.01)
+
+    def _handle_event(self, msg: dict):
+        etype = msg.get('type', '')
+
+        if etype == 'screen_size' or etype == 'resize':
+            self.screen_width = msg.get('width', self.screen_width)
+            self.screen_height = msg.get('height', self.screen_height)
+            if self._on_resize:
+                try: self._on_resize(self.screen_width, self.screen_height)
+                except Exception: pass
+
+        elif etype == 'overlay_ready':
+            self.overlay_ready = True
+            self.screen_width = msg.get('width', self.screen_width)
+            self.screen_height = msg.get('height', self.screen_height)
+            if self._on_overlay_ready:
+                try: self._on_overlay_ready()
+                except Exception: pass
+
+        elif etype == 'overlay_closed':
+            self.overlay_ready = False
+            if self._on_overlay_closed:
+                try: self._on_overlay_closed()
+                except Exception: pass
+
+        elif etype == 'menu_toggle':
+            self.menu_open = msg.get('open', False)
+            if self._on_menu_toggle:
+                try: self._on_menu_toggle(self.menu_open)
+                except Exception: pass
+
+        elif etype == 'menu_change':
+            item_id = msg.get('id', '')
+            value = msg.get('value')
+            # Update local menu state
+            if self._menu:
+                self._menu.set_value(item_id, value)
+            if self._on_menu_change_cb:
+                try: self._on_menu_change_cb(item_id, value)
+                except Exception: pass
+
+        elif etype == 'menu_action':
+            item_id = msg.get('id', '')
+            if self._on_menu_action_cb:
+                try: self._on_menu_action_cb(item_id)
+                except Exception: pass
+
+        elif etype == 'mouse_move':
+            if self._on_mouse_move:
+                try: self._on_mouse_move('move', msg.get('x', 0), msg.get('y', 0), 0)
+                except Exception: pass
+
+        elif etype == 'mouse_click':
+            if self._on_mouse_click:
+                try: self._on_mouse_click('click', msg.get('x', 0), msg.get('y', 0), msg.get('button', 0))
+                except Exception: pass
+
+        elif etype == 'key_down':
+            if self._on_key_down:
+                try: self._on_key_down(msg.get('key', ''), msg.get('code', ''),
+                                        msg.get('ctrl', False), msg.get('shift', False), msg.get('alt', False))
+                except Exception: pass
+
+        elif etype == 'hotkey_changed':
+            self.menu_hotkey = msg.get('key', self.menu_hotkey)
+
+    def _send(self, cmd: dict):
+        if not self._connected or self._pipe is None:
+            return
+
+        data = (json.dumps(cmd, separators=(',', ':')) + '\n').encode('utf-8')
+
+        with self._lock:
+            written = ctypes.wintypes.DWORD(0)
+            ok = kernel32.WriteFile(self._pipe, data, len(data),
+                                    ctypes.byref(written), None)
+            if not ok or written.value != len(data):
+                err = kernel32.GetLastError()
+                if err in (ERROR_BROKEN_PIPE, ERROR_NO_DATA, ERROR_PIPE_NOT_CONNECTED):
+                    kernel32.CloseHandle(self._pipe)
+                    self._pipe = None
+                    self._connected = False
+
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, *args):
+        self.disconnect()
+
+    def __del__(self):
+        try: self.disconnect()
+        except Exception: pass
+
+```

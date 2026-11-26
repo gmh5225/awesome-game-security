@@ -1,0 +1,5210 @@
+Project Path: arc_lolidroid86_Cheat-Eninge-Frankenstien-Build_0ooe7ya1
+
+Source Tree:
+
+```txt
+arc_lolidroid86_Cheat-Eninge-Frankenstien-Build_0ooe7ya1
+├── BUILDING.md
+├── CHANGES.md
+├── CONTRIBUTORS.md
+├── LICENSE
+├── README.md
+├── compat
+│   └── 00_frankenstein_compat.lua
+├── examples
+│   └── frankenstein_example.CEA
+├── extensions
+│   ├── Extensions
+│   │   └── AITools
+│   │       ├── AIDialog.LFM
+│   │       ├── aibase.lua
+│   │       ├── loadorder.txt
+│   │       └── tools
+│   │           └── aitools.lua
+│   └── autorun
+│       └── extensions_loader.lua
+├── installer
+│   ├── CE_Frankenstein.iss
+│   └── CE_Frankenstein_773.iss
+└── patches
+    └── autoassembler.patch
+
+```
+
+`BUILDING.md`:
+
+```md
+# Building CE Frankenstein from Source
+
+## Prerequisites
+
+| Tool | Version | Notes |
+|---|---|---|
+| Lazarus IDE | 2.2.2 | Include FPC 3.2.2 |
+| FPC | 3.2.2 | Bundled with Lazarus |
+| Inno Setup | 6.3+ | For building the installer |
+| Windows SDK / WDK | Optional | Only if rebuilding DBK driver from source |
+
+Download Lazarus 2.2.2 with FPC 3.2.2: https://sourceforge.net/projects/lazarus/files/Lazarus%20Windows%2064%20bits/Lazarus%202.2.2/
+
+---
+
+## Step 1 — Clone CE 7.5 and apply the patch
+
+```powershell
+git clone https://github.com/cheat-engine/cheat-engine.git
+cd cheat-engine
+git checkout ec45d5f4          # pin to the exact CE 7.5 commit the patch targets
+git apply ..\CE-Frankenstein\patches\autoassembler.patch
+```
+
+> If you cloned the Frankenstein repo to a different location, adjust the `..` path accordingly.
+
+Verify it applied cleanly:
+```powershell
+git diff --stat
+# Should show two files: autoassembler.pas (~450 lines) + SynHighlighterAA.pas (~50 lines)
+```
+
+---
+
+## Step 2 — Copy extension files
+
+```powershell
+# From the repo root:
+Copy-Item extensions\autorun\extensions_loader.lua "cheat-engine\Cheat Engine\bin\autorun\" -Force
+Copy-Item extensions\Extensions\AITools "cheat-engine\Cheat Engine\bin\Extensions\" -Recurse -Force
+```
+
+---
+
+## Step 3 — Build the EXE
+
+```powershell
+$lazbuild = "C:\lazarus\lazbuild.exe"   # adjust to your Lazarus path
+& $lazbuild --build-mode="Release 64-Bit" "cheat-engine\Cheat Engine\cheatengine.lpi"
+```
+
+Expected output: `420228 lines compiled, 0.0 sec, ... 0 error(s)`.  
+Output binary: `cheat-engine\Cheat Engine\bin\cheatengine-x86_64.exe`
+
+---
+
+## Step 4 — Gather supporting files
+
+The following files are needed in `Cheat Engine\bin\` for the installer but are **not** in the public CE source. Get them from a CE 7.7 install (run `CheatEngine77P.exe /VERYSILENT /DIR=C:\temp\ce77`):
+
+```powershell
+$ce77 = "C:\temp\ce77"
+$bin  = "cheat-engine\Cheat Engine\bin"
+
+$files = @(
+    'allochook-i386.dll', 'allochook-x86_64.dll',
+    'vehdebug-i386.dll', 'vehdebug-x86_64.dll',
+    'winhook-i386.dll', 'winhook-x86_64.dll',
+    'luaclient-i386.dll', 'luaclient-x86_64.dll',
+    'CSCompiler.dll',
+    'tcc32-32.dll', 'tcc32-64.dll', 'tcc64-32.dll', 'tcc64-64.dll',
+    'dbk64.cepack', 'dbk32.cepack',
+    'standalonephase1.cepack', 'standalonephase2.cepack', 'tiny.cepack',
+    'DotNetDataCollector32.exe', 'DotNetDataCollector64.exe',
+    'Kernelmoduleunloader.exe',
+    'Tutorial-i386.cepack', 'Tutorial-x86_64.exe'
+)
+
+foreach ($f in $files) {
+    $src = Join-Path $ce77 $f
+    if (Test-Path $src) { Copy-Item $src $bin -Force }
+}
+```
+
+### Alternative: Build DBK driver from source
+
+If you don't have a CE 7.7 install you can build `dbk64.sys` yourself:
+
+1. Install Visual Studio 2022 + WDK (Windows Driver Kit)
+2. Open `DBKKernel\DBKKernel.sln`
+3. Build `Release x64` → produces `dbk64.sys`
+4. Build `cepack` (see below), then run:
+   ```powershell
+   cepack\cepack.exe -c dbk64.sys "Cheat Engine\bin\dbk64.cepack"
+   ```
+
+Repeat for `dbk32.sys` (build `Release Win32`).
+
+The other DLLs (allochook, vehdebug, winhook, luaclient, tcc) are built as part of the full CE Patreon source; they are not available from the public repo.
+
+### Building cepack
+
+`cepack` is a small Lazarus tool in the CE source that packs/unpacks `.cepack` files. You need it to produce `dbk64.cepack` from the compiled `dbk64.sys`. Build it once before packing the driver:
+
+```powershell
+$lazbuild = "C:\lazarus\lazbuild.exe"
+& $lazbuild "Cheat Engine\cepack\cepack.lpr"
+# Output: Cheat Engine\cepack\cepack.exe
+```
+
+Once built, `cepack -c infile outfile` compresses, `cepack -x infile outfile` extracts.
+
+---
+
+## Step 5 — Build the installer
+
+First copy the ISS script from the Frankenstein repo into your CE source root:
+
+```powershell
+Copy-Item "CE-Frankenstein\installer\CE_Frankenstein.iss" "cheat-engine\" -Force
+```
+
+Then build:
+
+```powershell
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "cheat-engine\CE_Frankenstein.iss"
+```
+
+Output: `cheat-engine\installer_output\CheatEngine_Frankenstein_Setup.exe`.
+
+---
+
+## v3: Build on the CE 7.7.3 support files (recommended)
+
+v3 keeps the same patched 7.5 EXE from Steps 1–3 but takes **every other file** from a CE 7.7.3 install, and adds a Lua compatibility layer so the 7.7.3 scripts start without errors. You need your own CE 7.7.3 installer (`CheatEngine773P.exe`).
+
+```powershell
+# 1. Install CE 7.7.3 into a throwaway folder
+& .\CheatEngine773P.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /DIR="C:\temp\ce773"
+
+# 2. Build the stage folder next to the .iss (skip 7.7.3's own main EXEs, launcher and uninstaller)
+$stage = "CE-Frankenstein\installer\stage"
+robocopy C:\temp\ce773 $stage /E /XF cheatengine-x86_64.exe cheatengine-x86_64.exe.sig `
+  cheatengine-x86_64-SSE4-AVX2.exe cheatengine-x86_64-SSE4-AVX2.exe.sig `
+  cheatengine-i386.exe cheatengine-i386.exe.sig "Cheat Engine.exe" unins000.*
+
+# 3. Add the Frankenstein EXE (from Step 3) and the compatibility layer
+Copy-Item "cheat-engine\Cheat Engine\bin\cheatengine-x86_64.exe" $stage -Force
+Copy-Item "CE-Frankenstein\compat\00_frankenstein_compat.lua" "$stage\autorun\" -Force
+
+# 4. Optional: ceserver for Linux/Android targets
+# Expand-Archive ceserver773.zip "$stage\ceserver"
+```
+
+**5. One-line fix in `$stage\autorun\pseudocodediagram.lua`** (line ~1533). It anchors its menu entry to a 7.7-only menu item. Change:
+
+```lua
+mv.debuggerpopup.Items.insert(mv.miHighlightJumpDestinationInCurrentFunction.MenuIndex+1, miSpawnDiagram)
+```
+to:
+```lua
+mv.debuggerpopup.Items.insert((mv.miHighlightJumpDestinationInCurrentFunction or mv.miSelectCurrentFunction).MenuIndex+1, miSpawnDiagram)
+```
+
+**6. Build the installer:**
+```powershell
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "CE-Frankenstein\installer\CE_Frankenstein_773.iss"
+```
+Output: `CE-Frankenstein\installer\installer_output\CheatEngine_Frankenstein_773_Setup.exe`.
+
+> Do not commit or share the `stage` folder or the built installer: they contain CE 7.7.3 binaries.
+
+A correct v3 build starts with **no** Lua error dialogs. If one appears, the 7.7.3 version you used calls another function the 7.5 EXE lacks; see the compatibility table in [CHANGES.md](CHANGES.md#v3--ce-773-support-files--lua-compatibility-layer-2026-11-26).
+
+---
+
+## Verifying the build
+
+Open CE, attach to any process, and open the Auto-Assembler (Ctrl+Alt+A). Paste this test script:
+
+```
+{$ifdef CPU64}
+// 64-bit target confirmed
+{$endif}
+```
+
+It should assemble without errors. For `HOOK`/`UNHOOK`, use the template in [CHANGES.md](CHANGES.md#1-hookaddress-destination-origcodename).
+
+```
+
+`CHANGES.md`:
+
+```md
+# Changes from CE 7.5 Public Source
+
+Changes span two files: `Cheat Engine/autoassembler.pas` and `Cheat Engine/SynHighlighterAA.pas`.  
+Patch: `patches/autoassembler.patch` (499 lines, applies cleanly against CE 7.5 HEAD `ec45d5f4`).
+
+---
+
+## v3 — CE 7.7.3 support files + Lua compatibility layer (2026-11-26)
+
+The patched 7.5 EXE is unchanged. What changed is everything around it:
+
+- **All support files now come from CE 7.7.3** (DLLs, drivers, `autorun` scripts, `lua`, `tcclib`, `plugins`, `include`, languages) instead of a hand-picked list from 7.7. See BUILDING.md → "v3".
+- **`compat/00_frankenstein_compat.lua`** loads before the 7.7.3 `autorun` scripts (CE 7.5 loads `autorun\*.lua` alphabetically) and defines CE 7.6/7.7 Lua functions that the 7.5 EXE lacks. Every definition is guarded, so it never replaces a real function.
+- **`pseudocodediagram.lua`** needs a one-line fix (BUILDING.md, v3 step 5).
+
+Result: the 7.7.3 script set starts with **0 error dialogs** (it was 4 without the layer), and 23/23 self-tests passed inside CE.
+
+| 7.7 function | Frankenstein implementation |
+|---|---|
+| `CheckSynchronize`, `CreateMenuItem`, `InputQuery`, `MessageDialog` | Aliases of the 7.5 lowercase names |
+| `InjectLibrary(path, skipsymbols)` | Wraps `injectLibrary`; returns `true` or `false, error` |
+| `printf(fmt, ...)` | `print(string.format(...))` |
+| `getSystemArchitecture()` | `1` on 64-bit CE, else `0` |
+| `isAdmin()` | Calls `shell32.IsUserAnAdmin` |
+| `dbk_initialized()` / `dbvm_initialized()` | Flags set by wrapped `dbk_initialize` / `dbvm_initialize` |
+| `getTimeStamp()` | `HH:MM:SS.mmm` |
+| `getCurrentThreadObject()` | `{Name='Main Thread'}` on the main thread, else `nil` |
+| `getProcessAge()` | `nil` (unknown in 7.5; callers treat it as "old enough") |
+| `getMemoryRegionInfo(addr)` / `getMemoryProtection(addr)` | Built on `enumMemoryRegions`; protection as `{r,w,x}` |
+| `isPaused()` | Flag set by wrapped `pause` / `unpause` |
+| `loadNewSymbols()` | `reinitializeSymbolhandler(false)` |
+| `mono_log(...)` | Forwards to `monolog` |
+| `forEachAndFutureForm(class, fn)` | Same as 7.7.3's `forEachForm.lua`; defined early so `dmahelper.lua` can use it |
+| `createSettingsOption` / `getSettingsOption` / `setSettingsOption` | Stored in the registry: `HKCU\Software\Cheat Engine\Frankenstein\Options` (no settings-window UI) |
+| `createTableOption` / `getTableOption` / `setTableOption` | Stored inside the cheat table as a hidden table file `FrankensteinTableOptions` |
+
+**Not covered** (these 7.7 features need engine changes that are not in the public source): the DMA/CR3 helper functions used by `dmahelper.lua`, TCP/Wine socket bridges, `.NET` library injection (`injectDotNetLibrary`), and the Patreon session (`getCEPatreonSessionID`). The scripts that need them still load; only those features stay unavailable.
+
+---
+
+## 1. `HOOK(address, destination, origcodename)`
+
+**Syntax**
+```
+HOOK(address, destination, origcodename)
+```
+
+**What it does**
+
+1. Reads enough bytes at `address` to cover one full instruction (at least 14 bytes on 64-bit, 5 bytes on 32-bit — a full far/near JMP).
+2. Allocates a code cave named `origcodename` large enough for the saved bytes + a JMP back.
+3. Writes the original bytes + a return JMP into the cave.
+4. Writes a JMP (far on 64-bit, near on 32-bit) from `address` → `destination`.
+5. Pads any leftover bytes with `NOP`.
+
+**Generated code** (conceptual)
+```asm
+; at origcodename:
+  db <original bytes here>
+  jmp address+codesize         ; return to code after the hook
+
+; at address:
+  jmp far destination          ; 64-bit: 14-byte FF25 trampoline
+  nop                          ; padding if instruction was longer than 14
+```
+
+**Example**
+```
+[ENABLE]
+aobscan(myFunc, 48 89 5C 24 ?? 57 48 83 EC 20)
+alloc(myHook, 256)
+label(origBytes)
+
+myHook:
+  ; your code here
+  mov [myFlag], 1
+  jmp origBytes
+
+HOOK(myFunc, myHook, origBytes)
+
+[DISABLE]
+UNHOOK(myFunc)
+dealloc(myHook)
+```
+
+**Persistence**  
+Hook metadata (original bytes, cave address) is stored in a unit-level `hookInfoList` that persists across [ENABLE]/[DISABLE] calls within the same CE session, so `UNHOOK` can find the data without re-scanning.
+
+---
+
+## 2. `UNHOOK(address)`
+
+**Syntax**
+```
+UNHOOK(address)
+```
+
+Restores the original bytes that `HOOK()` saved. Looks up `address` in `hookInfoList`, writes the original byte sequence back, and queues the origcode allocation for deallocation.
+
+Must be called with the same `address` as the matching `HOOK()`.
+
+---
+
+## 3. `{$ifdef}` / `{$ifndef}` / `{$endif}`
+
+**Syntax**
+```
+{$ifdef SYMBOL}
+  ... lines included when SYMBOL is defined ...
+{$endif}
+
+{$ifndef SYMBOL}
+  ... lines included when SYMBOL is NOT defined ...
+{$endif}
+```
+
+**Built-in symbols** (always defined automatically)
+
+| Symbol | When true |
+|---|---|
+| `WINDOWS` | Always (CE on Windows) |
+| `CPU64` | Target process is 64-bit |
+| `WIN64` | Same as CPU64 |
+| `CPU32` | Target process is 32-bit |
+| `WIN32` | Same as CPU32 |
+
+**User-defined symbols** are picked up from any `DEFINE(name, value)` line present in the same script.
+
+**Nesting** is supported up to 64 levels deep.
+
+**Example**
+```
+{$ifdef CPU64}
+  jmp far myHook64
+{$else}
+  jmp myHook32
+{$endif}
+```
+
+`{$else}` flips the active/skip state at the current nesting level with a correct outer-skip guard, so nested blocks don't interfere.
+
+**Implementation**  
+`processAAIfdefBlocks(code, is64bit)` runs as a pre-pass before AOB scans. It blanks out excluded lines in-place (sets them to `''`) so the rest of the assembler sees a clean linear script. `{$else}` is handled by checking `nskip - ord(skipStack[skipDepth]) = 0` before flipping, ensuring outer skips are not disturbed.
+
+---
+
+## 4. `AOBSCANFUNCTION(name, functionname, aob)`
+
+**Syntax**
+```
+AOBSCANFUNCTION(name, functionname, aob)
+```
+
+Scans for `aob` within a window starting 256 bytes before `functionname` and ending 65 KB after it (resolved via the symbol handler). Equivalent to:
+```
+aobscanmodule(name, <module containing functionname>, aob)
+```
+...but constrained to the function's local region instead of the entire module. Useful when a byte pattern occurs in multiple places across a binary but you know which function it belongs to.
+
+**Example**
+```
+AOBSCANFUNCTION(myPattern, MyGameFunction, 48 8B 05 ?? ?? ?? ??)
+```
+
+---
+
+## Implementation Details
+
+### Files changed
+
+| File | Change |
+|---|---|
+| `Cheat Engine/autoassembler.pas` | All new AA commands + `{$else}` + AOBSCANFUNCTION scan bounds |
+| `Cheat Engine/SynHighlighterAA.pas` | Syntax highlighting for HOOK, UNHOOK, AOBSCANFUNCTION |
+
+### New types / globals added (unit level)
+
+```pascal
+type
+  THookInfoRec = record
+    hookaddr:     ptrUint;
+    origcodename: string;
+    codesize:     integer;
+    origbyteshex: string;  // hex string of saved bytes for UNHOOK
+  end;
+var
+  hookInfoList: array of THookInfoRec;
+```
+
+### New procedures added
+
+- `processAAIfdefBlocks(code: TStrings; is64bit: boolean)` — ifdef pre-pass
+- Inline handlers for `HOOK(`, `UNHOOK(`, `AOBSCANFUNCTION(` in `autoassemble2`'s first-pass loop
+
+### Bug fixed during implementation
+
+`ReadProcessMemory`'s 5th parameter (`lpNumberOfBytesRead`) must be `ptruint` (8 bytes on 64-bit), not `dword`. The original call used a local `bw: dword` variable; replaced with the already-declared `x: ptruint`.
+
+### Varsize reuse issue
+
+Inside `HOOK()`, `varsize` is first set to jmpsize (14 or 5), then overwritten with `length(origcodename)` for alloc-list sort ordering. The saved jmpsize is captured into `diff: ptruint` immediately after assignment and used for NOP-padding logic.
+
+---
+
+## Post-release fixes (v2)
+
+### Fix 1 — `{$else}` support
+
+`{$else}` was missing from `processAAIfdefBlocks` entirely. Scripts using the common `{$ifdef CPU64} … {$else} … {$endif}` pattern would silently execute both branches.
+
+**Fix:** Added `{$else}` handling with an outer-skip guard:
+```pascal
+if nskip - ord(skipStack[skipDepth]) = 0 then
+  // flip skipStack[skipDepth] and adjust nskip
+```
+This ensures `{$else}` only flips the current level's skip state when no outer block is already causing a skip.
+
+### Fix 2 — AOBSCANFUNCTION scan lower bound
+
+The original window was `startaddress` to `startaddress + 65536`, starting exactly at the symbol address. Patterns in function prologues (which compilers often emit a few bytes before the nominal symbol entry) would be missed.
+
+**Fix:** Window is now `startaddress - 256` (guarded against underflow) to `startaddress + 65792`, giving a small back-margin while keeping the forward range identical.
+
+### Fix 3 — Syntax highlighting for new keywords
+
+`HOOK`, `UNHOOK`, and `AOBSCANFUNCTION` displayed as plain identifiers in the AA editor. Added to `SynHighlighterAA.pas` using the existing hash-dispatch table:
+
+| Keyword | Hash | Slot |
+|---|---|---|
+| `hook` | 49 | New `Func49` |
+| `unhook` | 84 | Added to existing `Func84` (shared with `aobscanex`) |
+| `aobscanfunction` | 157 | New `Func157` |
+
+`{$ifdef}` / `{$else}` / `{$endif}` directives are already rendered as block comments by the highlighter (CE uses `{…}` Pascal comment syntax), which visually distinguishes them from code without additional changes.
+
+```
+
+`CONTRIBUTORS.md`:
+
+```md
+# Contributors
+
+| Contributor | Role |
+|---|---|
+| [lolidroid86](https://github.com/lolidroid86) | Project lead — concept, testing, CE 7.7 driver sourcing, build verification |
+| [Claude Sonnet 4.6](https://claude.ai) (Anthropic) | Implementation — AA command backports, installer script, documentation |
+
+```
+
+`LICENSE`:
+
+```
+Cheat Engine Frankenstein Build
+================================
+
+This repository contains:
+
+1. Source patches for Cheat Engine 7.5 (public source)
+2. An Inno Setup installer script
+3. Extension scripts (AITools, extensions_loader)
+4. Documentation
+
+---------------------------------------------------------------------------
+CHEAT ENGINE ORIGINAL LICENSE
+---------------------------------------------------------------------------
+
+Cheat Engine is copyright © dark_byte. All rights reserved.
+
+Cheat Engine is released as freeware. You are not allowed to redistribute
+it for monetary gain. You are allowed to include Cheat Engine's
+functionality in your project as long as that project is not a commercial
+project and you give credit where credit is due.
+
+The DBK kernel driver (dbk64.sys / dbk32.sys / dbk64.cepack / dbk32.cepack)
+is copyright © dark_byte and is redistributed here solely for personal,
+non-commercial use in accordance with the above terms. It remains the
+exclusive property of dark_byte.
+
+---------------------------------------------------------------------------
+THIS REPOSITORY'S PATCHES AND SCRIPTS
+---------------------------------------------------------------------------
+
+The patches, installer script, extension files, and documentation authored
+in this repository are released under the same non-commercial terms as
+Cheat Engine itself:
+
+  - Free for personal, non-commercial use
+  - Redistribution for monetary gain is not permitted
+  - Credit must be given to the original authors (see CONTRIBUTORS.md)
+
+---------------------------------------------------------------------------
+NO WARRANTY
+---------------------------------------------------------------------------
+
+This software is provided "as is", without warranty of any kind. The
+authors accept no liability for any damage caused by its use.
+
+```
+
+`README.md`:
+
+```md
+# Cheat Engine Frankenstein
+
+A custom build of **Cheat Engine 7.5** (public source) with four Auto-Assembler commands backported from CE 7.6.3/7.7.
+
+**v3 (2026-11-26):** the build now runs on the full **CE 7.7.3** support-file set, with a Lua compatibility layer ([`compat/00_frankenstein_compat.lua`](compat/00_frankenstein_compat.lua)) that adds the CE 7.6/7.7 Lua functions the 7.5 EXE lacks. The 7.7.3 scripts start with no errors. See [CHANGES.md](CHANGES.md) for the function list.
+
+---
+
+## What's Different
+
+### Backported Auto-Assembler Commands
+
+| Command | Purpose |
+|---|---|
+| `HOOK(address, destination, origcodename)` | Write a code hook and stash the original bytes/stub |
+| `UNHOOK(address)` | Restore original bytes written by a prior `HOOK()` |
+| `{$ifdef SYMBOL}` / `{$ifndef SYMBOL}` / `{$endif}` | Conditional compilation in AA scripts |
+| `AOBSCANFUNCTION(name, functionname, aob)` | AOB scan within ±64 KB of a named symbol |
+
+See [CHANGES.md](CHANGES.md) for full syntax, examples, and implementation notes.
+
+### AITools Extension
+
+`autorun/extensions_loader.lua` + `Extensions/AITools/` are included for the original (v2) build. AITools adds an AI-assisted scripting panel inside CE.
+
+> **Status:** AITools is written for CE 7.7 and calls functions the 7.5 EXE does not have (including `getCEPatreonSessionID()`), so it does **not** load cleanly on Frankenstein. The v3 build does not include the Extensions loader. If you want AITools, use an official CE 7.7.x build. Making it work here with your own API key (AITools supports custom OpenAI/Anthropic/Gemini endpoints) would need more shims; contributions welcome.
+
+---
+
+## Quick Start (build your own installer)
+
+No pre-built installer is distributed here — see [BUILDING.md](BUILDING.md) for the full walkthrough. Once built:
+
+1. Run `CheatEngine_Frankenstein_Setup.exe` as Administrator
+2. Optionally tick "Create desktop shortcut" and "Associate .CT files"
+3. Launch **Cheat Engine Frankenstein** from the Start Menu or desktop
+
+> The installer bundles `dbk64.cepack` / `dbk32.cepack` (the kernel driver). CE unpacks these to `dbk64.sys` / `dbk32.sys` on first run — requires Administrator.
+
+---
+
+## Building from Source
+
+See [BUILDING.md](BUILDING.md) for the full walkthrough. Short version:
+
+```
+git clone https://github.com/cheat-engine/cheat-engine.git
+cd cheat-engine
+git apply patches/autoassembler.patch
+lazbuild.exe --build-mode="Release 64-Bit" "Cheat Engine\cheatengine.lpi"
+```
+
+---
+
+## Repo Layout
+
+```
+patches/
+  autoassembler.patch      ← 499-line diff across autoassembler.pas + SynHighlighterAA.pas
+
+installer/
+  CE_Frankenstein.iss      ← Inno Setup 6 script (v2, hand-picked CE 7.7 files)
+  CE_Frankenstein_773.iss  ← v3 script: packs the whole installer\stage folder
+
+compat/
+  00_frankenstein_compat.lua ← v3 Lua layer: CE 7.6/7.7 functions missing from 7.5
+
+extensions/
+  autorun/
+    extensions_loader.lua  ← loads plugins from Extensions\ on startup
+  Extensions/
+    AITools/               ← AI scripting panel (configure endpoint in aibase.lua)
+
+examples/
+  frankenstein_example.CEA ← complete AA script demonstrating all four new commands
+```
+
+---
+
+## Supporting Files (not in this repo)
+
+The installer script expects these files in `Cheat Engine\bin\` at build time.  
+They are **not** included here because they are either (a) built from the [DBKKernel](https://github.com/cheat-engine/cheat-engine/tree/master/DBKKernel) source or (b) extracted from a CE 7.7 install.
+
+| File | Source |
+|---|---|
+| `dbk64.cepack`, `dbk32.cepack` | Build DBKKernel with WDK, then `cepack -c dbk64.sys dbk64.cepack` |
+| `allochook-*.dll`, `vehdebug-*.dll`, `winhook-*.dll` | CE 7.7 install |
+| `tcc32-*.dll`, `tcc64-*.dll` | CE 7.7 install |
+| `luaclient-*.dll`, `CSCompiler.dll` | CE 7.7 install |
+| `standalonephase*.cepack`, `tiny.cepack` | CE 7.7 install |
+| `DotNetDataCollector*.exe` | CE 7.7 install |
+
+---
+
+## Example Script
+
+See [`examples/frankenstein_example.CEA`](examples/frankenstein_example.CEA) for a complete working script demonstrating all four new commands together — AOBSCANFUNCTION, HOOK/UNHOOK, and `{$ifdef CPU64}/{$else}/{$endif}` — in a realistic invincibility hook pattern.
+
+---
+
+## Troubleshooting
+
+**CE crashes or fails to load on startup**
+- Run as Administrator. The DBK kernel driver requires elevation — without it CE exits silently or crashes before the main window appears.
+
+**`dbk64.sys` failed to load / driver error on first run**
+- Secure Boot or driver signature enforcement may be blocking the driver. Either disable Secure Boot in BIOS or enable test signing: `bcdedit /set testsigning on` (requires reboot). Note: test signing is not needed if you use the signed driver from a CE 7.7 install.
+
+**`lazbuild` not found when building from source**
+- Add Lazarus to your PATH: `$env:PATH += ";C:\lazarus"` — or use the full path `C:\lazarus\lazbuild.exe` as shown in BUILDING.md.
+
+**Patch fails to apply (`git apply` error)**
+- Make sure you're applying against CE 7.5 HEAD (`ec45d5f4`). Later commits may have context drift. Use `git apply --3way patches/autoassembler.patch` for a best-effort merge.
+
+**HOOK() throws "no module found for address"**
+- `HOOK` requires the target address to be in an already-loaded module. Make sure the process is attached and the module is loaded before running the script.
+
+**`{$ifdef}` / `{$else}` blocks not behaving correctly**
+- Directives are case-insensitive but must be on their own line with no leading spaces before the `{`. Inline use (e.g., `mov eax, 1 {$ifdef CPU64}`) is not supported.
+
+---
+
+## Contributors
+
+| Contributor | Role |
+|---|---|
+| [lolidroid86](https://github.com/lolidroid86) | Project lead — concept, testing, CE 7.7 driver sourcing, build verification |
+| [Claude Sonnet 4.6](https://claude.ai) (Anthropic) | Implementation — AA command backports, installer script, documentation |
+| [Claude Opus 5.5](https://claude.ai) (Anthropic) | v3 — CE 7.7.3 support-file build, Lua compatibility layer, testing |
+
+---
+
+## License
+
+Source patches are released under the same terms as Cheat Engine (open source, non-commercial).  
+`dbk64.cepack` / `dbk32.cepack` are the original CE kernel driver; they remain © dark_byte.
+
+```
+
+`compat/00_frankenstein_compat.lua`:
+
+```lua
+-- Frankenstein compatibility layer (CE 7.5 exe + CE 7.7.3 support scripts)
+-- Defines CE 7.6/7.7 Lua functions missing from the 7.5 build. Never overrides an existing function.
+
+-- 1: Case-alias functions
+if checkSynchronize and CheckSynchronize == nil then CheckSynchronize = checkSynchronize end
+if createMenuItem and CreateMenuItem == nil then CreateMenuItem = createMenuItem end
+if inputQuery and InputQuery == nil then InputQuery = inputQuery end
+if messageDialog and MessageDialog == nil then MessageDialog = messageDialog end
+
+-- 2: InjectLibrary
+if InjectLibrary == nil then
+  function InjectLibrary(path, skipsymbols)
+    local ok, result = pcall(injectLibrary, path, skipsymbols)
+    if not ok then return false, tostring(result) end
+    if result == false or result == nil then return false, 'injectLibrary failed' end
+    return true
+  end
+end
+
+-- 3: printf
+if printf == nil then
+  function printf(fmt, ...)
+    print(string.format(fmt, ...))
+  end
+end
+
+-- 4: getSystemArchitecture
+if getSystemArchitecture == nil then
+  function getSystemArchitecture()
+    if cheatEngineIs64Bit() then return 1 else return 0 end
+  end
+end
+
+-- 5: isAdmin
+if isAdmin == nil then
+  function isAdmin()
+    local ok, r = pcall(function()
+      local a = getAddressSafe('shell32.IsUserAnAdmin', true)
+      if not a then return nil end
+      return executeCodeLocal(a) ~= 0
+    end)
+    if ok and r ~= nil then return r end
+    return true
+  end
+end
+
+-- 6: dbk_initialized / dbvm_initialized
+local _fk_dbk = false
+local _fk_dbvm = false
+
+if dbk_initialize and dbk_initialized == nil then
+  local orig_dbk_initialize = dbk_initialize
+  function dbk_initialize(...)
+    local r1, r2 = orig_dbk_initialize(...)
+    if r1 then _fk_dbk = true end
+    return r1, r2
+  end
+end
+
+if dbvm_initialize and dbvm_initialized == nil then
+  local orig_dbvm_initialize = dbvm_initialize
+  function dbvm_initialize(...)
+    local r1, r2 = orig_dbvm_initialize(...)
+    if r1 then _fk_dbvm = true end
+    return r1, r2
+  end
+end
+
+if dbk_initialized == nil then
+  function dbk_initialized()
+    return _fk_dbk
+  end
+end
+
+if dbvm_initialized == nil then
+  function dbvm_initialized()
+    return _fk_dbvm
+  end
+end
+
+-- 7: getTimeStamp
+if getTimeStamp == nil then
+  function getTimeStamp()
+    return os.date('%H:%M:%S') .. string.format('.%03d', getTickCount() % 1000)
+  end
+end
+
+-- 8: getCurrentThreadObject
+if getCurrentThreadObject == nil then
+  local _fk_mainthread = { Name = 'Main Thread' }
+  function getCurrentThreadObject()
+    if inMainThread() then return _fk_mainthread else return nil end
+  end
+end
+
+-- 9: getProcessAge
+if getProcessAge == nil then
+  function getProcessAge()
+    return nil
+  end
+end
+
+-- 10: getMemoryRegionInfo / getMemoryProtection
+if getMemoryRegionInfo == nil then
+  function getMemoryRegionInfo(address)
+    local ok, result = pcall(function()
+      for _, region in ipairs(enumMemoryRegions()) do
+        if address >= region.BaseAddress and address < region.BaseAddress + region.RegionSize then
+          return region
+        end
+      end
+      return nil
+    end)
+    if ok then return result else return nil end
+  end
+end
+
+if getMemoryProtection == nil then
+  function getMemoryProtection(address)
+    local region = getMemoryRegionInfo(address)
+    if not region or region.Protect == 0 or (region.Protect & 0x01) ~= 0 then
+      return {r=false, w=false, x=false}
+    end
+    local p = region.Protect & 0xFF
+    return {r = true, w = (p & (0x04 | 0x08 | 0x40 | 0x80)) ~= 0, x = (p & 0xF0) ~= 0}
+  end
+end
+
+-- 11: isPaused
+local _fk_paused = false
+
+if pause and isPaused == nil then
+  local orig_pause = pause
+  function pause(...)
+    local r1, r2 = orig_pause(...)
+    _fk_paused = true
+    return r1, r2
+  end
+end
+
+if unpause and isPaused == nil then
+  local orig_unpause = unpause
+  function unpause(...)
+    local r1, r2 = orig_unpause(...)
+    _fk_paused = false
+    return r1, r2
+  end
+end
+
+if isPaused == nil then
+  function isPaused()
+    return _fk_paused
+  end
+end
+
+-- 12: loadNewSymbols
+if loadNewSymbols == nil then
+  function loadNewSymbols()
+    reinitializeSymbolhandler(false)
+  end
+end
+
+-- 13: mono_log
+if mono_log == nil then
+  function mono_log(...)
+    if type(monolog) == 'function' then
+      monolog(...)
+    end
+  end
+end
+
+-- 14: forEachAndFutureForm
+if forEachAndFutureForm == nil then
+  function forEachAndFutureForm(classname, func)
+    for i=0,getFormCount()-1 do
+      local f = getForm(i)
+      if f.ClassName==classname then func(f) end
+    end
+    registerFormAddNotification(function(f)
+      if classname==f.ClassName then
+        f.registerFirstShowCallback(function() func(f) end)
+      end
+    end)
+  end
+end
+
+-- 15: Settings options
+local _fk_settingdefs = {}
+
+local function _fk_settings()
+  return getSettings('Frankenstein\\Options')
+end
+
+if createSettingsOption == nil then
+  function createSettingsOption(name, description, ctype, category, unused, default)
+    _fk_settingdefs[name] = {description=description, type=ctype, category=category, default=default}
+  end
+end
+
+if getSettingsOption == nil then
+  function getSettingsOption(name)
+    local ok, s = pcall(function()
+      local settings = _fk_settings().Value[name]
+      if settings == nil or settings == '' then
+        local def = _fk_settingdefs[name]
+        if def then
+          if def.type == 0 then
+            return def.default == nil and false or def.default
+          else
+            return def.default
+          end
+        else
+          return nil
+        end
+      else
+        local def = _fk_settingdefs[name]
+        if def and def.type == 0 then
+          return settings == 'true'
+        elseif tonumber(settings) ~= nil and def and def.type ~= 0 then
+          return tonumber(settings)
+        else
+          return settings
+        end
+      end
+    end)
+    if ok then return s else
+      local def = _fk_settingdefs[name]
+      if def then
+        if def.type == 0 then
+          return def.default == nil and false or def.default
+        else
+          return def.default
+        end
+      else
+        return nil
+      end
+    end
+  end
+end
+
+if setSettingsOption == nil then
+  function setSettingsOption(name, value)
+    local ok = pcall(function()
+      _fk_settings().Value[name] = tostring(value)
+    end)
+    if not ok then return end
+  end
+end
+
+-- 16: Table options
+local _fk_tabledefs = {}
+
+if createTableOption == nil then
+  function createTableOption(name, description, ctype)
+    _fk_tabledefs[name] = {description=description, type=ctype}
+  end
+end
+
+local function _fk_readTableOptions()
+  local ok, result = pcall(function()
+    local tf = findTableFile('FrankensteinTableOptions')
+    if not tf then return {} end
+    local st = tf.getData()
+    st.Position = 0
+    local txt = st.readString(st.Size)
+    local t = {}
+    for line in txt:gmatch("[^\r\n]+") do
+      local name, value = line:match("([^=]+)=(.*)")
+      if name and value then
+        t[name] = value
+      end
+    end
+    return t
+  end)
+  if ok then return result else return {} end
+end
+
+local function _fk_writeTableOptions(t)
+  local ok, result = pcall(function()
+    local text = ""
+    local keys = {}
+    for k in pairs(t) do
+      table.insert(keys, k)
+    end
+    table.sort(keys)
+    for _, k in ipairs(keys) do
+      text = text .. k .. "=" .. t[k] .. "\n"
+    end
+    local tf = findTableFile('FrankensteinTableOptions')
+    if tf then tf.delete() end
+    tf = createTableFile('FrankensteinTableOptions')
+    local st = tf.getData()
+    st.Size = 0
+    st.Position = 0
+    st.writeString(text)
+  end)
+  return ok
+end
+
+if getTableOption == nil then
+  function getTableOption(name)
+    local t = _fk_readTableOptions()
+    local v = t[name]
+    if not v then
+      local def = _fk_tabledefs[name]
+      if not def or def.type == 0 then
+        return false
+      else
+        return nil
+      end
+    else
+      local def = _fk_tabledefs[name]
+      if def and def.type == 0 then
+        return v == 'true'
+      else
+        return tonumber(v) or v
+      end
+    end
+  end
+end
+
+if setTableOption == nil then
+  function setTableOption(name, value)
+    local t = _fk_readTableOptions()
+    t[name] = tostring(value)
+    _fk_writeTableOptions(t)
+  end
+end
+```
+
+`examples/frankenstein_example.CEA`:
+
+```CEA
+{ Cheat Engine Frankenstein Build — Example Script
+  Demonstrates all four backported AA commands:
+    - {$ifdef}/{$else}/{$endif}  conditional compilation
+    - AOBSCANFUNCTION             scoped AOB scan near a known symbol
+    - HOOK / UNHOOK               automatic hook + original-bytes stub
+
+  This example patches a hypothetical "TakeDamage" function to make the
+  player invincible. Adapt the AOB pattern and symbol name for your target.
+
+  USAGE:
+    1. Attach CE to your target process
+    2. Open Auto-Assembler (Ctrl+Alt+A)
+    3. Paste this script and click Execute
+}
+
+[ENABLE]
+
+{ ---- Step 1: Find TakeDamage using AOBSCANFUNCTION ----
+  Scans within ~64 KB of the symbol "Player::TakeDamage" for the byte
+  pattern. Much faster and less collision-prone than a full module scan. }
+
+AOBSCANFUNCTION(TakeDamage_addr, Player::TakeDamage, 48 89 5C 24 ?? 57 48 83 EC 20)
+
+{ ---- Step 2: Allocate the hook cave ---- }
+
+alloc(TakeDamage_hook, 256, TakeDamage_addr)
+label(original_bytes)
+label(returnaddr)
+
+{ ---- Step 3: Write the hook cave ----
+  Use {$ifdef CPU64} / {$else} / {$endif} so the same script works on
+  both 32-bit and 64-bit targets without editing. }
+
+TakeDamage_hook:
+  {$ifdef CPU64}
+    { 64-bit: preserve registers, zero out damage argument (rcx = this, rdx = damage) }
+    push rax
+    xor edx, edx           { damage = 0 }
+    pop rax
+    jmp original_bytes
+  {$else}
+    { 32-bit: damage is on the stack (typically [esp+8]) }
+    mov dword ptr [esp+8], 0
+    jmp original_bytes
+  {$endif}
+
+{ ---- Step 4: Install the hook ----
+  HOOK writes a JMP at TakeDamage_addr, saves the overwritten bytes into
+  original_bytes, and appends a JMP back to the instruction after the hook. }
+
+HOOK(TakeDamage_addr, TakeDamage_hook, original_bytes)
+
+[DISABLE]
+
+{ UNHOOK restores the original bytes that HOOK saved.
+  The dealloc frees the cave allocation. }
+
+UNHOOK(TakeDamage_addr)
+dealloc(TakeDamage_hook)
+
+```
+
+`extensions/Extensions/AITools/AIDialog.LFM`:
+
+```LFM
+object frmAIDialog: TCEForm
+  Left = 698
+  Height = 478
+  Top = 294
+  Width = 1232
+  ActiveControl = mInput
+  Caption = 'AI Dialog'
+  ClientHeight = 478
+  ClientWidth = 1232
+  DesignTimePPI = 144
+  DoubleBuffered = True
+  ParentDoubleBuffered = False
+  LCLVersion = '4.2.0.0'
+  OnCloseQuery = frmAIDialog_FormCloseQuery
+  object gbAPIKey: TCEGroupBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 0
+    Height = 93
+    Top = 0
+    Width = 1232
+    Anchors = [akTop, akLeft, akRight]
+    AutoSize = True
+    Caption = 'Your AI Access'
+    ClientHeight = 63
+    ClientWidth = 1228
+    ParentBackground = False
+    ParentFont = False
+    TabOrder = 2
+    object edtAPIKEY: TCEEdit
+      AnchorSideLeft.Control = gbAPIKey
+      AnchorSideTop.Control = rbAIAccessPublic
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = btnObtainKey
+      Left = 2
+      Height = 33
+      Top = 29
+      Width = 1109
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 2
+      BorderSpacing.Right = 4
+      EchoMode = emPassword
+      ParentFont = False
+      PasswordChar = '*'
+      TabOrder = 3
+      TextHint = '<Enter API key here>'
+      OnChange = frmAIDialog_edtAPIKEYChange
+      SelStart = 0
+      SelLength = 0
+      TextHintFontColor = clDefault
+      TextHintFontStyle = fsBold
+    end
+    object btnObtainKey: TCEButton
+      AnchorSideTop.Control = edtAPIKEY
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = gbAPIKey
+      AnchorSideRight.Side = asrBottom
+      Left = 1115
+      Height = 35
+      Top = 28
+      Width = 113
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      Caption = 'Obtain Key'
+      ParentFont = False
+      TabOrder = 4
+      OnClick = frmAIDialog_btnObtainKeyClick
+    end
+    object rbAIAccessPublic: TRadioButton
+      AnchorSideLeft.Control = gbAPIKey
+      AnchorSideTop.Control = gbAPIKey
+      Left = 0
+      Height = 29
+      Hint = 'The public CE API is just to give you a taste of the AI capabilities on the rare occasion the limit hasn''t been reached.  The limit it shared between ALL public api users. The chances of getting to it before the limit is reached are slim'#13#10#13#10'uses gemini-2.5-flash'
+      Top = 0
+      Width = 283
+      Caption = 'Public CE API (Extremely Limited)'
+      Checked = True
+      Font.Color = clWindowText
+      ParentColor = False
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 0
+      TabStop = True
+    end
+    object rbAIAccessPatreon: TRadioButton
+      AnchorSideLeft.Control = rbAIAccessPublic
+      AnchorSideLeft.Side = asrBottom
+      Left = 291
+      Height = 29
+      Hint = 'The Patreon CE API is similar to the public API, but has a slightly higher daily limit (still shared between all patreon members) You sometimes might even get a chance to use it.'#13#10#13#10'uses gemini-2.5-flash'
+      Top = 0
+      Width = 216
+      BorderSpacing.Left = 8
+      Caption = 'Patreon CE API (Limited)'
+      ParentColor = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 1
+    end
+    object rbAIAccessPrivate: TRadioButton
+      AnchorSideLeft.Control = rbAIAccessPatreon
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = gbAPIKey
+      Left = 515
+      Height = 29
+      Hint = 'The recommended way to use the AI tools. Even your free access key would give you more access than the public key as you don''t have to share with other users. And if you do need more feel free to change your account to a paid account. '#13#10#13#10'You can pick whichever compatible LLM model you wish'
+      Top = 0
+      Width = 316
+      BorderSpacing.Left = 8
+      Caption = 'Personal Google AI Key (Best option)'
+      ParentColor = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 2
+    end
+  end
+  object gbModelSelection: TCEGroupBox
+    AnchorSideTop.Control = gbAPIKey
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 964
+    Height = 81
+    Top = 93
+    Width = 268
+    Anchors = [akTop, akRight]
+    AutoSize = True
+    BorderSpacing.Bottom = -2
+    Caption = 'Current/Default Model'
+    ClientHeight = 51
+    ClientWidth = 264
+    ParentBackground = False
+    ParentFont = False
+    TabOrder = 3
+    object cbModelSelection: TCEComboBox
+      AnchorSideLeft.Control = gbModelSelection
+      AnchorSideLeft.Side = asrCenter
+      AnchorSideTop.Control = gbModelSelection
+      AnchorSideRight.Control = gbModelSelection
+      AnchorSideRight.Side = asrBottom
+      Left = 4
+      Height = 33
+      Top = 6
+      Width = 256
+      Anchors = [akTop, akRight]
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
+      BorderSpacing.Right = 4
+      BorderSpacing.Bottom = 12
+      ItemHeight = 25
+      ItemIndex = 0
+      Items.Strings = (
+        'gemini-2.5-flash'
+        '<loading>'
+      )
+      ParentFont = False
+      TabOrder = 0
+      Style = csDropDownList
+      Text = 'gemini-2.5-flash'
+    end
+  end
+  object gbOptions: TCEGroupBox
+    AnchorSideLeft.Control = gbModelSelection
+    AnchorSideTop.Control = gbModelSelection
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = gbAPIKey
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 694
+    Height = 414
+    Top = 148
+    Width = 358
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Top = 2
+    Caption = 'Options'
+    ClientHeight = 384
+    ClientWidth = 354
+    ParentBackground = False
+    TabOrder = 4
+    Visible = False
+    object CECheckbox1: TCECheckBox
+      Left = 12
+      Height = 29
+      Top = 20
+      Width = 132
+      Caption = 'CECheckbox1'
+      TabOrder = 0
+    end
+    object CECheckbox2: TCECheckBox
+      Left = 6
+      Height = 29
+      Top = 51
+      Width = 132
+      Caption = 'CECheckbox2'
+      TabOrder = 1
+    end
+  end
+  object btnSend: TCEButton
+    AnchorSideLeft.Control = gbOptions
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Side = asrBottom
+    Left = 967
+    Height = 35
+    Top = 439
+    Width = 66
+    Anchors = [akLeft, akBottom]
+    AutoSize = True
+    Font.Size=14    
+    BorderSpacing.Left = 3
+    BorderSpacing.Bottom = 2
+    Caption = 'Send'
+    TabOrder = 1
+    OnClick = frmAIDialog_btnSendClick
+  end
+  object CEPanel1: TCEPanel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = gbAPIKey
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = gbModelSelection
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 0
+    Height = 385
+    Top = 93
+    Width = 964
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ClientHeight = 385
+    ClientWidth = 964
+    ParentBackground = False
+    TabOrder = 0
+    inline mInput: TSynEdit
+      AnchorSideTop.Side = asrBottom
+      Left = 3
+      Height = 137
+      Top = 245
+      Width = 958
+      Align = alBottom
+      BorderSpacing.Left = 2
+      BorderSpacing.Right = 2
+      BorderSpacing.Bottom = 2
+      Color = clWindow
+      ParentColor = False
+      TabOrder = 0
+      Font.Name='Courier New'
+      Font.Size=10
+      Font.Quality=fqCleartypeNatural
+      Font.Color=clWindowText
+      BorderStyle = bsNone
+      Gutter.Visible = False
+      Gutter.Width = 95
+      Gutter.MouseActions = <>
+      RightGutter.Width = 0
+      RightGutter.MouseActions = <>
+      Keystrokes = <>
+      MouseActions = <>
+      MouseTextActions = <>
+      MouseSelActions = <>
+      Options = [eoAutoIndent, eoBracketHighlight, eoGroupUndo, eoSmartTabs, eoTabsToSpaces, eoTrimTrailingSpaces]
+      VisibleSpecialChars = [vscSpace, vscTabAtLast]
+      RightEdge = -1
+      SelectedColor.BackPriority = 50
+      SelectedColor.ForePriority = 50
+      SelectedColor.FramePriority = 50
+      SelectedColor.BoldPriority = 50
+      SelectedColor.ItalicPriority = 50
+      SelectedColor.UnderlinePriority = 50
+      SelectedColor.StrikeOutPriority = 50
+      BracketHighlightStyle = sbhsBoth
+      BracketMatchColor.Background = clNone
+      BracketMatchColor.Foreground = clNone
+      BracketMatchColor.Style = [fsBold]
+      FoldedCodeColor.Background = clNone
+      FoldedCodeColor.Foreground = clGray
+      FoldedCodeColor.FrameColor = clGray
+      MouseLinkColor.Background = clNone
+      MouseLinkColor.Foreground = clBlue
+      LineHighlightColor.Background = clNone
+      LineHighlightColor.Foreground = clNone
+      Keystrokes = <    
+      item
+        Command = ecUp
+        ShortCut = 38
+      end    
+      item
+        Command = ecSelUp
+        ShortCut = 8230
+      end    
+      item
+        Command = ecScrollUp
+        ShortCut = 16422
+      end    
+      item
+        Command = ecDown
+        ShortCut = 40
+      end    
+      item
+        Command = ecSelDown
+        ShortCut = 8232
+      end    
+      item
+        Command = ecScrollDown
+        ShortCut = 16424
+      end    
+      item
+        Command = ecLeft
+        ShortCut = 37
+      end    
+      item
+        Command = ecSelLeft
+        ShortCut = 8229
+      end    
+      item
+        Command = ecWordLeft
+        ShortCut = 16421
+      end    
+      item
+        Command = ecSelWordLeft
+        ShortCut = 24613
+      end    
+      item
+        Command = ecRight
+        ShortCut = 39
+      end    
+      item
+        Command = ecSelRight
+        ShortCut = 8231
+      end    
+      item
+        Command = ecWordRight
+        ShortCut = 16423
+      end    
+      item
+        Command = ecSelWordRight
+        ShortCut = 24615
+      end    
+      item
+        Command = ecPageDown
+        ShortCut = 34
+      end    
+      item
+        Command = ecSelPageDown
+        ShortCut = 8226
+      end    
+      item
+        Command = ecPageBottom
+        ShortCut = 16418
+      end    
+      item
+        Command = ecSelPageBottom
+        ShortCut = 24610
+      end    
+      item
+        Command = ecPageUp
+        ShortCut = 33
+      end    
+      item
+        Command = ecSelPageUp
+        ShortCut = 8225
+      end    
+      item
+        Command = ecPageTop
+        ShortCut = 16417
+      end    
+      item
+        Command = ecSelPageTop
+        ShortCut = 24609
+      end    
+      item
+        Command = ecLineStart
+        ShortCut = 36
+      end    
+      item
+        Command = ecSelLineStart
+        ShortCut = 8228
+      end    
+      item
+        Command = ecEditorTop
+        ShortCut = 16420
+      end    
+      item
+        Command = ecSelEditorTop
+        ShortCut = 24612
+      end    
+      item
+        Command = ecLineEnd
+        ShortCut = 35
+      end    
+      item
+        Command = ecSelLineEnd
+        ShortCut = 8227
+      end    
+      item
+        Command = ecEditorBottom
+        ShortCut = 16419
+      end    
+      item
+        Command = ecSelEditorBottom
+        ShortCut = 24611
+      end    
+      item
+        Command = ecToggleMode
+        ShortCut = 45
+      end    
+      item
+        Command = ecCopy
+        ShortCut = 16429
+      end    
+      item
+        Command = ecPaste
+        ShortCut = 8237
+      end    
+      item
+        Command = ecDeleteChar
+        ShortCut = 46
+      end    
+      item
+        Command = ecCut
+        ShortCut = 8238
+      end    
+      item
+        Command = ecDeleteLastChar
+        ShortCut = 8
+      end    
+      item
+        Command = ecDeleteLastChar
+        ShortCut = 8200
+      end    
+      item
+        Command = ecDeleteLastWord
+        ShortCut = 16392
+      end    
+      item
+        Command = ecUndo
+        ShortCut = 32776
+      end    
+      item
+        Command = ecRedo
+        ShortCut = 40968
+      end    
+      item
+        Command = ecLineBreak
+        ShortCut = 13
+      end    
+      item
+        Command = ecSelectAll
+        ShortCut = 16449
+      end    
+      item
+        Command = ecCopy
+        ShortCut = 16451
+      end    
+      item
+        Command = ecBlockIndent
+        ShortCut = 16457
+      end    
+      item
+        Command = ecLineBreak
+        ShortCut = 16461
+      end    
+      item
+        Command = ecInsertLine
+        ShortCut = 16462
+      end    
+      item
+        Command = ecDeleteWord
+        ShortCut = 16468
+      end    
+      item
+        Command = ecBlockUnindent
+        ShortCut = 16469
+      end    
+      item
+        Command = ecPaste
+        ShortCut = 16470
+      end    
+      item
+        Command = ecCut
+        ShortCut = 16472
+      end    
+      item
+        Command = ecDeleteLine
+        ShortCut = 16473
+      end    
+      item
+        Command = ecDeleteEOL
+        ShortCut = 24665
+      end    
+      item
+        Command = ecUndo
+        ShortCut = 16474
+      end    
+      item
+        Command = ecRedo
+        ShortCut = 24666
+      end    
+      item
+        Command = ecGotoMarker0
+        ShortCut = 16432
+      end    
+      item
+        Command = ecGotoMarker1
+        ShortCut = 16433
+      end    
+      item
+        Command = ecGotoMarker2
+        ShortCut = 16434
+      end    
+      item
+        Command = ecGotoMarker3
+        ShortCut = 16435
+      end    
+      item
+        Command = ecGotoMarker4
+        ShortCut = 16436
+      end    
+      item
+        Command = ecGotoMarker5
+        ShortCut = 16437
+      end    
+      item
+        Command = ecGotoMarker6
+        ShortCut = 16438
+      end    
+      item
+        Command = ecGotoMarker7
+        ShortCut = 16439
+      end    
+      item
+        Command = ecGotoMarker8
+        ShortCut = 16440
+      end    
+      item
+        Command = ecGotoMarker9
+        ShortCut = 16441
+      end    
+      item
+        Command = ecSetMarker0
+        ShortCut = 24624
+      end    
+      item
+        Command = ecSetMarker1
+        ShortCut = 24625
+      end    
+      item
+        Command = ecSetMarker2
+        ShortCut = 24626
+      end    
+      item
+        Command = ecSetMarker3
+        ShortCut = 24627
+      end    
+      item
+        Command = ecSetMarker4
+        ShortCut = 24628
+      end    
+      item
+        Command = ecSetMarker5
+        ShortCut = 24629
+      end    
+      item
+        Command = ecSetMarker6
+        ShortCut = 24630
+      end    
+      item
+        Command = ecSetMarker7
+        ShortCut = 24631
+      end    
+      item
+        Command = ecSetMarker8
+        ShortCut = 24632
+      end    
+      item
+        Command = ecSetMarker9
+        ShortCut = 24633
+      end    
+      item
+        Command = EcFoldLevel1
+        ShortCut = 41009
+      end    
+      item
+        Command = EcFoldLevel2
+        ShortCut = 41010
+      end    
+      item
+        Command = EcFoldLevel3
+        ShortCut = 41011
+      end    
+      item
+        Command = EcFoldLevel4
+        ShortCut = 41012
+      end    
+      item
+        Command = EcFoldLevel5
+        ShortCut = 41013
+      end    
+      item
+        Command = EcFoldLevel6
+        ShortCut = 41014
+      end    
+      item
+        Command = EcFoldLevel7
+        ShortCut = 41015
+      end    
+      item
+        Command = EcFoldLevel8
+        ShortCut = 41016
+      end    
+      item
+        Command = EcFoldLevel9
+        ShortCut = 41017
+      end    
+      item
+        Command = EcFoldLevel0
+        ShortCut = 41008
+      end    
+      item
+        Command = EcFoldCurrent
+        ShortCut = 41005
+      end    
+      item
+        Command = EcUnFoldCurrent
+        ShortCut = 41003
+      end    
+      item
+        Command = EcToggleMarkupWord
+        ShortCut = 32845
+      end    
+      item
+        Command = ecNormalSelect
+        ShortCut = 24654
+      end    
+      item
+        Command = ecColumnSelect
+        ShortCut = 24643
+      end    
+      item
+        Command = ecLineSelect
+        ShortCut = 24652
+      end    
+      item
+        Command = ecTab
+        ShortCut = 9
+      end    
+      item
+        Command = ecShiftTab
+        ShortCut = 8201
+      end    
+      item
+        Command = ecMatchBracket
+        ShortCut = 24642
+      end    
+      item
+        Command = ecColSelUp
+        ShortCut = 40998
+      end    
+      item
+        Command = ecColSelDown
+        ShortCut = 41000
+      end    
+      item
+        Command = ecColSelLeft
+        ShortCut = 40997
+      end    
+      item
+        Command = ecColSelRight
+        ShortCut = 40999
+      end    
+      item
+        Command = ecColSelPageDown
+        ShortCut = 40994
+      end    
+      item
+        Command = ecColSelPageBottom
+        ShortCut = 57378
+      end    
+      item
+        Command = ecColSelPageUp
+        ShortCut = 40993
+      end    
+      item
+        Command = ecColSelPageTop
+        ShortCut = 57377
+      end    
+      item
+        Command = ecColSelLineStart
+        ShortCut = 40996
+      end    
+      item
+        Command = ecColSelLineEnd
+        ShortCut = 40995
+      end    
+      item
+        Command = ecColSelEditorTop
+        ShortCut = 57380
+      end    
+      item
+        Command = ecColSelEditorBottom
+        ShortCut = 57379
+      end>
+      inline SynLeftGutterPartList1: TSynGutterPartList
+        object SynGutterMarks1: TSynGutterMarks
+          Width = 36
+          MouseActions = <>
+          MaxExtraMarksColums = 0
+          Options = [sgmoDeDuplicateMarksOnOverflow]
+        end
+        object SynGutterLineNumber1: TSynGutterLineNumber
+          Width = 35
+          MouseActions = <>
+          MarkupInfo.Background = clBtnFace
+          MarkupInfo.Foreground = clNone
+          DigitCount = 2
+          ShowOnlyLineNumbersMultiplesOf = 1
+          ZeroStart = False
+          LeadingZeros = False
+        end
+        object SynGutterChanges1: TSynGutterChanges
+          Width = 6
+          MouseActions = <>
+          ModifiedColor = 59900
+          SavedColor = clGreen
+        end
+        object SynGutterSeparator1: TSynGutterSeparator
+          Width = 3
+          MouseActions = <>
+          MarkupInfo.Background = clWhite
+          MarkupInfo.Foreground = clGray
+        end
+        object SynGutterCodeFolding1: TSynGutterCodeFolding
+          Width = 15
+          MouseActions = <>
+          MarkupInfo.Background = clNone
+          MarkupInfo.Foreground = clGray
+          MouseActionsExpanded = <>
+          MouseActionsCollapsed = <>
+        end
+      end
+    end
+    object mOutput: TMarkdownViewer
+      Left = 3
+      Height = 227
+      Top = 3
+      Width = 958
+      BorderSpacing.Left = 2
+      BorderSpacing.Top = 2
+      BorderSpacing.Right = 2
+      Align = alClient
+      Color = clWindow
+      TabOrder = 1
+    end
+    object CESplitter1: TCESplitter
+      Cursor = crVSplit
+      Left = 1
+      Height = 15
+      Top = 230
+      Width = 962
+      Align = alBottom
+      ResizeAnchor = akBottom
+    end
+  end
+end
+
+```
+
+`extensions/Extensions/AITools/aibase.lua`:
+
+```lua
+--Proof of concept of implementing LLM callbacks to use with CE without the need to use Python
+--Initially, this script implements the talking to and handling of a google AI type of LLM
+--Feel free to add support for locally executing LLM's
+
+--todo: add a voice to text and input the output to the AI, or if possible, enter voice as input directly ?
+--      other AI systems besides google ai , websocket support
+
+
+--MIT License
+--https://github.com/cheat-engine/AITools
+
+local s=getSettings('AITOOLS',true)
+local AIAccess=tonumber(s.AIAccess)
+local PatreonSessionID=s.PatreonSessionID or getCEPatreonSessionID()
+local AIKEY=s.AIKEY
+local jsonparser=require 'json'
+local agreedToSendData=s.agreedToSendData or false
+
+modelList=nil
+local waitingForList={} --list of comboboxes waiting for a list of models
+
+local pathdelim=(getOperatingSystem()==0) and [[\]] or [[/]]
+  
+local basepath=extractFilePath(getCurrentScriptPath())
+if basepath==nil then
+  basepath=getCheatEngineDir()..'Extensions'..pathdelim..'AITools'..pathdelim
+end
+
+local modelNameToNameLookup={} --for AIAccess 2 
+  
+
+aitools={}
+aiobjects={} --todo: move to data and free objects when the chat session ends
+
+function registerAITool(name, description, properties, required, functionToCall)
+  if (name==nil) or (name=='') then
+    error('registerAITool: name may not be nil')
+  end
+  if required==nil then
+    required={}
+  end
+  
+  if properties==nil then
+    properties={}
+  end  
+  
+  local t={}
+  t.name=name
+  t.description=description
+  t.parameters={}
+  t.parameters.type="OBJECT"  
+  if properties[1] then
+    error('Error in registerAITool for '..name..': properties must be an object, not an array')
+  end
+  t.parameters.properties=properties
+  t.parameters.required=required
+  setmetatable(t.parameters.required,{isArray=true}) --in case an empty requiredlisty is given
+  t.functionToCall=functionToCall
+  t.enabled=true
+  
+  aitools[name]=t
+end
+
+function find_json_block(text)
+    local start_index = nil
+    local depth = 0
+    local in_string = false
+    local escape = false
+
+    for i = 1, #text do
+        local ch = text:sub(i, i)
+
+        if in_string then
+            if escape then
+                escape = false
+            elseif ch == "\\" then
+                escape = true
+            elseif ch == '"' then
+                in_string = false
+            end
+        else
+            if ch == '"' then
+                in_string = true
+            elseif ch == "{" then
+                if depth == 0 then
+                    start_index = i
+                end
+                depth = depth + 1
+            elseif ch == "}" and depth > 0 then
+                depth = depth - 1
+                if depth == 0 then
+                    local block = text:sub(start_index, i)
+                    local remainder = text:sub(i + 1)
+                    return block, remainder
+                end
+            end
+        end
+    end
+
+    return nil, text
+end
+
+
+local retrieveModelList=nil
+local fillModelList=nil
+local aiRequest=nil
+
+
+retrieveModelList=function(combobox)
+  if combobox then
+    combobox.clear()
+  end
+  
+  if AIAccess==0 or AIAccess==1 then
+    if combobox==nil then return end
+    
+    local limits=getLimits()
+    
+    --return limits.models
+    
+    if limits and limits.models then
+      for i=1,#limits.models do
+        combobox.items.add(limits.models[i].name)
+      end
+    else
+      if limits.error then
+        
+        messageDialog('Failure obtaining model list:'..limits.error..'\n\r\n\rConsider becoming a patreon member or get an AI key from google. You\'ll have access to better models', mtError)
+        return
+      else
+        combobox.items.add('<Failed obtaining model list>')
+        combobox.items.add('<It\'s more than the public one>')      
+      end
+    end
+    
+    
+  elseif AIAccess==2 then
+    local i=getInternet()
+    if AIKEY==nil then
+      AIKEY=combobox.Owner.edtAPIKEY.text
+    end
+    i.Header='x-goog-api-key: '..AIKEY
+    jsonModelList=i.getURL('https://generativelanguage.googleapis.com/v1beta/models')
+    i.destroy()
+
+    local jml=jsonparser.decode(jsonModelList)
+
+    if jml then
+      if jml.error then       
+        messageDialog('Failure obtaining model list:'..jml.error.message, mtError)
+        return
+      end
+
+      if jml.models then
+        modelList={}
+        for i=1,#jml.models do
+          local has_generateContent=false
+          if jml.models[i].supportedGenerationMethods then
+            for j=1,#jml.models[i].supportedGenerationMethods do
+              if jml.models[i].supportedGenerationMethods[j]=='generateContent' then
+                has_generateContent=true
+                break
+              end
+            end
+            if has_generateContent==true then
+              if combobox then
+                combobox.items.add(jml.models[i].displayName)              
+              end
+              modelList[jml.models[i].displayName]=jml.models[i]
+            end
+          end
+        end
+      end
+     
+    end
+  end
+  
+  if combobox then
+    local i=combobox.items.indexOf(s.DefaultModel)
+    if i~=-1 then
+      combobox.itemIndex=i    
+    end
+  end
+
+end
+
+
+getLimits=function()
+  --returns the limits of the current patreon member
+  local r={}
+  if AIAccess==2 then    
+    r.maxtools=math.huge --infinite  
+    return r
+  end
+  
+  local i=getInternet()
+  
+  --jsonparser
+  local s
+  
+  if AIAccess==0 then
+    s=i.getURL('https://cheatengine.org/ai/limits.php')      
+  elseif AIAccess==1 then
+    local i=getInternet()    
+    i.Header='CEPATREONID:'..PatreonSessionID    
+    s=i.getURL('https://cheatengine.org/patreon/ailimits.php')
+  end
+   
+  i.destroy()
+ 
+  if s then
+    r=jsonparser.decode(s)  
+  else
+    r.maxtools=0
+  end
+  
+  return r
+end
+
+
+aiRequest=function(data, message)
+  local function handleError(message)
+    data.self.mOutput.lines.add('*Error:'..message..'*\n\r')
+    
+    if data.NotifyWhenDone then
+      data.NotifyWhenDone(data,'Error:'..message)
+    end  
+    return nil,message
+  end
+
+  if not data.WaitForData and not data.NotifyWhenDone and data.FullAnswerOnly then    
+    return nil,'The current config will result in no data'
+  end
+  
+  _G.lastdata=data
+  
+  if AIAccess~=2 then --having an AI key implies you accepted their terms
+    if not agreedToSendData then
+       
+      synchronize(function()
+        agreedToSendData=messageDialog('Using the AI features involves sending your AI requests to a server where they could potentially be intercepted. Also your AI requests can be used by Google to improve their AI. Make sure not to never send personal information. Do you agree to this?',mtConfirmation,mbYes,mbNo)==mrYes
+        s.agreedToSendData='1'
+        
+      end)
+      
+      if not agreedToSendData then
+        return handleError('No agreement to send data')
+      end
+    end
+  end
+  
+
+
+  if data.Internet==nil then
+    data.Internet=getInternet('CE AITOOLS')
+  end
+  
+  
+ data.Internet.Header=[[Content-Type: application/json
+Accept: text/event-stream]]
+
+ 
+  if AIAccess==1 then
+    if PatreonSessionID=='' then 
+      return handleError('PatreonSessionID missing')
+    end
+    data.Internet.Header=data.Internet.Header..[[
+    
+CEPATREONID: ]]..PatreonSessionID  
+  elseif AIAccess==2 then
+    if AIKEY==nil or AIKEY=='' then
+      return handleError('AIKEY missing')
+    end
+    data.Internet.Header=data.Internet.Header..[[
+    
+x-goog-api-key: ]]..AIKEY
+  end
+
+
+  
+
+  local prevdata=nil
+  local r={}
+  --local allprevdata={}
+
+
+  data.Error=nil
+
+  if data.self and (not data.FullAnswerOnly) then
+    data.Internet.OnReceiveData=function(sender, received)
+    
+     -- print("ondata: "..received)
+      --if inMainThread() then
+      --  print("in main thread")
+      --end      
+
+      if prevdata==nil then
+        prevdata=received
+      else
+        prevdata=prevdata..received
+      end
+
+      
+
+      local currentblock
+      repeat
+        currentblock, prevdata=find_json_block(prevdata)
+        if currentblock then
+          local valid,errstr=pcall(function()
+            local parsed=jsonparser.decode(currentblock)
+
+            table.insert(r, parsed)
+            if parsed.candidates then
+              if parsed.candidates[1].content and parsed.candidates[1].content.parts then
+                for i=1,#parsed.candidates[1].content.parts do
+
+                  if parsed.candidates[1].content.parts[i] and parsed.candidates[1].content.parts[i].text then
+                    synchronize(function()  
+                      data.self.mOutput.lines.text=data.self.mOutput.lines.text .. parsed.candidates[1].content.parts[i].text
+                      data.self.mOutput.SelStart=#data.self.mOutput.lines.text                      
+                    end)
+                  end
+                end
+              end
+            end
+
+            if parsed.error then
+              local message=nil
+              if parsed.error.message then
+                message=parsed.error.message
+              else
+                message=parsed.error
+              end
+              synchronize(function() 
+                data.self.mOutput.lines.add(" *Error:"..message..'*\n\r')
+              end)
+            end
+
+          end)
+        end
+      until currentblock==nil
+
+      data.lastreceived=r
+      data.allprevdata=allprevdata
+    end
+  end
+
+
+
+  local modelname=s.DefaultModel
+  local modelnamepath=''
+  
+  data.AIAccessMode=AIAccess
+
+  if data.self then
+    modelname=data.self.cbModelSelection.Text      
+    s.DefaultModel=modelname
+  end
+
+  if AIAccess==2 then
+    --get the modelnamepath
+    if modelList==nil then
+      retrieveModelList()
+    end
+    modelnamepath=modelList[modelname].name
+  end  
+  
+  
+  data.modelname=modelname
+  
+  
+  if data.history==nil then
+    data.history={}
+    data.history.contents={}
+  end
+  local input=data.history
+  
+  if AIAccess~=2 then
+    --the modelname is sent to the server
+    input.modelname=modelname
+  end
+ 
+  local newcontent={}
+  newcontent.role='user'  
+  newcontent.parts={}  
+  newcontent.parts[1]={}
+  newcontent.parts[1].text=message  
+
+ 
+ 
+  if AIAccess==2 then    
+    input.system_instruction={}
+    input.system_instruction.parts={}
+    input.system_instruction.parts[1]={}
+    --input.system_instruction.parts[1].text='You are currently being used by the Cheat Engine application. Use tools when possible, but fall back on your internal knowledge to answer general questions'
+    input.system_instruction.parts[1].text='You are a professional reverse engineer using Cheat Engine. Use tools when possible, but fall back on your internal knowledge of Cheat Engine.  Do not say you can not help'
+    
+  end
+
+  if data.Extra then --
+    if AIAccess==2 then      
+      input.system_instruction={}
+      input.system_instruction.parts={}
+      input.system_instruction.parts[1]={}
+      input.system_instruction.parts[1].text=data.Extra
+    else    
+      newcontent.parts[2]={}
+      newcontent.parts[2].text=data.Extra      
+      data.Extra=nil      
+    end
+  end
+  
+  table.insert(input.contents,newcontent) 
+    
+
+  --load tools
+  --
+  if data.limits==nil then
+    data.limits=getLimits() --limits is enforced on the server itself, this just saves some bandwith
+  end
+  
+  local maxtools
+  
+  if data.limits then
+    if data.limits.error then
+      messageDialog(data.limits.error,mtError,mbOK)
+      data.limits=nil
+      return
+    else
+      maxtools=data.limits.maxtools  
+    end
+  end
+ 
+ 
+  input.tools={}
+  input.tools[1]={}  
+  input.tools[1].functionDeclarations={}
+  
+  for name,data in pairs(aitools) do
+    if data.enabled then
+      local e={}
+      e.name=name
+      e.description=data.description
+      e.parameters=data.parameters
+      --not functionToCall and not Enabled
+      table.insert(input.tools[1].functionDeclarations,e)
+      
+      --limit to maxtools
+      
+      --meh, if it takes too much sitepower I just block it and give an error to use a google AI key
+      --if maxtools and #input.tools[1].functionDeclarations>maxtools then
+      --  break
+      --end      
+    end
+  end
+  
+  if #input.tools[1].functionDeclarations==0 then
+    input.tools=nil
+  end
+  
+  
+  local inputtext=jsonparser.encode(input)
+  local result
+  
+  local thread=createThread(function(t)
+    data.thread=t
+    t.Name='GenerateContent AI command'
+    if data.WaitForData then
+      t.freeOnTerminate(false)
+    end
+
+    local url
+    if AIAccess==0 then
+      url='https://cheatengine.org/ai/aiproxy.php'
+    elseif AIAccess==1 then
+      url='https://cheatengine.org/patreon/aiproxy.php'
+    elseif AIAccess==2 then
+      url='https://generativelanguage.googleapis.com/v1beta/'..modelnamepath..':streamGenerateContent'
+    end
+    
+    data.usedurl=url
+    data.lastinputtext=inputtext
+    
+    if data.allfullresponses==nil then
+      data.allfullresponses={}
+    end
+    
+
+    result=data.Internet.postURL(url, inputtext)
+    local response
+    local textresult=''
+    
+    while result do
+      table.insert(data.allfullresponses,result)
+      
+      
+      response=nil
+      
+      data.InternetDone=true
+      data.UnparsedResult=result
+      local parsed
+      local valid,err=pcall(function()
+        parsed=jsonparser.decode(result)
+        data.parsedResult=parsed
+      end)
+      
+      if valid then       
+        if parsed then
+          if parsed.error then
+            data.Error=true
+            textresult='Base error:'..parsed.error
+          else
+            for i=1,#parsed do
+              if parsed[i] then
+                if parsed[i].candidates then
+                  if parsed[i].candidates[1] then
+                    if parsed[i].candidates[1].content then
+                      local newcontent={}  
+                      table.insert(input.contents,newcontent)                      
+                      newcontent.role=parsed[i].candidates[1].content.role
+                     
+                      if parsed[i].candidates[1].content.parts then    
+                        newcontent.parts={}
+                        local parts=parsed[i].candidates[1].content.parts
+
+                        
+                        for j=1,#parts do
+                          newcontent.parts[j]={}
+                          newcontent.parts[j]=parts[j]
+                          --newcontent.parts[j].text=parts[j].text
+                          --newcontent.parts[j].functionCall=parts[j].functionCall
+                          
+                          if parts[j].text then
+                            textresult=textresult..parts[j].text
+                          end
+                          
+                          if parts[j].functionCall then
+                            --parse the args
+                            synchronize(function() 
+                              if data.self and data.self.mOutput then
+                                data.self.mOutput.lines.add(' *Calling function :'..parts[j].functionCall.name..'* \n\r')
+                                
+                              end
+                            end)  
+                            
+                            if response==nil then
+                              response={} --add it if needed
+                              response.role='user'
+                              response.parts={}
+                              
+                              --data.resultBeforeResponse=data.UnparsedResult
+                            end
+                            
+                            local tool=aitools[parts[j].functionCall.name]
+                            
+                            local r={}
+                            r.functionResponse={}
+                            r.functionResponse.name=parts[j].functionCall.name
+                            
+                            if tool then
+                              local f=tool.functionToCall
+                              if f then
+                                r.functionResponse.response=tool.functionToCall(parts[j].functionCall.args)                                                       
+                              else
+                                r.functionResponse.response={Error='Invalid config for '..parts[j].functionCall.name}
+                                synchronize(function() 
+                                  data.self.mOutput.lines.add('result: Invalid config')                            
+                                end)                                    
+                              end
+                            else
+                              r.functionResponse.response={Error='Unknown function name'}
+                              synchronize(function() 
+                                data.self.mOutput.lines.add('result: Unknown function')                            
+                              end)                              
+                            end
+                            table.insert(response.parts,r)
+                          end
+                        end                        
+                      end
+                     
+                    end
+                  end
+                end
+                
+                if parsed[i].error then
+                  data.Error=true
+                  textresult='Error:'..parsed[i].error.message
+                end                
+              end
+            end
+          end
+        end
+        
+   
+        if response then
+          --there's a response to give
+          table.insert(input.contents, response)
+          inputtext=jsonparser.encode(input)
+          result=data.Internet.postURL(url, inputtext)
+        else
+          result=nil
+        end
+        
+      else
+        data.Error=true
+        textresult='Parse Error:'..err
+        if data.self then
+          synchronize(function() 
+            if result==nil or result:trim()=='' then
+              data.self.mOutput.lines.add('\n\r  *<server seems to be down>*');
+            else
+              data.self.mOutput.lines.add('\n\r<Error while receiving data:'..err..'>')                            
+            end
+          end)      
+        end
+        break;
+      end
+    end
+    
+    data.result=textresult
+
+    if data.NotifyWhenDone then
+      --print("Notifying with result:"..result) 
+      synchronize(function()
+        if data.NotifyWhenDone then
+          data.NotifyWhenDone(data, textresult)
+        end
+      end)
+    end
+    
+    if not data.WaitForData then
+      data.thread=nil
+    end
+   -- print("thread finished")    
+  end)
+
+  if data.WaitForData then
+    if thread then
+      thread.waitfor()
+      thread.destroy() thread=nil
+    end
+    if data.Error then
+      return nil,textresult
+    else
+      return textresult
+    end
+  else
+    if data.NotifyWhenDone then
+      return nil,'Success: the notify routine will be called when done'
+    else
+      if data.FullAnswerOnly then
+        return nil,'well, this is a waste of tokens'
+      else
+        return nil,'look at the display'
+      end
+    end
+  end
+
+end
+
+local function applyAndSaveKey(f)
+ -- print("applyAndSaveKey")
+  if f.rbAIAccessPatreon.checked then
+    PatreonSessionID=f.edtAPIKEY.text
+    s.PatreonSessionID=PatreonSessionID
+
+  elseif f.rbAIAccessPrivate.checked then
+    AIKEY=f.edtAPIKEY.text
+    if AIKEY~='' then
+      s.AIKEY=AIKEY
+    end
+
+  end
+end
+
+function spawnAIDialog(command, extra) --command and extra are optional
+  local animator
+  local data={}
+
+  local f=createFormFromFile(basepath..'AIDialog.LFM')  
+  
+  local function startAnimator()
+    if animator==nil then
+      local position = 1
+      local direction = 1
+      local maxLength = 7
+      
+      animator=createTimer(f)
+      animator.Enabled=false
+      animator.Interval=50
+      animator.OnTimer=function(t)
+        local a = string.rep(" ", position - 1)
+        local b = string.rep(" ", maxLength - position)
+
+        if f and f.btnSend then
+          f.btnSend.Caption = a .. "•" .. b
+        else
+          animator.destroy()
+          animator=nil
+        end
+
+        position = position + direction
+
+        if position >= maxLength then
+          direction = -1
+        elseif position <= 1 then
+          direction = 1 
+        end     
+      end      
+    end
+    
+    if animator then    
+      animator.Enabled=true
+    end  
+  end
+  
+  local function stopAnimator()
+    if animator then
+      animator.Enabled=false
+    end
+  end
+  
+
+  data.self=f
+  data.Extra=extra
+
+
+  f.OnClose=function(sender)
+    for i=1,#waitingForList do
+      if f.cbModelSelection==waitingForList[i] then
+        waitingForList[i]=nil
+      end
+    end
+
+    data.self=nil
+    destroyRef(f.Tag)
+    
+    applyAndSaveKey(f)
+    
+    f=nil    
+    return caFree
+  end
+
+  f.btnObtainKey.OnClick=function()
+    if f.rbAIAccessPrivate.checked then
+      shellExecute('https://aistudio.google.com/app/api-keys')
+    elseif f.rbAIAccessPatreon.checked then
+      local sessionid=getCEPatreonSessionID(true)
+      if sessionid then
+        f.edtAPIKEY.text=sessionid
+        PatreonSessionID=sessionid
+      end
+    end
+  end
+  
+  f.mInput.OnKeyDown=function(sender,key)
+   
+    if key==VK_RETURN and isKeyPressed(VK_CONTROL) then
+      f.btnSend.doClick()
+    else
+      return key
+    end
+  end
+  
+  f.btnSend.OnClick=function(sender)
+    --collect the history if there is any (data can be accessed here directly)
+    if f.mOutput.Lines.Count>0 then
+      f.mOutput.Lines.add('')
+    end 
+
+    local message=f.mInput.Lines.Text
+    f.mOutput.Lines.add('> '..f.mInput.Lines.Text)
+    f.mInput.Lines.clear()
+
+    f.btnSend.enabled=false
+    if f.mOutput.Lines.Count>0 then
+      f.mOutput.Lines.add('')
+    end
+    
+    applyAndSaveKey(f)
+    
+    startAnimator()
+    
+    if f and f.btnSend then
+      f.btnSend.cursor=crHourGlass     
+    end
+
+    data.NotifyWhenDone=function(data,r)
+      if f and f.btnSend then
+        f.btnSend.enabled=true
+        
+        f.btnSend.Caption=translate('Send')
+        f.btnSend.cursor=crDefault
+        
+        stopAnimator()
+      end
+    end
+    aiRequest(data, message)
+  end
+  
+  local AIAccessChange=function(sender)
+    data.limits=nil
+    f.cbModelSelection.Items.clear()
+    if s.DefaultModel~='' then
+      f.cbModelSelection.Items.add(s.DefaultModel)
+      f.cbModelSelection.ItemIndex=0
+    end
+    
+    if f.rbAIAccessPublic.Checked then
+      f.edtAPIKEY.visible=false
+      f.btnObtainKey.visible=false
+      s.AIAccess='0'
+      AIAccess=0
+    elseif f.rbAIAccessPatreon.Checked then      
+      f.edtAPIKEY.TextHint='<Enter CE Patreon session ID here>'      
+      f.edtAPIKEY.Text=PatreonSessionID or ''
+      f.edtAPIKEY.visible=true
+      f.btnObtainKey.Caption='Refresh session'   
+      f.btnObtainKey.visible=true
+      s.AIAccess='1'
+      AIAccess=1
+    else
+      f.edtAPIKEY.TextHint='<Enter API key here>'
+      f.edtAPIKEY.Text=AIKEY or ''
+      f.edtAPIKEY.visible=true
+      f.btnObtainKey.Caption='Obtain Key'    
+      f.btnObtainKey.visible=true
+      s.AIAccess='2'
+      AIAccess=2
+    end
+  end
+  
+  if AIAccess then
+    if AIAccess==1 then
+      f.rbAIAccessPatreon.Checked=true      
+    elseif AIAccess==2 then            
+      f.rbAIAccessPrivate.Checked=true
+    end
+  else
+    --first time execute
+    PatreonSessionID=getCEPatreonSessionID()
+    if PatreonSessionID then
+      f.rbAIAccessPatreon.Checked=true
+    end
+    AIAccess=0
+  end
+  
+  
+  f.rbAIAccessPublic.OnChange=AIAccessChange
+  f.rbAIAccessPatreon.OnChange=AIAccessChange
+  f.rbAIAccessPrivate.OnChange=AIAccessChange
+  
+  AIAccessChange()
+  
+  -- f.cbModelSelection.OnDropDown=function(sender)
+  f.cbModelSelection.OnGetItems=function(sender)
+    if f.cbModelSelection.items.Count<=1 then
+      --retrieveModelList(f.cbModelSelection)  
+      retrieveModelList(f.cbModelSelection)      
+    end
+  end
+  
+  f.Tag=createRef(data) --for storing the history and other useful details
+
+
+  f.Position=poScreenCenter
+  f.Show()
+  
+  f.mInput.setFocus()
+
+  
+  if command then 
+    f.mOutput.Lines.add('>...')  
+    f.btnSend.enabled=false 
+    f.btnSend.cursor=crHourGlass     
+    startAnimator()
+    
+    data.NotifyWhenDone=function(data,r)
+      f.btnSend.enabled=true   
+      f.btnSend.cursor=crDefault
+      f.btnSend.Caption=translate('Send')
+      stopAnimator()      
+    end
+    
+    aiRequest(data, command)    
+  end
+
+  _G.debug_LastAIForm=f
+  
+  return f
+end
+
+function askAIQuestion(command, extra, notifyWhenDone) --NotifyWhenDone(data,result)
+  if (notifyWhenDone==nil) and (type(extra)=='function') then
+    --kinda lazy but ok...
+    notifyWhenDone=extra
+    extra=nil
+  end
+  
+
+  local data={}
+  data.Extra=extra
+  data.FullAnswerOnly=true
+  if notifyWhenDone then
+    data.NotifyWhenDone=notifyWhenDone
+  else
+    data.WaitForData=true
+  end
+  return aiRequest(data, command)
+end
+
+
+local initialized=false
+function initAIMenuItems()
+  --add AI menus to some useful places
+  if initialized then return true end
+  
+  initialized=true
+  
+  require('forEachForm')
+  
+  local logo=createPNG()
+  logo.loadFromFile(basepath..'AI128x128.png')
+
+  
+  --"Explain this function" inside the memoryview context menu
+  forEachAndFutureForm('TMemoryBrowser',function(f)
+    local miAI_Sep=createMenuItem(f)
+    miAI_Sep.Caption='-'
+    local miAI_Explain=createMenuItem(f)
+    miAI_Explain.Caption=translate('Explain this function')
+    
+    f.debuggerpopup.Items.add(miAI_Sep)
+    f.debuggerpopup.Items.add(miAI_Explain)   
+
+    local ii=f.mvImageList.add(logo)
+    miAI_Explain.ImageIndex=ii
+    miAI_Explain.OnClick=function(sender)
+      --get the function
+      local d=f.disassembleSelectedFunction()
+      if d and d~='' then      
+        spawnAIDialog([[The following code is a function copied by Cheat Engine's disassembler. Describe what this function does: 
+```
+]]..d..[[
+```]])
+      end
+    end
+    
+    local miAI_PseudoCode=createMenuItem(f)
+    miAI_PseudoCode.Caption=translate('Generate pseudocode for this function')
+    
+    f.debuggerpopup.Items.add(miAI_PseudoCode)   
+
+    local ii=f.mvImageList.add(logo)
+    miAI_PseudoCode.ImageIndex=ii
+    miAI_PseudoCode.OnClick=function(sender)
+      --get the function
+      local d=f.disassembleSelectedFunction()
+      if d and d~='' then      
+        spawnAIDialog([[The following code is a function copied by Cheat Engine's disassembler. Generate pseudocode based on this function :
+```
+]]..d..[[
+```]])
+      end
+    end
+  end)
+  
+  forEachAndFutureForm('TfrmLuaEngine',function(f)
+    local id  
+    local oldDestroy
+    local aif --ai form
+    local miAI_sep=createMenuItem(f)
+
+    miAI_sep.Caption='-'
+    
+    local miAI_AskAboutScript=createMenuItem(f)
+    
+    miAI_AskAboutScript.Name='miAI_AskAboutScript'
+    miAI_AskAboutScript.Caption=translate('Ask about this script')
+    
+    f.mscript.PopupMenu.Items.add(miAI_sep)
+    f.mscript.PopupMenu.Items.add(miAI_AskAboutScript)
+    local ii=f.mscript.PopupMenu.Images.add(logo)
+    miAI_AskAboutScript.ImageIndex=ii
+    miAI_AskAboutScript.OnClick=function(sender)
+      if id==nil then        
+        id=#aiobjects+1
+        aiobjects[id]=f
+        
+        oldDestroy=f.OnDestroy
+        
+        f.OnDestroy=function(s)
+          if aif then
+            aif.close()
+            aif=nil
+          end
+          aiobjects[id]=nil
+          if oldDestroy then
+            oldDestroy(s)
+          end
+        end        
+      end
+      aif=spawnAIDialog(nil,'\n\r This is from a LuaEngine window where the LuaEngineWindowID='..id)
+      aif.mOutput.Lines.add('###Ask your questions about the current Lua Engine script here')
+      aif.Caption=aif.Caption..' (Lua Engine)'
+      aif.OnDestroy=function(s)
+        aif=nil
+      end
+    end
+  end)
+  
+  forEachAndFutureForm('TfrmAutoInject',function(f)
+    local id
+    local oldDestroy
+    local aif --ai form
+    local miAI_sep=createMenuItem(f)
+    miAI_sep.Caption='-'
+    
+    local miAI_AskAboutScript=createMenuItem(f)
+    
+    miAI_AskAboutScript.Name='miAI_AskAboutScript'
+    miAI_AskAboutScript.Caption=translate('Ask about this script')
+    
+    f.assembleScreen.PopupMenu.Items.add(miAI_sep)
+    f.assembleScreen.PopupMenu.Items.add(miAI_AskAboutScript)
+    local ii=f.assembleScreen.PopupMenu.Images.add(logo)
+    miAI_AskAboutScript.ImageIndex=ii
+    miAI_AskAboutScript.OnClick=function(sender)
+      if id==nil then
+        id=#aiobjects+1
+        aiobjects[id]=f
+        
+        oldDestroy=f.OnDestroy
+        
+        f.OnDestroy=function(s)
+          if aif then
+            aif.close()
+            aif=nil
+          end
+          
+          aiobjects[id]=nil
+          if oldDestroy then
+            oldDestroy(s)
+          end
+        end
+        
+      end
+
+      aif=spawnAIDialog(nil,'\n\r This is from an AutoAssembler window where the AutoAssemblerWindowID='..id)
+      aif.mOutput.Lines.add('###Ask your questions about the current AutoAssembler script here')
+      aif.Caption=aif.Caption..' (AutoAssembler)'
+      aif.OnDestroy=function(s)
+        aif=nil
+      end
+      
+    end
+  end)  
+  
+  
+  
+  local mi=createMenuItem(MainForm)
+  mi.Caption=translate('Ask AI')  
+  mi.Shortcut='Ctrl+Alt+I'
+  mi.ImageIndex=MainForm.Menu.Images.add(logo)
+  mi.OnClick=function()
+    spawnAIDialog()
+  end
+  MainForm.miHelp.insert(MainForm.miLuaDocumentation.MenuIndex,mi)  
+end
+
+if createSettingsOption then
+  createSettingsOption('EnableAITools','Enable use of AI functions (Requires restart of CE to apply)', ctBoolean, 'AI Tools', 2, true)
+
+  if getSettingsOption('EnableAITools')==true then
+    initAIMenuItems()
+  end
+else
+  initAIMenuItems()
+end
+
+```
+
+`extensions/Extensions/AITools/loadorder.txt`:
+
+```txt
+#this file controls the order the lua files are loaded
+aibase.lua #load as first
+tools #then load the tools subfolder
+
+
+```
+
+`extensions/Extensions/AITools/tools/aitools.lua`:
+
+```lua
+--base tools
+--MIT License 
+--https://github.com/cheat-engine/AITools
+
+function ai_getOpenedProcessName()
+  if process then return {processname=process} else return {processname='no process opened yet'} end
+end
+
+function ai_openProcess(args)
+  local processname=args.processname
+  
+  if processname then
+    local r  
+    r=openProcess(processname)
+    if r then
+      return {result='Success', currentProcessID=getOpenedProcessID()}      
+    else
+      return {error='Failure opening '..processname}
+    end
+  else
+    return {error='No processname provided'}
+  end   
+end
+
+local function UpdateMemscanDialog(f,ms)
+  synchronize(function()
+    f.lblVartype.caption='vartype:'..ms.VarType    
+    f.lblLastScanOption.Caption='Last scan option:'..ms.ScanOption
+    f.lblLastScanValue.Caption='Scan Value: '..ms.ScanValue
+    f.lblResultsFound.Caption='Number of results: '..ms.FoundCount   
+    
+    f.lvResults.Items.Count=ms.FoundCount
+    local fl=ms.FoundList
+    if fl then
+      fl.Initialize()
+    end
+  end)
+  
+end
+
+--test:
+--ai_scanMemory({value=100})
+function ai_scanMemory(args)
+  local f
+  local pb
+  local fl
+  local ms
+  
+  synchronize(function()
+    f=createForm()
+    f.Caption='AI memscan session'  
+    f.BorderStyle=bsSizeable
+    f.Position=poScreenCenter
+    f.OnClose=nil
+
+    local infoPanel=createPanel(f)
+    infoPanel.ChildSizing.ControlsPerLine=2
+    infoPanel.ChildSizing.Layout='cclLeftToRightThenTopToBottom'
+    infoPanel.ChildSizing.HorizontalSpacing=f.Canvas.getTextWidth('XXX')
+
+    local lblVartype=createLabel(f)
+    lblVartype.name='lblVartype'    
+    lblVartype.Parent=infoPanel   
+
+    local lblLastScanOption=createLabel(f)
+    lblLastScanOption.Parent=infoPanel
+    lblLastScanOption.name='lblLastScanOption'   
+    
+    local lblLastScanValue=createLabel(f)
+    lblLastScanValue.Parent=infoPanel
+    lblLastScanValue.name='lblLastScanValue'
+    
+    local lblResultsFound=createLabel(f)
+    lblResultsFound.Parent=infoPanel
+    lblResultsFound.name='lblResultsFound'    
+    
+    infoPanel.align=alTop
+    infoPanel.autoSize=true
+    
+    pb=createProgressBar(f)
+    pb.align=alTop
+    pb.Name='pbMemscanProgress'
+    
+    lv=createListView(f)    
+    lv.align=alClient
+    lv.name='lvResults'
+    lv.AutoWidthLastColumn=true
+    
+    lv.OnData=function(sender, li)
+      if fl then
+        li.Caption=fl.getAddress(li.Index)
+        li.SubItems.add(fl.getValue(li.index))
+      end
+    end
+    
+    cAddress=lv.Columns.add()
+    cAddress.Caption='Address'
+    cValue=lv.Columns.add()
+    cValue.Caption='Value'
+    cAddress.Width=f.Canvas.getTextWidth('xxxxxxxxxxxxxx')
+    cValue.Width=lv.ClientWidth-cAddress.Width
+    
+    lv.OwnerData=true  
+  end)
+  
+
+  
+  
+  
+  local value=args.value
+  local value2=args.value2
+  local scanoption=args.scanoption
+  local alignment=args.alignment
+  local vartype=args.vartype
+  ms=createMemScan(pb)
+  fl=createFoundList(ms) 
+
+  ms.ScanValue=value
+  if value2 then 
+    ms.ScanValue2=value2
+  end
+  
+  if vartype then
+    ms.VarType=vartype
+  end
+  
+  if scanoption then
+    ms.ScanOption=scanoption
+  end
+  
+  if alignment then
+    ms.FastScanMethod='fsmAligned'  
+    Fastscanparameter=alignment
+  end
+  
+  UpdateMemscanDialog(f,ms)    
+  ms.scan()
+  
+  ms.waitTillDone()
+  UpdateMemscanDialog(f,ms)    
+  
+  
+  if ms.ErrorString and ms.ErrorString~='' then
+    local err=ms.ErrorString
+    ms.destroy()
+    return {error='Scan error:'..err}
+  end
+  
+  local i=#aiobjects+1 --perhaps store it in lastData and free when the form and history is deleted
+  
+ 
+  local memscaninfo={}
+  memscaninfo.ms=ms
+  memscaninfo.f=f
+  memscaninfo.type='memscaninfo'
+ 
+  aiobjects[i]=memscaninfo
+  
+  local r
+  
+  if scanoption=='soUnknownValue'  then
+    r={status='success', scanID=i, message='Scan finished. call refineScan to filter the results'}
+    if ms.FoundCount<=5 then
+      r.Addresses={}
+      local results=ms.Results
+      
+      for i=1,#results do      
+        r.Addresses[i]=string.format('0x%.8x',results[i])
+      end    
+    end  
+  else   
+    r={status='success', scanID=i, foundCount=ms.FoundCount, message='Found '..ms.FoundCount..' results'}
+    if ms.FoundCount<=5 then
+      r.Addresses={}
+      local results=ms.Results
+      
+      for i=1,#results do      
+        r.Addresses[i]=string.format('0x%.8x',results[i])
+      end    
+    end
+  end
+  
+   
+  return r
+  --return a scannerid
+end
+
+local function ai_refineScan(args)
+  local scannerid=args.scanID
+ -- print("ai_refineScan")
+  --printf("scannerid=%d", scannerid)
+  
+  if aiobjects[scannerid]==nil or type(aiobjects[scannerid])~='table' or aiobjects[scannerid].type~='memscaninfo' then
+    return {error='the scanID was incorrect'}
+  end
+  
+  local ms=aiobjects[scannerid].ms
+  local f=aiobjects[scannerid].f
+    
+  ms.value=args.value
+  
+  if args.value2 then
+    ms.value=args.value2
+  end
+  
+  if args.scanoption then
+    ms.scanoption=args.scanoption
+  end
+  
+  ms.scan()
+  if not ms.waitTillDone() then
+    return {error='ms.waitTillDone() returned false'}  
+  end
+  
+  UpdateMemscanDialog(f,ms)
+  
+  
+  if ms.ErrorString and ms.ErrorString~='' then
+    local err=ms.ErrorString
+    return {error='Scan error:'..err}
+  end  
+  
+  local r={status='success', foundCount=ms.FoundCount, message='Found '..ms.FoundCount..' results'}  
+
+  if ms.FoundCount<=5 then
+    r.Addresses={}
+    local results=ms.Results
+    
+    for i=1,#results do      
+      r.Addresses[i]=string.format('0x%.8x',results[i])
+    end    
+  end
+  return r    
+end
+
+function ai_getResultsAndValues(args) --startindex, count
+  local scannerid=args.scanID  
+  local index=args.index
+  local count=args.count
+  
+  if aiobjects[scannerid]==nil or type(aiobjects[scannerid])~='table' or aiobjects[scannerid].type~='memscaninfo' then
+    return {error='the scanID was incorrect'}
+  end
+  
+  local ms=aiobjects[scannerid].ms
+  local f=aiobjects[scannerid].f
+   
+  local r={}
+  
+  local al=ms.FoundList
+  if al==nil then
+    al=createFoundList(ms)    
+  end
+  al.initialize()
+  
+  local maxindex=math.min(al.count-1,index+count-1)
+  
+  for i=index,maxindex do
+    local e={}
+    e.index=i
+    e.address=al.Address[i]
+    e.value=al.Value[i]
+    
+    table.insert(r,e)
+  end
+  
+ -- al.deinitialize()  
+ -- al.destroy() al=nil
+  
+  return {status='success', result=r}
+end
+
+function ai_startWatchpoint(args)
+  local address=args.address
+  local watchsize=args.watchsize or 1
+  local watchtype=_G[args.watchtype] or bptAccess  
+  
+  --autoUpdate ? send a hidden conversation update every few seconds if there's a change ?
+  
+  --print("ai_startWatchpoint. args=",args)
+  
+  if address then
+    local a=getAddressSafe(address)
+    if a then
+      local id=#aiobjects+1
+      local data={}
+      data.type='watchpoint'      
+      data.results={}      
+      data.resultsLookupActual={}
+      aiobjects[id]=data      
+
+      local r,r2=debug_setBreakpoint(a,watchsize,watchtype,function()
+        --add to data.result
+        --print("bp triggered")
+        local instructionPointer
+               
+        local r={}        
+        r.context=debug_getCurrentContextTable()
+        
+        if r.context then
+          if targetIsX86() then
+            if targetIs64Bit() then
+              r.InstructionPointer=r.context.RIP 
+              r.StackPointer=r.context.RSP
+            else
+              r.InstructionPointer=r.context.EIP
+              r.StackPointer=r.context.ESP
+            end            
+          elseif targetIsArm() then
+            r.InstructionPointer=r.context.PC
+            r.StackPointer=r.context.SP
+          end 
+
+          if data.results[r.InstructionPointer] then
+            r=data.results[r.InstructionPointer]
+            r.count=r.count+1
+          else
+             --first time. get some extra info
+            data.results[r.InstructionPointer]=r
+            r.count=1          
+            
+            local start,stop=getFunctionRange(getFunctionRange(r.InstructionPointer))
+            r.functionRange={start=start,stop=stop}
+
+            --get the actual instruction pointer
+            --test for rep            
+            local d=createDisassembler()    
+            d.showSymbols=true            
+            d.showModules=true
+            
+            d.disassemble(r.InstructionPointer)
+            if d.LastDisassembleData.isRep then
+              r.actualInstructionPointer=r.InstructionPointer
+            else
+              r.actualInstructionPointer=getPreviousOpcode(r.InstructionPointer)
+              d.disassemble(r.actualInstructionPointer)
+            end
+            data.resultsLookupActual[r.actualInstructionPointer]=r --for quick lookup
+            
+            r.contextExt=debug_getCurrentContextTable(true)
+            
+            --delete from contextExt the nonExt parts
+            for name,val in pairs(r.context) do
+              r.contextExt[name]=nil
+            end
+            
+            r.stack=readBytes(r.StackPointer,1024, true)
+            
+            r.stacktrace=debug_stacktrace(r.StackPointer,1024)
+            
+            r.opcode=d.LastDisassembleData.opcode ..' '..d.LastDisassembleData.parameters
+            r.opcodesize=#d.LastDisassembleData.bytes
+            d.destroy() d=nil            
+          end
+        end
+      end)
+      
+      if r then
+        print("ai_startWatchpoint success")
+        data.breakpointid=r2
+        return {status='success', watchpointID=id}        
+      else
+       -- print("ai_startWatchpoint failure 1")      
+       -- print("r2=",r2)
+        aiobjects[id]=nil --nevermind
+        if r2==nil then r2='failure for an unknown reason' end
+        return {error=r2}      
+      end
+    else
+      print("ai_startWatchpoint failure 2")   
+      return {error='Failure interpreting what the address `'..address..'` meant'}
+    end
+  else
+    print("ai_startWatchpoint failure 3")   
+    return {error='address was not provided or unparsable'}
+  end
+end
+
+function ai_stopWatchpoint(args)
+  local watchpointID=args.watchpointID
+  if watchpointID then
+    local data=aiobjects[watchpointID]
+    if data then
+      if data.type~='watchpoint' then
+        return {error='watchpointID corrupted'}
+      end
+      local r,err=debug_removeBreakpointByID(data.breakpointid)
+      if r then
+        aiobjects[watchpointID].stopped=true
+        return {status='success'}
+      else
+        if err==nil then      
+          return {error='failure removing the watchpoint'}
+        else
+          return {error=err}
+        end
+      end
+    else
+      return {error='watchpointID invalid'}
+    end
+  else
+    return {error='watchpointID missing'}
+  end
+end
+
+function ai_deleteWatchpoint(args)
+  local watchpointID=args.watchpointID
+  if watchpointID then
+    local data=aiobjects[watchpointID]
+    if data.stopped==false then
+      local r=ai_stopWatchpoint(args)
+      if r.error then
+        return r
+      end           
+    end
+    
+    aiobjects[watchpointID]=nil
+    return {status='success'}
+  else
+    return {error='watchpointID missing'}
+  end
+end
+
+function ai_queryWatchPointStatus(args)
+  local watchpointID=args.watchpointID
+  if watchpointID then
+    local r={}
+    local data=aiobjects[watchpointID]
+    if data==nil then
+      return {error='watchpointID is invalid. Did you actually call startWatchpoint?'}
+    end
+    if data.type~='watchpoint' then
+      return {error='watchpointID corrupted'}
+    end
+    
+    if data.results==nil then
+      return {error='watchpointID result data missing'}
+    end
+    
+    for instructionPointer,result in pairs(data.results) do
+      local e={}
+      e.InstructionAddress=string.format("0x%x",result.actualInstructionPointer) --needs to be a string
+      e.Opcode=result.opcode
+      e.Count=result.count
+      
+      table.insert(r,e)
+    end    
+    
+    return {status='success', results=r}
+  else
+    return {error='watchpointID missing'}
+  end 
+end
+
+
+function ai_getDetailedWatchpointData(args)
+  local watchpointID=args.watchpointID
+  local address=getAddressSafe(args.address)
+  local indexeddatatypes=args.datatypes
+
+  local datatypes={}
+  for i=1,#indexeddatatypes do
+    datatypes[indexeddatatypes[i]]=true
+  end
+  
+  --print("ai_getDetailedWatchpointData. args=", args)
+  
+  if address==nil then
+    return {error='address was not provided or unparsable'}
+  end
+  if watchpointID then
+    local data=aiobjects[watchpointID]
+    
+    if data.type~='watchpoint' then
+      return {error='watchpointID corrupted'}
+    end
+    
+    if data.results==nil then
+      return {error='watchpointID result data missing'}
+    end
+    
+    local e=data.resultsLookupActual[address]
+    if e==nil then
+      return {error='invalid address'}
+    end
+    
+    local r={}
+
+    if datatypes.wpFunctionRange then
+      r.functionRange=e.functionRange
+    end    
+    
+    if datatypes.wpRegisters then
+      r.registers=e.context
+    end
+    
+    if datatypes.wpExtendedRegisters then
+      r.extendedRegisters=e.contextExt
+    end    
+    
+    if datatypes.wpStackTrace then
+      r.stacktrace=e.stacktrace
+    end
+    
+    if datatypes.wpStackView then      
+      local s=''
+      local stackSnapshotSize=args.stackSnapshotSize or 32      
+      
+      for i=1,stackSnapshotSize do
+        s=s..format('%.2x ',e.stack[i])
+      end
+      
+      r.stackview=s
+    end
+    
+    return {status='success', results=r}
+  else
+    return {error='watchpointID missing'}
+  end 
+end
+
+function ai_disassembleRange(args)
+  local start=getAddressSafe(args.startAddress)
+  local stop=getAddressSafe(args.stopAddress)
+  local showSymbols=args.showSymbols or true
+  local showModules=args.showModules or true
+  local showSections=args.showSections or false
+  
+  local d=createDisassembler()
+  d.showSymbol=true
+  d.showModules=true
+  d.showSections=true  
+  
+  local r={}
+  
+  local a=start
+  while a<=stop do
+    local e={}
+    d.disassemble(a)
+    local ldd=d.LastDisassembleData
+    e.address=string.format("0x%x",a)
+    e.instruction=ldd.prefix..' '..ldd.opcode..' '..ldd.parameters
+    e.addressString=getNameFromAddress(a, true,true,false)
+    e.bytes=ldd.bytes
+    
+    table.insert(r,e)
+    
+    a=a+#d.LastDisassembleData.bytes
+  end  
+  
+  
+  d.destroy() d=nil
+  
+  return {status='success', result=r}
+end
+
+function ai_disassembleSingleInstruction(args)
+  local r=ai_disassembleRange({startAddress=args.address, stopAddress=args.address, showSymbols=args.showSymbols, showModules=args.showModules, showSections=args.showSections})
+  if r and r.status=='success' and r.result[1] then
+    local r2=r.result[1]
+    return {status='success',result=r2}
+  else
+    return {error='disassembling has failed'}
+  end
+end
+
+function ai_getFunctionRange(args)
+  local address=getAddressSafe(args.address)
+  
+  local start,stop=getFunctionRange(address)
+  
+  if start and stop then
+    return {status='success', start=start, stop=stop}    
+  else
+    return {error="Failure to get a range. Maybe it's not a function"}    
+  end
+end
+
+function ai_enumModules(args)
+  --list of modulenames, base address and size
+  local ml=enumModules()
+  local r={}
+  for i=1,#ml do
+    r[i]={}
+    r[i].moduleName=ml[i].Name
+    r[i].baseAddress=string.format("0x%x",ml[i].Address)
+    r[i].endAddress=string.format("0x%x",ml[i].Address+ml[i].Size)    
+  end
+  
+  return {status='success', moduleList=r}    
+end
+
+function ai_getModuleFromAddress(args)
+  local address=getAddressSafe(args.address)
+  local ml=enumModules()
+  for i=1,#ml do
+    if (address>ml[i].Address) and (address<ml[i].Address+ml[i].Size) then
+      return {status='success', moduleinfo={moduleName=ml[i].Name, baseAddress=string.format("0x%x",ml[i].Address), endAddress=string.format("0x%x",ml[i].Address+ml[i].Size) }}   
+    end
+  end
+  
+  return {error="The given address does not belong to a module"}
+end
+
+function ai_getModuleSections(args)
+  local modulename=args.moduleName
+  local sl=enumSectionsOfModule(modulename)
+  if sl then
+    for i=1,#sl do
+      sl[i].FileAddress=nil --less info to confuse it
+    end
+    return {status='success', sl}
+  else
+    return {error='Failed retrieving the sections of '..modulename} 
+  end        
+end
+
+function ai_getTargetedProcessInfo()
+  local r={}
+  r.is64bit=targetIs64Bit()
+  if targetIsAndroid() then
+    r.android=true
+  end
+  
+  if targetIsX86() then
+    r.x86=true
+  end
+  
+  if targetIsArm() then
+    r.arm=true
+  end  
+  
+  if getABI()==0 then
+    r.callingConvention='Windows'
+  else
+    r.callingConvention='System V'
+  end
+  
+  return {ProcessInfo=r}
+end
+
+local readFunctions={}
+readFunctions['vtByte']=function(address) return readByte(address) end
+readFunctions['vtWord']=function(address) return readSmallInteger(address) end
+readFunctions['vtDword']=function(address) return readInteger(address) end
+readFunctions['vtQword']=function(address) return string.format("%x",readQword(address)) end
+readFunctions['vtSingle']=function(address) return readFloat(address) end
+readFunctions['vtDouble']=function(address) return readString(address) end
+
+local readSizes={}
+readSizes['vtByte']=1
+readSizes['vtWord']=2
+readSizes['vtDword']=4
+readSizes['vtQword']=8
+readSizes['vtSingle']=4
+readSizes['vtDouble']=8
+
+
+function ai_readMemoryBlock(args)
+  local address=getAddressSafe(args.address)
+  local elementType=args.elementType
+  local count=args.count
+  
+  if address==nil then
+    return {error='Invalid address'}  
+  end
+  
+  local reader=readFunctions[elementType]
+  if reader==nil then
+    return {error='The elementtype is invalid'}    
+  end
+  
+  local elementSize=readSizes[elementType]
+  
+  local readerror=false
+  local r={}
+  for i=1,count do
+    local a=address+elementSize*(i-1)
+    r[i]=reader(a)
+    
+    if r[i]==nil then
+      readerror=true
+    end
+  end
+  
+  if readerror then
+    if #r==0 then
+      return {error='The memory is unreadable'}
+    else
+      return {status='partial success. Not all bytes are readable', result=r}
+    end
+  else  
+    return {status='success', result=r}
+  end
+end
+
+function ai_readString(args)
+  local address=getAddressSafe(args.address)
+  local widestring=args.widestring or false
+  local charcount=args.charcount or 100
+  
+  if address==nil then
+    return {error='Invalid address'}  
+  end
+  
+  return {status='success', result=readString(address, charcount, widestring)}
+end
+
+function ai_showLuaScript(args)  
+  synchronize(function() 
+    local f=createLuaEngine()
+    f.mScript.Lines.Text=args.LuaScript or '' 
+    f.show()
+  end)
+  return {status='success'}  
+end
+
+function ai_showAutoAssemblerScript(args)  
+  synchronize(function() 
+    local f=createAutoAssemblerForm()
+    f.Assemblescreen.Lines.Text=args.AutoAssemblerScript or ''     
+    
+  end)  
+  
+  return {status='success'}
+end
+
+function ai_syntaxCheckAutoAssemblerScript(args)  
+  local script=args.AutoAssemblerScript
+  local enablesection=args.EnableSection or true
+  r,r2=autoAssembleCheck(script,enablesection,false)
+  
+  if not r then
+    return {error=r2}  
+  else
+    return {status='successs'}
+  end
+end
+
+
+function ai_getVersionStrings(args)
+  s,s2=getFileVersion(enumModules()[1].PathToFile)
+  return {s2}
+end
+
+function ai_showMemoryView(args)
+  synchronize(function() 
+    local disassemblerAddress=args.disassemblerAddress
+    local hexviewAddress=args.hexviewAddress
+    
+    getMemoryViewForm().show() 
+  end)
+  
+  return {status='success'}
+end
+
+function ai_createMemoryRecord(args)
+  local description=args.description 
+
+  
+  return synchronize(function()
+    local parent=nil
+    if args.parentNode then
+      local parent=AddressList.getMemoryRecordByID(id)
+      if parent==nil then      
+        return {error='the parentNode was not valid'}
+      end
+    end  
+  
+    local mr=AddressList.createMemoryRecord()
+    mr.description=description
+    
+    if args.script then
+      mr.Script=args.script
+      
+      if args.async then
+        mr.Async=args.async
+      end 
+      mr.VarType='vtAutoAssembler'      
+    else
+      if args.address then
+        mr.Address=args.address
+      end
+      
+      if args.vartype then
+        if args.vartype=='vtWideString' then
+          args.vartype='vtUnicodeString'
+        end
+        mr.VarType=args.vartype
+      end
+      
+      if args.stringSize then
+        mr.String.Size=args.stringSize
+      end
+      
+      if args.offsets then
+        local i=1,#args.offsets do
+          mr.OffsetText[i-1]=args.offsets[i]
+        end
+      end       
+    end  
+    
+    if parent then
+      mr.parent=parent
+    end
+    return {status='success', memoryRecordID=mr.ID}
+  end)
+end
+
+function ai_editMemoryRecord(args)
+  return synchronize(function()
+    local id=args.memoryRecordID
+    
+    if id then
+      local mr=AddressList.getMemoryRecordByID(id)
+      if mr then
+        local description=args.description
+    
+        local parent=mr.parent
+        if args.parentNode then
+          local parent=AddressList.getMemoryRecordByID(id)
+          if parent==nil then      
+            return {error='the parentNode was not valid'}            
+          end
+        end
+
+        if args.description then
+          mr.description=args.description
+        end
+        
+        if args.script then
+          mr.Script=args.script
+          
+          if args.async then
+            mr.Async=args.async
+          end    
+        else
+          if args.address then
+            mr.AddressString=args.address
+          end
+          
+          if args.vartype then
+            if args.vartype=='vtWideString' then
+              args.vartype='vtUnicodeString'
+            end
+            mr.VarType=args.vartype
+          end
+          
+          if args.stringSize then
+            mr.String.Size=args.stringSize
+          end
+          
+          if args.offsets then
+            local i=1,#args.offsets do
+              mr.OffsetText[i-1]=args.offsets[i]
+            end
+          end  
+
+          if args.value then
+            mr.Value=args.value
+          end
+                    
+          if args.active then
+            mr.Active=args.active            
+          end
+        end  
+        
+        if args.parentNode then
+          mr.parent=parent
+        end
+       
+        return {status='success'}        
+      else
+        return {error='The memoryrecord with the given ID was not found'}        
+      end  
+    else
+      return {error='memoryRecordID parameter was missing'}      
+    end
+  end)
+end
+
+function ai_deleteMemoryRecord(args)
+  local id=args.memoryRecordID
+  
+  return synchronize(function()
+    if id then
+      return synchronize(function()
+        local mr=AddressList.getMemoryRecordByID(id)
+        if mr then
+          mr.destroy()
+          return {status='success'}        
+        else
+          return {error='The memoryrecord with the given ID was not found'}        
+        end
+      end)    
+    else    
+      return {error='memoryRecordID parameter was missing'}
+    end
+  end)
+end
+
+function ai_getAddressList(args)
+  function scanNode(node)
+    local r={}
+    while node do
+      local e={}
+      e.memoryRecordID=node.memrec.ID
+      e.description=node.memrec.Description
+      if node.Count>0 then
+        e.children=scanNode(node.Items[0])
+      end
+
+      table.insert(r,e)
+
+      node=node.getNextSibling()
+    end
+
+    return r
+  end
+
+  local r
+  synchronize(function()
+    if AddressList.List.Items.Count>0 then
+      r=scanNode(AddressList.List.Items[0])
+    else
+      r={}
+    end
+  end)
+
+  return {status='success', list=r}
+end
+
+function ai_getMemoryRecordDetails(args)
+  local id=args.memoryRecordID
+  return synchronize(function()
+    if id then
+      local mr=AddressList.getMemoryRecordByID(id)
+      if mr then
+        local r={}
+        r.description=mr.Description
+        
+        if mr.VarType=='vtString' then
+          r.stringSize=mr.String.Size
+          
+          if mr.String.Unicode then
+            r.vartype=vtWideString
+          else
+            r.vartype=vtString
+          end
+        end     
+       
+        
+        if mr.Script then
+          r.script=mr.Script
+          r.async=mr.async
+        else
+          r.address=mr.Address
+          local offsets={}
+          
+          for i=1,mr.OffsetCount do
+            offsets[i]=mr.OffsetText[i-1]       
+          end        
+          if #offsets>0 then
+            r.offsets=offsets 
+          end
+        end
+        
+        r.value=mr.Value
+        
+        r.active=mr.Active
+        
+        if mr.parent then
+          r.parent=mr.parent.ID
+        end
+        
+        return {status='success', info=r}
+      else
+        return {error='The memoryrecord with the given ID was not found'}
+      end  
+    else
+      return {error='memoryRecordID parameter was missing'}
+    end  
+  end)
+end
+
+function ai_getMemoryRecordByDescription(args)
+  return synchronize(function()
+    local r=AddressList.getMemoryRecordByDescription(args.description)
+    if r then
+      return {memoryRecordID=r.ID}
+    else
+      return {error='No memory record with this description found'}
+    end
+  end)
+end
+
+local writeFunctions={}
+writeFunctions['vtByte']=function(address, value) return writeByte(address,tonumber(value)) end
+writeFunctions['vtWord']=function(address, value) return writeSmallInteger(address, tonumber(value)) end
+writeFunctions['vtDword']=function(address, value) return writeInteger(address, tonumber(value)) end
+writeFunctions['vtQword']=function(address, value) return writeQword(address, tonumber(value)) end
+writeFunctions['vtSingle']=function(address, value) return writeFloat(address, tonumber(value)) end
+writeFunctions['vtDouble']=function(address, value) return writeDouble(address, tonumber(value)) end
+writeFunctions['vtString']=function(address, value) return writeString(address, value) end
+writeFunctions['vtWideString']=function(address, value) return writeString(address, value, true) end
+
+function ai_writeAddress(args)
+  local vartype=args.vartype
+  local address=getAddressSafe(args.address)
+  local value=args.value
+  local zeroTerminate=args.zeroTerminator
+  
+  local writer=writeFunctions[vartype]
+  
+  if writer then
+    local r=writer(address,value)
+    if r then
+      return {status='success'}      
+    else
+      return {error='write operation failed'}
+    end
+  else
+    return {error='Unsupported vartype'}
+  end  
+end
+
+function ai_getLuaEngineScript(args)
+  local id=args.LuaEngineWindowID
+  local luaengine
+  if id and id~=0 then
+    luaengine=aiobjects[id]
+  else
+    luaengine=getLuaEngine()
+  end
+  
+  if luaengine==nil then
+    return {error='Invalid LuaEngineWindowID'}
+  end
+  
+  
+  local script
+  
+  synchronize(function()
+    script=luaengine.mscript.lines.text    
+  end)
+  
+  return {status='success',script=script}
+end
+
+function ai_setLuaEngineScript(args)
+  local id=args.LuaEngineWindowID
+  local script=args.script
+  local luaengine
+  if id and id~=0 then
+    luaengine=aiobjects[id]
+  else
+    luaengine=getLuaEngine()
+  end
+  
+  if luaengine==nil then
+    return {error='Invalid LuaEngineWindowID'}
+  end
+  
+  synchronize(function()
+    luaengine.mscript.lines.text=script
+  end)  
+  return {status='success'}
+end
+
+function ai_getAutoAssemblerScript(args)
+  local id=args.AutoAssemblerWindowID
+  local aawindow
+  if id then
+    aawindow=aiobjects[id] 
+  end
+  
+  if aawindow==nil then
+    return {error='Invalid AutoAssemblerWindowID'}
+  end
+  
+  
+  local script
+  
+  synchronize(function()
+    script=aawindow.assembleScreen.lines.text    
+  end)
+  
+  return {status='success',script=script}
+end
+
+function ai_setAutoAssemblerScript(args)
+  local id=args.AutoAssemblerWindowID
+  local script=args.script
+  local aawindow
+  if id then
+    aawindow=aiobjects[id]
+  end
+  
+  if aawindow==nil then
+    return {error='Invalid LuaEngineWindowID'}
+  end
+  
+  synchronize(function()
+    aawindow.assembleScreen.lines.text=script
+  end)  
+  return {status='success'}
+end
+
+
+registerAITool('getOpenedProcessName','Returns the currently opened processname. (the executable)', {},{},ai_getOpenedProcessName)
+registerAITool('openProcess','Opens the the most recent process with this name. Result is true on success and also provides the processID', {processname={type='STRING',description='name of the process to open'}},{"processname"},ai_openProcess)
+registerAITool('scanMemory','Scan for a value and get a scannerID. This scannerID can be used to obtain the results and do a refineScan. Don\'t bother informing the user what the scannerID is. it is ambiguous for the user', 
+                                             {value={type='STRING',description='the value to scan for'}, 
+                                              value2={type='STRING',description='when scanoption is soValueBetween this determines the second part of the range'}, 
+                                              scanoption={type='STRING', enum={'soExactValue', 'soValueBetween', 'soBiggerThan', 'soSmallerThan', 'soUnknownValue'},
+                                                          description=[[The scan operation to perform
+                                                          - soExactValue: Scan for an exact match of the value (default)
+                                                          - soValueBetween: Scan for a value between value and value2 
+                                                          - soBiggerThan: Scan for values bigger than the given value
+                                                          - soSmallerThan: Scan for values smaller than the given value
+                                                          - soUnknownValue: Do a scan to obtain a memory snapshot of the target process but do not scan for a value yet. This is useful if you don't know the initial value
+                                                          ]]
+                                                         },
+                                              vartype={type='STRING', enum={'vtByte', 'vtWord', 'vtDword', 'vtQword', 'vtSingle', 'vtDouble', 'vtString', 'vtByteArray', 'vtGrouped', 'vtBinary', 'vtAll'},
+                                                       description=[[The data type to scan for 
+                                                        - vtByte: 1-byte integer (0-255)
+                                                        - vtWord: 2-byte integer
+                                                        - vtDword: 4-byte integer (default. Standard for most game values). 
+                                                        - vtQword: 8-byte integer
+                                                        - vtSingle: 4-byte floating point 
+                                                        - vtDouble: 8-byte floating point 
+                                                        - vtString: ascii string scan
+                                                        - vtGrouped: a cheat engine groupscan formatted string
+                                                        - vtByteArray: A sequence of hex bytes (AOB)
+                                                        - vtBinary: Scans for the given value's binary value inside the memory. Best used for big values that take up at least 1 byte
+                                                        - vtAll: Scans the most common types at the same time (vtDword, vtSingle, vtDouble)]]
+                                                      },
+                                              alignment={type='INTEGER', description='What memory alignment should be used. Default is 4'}
+                                              },
+                                              {'value'}, --required
+                                              ai_scanMemory) --function
+                                              
+                                              
+registerAITool('refineScan', 'refines a previously made scan', 
+                                             {
+                                             scanID={type='INTEGER', description='the scanID returned by the initial call to scanMemory.  Never ask the user for this value. If you do not have it, call scanMemory first'},
+                                             value={type='STRING',description='the value to scan for or use depending on the scanoption'}, 
+                                             scanoption={type='STRING', enum={'soExactValue', 'soValueBetween', 'soBiggerThan', 'soSmallerThan', 'soIncreasedValue', 'soIncreasedValueBy', 'soDecreasedValue', 'soDecreasedValueBy', 'soChanged', 'soUnchanged', 'soReadable'},
+                                                         description=[[The scan operation to perform
+                                                        - soExactValue: Scan for an exact match of the value
+                                                        - soValueBetween: Scan for a value between value and value2 
+                                                        - soBiggerThan: Scan for values bigger than the given value
+                                                        - soSmallerThan: Scan for values smaller than the given value
+                                                        - soIncreasedValue: Scan for values that have increased since last scan
+                                                        - soIncreasedValueBy: Scan for values that have increased by value since last scan
+                                                        - soDecreasedValue: Scan for values that have been decreased since last scan
+                                                        - soDecreasedValueBy: Scan for values that have been decreased by value sinze last scan
+                                                        - soChanged: Scan for values that have been changed since last scan
+                                                        - soUnchanged: Scan for values that have not changed since last scan  
+                                                        - soForgot: Scan for values that are readable. Handy for cases the user got distracted and doesn't know if the value got changed or not]]
+                                                        },                                                        
+                                              },
+                                              {'scanID', 'value'}, --required
+                                              ai_refineScan) --function
+                                              
+registerAITool('getResultsAndValues', [[Retrieves a view of the results of the given scanID. each entry has: 
+                                          - address: It holds the address in hexadecimal string format and for the ALL type it also contains an identifier what type it is 
+                                          - value : The value this address currently holds. the value '???' means it is unreadable
+                                          - index : the index number of the results ]],                                           
+                                             {
+                                             scanID={type='INTEGER', description='the scanID returned by the initial call to scanMemory'},
+                                             index={type='INTEGER',description='The start index of the results. Index starts at 0'}, 
+                                             count={type='INTEGER',description='The number of results to retrieve'}
+                                             }, --parameters
+                                             {'scanID', 'index', 'count'}, --required
+                                             ai_getResultsAndValues) --function 
+          
+
+registerAITool('startWatchpoint', [[Attaches the debugger to the target process if needed and sets a watchpoint at a given address so that each time it is hit it collects data and then continues the target. 
+                                    When called the function returns a watchpointID which you can use with the queryWatchPointStatus function and later with the stopWatchpoint function
+                                    After having obtained a valid watchpointID (>0) tell the user to do things in the game to trigger the watchpoint and tell you when done ]],
+                                             {
+                                             address={type='STRING', description='The address to watch for memory accesses. Formatted as hexadecimal or a symbol recognized by Cheat Engine'},                 
+                                             watchsize={type='INTEGER', description='The size in bytes for the watchpoint. default 1'},
+                                             watchtype={type='STRING', enum={'bptAccess','bptWrite'}, 
+                                                        description=[[What kind of watch to use. 
+                                                                        - bptAccess: will record every access (default if not set)
+                                                                        - bptWrite will only record writes]] }
+                                             }, --parameters
+                                             {'address'}, --required
+                                             ai_startWatchpoint) --function         
+                                               
+     
+registerAITool('stopWatchpoint', [[Stops a previously created watchpoint but doesn't delete the data yet]],
+                                             {
+                                             watchpointID={type='INTEGER', description='The watchpointID returned by startWatchpoint'},                                                              
+                                             }, --parameters
+                                             {'watchpointID'}, --required
+                                             ai_stopWatchpoint) --function  
+                                             
+registerAITool('deleteWatchpoint', [[Stops a previously created watchpoint if it wasn't stopped yet, and deletes the gathered data. The watchpointID will be invalid after that]],
+                                             {
+                                             watchpointID={type='INTEGER', description='The watchpointID returned by startWatchpoint'},                                                              
+                                             }, --parameters
+                                             {'watchpointID'}, --required
+                                             ai_deleteWatchpoint) --function                                               
+                                             
+registerAITool('queryWatchPointStatus', [[Retrieves a list of instructions that have triggered the given watchpoint. Each entry contains the instruction address, the disassemly of the instruction,  and the number of times that instruction was encountered during the watchpoint recording, so far. Use getDetailedWatchpointData with the returned instruction address to obtain more information like the state of the registers at the time it got triggered]],
+                                             {
+                                             watchpointID={type='INTEGER', description='The watchpointID returned by startWatchpoint'},                                                              
+                                             }, --parameters
+                                             {'watchpointID'}, --required
+                                             ai_queryWatchPointStatus) --function  
+                                             
+registerAITool('getDetailedWatchpointData', [[Retrieves detailed data about a watchpoint result. This includes the general purpose registers, stackview, stack snapshots, and the extended register states]],
+                                             {
+                                             watchpointID={type='INTEGER', description='The watchpointID returned by startWatchpoint'},                                                              
+                                             address={type='STRING', description='The instruction address returned by queryWatchPointStatus'},                                                                                                           
+                                             datatypes={type="ARRAY", 
+                                                        items={
+                                                          type='STRING',
+                                                          enum={'wpFunctionRange', 'wpRegisters','wpExtendedRegisters', 'wpStackTrace', 'wpStackView'}
+                                                          },
+                                                        description=[[A list of optional data to retrieve
+                                                          - wpFunctionRange : The start and stop address of the function the instruction is in
+                                                          - wpRegisters : The list of general purpose registers and their values. Keep in mind these are from after the instruction was executed
+                                                          - wpExtendedRegisters: The extra registers like the floating point unit registers, XMM registers, etc... depending on the architecture
+                                                          - wpStackTrace: a stacktrace showing the return addresses
+                                                          - wpStackView: a byte snapshot of the stack formatted as a list of bytes. Provide stackSnapshotSize else the size will be 32                                                      
+                                                        ]]},
+                                             stackSnapshotSize={type='INTEGER', description='if datatype wpStackView is present it indicates the number of bytes of the stack snapshot to retrieve. Max 1024'},  
+                                             }, --parameters
+                                             {'watchpointID','address', 'datatypes'}, --required
+                                             ai_getDetailedWatchpointData) --function  
+                                             
+registerAITool('disassembleRange', [[Disassembles a range of code using the cheat engine disassembler. It returns a list of entries each containing the address in hexadecimal format, the addressString as it would be shown by the show* parameters, the bytes that make up the instruction, and the instruction itself]],
+                                             {
+                                             startAddress={type='STRING', description='The address to start disassembling from (supports cheat engine symbols)'},                                                              
+                                             stopAddress={type='STRING', description='The end of the disassembly'},                                                              
+                                             showSymbols={type='BOOLEAN', description='Show symbols for addresses. Default=true'},
+                                             showModules={type='BOOLEAN', description='Show modulename+offset notation for addresses (if no symbol is found and showSymbols was true). Default=true'},
+                                             showSections={type='BOOLEAN', description='Show `modulename.sectionname+offset` for addresses.  overrides showModules when true. Default=false'},    
+                                             }, --parameters
+                                             {'startAddress','stopAddress'}, --required
+                                             ai_disassembleRange) --function  
+                                             
+registerAITool('disassembleInstruction', [[Disassembles a single instruction. It contains the address in hexadecimal format, the addressString as it would be shown by the show* parameters, the bytes that make up the instruction, and the instruction itself]],
+                                             {
+                                             address={type='STRING', description='The address to start disassembling from (supports cheat engine symbols)'},                                                                                                           
+                                             showSymbols={type='BOOLEAN', description='Show symbols for addresses. Default=true'},
+                                             showModules={type='BOOLEAN', description='Show modulename+offset notation for addresses (if no symbol is found and showSymbols was true). Default=true'},
+                                             showSections={type='BOOLEAN', description='Show `modulename.sectionname+offset` for addresses.  overrides showModules when true. Default=false'},    
+                                             }, --parameters
+                                             {'address'}, --required
+                                             ai_disassembleSingleInstruction) --function                                               
+                                             
+registerAITool('getFunctionRange', [[Gets the range of the function the given address belongs to]],
+                                             {
+                                             address={type='STRING', description='The address to inspect'},                                                                                                           
+                                             }, --parameters
+                                             {'address'}, --required
+                                             ai_getFunctionRange) --function     
+                                             
+registerAITool('enumModules', [[Gets the list of modules currently loaded in the game.  You can assume that the first one is the main executable.  Each entry contains the name, baseAddress and endAddress of each loaded module]],
+                                             {                                                                                                                                                        
+                                             }, --parameters (none)
+                                             {}, --required
+                                             ai_enumModules) --function  
+                                             
+registerAITool('getModuleFromAddress', [[If the address belongs to a module, this returns the module name, it's baseAddress and endAddress ]],
+                                             {  
+                                                address={type='STRING', description='The address to inspect'},                                               
+                                             }, 
+                                             {address}, --required
+                                             ai_getModuleFromAddress) --function                                               
+
+registerAITool('getModuleSections', [[Gets the section list of the specified module and their specifics]],
+                                             {
+                                             moduleName={type='STRING', description='The name of the module to retrieve the sections from'},
+                                             }, --parameters
+                                             {'moduleName'}, --required
+                                             ai_getFunctionRange) --function
+
+registerAITool('getTargetedProcessInfo', [[Gets architecture information about the target process: The calling convention, if the target is 64-bit, if it's ARM or x86, and if it's android or not]],
+                                             {                                                                                                                                           
+                                             }, --parameters
+                                             {}, --required
+                                             ai_getTargetedProcessInfo) --function     
+                                             
+registerAITool('readMemoryBlock', [[Reads memory in specific sizes and formats]],
+                                             {
+                                             address={type='STRING', description='The address to start the read from (Supports cheat engine symbols)'},
+                                             elementType={type='STRING', enum={'vtByte', 'vtWord', 'vtDword', 'vtQword', 'vtSingle', 'vtDouble'},
+                                                       description=[[The element type to read
+                                                        - vtByte: 1-byte integer
+                                                        - vtWord: 2-byte integer
+                                                        - vtDword: 4-byte integer
+                                                        - vtQword: 8-byte integer (returns as strings to deal with json number issues for 64-bit values)
+                                                        - vtSingle: 4-byte floating point 
+                                                        - vtDouble: 8-byte floating point 
+                                                        ]]},
+                                             count={type='INTEGER', description='The number of elements to read'}
+               
+                                             }, --parameters
+                                             {'address','elementType','count'}, --required
+                                             ai_readMemoryBlock) --function      
+
+registerAITool('readString', [[Reads a string of memory from a memory address]],
+                                             {
+                                             address={type='STRING', description='The address to start the read from (Supports cheat engine symbols)'},                                             
+                                             charcount={type='INTEGER', description='The number of characters to read (default 100 or 0-terminator. whatever comes first)'},
+                                             widestring={type='BOOLEAN', description='If true the address points to a string of widechar characters'}
+                                             }, --parameters
+                                             {'address'}, --required
+                                             ai_readString) --function     
+
+               
+
+               
+registerAITool('showLuaScript',[[Opens a lua engine window and inserts the provided lua script in the editor field]],{LuaScript={type='STRING', description='The script to show in the editor section)'}},{'LuaScript'},ai_showLuaScript)                                         
+
+registerAITool('getLuaEngineScript',[[retrieves the lua script from a specific lua engine window]],
+                                                  {
+                                                    LuaEngineWindowID={type='INTEGER', description='The identifier of the lua engine window.  If not provided WindowID will be 0, which is the default Lua Engine window'}
+                                                  },
+                                                  {},--
+                                                  ai_getLuaEngineScript)
+
+registerAITool('setLuaEngineScript',[[sets the lua script in a specific lua engine window]],
+                                                  {
+                                                    LuaEngineWindowID={type='INTEGER', description='The identifier of the lua engine window.  If not provided WindowID will be 0, which is the default Lua Engine window'},
+                                                    script={type='STRING', description='The new lua script'}
+                                                  },
+                                                  {'script'},
+                                                  ai_setLuaEngineScript)
+
+
+
+                                                  
+
+registerAITool('showAutoAssemblerScript',[[Opens an autoAssembler window and inserts the provided auto assembler script in the editor field]],{AutoAssemblerScript={type='STRING', description='The script to show in the editor section)'}},{'AutoAssemblerScript'},ai_showAutoAssemblerScript)                                         
+
+registerAITool('getAutoAssemblerScript',[[retrieves the autoassembler script from a specific autoassembler window]],
+                                                  {
+                                                    AutoAssemblerWindowID={type='INTEGER', description='The identifier of the AutoAssembler window'}
+                                                  },
+                                                  {'AutoAssemblerWindowID'},--
+                                                  ai_getAutoAssemblerScript)
+
+registerAITool('setAutoAssemblerScript',[[sets the lua script in a specific lua engine window]],
+                                                  {
+                                                    AutoAssemblerWindowID={type='INTEGER', description='The identifier of the AutoAssembler window.  If not provided WindowID will be 0, which is the default Lua Engine window'},
+                                                    script={type='STRING', description='The new autoassembler script'}
+                                                  },
+                                                  {'AutoAssemblerWindowID','script'},
+                                                  ai_setAutoAssemblerScript)
+                                                  
+
+registerAITool('syntaxCheckAutoAssemblerScript',[[Checks the given auto assembler script if it will error out when assembling in the current state]],{
+                                                                                                                                                      AutoAssemblerScript={type='STRING', description='The autoassembler script to check)'},
+                                                                                                                                                      EnableSection={type='boolean', description='Check the enable section when true or not provided. If false, the disable section will be checked.  If there is no disable or enable section the script will be handled as an enable section'}                                                                                                                                                      
+                                                                                                                                                      },{'AutoAssemblerScript'},ai_syntaxCheckAutoAssemblerScript)                                         
+
+
+registerAITool('openMemoryView',[[Opens the memory view window]],{disassemblerAddress={type='STRING', description='The address for the disassembler'},
+                                                                  hexviewAddress={type='STRING', description='The hexadecimal address for the disassembler'} 
+                                                                 },{},ai_showMemoryView)    
+                                                                 
+registerAITool('getVersionStrings',[[Retrieves the version resource strings of the target process. This includes, ProductVersion, FileDescription, InternalName, etc...]],{},{},ai_getVersionStrings)                                         
+
+registerAITool('createMemoryRecord',[[Creates a new memory record and adds it to the main address list. It returns a memoryRecordID which will never change. Not when the user renames it and not when the user changes the order]], 
+                                          {
+                                          --params
+                                          description={type='STRING', description='The memory record description/name'},
+                                          vartype={type='STRING', enum={'vtByte', 'vtWord', 'vtDword', 'vtQword', 'vtSingle', 'vtDouble', 'vtString', 'vtWideString'},
+                                                       description=[[The variable type of the memory record
+                                                        - vtByte: 1-byte integer
+                                                        - vtWord: 2-byte integer
+                                                        - vtDword: 4-byte integer (Default)
+                                                        - vtQword: 8-byte integer
+                                                        - vtSingle: 4-byte floating point 
+                                                        - vtDouble: 8-byte floating point 
+                                                        - vtString: an utf8 encoded string
+                                                        - vtWideString: a widestring
+                                                        - vtAutoAssembler : cheat engine autoassembler script
+                                                        ]]},
+                                                        
+                                          stringSize={type='INTEGER', description='The number of characters for the string if a string type'},
+                                                        
+                                          
+                                          address={type='STRING', description='The address/baseaddress of the record in hexadecimal notation. Omit the 0x part in front. This field can also contain known symbols to Cheat Engine'},                                                        
+                                          offsets={type='ARRAY', items={type='STRING'}, description=[[When set the address will be handled as a pointer address/
+                                                                                                     It is a list of offsets(hexadecimal values(no 0x in front), interpretable symbols or lua code)
+                                                                                                     During runtime, the first offset's value gets added to the baseAddress's value (in 32-bit 4 bytes, in 64-bit 8 bytes) : P1
+                                                                                                     If there is a 2nd offset, P1 will get read as a pointer and the value of the 2nd offset will be added to that : P2
+                                                                                                     This repeats until the last offset. The final address will then become the last pointer(Px)+lastoffset]]},
+                                          
+                                          script={type='STRING',description='An autoassembler script with [ENABLE] and [DISABLE] tags. It triggers when the Active checkbox gets checked/unchecked.  If set, vartype of vtAutoAssembler is assumed'},
+                                          async={type='BOOLEAN', description='If true the autoassembler script will run in a seperate thread when activating, not freezing the user\'s UI'},
+                                          parentNode={type='INTEGER', description='The parent memoryRecordID'}
+                                          }
+                                          ,
+                                          {
+                                          --required
+                                          'description'
+                                          }
+                                          ,
+                                          ai_createMemoryRecord)
+
+registerAITool('deleteMemoryRecord',[[Deletes a memoryrecord with the given memoryRecordID]],
+                                          {
+                                          --params
+                                          memoryRecordID={type='INTEGER', description='The unique identifier of a memoryrecord in the addresslist'},
+                                          }
+                                          ,
+                                          {
+                                          --required
+                                          'memoryRecordID'
+                                          }
+                                          ,
+                                          ai_deleteMemoryRecord)
+                                          
+registerAITool('getAddressList',[[Returns the current addreslist layout. Each entry contains the description and the unique memoryRecordID]],{},{},ai_getAddressList)
+     
+registerAITool('writeAddress',[[Writes a value to a certain address]], 
+                              {
+                                        address={type='STRING', description='The address to change in Cheat Engine address notation. This can be a symbol, or a hexadecimal address'},                                                        
+                                        vartype={type='STRING', enum={'vtByte', 'vtWord', 'vtDword', 'vtQword', 'vtSingle', 'vtDouble', 'vtString', 'vtWideString'},
+                                                       description=[[The variable type of the address to change/how to interpret the new value
+                                                        - vtByte: 1-byte integer
+                                                        - vtWord: 2-byte integer
+                                                        - vtDword: 4-byte integer
+                                                        - vtQword: 8-byte integer
+                                                        - vtSingle: 4-byte floating point 
+                                                        - vtDouble: 8-byte floating point 
+                                                        - vtString: an utf8 encoded string
+                                                        - vtWideString: a widestring                                                        
+                                                        ]]},
+                                        value={type='STRING', description='The new value. It will be interpreted according to the given vartype'}                
+                              },
+                              {'address','vartype','value'},
+                              ai_writeAddress                              
+                              )
+                                    
+     
+registerAITool('getMemoryRecordDetails',[[Get details like the description, vartype, address, offsets, script, parent, value, active state etc... for the given memoryRecord. See createMemoryRecord for details]],
+                                          {
+                                          --params
+                                          memoryRecordID={type='INTEGER', description='The unique identifier of a memoryrecord in the addresslist'},
+                                          }
+                                          ,
+                                          {
+                                          --required
+                                          'memoryRecordID'
+                                          }
+                                          ,
+                                          ai_getMemoryRecordDetails)
+                                          
+      
+registerAITool('editMemoryRecord',[[edits an existing memory record identified by it's memoryRecordID. This means the memoryrecord needs to be created first]], 
+                                          {
+                                          --params
+                                          memoryRecordID={type='INTEGER', description='The unique identifier of a memoryrecord in the addresslist'},
+                                          description={type='STRING', description='The new description/name of the memory record'},
+                                          vartype={type='STRING', enum={'vtByte', 'vtWord', 'vtDword', 'vtQword', 'vtSingle', 'vtDouble', 'vtString', 'vtWideString'},
+                                                       description=[[The new variable type of the memory record
+                                                        - vtByte: 1-byte integer
+                                                        - vtWord: 2-byte integer
+                                                        - vtDword: 4-byte integer
+                                                        - vtQword: 8-byte integer
+                                                        - vtSingle: 4-byte floating point 
+                                                        - vtDouble: 8-byte floating point 
+                                                        - vtString: an utf8 encoded string
+                                                        - vtWideString: a widestring
+                                                        - vtAutoAssembler : autoassembler script
+                                                        ]]},
+                                                        
+                                          stringSize={type='INTEGER', description='The new maximum number of characters for the string if a string type'},
+                                                        
+                                          
+                                          address={type='STRING', description='The new address/baseaddress of the record in hexadecimal notation. Omit the 0x part in front. This field can also contain known symbols to Cheat Engine'},                                                        
+                                          offsets={type='ARRAY', items={type='STRING'}, description=[[When set the address will be handled as a pointer address/
+                                                                                                     It is a list of offsets(hexadecimal values(no 0x in front), interpretable symbols or lua code)
+                                                                                                     During runtime, the first offset's value gets added to the baseAddress's value (in 32-bit 4 bytes, in 64-bit 8 bytes) : P1
+                                                                                                     If there is a 2nd offset, P1 will get read as a pointer and the value of the 2nd offset will be added to that : P2
+                                                                                                     This repeats until the last offset. The final address will then become the last pointer(Px)+lastoffset]]},
+                                          
+                                          script={type='STRING',description='The updated/new autoassembler script with [ENABLE] and [DISABLE] tags'},
+                                          async={type='BOOLEAN', description='Changes the async variable. If true the autoassembler script will run in a seperate thread when activating, not freezing the user\'s UI'},
+                                          parentNode={type='INTEGER', description='Sets a new parent. null if you want it to be at the root'},
+                                          value={type='STRING', description='Sets the value of the memory record.  If it was frozen this will update the value it freezes at.  You can also set the value to (MemoryRecordDescription) and it will set the value to the same value as the memoryrecord with the given description.  You do not have to Activate the record before this change takes effect'},
+                                          active={type='BOOLEAN', description=[[If the valuetype isn't vtAutoAssembler then when set to true will freeze the value to the current value, and when false unfreeze the value
+                                                                               If it is sa vtAutoAssembler setting this to true will assemble the [ENABLE] section. On false it will execute the [DISABLE] section]]}
+                                          }
+                                          ,
+                                          {
+                                          --required
+                                          'memoryRecordID'
+                                          }
+                                          ,
+                                          ai_editMemoryRecord)
+                                          
+registerAITool('getMemoryRecordByDescription',[[Returns a unique never changing memoryRecordID with the given description/name]],{description={type='STRING', description='The description of the memory record to look for'}},{'description'},ai_getMemoryRecordByDescription)
+                                               
+
+                                          
+
+
+--nuclear option (and halicinary):
+--registerAITool('executeLuaCode','Execute any lua code inside the current Cheat Engine instance', {script},{},ai_executeCode)
+
+
+
+```
+
+`extensions/autorun/extensions_loader.lua`:
+
+```lua
+-- Extensions subfolder loader (backport of CE 7.6.6 feature)
+-- Loads plugins from the Extensions folder, respecting loadorder.txt if present
+
+local pathdelim = (getOperatingSystem() == 0) and [[\]] or [[/]]
+local extensionsDir = getCheatEngineDir() .. 'Extensions' .. pathdelim
+
+local function fileExists(path)
+  local f = io.open(path, 'r')
+  if f then f:close() return true end
+  return false
+end
+
+local function loadLuaFile(path)
+  local ok, err = pcall(dofile, path)
+  if not ok then
+    print('Extensions loader error loading ' .. path .. ': ' .. tostring(err))
+  end
+end
+
+local function loadFolder(dir)
+  -- Check for loadorder.txt
+  local orderFile = dir .. 'loadorder.txt'
+  if fileExists(orderFile) then
+    for line in io.lines(orderFile) do
+      line = line:match('^(.-)%s*#.*$') or line:match('^(.-)%s*$')
+      if line and line ~= '' then
+        local target = dir .. line
+        if fileExists(target .. '.lua') then
+          loadLuaFile(target .. '.lua')
+        elseif fileExists(target) then
+          -- It's a subfolder
+          loadFolder(target .. pathdelim)
+        end
+      end
+    end
+  else
+    -- No loadorder.txt, just load all .lua files
+    -- CE's enumFiles equivalent via lua pattern
+    local p = io.popen('dir /b "' .. dir .. '*.lua" 2>nul')
+    if p then
+      for f in p:lines() do
+        loadLuaFile(dir .. f)
+      end
+      p:close()
+    end
+  end
+end
+
+-- Enumerate subdirectories in Extensions
+local p = io.popen('dir /b /ad "' .. extensionsDir .. '" 2>nul')
+if p then
+  for subdir in p:lines() do
+    loadFolder(extensionsDir .. subdir .. pathdelim)
+  end
+  p:close()
+end
+
+```
+
+`installer/CE_Frankenstein.iss`:
+
+```iss
+[Setup]
+AppName=Cheat Engine Frankenstein
+AppVersion=7.5-FK
+AppPublisher=dark_byte (custom build)
+DefaultDirName={autopf}\Cheat Engine - Frankenstein
+DefaultGroupName=Cheat Engine - Frankenstein
+UninstallDisplayName=Cheat Engine Frankenstein
+UninstallDisplayIcon={app}\cheatengine-x86_64.exe
+OutputDir={#SourcePath}\installer_output
+OutputBaseFilename=CheatEngine_Frankenstein_Setup
+Compression=lzma2/ultra64
+SolidCompression=yes
+PrivilegesRequired=admin
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
+WizardStyle=modern
+DisableProgramGroupPage=yes
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"
+Name: "fileassoc"; Description: "Associate .CT files with Cheat Engine"; GroupDescription: "File associations:"
+
+[Files]
+; Main executable (our custom Frankenstein build)
+Source: "Cheat Engine\bin\cheatengine-x86_64.exe"; DestDir: "{app}"; Flags: ignoreversion
+
+; Core DLLs
+Source: "Cheat Engine\bin\CED3D10Hook.dll";        DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\CED3D10Hook64.dll";      DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\CED3D11Hook.dll";        DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\CED3D11Hook64.dll";      DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\ced3d9hook.dll";         DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\ced3d9hook64.dll";       DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\d3dhook.dll";            DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\d3dhook64.dll";          DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\lua53-32.dll";           DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\lua53-64.dll";           DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\libipt-32.dll";          DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\libipt-64.dll";          DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\libmikmod32.dll";        DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\libmikmod64.dll";        DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\allochook-i386.dll";     DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\allochook-x86_64.dll";   DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\vehdebug-i386.dll";      DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\vehdebug-x86_64.dll";    DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\winhook-i386.dll";       DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\winhook-x86_64.dll";     DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\luaclient-i386.dll";     DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\luaclient-x86_64.dll";   DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\CSCompiler.dll";         DestDir: "{app}"; Flags: ignoreversion
+
+; TCC compiler DLLs (C code compilation in CE)
+Source: "Cheat Engine\bin\tcc32-32.dll";           DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\tcc32-64.dll";           DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\tcc64-32.dll";           DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\tcc64-64.dll";           DestDir: "{app}"; Flags: ignoreversion
+
+; DBK driver files (packed; CE unpacks to .sys on first use)
+Source: "Cheat Engine\bin\dbk64.cepack";           DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\dbk32.cepack";           DestDir: "{app}"; Flags: ignoreversion
+
+; Standalone trainer builder
+Source: "Cheat Engine\bin\standalonephase1.dat";    DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "Cheat Engine\bin\standalonephase1.cepack"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\standalonephase2.cepack"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\tiny.dat";               DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "Cheat Engine\bin\tiny.cepack";            DestDir: "{app}"; Flags: ignoreversion
+
+; .NET data collectors
+Source: "Cheat Engine\bin\DotNetDataCollector32.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\DotNetDataCollector64.exe"; DestDir: "{app}"; Flags: ignoreversion
+
+; Utilities
+Source: "Cheat Engine\bin\Kernelmoduleunloader.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\Tutorial-i386.cepack";   DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\Tutorial-x86_64.exe";    DestDir: "{app}"; Flags: ignoreversion
+
+; Lua and misc
+Source: "Cheat Engine\bin\celua.txt";              DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\class.lua";              DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\classwrapper.lua";       DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\defines.lua";            DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\main.lua";               DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\overlay.fx";             DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\commonmodulelist.txt";   DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\donottrace.txt";         DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\vmdisk.img";             DestDir: "{app}"; Flags: ignoreversion
+Source: "Cheat Engine\bin\vmdisk.img.sig";         DestDir: "{app}"; Flags: ignoreversion
+
+; clibs
+Source: "Cheat Engine\bin\clibs32\lfs.dll"; DestDir: "{app}\clibs32"; Flags: ignoreversion
+Source: "Cheat Engine\bin\clibs64\lfs.dll"; DestDir: "{app}\clibs64"; Flags: ignoreversion
+
+; lua_extra
+Source: "Cheat Engine\bin\lua_extra\*"; DestDir: "{app}\lua_extra"; Flags: ignoreversion recursesubdirs
+
+; win32/win64 debug helpers
+Source: "Cheat Engine\bin\win32\*"; DestDir: "{app}\win32"; Flags: ignoreversion recursesubdirs
+Source: "Cheat Engine\bin\win64\*"; DestDir: "{app}\win64"; Flags: ignoreversion recursesubdirs
+
+; C include headers
+Source: "Cheat Engine\bin\include\*"; DestDir: "{app}\include"; Flags: ignoreversion recursesubdirs
+
+; autorun scripts
+Source: "Cheat Engine\bin\autorun\*"; DestDir: "{app}\autorun"; Flags: ignoreversion recursesubdirs
+
+; Extensions (AITools and others)
+Source: "Cheat Engine\bin\Extensions\*"; DestDir: "{app}\Extensions"; Flags: ignoreversion recursesubdirs
+
+; Languages
+Source: "Cheat Engine\bin\languages\*"; DestDir: "{app}\languages"; Flags: ignoreversion recursesubdirs
+
+[Icons]
+Name: "{group}\Cheat Engine Frankenstein"; Filename: "{app}\cheatengine-x86_64.exe"
+Name: "{group}\Uninstall Cheat Engine Frankenstein"; Filename: "{uninstallexe}"
+Name: "{commondesktop}\Cheat Engine Frankenstein"; Filename: "{app}\cheatengine-x86_64.exe"; Tasks: desktopicon
+
+[Registry]
+; .CT file association
+Root: HKCR; Subkey: ".CT"; ValueType: string; ValueName: ""; ValueData: "CETableFile"; Flags: uninsdeletevalue; Tasks: fileassoc
+Root: HKCR; Subkey: "CETableFile"; ValueType: string; ValueName: ""; ValueData: "Cheat Engine Table"; Flags: uninsdeletekey; Tasks: fileassoc
+Root: HKCR; Subkey: "CETableFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\cheatengine-x86_64.exe,0"; Tasks: fileassoc
+Root: HKCR; Subkey: "CETableFile\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\cheatengine-x86_64.exe"" ""%1"""; Tasks: fileassoc
+
+[Run]
+; Launch CE after install
+Filename: "{app}\cheatengine-x86_64.exe"; Description: "Launch Cheat Engine Frankenstein"; Flags: nowait postinstall skipifsilent
+
+```
+
+`installer/CE_Frankenstein_773.iss`:
+
+```iss
+; Cheat Engine Frankenstein - rebuilt 2026-11-26 on the CE 7.7.3 (Patreon, build 10970) support files.
+; Main exe = our custom 7.5 source build (HOOK/UNHOOK, {$ifdef}/{$else}/{$endif}, AOBSCANFUNCTION backports).
+; Everything else comes from the staging folder "stage\" next to this script:
+;   7.7.3 install tree (minus its own main exes/launcher/uninstaller) + AITools from git + ceserver773 + lua_extra.
+; The stage folder and the resulting installer contain CE 7.7.x binaries: build them yourself, do not redistribute them.
+
+[Setup]
+AppName=Cheat Engine Frankenstein
+AppVersion=7.5-FK (7.7.3 support files)
+AppPublisher=dark_byte (custom build)
+DefaultDirName={autopf}\Cheat Engine - Frankenstein
+DefaultGroupName=Cheat Engine - Frankenstein
+UninstallDisplayName=Cheat Engine Frankenstein
+UninstallDisplayIcon={app}\cheatengine-x86_64.exe
+OutputDir={#SourcePath}\installer_output
+OutputBaseFilename=CheatEngine_Frankenstein_773_Setup
+Compression=lzma2/ultra64
+SolidCompression=yes
+PrivilegesRequired=admin
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
+WizardStyle=modern
+DisableProgramGroupPage=yes
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"
+Name: "fileassoc"; Description: "Associate .CT files with Cheat Engine"; GroupDescription: "File associations:"
+
+[Files]
+Source: "stage\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[Icons]
+Name: "{group}\Cheat Engine Frankenstein"; Filename: "{app}\cheatengine-x86_64.exe"
+Name: "{group}\Uninstall Cheat Engine Frankenstein"; Filename: "{uninstallexe}"
+Name: "{commondesktop}\Cheat Engine Frankenstein"; Filename: "{app}\cheatengine-x86_64.exe"; Tasks: desktopicon
+
+[Registry]
+; .CT file association
+Root: HKCR; Subkey: ".CT"; ValueType: string; ValueName: ""; ValueData: "CETableFile"; Flags: uninsdeletevalue; Tasks: fileassoc
+Root: HKCR; Subkey: "CETableFile"; ValueType: string; ValueName: ""; ValueData: "Cheat Engine Table"; Flags: uninsdeletekey; Tasks: fileassoc
+Root: HKCR; Subkey: "CETableFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\cheatengine-x86_64.exe,0"; Tasks: fileassoc
+Root: HKCR; Subkey: "CETableFile\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\cheatengine-x86_64.exe"" ""%1"""; Tasks: fileassoc
+
+[Run]
+Filename: "{app}\cheatengine-x86_64.exe"; Description: "Launch Cheat Engine Frankenstein"; Flags: nowait postinstall skipifsilent
+
+```
+
+`patches/autoassembler.patch`:
+
+```patch
+diff --git a/Cheat Engine/SynHighlighterAA.pas b/Cheat Engine/SynHighlighterAA.pas
+index 257458a7..300cfe9b 100755
+--- a/Cheat Engine/SynHighlighterAA.pas	
++++ b/Cheat Engine/SynHighlighterAA.pas	
+@@ -319,6 +319,7 @@ type
+     function Func45: TtkTokenKind;
+     function Func46: TtkTokenKind; //resd
+     function Func47: TtkTokenKind; //spl
++    function Func49: TtkTokenKind; //hook
+     function Func50: TtkTokenKind; //xmm0-15
+     function Func52: TtkTokenKind; //dealloc / disable
+     function Func53: TtkTokenKind; //rsp
+@@ -330,7 +331,7 @@ type
+     function Func68: TtkTokenKind; //include
+     function Func81: TtkTokenKind; //allocnx
+     function Func82: TtkTokenKind; //assert //allocxo
+-    function Func84: TtkTokenKind; //aobscanex
++    function Func84: TtkTokenKind; //aobscanex/unhook
+     function Func92: TtkTokenKind; //globalalloc
+     function Func99: TtkTokenKind; //reassemble
+     function Func101: TtkTokenKind; //fullaccess/loadbinary/struct
+@@ -339,6 +340,7 @@ type
+     function Func123: TtkTokenKind; //aobscanregion
+     function Func124: TtkTokenKind; //endstruct
+     function Func125: TtkTokenKind; //aobscanmodule
++    function Func157: TtkTokenKind; //aobscanfunction
+     function Func180: TtkTokenKind; //createthreadandwait
+     function Func187: TtkTokenKind; //registersymbol
+     function Func222: TtkTokenKind; //unregistersymbol
+@@ -613,6 +615,7 @@ begin
+   fIdentFuncTable[45] := {$IFDEF FPC}@{$ENDIF}Func45;
+   fIdentFuncTable[46] := {$IFDEF FPC}@{$ENDIF}Func46;
+   fIdentFuncTable[47] := {$IFDEF FPC}@{$ENDIF}Func47;
++  fIdentFuncTable[49] := {$IFDEF FPC}@{$ENDIF}Func49;
+   fIdentFuncTable[50] := {$IFDEF FPC}@{$ENDIF}Func50;
+   fIdentFuncTable[52] := {$IFDEF FPC}@{$ENDIF}Func52;
+   fIdentFuncTable[53] := {$IFDEF FPC}@{$ENDIF}Func53;
+@@ -633,6 +636,7 @@ begin
+   fIdentFuncTable[123] := {$IFDEF FPC}@{$ENDIF}Func123;
+   fIdentFuncTable[124] := {$IFDEF FPC}@{$ENDIF}Func124;
+   fIdentFuncTable[125] := {$IFDEF FPC}@{$ENDIF}Func125;
++  fIdentFuncTable[157] := {$IFDEF FPC}@{$ENDIF}Func157;
+   fIdentFuncTable[180] := {$IFDEF FPC}@{$ENDIF}Func180;
+   fIdentFuncTable[187] := {$IFDEF FPC}@{$ENDIF}Func187;
+   fIdentFuncTable[222] := {$IFDEF FPC}@{$ENDIF}Func222;
+@@ -959,6 +963,12 @@ begin
+     Result := tkIdentifier;
+ end;
+ 
++function TSynAASyn.Func49: TtkTokenKind; //hook
++begin
++  if KeyComp('hook') then Result := tkKey else
++    Result := tkIdentifier;
++end;
++
+ function TSynAASyn.Func50: TtkTokenKind; //xmm0
+ begin
+   if KeyComp('xmm0') then Result := tkRegister else
+@@ -1049,9 +1059,10 @@ begin
+       Result := tkIdentifier;
+ end;
+ 
+-function TSynAASyn.Func84: TtkTokenKind; //aobscanex
++function TSynAASyn.Func84: TtkTokenKind; //aobscanex/unhook
+ begin
+   if KeyComp('aobscanex') then Result := tkKey else
++  if KeyComp('unhook') then Result := tkKey else
+     Result := tkIdentifier;
+ end;
+ 
+@@ -1105,6 +1116,12 @@ begin
+     Result := tkIdentifier;
+ end;
+ 
++function TSynAASyn.Func157: TtkTokenKind; //aobscanfunction
++begin
++  if KeyComp('aobscanfunction') then Result := tkKey else
++    Result := tkIdentifier;
++end;
++
+ function TSynAASyn.Func180: TtkTokenKind; //createthreadandwait
+ begin
+   if KeyComp('createthreadandwait') then Result := tkKey else
+diff --git a/Cheat Engine/autoassembler.pas b/Cheat Engine/autoassembler.pas
+index e94bbd6b..60310a6a 100755
+--- a/Cheat Engine/autoassembler.pas	
++++ b/Cheat Engine/autoassembler.pas	
+@@ -1263,6 +1263,60 @@ begin
+         code[i]:='DEFINE('+s1+', 00000000)';
+ 
+     end;
++
++    if uppercase(copy(currentline,1,16))='AOBSCANFUNCTION(' then //AOBSCANFUNCTION(varname, functionname, aob)
++    begin
++      a:=pos('(',currentline);
++      b:=pos(',',currentline);
++      c:=PosEx(',',currentline,b+1);
++      d:=pos(')',currentline);
++
++      if (a>0) and (b>0) and (c>0) and (d>0) then
++      begin
++        s1:=trim(copy(currentline,a+1,b-a-1));
++        s2:=trim(copy(currentline,b+1,c-b-1));
++        s3:=trim(copy(currentline,c+1,d-c-1));
++        //s1=varname  s2=functionname  s3=aob
++
++        if (not syntaxcheckonly) then
++        begin
++          startaddress:=symhandler.getAddressFromName(s2);
++          // Scan a window: 256 bytes before (catches prologues/callers) to 65536 after.
++          if startaddress > 256 then dec(startaddress, 256);
++          stopaddress:=startaddress + 65536 + 256;
++
++          m:=-1;
++          for j:=0 to length(aobscanmodules)-1 do
++          begin
++            if (startaddress=aobscanmodules[j].minaddress) and (stopaddress=aobscanmodules[j].maxaddress) then
++            begin
++              m:=j;
++              break;
++            end;
++          end;
++
++          if m=-1 then
++          begin
++            setlength(aobscanmodules, length(aobscanmodules)+1);
++            m:=length(aobscanmodules)-1;
++            aobscanmodules[m].name:='<FUNC:'+uppercase(s2)+'>';
++            aobscanmodules[m].minaddress:=startaddress;
++            aobscanmodules[m].maxaddress:=stopaddress;
++            setlength(aobscanmodules[m].entries,0);
++          end;
++
++          j:=length(aobscanmodules[m].entries);
++          setlength(aobscanmodules[m].entries, j+1);
++          aobscanmodules[m].entries[j].name:=s1;
++          aobscanmodules[m].entries[j].aobstring:=s3;
++          aobscanmodules[m].entries[j].linenumber:=i;
++        end
++        else
++          code[i]:='DEFINE('+s1+', 00000000)';
++
++      end else raise exception.Create('Wrong syntax. AOBSCANFUNCTION(varname, functionname, 11 22 33)');
++    end;
++
+   end;
+   //do simultaneous scans for the selected modules
+ 
+@@ -1496,6 +1550,154 @@ end;
+ 
+ var nextaaid: longint;
+ 
++type
++  THookInfoRec = record
++    hookaddr: ptrUint;
++    origcodename: string;
++    codesize: integer;
++    origbyteshex: string;
++  end;
++
++var
++  hookInfoList: array of THookInfoRec;
++
++procedure processAAIfdefBlocks(code: TStrings; is64bit: boolean);
++// Preprocesses {$ifdef SYMBOL}/{$ifndef SYMBOL}/{$endif} directives in AA scripts.
++// Blanks lines inside conditionally-excluded blocks. Runs before aobscans so
++// that excluded AOBSCAN lines are also skipped.
++// NOTE: pre-scans DEFINE() lines for user symbols; a DEFINE inside a skipped
++// block will still be seen (limitation, acceptable for typical usage).
++const
++  MAXNEST = 64;
++var
++  i, a, b, skipDepth, nskip: integer;
++  currentline, sym: string;
++  definedNames: TStringList;
++  skipStack: array[0..MAXNEST-1] of boolean;
++begin
++  definedNames := TStringList.Create;
++  try
++    definedNames.CaseSensitive := false;
++
++    // Built-in platform defines
++    {$ifdef windows}
++    definedNames.Add('WINDOWS');
++    {$endif}
++    if is64bit then
++    begin
++      definedNames.Add('CPU64');
++      definedNames.Add('WIN64');
++    end else begin
++      definedNames.Add('CPU32');
++      definedNames.Add('WIN32');
++    end;
++
++    // Pre-scan for user DEFINE(name, ...) to collect symbol names
++    for i := 0 to code.Count-1 do
++    begin
++      currentline := uppercase(trim(code[i]));
++      if copy(currentline, 1, 7) = 'DEFINE(' then
++      begin
++        a := pos('(', currentline);
++        b := pos(',', currentline);
++        if (a > 0) and (b > 0) then
++          definedNames.Add(trim(copy(currentline, a+1, b-a-1)));
++      end;
++    end;
++
++    FillChar(skipStack, SizeOf(skipStack), 0);
++    skipDepth := 0;
++    nskip := 0;
++
++    i := 0;
++    while i < code.Count do
++    begin
++      currentline := uppercase(trim(code[i]));
++
++      if currentline = '{$ENDIF}' then
++      begin
++        if skipDepth > 0 then
++        begin
++          if skipStack[skipDepth] then dec(nskip);
++          dec(skipDepth);
++        end;
++        code[i] := '';
++        inc(i);
++        continue;
++      end;
++
++      if currentline = '{$ELSE}' then
++      begin
++        code[i] := '';
++        if skipDepth > 0 then
++        begin
++          // Only flip if no outer level is causing the skip
++          if nskip - ord(skipStack[skipDepth]) = 0 then
++          begin
++            if skipStack[skipDepth] then
++            begin
++              skipStack[skipDepth] := false;
++              dec(nskip);
++            end else begin
++              skipStack[skipDepth] := true;
++              inc(nskip);
++            end;
++          end;
++        end;
++        inc(i);
++        continue;
++      end;
++
++      if copy(currentline, 1, 8) = '{$IFDEF ' then
++      begin
++        if skipDepth < MAXNEST-1 then
++        begin
++          inc(skipDepth);
++          sym := trim(copy(currentline, 9, length(currentline)-9));
++          if (length(sym) > 0) and (sym[length(sym)] = '}') then
++            sym := trim(copy(sym, 1, length(sym)-1));
++          if (nskip > 0) or (definedNames.IndexOf(sym) < 0) then
++          begin
++            skipStack[skipDepth] := true;
++            inc(nskip);
++          end else
++            skipStack[skipDepth] := false;
++        end;
++        code[i] := '';
++        inc(i);
++        continue;
++      end;
++
++      if copy(currentline, 1, 9) = '{$IFNDEF ' then
++      begin
++        if skipDepth < MAXNEST-1 then
++        begin
++          inc(skipDepth);
++          sym := trim(copy(currentline, 10, length(currentline)-10));
++          if (length(sym) > 0) and (sym[length(sym)] = '}') then
++            sym := trim(copy(sym, 1, length(sym)-1));
++          if (nskip > 0) or (definedNames.IndexOf(sym) >= 0) then
++          begin
++            skipStack[skipDepth] := true;
++            inc(nskip);
++          end else
++            skipStack[skipDepth] := false;
++        end;
++        code[i] := '';
++        inc(i);
++        continue;
++      end;
++
++      if nskip > 0 then
++        code[i] := '';
++
++      inc(i);
++    end;
++  finally
++    definedNames.Free;
++  end;
++end;
++
+ function autoassemble2(code: tstrings;popupmessages: boolean;syntaxcheckonly:boolean; targetself: boolean; disableinfo: TDisableInfo=nil; memrec: TMemoryRecord=nil):boolean;
+ {
+ registeredsymbols is a stringlist that is initialized by the caller as case insensitive and no duplicates
+@@ -1598,6 +1800,8 @@ var i: integer=0;
+     varsize: integer=0;
+     tokens: tstringlist=nil;
+     baseaddress: ptrUint=0;
++    hookorigbytes: string='';
++    hookcodesize: integer=0;
+ 
+     multilineinjection: tstringlist=nil;
+     include: tstringlist=nil;
+@@ -1937,6 +2141,8 @@ begin
+     removecomments(code);  //also trims each line
+     unlabeledlabels(code);
+ 
++    processAAIfdefBlocks(code, processhandler.is64Bit or targetself);
++
+     if not strictmode then
+       getPotentialLabels(code, potentiallabels);
+ 
+@@ -2843,6 +3049,177 @@ begin
+           end;
+ 
+ 
++          // Hook(hookaddr, destaddr, origcodename)
++          // Generates hook jmp at hookaddr, saves original bytes to origcodename alloc,
++          // writes original instruction + jmp-back at origcodename.
++          if uppercase(copy(currentline,1,5))='HOOK(' then
++          begin
++            a:=pos('(',currentline);
++            b:=pos(',',currentline);
++            c:=PosEx(',',currentline,b+1);
++            d:=pos(')',currentline);
++            if (a>0) and (b>0) and (c>0) and (d>0) then
++            begin
++              s1:=trim(copy(currentline,a+1,b-a-1)); //hookaddr
++              s2:=trim(copy(currentline,b+1,c-b-1)); //destaddr
++              s3:=trim(copy(currentline,c+1,d-c-1)); //origcodename
++              if not syntaxcheckonly then
++              begin
++                testptr:=getAddressFromScript(s1);
++                if testptr=0 then raise Exception.Create('HOOK: could not resolve hook address: '+s1);
++                if processhandler.is64Bit then varsize:=14 else varsize:=5;
++                diff:=varsize; // save jmpsize before varsize is reused
++                multilineinjection:=TStringList.Create;
++                try
++                  x:=testptr;
++                  while x-testptr < ptrUint(varsize) do
++                    GetOriginalInstruction(x, multilineinjection, processhandler.is64Bit, true);
++                  hookcodesize:=integer(x-testptr);
++
++                  // Read original bytes to store
++                  setlength(bytes, hookcodesize);
++                  ReadProcessMemory(processhandle, pointer(testptr), @bytes[0], hookcodesize, x);
++                  hookorigbytes:='';
++                  for k:=0 to hookcodesize-1 do
++                    hookorigbytes:=hookorigbytes+inttohex(bytes[k],2)+' ';
++                  hookorigbytes:=trim(hookorigbytes);
++                finally
++                  freeandnil(multilineinjection);
++                end;
++
++                // Update or add hook info in global list
++                k:=-1;
++                for j:=0 to length(hookInfoList)-1 do
++                  if hookInfoList[j].hookaddr=testptr then begin k:=j; break; end;
++                if k<0 then
++                begin
++                  setlength(hookInfoList, length(hookInfoList)+1);
++                  k:=length(hookInfoList)-1;
++                end;
++                hookInfoList[k].hookaddr:=testptr;
++                hookInfoList[k].origcodename:=s3;
++                hookInfoList[k].codesize:=hookcodesize;
++                hookInfoList[k].origbyteshex:=hookorigbytes;
++
++                // Add origcodename to allocs (near hookaddr so jmp back is short)
++                varsize:=length(s3);
++                j:=0;
++                while (j<length(allocs)) and (length(allocs[j].varname)>varsize) do inc(j);
++                setlength(allocs,length(allocs)+1);
++                for k:=length(allocs)-1 downto j+1 do allocs[k]:=allocs[k-1];
++                allocs[j].varname:=s3;
++                allocs[j].size:=hookcodesize+16;
++                allocs[j].prefered:=testptr;
++                if SystemSupportsWritableExecutableMemory then
++                  allocs[j].protection:=PAGE_EXECUTE_READWRITE
++                else
++                  allocs[j].protection:=PAGE_EXECUTE_READ;
++
++                // Replace Hook() assemblerline with origcodename: (sets assembly cursor)
++                assemblerlines[length(assemblerlines)-1].line:=s3+':';
++
++                // db original bytes at origcode location
++                setlength(assemblerlines,length(assemblerlines)+1);
++                assemblerlines[length(assemblerlines)-1].linenr:=currentlinenr;
++                assemblerlines[length(assemblerlines)-1].line:='db '+hookorigbytes;
++
++                // jmp back past the hook in original code flow
++                setlength(assemblerlines,length(assemblerlines)+1);
++                assemblerlines[length(assemblerlines)-1].linenr:=currentlinenr;
++                assemblerlines[length(assemblerlines)-1].line:='jmp '+inttohex(testptr+hookcodesize,16);
++
++                // Set cursor to hookaddr and write hook jump
++                setlength(assemblerlines,length(assemblerlines)+1);
++                assemblerlines[length(assemblerlines)-1].linenr:=currentlinenr;
++                assemblerlines[length(assemblerlines)-1].line:=inttohex(testptr,16)+':';
++
++                setlength(assemblerlines,length(assemblerlines)+1);
++                assemblerlines[length(assemblerlines)-1].linenr:=currentlinenr;
++                if processhandler.is64Bit then
++                  assemblerlines[length(assemblerlines)-1].line:='jmp far '+s2
++                else
++                  assemblerlines[length(assemblerlines)-1].line:='jmp '+s2;
++
++                // nop padding if original code covered more than the jmp size
++                if hookcodesize>integer(diff) then
++                begin
++                  setlength(assemblerlines,length(assemblerlines)+1);
++                  assemblerlines[length(assemblerlines)-1].linenr:=currentlinenr;
++                  if hookcodesize-integer(diff)>1 then
++                    assemblerlines[length(assemblerlines)-1].line:='nop '+inttohex(hookcodesize-integer(diff),1)
++                  else
++                    assemblerlines[length(assemblerlines)-1].line:='nop';
++                end;
++
++                // Auto-register origcodename symbol
++                setlength(addsymbollist,length(addsymbollist)+1);
++                addsymbollist[length(addsymbollist)-1]:=s3;
++                if disableinfo<>nil then
++                  disableinfo.registeredsymbols.Add(s3);
++              end else begin
++                // Syntax check: register origcodename as a dummy alloc
++                varsize:=length(s3);
++                j:=0;
++                while (j<length(allocs)) and (length(allocs[j].varname)>varsize) do inc(j);
++                setlength(allocs,length(allocs)+1);
++                for k:=length(allocs)-1 downto j+1 do allocs[k]:=allocs[k-1];
++                allocs[j].varname:=s3;
++                allocs[j].size:=32;
++                allocs[j].prefered:=0;
++                allocs[j].protection:=PAGE_EXECUTE_READWRITE;
++                setlength(addsymbollist,length(addsymbollist)+1);
++                addsymbollist[length(addsymbollist)-1]:=s3;
++                if disableinfo<>nil then disableinfo.registeredsymbols.Add(s3);
++                setlength(assemblerlines,length(assemblerlines)-1);
++              end;
++              continue;
++            end else raise Exception.Create('Wrong syntax. Hook(hookaddr,destaddr,origcodename)');
++          end;
++
++          // UNHOOK(hookaddr)
++          // Restores original bytes saved by Hook() and marks origcode for dealloc.
++          if uppercase(copy(currentline,1,7))='UNHOOK(' then
++          begin
++            a:=pos('(',currentline);
++            b:=pos(')',currentline);
++            if (a>0) and (b>0) then
++            begin
++              s1:=trim(copy(currentline,a+1,b-a-1)); //hookaddr
++              if not syntaxcheckonly then
++              begin
++                testptr:=getAddressFromScript(s1);
++                // Find stored hook info
++                k:=-1;
++                for j:=0 to length(hookInfoList)-1 do
++                  if hookInfoList[j].hookaddr=testptr then begin k:=j; break; end;
++                if k<0 then
++                  raise Exception.Create('UNHOOK: no Hook() info for address '+s1+'. Make sure [ENABLE] ran first.');
++
++                s3:=hookInfoList[k].origcodename;
++                hookorigbytes:=hookInfoList[k].origbyteshex;
++
++                // Replace UNHOOK() line: restore original bytes at hookaddr
++                assemblerlines[length(assemblerlines)-1].line:=inttohex(testptr,16)+':';
++
++                setlength(assemblerlines,length(assemblerlines)+1);
++                assemblerlines[length(assemblerlines)-1].linenr:=currentlinenr;
++                assemblerlines[length(assemblerlines)-1].line:='db '+hookorigbytes;
++
++                // Also add origcodename alloc to the dealloc list (free the alloc)
++                if disableinfo<>nil then
++                  for j:=0 to length(disableinfo.allocs)-1 do
++                    if uppercase(disableinfo.allocs[j].varname)=uppercase(s3) then
++                    begin
++                      setlength(dealloc,length(dealloc)+1);
++                      dealloc[length(dealloc)-1]:=disableinfo.allocs[j].address;
++                      break;
++                    end;
++              end else
++                setlength(assemblerlines,length(assemblerlines)-1);
++              continue;
++            end else raise Exception.Create('Wrong syntax. UNHOOK(hookaddr)');
++          end;
++
+           //replace ALLOC identifiers with values so the assemble error check doesnt crash on that
+           if processhandler.is64bit then
+           begin
+
+```
