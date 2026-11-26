@@ -5089,6 +5089,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/LooperSalty/cs2-tracker [CS2 stats tracker with local FastAPI, Game State Integration live match feed, and explainable heuristic anti-cheat suspicion scoring]
 - https://github.com/ShaniTheDeveloper/Adaptive_Anti-Cheat_Stream_Processor [C++/Qt desktop pipeline that ingests simulated gameplay telemetry and flags suspicious patterns with Bloom filters, count-min sketches, and sliding windows]
 - https://github.com/ArghadeepMisra/player-simulation [Fairplay Kafka Streams telemetry lab: simulates ~1,000 players, streams aimbot/speedhack detection flags, and verifies exactly-once processing with a ground-truth verifier]
+- https://github.com/jeffreyesdavid/aegis-log-sentinel [Python live-service telemetry triage with HMAC pseudonymization, movement/bot/economy cheat heuristics, and unittest-backed detection benchmarks]
 - https://github.com/ConWan30/qortime-ai [Muse explain/red-team and SAM visualization layer on deterministic console match-integrity receipts; AI advisories cannot upgrade referee verdicts]
 - https://github.com/oykuoner/YAACS-AntiCheat [CS2 anti-cheat research pipeline that parses HLTV demos with demoparser2, extracts spatiotemporal aim telemetry, and benchmarks heuristic plus ML aimbot classifiers]
 - https://github.com/essensha/cs2-anti-cheat-ml-research [CS2-framed ML research notebooks on synthetic telemetry: classifiers, calibration, concept drift, graph-based coordination, and production-style review-capacity simulations]
