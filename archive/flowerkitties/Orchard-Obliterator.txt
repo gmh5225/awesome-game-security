@@ -1,0 +1,4010 @@
+Project Path: arc_flowerkitties_Orchard-Obliterator_r3rbaw0p
+
+Source Tree:
+
+```txt
+arc_flowerkitties_Orchard-Obliterator_r3rbaw0p
+├── LICENSE
+├── build.ps1
+├── orchard.sig
+└── src
+    ├── AssemblyInfo.cs
+    ├── ClassFile.cs
+    ├── Evidence.cs
+    ├── Fingerprints.cs
+    ├── Guard.cs
+    ├── Handles.cs
+    ├── Hunter.cs
+    ├── JarScanner.cs
+    ├── Locations.cs
+    ├── Native.cs
+    ├── Program.cs
+    ├── Quarantine.cs
+    ├── Report.cs
+    ├── Traces.cs
+    └── Zip.cs
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 flowerkitties
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`build.ps1`:
+
+```ps1
+$ErrorActionPreference = 'Stop'
+Set-Location $PSScriptRoot
+
+$csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+if (-not (Test-Path $csc)) { throw "csc.exe not found at $csc" }
+
+New-Item -ItemType Directory -Force bin | Out-Null
+
+$opts = @(
+    '/nologo', '/target:exe', '/platform:x64', '/optimize+',
+    '/out:bin\OrchardObliterator.exe',
+    '/resource:orchard.sig,orchard.sig',
+    '/r:System.Management.dll', '/r:System.Drawing.dll'
+)
+if (Test-Path app.ico) { $opts += '/win32icon:app.ico' }
+
+& $csc @opts (Get-ChildItem src\*.cs | ForEach-Object FullName)
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+Get-Item bin\OrchardObliterator.exe | Select-Object Name, Length, LastWriteTime
+
+```
+
+`orchard.sig`:
+
+```sig
+# orchard.sig
+# file <sha256> <label>
+file bc81ac1fe76b92335b3daad1818fa538f29535d06ab4d9b892123e6d729fa78b orchard 1.9.1+1.21.11 build 251
+
+# build namespaces (rotate per build, still worth catching)
+token qd4510ca8999943a4801255148c7b91dd
+token q9ecfbb59a2c648f2a1e8ed4b6a863868
+token q617045ed885d496e81339caeb4274bab
+token qd4fa9c1257754d669097e0174f6fc60e
+token q38f0cbb877a74a8d854efab930d4ea35
+token q0ea213934a4de41cb3fc
+token q4ab4faf15b86ebb190ef
+token 4f28c57b-a95a-426c-9265-f1a243f17b65
+
+watermark 114514.java
+watermark 1919810.kt
+watermark 69420.java
+watermark \u4f60\u5988\u6b7b\u4e86.kt
+
+loader defineClass
+loader defineHiddenClass
+loader defineAnonymousClass
+loader java/lang/instrument/Instrumentation
+loader jdk/internal/misc/Unsafe
+
+stealth ClientBrandRetriever.getClientModName spoofs the client brand servers see
+stealth GLX._getCpuInfo masks CPU info on the debug screen
+stealth class_6396.method_37128 rewrites the hardware block of crash reports
+stealth class_6628.method_51796 tampers with telemetry
+stealth class_8673.method_52784 intercepts resource-pack probes servers use to fingerprint mods
+stealth class_2588.method_11025 blocks translation-key probes servers use to detect mods
+stealth class_2588.<init> blocks translation-key probes servers use to detect mods
+
+combat class_1774.method_7884 crystal placement hook
+combat class_634.method_11132 velocity packet hook (anti-knockback)
+combat class_636.method_2918 attack hook
+combat class_1661.method_67532 selected-slot override (silent swap)
+combat class_1297.method_5851 forced glow (ESP)
+combat class_746.method_3136 movement packet hook (silent rotations)
+combat class_2543.decode raw packet decoder hook
+
+mem namespace 35 qd4510ca8999943a4801255148c7b91dd
+mem namespace 35 q38f0cbb877a74a8d854efab930d4ea35
+mem namespace 35 q9ecfbb59a2c648f2a1e8ed4b6a863868
+mem namespace 35 q0ea213934a4de41cb3fc
+mem namespace 35 q4ab4faf15b86ebb190ef
+mem meta 60 LicenseRef-Orchard-Proprietary
+mem meta 60 orchard_build
+mem lang 40 key.nsc.profile_
+mem asset 25 cornerRadiusForMode
+mem asset 25 edgeGlowIntensity
+mem asset 15 screenPxDistance
+mem packer 20 1919810.kt
+mem packer 20 \u4f60\u5988\u6b7b\u4e86.kt
+mem packer 10 114514.java
+mem packer 10 69420.java
+
+log qd4510ca8999943a4801255148c7b91dd
+log q38f0cbb877a74a8d854efab930d4ea35
+log q4ab4faf15b86ebb190ef
+log LicenseRef-Orchard
+log (orchard)
+log key.nsc.
+
+host libraries.minecraft.net
+host maven.fabricmc.net
+host maven.quiltmc.org
+host maven.neoforged.net
+host maven.minecraftforge.net
+host repo1.maven.org
+host repo.maven.apache.org
+host maven.modrinth.com
+host maven.legacyfabric.net
+host mojang.com
+host minecraft.net
+
+# mixin footprint of 1.9.1 (intermediary names survive any obfuscation)
+hook ClientBrandRetriever.getClientModName
+hook GLX._getCpuInfo
+hook InputTracker.isPressed
+hook InputTracker.update
+hook class_1007.method_4213
+hook class_1007.method_62604
+hook class_10426.method_65577
+hook class_1297.method_22861
+hook class_1297.method_5476
+hook class_1297.method_5477
+hook class_1297.method_5697
+hook class_1297.method_5724
+hook class_1297.method_5733
+hook class_1297.method_5756
+hook class_1297.method_5851
+hook class_1297.method_5872
+hook class_1309
+hook class_1309.method_6028
+hook class_1309.method_6043
+hook class_1309.method_61430
+hook class_1309.method_66279
+hook class_1657.method_5476
+hook class_1657.method_5477
+hook class_1657.method_75122
+hook class_1661
+hook class_1661.method_67531
+hook class_1661.method_67532
+hook class_1661.method_7391
+hook class_1671.method_5773
+hook class_1747.method_7709
+hook class_1774.method_7884
+hook class_1799.method_7965
+hook class_2535.channelActive
+hook class_2535.channelInactive
+hook class_2535.method_10743
+hook class_2535.method_10770
+hook class_2535.method_53859
+hook class_2543.decode
+hook class_2588.<init>
+hook class_2588.method_11025
+hook class_2684
+hook class_304
+hook class_304.method_1420
+hook class_304.method_1424
+hook class_309.method_1466
+hook class_310
+hook class_310.method_1490
+hook class_310.method_1508
+hook class_310.method_1523
+hook class_310.method_1536
+hook class_310.method_1574
+hook class_310.method_1583
+hook class_312
+hook class_312.method_55793
+hook class_329.method_1748
+hook class_329.method_1759
+hook class_329.method_55805
+hook class_338.method_1812
+hook class_3521.method_55496
+hook class_408.method_25394
+hook class_408.method_25402
+hook class_408.method_25432
+hook class_4184.method_19318
+hook class_4184.method_19321
+hook class_465
+hook class_634.method_11099
+hook class_634.method_11100
+hook class_634.method_11124
+hook class_634.method_11128
+hook class_634.method_11132
+hook class_634.method_11136
+hook class_634.method_11146
+hook class_634.method_11148
+hook class_634.method_11160
+hook class_634.method_43596
+hook class_634.method_45729
+hook class_634.method_49034
+hook class_636
+hook class_636.method_2896
+hook class_636.method_2910
+hook class_636.method_2911
+hook class_636.method_2918
+hook class_636.method_2919
+hook class_638
+hook class_6396.method_37128
+hook class_640.method_52810
+hook class_6628.method_51796
+hook class_7202
+hook class_7286.method_42593
+hook class_742.method_52814
+hook class_743.method_3129
+hook class_745.method_6007
+hook class_746
+hook class_746.method_3136
+hook class_746.method_48300
+hook class_746.method_5773
+hook class_746.method_6007
+hook class_746.method_66282
+hook class_757.method_22973
+hook class_757.method_3172
+hook class_757.method_3188
+hook class_757.method_76295
+hook class_759.method_22976
+hook class_759.method_3220
+hook class_759.method_3228
+hook class_759.method_33303
+hook class_761.method_22710
+hook class_761.method_72917
+hook class_761.method_74752
+hook class_765.method_3313
+hook class_765.method_42596
+hook class_8673.method_52784
+hook class_8828$class_2585.method_27660
+hook class_897.method_3921
+hook class_897.method_3926
+hook class_898.method_3950
+hook class_922.method_62355
+hook class_972.method_4177
+
+# asset content: raw sha, decoded pixels, normalized shader/json text
+asset px:082731d7e99db516384cb4bc7667a950793c224a11bceaa2f91ae6603bfa7579 png:q05f391f2
+asset px:0bafd93917eda773bf32d5a0f7c57314334c9c9d2760db32b778810d1bf2f141 png:qd0ca2bb9
+asset px:0cdd57fc270dd8e40958004c7a56cedc9b11187275a42d3899d45d0bcaac9669 png:q83eab0f9
+asset px:1921da930350dcaaa2e3fd2aad59d3d18e4116fde5492b885649e52e5cec2887 png:q11530d8c
+asset px:1e7e6f624240276ebff7dfe27d631718442593645c89edc0dd2a63cc9e677871 png:q8128b34b
+asset px:2f70ab4790b88499ba4025e9df0ef8ab9337178946ef37debe7446bd2d7c822a png:qa27b697f
+asset px:35eab93f25a0f8630a80a1ed1f22d3fd9c4e19878f897e110ae80736c29c58f0 png:q7644e401
+asset px:3c9aaf9d3a6da80194b16d4f4c0e45c2aa06507de0f48a69b5772991739b3c1c png:q0a0e363b
+asset px:4251131d172ebbb406916a282d40bbd42d4967094e8348c864ed99b985e903e4 png:q2d20cc6b
+asset px:42fb5d9e18208605c0653671d3c81068ad0c507e840a281a310a4999a62c7a36 png:q99dd4273
+asset px:44b6fd3e3585914ac694e17fb432db34d473fbf9df8a7b6a2a2ff99668a4b9a1 png:qeb8caa9f
+asset px:46533a2c24313b0c2c73007763edc02d1fb0e7f49d367b5059689d5a02a843d0 png:qb2f4c561
+asset px:4988f19628e2039605b83bff9a9640b886d7c30e90070d4c783e8dbc7aa23a4c png:qc4b91bb2
+asset px:4ee18e2ce70daade34e141c70dca4ebc4f82bd3c92ead9415d75baca40e49d57 png:q241455a5
+asset px:4fec903756a15fca31c93e263d7fecdcee778ce3b07ec6b01246d4ffc8e14341 png:qc9d29a34
+asset px:525d2101f1ac58b3dc3fc3514a80776694a93f42bdf08e62b45f0037ea7cd446 png:q0dc81a78
+asset px:57d2eaf30c03997026a47aaa3da3c47d39f57315aa3e9508efda779f2573a8fd png:qe8de165f
+asset px:5b461116e0791de47663aedf2701dc25ce0653f80bd58518b3e7e1a8c0de1f6e png:qcd716f6e
+asset px:61fd5b7272476ae2773de87f78714f07989b33cf7c434940788a50b572b34865 png:q92314038
+asset px:69e99f4faea4a4fcb3375695a3f67752fd9eb221c0bb75a99ef937eabac8c476 png:q672f659c
+asset px:752ea54d35c0683ca63864446b2fb57e70466943712a7367d2f24e5779b8087d png:q2faa654b
+asset px:76ec82a72c8359d9f8ab34921305cee9b80ef8ee8a8558b0aa1f660e8f6f7405 png:q36999c80
+asset px:7cd24fb4a6de7866be1401db4167575def4e2d734c256eaf6cadf9ba595fd9e6 png:q23ee31d9
+asset px:867309deb91e9f66976d4e39b4f4a5f5ba21e4b17bd23d4921880ec1c5cbb2b9 png:q9d98d594
+asset px:88c5c6a313bcd54dcab021cd4cb4526c99a0f2a29f7fd91196b30689af28318e png:q8f48015c
+asset px:926304855cffd89bac6e9089d0932db24c1a62f3f14b75692bb58bbbe25ddc1a png:qf8426a32
+asset px:9351c04cab57c1bdc1184275462c3b84496e6da47405545537da2b6ca535bcdf png:qbea865aa
+asset px:937abf091adad048ca9ecea1e0912f0c1664b1268a5d1f58e9e15b1175e6cca8 png:qaeb5043f
+asset px:9911778ac3a66d45699d402c0b7e40bf2ef3aee53620e8c420dfe77b243d5972 png:qf2880960
+asset px:9b6d9462227ee4f71f74107d7fe4d162ddbd7bbcdf3ee0cc281dd77abcb7cbcd png:qf979d75f
+asset px:9d3ca9668af7caf61071fb22b684653f520015f7539189841ad44d36007af38d png:qe2cd21d8
+asset px:a1a72f4d4f073bdc6c44ec104b33e5e6a2b741a48a16804adcca2a54e16bd8cf png:qddfed75a
+asset px:a3c867d65824ed47af9c3f55a5d28d2f67381242bd58d113960a141f4f0c29ed png:qc2249c0b
+asset px:a40532576367d826a8dd464e07332eb4ba0c202eedcfbe301369d5e39a55ba75 png:q3d6a943b
+asset px:a4d6cb2b91f48971c0443471c0f684165f11d69742401a436474a1a5682d0870 png:qde756621
+asset px:a69d05eeff5703aaf07f3dc6a0ef3d01550e39c787314a05a3963a4dbaa08c7f png:q11b1dddf
+asset px:a9d581c2c18cb7df241e49da6bde85dc8360f4d74fbe8aa9aacc69dbbcc0c610 png:qb6ec5bba
+asset px:b29e618b89425145c01bc1443e9b339fe7a4da11c53d50a06e186d98a74372eb png:qb5255f3a
+asset px:c8a652e86df6f20d438751cd2bdf68c90933176fdd0f630cba1298a27b099479 png:qd7dc0a27
+asset px:d03962c934c669b4eb2351bff49a7a70d0a5a6abfcb33054763da481515dffc5 png:q2ddb7629
+asset px:d46db58db8ceea4c4022f4eff6c219562f6081d597d0526b3c9479b3c5b34b5d png:q91b1366b
+asset px:d521600c3affb976e17a39e8fe48657aaff0b8c85599223f17417efa0d83a461 png:q40af6033
+asset px:e7760028975adc403aa742e1288144dc57e39140e396ad29d1f8f0f56f75e5c1 png:q8dad735c
+asset px:f7ff759034074f58aa39530bb4c85e02e5c54f7d2018d983fc2ad53fd45c7d04 png:qe355ded6
+asset px:fd84f9b7ba26fe94d586aada15d447b64429bfffc2ba451dbf1575d0cd8ad166 png:qa341f844
+asset sha:01757984942020943de28e7d8ae60eac0ebca8d5aab4335ebd4dc05dca756cf8 png:q8f48015c
+asset sha:0773428e3d254772b0168dcf4ae71eaeb0f65e1a095941f08ba64d5f37a613ce png:q2faa654b
+asset sha:078a29e5729fcae0178cec97b48089d74f5e0d6d2e81aa655328f3602e7aca63 fsh:q5e6928e4
+asset sha:07c77241aac54d2d7bce690f0df97c335581755c17b0bfa8a57c0efa00d6e9f7 png:qe355ded6
+asset sha:093d724d5ce56ee80bd26e4d10aec549569b147d54cb2b62a679759da1b1357d png:qc9d29a34
+asset sha:0afa00238037f554182f5b83cdc10792a8e5ddad1bc5e91b7cc19f7c6db62b98 ogg:qa07eb499
+asset sha:14ab7efb049c5972546d69d3b845eeaf2050d5fb92b7554761327749f9961de3 ogg:q6328fd6a
+asset sha:161f052f8f3ce194548fdf885d660e0e2be47277091287328014da6558402772 png:qddfed75a
+asset sha:1788d309fa6c93e5ade64700d88b32cc2dda0898e0e833077b78d8e264a82043 json:qc724abf6
+asset sha:1876a633acda0f875dbeffd84bd7a556be1babab440df9bdc07e0f7f2876b06e fsh:q80ccc712
+asset sha:1bc28191053f54debcdd8f61b18a3633f50af1485e994c3552edce2921e14e03 png:qde756621
+asset sha:1f7a89ba285a78b8f8adec98d33456494ddac0fcc7f03020cfe91a1f51eee4f3 png:qb5255f3a
+asset sha:2677294ecd38dbc82978a8b2588d70369162ccabfe5cac0c28435156c6458c1f png:qc2249c0b
+asset sha:2d388369662bef2e099d234c09892b39b638701867b7bdc1460a39031d3c5118 fsh:q126a79d3
+asset sha:2e4d48db8ca05a7684b1e036683ceff9b403ed38cb2d44cafac8176980968aa3 fsh:qce43f028
+asset sha:2feb68b8fd543a8cdea6ed078a31e670e4e887ec926df2227f24cc17edcf1f53 png:q2d20cc6b
+asset sha:310194dd178e63c56677554e19e98e72f3a7bc2336bdef52054193ef44530031 png:qa27b697f
+asset sha:32806b03053b29f345b4ae920c8d67256dbf9aadf0feea6f57a3be9bf8971fde json:qebc2a753
+asset sha:332dbfbe77fdede9780dd14678239c2d16d9d4f82dea92b4e84287522f4af9c1 ogg:q13a35101
+asset sha:34d68d7b12a3fe9efd7b86924e20c7e83a065318c896b5471c1c03625ee0f67c png:qbea865aa
+asset sha:369eef3e2a4f73aa334297f6b220aea4ac855c639671f88149959b3c39785305 fsh:q44e974c8
+asset sha:37d51c7cfbc0274c3df07ebd47f2f31a058c298f2a39578eccb9874dd0375f37 bin:qa5be91ba
+asset sha:3c20e3867c307d5a59a6dd55d7163fb8d5f928f33058f3e28ff01f32a92035da vsh:qbc1655ff
+asset sha:3ff1ae3ae8569e614065edfd73afefe43a95edd559c26f686bf7cbea46ea3e01 vsh:qeae422f2
+asset sha:417c0e7b5988711a93a1a3a0782d1ab6b02302386672a61168839422ba13f4ac fsh:q2c4a1f7d
+asset sha:4672d45497f1817e691bcb16319fe68d459c0c9de66a096be13d5f21a6f0d065 json:qc313b69a
+asset sha:4fad08bf25b16896664bf23d991471d79013d0fe28b352164737ebaccb4e2e34 json:qb58bdaef
+asset sha:4fec8d1a5e6a1c8d2778a30de690bc29e66b9dc40261a364c735a02a1288baf3 fsh:q25a7f8c4
+asset sha:539cac46f5c9bff4a149a539428194db74a0a7c8b34aa456f6fb6d22ffd64c6d png:q672f659c
+asset sha:53eb6da30e45211a13981b136fe8df1b78f823aafe5a83891ccda259912f5f50 fsh:q09a8555f
+asset sha:546af89d91b504a1a2709c50cf777da9a109314480eba66a9d36e4a40bb8857a png:q7644e401
+asset sha:57f166ee092b670e7186c017a0a334449793b951b8bea64093c83d8ba91a54c6 fsh:q94ef4460
+asset sha:5f921703c22e4d8cf7905b21295a97062479b6e1f55b72d9b9dff9f93c9b50b8 vsh:q7a9daad7
+asset sha:67a7d8794184fa7ddc17b0b3a9f318555deb1c807969937dc146cc9253f6f5b1 png:q2ddb7629
+asset sha:6a95255d9f1b6eba0b3fa93141af11e8249b538c52b073ecefb0a82be594de21 vsh:qe2d2dbd8
+asset sha:6bce20cc6bf37abab5bccf9e95731b619b9bb9a607bb66a407eeef5e0fa7c430 fsh:qaa079898
+asset sha:6d26dbaf166d430904192c528e3fe4b5e347944117df57546b00fd327cfa0bd1 png:q91b1366b
+asset sha:6e78864d64baabd6a4afd69c832f4802a0d318cf4825f9936298229104a10331 json:q05f391f2
+asset sha:6eed3a580c6f0a44eb1d32288e77ed639f5de7119530cf436f8a79f6f7ec6aff png:qc4b91bb2
+asset sha:6f56cbba9a7845db3680eb4d0b13c0885c13625d7c7e5a0b069d66c6bc313c8e fsh:q94a14ce4
+asset sha:6f8396ab1ac86aacec566f88e316b1ee0994e1cb2340fa9bbf2df781d0e55fe7 png:q36999c80
+asset sha:6fadf2828bb79643198309ff3ffcf7d0dd7bae4a0eaa620fb8c6b276e342a554 png:q241455a5
+asset sha:72570694bac1267ad24d9ca742338569eaccd662e191f4583a50679f04034185 png:q99dd4273
+asset sha:743830d107e660ab97922432ed5415c6085a7993b5e226e396da540f50c31a82 fsh:q7edb06f7
+asset sha:7aca264c5bea4404592a6ce60b73a7353fde9a26efb7b4e78d64f8e70e20a675 ogg:qa07eb499
+asset sha:8037c1504de7809a1203ad8dd122f5781ae9e6708d54c9b966851a6d4a4af8b7 json:qf6196ece
+asset sha:820969d6333b8f619b9b2698b71eef92daf5ac130dec7e33ec7c84d9e5e2c230 png:qd7dc0a27
+asset sha:83c1aa81d4774d89939407c8acfcd70f5b139d35fafbd755dd5a2e1c94837f47 ogg:qa07eb499
+asset sha:84dbc413c8cc13b99dd5a8b2a9ef8a0e61d199b44ecaee14d90d7c7ecb5809d0 png:q40af6033
+asset sha:87d8e6c2258e7a417595f1461783cd876527a9e92fa4c86f07130c8c7d6a212e png:q0dc81a78
+asset sha:8d7613f6e5b150dfb3cfd8565f6e8ca133de6fe1b564c9b046a579159c77d81d fsh:qeae422f2
+asset sha:8dc1d417a5a41ca8a9b1bb8d79ca2a79167653913bf6468c5e5c1549066cb4f7 png:q92314038
+asset sha:8e1a2d5eee9c74906b246af7e4b1215a9f7f2c8d95a8dcb5f8204e3d13a16b12 png:qaeb5043f
+asset sha:8e862ddc290f47ec1de41b42946c1eabaf0f5d68029d3ff97365ad957b641681 png:qe8de165f
+asset sha:939b1f1e40e4e2449a14313a13f8327b0bb7d710fd2a8f867dc2c99bda91b8fe png:qe2cd21d8
+asset sha:9486eede70f2f1eaa297c8c80af1a29ebd4fb11898c01eb8b7ba58dc3ecadd85 png:q05f391f2
+asset sha:957490cfc16b0c18e88efc7ad6f7a1c63ce26f4ac7b89ac63b99e9f11fe8321b png:qb6ec5bba
+asset sha:96343efc10460f4584d52e9e7001266011af9eef9034832e8247ed6a2eaa6a60 png:qd0ca2bb9
+asset sha:97c9793e370eea6c1a5f1d0f68694714aadce2a1e01dfa88b1632af91291d48b json:q2faa654b
+asset sha:9983a6df0cf77b0f77adb4de591687716bd69cec4f48779908b85fce156fb088 png:q83eab0f9
+asset sha:9a7f7ab9d13cc0c029dd62e29e2d46de48650230dc1706f78358cb30c0e0d051 ogg:qa07eb499
+asset sha:a0c7591b50caa993a9b947e4e547abfd2a3da92872611a27ebb1dcd436faf09b png:q11b1dddf
+asset sha:a774ffea777b73ffd25d6fcac6b7de196adb71ade18cd3073f25303dde6db9a9 png:qf2880960
+asset sha:a8bee620d7957a61e659ad0efe03bed698fa7035166b137f0ecf528ee1d62f49 png:q23ee31d9
+asset sha:aa818acd7f33535ed74f0b1ea6942f54771648a0a832091fb5d28436a1cd41ce json:q3fc4a2ed
+asset sha:ab8d73c6c5fb133cf8f72f85b658c4e805e3e80b2bd30136e195683c53876967 fsh:q8513c139
+asset sha:ac1974d48d0a9ce3345d80439de3eca7c3180bdf88e1c30c194cbabcd475c3d6 png:q8dad735c
+asset sha:aee24b05aaa9eb0909907e4da88512b2af0a3a064dc613ac2deb6136dc504c5f png:qb2f4c561
+asset sha:af052419e63e00a5fb7efdc1a4ddfc67defc726c65c48671a508f074a733f968 fsh:q9e1515a2
+asset sha:b31ac744c7109863b97ec918598e28db37c19a60f0ef604c453a0cfb1bc894e1 ogg:q6328fd6a
+asset sha:b74471524e71dc242c82dd1faa09f83c2c9013870a9dde5eb8cd6963adf42f67 vsh:q09a8555f
+asset sha:c57e820341886f1b43a41c4210efad6d4d5448f3a2248821b5516dd63de73b02 png:q9d98d594
+asset sha:c7e8ed73b2ea033d2514b7667a78317cb5a52c87f434a1d2a495b80f12b6016f json:qc379be0b
+asset sha:caad2c2d1b10fee8993964e5fd325a514bdb81a53b9f04bb23464a6bd923c3b0 ogg:q6328fd6a
+asset sha:cb6ac2fc0a466f4e440dbced4e044d1f9227facfd08e4240e1379343a6cd4084 json:q11530d8c
+asset sha:cbf08fb67323eb4ea86c7702234080aabbae2364c36dacb60a0f22b30160cb9c json:q5bf26b77
+asset sha:cdf3d3c86598f6cbd70bcea01fa659ec9423367f5f3c4b1c21df1ad9da9e2429 json:q238aba27
+asset sha:d3fbe67ed0e3b5a8cce19ecfa53995b6b95dbb2ab8c31231c6ad3d05625f07ab png:qf8426a32
+asset sha:d6ebe6d8fcd1750c5fb829cbb198611deeb4bcebe296ddceb8ded62ec0630633 json:qc4b646d8
+asset sha:d903aa72f46d726017f3dfeee91817a2cc5e367b7aeba1f67506261e07051582 vsh:q2c4a1f7d
+asset sha:deb21b0b21f8a7310e2107bb76540ba1cb4c4161e07024e80f118b1eb7bf0039 png:qcd716f6e
+asset sha:e1204d9e1d4d043585e51161224fc160aab68e1afc0eeab4b7934cc25b357367 ogg:q6328fd6a
+asset sha:e1face1e3565c251552106c1d3369ce87e5eabcf0b44356e0b5320990b92fc06 png:q3d6a943b
+asset sha:e5acdefff957ce5e6af392470ce5134e58650a0109cc2a47c0613738cf5afc0c png:q8128b34b
+asset sha:e8ea4a95790366db33bd90aa892c738a25041117f2178a503509a2b8b9db5d2d fsh:qc8732dcb
+asset sha:e9ca5cd3def7c9cbb8af94fde00a514b2e43b9ce6cf49dd3b2dc7397a9b1d0e0 png:qa341f844
+asset sha:eacce448fd2f0845774417449ce25a91496aa1d388fcb7e8b87d8ddf1bf019fa png:qeb8caa9f
+asset sha:ef6b8c1a536094a9855f2ebadacd401dceef78492bede3c36737860917940df6 fsh:qe4af365d
+asset sha:ef94123d026da13327581df909ea9563b15fa9e42fa50b885705ee527c43b8c3 fsh:qfe01f0b4
+asset sha:f82c50a6ca8a850d83de4d36b8052e4bc252bd86f27f5567eb58904e680d659f fsh:qbc1655ff
+asset sha:f912153839447a11935d8e079f51cf7cad59a60d743c8646328fee803bd5110d png:q0a0e363b
+asset sha:fbc273af1a7216e850945c335161f0e2bc1602288ad97533a04e6f89ded6979a fsh:q7a9daad7
+asset sha:fe5c412ee80924ff66e2fd054e613d8acc76b2441cb45e0b5db990444200821a png:qf979d75f
+asset sha:ffeb94821cc367ac683748375aaec0f3760d761941c11b2fcf91be809cc65d82 png:q11530d8c
+asset txt:04f617a561f5dd2d77e35c9727d637c6e2dc5c7887bcf45c27af862f8ea356b0 fsh:qe4af365d
+asset txt:0ec574bb041bb1a393674c58ac7631cf493107043942e59dea8e546c787ef7e4 json:q2faa654b
+asset txt:11bfd01fc089c3d1f6b22ae49510c33aa35977a7e09b01f27a9f7384c51ecf2b vsh:q7a9daad7
+asset txt:12540beb0476c0c1eee1b740098fa4cfcf05ba0de9d5cdffdf1df165ac99ed49 fsh:q7a9daad7
+asset txt:1d0987c5b78135a656c75a917541156e4a1e0ac99078d780ba12d97be803f426 fsh:q94ef4460
+asset txt:2bd5892b76737dc3ff3a04c7a4269acf1baf7a8c49f4b49382e0db2877180a35 vsh:q2c4a1f7d
+asset txt:2c20b4bd74443346432b352b81f57a4fa03309f5a7196af44be2dcd3854f4671 fsh:q8513c139
+asset txt:3da7bdf3270169f7adffd8bf75eaef50872a35a012d14363a237203aad47680d json:q3fc4a2ed
+asset txt:465068f50cb37d6c69f7162acec161ca5d1bbca76c866fd8a491d8f0bf85e6d1 vsh:q09a8555f
+asset txt:465aa502319f6fb5720cc7e03448445101cff9a869eba22bfee2ad51101853d2 json:q11530d8c
+asset txt:476c9593bd2403988e513689a989d392121bd192ee1a642feef5f215b80646fa fsh:q25a7f8c4
+asset txt:4f281dfd5d2fe2020ab62cf552aaf4a9a6981bdba011668043f198c46b536a3d fsh:q80ccc712
+asset txt:518850866048744e0a9ef44e423089cc0104bb9d60b187670a72081702c4d841 json:q05f391f2
+asset txt:5508b6352537732248f95ec3510eac4bfbc14b1be88e189c46ba02dbac017047 fsh:q44e974c8
+asset txt:61fdf61f15d54fd23a58f695ede2883fbd21e86d0ef10daca33a281066f13a4d vsh:qbc1655ff
+asset txt:621b5d4b0b6c1becc2ebed0cf32902a60e90b6e75f55980bb92cf3f0402d5413 json:qc4b646d8
+asset txt:62c4ab1d08c1a0ccb39769ea069dd2f02d2cc676d74aebfe7669980ad6e219c6 vsh:qeae422f2
+asset txt:70fe1e9e6d197467dd73f9bd2917dc98e33af9fec5e35f389fed559084503d11 json:q238aba27
+asset txt:72893463a725fae3ab60ceef252809dbb75f22fc4d7964af7a9f08b324bf1612 json:qc313b69a
+asset txt:787523894d66aaaafc59ee83f34f446e3d5969a28dd014fae6ee434aba8c909b fsh:q94a14ce4
+asset txt:7e7a129b3d47cb2595d9812096dffc87c95fffab1ad5ff660d049d4b7dedcc47 json:q5bf26b77
+asset txt:9aa3381794f576b7cd62a84a4cd0dca3db7d490200ab4c9c81d480428d1a5c64 vsh:qe2d2dbd8
+asset txt:9e4eadd4b710f3db0b6f37d68624e709941fb576db16acb0541aef09d7737618 fsh:q2c4a1f7d
+asset txt:a74544d9ab272acefc12ac9bb542c27056990a856194ef0e0dfdf0c7339adf2d fsh:qeae422f2
+asset txt:a942e70b0e94125a2659f492cbcae86f05ac16b9d5abfd875cd7e709b946532f json:qebc2a753
+asset txt:b458719b019af2bad5f6187423a2a1331e11a50ccf5384600d88d6d2cb8898cf fsh:q5e6928e4
+asset txt:b512df728ccf71245032b4effba66abdc74b443eecc2b859e98d8a5d508d582e fsh:q9e1515a2
+asset txt:b5356af392a82ac8a2bffff30b247a537ee1fb412d700f06ece19aed21851a39 fsh:qaa079898
+asset txt:b9364f7de0ad4355ca047aab61a36801870ddb6d6dae68cf12a680f623bd0c63 fsh:qc8732dcb
+asset txt:c0744a56ef883ef64b02231e6bc218709681f7e5576d9aaa1ec8f343dd398b21 fsh:q126a79d3
+asset txt:cae8dcde48efbbb9227c8e8010de9f0bc309abf322a9fa5aca5debd772cd9b89 json:qf6196ece
+asset txt:d4f60b6685fa54f449b29f2e0434cbbeb10e43f896af638fde72ed4db4c3a818 fsh:qbc1655ff
+asset txt:d9cee906f4ffd27cd3cf6112756874a4020c10474e204cb6393fc83bc0d200e1 fsh:q7edb06f7
+asset txt:e3352c809d6a202df911d06bf1178bbb7b9a173541c2e95cd6bee90dcd1bbad1 json:qc724abf6
+asset txt:ef198f8c70f1b7712e4c611be1210c09473e067c4176a0ffd3ff49376b02e247 json:qb58bdaef
+asset txt:fb041f90f63efc3f37db62a449cd8eca90df3efdd712da0e813616a6fc1a91ac fsh:q09a8555f
+
+```
+
+`src/AssemblyInfo.cs`:
+
+```cs
+using System.Reflection;
+
+[assembly: AssemblyTitle("Orchard Obliterator")]
+[assembly: AssemblyDescription("Finds, exposes and blocks the Orchard Minecraft cheat")]
+[assembly: AssemblyProduct("Orchard Obliterator")]
+[assembly: AssemblyCopyright("Copyright (c) 2026 flowerkitties, MIT License")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+```
+
+`src/ClassFile.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace OrchardObliterator
+{
+    sealed class ClassFile
+    {
+        public readonly List<string> Strings = new List<string>();
+        public readonly List<string> MixinTargets = new List<string>();
+        public readonly List<string> HookedMethods = new List<string>();
+        public string DebugExtension;
+        public string Name;
+        public bool IsMixin;
+        public bool Complete;
+        public int Length;
+
+        string[] utf8;
+        int[] classNameIndex;
+        byte[] b;
+        int p;
+
+        public static ClassFile Parse(byte[] data)
+        {
+            return Parse(data, 0);
+        }
+
+        public static ClassFile Parse(byte[] data, int offset)
+        {
+            if (data == null || offset < 0 || data.Length - offset < 10) return null;
+            if (data[offset] != 0xCA || data[offset + 1] != 0xFE || data[offset + 2] != 0xBA || data[offset + 3] != 0xBE) return null;
+            var cf = new ClassFile();
+            try
+            {
+                cf.b = data;
+                cf.p = offset + 8;
+                cf.Read();
+                cf.Complete = true;
+                cf.Length = cf.p - offset;
+            }
+            catch
+            {
+            }
+            cf.b = null;
+            return cf;
+        }
+
+        void Read()
+        {
+            int count = U2();
+            utf8 = new string[count];
+            classNameIndex = new int[count];
+            for (int i = 1; i < count; i++)
+            {
+                int tag = b[p++];
+                switch (tag)
+                {
+                    case 1:
+                        int len = U2();
+                        utf8[i] = DecodeModifiedUtf8(b, p, len);
+                        Strings.Add(utf8[i]);
+                        p += len;
+                        break;
+                    case 7:
+                        classNameIndex[i] = U2();
+                        break;
+                    case 3: case 4: case 9: case 10: case 11: case 12: case 17: case 18:
+                        p += 4;
+                        break;
+                    case 5: case 6:
+                        p += 8;
+                        i++;
+                        break;
+                    case 8: case 16: case 19: case 20:
+                        p += 2;
+                        break;
+                    case 15:
+                        p += 3;
+                        break;
+                    default:
+                        throw new FormatException();
+                }
+            }
+
+            p += 2;
+            int self = U2();
+            if (self > 0 && self < count) Name = Utf(classNameIndex[self]);
+            p += 2;
+            int interfaces = U2();
+            p += interfaces * 2;
+
+            SkipMembers(false);
+            SkipMembers(true);
+
+            int attrs = U2();
+            for (int i = 0; i < attrs; i++)
+            {
+                string name = Utf(U2());
+                int len = U4();
+                int end = p + len;
+                if (name == "RuntimeInvisibleAnnotations" || name == "RuntimeVisibleAnnotations")
+                    ReadAnnotations(true);
+                else if (name == "SourceDebugExtension")
+                    DebugExtension = DecodeModifiedUtf8(b, p, Math.Min(len, 512));
+                p = end;
+            }
+        }
+
+        void SkipMembers(bool methods)
+        {
+            int n = U2();
+            for (int i = 0; i < n; i++)
+            {
+                p += 6;
+                int attrs = U2();
+                for (int a = 0; a < attrs; a++)
+                {
+                    string name = Utf(U2());
+                    int len = U4();
+                    int end = p + len;
+                    if (methods && (name == "RuntimeInvisibleAnnotations" || name == "RuntimeVisibleAnnotations"))
+                        ReadAnnotations(false);
+                    p = end;
+                }
+            }
+        }
+
+        void ReadAnnotations(bool onClass)
+        {
+            int n = U2();
+            for (int i = 0; i < n; i++)
+                ReadAnnotation(onClass, 0);
+        }
+
+        void ReadAnnotation(bool onClass, int depth)
+        {
+            string type = Utf(U2()) ?? "";
+            int pairs = U2();
+            bool mixin = onClass && depth == 0 && type == "Lorg/spongepowered/asm/mixin/Mixin;";
+            bool hook = !onClass && depth == 0 && (type.StartsWith("Lorg/spongepowered/asm/mixin/injection/") || type.StartsWith("Lcom/llamalad7/mixinextras/injector/"));
+            if (mixin) IsMixin = true;
+
+            for (int i = 0; i < pairs; i++)
+            {
+                string key = Utf(U2());
+                var values = new List<string>();
+                ReadElement(values, depth);
+                if (mixin && (key == "value" || key == "targets"))
+                {
+                    foreach (var v in values) MixinTargets.Add(ShortName(v));
+                }
+                else if (hook && key == "method")
+                {
+                    foreach (var v in values)
+                    {
+                        string m = v;
+                        int cut = m.IndexOf('(');
+                        if (cut > 0) m = m.Substring(0, cut);
+                        int owner = m.LastIndexOf(';');
+                        if (owner >= 0) m = m.Substring(owner + 1);
+                        if (m.Length > 0) HookedMethods.Add(m);
+                    }
+                }
+            }
+        }
+
+        void ReadElement(List<string> sink, int depth)
+        {
+            char tag = (char)b[p++];
+            switch (tag)
+            {
+                case 's':
+                    sink.Add(Utf(U2()));
+                    break;
+                case 'c':
+                    sink.Add(Utf(U2()));
+                    break;
+                case 'e':
+                    p += 4;
+                    break;
+                case '@':
+                    ReadAnnotation(false, depth + 1);
+                    break;
+                case '[':
+                    int n = U2();
+                    for (int i = 0; i < n; i++) ReadElement(sink, depth);
+                    break;
+                default:
+                    p += 2;
+                    break;
+            }
+        }
+
+        public static string ShortName(string v)
+        {
+            if (string.IsNullOrEmpty(v)) return "?";
+            string s = v;
+            if (s.StartsWith("L") && s.EndsWith(";")) s = s.Substring(1, s.Length - 2);
+            s = s.Replace('.', '/');
+            int slash = s.LastIndexOf('/');
+            return slash >= 0 ? s.Substring(slash + 1) : s;
+        }
+
+        public IEnumerable<string> Footprint()
+        {
+            foreach (var t in MixinTargets)
+            {
+                if (HookedMethods.Count == 0) yield return t;
+                foreach (var m in HookedMethods) yield return t + "." + m;
+            }
+        }
+
+        string Utf(int index)
+        {
+            return index > 0 && index < utf8.Length ? utf8[index] : null;
+        }
+
+        int U2()
+        {
+            int v = (b[p] << 8) | b[p + 1];
+            p += 2;
+            return v;
+        }
+
+        int U4()
+        {
+            int v = (b[p] << 24) | (b[p + 1] << 16) | (b[p + 2] << 8) | b[p + 3];
+            p += 4;
+            return v;
+        }
+
+        static string DecodeModifiedUtf8(byte[] data, int start, int len)
+        {
+            var sb = new StringBuilder(len);
+            int i = start, end = start + len;
+            while (i < end)
+            {
+                int c = data[i];
+                if (c < 0x80) { sb.Append((char)c); i++; }
+                else if ((c & 0xE0) == 0xC0 && i + 1 < end)
+                {
+                    sb.Append((char)(((c & 0x1F) << 6) | (data[i + 1] & 0x3F)));
+                    i += 2;
+                }
+                else if ((c & 0xF0) == 0xE0 && i + 2 < end)
+                {
+                    sb.Append((char)(((c & 0x0F) << 12) | ((data[i + 1] & 0x3F) << 6) | (data[i + 2] & 0x3F)));
+                    i += 3;
+                }
+                else { sb.Append('?'); i++; }
+            }
+            return sb.ToString();
+        }
+    }
+}
+
+```
+
+`src/Evidence.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace OrchardObliterator
+{
+    enum Level
+    {
+        Clean,
+        Confirmed
+    }
+
+    sealed class Hit
+    {
+        public string Kind;
+        public string Detail;
+        public int Weight;
+    }
+
+    sealed class Evidence
+    {
+        public const int ConfirmAt = 100;
+
+        static readonly Dictionary<string, int> Caps = new Dictionary<string, int>
+        {
+            { "hash", 100 },
+            { "meta", 100 },
+            { "namespace", 105 },
+            { "footprint", 100 },
+            { "asset", 80 },
+            { "lang", 40 },
+            { "integrity", 70 },
+            { "packer", 60 },
+            { "stealth", 60 },
+            { "combat", 32 },
+            { "hiding", 40 },
+            { "injection", 60 }
+        };
+
+        static readonly HashSet<string> OrchardOnly = new HashSet<string> { "hash", "meta", "namespace", "footprint", "asset", "lang" };
+
+        public readonly string Source;
+        public readonly List<Hit> Hits = new List<Hit>();
+        public readonly List<string> Notes = new List<string>();
+        readonly HashSet<string> seen = new HashSet<string>();
+
+        public Evidence(string source)
+        {
+            Source = source;
+        }
+
+        public void Add(string kind, int weight, string detail)
+        {
+            if (!seen.Add(kind + "|" + detail)) return;
+            Hits.Add(new Hit { Kind = kind, Weight = weight, Detail = detail });
+        }
+
+        public void Absorb(Evidence child, string prefix)
+        {
+            foreach (var h in child.Hits)
+                Add(h.Kind, h.Weight, prefix + h.Detail);
+        }
+
+        public static bool IsOrchardOnly(string kind)
+        {
+            return OrchardOnly.Contains(kind);
+        }
+
+        int Sum(Func<Hit, bool> filter)
+        {
+            int total = 0;
+            foreach (var g in Hits.Where(filter).GroupBy(h => h.Kind))
+            {
+                int sum = g.Sum(h => h.Weight);
+                int cap;
+                total += Caps.TryGetValue(g.Key, out cap) ? Math.Min(sum, cap) : sum;
+            }
+            return total;
+        }
+
+        public int OrchardScore
+        {
+            get { return Sum(h => OrchardOnly.Contains(h.Kind)); }
+        }
+
+        public int Score
+        {
+            get { return OrchardScore >= ConfirmAt ? Sum(h => true) : OrchardScore; }
+        }
+
+        public Level Level
+        {
+            get { return OrchardScore >= ConfirmAt ? Level.Confirmed : Level.Clean; }
+        }
+    }
+}
+
+```
+
+`src/Fingerprints.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Text;
+
+namespace OrchardObliterator
+{
+    sealed class MemorySignature
+    {
+        public string Kind;
+        public int Weight;
+        public string Text;
+        public byte[] Bytes;
+    }
+
+    static class Fingerprints
+    {
+        public static readonly Dictionary<string, string> KnownFiles = new Dictionary<string, string>();
+        public static readonly List<string> NameTokens = new List<string>();
+        public static readonly Dictionary<string, string> Assets = new Dictionary<string, string>();
+        public static readonly HashSet<string> Footprint = new HashSet<string>(StringComparer.Ordinal);
+        public static readonly Dictionary<string, string> StealthHooks = new Dictionary<string, string>();
+        public static readonly Dictionary<string, string> CombatHooks = new Dictionary<string, string>();
+        public static readonly HashSet<string> Watermarks = new HashSet<string>();
+        public static readonly HashSet<string> LoaderApis = new HashSet<string>();
+        public static readonly List<MemorySignature> Memory = new List<MemorySignature>();
+        public static readonly List<string> LogPatterns = new List<string>();
+        public static readonly List<string> TrustedHosts = new List<string>();
+        public static string LoadedFrom = "built-in";
+
+        public static void Load()
+        {
+            string local = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "orchard.sig");
+            using (var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("orchard.sig"))
+            using (var r = new StreamReader(s, Encoding.UTF8))
+                Parse(r);
+
+            if (File.Exists(local))
+            {
+                using (var r = new StreamReader(local, Encoding.UTF8))
+                    Parse(r);
+                LoadedFrom = "built-in + " + local;
+            }
+        }
+
+        static void Parse(TextReader r)
+        {
+            string line;
+            while ((line = r.ReadLine()) != null)
+            {
+                line = line.Trim();
+                if (line.Length == 0 || line[0] == '#') continue;
+                var parts = line.Split(new[] { ' ' }, 3);
+                string rest = parts.Length > 2 ? parts[2] : "";
+                switch (parts[0])
+                {
+                    case "file": KnownFiles[parts[1]] = rest; break;
+                    case "token": NameTokens.Add(parts[1]); break;
+                    case "asset": Assets[parts[1]] = rest; break;
+                    case "hook": Footprint.Add(parts[1]); break;
+                    case "stealth": StealthHooks[parts[1]] = rest; break;
+                    case "combat": CombatHooks[parts[1]] = rest; break;
+                    case "watermark": Watermarks.Add(Unescape(line.Substring(10))); break;
+                    case "loader": LoaderApis.Add(parts[1]); break;
+                    case "log": LogPatterns.Add(line.Substring(4)); break;
+                    case "host": TrustedHosts.Add(parts[1]); break;
+                    case "mem":
+                        var bits = line.Split(new[] { ' ' }, 4);
+                        string text = Unescape(bits[3]);
+                        Memory.Add(new MemorySignature
+                        {
+                            Kind = bits[1],
+                            Weight = int.Parse(bits[2]),
+                            Text = text,
+                            Bytes = Encoding.UTF8.GetBytes(text)
+                        });
+                        break;
+                }
+            }
+        }
+
+        static string Unescape(string s)
+        {
+            var sb = new StringBuilder();
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (s[i] == '\\' && i + 5 < s.Length && s[i + 1] == 'u')
+                {
+                    sb.Append((char)Convert.ToInt32(s.Substring(i + 2, 4), 16));
+                    i += 5;
+                }
+                else sb.Append(s[i]);
+            }
+            return sb.ToString();
+        }
+    }
+}
+
+```
+
+`src/Guard.cs`:
+
+```cs
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading;
+
+namespace OrchardObliterator
+{
+    static class Guard
+    {
+        static readonly ConcurrentDictionary<string, DateTime> queue = new ConcurrentDictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
+        static readonly List<FileSystemWatcher> watchers = new List<FileSystemWatcher>();
+
+        public static void Run(Dictionary<string, Evidence> cache, Func<string, Evidence> probe)
+        {
+            Report.Section("Guard");
+            var dirs = Locations.GameDirs();
+            foreach (var d in Locations.LooseDirs()) Locations.AddUnique(dirs, d);
+            foreach (var d in dirs) Watch(d);
+            Report.Info(string.Format("watching {0} folders and every new java process. Ctrl+C to stop.", watchers.Count));
+
+            var known = new HashSet<int>(Process.GetProcesses().Select(p => p.Id));
+            var pending = new Dictionary<int, DateTime>();
+            bool stop = false;
+            Console.CancelKeyPress += (s, e) => { e.Cancel = true; stop = true; };
+
+            while (!stop)
+            {
+                Thread.Sleep(700);
+
+                foreach (var kv in queue.ToArray())
+                {
+                    if ((DateTime.Now - kv.Value).TotalMilliseconds < 1200) continue;
+                    DateTime dummy;
+                    queue.TryRemove(kv.Key, out dummy);
+                    if (!File.Exists(kv.Key) || !Locations.IsArchive(kv.Key, 300, 400L * 1024 * 1024)) continue;
+                    cache.Remove(kv.Key);
+                    var ev = probe(kv.Key);
+                    if (ev.Level == Level.Confirmed)
+                    {
+                        Report.Bad(string.Format("{0:HH:mm:ss} Orchard dropped into {1}", DateTime.Now, kv.Key));
+                        Quarantine.Lock(kv.Key);
+                    }
+                }
+
+                foreach (var gp in Hunter.FindJava())
+                {
+                    if (known.Contains(gp.Pid) && !pending.ContainsKey(gp.Pid)) continue;
+                    if (!known.Contains(gp.Pid))
+                    {
+                        known.Add(gp.Pid);
+                        pending[gp.Pid] = DateTime.Now;
+                        Report.Info(string.Format("{0:HH:mm:ss} new {1} pid {2}", DateTime.Now, gp.Name, gp.Pid));
+                        if (!string.IsNullOrEmpty(gp.GameDir)) Watch(gp.GameDir);
+                        if (QuickCheck(gp, cache, probe)) { pending.Remove(gp.Pid); continue; }
+                    }
+                    if ((DateTime.Now - pending[gp.Pid]).TotalSeconds < 20) continue;
+                    pending.Remove(gp.Pid);
+
+                    Hunter.Inspect(gp);
+                    if (gp.Memory.Level == Level.Confirmed)
+                    {
+                        Report.Evidence(gp.Memory);
+                        Terminate(gp, "Orchard classes found in memory");
+                    }
+                    else
+                    {
+                        Report.Good(string.Format("pid {0} memory clean ({1:N0} MB read)", gp.Pid, gp.Scanned >> 20));
+                    }
+                }
+            }
+            foreach (var w in watchers) w.Dispose();
+        }
+
+        static bool QuickCheck(GameProcess gp, Dictionary<string, Evidence> cache, Func<string, Evidence> probe)
+        {
+            var jars = new List<string>(gp.ArgJars);
+            if (!string.IsNullOrEmpty(gp.GameDir) && Directory.Exists(Path.Combine(gp.GameDir, "mods")))
+                jars.AddRange(Locations.Walk(Path.Combine(gp.GameDir, "mods"), 4));
+
+            var bad = new List<string>();
+            foreach (var j in jars.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                if (!File.Exists(j)) continue;
+                cache.Remove(j);
+                if (probe(j).Level == Level.Confirmed) bad.Add(j);
+            }
+            if (bad.Count == 0) return false;
+            Terminate(gp, "launching with " + bad[0]);
+            foreach (var b in bad) Quarantine.Lock(b);
+            return true;
+        }
+
+        static void Terminate(GameProcess gp, string why)
+        {
+            if (Hunter.Kill(gp.Pid)) Report.Bad(string.Format("{0:HH:mm:ss} killed {1} pid {2}: {3}", DateTime.Now, gp.Name, gp.Pid, why));
+            else Report.Warn(string.Format("could not kill pid {0} ({1})", gp.Pid, why));
+        }
+
+        static void Watch(string dir)
+        {
+            if (!Directory.Exists(dir) || watchers.Any(w => string.Equals(w.Path, dir, StringComparison.OrdinalIgnoreCase))) return;
+            try
+            {
+                var w = new FileSystemWatcher(dir)
+                {
+                    IncludeSubdirectories = true,
+                    NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size,
+                    InternalBufferSize = 64 * 1024
+                };
+                FileSystemEventHandler touch = (s, e) => queue[e.FullPath] = DateTime.Now;
+                w.Created += touch;
+                w.Changed += touch;
+                w.Renamed += (s, e) => queue[e.FullPath] = DateTime.Now;
+                w.EnableRaisingEvents = true;
+                watchers.Add(w);
+            }
+            catch
+            {
+            }
+        }
+    }
+}
+
+```
+
+`src/Handles.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+
+namespace OrchardObliterator
+{
+    sealed class OpenFile
+    {
+        public string Path;
+        public bool Gone;
+        public byte[] Data;
+    }
+
+    static class Handles
+    {
+        const int SystemExtendedHandleInformation = 64;
+        const uint LengthMismatch = 0xC0000004;
+        const uint PROCESS_DUP_HANDLE = 0x0040;
+        const uint DUPLICATE_SAME_ACCESS = 2;
+        const int FILE_TYPE_DISK = 1;
+        const int Entry = 40;
+
+        [DllImport("ntdll.dll")]
+        static extern uint NtQuerySystemInformation(int cls, IntPtr buffer, int length, out int returned);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool DuplicateHandle(IntPtr sourceProcess, IntPtr source, IntPtr targetProcess, out IntPtr target, uint access, bool inherit, uint options);
+
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetCurrentProcess();
+
+        [DllImport("kernel32.dll")]
+        static extern int GetFileType(IntPtr file);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern int GetFinalPathNameByHandle(IntPtr file, StringBuilder path, int size, int flags);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool GetFileSizeEx(IntPtr file, out long size);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool SetFilePointerEx(IntPtr file, long distance, out long position, int method);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool ReadFile(IntPtr file, byte[] buffer, int count, out int read, ref NativeOverlapped overlapped);
+
+        public static List<OpenFile> Archives(int pid, long maxSize)
+        {
+            var result = new List<OpenFile>();
+            IntPtr proc = Native.OpenProcess(PROCESS_DUP_HANDLE, false, pid);
+            if (proc == IntPtr.Zero) return result;
+
+            IntPtr table = IntPtr.Zero;
+            try
+            {
+                int size = 1 << 22, needed;
+                while (true)
+                {
+                    table = Marshal.AllocHGlobal(size);
+                    uint status = NtQuerySystemInformation(SystemExtendedHandleInformation, table, size, out needed);
+                    if (status == 0) break;
+                    Marshal.FreeHGlobal(table);
+                    table = IntPtr.Zero;
+                    if (status != LengthMismatch || size > 1 << 28) return result;
+                    size = Math.Max(size * 2, needed + 65536);
+                }
+
+                long count = Marshal.ReadIntPtr(table).ToInt64();
+                var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                for (long i = 0; i < count; i++)
+                {
+                    IntPtr row = table + 16 + (int)(i * Entry);
+                    if (Marshal.ReadIntPtr(row, 8).ToInt64() != pid) continue;
+                    uint access = (uint)Marshal.ReadInt32(row, 24);
+                    if ((access & 1) == 0) continue;
+
+                    IntPtr dup;
+                    if (!DuplicateHandle(proc, Marshal.ReadIntPtr(row, 16), GetCurrentProcess(), out dup, 0, false, DUPLICATE_SAME_ACCESS)) continue;
+                    try
+                    {
+                        if (GetFileType(dup) != FILE_TYPE_DISK) continue;
+                        var sb = new StringBuilder(1024);
+                        if (GetFinalPathNameByHandle(dup, sb, sb.Capacity, 0) <= 0) continue;
+                        string path = sb.ToString();
+                        if (path.StartsWith(@"\\?\")) path = path.Substring(4);
+                        if (!seen.Add(path)) continue;
+
+                        bool gone = path.Contains(@"\$Extend\$Deleted\") || !File.Exists(path);
+                        if (!gone) continue;
+
+                        long length;
+                        if (!GetFileSizeEx(dup, out length) || length < 64 || length > maxSize) continue;
+                        var data = ReadAll(dup, length);
+                        if (data == null || data[0] != 'P' || data[1] != 'K') continue;
+                        result.Add(new OpenFile { Path = path, Gone = true, Data = data });
+                    }
+                    finally
+                    {
+                        Native.CloseHandle(dup);
+                    }
+                }
+            }
+            catch
+            {
+            }
+            finally
+            {
+                if (table != IntPtr.Zero) Marshal.FreeHGlobal(table);
+                Native.CloseHandle(proc);
+            }
+            return result;
+        }
+
+        static byte[] ReadAll(IntPtr file, long length)
+        {
+            long before;
+            bool restore = SetFilePointerEx(file, 0, out before, 1);
+            try
+            {
+                var data = new byte[length];
+                long off = 0;
+                var chunk = new byte[1 << 20];
+                while (off < length)
+                {
+                    var ov = new NativeOverlapped { OffsetLow = (int)(off & 0xFFFFFFFF), OffsetHigh = (int)(off >> 32) };
+                    int want = (int)Math.Min(chunk.Length, length - off), got;
+                    if (!ReadFile(file, chunk, want, out got, ref ov) || got <= 0) return null;
+                    Buffer.BlockCopy(chunk, 0, data, (int)off, got);
+                    off += got;
+                }
+                return data;
+            }
+            finally
+            {
+                long ignored;
+                if (restore) SetFilePointerEx(file, before, out ignored, 0);
+            }
+        }
+    }
+}
+
+```
+
+`src/Hunter.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Management;
+using System.Text;
+using System.Text.RegularExpressions;
+
+namespace OrchardObliterator
+{
+    sealed class GameProcess
+    {
+        public int Pid;
+        public string Name;
+        public string Exe;
+        public string CommandLine;
+        public string GameDir;
+        public bool Fabric;
+        public readonly List<string> ArgJars = new List<string>();
+        public readonly List<string> Flags = new List<string>();
+        public readonly HashSet<string> CarvedJars = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        public readonly List<string> ForeignModules = new List<string>();
+        public readonly List<string> UnbackedImages = new List<string>();
+        public readonly List<string> JarsInUse = new List<string>();
+        public readonly List<string> DeletedOpen = new List<string>();
+        public int MixinClasses;
+        public Evidence Memory;
+        public long Scanned;
+        public bool Denied;
+    }
+
+    static class Hunter
+    {
+        const int Chunk = 8 * 1024 * 1024;
+        const int Overlap = 512;
+        const int MaxCarved = 20000;
+        const int MaxMixins = 20000;
+        const int Window = 256 * 1024;
+
+        static readonly byte[] MixinTag = Encoding.ASCII.GetBytes("Lorg/spongepowered/asm/mixin/Mixin;");
+
+        static readonly HashSet<string> Roots = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "net", "com", "org", "io", "me", "dev", "de", "xyz", "gg", "cc", "fr", "ru", "uk", "nl", "pl", "it",
+            "club", "top", "site", "github", "mod", "mods", "mixin", "mixins", "client", "lol", "ac", "app"
+        };
+
+        static readonly string[] NativeAllow =
+        {
+            "lwjgl", "glfw", "openal", "jemalloc", "jinput", "jna", "jcef", "libcef", "discord", "sapiwrapper",
+            "flite", "theseus", "imgui", "rtss", "graphics-hook", "nvspcap", "nvapi", "obs", "steam", "overlay"
+        };
+
+        public static List<GameProcess> FindJava()
+        {
+            var found = new List<GameProcess>();
+            try
+            {
+                using (var q = new ManagementObjectSearcher("SELECT ProcessId, Name, ExecutablePath, CommandLine FROM Win32_Process"))
+                {
+                    foreach (ManagementObject mo in q.Get())
+                    {
+                        string name = (mo["Name"] as string) ?? "";
+                        string cmd = (mo["CommandLine"] as string) ?? "";
+                        string exe = (mo["ExecutablePath"] as string) ?? "";
+                        string lname = name.ToLowerInvariant();
+                        bool jvm = lname == "java.exe" || lname == "javaw.exe"
+                                   || cmd.Contains("net.fabricmc") || cmd.Contains("net.minecraft")
+                                   || cmd.Contains("-Djava.library.path") || cmd.Contains("cpw.mods") || cmd.Contains("-Xmx");
+                        if (!jvm) continue;
+                        if (lname == "orchardobliterator.exe") continue;
+
+                        var gp = new GameProcess
+                        {
+                            Pid = Convert.ToInt32(mo["ProcessId"]),
+                            Name = name,
+                            Exe = exe,
+                            CommandLine = cmd
+                        };
+                        ParseCommandLine(gp);
+                        found.Add(gp);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Report.Warn("process list via WMI failed: " + e.Message);
+                foreach (var p in Process.GetProcesses())
+                {
+                    string n = p.ProcessName.ToLowerInvariant();
+                    if (n == "java" || n == "javaw")
+                        found.Add(new GameProcess { Pid = p.Id, Name = p.ProcessName + ".exe", CommandLine = "" });
+                }
+            }
+            return found;
+        }
+
+        static void ParseCommandLine(GameProcess gp)
+        {
+            var args = Split(gp.CommandLine);
+            for (int i = 0; i < args.Count; i++)
+            {
+                string a = args[i];
+                string next = i + 1 < args.Count ? args[i + 1] : "";
+
+                if (a == "--gameDir") gp.GameDir = next;
+                else if (a.Contains("KnotClient") || a.Contains("net.fabricmc.loader")) gp.Fabric = true;
+                else if (a.StartsWith("-Dfabric.addMods=", StringComparison.OrdinalIgnoreCase))
+                {
+                    gp.Flags.Add("extra mods injected with " + a);
+                    foreach (var p in a.Substring(17).Split(';'))
+                        if (p.Length > 0) gp.ArgJars.Add(p.TrimStart('@'));
+                }
+                else if (a.StartsWith("-javaagent:", StringComparison.OrdinalIgnoreCase))
+                {
+                    string jar = a.Substring(11);
+                    int eq = jar.IndexOf('=');
+                    if (eq > 0) jar = jar.Substring(0, eq);
+                    gp.Flags.Add("java agent attached: " + jar);
+                    gp.ArgJars.Add(jar);
+                }
+                else if (a.StartsWith("-agentpath:", StringComparison.OrdinalIgnoreCase) || a.StartsWith("-agentlib:", StringComparison.OrdinalIgnoreCase))
+                {
+                    gp.Flags.Add("native JVMTI agent: " + a);
+                }
+                else if (a == "-cp" || a == "-classpath" || a == "--class-path")
+                {
+                    foreach (var p in next.Split(';'))
+                        if (p.EndsWith(".jar", StringComparison.OrdinalIgnoreCase)) gp.ArgJars.Add(p);
+                }
+                else if (a.StartsWith("-Dfabric.debug.", StringComparison.OrdinalIgnoreCase) || a.StartsWith("-Dmixin.", StringComparison.OrdinalIgnoreCase))
+                {
+                    gp.Flags.Add("loader debug switch: " + a);
+                }
+            }
+            if (gp.Fabric && string.IsNullOrEmpty(gp.GameDir))
+                gp.GameDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft");
+        }
+
+        static List<string> Split(string cmd)
+        {
+            var list = new List<string>();
+            var sb = new StringBuilder();
+            bool quoted = false;
+            foreach (char c in cmd ?? "")
+            {
+                if (c == '"') { quoted = !quoted; continue; }
+                if (c == ' ' && !quoted)
+                {
+                    if (sb.Length > 0) { list.Add(sb.ToString()); sb.Clear(); }
+                    continue;
+                }
+                sb.Append(c);
+            }
+            if (sb.Length > 0) list.Add(sb.ToString());
+            return list;
+        }
+
+        public static void Inspect(GameProcess gp)
+        {
+            gp.Memory = new Evidence(string.Format("{0} pid {1} (live memory)", gp.Name, gp.Pid));
+            Modules(gp);
+
+            IntPtr h = Native.OpenProcess(Native.PROCESS_QUERY_INFORMATION | Native.PROCESS_VM_READ, false, gp.Pid);
+            if (h == IntPtr.Zero)
+            {
+                gp.Denied = true;
+                return;
+            }
+
+            var sigs = Fingerprints.Memory;
+            var counts = new int[sigs.Count];
+            var asciiJar = Encoding.ASCII.GetBytes(".jar");
+            var asciiJarUp = Encoding.ASCII.GetBytes(".JAR");
+            var wideJar = Encoding.Unicode.GetBytes(".jar");
+            var buf = new byte[Chunk + Overlap];
+            var window = new byte[Window * 2];
+            var parsedAt = new HashSet<long>();
+            var mixins = new Dictionary<string, ClassFile>(StringComparer.Ordinal);
+            var sw = Stopwatch.StartNew();
+
+            try
+            {
+                long addr = 0;
+                Native.MemoryInfo mi;
+                var miSize = (IntPtr)System.Runtime.InteropServices.Marshal.SizeOf(typeof(Native.MemoryInfo));
+                while (Native.VirtualQueryEx(h, (IntPtr)addr, out mi, miSize) != IntPtr.Zero)
+                {
+                    long start = mi.BaseAddress.ToInt64();
+                    long size = mi.RegionSize.ToInt64();
+                    if (size <= 0) break;
+
+                    bool readable = mi.State == Native.MEM_COMMIT && (mi.Protect & (Native.PAGE_NOACCESS | Native.PAGE_GUARD)) == 0 && mi.Protect != 0;
+                    if (readable)
+                    {
+                        bool exec = (mi.Protect & 0xF0) != 0;
+                        if (exec && mi.Type == 0x20000) CheckPe(h, start, gp);
+
+                        for (long off = 0; off < size; off += Chunk)
+                        {
+                            int want = (int)Math.Min(Chunk + Overlap, size - off);
+                            IntPtr read;
+                            if (!Native.ReadProcessMemory(h, (IntPtr)(start + off), buf, (IntPtr)want, out read)) continue;
+                            int n = read.ToInt32();
+                            if (n <= 0) continue;
+                            gp.Scanned += Math.Min(n, Chunk);
+
+                            for (int s = 0; s < sigs.Count; s++)
+                                counts[s] += Count(buf, n, sigs[s].Bytes);
+
+                            if (mixins.Count < MaxMixins)
+                                CarveMixins(h, buf, n, start + off, window, parsedAt, mixins);
+
+                            if (gp.CarvedJars.Count < MaxCarved)
+                            {
+                                CarveAscii(buf, n, asciiJar, gp.CarvedJars);
+                                CarveAscii(buf, n, asciiJarUp, gp.CarvedJars);
+                                CarveWide(buf, n, wideJar, gp.CarvedJars);
+                            }
+                        }
+                        if (sw.ElapsedMilliseconds > 250)
+                        {
+                            Report.Progress(string.Format("  pid {0}: {1:N0} MB scanned", gp.Pid, gp.Scanned >> 20));
+                            sw.Restart();
+                        }
+                    }
+
+                    long nextAddr = start + size;
+                    if (nextAddr <= addr) break;
+                    addr = nextAddr;
+                }
+            }
+            finally
+            {
+                Native.CloseHandle(h);
+                Report.ClearProgress();
+            }
+
+            gp.MixinClasses = mixins.Count;
+            MixinFootprint(gp, mixins.Values);
+
+            foreach (var open in Handles.Archives(gp.Pid, 256L * 1024 * 1024))
+            {
+                var ev = JarScanner.Inspect(open.Data, open.Path, Path.GetExtension(open.Path), 0);
+                if (ev.Level != Level.Confirmed) continue;
+                gp.DeletedOpen.Add(open.Path);
+                gp.Memory.Absorb(ev, "deleted but still open " + open.Path + ": ");
+            }
+
+            for (int s = 0; s < sigs.Count; s++)
+            {
+                if (counts[s] == 0) continue;
+                gp.Memory.Add(sigs[s].Kind, sigs[s].Weight, string.Format("\"{0}\" resident in memory x{1:N0}", sigs[s].Text, counts[s]));
+            }
+            foreach (var u in gp.UnbackedImages)
+                gp.Memory.Add("injection", 30, u);
+        }
+
+        static void CarveMixins(IntPtr h, byte[] buf, int n, long baseAddr, byte[] window, HashSet<long> parsedAt, Dictionary<string, ClassFile> sink)
+        {
+            int i = 0, last = n - MixinTag.Length;
+            while (i <= last && sink.Count < MaxMixins)
+            {
+                i = Array.IndexOf(buf, MixinTag[0], i, last - i + 1);
+                if (i < 0) return;
+                int k = 1;
+                while (k < MixinTag.Length && buf[i + k] == MixinTag[k]) k++;
+                if (k == MixinTag.Length)
+                {
+                    var cf = ClassAround(h, buf, n, i, baseAddr, window, parsedAt);
+                    if (cf != null && cf.IsMixin && cf.Name != null && !sink.ContainsKey(cf.Name)) sink[cf.Name] = cf;
+                    i += MixinTag.Length;
+                    continue;
+                }
+                i++;
+            }
+        }
+
+        static ClassFile ClassAround(IntPtr h, byte[] buf, int n, int hit, long baseAddr, byte[] window, HashSet<long> parsedAt)
+        {
+            int s = Magic(buf, hit, Math.Max(0, hit - Window));
+            if (s >= 0)
+            {
+                if (!parsedAt.Add(baseAddr + s)) return null;
+                var cf = ClassFile.Parse(buf, s);
+                if (cf != null && cf.Complete && s + cf.Length <= n) return cf;
+                return Remote(h, baseAddr + s, window);
+            }
+            if (hit >= Window) return null;
+
+            long from = Math.Max(0, baseAddr + hit - Window);
+            int rel = (int)(baseAddr + hit - from);
+            if (ReadAt(h, from, window, Window) < rel) return null;
+            s = Magic(window, rel, 0);
+            if (s < 0 || !parsedAt.Add(from + s)) return null;
+            return Remote(h, from + s, window);
+        }
+
+        static ClassFile Remote(IntPtr h, long addr, byte[] window)
+        {
+            int got = ReadAt(h, addr, window, window.Length);
+            var cf = got > 10 ? ClassFile.Parse(window, 0) : null;
+            return cf != null && cf.Complete && cf.Length <= got ? cf : null;
+        }
+
+        static int ReadAt(IntPtr h, long addr, byte[] into, int count)
+        {
+            IntPtr read;
+            Native.ReadProcessMemory(h, (IntPtr)addr, into, (IntPtr)count, out read);
+            return read.ToInt32();
+        }
+
+        static int Magic(byte[] b, int from, int floor)
+        {
+            for (int s = from - 8; s >= floor; s--)
+            {
+                if (b[s] != 0xCA || b[s + 1] != 0xFE || b[s + 2] != 0xBA || b[s + 3] != 0xBE) continue;
+                int major = (b[s + 6] << 8) | b[s + 7];
+                if (major >= 45 && major <= 90) return s;
+            }
+            return -1;
+        }
+
+        static void MixinFootprint(GameProcess gp, IEnumerable<ClassFile> mixins)
+        {
+            var groups = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+            var members = new Dictionary<string, int>(StringComparer.Ordinal);
+            foreach (var cf in mixins)
+            {
+                var parts = cf.Name.Split('/');
+                for (int depth = 1; depth < parts.Length; depth++)
+                {
+                    if (depth == 1 && (Roots.Contains(parts[0]) || parts[0].Length < 4)) continue;
+                    string pkg = string.Join("/", parts, 0, depth);
+                    HashSet<string> set;
+                    if (!groups.TryGetValue(pkg, out set))
+                    {
+                        groups[pkg] = set = new HashSet<string>(StringComparer.Ordinal);
+                        members[pkg] = 0;
+                    }
+                    members[pkg]++;
+                    foreach (var f in cf.Footprint()) set.Add(f);
+                }
+            }
+
+            string best = null;
+            int bestShared = 0;
+            foreach (var g in groups)
+            {
+                int shared = g.Value.Count(f => Fingerprints.Footprint.Contains(f));
+                if (shared > bestShared || (shared == bestShared && shared > 0 && g.Key.Length > best.Length))
+                {
+                    best = g.Key;
+                    bestShared = shared;
+                }
+            }
+            if (best == null) return;
+
+            var ev = new Evidence(best);
+            JarScanner.Footprint(ev, groups[best], members[best]);
+            gp.Memory.Absorb(ev, "loaded mixins in " + best.Replace('/', '.') + ": ");
+        }
+
+        static void Modules(GameProcess gp)
+        {
+            try
+            {
+                var p = Process.GetProcessById(gp.Pid);
+                string javaHome = "";
+                if (!string.IsNullOrEmpty(gp.Exe))
+                {
+                    var bin = Path.GetDirectoryName(gp.Exe);
+                    javaHome = (Path.GetDirectoryName(bin) ?? bin).ToLowerInvariant();
+                }
+                string win = Environment.GetFolderPath(Environment.SpecialFolder.Windows).ToLowerInvariant();
+                foreach (ProcessModule m in p.Modules)
+                {
+                    string file = (m.FileName ?? "").ToLowerInvariant();
+                    if (file.StartsWith(win) || (javaHome.Length > 3 && file.StartsWith(javaHome))) continue;
+                    if (file.Contains("\\program files")) continue;
+                    string leaf = Path.GetFileName(file);
+                    if (NativeAllow.Any(a => leaf.StartsWith(a) || leaf.Contains(a))) continue;
+                    gp.ForeignModules.Add(m.FileName);
+                    bool userDir = file.Contains("\\temp\\") || file.Contains("\\downloads\\") || file.Contains("\\desktop\\") || file.Contains("\\appdata\\");
+                    if (userDir) gp.Memory.Add("injection", 20, "native module from a user folder: " + m.FileName);
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        static void CheckPe(IntPtr h, long start, GameProcess gp)
+        {
+            var head = new byte[0x400];
+            IntPtr read;
+            if (!Native.ReadProcessMemory(h, (IntPtr)start, head, (IntPtr)head.Length, out read) || read.ToInt32() < 0x100) return;
+            if (head[0] != 'M' || head[1] != 'Z') return;
+            int lfanew = BitConverter.ToInt32(head, 0x3C);
+            if (lfanew <= 0 || lfanew > 0x3F0) return;
+            if (head[lfanew] == 'P' && head[lfanew + 1] == 'E' && head[lfanew + 2] == 0 && head[lfanew + 3] == 0)
+                gp.UnbackedImages.Add(string.Format("PE image in private executable memory at 0x{0:X} (manually mapped / injected)", start));
+        }
+
+        static int Count(byte[] buf, int n, byte[] needle)
+        {
+            int c = 0, i = 0, last = n - needle.Length;
+            byte first = needle[0];
+            while (i <= last)
+            {
+                i = Array.IndexOf(buf, first, i, last - i + 1);
+                if (i < 0) break;
+                int k = 1;
+                while (k < needle.Length && buf[i + k] == needle[k]) k++;
+                if (k == needle.Length) c++;
+                i++;
+            }
+            return c;
+        }
+
+        static bool PathChar(int c)
+        {
+            return c >= 0x20 && c < 0x7f && c != '"' && c != '<' && c != '>' && c != '|' && c != '*' && c != '?' && c != ';';
+        }
+
+        static void CarveAscii(byte[] buf, int n, byte[] pattern, HashSet<string> sink)
+        {
+            int i = 0;
+            while (i <= n - 4)
+            {
+                i = Array.IndexOf(buf, pattern[0], i, n - 4 - i + 1);
+                if (i < 0) return;
+                if (buf[i + 1] == pattern[1] && buf[i + 2] == pattern[2] && buf[i + 3] == pattern[3])
+                {
+                    int s = i;
+                    while (s > 0 && i - s < 400 && PathChar(buf[s - 1])) s--;
+                    Keep(Encoding.ASCII.GetString(buf, s, i + 4 - s), sink);
+                }
+                i++;
+            }
+        }
+
+        static void CarveWide(byte[] buf, int n, byte[] pattern, HashSet<string> sink)
+        {
+            int i = 0;
+            while (i <= n - 8)
+            {
+                i = Array.IndexOf(buf, pattern[0], i, n - 8 - i + 1);
+                if (i < 0) return;
+                bool hit = true;
+                for (int k = 1; k < 8; k++)
+                {
+                    if (buf[i + k] != pattern[k] && !(k % 2 == 0 && buf[i + k] == char.ToUpperInvariant((char)pattern[k])))
+                    {
+                        hit = false;
+                        break;
+                    }
+                }
+                if (hit && (i & 1) == 0)
+                {
+                    int s = i;
+                    while (s > 1 && i - s < 800 && buf[s - 1] == 0 && PathChar(buf[s - 2])) s -= 2;
+                    Keep(Encoding.Unicode.GetString(buf, s, i + 8 - s), sink);
+                }
+                i++;
+            }
+        }
+
+        static readonly Regex Drive = new Regex(@"[A-Za-z]:[\\/]", RegexOptions.RightToLeft);
+
+        static void Keep(string raw, HashSet<string> sink)
+        {
+            var m = Drive.Match(raw);
+            if (!m.Success) return;
+            string path = raw.Substring(m.Index);
+            if (path.Contains("%"))
+            {
+                try { path = Uri.UnescapeDataString(path); } catch { }
+            }
+            path = path.Replace('/', '\\');
+            if (path.Length < 8 || path.Contains("\\\\") || path.Contains("..")) return;
+            if (sink.Count < MaxCarved) sink.Add(path);
+        }
+
+        public static bool Kill(int pid)
+        {
+            try
+            {
+                var p = Process.GetProcessById(pid);
+                p.Kill();
+                p.WaitForExit(5000);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+}
+
+```
+
+`src/JarScanner.cs`:
+
+```cs
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+
+namespace OrchardObliterator
+{
+    static class JarScanner
+    {
+        const int MaxDepth = 4;
+        const int MaxClasses = 12000;
+
+        static readonly Regex RandomSegment = new Regex(@"^(q?[0-9a-f]{16,}[ab]*|[Il1]{6,}|[ab]{7,}|[O0]{6,}|[Ѐ-ӿ一-鿿]{3,})$", RegexOptions.Compiled);
+        static readonly Regex HexToken = new Regex(@"q[0-9a-f]{12,}", RegexOptions.Compiled);
+        static readonly Regex Comments = new Regex(@"//[^\n]*|/\*.*?\*/", RegexOptions.Compiled | RegexOptions.Singleline);
+        static readonly Regex Spaces = new Regex(@"\s+", RegexOptions.Compiled);
+
+        public static Evidence InspectFile(string path)
+        {
+            string ext = Path.GetExtension(path).ToLowerInvariant();
+            string dirKey = null;
+            try
+            {
+                Zip directory;
+                long shift;
+                dirKey = DirectoryKey(path, ext, out directory, out shift);
+                Evidence seenBefore;
+                if (dirKey != null && byDirectory.TryGetValue(dirKey, out seenBefore))
+                    return CopyOf(seenBefore, path);
+                if (directory != null && !NeedsFullRead(path, directory, ext, shift))
+                {
+                    var skim = new Evidence(path);
+                    byDirectory[dirKey] = skim;
+                    return skim;
+                }
+            }
+            catch
+            {
+                dirKey = null;
+            }
+
+            var full = InspectWhole(path);
+            if (dirKey != null) byDirectory[dirKey] = full;
+            return full;
+        }
+
+        static readonly ConcurrentDictionary<string, Evidence> byDirectory = new ConcurrentDictionary<string, Evidence>();
+
+        static Evidence CopyOf(Evidence known, string path)
+        {
+            var copy = new Evidence(path);
+            copy.Notes.AddRange(known.Notes.Where(n => !n.StartsWith("same file as")));
+            if (known.Hits.Count > 0) copy.Notes.Add("same file as " + known.Source);
+            copy.Absorb(known, "");
+            return copy;
+        }
+
+        static string DirectoryKey(string path, string ext, out Zip directory, out long shift)
+        {
+            directory = null;
+            shift = 0;
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+            {
+                long len = fs.Length;
+                int tailLen = (int)Math.Min(len, 22 + 65535 + 64);
+                var tail = ReadAt(fs, len - tailLen, tailLen);
+                int eocd = -1;
+                for (int i = tail.Length - 22; i >= 0; i--)
+                    if (tail[i] == 'P' && tail[i + 1] == 'K' && tail[i + 2] == 5 && tail[i + 3] == 6) { eocd = i; break; }
+                if (eocd < 0) return null;
+
+                long dirSize = BitConverter.ToUInt32(tail, eocd + 12);
+                long dirOffset = BitConverter.ToUInt32(tail, eocd + 16);
+                if (dirSize == 0xFFFFFFFF || dirOffset == 0xFFFFFFFF || dirSize > 64L * 1024 * 1024) return null;
+
+                long eocdAt = len - tailLen + eocd;
+                long dirAt = eocdAt - dirSize;
+                if (dirAt < 0) return null;
+                var block = ReadAt(fs, dirAt, (int)(len - dirAt));
+                directory = Zip.Open(block);
+                shift = dirAt - dirOffset;
+                string shiftNote = dirAt != dirOffset ? "|shift" + (dirAt - dirOffset) : "";
+                return Sha256(block) + "|" + len + "|" + ext + shiftNote;
+            }
+        }
+
+        static bool NeedsFullRead(string path, Zip directory, string ext, long shift)
+        {
+            if (ext != ".jar" && ext != ".zip" && ext != ".disabled") return true;
+            int classes = 0, random = 0;
+            foreach (var item in directory.Items)
+            {
+                string n = item.Name;
+                if (n == "fabric.mod.json" || n == "quilt.mod.json" || n == "META-INF/mods.toml" || n == "META-INF/neoforge.mods.toml" || n == "mcmod.info")
+                    return true;
+                if (n.EndsWith(".mixins.json") || n.EndsWith(".accesswidener")) return true;
+                if (n.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) || n.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)) return true;
+                if (Fingerprints.NameTokens.Any(t => n.IndexOf(t, StringComparison.Ordinal) >= 0)) return true;
+                if (n.EndsWith(".class", StringComparison.OrdinalIgnoreCase))
+                {
+                    classes++;
+                    if (IsRandomPath(n)) random++;
+                }
+                if (n == "META-INF/MANIFEST.MF" && IsAgentManifest(path, item, shift)) return true;
+            }
+            return classes >= 30 && random * 10 >= classes * 6;
+        }
+
+        static bool IsAgentManifest(string path, ZipItem item, long shift)
+        {
+            if (item.Packed > 1024 * 1024 || shift != 0) return true;
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+            {
+                var head = ReadAt(fs, item.Offset, 30);
+                if (BitConverter.ToUInt32(head, 0) != 0x04034b50) return true;
+                long start = item.Offset + 30 + BitConverter.ToUInt16(head, 26) + BitConverter.ToUInt16(head, 28);
+                var packed = ReadAt(fs, start, (int)item.Packed);
+                string text;
+                if (item.Method == 0) text = Encoding.UTF8.GetString(packed);
+                else
+                {
+                    using (var inflate = new System.IO.Compression.DeflateStream(new MemoryStream(packed), System.IO.Compression.CompressionMode.Decompress))
+                    using (var r = new StreamReader(inflate, Encoding.UTF8))
+                        text = r.ReadToEnd();
+                }
+                return text.Contains("Premain-Class") || text.Contains("Agent-Class");
+            }
+        }
+
+        static byte[] ReadAt(FileStream fs, long offset, int count)
+        {
+            var buf = new byte[count];
+            fs.Seek(offset, SeekOrigin.Begin);
+            int off = 0;
+            while (off < count)
+            {
+                int got = fs.Read(buf, off, count - off);
+                if (got <= 0) break;
+                off += got;
+            }
+            return buf;
+        }
+
+        static Evidence InspectWhole(string path)
+        {
+            byte[] data;
+            try { data = ReadShared(path); }
+            catch (Exception e)
+            {
+                var ev = new Evidence(path);
+                ev.Notes.Add("unreadable: " + e.Message);
+                return ev;
+            }
+            string key = Sha256(data) + "|" + Path.GetExtension(path).ToLowerInvariant();
+            Evidence known;
+            if (bySha.TryGetValue(key, out known))
+            {
+                var copy = new Evidence(path);
+                copy.Notes.AddRange(known.Notes);
+                copy.Notes.Add("same file as " + known.Source);
+                copy.Absorb(known, "");
+                return copy;
+            }
+            var fresh = Inspect(data, path, Path.GetExtension(path), 0);
+            bySha[key] = fresh;
+            return fresh;
+        }
+
+        static readonly ConcurrentDictionary<string, Evidence> bySha = new ConcurrentDictionary<string, Evidence>();
+
+        public static byte[] ReadShared(string path)
+        {
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+            {
+                var buf = new byte[fs.Length];
+                int off = 0;
+                while (off < buf.Length)
+                {
+                    int got = fs.Read(buf, off, buf.Length - off);
+                    if (got <= 0) break;
+                    off += got;
+                }
+                return buf;
+            }
+        }
+
+        public static Evidence Inspect(byte[] data, string source, string extension, int depth)
+        {
+            var ev = new Evidence(source);
+            string sha = Sha256(data);
+            if (Fingerprints.KnownFiles.ContainsKey(sha))
+                ev.Add("hash", 100, "known build " + Fingerprints.KnownFiles[sha]);
+
+            var zip = Zip.Open(data);
+            if (zip == null)
+            {
+                RawTokenSweep(data, ev);
+                return ev;
+            }
+
+            Disguise(ev, zip, extension, depth);
+            Names(ev, zip);
+
+            var classes = zip.Items.Where(i => !i.IsDirectory && i.Name.EndsWith(".class", StringComparison.OrdinalIgnoreCase)).ToList();
+            int randomNames = classes.Count(c => IsRandomPath(c.Name));
+            bool hashedTree = classes.Count >= 30 && randomNames * 10 >= classes.Count * 6;
+
+            if (!LooksLikeMod(zip, ev, hashedTree))
+            {
+                NestedOnly(ev, zip, source, depth);
+                return ev;
+            }
+            Metadata(ev, zip);
+
+            var footprint = new HashSet<string>();
+            int mixins = 0;
+            var declared = MixinClasses(zip);
+            IEnumerable<ZipItem> mixinItems = declared.Count > 0
+                ? declared.Select(n => zip.Find(n)).Where(i => i != null)
+                : (hashedTree ? classes.Take(MaxClasses) : Enumerable.Empty<ZipItem>());
+            foreach (var item in mixinItems)
+            {
+                var cf = ClassFile.Parse(zip.Read(item));
+                if (cf == null || !cf.IsMixin) continue;
+                mixins++;
+                foreach (var f in cf.Footprint()) footprint.Add(f);
+            }
+            Footprint(ev, footprint, mixins);
+
+            foreach (var item in zip.Items)
+            {
+                if (item.IsDirectory || item.Size < 64 || item.Size > 64L * 1024 * 1024) continue;
+                if (item.Name.EndsWith(".class", StringComparison.OrdinalIgnoreCase)) continue;
+                var head = zip.Peek(item, 4);
+                if (head == null || head.Length < 4 || head[0] != 'P' || head[1] != 'K' || head[2] != 3 || head[3] != 4) continue;
+                if (depth >= MaxDepth) continue;
+                var bytes = zip.Read(item);
+                if (bytes == null) continue;
+                var child = Inspect(bytes, source + "!/" + item.Name, Path.GetExtension(item.Name), depth + 1);
+                if (child.Hits.Count == 0) continue;
+                if (!item.Name.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) && !item.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                    ev.Add("hiding", 15, "jar stored under a fake name: " + item.Name);
+                ev.Absorb(child, "inside " + item.Name + ": ");
+            }
+
+            if (hashedTree || ev.Hits.Any(h => Evidence.IsOrchardOnly(h.Kind)))
+                Corroborate(ev, zip, classes, randomNames, hashedTree);
+            return ev;
+        }
+
+        static List<string> MixinClasses(Zip zip)
+        {
+            var found = new List<string>();
+            int configs = 0;
+            foreach (var item in zip.Items)
+            {
+                if (!item.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase) || item.Size > 256 * 1024) continue;
+                if (item.Name.StartsWith("assets/") || item.Name.StartsWith("data/")) continue;
+                if (++configs > 64) break;
+                var text = zip.ReadText(item);
+                if (text == null) continue;
+                var pkg = Regex.Match(text, "\"package\"\\s*:\\s*\"([^\"]+)\"");
+                if (!pkg.Success) continue;
+                string prefix = pkg.Groups[1].Value.Replace('.', '/') + "/";
+                foreach (Match arr in Regex.Matches(text, "\"(?:mixins|client|server)\"\\s*:\\s*\\[([^\\]]*)\\]"))
+                    foreach (Match name in Regex.Matches(arr.Groups[1].Value, "\"([^\"]+)\""))
+                        found.Add(prefix + name.Groups[1].Value.Replace('.', '/') + ".class");
+            }
+            return found;
+        }
+
+        static void Corroborate(Evidence ev, Zip zip, List<ZipItem> classes, int randomNames, bool hashedTree)
+        {
+            int encrypted = 0;
+            var watermarks = new HashSet<string>();
+            var fakeSmap = new HashSet<string>();
+            var loaderApis = new HashSet<string>();
+
+            foreach (var item in classes.Take(MaxClasses))
+            {
+                var cf = ClassFile.Parse(zip.Read(item));
+                if (cf == null) continue;
+
+                if (cf.DebugExtension != null && !cf.DebugExtension.StartsWith("SMAP"))
+                {
+                    string tag = cf.DebugExtension.Trim();
+                    if (tag.Length > 40) tag = tag.Substring(0, 40);
+                    if (Fingerprints.Watermarks.Contains(tag)) watermarks.Add(tag);
+                    else fakeSmap.Add(tag);
+                }
+
+                bool st = false, cn = false, iso = false;
+                foreach (var s in cf.Strings)
+                {
+                    if (s == "getStackTrace") st = true;
+                    else if (s == "getClassName") cn = true;
+                    else if (s == "ISO-8859-1") iso = true;
+                    else if (Fingerprints.LoaderApis.Contains(s)) loaderApis.Add(s);
+                }
+                if (st && cn && iso) encrypted++;
+            }
+
+            if (hashedTree)
+                ev.Add("packer", 30, string.Format("hash-renamed class tree ({0} of {1} classes)", randomNames, classes.Count));
+            foreach (var w in watermarks)
+                ev.Add("packer", 25, "obfuscator watermark \"" + w + "\"");
+            if (fakeSmap.Count > 0)
+                ev.Add("packer", 15, "junk SourceDebugExtension in place of SMAP (" + string.Join(", ", fakeSmap.Take(3)) + ")");
+            if (encrypted >= 10 && encrypted * 5 >= classes.Count)
+                ev.Add("packer", 20, string.Format("stack-trace keyed string encryption in {0} classes", encrypted));
+            if (loaderApis.Count > 0 && HasModMeta(zip))
+                ev.Add("hiding", 10, "runtime class loading APIs: " + string.Join(", ", loaderApis));
+
+            bool corroborated = ev.Hits.Any(h => Evidence.IsOrchardOnly(h.Kind));
+            Dictionary<string, bool> classHashes = null;
+            var fileLevel = new Dictionary<string, string>();
+            int assetHits = 0, blobs = 0, biggestSize = 0;
+            string biggest = null;
+            foreach (var item in zip.Items)
+            {
+                if (item.IsDirectory || item.Name.EndsWith(".class", StringComparison.OrdinalIgnoreCase)) continue;
+                if (item.Size > 4L * 1024 * 1024) continue;
+                var bytes = zip.Read(item);
+                if (bytes == null) continue;
+
+                if (bytes.Length >= 680 && bytes.Length % 68 == 0 && IsHex(bytes, 0, 64))
+                {
+                    if (classHashes == null) classHashes = HashClasses(zip, classes);
+                    IntegrityTable(ev, item.Name, bytes, classHashes, classes.Count);
+                }
+
+                foreach (var key in AssetKeys(item.Name, bytes, corroborated))
+                {
+                    string label;
+                    if (Fingerprints.Assets.TryGetValue(key, out label) && !fileLevel.ContainsKey(label))
+                    {
+                        fileLevel[label] = item.Name;
+                        assetHits++;
+                    }
+                }
+
+                if (bytes.Length >= 32 * 1024 && IsOpaque(item.Name) && Entropy(bytes) > 7.95)
+                {
+                    blobs++;
+                    if (biggest == null || bytes.Length > biggestSize) { biggest = item.Name; biggestSize = bytes.Length; }
+                }
+            }
+
+            if (assetHits > 0)
+            {
+                var sample = fileLevel.First();
+                ev.Add("asset", Math.Min(corroborated ? 80 : 30, assetHits * 20), string.Format("{0} Orchard assets matched by content (e.g. {1} stored as {2})", assetHits, sample.Key, sample.Value));
+            }
+            if (blobs > 0)
+                ev.Add("hiding", blobs >= 5 ? 20 : 10, string.Format("{0} encrypted-looking blob(s), largest {1} ({2:N0} bytes)", blobs, biggest, biggestSize));
+        }
+
+        static bool HasModMeta(Zip zip)
+        {
+            return zip.Find("fabric.mod.json") != null || zip.Find("quilt.mod.json") != null
+                   || zip.Find("META-INF/mods.toml") != null || zip.Find("META-INF/neoforge.mods.toml") != null;
+        }
+
+        static bool LooksLikeMod(Zip zip, Evidence ev, bool hashedTree)
+        {
+            if (hashedTree || zip.Shift > 0 || ev.Hits.Any(h => h.Kind != "hiding")) return true;
+            foreach (var item in zip.Items)
+            {
+                string n = item.Name;
+                if (n == "fabric.mod.json" || n == "quilt.mod.json" || n == "META-INF/mods.toml" || n == "META-INF/neoforge.mods.toml" || n == "mcmod.info")
+                    return true;
+                if (n.EndsWith(".mixins.json") || n.EndsWith(".accesswidener")) return true;
+            }
+            var manifest = zip.ReadText(zip.Find("META-INF/MANIFEST.MF"));
+            if (manifest != null && (manifest.Contains("Premain-Class") || manifest.Contains("Agent-Class") || manifest.Contains("Launcher-Agent-Class")))
+            {
+                ev.Notes.Add("java agent jar (" + Regex.Match(manifest, @"(Premain|Agent|Launcher-Agent)-Class:\s*(\S+)").Value + ")");
+                return true;
+            }
+            return false;
+        }
+
+        static void NestedOnly(Evidence ev, Zip zip, string source, int depth)
+        {
+            if (depth >= MaxDepth) return;
+            foreach (var item in zip.Items)
+            {
+                if (!item.Name.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) || item.Size > 64L * 1024 * 1024) continue;
+                var bytes = zip.Read(item);
+                if (bytes == null) continue;
+                var child = Inspect(bytes, source + "!/" + item.Name, ".jar", depth + 1);
+                if (child.Hits.Count > 0) ev.Absorb(child, "inside " + item.Name + ": ");
+            }
+        }
+
+        static void Disguise(Evidence ev, Zip zip, string extension, int depth)
+        {
+            var ex = (extension ?? "").ToLowerInvariant();
+            if (depth == 0 && ex != ".jar" && ex != ".zip")
+                ev.Add("hiding", 10, "archive wearing a " + (ex.Length == 0 ? "blank" : ex) + " extension");
+            if (zip.Shift > 0)
+                ev.Add("hiding", 15, string.Format("archive starts {0:N0} bytes into the file (polyglot)", zip.Shift));
+            int dupes = zip.Items.Count - zip.Items.Select(i => i.Name).Distinct().Count();
+            if (dupes > 0)
+                ev.Add("hiding", 10, dupes + " duplicate entry names (anti-unzip trick)");
+        }
+
+        static void Names(Evidence ev, Zip zip)
+        {
+            foreach (var token in Fingerprints.NameTokens)
+            {
+                int n = zip.Items.Count(i => i.Name.IndexOf(token, StringComparison.Ordinal) >= 0);
+                if (n > 0) ev.Add("namespace", 35, string.Format("Orchard namespace {0}… ({1} entries)", token.Substring(0, 12), n));
+            }
+        }
+
+        static void Metadata(Evidence ev, Zip zip)
+        {
+            foreach (var metaName in new[] { "fabric.mod.json", "quilt.mod.json" })
+            {
+                var text = zip.ReadText(zip.Find(metaName));
+                if (text == null) continue;
+
+                var id = Regex.Match(text, "\"id\"\\s*:\\s*\"([^\"]*)\"");
+                var ver = Regex.Match(text, "\"version\"\\s*:\\s*\"([^\"]*)\"");
+                var name = Regex.Match(text, "\"name\"\\s*:\\s*\"([^\"]*)\"");
+                ev.Notes.Add(string.Format("{0}: id={1} name={2} version={3}", metaName,
+                    id.Success ? id.Groups[1].Value : "?", name.Success ? name.Groups[1].Value : "?", ver.Success ? ver.Groups[1].Value : "?"));
+
+                if (id.Success && id.Groups[1].Value.ToLowerInvariant().Contains("orchard"))
+                    ev.Add("meta", 40, "mod id \"" + id.Groups[1].Value + "\"");
+                if (name.Success && name.Groups[1].Value.ToLowerInvariant().Contains("orchard"))
+                    ev.Add("meta", 20, "mod name \"" + name.Groups[1].Value + "\"");
+                if (text.Contains("orchard_build") || text.Contains("orchard_subversion"))
+                    ev.Add("meta", 50, "orchard_build custom field");
+                if (text.IndexOf("LicenseRef-Orchard", StringComparison.OrdinalIgnoreCase) >= 0)
+                    ev.Add("meta", 50, "LicenseRef-Orchard license tag");
+
+                var entry = Regex.Match(text, "\"(?:client|main)\"\\s*:\\s*\\[\\s*\"([^\"]+)\"");
+                if (entry.Success && entry.Groups[1].Value.Split('.').Count(s => RandomSegment.IsMatch(s)) >= 2)
+                    ev.Add("packer", 10, "entrypoint is a hashed name");
+            }
+
+            foreach (var item in zip.Items)
+            {
+                if (!Regex.IsMatch(item.Name, @"^assets/[^/]+/lang/[^/]+\.json$")) continue;
+                var text = zip.ReadText(item);
+                if (text == null) continue;
+                if (text.Contains("key.nsc.profile_") || text.Contains("\"key.nsc.panel\""))
+                    ev.Add("lang", 40, "Orchard keybind table (key.nsc.*) in " + item.Name);
+            }
+        }
+
+        internal static void Footprint(Evidence ev, HashSet<string> footprint, int mixins)
+        {
+            if (footprint.Count == 0) return;
+            var reference = Fingerprints.Footprint;
+            int shared = footprint.Count(f => reference.Contains(f));
+            double ratio = reference.Count == 0 ? 0 : (double)shared / reference.Count;
+
+            int weight = ratio >= 0.70 ? 100 : ratio >= 0.50 ? 60 : 0;
+            if (weight > 0)
+                ev.Add("footprint", weight, string.Format("mixin footprint matches Orchard {0:P0} ({1}/{2} hooks, {3} mixins)", ratio, shared, reference.Count, mixins));
+
+            foreach (var kv in Fingerprints.StealthHooks)
+                if (footprint.Contains(kv.Key)) ev.Add("stealth", 15, kv.Value);
+            foreach (var kv in Fingerprints.CombatHooks)
+                if (footprint.Contains(kv.Key)) ev.Add("combat", 8, kv.Value);
+        }
+
+        static void IntegrityTable(Evidence ev, string name, byte[] table, Dictionary<string, bool> classHashes, int classCount)
+        {
+            int records = table.Length / 68, matched = 0;
+            for (int i = 0; i < records; i++)
+            {
+                if (!IsHex(table, i * 68, 64)) return;
+                if (classHashes.ContainsKey(Encoding.ASCII.GetString(table, i * 68, 64))) matched++;
+            }
+            if (matched >= 10)
+                ev.Add("integrity", 70, string.Format("self-integrity table {0}: {1} of {2} classes pinned by SHA-256", name, matched, classCount));
+            else
+                ev.Add("integrity", 35, string.Format("integrity table layout in {0} ({1} records)", name, records));
+        }
+
+        static Dictionary<string, bool> HashClasses(Zip zip, List<ZipItem> classes)
+        {
+            var map = new Dictionary<string, bool>();
+            foreach (var c in classes)
+            {
+                var b = zip.Read(c);
+                if (b != null) map[Sha256(b)] = true;
+            }
+            return map;
+        }
+
+        static void RawTokenSweep(byte[] data, Evidence ev)
+        {
+            foreach (var token in Fingerprints.NameTokens)
+                if (IndexOf(data, Encoding.ASCII.GetBytes(token), 0) >= 0)
+                    ev.Add("namespace", 35, "Orchard namespace " + token.Substring(0, 12) + "… in unparseable archive");
+        }
+
+        public static IEnumerable<string> AssetKeys(string name, byte[] bytes, bool decode)
+        {
+            yield return "sha:" + Sha256(bytes);
+            if (!decode) yield break;
+            string lower = name.ToLowerInvariant();
+            if (lower.EndsWith(".png"))
+            {
+                var px = PixelHash(bytes);
+                if (px != null) yield return "px:" + px;
+            }
+            else if (lower.EndsWith(".fsh") || lower.EndsWith(".vsh") || lower.EndsWith(".glsl") || lower.EndsWith(".json"))
+            {
+                yield return "txt:" + NormalizedHash(bytes);
+            }
+        }
+
+        static string NormalizedHash(byte[] bytes)
+        {
+            string text = Encoding.UTF8.GetString(bytes);
+            text = Comments.Replace(text, "");
+            text = HexToken.Replace(text, "#");
+            text = Spaces.Replace(text, "");
+            return Sha256(Encoding.UTF8.GetBytes(text));
+        }
+
+        static string PixelHash(byte[] png)
+        {
+            try
+            {
+                using (var ms = new MemoryStream(png))
+                using (var src = new Bitmap(ms))
+                using (var bmp = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb))
+                {
+                    using (var g = Graphics.FromImage(bmp))
+                    {
+                        g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                        g.DrawImage(src, 0, 0, src.Width, src.Height);
+                    }
+                    var rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+                    var lk = bmp.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                    try
+                    {
+                        int row = bmp.Width * 4;
+                        var pixels = new byte[row * bmp.Height + 8];
+                        BitConverter.GetBytes(bmp.Width).CopyTo(pixels, 0);
+                        BitConverter.GetBytes(bmp.Height).CopyTo(pixels, 4);
+                        for (int y = 0; y < bmp.Height; y++)
+                            Marshal.Copy(lk.Scan0 + y * lk.Stride, pixels, 8 + y * row, row);
+                        return Sha256(pixels);
+                    }
+                    finally
+                    {
+                        bmp.UnlockBits(lk);
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        static bool IsRandomPath(string name)
+        {
+            var parts = name.Substring(0, name.Length - 6).Split('/');
+            return parts.Length > 0 && parts.All(s => RandomSegment.IsMatch(s));
+        }
+
+        static bool IsOpaque(string name)
+        {
+            string e = Path.GetExtension(name).ToLowerInvariant();
+            return e != ".png" && e != ".ogg" && e != ".jpg" && e != ".gz" && e != ".zip" && e != ".jar" && e != ".ttf" && e != ".otf" && e != ".nbt" && e != ".so" && e != ".dll" && e != ".dylib";
+        }
+
+        static bool IsHex(byte[] b, int start, int len)
+        {
+            if (start + len > b.Length) return false;
+            for (int i = start; i < start + len; i++)
+            {
+                byte c = b[i];
+                if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))) return false;
+            }
+            return true;
+        }
+
+        static double Entropy(byte[] b)
+        {
+            var counts = new int[256];
+            foreach (var x in b) counts[x]++;
+            double e = 0;
+            foreach (var c in counts)
+            {
+                if (c == 0) continue;
+                double p = (double)c / b.Length;
+                e -= p * Math.Log(p, 2);
+            }
+            return e;
+        }
+
+        public static int IndexOf(byte[] hay, byte[] needle, int start)
+        {
+            int last = hay.Length - needle.Length;
+            byte first = needle[0];
+            for (int i = start; i <= last; i++)
+            {
+                i = Array.IndexOf(hay, first, i, last - i + 1);
+                if (i < 0) return -1;
+                int k = 1;
+                while (k < needle.Length && hay[i + k] == needle[k]) k++;
+                if (k == needle.Length) return i;
+            }
+            return -1;
+        }
+
+        public static string Sha256(byte[] data)
+        {
+            using (var sha = SHA256.Create())
+            {
+                var h = sha.ComputeHash(data);
+                var sb = new StringBuilder(64);
+                foreach (var x in h) sb.Append(x.ToString("x2"));
+                return sb.ToString();
+            }
+        }
+
+        public static void DumpFingerprint(string path, TextWriter w)
+        {
+            var data = ReadShared(path);
+            var zip = Zip.Open(data);
+            if (zip == null)
+            {
+                w.WriteLine("not an archive");
+                return;
+            }
+            w.WriteLine("file " + Sha256(data));
+            var footprint = new SortedSet<string>(StringComparer.Ordinal);
+            foreach (var item in zip.Items)
+            {
+                if (item.IsDirectory) continue;
+                var bytes = zip.Read(item);
+                if (bytes == null) continue;
+                if (item.Name.EndsWith(".class"))
+                {
+                    var cf = ClassFile.Parse(bytes);
+                    if (cf != null && cf.IsMixin) foreach (var f in cf.Footprint()) footprint.Add(f);
+                    continue;
+                }
+                if (item.Name.StartsWith("META-INF/") || item.Name.EndsWith(".mod.json") || item.Name.EndsWith(".mixins.json")) continue;
+                if (item.Name.EndsWith("ofl.txt") || item.Name.EndsWith("/lang/en_us.json") || item.Name.EndsWith("sounds.json")) continue;
+                if (bytes.Length < 512) continue;
+                string tail = item.Name.Substring(item.Name.LastIndexOf('/') + 1);
+                foreach (var key in AssetKeys(item.Name, bytes, true))
+                    w.WriteLine("asset " + key + " " + Path.GetExtension(tail).TrimStart('.') + ":" + tail.Substring(0, Math.Min(9, tail.Length)));
+            }
+            foreach (var f in footprint) w.WriteLine("hook " + f);
+        }
+    }
+}
+
+```
+
+`src/Locations.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+namespace OrchardObliterator
+{
+    static class Locations
+    {
+        static readonly string AppData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+        static readonly string[] SkipDirs =
+        {
+            "\\windows\\", "\\windowsapps\\", "\\system volume information\\", "\\$recycle.bin\\",
+            "\\$windows.~bt\\", "\\$winreagent\\", "\\assets\\objects\\", "\\node_modules\\", "\\.git\\",
+            "\\saves\\", "\\.bobby\\", "\\xaero", "\\.voxy\\", "\\replay_recordings\\", "\\distant_horizons",
+            "\\webcache2\\", "\\gpucache\\", "\\flashback\\"
+        };
+
+        static readonly HashSet<string> DeadEnds = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "node_modules", ".git", ".gradle", ".m2", ".cargo", ".rustup", ".nuget", "saves", ".bobby", ".voxy",
+            "objects", "replay_recordings", "webcache2", "gpucache", "winsxs", "$recycle.bin", "windowsapps",
+            "system volume information", "$windows.~bt", "$winreagent", "assets", "libraries", "jre", "runtime"
+        };
+
+        static readonly string[] LauncherConfigs = { "prismlauncher.cfg", "polymc.cfg", "multimc.cfg", "pollymc.cfg", "ultimmc.cfg" };
+
+        static List<string> discovered;
+
+        public static List<string> GameDirs()
+        {
+            var dirs = new List<string>();
+            foreach (var d in Discover()) Add(dirs, d);
+            Add(dirs, Path.Combine(AppData, ".minecraft"));
+            Add(dirs, Path.Combine(AppData, ".tlauncher"));
+            Add(dirs, Path.Combine(AppData, ".feather"));
+            Add(dirs, Path.Combine(Home, ".lunarclient"));
+            Add(dirs, Path.Combine(AppData, ".technic", "modpacks"));
+
+            foreach (var root in new[]
+            {
+                Path.Combine(AppData, "PrismLauncher", "instances"),
+                Path.Combine(AppData, "PolyMC", "instances"),
+                Path.Combine(AppData, "MultiMC", "instances"),
+                Path.Combine(AppData, "ModrinthApp", "profiles"),
+                Path.Combine(AppData, "com.modrinth.theseus", "profiles"),
+                Path.Combine(Home, "curseforge", "minecraft", "Instances"),
+                Path.Combine(AppData, "ATLauncher", "instances"),
+                Path.Combine(AppData, "gdlauncher_next", "instances"),
+                Path.Combine(AppData, "gdlauncher_carbon", "data", "instances")
+            })
+            {
+                if (!Directory.Exists(root)) continue;
+                foreach (var d in SafeDirs(root))
+                {
+                    if (Directory.Exists(Path.Combine(d, ".minecraft"))) Add(dirs, Path.Combine(d, ".minecraft"));
+                    else if (Directory.Exists(Path.Combine(d, "minecraft"))) Add(dirs, Path.Combine(d, "minecraft"));
+                    else Add(dirs, d);
+                }
+            }
+            return dirs;
+        }
+
+        public static List<string> Discover()
+        {
+            if (discovered != null) return discovered;
+            discovered = new List<string>();
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            string local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var instanceRoots = new List<string>();
+
+            var roots = new List<KeyValuePair<string, int>>
+            {
+                new KeyValuePair<string, int>(AppData, 7),
+                new KeyValuePair<string, int>(local, 7),
+                new KeyValuePair<string, int>(Home, 7)
+            };
+            foreach (var drive in FixedDrives()) roots.Add(new KeyValuePair<string, int>(drive, 6));
+
+            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var root in roots)
+            {
+                var stack = new Stack<KeyValuePair<string, int>>();
+                stack.Push(root);
+                while (stack.Count > 0 && visited.Count < 600000 && sw.Elapsed.TotalSeconds < 45)
+                {
+                    var cur = stack.Pop();
+                    if (!visited.Add(cur.Key)) continue;
+                    if (visited.Count % 2000 == 0) Report.Progress("  looking for game folders: " + cur.Key);
+
+                    if (IsGameDir(cur.Key)) Add(discovered, cur.Key);
+                    foreach (var cfg in LauncherConfigs)
+                    {
+                        string path = Path.Combine(cur.Key, cfg);
+                        if (File.Exists(path)) instanceRoots.AddRange(InstanceDirsFrom(path));
+                    }
+
+                    if (cur.Value <= 0) continue;
+                    string[] subs;
+                    try { subs = Directory.GetDirectories(cur.Key); } catch { continue; }
+                    foreach (var s in subs)
+                    {
+                        string leaf = Path.GetFileName(s);
+                        if (DeadEnds.Contains(leaf)) continue;
+                        if (cur.Key.Length <= 3 && (leaf.Equals("Windows", StringComparison.OrdinalIgnoreCase) || leaf.Equals("Users", StringComparison.OrdinalIgnoreCase))) continue;
+                        try
+                        {
+                            if ((File.GetAttributes(s) & FileAttributes.ReparsePoint) != 0) continue;
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                        stack.Push(new KeyValuePair<string, int>(s, cur.Value - 1));
+                    }
+                }
+            }
+
+            foreach (var root in instanceRoots.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                foreach (var d in SafeDirs(root))
+                {
+                    foreach (var c in new[] { Path.Combine(d, ".minecraft"), Path.Combine(d, "minecraft"), d })
+                        if (IsGameDir(c)) { Add(discovered, c); break; }
+                }
+            }
+            Report.ClearProgress();
+            return discovered;
+        }
+
+        static bool IsGameDir(string dir)
+        {
+            try
+            {
+                if (!Directory.Exists(Path.Combine(dir, "mods"))) return false;
+                string leaf = Path.GetFileName(dir).ToLowerInvariant();
+                return leaf == ".minecraft" || leaf == "minecraft"
+                       || File.Exists(Path.Combine(dir, "options.txt"))
+                       || Directory.Exists(Path.Combine(dir, "config"))
+                       || Directory.Exists(Path.Combine(dir, "logs"))
+                       || Directory.Exists(Path.Combine(dir, "saves"));
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        static IEnumerable<string> InstanceDirsFrom(string cfg)
+        {
+            var found = new List<string>();
+            string baseDir = Path.GetDirectoryName(cfg);
+            try
+            {
+                foreach (var line in File.ReadAllLines(cfg))
+                {
+                    if (!line.StartsWith("InstanceDir=", StringComparison.OrdinalIgnoreCase)) continue;
+                    string v = line.Substring(12).Trim().Trim('"');
+                    if (v.Length == 0) continue;
+                    found.Add(Path.IsPathRooted(v) ? v : Path.Combine(baseDir, v));
+                }
+            }
+            catch
+            {
+            }
+            found.Add(Path.Combine(baseDir, "instances"));
+            return found.Where(Directory.Exists);
+        }
+
+        public static List<string> LooseDirs()
+        {
+            var list = new List<string>();
+            Add(list, Path.Combine(Home, "Downloads"));
+            Add(list, Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
+            Add(list, Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+            Add(list, Path.GetTempPath());
+            Add(list, Path.Combine(AppData, "..", "LocalLow"));
+            return list;
+        }
+
+        static void Add(List<string> list, string path)
+        {
+            try
+            {
+                path = Path.GetFullPath(path).TrimEnd('\\');
+                if (Directory.Exists(path) && !list.Any(p => string.Equals(p, path, StringComparison.OrdinalIgnoreCase)))
+                    list.Add(path);
+            }
+            catch
+            {
+            }
+        }
+
+        public static void AddUnique(List<string> list, string path)
+        {
+            Add(list, path);
+        }
+
+        static IEnumerable<string> SafeDirs(string root)
+        {
+            try { return Directory.GetDirectories(root); }
+            catch { return new string[0]; }
+        }
+
+        public static IEnumerable<string> Walk(string root, int maxDepth)
+        {
+            var stack = new Stack<KeyValuePair<string, int>>();
+            stack.Push(new KeyValuePair<string, int>(root, 0));
+            while (stack.Count > 0)
+            {
+                var cur = stack.Pop();
+                string dir = cur.Key;
+                string probe = dir.ToLowerInvariant() + "\\";
+                if (SkipDirs.Any(s => probe.Contains(s)) && cur.Value > 0) continue;
+
+                string[] files = null, subs = null;
+                try { files = Directory.GetFiles(dir); } catch { }
+                try { subs = Directory.GetDirectories(dir); } catch { }
+
+                if (files != null)
+                    foreach (var f in files) yield return f;
+
+                if (subs == null || cur.Value >= maxDepth) continue;
+                foreach (var s in subs)
+                {
+                    try
+                    {
+                        var attr = File.GetAttributes(s);
+                        if ((attr & FileAttributes.ReparsePoint) != 0)
+                        {
+                            ReparsePoints.Add(s);
+                            continue;
+                        }
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    stack.Push(new KeyValuePair<string, int>(s, cur.Value + 1));
+                }
+            }
+        }
+
+        public static readonly List<string> ReparsePoints = new List<string>();
+
+        public static bool IsArchive(string path, long minSize, long maxSize)
+        {
+            try
+            {
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+                {
+                    if (fs.Length < minSize || fs.Length > maxSize) return false;
+                    var head = new byte[4];
+                    int h = fs.Read(head, 0, 4);
+                    if (h == 4 && head[0] == 'P' && head[1] == 'K' && head[2] == 3 && head[3] == 4) return true;
+
+                    int tailLen = (int)Math.Min(fs.Length, 1024);
+                    var tail = new byte[tailLen];
+                    fs.Seek(-tailLen, SeekOrigin.End);
+                    int t = 0;
+                    while (t < tailLen)
+                    {
+                        int got = fs.Read(tail, t, tailLen - t);
+                        if (got <= 0) break;
+                        t += got;
+                    }
+                    return Zip.LooksLikeZip(head, h, tail, t);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static IEnumerable<string> FixedDrives()
+        {
+            foreach (var d in DriveInfo.GetDrives())
+            {
+                bool ok = false;
+                try { ok = d.IsReady && (d.DriveType == DriveType.Fixed || d.DriveType == DriveType.Removable); } catch { }
+                if (ok) yield return d.RootDirectory.FullName;
+            }
+        }
+    }
+}
+
+```
+
+`src/Native.cs`:
+
+```cs
+using System;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
+
+namespace OrchardObliterator
+{
+    static class Native
+    {
+        public const uint PROCESS_VM_READ = 0x0010;
+        public const uint PROCESS_QUERY_INFORMATION = 0x0400;
+        public const uint PROCESS_TERMINATE = 0x0001;
+        public const uint MEM_COMMIT = 0x1000;
+        public const uint PAGE_NOACCESS = 0x01;
+        public const uint PAGE_GUARD = 0x100;
+
+        public const uint GENERIC_READ = 0x80000000;
+        public const uint FILE_SHARE_READ = 1;
+        public const uint FILE_SHARE_WRITE = 2;
+        public const uint FILE_SHARE_DELETE = 4;
+        public const uint OPEN_EXISTING = 3;
+
+        public const uint FSCTL_QUERY_USN_JOURNAL = 0x000900f4;
+        public const uint FSCTL_READ_USN_JOURNAL = 0x000900bb;
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MemoryInfo
+        {
+            public IntPtr BaseAddress;
+            public IntPtr AllocationBase;
+            public uint AllocationProtect;
+            public IntPtr RegionSize;
+            public uint State;
+            public uint Protect;
+            public uint Type;
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern IntPtr OpenProcess(uint access, bool inherit, int pid);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool CloseHandle(IntPtr handle);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern IntPtr VirtualQueryEx(IntPtr process, IntPtr address, out MemoryInfo info, IntPtr length);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool ReadProcessMemory(IntPtr process, IntPtr address, byte[] buffer, IntPtr size, out IntPtr read);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern SafeFileHandle CreateFile(string name, uint access, uint share, IntPtr security, uint disposition, uint flags, IntPtr template);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool DeviceIoControl(SafeFileHandle device, uint code, byte[] input, int inputSize, byte[] output, int outputSize, out int returned, IntPtr overlapped);
+
+        [DllImport("ntdll.dll")]
+        public static extern uint RtlGetCompressionWorkSpaceSize(ushort format, out uint bufferWorkspace, out uint fragmentWorkspace);
+
+        [DllImport("ntdll.dll")]
+        public static extern uint RtlDecompressBufferEx(ushort format, byte[] output, int outputSize, byte[] input, int inputSize, out int finalSize, byte[] workspace);
+    }
+}
+
+```
+
+`src/Program.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
+
+namespace OrchardObliterator
+{
+    static class Program
+    {
+        static bool deep, block, guard, noMemory, verbose, only;
+        static int days = 30;
+        static string reportPath;
+        static readonly List<string> extraPaths = new List<string>();
+
+        static readonly Dictionary<string, Evidence> probed = new Dictionary<string, Evidence>(StringComparer.OrdinalIgnoreCase);
+        static readonly List<GameProcess> live = new List<GameProcess>();
+        static readonly List<string> missingLoaded = new List<string>();
+
+        static int Main(string[] args)
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            try { Console.Title = "Orchard Obliterator"; } catch { }
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i].ToLowerInvariant())
+                {
+                    case "--deep": deep = true; break;
+                    case "--block": block = true; break;
+                    case "--guard": guard = true; block = true; break;
+                    case "--no-mem": noMemory = true; break;
+                    case "--only": only = true; break;
+                    case "--verbose": case "-v": verbose = true; break;
+                    case "--quiet": Report.Quiet = true; break;
+                    case "--path": if (i + 1 < args.Length) extraPaths.Add(args[++i]); break;
+                    case "--days": if (i + 1 < args.Length) int.TryParse(args[++i], out days); break;
+                    case "--out": if (i + 1 < args.Length) reportPath = args[++i]; break;
+                    case "--fingerprint":
+                        Fingerprints.Load();
+                        JarScanner.DumpFingerprint(args[i + 1], Console.Out);
+                        return 0;
+                    case "--help": case "-h": case "/?":
+                        Usage();
+                        return 0;
+                    default:
+                        if (File.Exists(args[i]) || Directory.Exists(args[i])) extraPaths.Add(args[i]);
+                        else { Console.Error.WriteLine("unknown option " + args[i]); Usage(); return 64; }
+                        break;
+                }
+            }
+
+            Banner();
+            Fingerprints.Load();
+            Report.Dim(string.Format("signatures: {0} ({1} hooks, {2} assets, {3} memory)", Fingerprints.LoadedFrom, Fingerprints.Footprint.Count, Fingerprints.Assets.Count, Fingerprints.Memory.Count));
+            bool admin = Traces.IsAdmin();
+            if (!admin) Report.Warn("not elevated: prefetch, USN journal and elevated games are skipped. Run as admin for the full sweep.");
+
+            var clock = Stopwatch.StartNew();
+            Scan(admin);
+            int code = Summary();
+            Report.Dim(string.Format("took {0:0.0}s", clock.Elapsed.TotalSeconds));
+
+            if (block) Obliterate();
+            string saved = Report.Save(reportPath);
+            Report.Dim("report saved to " + saved);
+
+            if (guard) Guard.Run(probed, Probe);
+            return code;
+        }
+
+        static void Usage()
+        {
+            Console.WriteLine("OrchardObliterator [options] [file|folder ...]");
+            Console.WriteLine();
+            Console.WriteLine("  --deep            sweep every fixed drive for archives, any extension");
+            Console.WriteLine("  --block           kill the game and quarantine Orchard jars it finds");
+            Console.WriteLine("  --guard           stay running, watch game folders and new java processes, block on sight");
+            Console.WriteLine("  --no-mem          skip reading java process memory");
+            Console.WriteLine("  --path <p>        also scan this file or folder (repeatable)");
+            Console.WriteLine("  --only            scan just the --path targets, skip the rest");
+            Console.WriteLine("  --days <n>        how far back to read the USN journal (default 30)");
+            Console.WriteLine("  --out <file>      where to write the report");
+            Console.WriteLine("  --verbose         list clean archives too");
+            Console.WriteLine("  --fingerprint <f> print hooks/asset keys of a sample, for orchard.sig");
+        }
+
+        static void Banner()
+        {
+            Report.Section("Orchard Obliterator 1.0");
+            Report.Dim(string.Format("{0} / {1} / {2:yyyy-MM-dd HH:mm:ss}", Environment.MachineName, Environment.UserName, DateTime.Now));
+        }
+
+        static void Scan(bool admin)
+        {
+            var gameDirs = only ? new List<string>() : Locations.GameDirs();
+
+            Report.Section("Running game");
+            var procs = Hunter.FindJava();
+            if (procs.Count == 0) Report.Info("no java processes running");
+            foreach (var gp in procs)
+            {
+                live.Add(gp);
+                Report.Info(string.Format("{0} pid {1}{2}", gp.Name, gp.Pid, gp.Fabric ? " (fabric)" : ""));
+                if (!string.IsNullOrEmpty(gp.GameDir))
+                {
+                    Report.Dim("gameDir " + gp.GameDir);
+                    Locations.AddUnique(gameDirs, gp.GameDir);
+                }
+                if (verbose) foreach (var f in gp.Flags) Report.Dim(f);
+
+                if (!noMemory)
+                {
+                    Hunter.Inspect(gp);
+                    if (gp.Denied) Report.Warn("could not open process memory (game runs elevated? rerun as admin)");
+                    else Report.Dim(string.Format("{0:N0} MB of memory read, {1} mixin classes recovered, {2} jar paths carved", gp.Scanned >> 20, gp.MixinClasses, gp.CarvedJars.Count));
+                    foreach (var d in gp.DeletedOpen) Report.Bad(string.Format("pid {0} still holds deleted jar {1}", gp.Pid, d));
+                    if (verbose) foreach (var m in gp.ForeignModules) Report.Dim("non-JDK native module: " + m);
+                    if (gp.Memory.Level == Level.Confirmed || (verbose && gp.Memory.Hits.Count > 0)) Report.Evidence(gp.Memory);
+                }
+
+                var candidates = new List<string>(gp.ArgJars);
+                candidates.AddRange(gp.CarvedJars);
+                if (!string.IsNullOrEmpty(gp.GameDir) && Directory.Exists(Path.Combine(gp.GameDir, "mods")))
+                    candidates.AddRange(Locations.Walk(Path.Combine(gp.GameDir, "mods"), 4));
+
+                foreach (var c in candidates.Distinct(StringComparer.OrdinalIgnoreCase))
+                {
+                    if (File.Exists(c))
+                    {
+                        var ev = Probe(c);
+                        if (ev != null && ev.Level == Level.Confirmed)
+                        {
+                            gp.JarsInUse.Add(c);
+                            Report.Bad(string.Format("jar in use by pid {0}: {1}", gp.Pid, c));
+                        }
+                    }
+                    else if (LooksLikeModPath(c) && (verbose || c.ToLowerInvariant().Contains("orchard") || (gp.Memory != null && gp.Memory.Level == Level.Confirmed)))
+                    {
+                        missingLoaded.Add(c);
+                        Report.Warn(string.Format("pid {0} has {1} in memory but the file is gone", gp.Pid, c));
+                    }
+                }
+            }
+
+            if (only)
+            {
+                Report.Section("Selected paths");
+                ScanExtra();
+                return;
+            }
+
+            Report.Section("Game folders");
+            var spent = new Dictionary<string, Stopwatch>();
+            Func<string, Stopwatch> clock = k =>
+            {
+                Stopwatch w;
+                if (!spent.TryGetValue(k, out w)) spent[k] = w = new Stopwatch();
+                return w;
+            };
+            foreach (var dir in gameDirs)
+            {
+                var whole = Stopwatch.StartNew();
+                Report.Info(dir);
+                foreach (var sub in new[] { "mods", ".fabric", "versions", "libraries", "config", "shaderpacks", "resourcepacks" })
+                {
+                    string d = Path.Combine(dir, sub);
+                    if (!Directory.Exists(d)) continue;
+                    clock(sub).Start();
+                    SweepFolder(d, 12, sub == "mods" || sub == "config");
+                    clock(sub).Stop();
+                }
+                clock("root").Start();
+                foreach (var f in SafeFiles(dir)) { Traces.AlternateStreams(f); ProbeIfArchive(f); }
+                clock("root").Stop();
+                clock("logs").Start();
+                Traces.Logs(dir);
+                clock("logs").Stop();
+                clock("launch configs").Start();
+                Traces.LaunchConfigs(dir);
+                clock("launch configs").Stop();
+                if (verbose && whole.Elapsed.TotalSeconds > 5) Report.Dim(string.Format("{0:0.0}s in this folder", whole.Elapsed.TotalSeconds));
+            }
+            if (verbose)
+                Report.Dim("time by step: " + string.Join(", ", spent.OrderByDescending(kv => kv.Value.Elapsed).Select(kv => string.Format("{0} {1:0.0}s", kv.Key, kv.Value.Elapsed.TotalSeconds))));
+            if (verbose)
+                foreach (var r in Locations.ReparsePoints.Distinct()) Report.Warn("folder is a junction/symlink (could point at a USB stick): " + r);
+
+            Report.Section("Loose files");
+            foreach (var dir in Locations.LooseDirs())
+            {
+                Report.Progress("  " + dir);
+                SweepFolder(dir, dir.StartsWith(Path.GetTempPath().TrimEnd('\\'), StringComparison.OrdinalIgnoreCase) ? 5 : 3, false);
+            }
+            ScanExtra();
+            if (deep)
+            {
+                foreach (var drive in Locations.FixedDrives())
+                {
+                    Report.Info("deep sweep " + drive);
+                    SweepFolder(drive, 40, false);
+                }
+            }
+            Report.ClearProgress();
+
+            Report.Section("Traces left behind");
+            Traces.RecycleBin();
+            Traces.RecentItems();
+            if (admin)
+            {
+                Traces.Prefetch();
+                Traces.UsnJournal(days);
+            }
+            foreach (var f in Traces.ExtraFiles.Distinct(StringComparer.OrdinalIgnoreCase).ToList())
+            {
+                if (f.IndexOf(':', 2) > 0) ProbeStream(f);
+                else Probe(f);
+            }
+            if (!Traces.Found.Any(t => t.Tier > Traces.Noise))
+                Report.Good("no Orchard traces in logs, recycle bin, recent items" + (admin ? ", prefetch or USN journal" : ""));
+            foreach (var t in Traces.Found.OrderByDescending(t => t.Tier))
+            {
+                if (t.Tier == Traces.Proof) Report.Bad(t.What);
+                else if (t.Tier == Traces.Lead) Report.Warn(t.What + "  (name only, not proof)");
+                else if (verbose) Report.Dim(t.What);
+                else continue;
+                Report.Dim(t.Where);
+            }
+        }
+
+        static void ScanExtra()
+        {
+            foreach (var p in extraPaths)
+            {
+                if (File.Exists(p)) { Traces.AlternateStreams(p); Probe(p); }
+                else SweepFolder(p, 30, true);
+            }
+            foreach (var f in Traces.ExtraFiles.Distinct(StringComparer.OrdinalIgnoreCase).ToList())
+                if (f.IndexOf(':', 2) > 0) ProbeStream(f);
+        }
+
+        static bool LooksLikeModPath(string p)
+        {
+            string l = p.ToLowerInvariant();
+            return l.Contains("\\mods\\") || l.Contains("orchard") || l.Contains("\\temp\\") || l.Contains("\\downloads\\") || l.Contains("\\desktop\\");
+        }
+
+        static IEnumerable<string> SafeFiles(string dir)
+        {
+            try { return Directory.GetFiles(dir); }
+            catch { return new string[0]; }
+        }
+
+        static void SweepFolder(string root, int depth, bool streams)
+        {
+            var files = new List<string>();
+            foreach (var f in Locations.Walk(root, depth))
+            {
+                if (files.Count % 200 == 0) Report.Progress("  " + f);
+                if (streams) Traces.AlternateStreams(f);
+                if (!probed.ContainsKey(f)) files.Add(f);
+            }
+            ProbeMany(files);
+        }
+
+        static void ProbeMany(List<string> files)
+        {
+            var results = new Evidence[files.Count];
+            var options = new ParallelOptions { MaxDegreeOfParallelism = Math.Max(2, Math.Min(8, Environment.ProcessorCount)) };
+            Parallel.For(0, files.Count, options, i =>
+            {
+                if (!Locations.IsArchive(files[i], 300, 400L * 1024 * 1024)) return;
+                var sw = Stopwatch.StartNew();
+                var ev = JarScanner.InspectFile(files[i]);
+                if (verbose && sw.ElapsedMilliseconds > 1500)
+                    ev.Notes.Add(string.Format("slow: {0:N0} ms", sw.ElapsedMilliseconds));
+                results[i] = ev;
+            });
+            for (int i = 0; i < files.Count; i++)
+            {
+                if (results[i] == null || probed.ContainsKey(files[i])) continue;
+                probed[files[i]] = results[i];
+                Show(results[i]);
+            }
+        }
+
+        static void ProbeIfArchive(string f)
+        {
+            if (probed.ContainsKey(f)) return;
+            if (!Locations.IsArchive(f, 300, 400L * 1024 * 1024)) return;
+            Probe(f);
+        }
+
+        static Evidence Probe(string path)
+        {
+            Evidence ev;
+            if (probed.TryGetValue(path, out ev)) return ev;
+            var sw = Stopwatch.StartNew();
+            ev = JarScanner.InspectFile(path);
+            probed[path] = ev;
+            if (verbose && sw.ElapsedMilliseconds > 1500)
+                ev.Notes.Add(string.Format("slow: {0:N0} ms", sw.ElapsedMilliseconds));
+            Show(ev);
+            return ev;
+        }
+
+        static void ProbeStream(string stream)
+        {
+            if (probed.ContainsKey(stream)) return;
+            byte[] data = null;
+            try { data = Traces.ReadStream(stream); } catch { }
+            if (data == null) return;
+            var ev = JarScanner.Inspect(data, stream, ".stream", 0);
+            probed[stream] = ev;
+            Show(ev);
+        }
+
+        static void Show(Evidence ev)
+        {
+            if (ev.Level != Level.Clean || verbose)
+            {
+                Report.ClearProgress();
+                Report.Evidence(ev);
+                if (ev.Level != Level.Clean)
+                {
+                    string zone = Traces.ZoneIdentifier(ev.Source);
+                    if (zone != null) Report.Dim("downloaded from: " + (zone.Length > 220 ? zone.Substring(0, 220) + "..." : zone));
+                }
+            }
+        }
+
+        static int Summary()
+        {
+            var confirmed = probed.Values.Where(e => e.Level == Level.Confirmed).ToList();
+            var liveHits = live.Where(g => g.Memory != null && g.Memory.Level == Level.Confirmed).ToList();
+            var proof = Traces.Found.Where(t => t.Tier == Traces.Proof).ToList();
+            var leads = Traces.Found.Where(t => t.Tier == Traces.Lead).ToList();
+
+            Report.Section("Verdict");
+            foreach (var g in liveHits) Report.Bad(string.Format("Orchard is running right now in {0} pid {1} (score {2})", g.Name, g.Pid, g.Memory.Score));
+            foreach (var e in confirmed) Report.Bad("Orchard jar: " + e.Source);
+            if (liveHits.Count > 0 && confirmed.Count == 0)
+                Report.Bad("the running cheat has no jar on disk: it was loaded and then deleted, renamed or pulled from removable media");
+            foreach (var m in missingLoaded) Report.Warn("loaded but missing: " + m);
+            if (proof.Count > 0) Report.Bad(proof.Count + " log/crash entr" + (proof.Count == 1 ? "y proves" : "ies prove") + " Orchard ran on this PC");
+            if (leads.Count > 0) Report.Warn(leads.Count + " name-only lead(s) above; filenames are not proof");
+
+            Report.Info(string.Format("{0} archives checked, {1} java process(es) inspected", probed.Count, live.Count));
+            Report.Info("");
+            if (liveHits.Count > 0 || confirmed.Count > 0)
+            {
+                Report.Bad("RESULT: ORCHARD DETECTED");
+                return 2;
+            }
+            if (proof.Count > 0)
+            {
+                Report.Bad("RESULT: ORCHARD WAS USED (no jar left on disk)");
+                return 2;
+            }
+            Report.Good("RESULT: NO ORCHARD");
+            return 0;
+        }
+
+        static void Obliterate()
+        {
+            Report.Section("Blocking");
+            foreach (var g in live)
+            {
+                bool usesJar = g.JarsInUse.Count > 0;
+                bool hot = g.Memory != null && g.Memory.Level == Level.Confirmed;
+                if (!hot && !usesJar) continue;
+                if (Hunter.Kill(g.Pid)) Report.Bad(string.Format("killed {0} pid {1}", g.Name, g.Pid));
+                else Report.Warn(string.Format("could not kill pid {0}", g.Pid));
+            }
+            foreach (var e in probed.Values.Where(x => x.Level == Level.Confirmed).ToList())
+                Quarantine.Lock(e.Source);
+        }
+    }
+}
+
+```
+
+`src/Quarantine.cs`:
+
+```cs
+using System;
+using System.IO;
+
+namespace OrchardObliterator
+{
+    static class Quarantine
+    {
+        public static string Folder
+        {
+            get
+            {
+                string root = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                string dir = Path.Combine(root, "OrchardObliterator", "quarantine");
+                try
+                {
+                    Directory.CreateDirectory(dir);
+                    return dir;
+                }
+                catch
+                {
+                    dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OrchardObliterator", "quarantine");
+                    Directory.CreateDirectory(dir);
+                    return dir;
+                }
+            }
+        }
+
+        public static bool Lock(string path)
+        {
+            if (!File.Exists(path))
+            {
+                Report.Warn("cannot quarantine " + path + " (not a plain file)");
+                return false;
+            }
+
+            string dir = Folder;
+            string sha = "";
+            try { sha = JarScanner.Sha256(JarScanner.ReadShared(path)); } catch { }
+            string target = Path.Combine(dir, string.Format("{0:yyyyMMdd_HHmmss}_{1}.quarantined", DateTime.Now, Path.GetFileName(path)));
+
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                try
+                {
+                    File.Move(path, target);
+                    File.SetAttributes(target, FileAttributes.ReadOnly);
+                    File.AppendAllText(Path.Combine(dir, "manifest.txt"),
+                        string.Format("{0:yyyy-MM-dd HH:mm:ss}\t{1}\t{2}\t{3}{4}", DateTime.Now, sha, path, target, Environment.NewLine));
+                    Report.Bad("quarantined " + path);
+                    Report.Dim("moved to " + target);
+                    return true;
+                }
+                catch (IOException)
+                {
+                    System.Threading.Thread.Sleep(300);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    break;
+                }
+            }
+            Report.Warn("could not move " + path + " (still locked or no permission)");
+            return false;
+        }
+    }
+}
+
+```
+
+`src/Report.cs`:
+
+```cs
+using System;
+using System.IO;
+using System.Text;
+
+namespace OrchardObliterator
+{
+    static class Report
+    {
+        static readonly StringBuilder log = new StringBuilder();
+        static readonly object gate = new object();
+        public static bool Quiet;
+
+        static readonly System.Diagnostics.Stopwatch phase = System.Diagnostics.Stopwatch.StartNew();
+        static string current;
+
+        public static void Section(string title)
+        {
+            if (current != null && phase.Elapsed.TotalSeconds >= 0.5)
+                Line(string.Format("     ({0} took {1:0.0}s)", current.ToLowerInvariant(), phase.Elapsed.TotalSeconds), ConsoleColor.DarkGray);
+            current = title;
+            phase.Restart();
+            Line("", ConsoleColor.Gray);
+            Line("== " + title + " " + new string('=', Math.Max(3, 66 - title.Length)), ConsoleColor.DarkCyan);
+        }
+
+        public static void Info(string text) { Line("   " + text, ConsoleColor.Gray); }
+        public static void Dim(string text) { Line("     " + text, ConsoleColor.DarkGray); }
+        public static void Good(string text) { Line(" + " + text, ConsoleColor.Green); }
+        public static void Warn(string text) { Line(" ? " + text, ConsoleColor.Yellow); }
+        public static void Bad(string text) { Line(" ! " + text, ConsoleColor.Red); }
+
+        public static void Evidence(Evidence ev)
+        {
+            var level = ev.Level;
+            string tag = level == Level.Confirmed ? "ORCHARD" : "clean";
+            string head = string.Format("[{0} {1}] {2}", tag, ev.Score, ev.Source);
+            if (level == Level.Confirmed) Bad(head);
+            else Info(head);
+
+            foreach (var n in ev.Notes) Dim(n);
+            foreach (var h in ev.Hits) Dim(string.Format("{0,-9} +{1,-3} {2}", h.Kind, h.Weight, h.Detail));
+        }
+
+        public static void Progress(string text)
+        {
+            if (Quiet || Console.IsOutputRedirected) return;
+            lock (gate)
+            {
+                int width = 78;
+                try { width = Math.Max(20, Console.WindowWidth - 1); } catch { }
+                if (text.Length > width) text = "..." + text.Substring(text.Length - width + 3);
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("\r" + text.PadRight(width) + "\r");
+                Console.ResetColor();
+            }
+        }
+
+        public static void ClearProgress()
+        {
+            Progress("");
+        }
+
+        static void Line(string text, ConsoleColor color)
+        {
+            lock (gate)
+            {
+                log.AppendLine(text);
+                if (Quiet) return;
+                Console.ForegroundColor = color;
+                Console.WriteLine(text);
+                Console.ResetColor();
+            }
+        }
+
+        public static string Save(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                string name = string.Format("OrchardObliterator_{0}_{1:yyyyMMdd_HHmmss}.txt", Environment.MachineName, DateTime.Now);
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, name);
+            }
+            try
+            {
+                File.WriteAllText(path, log.ToString(), Encoding.UTF8);
+            }
+            catch
+            {
+                path = Path.Combine(Path.GetTempPath(), Path.GetFileName(path));
+                File.WriteAllText(path, log.ToString(), Encoding.UTF8);
+            }
+            return path;
+        }
+    }
+}
+
+```
+
+`src/Traces.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Microsoft.Win32.SafeHandles;
+
+namespace OrchardObliterator
+{
+    sealed class Trace
+    {
+        public string Where;
+        public string What;
+        public int Tier;
+    }
+
+    static class Traces
+    {
+        public static readonly List<Trace> Found = new List<Trace>();
+        public static readonly List<string> ExtraFiles = new List<string>();
+
+        static readonly Regex ModLine = new Regex(@"^\s*[-|\\]+\s*([a-z0-9_.\-]+)\s+(\S+)", RegexOptions.Compiled);
+        static readonly Regex Hashy = new Regex(@"^q?[0-9a-f]{16,}$", RegexOptions.Compiled);
+
+        public const int Noise = 0, Lead = 1, Proof = 2;
+
+        static Regex logPattern;
+
+        static void Note(string where, string what, int tier)
+        {
+            lock (Found)
+            {
+                if (Found.Any(t => t.Where == where && t.What == what)) return;
+                Found.Add(new Trace { Where = where, What = what, Tier = tier });
+            }
+        }
+
+        public static bool IsAdmin()
+        {
+            try { return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator); }
+            catch { return false; }
+        }
+
+        public static void Logs(string gameDir)
+        {
+            var files = new List<string>();
+            foreach (var sub in new[] { "logs", "crash-reports" })
+            {
+                string d = Path.Combine(gameDir, sub);
+                if (!Directory.Exists(d)) continue;
+                try { files.AddRange(Directory.GetFiles(d)); } catch { }
+            }
+            files.RemoveAll(f =>
+            {
+                string lower = f.ToLowerInvariant();
+                return !(lower.EndsWith(".log") || lower.EndsWith(".log.gz") || lower.EndsWith(".txt"));
+            });
+            Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 8 }, f =>
+            {
+                string text = ReadLog(f);
+                if (text != null) ScanLogText(f, text);
+            });
+        }
+
+        static string ReadLog(string path)
+        {
+            try
+            {
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+                {
+                    Stream s = fs;
+                    if (path.EndsWith(".gz", StringComparison.OrdinalIgnoreCase)) s = new GZipStream(fs, CompressionMode.Decompress);
+                    using (var r = new StreamReader(s, Encoding.UTF8))
+                    {
+                        var sb = new StringBuilder();
+                        var buf = new char[65536];
+                        int n;
+                        while (sb.Length < 32 * 1024 * 1024 && (n = r.Read(buf, 0, buf.Length)) > 0)
+                            sb.Append(buf, 0, n);
+                        return sb.ToString();
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        static void ScanLogText(string file, string text)
+        {
+            if (logPattern == null)
+                logPattern = new Regex(string.Join("|", Fingerprints.LogPatterns.Select(Regex.Escape)), RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            bool patterns = Fingerprints.LogPatterns.Count > 0 && logPattern.IsMatch(text);
+            if (!patterns && text.IndexOf(" mods:", StringComparison.Ordinal) < 0) return;
+            var lines = text.Split('\n');
+            bool inModList = false;
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i].TrimEnd('\r');
+                if (line.Contains("Loading ") && line.Contains(" mods:")) { inModList = true; continue; }
+                if (inModList)
+                {
+                    var m = ModLine.Match(line);
+                    if (!m.Success) { inModList = false; }
+                    else
+                    {
+                        string id = m.Groups[1].Value;
+                        if (id == "orchard")
+                            Note(file, string.Format("line {0}: mod list contains \"{1} {2}\"", i + 1, id, m.Groups[2].Value), Proof);
+                        else if (id.Contains("orchard"))
+                            Note(file, string.Format("line {0}: mod list contains \"{1} {2}\"", i + 1, id, m.Groups[2].Value), Lead);
+                        else if (Hashy.IsMatch(id))
+                            Note(file, string.Format("line {0}: mod with a hashed id \"{1}\"", i + 1, id), Noise);
+                        continue;
+                    }
+                }
+                if (patterns && logPattern.IsMatch(line))
+                {
+                    string snip = line.Trim();
+                    if (snip.Length > 160) snip = snip.Substring(0, 160) + "...";
+                    Note(file, string.Format("line {0}: {1}", i + 1, snip), Proof);
+                }
+            }
+        }
+
+        public static void LaunchConfigs(string gameDir)
+        {
+            var files = new List<string>();
+            foreach (var name in new[] { "launcher_profiles.json", "launcher_profiles_microsoft_store.json", "instance.cfg", "mmc-pack.json", "profile.json", "minecraftinstance.json" })
+            {
+                string a = Path.Combine(gameDir, name);
+                string b = Path.Combine(Path.GetDirectoryName(gameDir) ?? gameDir, name);
+                if (File.Exists(a)) files.Add(a);
+                if (File.Exists(b) && b != a) files.Add(b);
+            }
+            string versions = Path.Combine(gameDir, "versions");
+            if (Directory.Exists(versions))
+            {
+                try { files.AddRange(Directory.GetFiles(versions, "*.json", SearchOption.AllDirectories)); } catch { }
+            }
+
+            foreach (var f in files)
+            {
+                string text;
+                try { text = File.ReadAllText(f); } catch { continue; }
+                foreach (Match m in Regex.Matches(text, @"(-javaagent:[^""\s,]+|-agentpath:[^""\s,]+|-Dfabric\.addMods=[^""\s,]+)"))
+                    Note(f, "launch argument " + m.Value, Noise);
+                foreach (Match m in Regex.Matches(text, @"""url""\s*:\s*""(https?://[^""/]+)"))
+                {
+                    string host = m.Groups[1].Value.ToLowerInvariant();
+                    if (!Fingerprints.TrustedHosts.Any(h => host.EndsWith(h)))
+                        Note(f, "library pulled from unusual host " + host, Noise);
+                }
+            }
+        }
+
+        public static void RecycleBin()
+        {
+            string sid = WindowsIdentity.GetCurrent().User.Value;
+            foreach (var root in Locations.FixedDrives())
+            {
+                string bin = Path.Combine(root, "$Recycle.Bin", sid);
+                if (!Directory.Exists(bin)) continue;
+                string[] infos;
+                try { infos = Directory.GetFiles(bin, "$I*"); } catch { continue; }
+                foreach (var info in infos)
+                {
+                    string original = ParseRecycleInfo(info);
+                    if (original == null) continue;
+                    string data = Path.Combine(bin, "$R" + Path.GetFileName(info).Substring(2));
+                    bool jarish = original.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) || original.ToLowerInvariant().Contains("orchard");
+                    if (File.Exists(data) && Locations.IsArchive(data, 512, 400L * 1024 * 1024))
+                    {
+                        ExtraFiles.Add(data);
+                        if (jarish) Note(data, "deleted archive waiting in the Recycle Bin, was " + original, Noise);
+                    }
+                    else if (jarish)
+                    {
+                        Note(info, "Recycle Bin record for " + original, original.ToLowerInvariant().Contains("orchard") ? Lead : Noise);
+                    }
+                }
+            }
+        }
+
+        static string ParseRecycleInfo(string path)
+        {
+            try
+            {
+                var b = File.ReadAllBytes(path);
+                long version = BitConverter.ToInt64(b, 0);
+                if (version == 2)
+                {
+                    int chars = BitConverter.ToInt32(b, 24);
+                    return Encoding.Unicode.GetString(b, 28, Math.Max(0, (chars - 1) * 2));
+                }
+                if (version == 1) return Encoding.Unicode.GetString(b, 24, 520).TrimEnd('\0');
+            }
+            catch
+            {
+            }
+            return null;
+        }
+
+        public static void RecentItems()
+        {
+            string recent = Environment.GetFolderPath(Environment.SpecialFolder.Recent);
+            string[] links;
+            try { links = Directory.GetFiles(recent, "*.lnk"); } catch { return; }
+            var rx = new Regex(@"[A-Za-z]:\\[^\0""<>|*?]{2,240}?\.(jar|zip)", RegexOptions.IgnoreCase);
+            foreach (var lnk in links)
+            {
+                string name = Path.GetFileName(lnk).ToLowerInvariant();
+                byte[] b;
+                try { b = File.ReadAllBytes(lnk); } catch { continue; }
+                var targets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (Match m in rx.Matches(Encoding.GetEncoding(1252).GetString(b))) targets.Add(m.Value);
+                foreach (Match m in rx.Matches(Encoding.Unicode.GetString(b))) targets.Add(m.Value);
+                foreach (Match m in rx.Matches(Encoding.Unicode.GetString(b, 1, b.Length - 1))) targets.Add(m.Value);
+
+                foreach (var t in targets)
+                {
+                    bool orchard = t.ToLowerInvariant().Contains("orchard") || name.Contains("orchard");
+                    if (File.Exists(t))
+                    {
+                        if (t.EndsWith(".jar", StringComparison.OrdinalIgnoreCase)) ExtraFiles.Add(t);
+                        if (orchard) Note(lnk, "recently opened " + t, Lead);
+                    }
+                    else if (orchard || t.ToLowerInvariant().Contains("\\mods\\"))
+                    {
+                        Note(lnk, "recently opened " + t + " (file is gone now)", orchard ? Lead : Noise);
+                    }
+                }
+                if (name.Contains("orchard") && targets.Count == 0)
+                    Note(lnk, "recent item shortcut named " + Path.GetFileName(lnk), Lead);
+            }
+        }
+
+        public static string ZoneIdentifier(string path)
+        {
+            try
+            {
+                using (var h = Native.CreateFile(path + ":Zone.Identifier", Native.GENERIC_READ, Native.FILE_SHARE_READ | Native.FILE_SHARE_WRITE | Native.FILE_SHARE_DELETE, IntPtr.Zero, Native.OPEN_EXISTING, 0, IntPtr.Zero))
+                {
+                    if (h.IsInvalid) return null;
+                    using (var fs = new FileStream(h, FileAccess.Read))
+                    using (var r = new StreamReader(fs))
+                    {
+                        var lines = r.ReadToEnd().Split('\n').Select(l => l.Trim()).Where(l => l.StartsWith("HostUrl=") || l.StartsWith("ReferrerUrl="));
+                        string joined = string.Join("  ", lines);
+                        return joined.Length == 0 ? null : joined;
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        struct StreamData
+        {
+            public long Size;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 296)]
+            public string Name;
+        }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern IntPtr FindFirstStreamW(string file, int level, out StreamData data, int flags);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern bool FindNextStreamW(IntPtr find, out StreamData data);
+
+        [DllImport("kernel32.dll")]
+        static extern bool FindClose(IntPtr find);
+
+        public static void AlternateStreams(string path)
+        {
+            StreamData sd;
+            IntPtr find = FindFirstStreamW(path, 0, out sd, 0);
+            if (find == new IntPtr(-1)) return;
+            try
+            {
+                do
+                {
+                    string name = sd.Name ?? "";
+                    if (name == "::$DATA" || name.StartsWith(":Zone.Identifier") || name.StartsWith(":SmartScreen") || name.StartsWith(":com.dropbox")) continue;
+                    string stream = path + name.Replace(":$DATA", "");
+                    Note(path, string.Format("hidden alternate data stream {0} ({1:N0} bytes)", name, sd.Size), Noise);
+                    if (sd.Size > 512) ExtraFiles.Add(stream);
+                }
+                while (FindNextStreamW(find, out sd));
+            }
+            finally
+            {
+                FindClose(find);
+            }
+        }
+
+        public static byte[] ReadStream(string streamPath)
+        {
+            using (var h = Native.CreateFile(streamPath, Native.GENERIC_READ, Native.FILE_SHARE_READ | Native.FILE_SHARE_WRITE | Native.FILE_SHARE_DELETE, IntPtr.Zero, Native.OPEN_EXISTING, 0, IntPtr.Zero))
+            {
+                if (h.IsInvalid) return null;
+                using (var fs = new FileStream(h, FileAccess.Read))
+                using (var ms = new MemoryStream())
+                {
+                    fs.CopyTo(ms);
+                    return ms.ToArray();
+                }
+            }
+        }
+
+        public static void Prefetch()
+        {
+            string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Prefetch");
+            string[] files;
+            try { files = Directory.GetFiles(dir, "JAVA*.pf"); }
+            catch
+            {
+                Report.Dim("prefetch: no access (run as administrator)");
+                return;
+            }
+            var rx = new Regex(@"\\VOLUME\{[^}]+\}(\\[^\0]+?\.(JAR|ZIP))", RegexOptions.IgnoreCase);
+            foreach (var pf in files)
+            {
+                byte[] raw = Decompress(pf);
+                if (raw == null) continue;
+                var text = Encoding.Unicode.GetString(raw);
+                foreach (Match m in rx.Matches(text))
+                {
+                    string tail = m.Groups[1].Value;
+                    string lower = tail.ToLowerInvariant();
+                    string onDisk = Locations.FixedDrives().Select(d => d.TrimEnd('\\') + tail).FirstOrDefault(File.Exists);
+                    bool orchard = lower.Contains("orchard");
+                    bool modsDir = lower.Contains("\\mods\\") || lower.Contains("\\temp\\") || lower.Contains("\\downloads\\");
+                    if (onDisk != null)
+                    {
+                        if (modsDir || orchard) ExtraFiles.Add(onDisk);
+                        if (orchard) Note(pf, "java loaded " + onDisk, Lead);
+                    }
+                    else if (modsDir || orchard)
+                    {
+                        Note(pf, "java loaded " + tail + " which no longer exists", orchard ? Lead : Noise);
+                    }
+                }
+            }
+        }
+
+        static byte[] Decompress(string pf)
+        {
+            byte[] b;
+            try { b = File.ReadAllBytes(pf); } catch { return null; }
+            if (b.Length < 8) return null;
+            if (b[0] == 'M' && b[1] == 'A' && b[2] == 'M')
+            {
+                int size = BitConverter.ToInt32(b, 4);
+                uint ws, fs;
+                if (Native.RtlGetCompressionWorkSpaceSize(4, out ws, out fs) != 0) return null;
+                var work = new byte[ws];
+                var input = new byte[b.Length - 8];
+                Buffer.BlockCopy(b, 8, input, 0, input.Length);
+                var output = new byte[size];
+                int final;
+                if (Native.RtlDecompressBufferEx(4, output, size, input, input.Length, out final, work) != 0) return null;
+                return output;
+            }
+            return b;
+        }
+
+        public static void UsnJournal(int days)
+        {
+            DateTime since = DateTime.UtcNow.AddDays(-days);
+            foreach (var root in Locations.FixedDrives())
+            {
+                string vol = @"\\.\" + root.TrimEnd('\\');
+                using (var h = Native.CreateFile(vol, Native.GENERIC_READ, Native.FILE_SHARE_READ | Native.FILE_SHARE_WRITE, IntPtr.Zero, Native.OPEN_EXISTING, 0, IntPtr.Zero))
+                {
+                    if (h.IsInvalid)
+                    {
+                        Report.Dim("usn journal " + root + ": no access (run as administrator)");
+                        continue;
+                    }
+                    ReadJournal(h, root, since);
+                }
+            }
+        }
+
+        static void ReadJournal(SafeFileHandle h, string root, DateTime since)
+        {
+            var q = new byte[80];
+            int got;
+            if (!Native.DeviceIoControl(h, Native.FSCTL_QUERY_USN_JOURNAL, null, 0, q, q.Length, out got, IntPtr.Zero)) return;
+            long journalId = BitConverter.ToInt64(q, 0);
+            long next = BitConverter.ToInt64(q, 8);
+            long end = BitConverter.ToInt64(q, 16);
+
+            var input = new byte[40];
+            var output = new byte[1 << 20];
+            var pendingRename = new Dictionary<string, string>();
+            int scanned = 0;
+
+            while (next < end)
+            {
+                BitConverter.GetBytes(next).CopyTo(input, 0);
+                BitConverter.GetBytes(0x3300u).CopyTo(input, 8);
+                BitConverter.GetBytes(0).CopyTo(input, 12);
+                BitConverter.GetBytes(0L).CopyTo(input, 16);
+                BitConverter.GetBytes(0L).CopyTo(input, 24);
+                BitConverter.GetBytes(journalId).CopyTo(input, 32);
+                if (!Native.DeviceIoControl(h, Native.FSCTL_READ_USN_JOURNAL, input, input.Length, output, output.Length, out got, IntPtr.Zero)) break;
+                if (got <= 8) break;
+                long after = BitConverter.ToInt64(output, 0);
+
+                int p = 8;
+                while (p + 60 <= got)
+                {
+                    int len = BitConverter.ToInt32(output, p);
+                    if (len <= 0 || p + len > got) break;
+                    int major = BitConverter.ToUInt16(output, p + 4);
+                    int refLen = major >= 3 ? 16 : 8;
+                    int at = p + 8 + refLen * 2;
+                    long stamp = BitConverter.ToInt64(output, at + 8);
+                    uint reason = BitConverter.ToUInt32(output, at + 16);
+                    int nameLen = BitConverter.ToUInt16(output, at + 32);
+                    int nameOff = BitConverter.ToUInt16(output, at + 34);
+                    string fileRef = BitConverter.ToString(output, p + 8, refLen);
+                    string name = Encoding.Unicode.GetString(output, p + nameOff, nameLen);
+                    scanned++;
+
+                    DateTime when = DateTime.FromFileTimeUtc(stamp);
+                    if (when >= since) Classify(root, fileRef, name, reason, when.ToLocalTime(), pendingRename);
+                    p += len;
+                }
+                if (after <= next) break;
+                next = after;
+            }
+            Report.Dim(string.Format("usn journal {0}: {1:N0} records read", root, scanned));
+        }
+
+        static void Classify(string root, string fileRef, string name, uint reason, DateTime when, Dictionary<string, string> pendingRename)
+        {
+            string lower = name.ToLowerInvariant();
+            string where = "USN " + root;
+            if ((reason & 0x1000) != 0) pendingRename[fileRef] = name;
+            if ((reason & 0x2000) != 0)
+            {
+                string old;
+                if (pendingRename.TryGetValue(fileRef, out old))
+                {
+                    pendingRename.Remove(fileRef);
+                    bool wasJar = old.EndsWith(".jar", StringComparison.OrdinalIgnoreCase);
+                    bool isJar = lower.EndsWith(".jar");
+                    if (wasJar != isJar || old.ToLowerInvariant().Contains("orchard") || lower.Contains("orchard"))
+                        Note(where, string.Format("{0:yyyy-MM-dd HH:mm:ss} renamed {1} -> {2}", when, old, name), old.ToLowerInvariant().Contains("orchard") || lower.Contains("orchard") ? Lead : Noise);
+                }
+            }
+            if (lower.Contains("orchard") && (lower.EndsWith(".jar") || lower.EndsWith(".zip")))
+            {
+                string what = (reason & 0x200) != 0 ? "deleted" : (reason & 0x100) != 0 ? "created" : null;
+                if (what != null) Note(where, string.Format("{0:yyyy-MM-dd HH:mm:ss} {1} {2}", when, what, name), Lead);
+            }
+        }
+    }
+}
+
+```
+
+`src/Zip.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Text;
+
+namespace OrchardObliterator
+{
+    sealed class ZipItem
+    {
+        public string Name;
+        public int Method;
+        public int Flags;
+        public long Packed;
+        public long Size;
+        public long Offset;
+
+        public bool IsDirectory { get { return Name.EndsWith("/"); } }
+    }
+
+    sealed class Zip
+    {
+        const int MaxInflate = 96 * 1024 * 1024;
+
+        readonly byte[] data;
+        public readonly long Shift;
+        public readonly List<ZipItem> Items = new List<ZipItem>();
+        readonly Dictionary<string, ZipItem> byName = new Dictionary<string, ZipItem>(StringComparer.Ordinal);
+
+        Zip(byte[] data, long shift)
+        {
+            this.data = data;
+            Shift = shift;
+        }
+
+        public static bool LooksLikeZip(byte[] head, int headLen, byte[] tail, int tailLen)
+        {
+            if (headLen >= 4 && head[0] == 'P' && head[1] == 'K' && head[2] == 3 && head[3] == 4)
+                return true;
+            for (int i = tailLen - 22; i >= 0; i--)
+                if (tail[i] == 'P' && tail[i + 1] == 'K' && tail[i + 2] == 5 && tail[i + 3] == 6)
+                    return true;
+            return false;
+        }
+
+        public static Zip Open(byte[] data)
+        {
+            try { return Parse(data); }
+            catch { return null; }
+        }
+
+        static Zip Parse(byte[] data)
+        {
+            int eocd = -1;
+            int floor = Math.Max(0, data.Length - 22 - 65535);
+            for (int i = data.Length - 22; i >= floor; i--)
+            {
+                if (data[i] == 'P' && data[i + 1] == 'K' && data[i + 2] == 5 && data[i + 3] == 6)
+                {
+                    eocd = i;
+                    break;
+                }
+            }
+            if (eocd < 0) return null;
+
+            long count = U16(data, eocd + 10);
+            long dirSize = U32(data, eocd + 12);
+            long dirOffset = U32(data, eocd + 16);
+            long anchor = eocd;
+
+            if (dirOffset == 0xFFFFFFFF || count == 0xFFFF || dirSize == 0xFFFFFFFF)
+            {
+                int loc = eocd - 20;
+                if (loc < 0 || U32(data, loc) != 0x07064b50) return null;
+                int z = -1;
+                for (long probe = loc - 56; probe >= 0 && probe >= loc - 56 - 4096; probe--)
+                {
+                    if (U32(data, (int)probe) == 0x06064b50) { z = (int)probe; break; }
+                }
+                if (z < 0) return null;
+                count = (long)U64(data, z + 32);
+                dirSize = (long)U64(data, z + 40);
+                dirOffset = (long)U64(data, z + 48);
+                anchor = z;
+            }
+
+            long dirStart = anchor - dirSize;
+            if (dirStart < 0) return null;
+            var zip = new Zip(data, dirStart - dirOffset);
+
+            int p = (int)dirStart;
+            for (long n = 0; n < count && p + 46 <= data.Length; n++)
+            {
+                if (U32(data, p) != 0x02014b50) break;
+                int flags = U16(data, p + 8);
+                int nameLen = U16(data, p + 28);
+                int extraLen = U16(data, p + 30);
+                int commentLen = U16(data, p + 32);
+                if (p + 46 + nameLen > data.Length) break;
+
+                var enc = (flags & 0x800) != 0 ? Encoding.UTF8 : Encoding.GetEncoding(437);
+                var item = new ZipItem
+                {
+                    Flags = flags,
+                    Method = U16(data, p + 10),
+                    Packed = U32(data, p + 20),
+                    Size = U32(data, p + 24),
+                    Offset = U32(data, p + 42),
+                    Name = enc.GetString(data, p + 46, nameLen).Replace('\\', '/')
+                };
+                zip.Items.Add(item);
+                if (!zip.byName.ContainsKey(item.Name)) zip.byName[item.Name] = item;
+                p += 46 + nameLen + extraLen + commentLen;
+            }
+            return zip.Items.Count == 0 ? null : zip;
+        }
+
+        public ZipItem Find(string name)
+        {
+            ZipItem item;
+            return byName.TryGetValue(name, out item) ? item : null;
+        }
+
+        public byte[] Read(ZipItem item)
+        {
+            if ((item.Flags & 1) != 0) return null;
+            if (item.Packed == 0xFFFFFFFF || item.Size > MaxInflate) return null;
+            long local = item.Offset + Shift;
+            if (local < 0 || local + 30 > data.Length) return null;
+            if (U32(data, (int)local) != 0x04034b50) return null;
+
+            long start = local + 30 + U16(data, (int)local + 26) + U16(data, (int)local + 28);
+            long packed = item.Packed;
+            if (start + packed > data.Length) packed = data.Length - start;
+            if (packed < 0) return null;
+
+            try
+            {
+                if (item.Method == 0)
+                {
+                    var raw = new byte[packed];
+                    Buffer.BlockCopy(data, (int)start, raw, 0, (int)packed);
+                    return raw;
+                }
+                if (item.Method != 8) return null;
+
+                using (var src = new MemoryStream(data, (int)start, (int)packed, false))
+                using (var inflate = new DeflateStream(src, CompressionMode.Decompress))
+                using (var dst = new MemoryStream(item.Size > 0 ? (int)item.Size : 4096))
+                {
+                    var buf = new byte[16384];
+                    int got;
+                    while ((got = inflate.Read(buf, 0, buf.Length)) > 0)
+                    {
+                        dst.Write(buf, 0, got);
+                        if (dst.Length > MaxInflate) return null;
+                    }
+                    return dst.ToArray();
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public byte[] Peek(ZipItem item, int count)
+        {
+            if ((item.Flags & 1) != 0) return null;
+            long local = item.Offset + Shift;
+            if (local < 0 || local + 30 > data.Length || U32(data, (int)local) != 0x04034b50) return null;
+            long start = local + 30 + U16(data, (int)local + 26) + U16(data, (int)local + 28);
+            int avail = (int)Math.Min(item.Packed, data.Length - start);
+            if (avail <= 0) return null;
+            try
+            {
+                if (item.Method == 0)
+                {
+                    var raw = new byte[Math.Min(count, avail)];
+                    Buffer.BlockCopy(data, (int)start, raw, 0, raw.Length);
+                    return raw;
+                }
+                if (item.Method != 8) return null;
+                using (var inflate = new DeflateStream(new MemoryStream(data, (int)start, avail, false), CompressionMode.Decompress))
+                {
+                    var buf = new byte[count];
+                    int got = 0, n;
+                    while (got < count && (n = inflate.Read(buf, got, count - got)) > 0) got += n;
+                    if (got < count) Array.Resize(ref buf, got);
+                    return buf;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public string ReadText(ZipItem item)
+        {
+            var bytes = item == null ? null : Read(item);
+            return bytes == null ? null : Encoding.UTF8.GetString(bytes);
+        }
+
+        static int U16(byte[] b, int i) { return b[i] | (b[i + 1] << 8); }
+        static long U32(byte[] b, int i) { return (uint)(b[i] | (b[i + 1] << 8) | (b[i + 2] << 16) | (b[i + 3] << 24)); }
+        static ulong U64(byte[] b, int i) { return (ulong)U32(b, i) | ((ulong)U32(b, i + 4) << 32); }
+    }
+}
+
+```
