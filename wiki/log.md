@@ -1,3 +1,5 @@
+- **2026-11-26** — ingest `description:FOCUSGAMERCH/STP-Vanguard`: entity [[stp-vanguard]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[vortexac]], [[alt-v-anticheat-guide]], and [[basic-anti-cheat]].
+
 - **2026-11-26** — ingest `description:KoJesko/PlasmaTrack-Dev`: entity [[plasmatrack-dev]]; cited on [[overviews/anti-cheat]] and [[concepts/input-provenance]]; cross-linked [[dmn-minigame]], [[serverless-time-trial-racing-game]], [[spf-ghidra-pattern-helper]], and [[detector-operations]].
 
 - **2026-11-26** — ingest `readme:categories` (projection `wiki/sources/README-categories.md`): **Anti Cheat** **958** (+2 vs wiki **956**); **Cheat** **3166** and other major README anchors unchanged (**Game Engine** **160**, **Game Develop** **207**, **DirectX** **58**, **Game Network** **37**, **Game Testing** **24**, **Some Tricks** **120**, console/platform lanes unchanged); 41 top-level README sections (empty **NeverC & NeverD** placeholder); synced count anchors on [[overviews/overview]], [[overviews/anti-cheat]], [[concepts/compiled-wiki]], [[concepts/resource-selection]]; light `index.md` section notes; no per-category pages.
