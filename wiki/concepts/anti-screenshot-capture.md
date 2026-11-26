@@ -20,7 +20,8 @@ sources:
   - wiki/sources/descriptions/vmguard__dwm-window-capture.md
   - wiki/sources/descriptions/saadnahid7__smalipatcher_reborn.md
   - wiki/sources/descriptions/allnighter51__Iris.md
-updated: 2026-10-27
+  - wiki/sources/descriptions/miaoyu2233__Foxo.md
+updated: 2026-11-26
 confidence: medium
 ---
 
@@ -66,7 +67,7 @@ Comparative Windows capture samples such as [[screenshot]] (gmh5225; BitBlt, DXG
 
 - **Frame suppression** — detect AC `BitBlt`/`PrintWindow` hooks and skip ImGui draw for the captured frame.
 - **GDI capture hook** — hook `BitBlt` in gdi32 so AC screenshot pipelines receive a pre-stored clean frame instead of the live overlay-modified client area; educational PoC [[screenshot-detection-bypass]] (Mes2d; C++; class-based hook + settings; README `[BitBlt]`). (source: wiki/sources/descriptions/Mes2d__Screenshot-Detection-Bypass.md)
-- **Display affinity** — `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` on external overlay HWND so some capture APIs omit it. Rust/Tauri HUD compositors such as [[iris-overlay]] (allnighter51; optional streamer mode on layered PNG/WebP stacks; no game inject) document productized WDA on the external-overlay lane beside cheat ESP samples. (source: wiki/sources/descriptions/allnighter51__Iris.md) Kernel-assisted window protection such as [[noscreen]] (KANKOSHEV; custom driver + device interface; display-affinity-like anti-capture without direct target process memory modification; reduced user-mode detection surface; README Hide Window) extends that lane below user-mode WDA calls. (source: wiki/sources/descriptions/KANKOSHEV__NoScreen.md)
+- **Display affinity** — `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` on external overlay HWND so some capture APIs omit it. Rust/Tauri HUD compositors such as [[iris-overlay]] (allnighter51; optional streamer mode on layered PNG/WebP stacks; no game inject) document productized WDA on the external-overlay lane beside cheat ESP samples. (source: wiki/sources/descriptions/allnighter51__Iris.md) Zero-injection game UI translators such as [[foxo]] (miaoyu2233; separate PySide6 overlay HWND; DXGI/mss OCR loop; excludes translation chrome from some capture paths while keeping hooks out of the game process) illustrate legitimate localization tooling on the same WDA mechanism. (source: wiki/sources/descriptions/miaoyu2233__Foxo.md) Kernel-assisted window protection such as [[noscreen]] (KANKOSHEV; custom driver + device interface; display-affinity-like anti-capture without direct target process memory modification; reduced user-mode detection surface; README Hide Window) extends that lane below user-mode WDA calls. (source: wiki/sources/descriptions/KANKOSHEV__NoScreen.md)
 - **DWM composition** — separate surfaces that survive `PrintWindow` but not all BitBlt paths; kernel DC blocking in extreme cases.
 - **Hardware overlay planes** — content on dedicated scan-out planes may be absent from software duplication.
 - **Off-screen render** — secondary display, capture card, or virtual camera feed outside the game window.
