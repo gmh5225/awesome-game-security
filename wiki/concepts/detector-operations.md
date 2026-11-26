@@ -56,7 +56,8 @@ sources:
   - wiki/sources/descriptions/NetVar1337__cheat-intel.md
   - wiki/sources/descriptions/ArghadeepMisra__gamerfield-backend.md
   - wiki/sources/descriptions/ArghadeepMisra__player-simulation.md
-updated: 2026-11-25
+  - wiki/sources/descriptions/jeffreyesdavid__aegis-log-sentinel.md
+updated: 2026-11-26
 confidence: high
 ---
 
@@ -118,6 +119,8 @@ Multiplayer-FPS behavioural stacks such as [[aegis-ac-fps]] (phugiadang12; Pytho
 Spring Boot integrity backends such as [[gamerfield-backend]] (ArghadeepMisra; **Fairplay Arena**; JWT-scoped players/moderators/trusted automated judges; moderation queue with **confidence-gated** auto-ban proposals; **append-only PostgreSQL audit** for enforcement actions; ban appeals; Redis leaderboard ranks—separate **decision state** from rank cache and treat judge threshold breaches as review evidence before high-impact sanctions) illustrate production-style human-in-the-loop cheat ops on a stateless REST source of truth. (source: wiki/sources/descriptions/ArghadeepMisra__gamerfield-backend.md)
 
 Kafka streaming labs such as [[player-simulation]] (ArghadeepMisra; **Fairplay Telemetry**; Java simulator publishes high-rate match events with **seeded cheaters** and **ground-truth manifests**; replicated Kafka Streams hopping-window aimbot/speedhack rules emit **scored evidence**; optional verifier reconciles detector output and stream counts against simulator truth; exactly-once sequence-integrity exercises under failure—treat streaming flags as **measurement and calibration evidence**; pair with human review thresholds before mapping hop-window hits to enforcement ladders) complement desktop stream prototypes such as [[adaptive-anti-cheat-stream-processor]]. (source: wiki/sources/descriptions/ArghadeepMisra__player-simulation.md)
+
+Live-service triage pipelines such as [[aegis-log-sentinel]] (jeffreyesdavid; Python stdlib; SQLite ingest; **HMAC-SHA256** pseudonymization before external AI briefing; rule heuristics plus **Isolation Forest** behavioral scoring; severity-ranked trade-freeze/log-capture/**suspension recommendations**—routes ML hits to human review with **no auto-ban**; unittest-backed synthetic FP benches) rehearse privacy-preserving analyst workflows beside FPS SOC stacks such as [[aegis-ac-fps]]. (source: wiki/sources/descriptions/jeffreyesdavid__aegis-log-sentinel.md)
 
 ## Related
 

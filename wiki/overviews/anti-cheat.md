@@ -1113,6 +1113,7 @@ sources:
   - wiki/sources/descriptions/AmirrezaJaberi__FIREAC.md
   - wiki/sources/descriptions/KoJesko__PlasmaTrack-Dev.md
   - wiki/sources/descriptions/FOCUSGAMERCH__STP-Vanguard.md
+  - wiki/sources/descriptions/jeffreyesdavid__aegis-log-sentinel.md
 updated: 2026-11-26
 confidence: high
 ---
@@ -1650,6 +1651,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Server-log FPS evidence pipeline:** [[detect-fps-hackers]] (Nimdy/fpsdet; Python 3.11+ CLI; ingests dedicated-server JSON combat/movement logs; scores gear violations, statistical outliers, information-theoretic aim signals, and cross-account humanizer patterns; human-review case files without client installs or auto-bans; Unity/Unreal/Godot emitter examples; Grafana/Kibana/Splunk mappings; Anti Cheat / Open Source Anti Cheat System) beside demo-telemetry research such as [[yaacs-anticheat]] and behavioral labs such as [[apex-anticheat-lab]]. (source: wiki/sources/descriptions/Nimdy__detect-FPS-hackers.md)
 
 **Server-side behavioural FPS stack:** [[aegis-ac-fps]] (phugiadang12; Python FastAPI/UDP JSONL collector → SQLite; explainable turn/hit/headshot-rate rules + honeypot cheat simulators; Claude SOC analyst case triage; human-approved **delayed ban waves** + React dashboard + Discord alerts; no client driver or memory reads; Anti Cheat / Open Source Anti Cheat System) beside log-review CLIs such as [[detect-fps-hackers]] and shadow-mode APIs such as [[aimguard]]. (source: wiki/sources/descriptions/phugiadang12__aegis-ac.md)
+
+**Live-service MMO telemetry triage:** [[aegis-log-sentinel]] (jeffreyesdavid; Python stdlib + SQLite; **HMAC-SHA256** pseudonymization of player IDs/IPs before external AI summarization; rule flags for speed abuse, macro/smart-bot cadence, and economy spikes; **Isolation Forest** behavioral layer for jittered bots; prioritized analyst actions without auto-ban; synthetic benchmarks + unit tests for high-skill false-positive stress; Anti Cheat) beside behavioural FPS stacks such as [[aegis-ac-fps]] and unsupervised session ML such as [[anticheat-engine]]. (source: wiki/sources/descriptions/jeffreyesdavid__aegis-log-sentinel.md)
 
 **PUBG official API review pipeline:** [[pubg-match-pipeline]] (eysang-blip; Python; incremental PUBG match API JSON ingest with rate-limit handling; SQLite store with deterministic rebuilds; nine-check data-quality gate; SQL views ranking squad human players via per-match damage-per-minute z-scores and headshot-rate outliers for manual AC review—public match summaries only, not in-client telemetry; Anti Cheat / Open Source Anti Cheat System) beside batch PySpark pipelines such as [[pubg-bigdata-analytics]] and server-log FPS evidence tooling such as [[detect-fps-hackers]]. (source: wiki/sources/descriptions/eysang-blip__pubg-match-pipeline.md)
 
