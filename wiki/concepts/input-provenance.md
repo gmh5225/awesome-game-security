@@ -14,7 +14,8 @@ sources:
   - wiki/sources/descriptions/kyzoeth__bitgeist.md
   - wiki/sources/descriptions/DMN-Software__dmn_minigame.md
   - wiki/sources/descriptions/eric-rolph__serverless-time-trial-racing-game.md
-updated: 2026-11-24
+  - wiki/sources/descriptions/KoJesko__PlasmaTrack-Dev.md
+updated: 2026-11-26
 confidence: high
 ---
 
@@ -94,6 +95,8 @@ Async sim-racing reference [[serverless-time-trial-racing-game]] treats **Ed2551
 
 Embeddable minigame suite [[dmn-minigame]] accepts only **tick-aligned input logs** as **client-reported** telemetry, then derives leaderboard scores from a **server-side replay** of the shared seeded TypeScript simulation—label final scores **server-derived** and treat direct client score POSTs as untrusted unless replay-validated. (source: wiki/sources/descriptions/DMN-Software__dmn_minigame.md)
 
+VTC haul tracker [[plasmatrack-dev]] treats SCS/TruckersMP telemetry chunks uploaded from the Windows client as **client-reported** evidence, then rebuilds each job timeline through shared Rust **pt-core** on the Cloudflare Workers ingest path—label reconstructed haul scores and rule outcomes **server-derived**; local SQLite logging is a transport/cache layer, not authoritative scoring. (source: wiki/sources/descriptions/KoJesko__PlasmaTrack-Dev.md)
+
 ## Related
 
-[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[chompchomp-io]] · [[earlybuffering-gd]] · [[lolollbot]] · [[bitgeist]] · [[serverless-time-trial-racing-game]] · [[dmn-minigame]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[chompchomp-io]] · [[earlybuffering-gd]] · [[lolollbot]] · [[bitgeist]] · [[serverless-time-trial-racing-game]] · [[dmn-minigame]] · [[plasmatrack-dev]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
