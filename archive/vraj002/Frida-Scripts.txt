@@ -1,0 +1,2642 @@
+Project Path: arc_vraj002_Frida-Scripts_2m4zx7nm
+
+Source Tree:
+
+```txt
+arc_vraj002_Frida-Scripts_2m4zx7nm
+├── LICENSE
+├── README.md
+├── android-anti-exit-stealth.js
+├── conscrypt-okhttp-root-bypass.js
+├── frida-universal-bypass.js
+└── frida-universal-ios.js
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Vraj Patel
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+frida -U -f com.example.app -l frida-universal-bypass.js
+
+```
+
+`android-anti-exit-stealth.js`:
+
+```js
+/* --- ALL-IN-ONE BYPASS (Crash Fix + SSL + Anti-Exit) --- */
+
+// 1. NATIVE EXIT BLOCKER (Prevents "Process terminated")
+// We run this OUTSIDE Java.perform to catch early native checks
+try {
+    const exitPtr = Module.findExportByName(null, "exit");
+    if (exitPtr) {
+        Interceptor.replace(exitPtr, new NativeCallback(function(code) {
+            console.log("[!] BLOCKED NATIVE EXIT(" + code + ")");
+            // We do nothing, effectively swallowing the exit command
+        }, 'void', ['int']));
+        console.log("[+] Native 'exit' Hooked");
+    }
+} catch (e) { console.log("[-] Exit Hook Error: " + e.message); }
+
+try {
+    const killPtr = Module.findExportByName(null, "kill");
+    if (killPtr) {
+        Interceptor.replace(killPtr, new NativeCallback(function(pid, sig) {
+            console.log("[!] BLOCKED NATIVE KILL(pid=" + pid + ", sig=" + sig + ")");
+        }, 'int', ['int', 'int']));
+        console.log("[+] Native 'kill' Hooked");
+    }
+} catch (e) {}
+
+
+Java.perform(function() {
+    console.log("\n[*] STARTING JAVA LAYER HOOKS...");
+
+    // ============================================================
+    // 2. MAIN ACTIVITY CRASH FIX (Critical)
+    // ============================================================
+    try {
+        const MainActivity = Java.use("com.nayifat.mobile.MainActivity");
+        if (MainActivity.performRuntimeSecurityCheck) {
+            MainActivity.performRuntimeSecurityCheck.implementation = function() {
+                // Do nothing to prevent the SIGSEGV crash
+                console.log("[!] CRASH PREVENTED: Bypassed performRuntimeSecurityCheck"); 
+                return;
+            };
+        }
+    } catch(e) { console.log("[-] Crash Fix Error: " + e.message); }
+
+    // ============================================================
+    // 3. EMULATOR SPOOFING
+    // ============================================================
+    try {
+        const Build = Java.use("android.os.Build");
+        Build.FINGERPRINT.value = "google/oriole/oriole:13/TP1A.221005.002/9012097:user/release-keys";
+        Build.MODEL.value = "Pixel 6";
+        Build.MANUFACTURER.value = "Google";
+        Build.BRAND.value = "google";
+        Build.DEVICE.value = "oriole";
+        Build.PRODUCT.value = "oriole";
+        Build.TAGS.value = "release-keys";
+        console.log("[+] Emulator Fingerprint Spoofed");
+    } catch(e) {}
+
+    // ============================================================
+    // 4. ROBUST SSL PINNING BYPASS (From your previous script)
+    // ============================================================
+
+    // A. Custom TrustManager (Trusts Everything)
+    const X509TrustManager = Java.use("javax.net.ssl.X509TrustManager");
+    const TrustManager = Java.registerClass({
+        name: 'com.nayifat.bypass.TrustManager',
+        implements: [X509TrustManager],
+        methods: {
+            checkClientTrusted: function(chain, authType) {},
+            checkServerTrusted: function(chain, authType) {},
+            getAcceptedIssuers: function() { return []; }
+        }
+    });
+
+    // B. Hook SSLContext to use our TrustManager
+    try {
+        const SSLContext = Java.use("javax.net.ssl.SSLContext");
+        const SSLContext_init = SSLContext.init.overload('[Ljavax.net.ssl.KeyManager;', '[Ljavax.net.ssl.TrustManager;', 'java.security.SecureRandom');
+        SSLContext_init.implementation = function(keyManager, trustManager, secureRandom) {
+            // Replace the app's TrustManager with ours
+            SSLContext_init.call(this, keyManager, [TrustManager.$new()], secureRandom);
+        };
+        console.log("[+] SSLContext Hooked");
+    } catch(e) {}
+
+    // C. OkHttp CertificatePinner (Critical for modern apps)
+    try {
+        const CertificatePinner = Java.use("okhttp3.CertificatePinner");
+        CertificatePinner.check.overload('java.lang.String', 'java.util.List').implementation = function(str, list) {
+            console.log("[+] Bypassed OkHttp Pinner: " + str);
+            return; // Do nothing, allowing the connection
+        };
+    } catch(e) {}
+
+    try {
+        const PinnerBuilder = Java.use("okhttp3.CertificatePinner$Builder");
+        PinnerBuilder.add.implementation = function(pattern, pins) {
+            return this; // Ignore adding pins
+        };
+    } catch(e) {}
+
+    // D. React Native Pinning (Specific to Nayifat)
+    try {
+        const RNPinningSsl = Java.use("com.nayifat.mobile.RNPinningSsl");
+        const Promise = Java.use("com.facebook.react.bridge.Promise");
+
+        // We override the getStatus method to always return Success/False
+        RNPinningSsl.getStatus.overload('java.lang.String', 'java.lang.String', 'java.lang.String', 'com.facebook.react.bridge.Promise').implementation = function(u, f, s, promise) {
+            console.log("[+] RNPinningSsl Hit");
+            // Resolve the promise with FALSE (No error/No pinning issue)
+            const JBoolean = Java.use("java.lang.Boolean");
+            promise.resolve(JBoolean.valueOf(false)); 
+            return;
+        };
+    } catch(e) { console.log("[-] RNPinningSsl hook error: " + e.message); }
+
+    // E. Proxy Selector (Fixes connection drops on Emulator)
+    try {
+        const ProxySelector = Java.use("java.net.ProxySelector");
+        const Proxy = Java.use("java.net.Proxy");
+        const InetSocketAddress = Java.use("java.net.InetSocketAddress");
+        const ArrayList = Java.use("java.util.ArrayList");
+
+        const MyProxySelector = Java.registerClass({
+            name: 'com.nayifat.bypass.ProxySelector',
+            superClass: ProxySelector, 
+            methods: {
+                select: function(uri) {
+                    const list = ArrayList.$new();
+                    // Force direct connection or Emulator Proxy (10.0.2.2)
+                    // Usually Proxy.NO_PROXY is safest for bypassing interception
+                    list.add(Proxy.NO_PROXY.value);
+                    return list;
+                },
+                connectFailed: function(uri, sa, ioe) {}
+            }
+        });
+        ProxySelector.setDefault(MyProxySelector.$new());
+        console.log("[+] ProxySelector Fixed");
+    } catch(e) {}
+
+    // ============================================================
+    // 5. ROOT / FRIDA DETECTION
+    // ============================================================
+    try {
+        const FridaDet = Java.use("com.nayifat.mobile.FridaDetectionModule");
+        // Helper to resolve promises safely
+        FridaDet.getFridaStatus.implementation = function(promise) {
+            const JBoolean = Java.use("java.lang.Boolean");
+            promise.resolve(JBoolean.valueOf(false));
+        };
+
+        // Force all boolean checks to False
+        const boolMethods = [
+            "isFridaRunning", "detectFridaStrings", "isFridaInLoadedLibraries",
+            "isFridaInMemoryMaps", "isFridaPortOpen", "isFridaServerRunning_Process",
+            "isFridaServerRunning_executable", "isFridaServerRunning_port"
+        ];
+        boolMethods.forEach(function(m) {
+            FridaDet[m].implementation = function() { return false; };
+        });
+    } catch(e) {}
+
+    try {
+        const JailMonkey = Java.use("com.gantix.JailMonkey.JailMonkeyModule");
+        const HashMap = Java.use("java.util.HashMap");
+        const JString = Java.use("java.lang.String");
+        const JBoolean = Java.use("java.lang.Boolean");
+
+        JailMonkey.getConstants.implementation = function() {
+            var map = HashMap.$new();
+            map.put(JString.$new("isJailBroken"), JBoolean.valueOf(false));
+            map.put(JString.$new("canMockLocation"), JBoolean.valueOf(false));
+            map.put(JString.$new("isRooted"), JBoolean.valueOf(false));
+            return map;
+        };
+    } catch(e) {}
+
+    console.log("[*] SCRIPT LOADED. WAITING FOR APP...");
+});
+
+```
+
+`conscrypt-okhttp-root-bypass.js`:
+
+```js
+/**
+* 2026 Targeted VAPT Master (Crash-Free Proxy Edition)
+* Fixed: Updated Conscrypt signature based on Frida error log to stop app hanging.
+*/
+
+const forbiddenPaths = [
+    "su", "magisk", "busybox", "supersu", "superuser", "ksu", "daemonsu", "logswitch",
+    "9a5ba575.0", "9a5ba575.1", "9dad1a1b.0", "b9ebaf8b.0", "cacerts-removed"
+];
+
+// !!! MUST CHANGE THIS TO YOUR BURP SUITE IP !!!
+const BURP_HOST = "172.16.15.67"; 
+const BURP_PORT = 8081;
+
+Java.perform(function() {
+    console.log("[*] Initializing Crash-Free Proxy Master Bypass...");
+
+    // ==========================================
+    // 1. LOW-LEVEL CONSCRYPT SSL BYPASS (Fixed Signature)
+    // ==========================================
+    try {
+        const TrustManagerImpl = Java.use('com.android.org.conscrypt.TrustManagerImpl');
+        const ArrayList = Java.use("java.util.ArrayList");
+
+        // Fixed signature provided by your device's Frida log
+        TrustManagerImpl.checkTrustedRecursive.overload(
+            '[Ljava.security.cert.X509Certificate;', '[B', '[B', 'java.lang.String', 'boolean', 'java.util.ArrayList', 'java.util.ArrayList', 'java.util.Set'
+        ).implementation = function(certs, ocspData, tlsSctData, host, clientAuth, untrustedChain, trustAnchorChain, used) {
+            console.log("[+] Conscrypt: Forced OS to trust Burp certificate!");
+            return ArrayList.$new(); // Returns empty list (Valid)
+        };
+    } catch (e) {
+        console.log("[-] Conscrypt hook failed: " + e);
+    }
+
+    // Add generic TrustManager bypass just in case standard Java networking is used
+    try {
+        const X509TrustManager = Java.use('javax.net.ssl.X509TrustManager');
+        const TrustAllManager = Java.registerClass({
+            name: 'com.sec.TrustAllManager',
+            implements: [X509TrustManager],
+            methods: {
+                checkClientTrusted: function(chain, authType) {},
+                checkServerTrusted: function(chain, authType) {},
+                getAcceptedIssuers: function() { return []; }
+            }
+        });
+        const tmArray = Java.array('javax.net.ssl.TrustManager', [TrustAllManager.$new()]);
+        const SSLContext = Java.use('javax.net.ssl.SSLContext');
+        const sslInit = SSLContext.init.overload('[Ljavax.net.ssl.KeyManager;', '[Ljavax.net.ssl.TrustManager;', 'java.security.SecureRandom');
+        sslInit.implementation = function(km, tm, sr) {
+            sslInit.call(this, km, tmArray, sr);
+        };
+    } catch (e) {}
+
+    // ==========================================
+    // 2. OBFUSCATED OKHTTP BYPASS (g7.C)
+    // ==========================================
+    try {
+        const ObfuscatedBuilder = Java.use("g7.C$a");
+
+        // Strip the Certificate Pinner
+        ObfuscatedBuilder.d.overload('g7.h').implementation = function(pinner) {
+            console.log("[+] Stripped Obfuscated CertificatePinner (g7.h)");
+            return this; 
+        };
+
+        // Reflect the Proxy
+        ObfuscatedBuilder.b.overload().implementation = function() {
+            const Proxy = Java.use('java.net.Proxy');
+            const ProxyType = Java.use('java.net.Proxy$Type');
+            const InetSocketAddress = Java.use('java.net.InetSocketAddress');
+
+            const burpAddress = InetSocketAddress.$new(BURP_HOST, BURP_PORT);
+            const burpProxy = Proxy.$new(ProxyType.HTTP.value, burpAddress);
+
+            try {
+                const builderClass = Java.use("g7.C$a").class;
+
+                // Inject Proxy (Field 'm')
+                const proxyField = builderClass.getDeclaredField("m");
+                proxyField.setAccessible(true);
+                proxyField.set(this, burpProxy);
+
+                // Clear ProxySelector (Field 'n')
+                const selectorField = builderClass.getDeclaredField("n");
+                selectorField.setAccessible(true);
+                selectorField.set(this, null);
+
+                console.log("[+] Proxy Reflection Success: Traffic forced to Burp!");
+            } catch(err) {}
+
+            return this.b();
+        };
+    } catch(e) {}
+
+    // ==========================================
+    // 3. STANDARD URL PROXY FORCER
+    // ==========================================
+    try {
+        const URL = Java.use('java.net.URL');
+        const Proxy = Java.use('java.net.Proxy');
+        const ProxyType = Java.use('java.net.Proxy$Type');
+        const InetSocketAddress = Java.use('java.net.InetSocketAddress');
+        const burpAddress = InetSocketAddress.$new(BURP_HOST, BURP_PORT);
+        const burpProxy = Proxy.$new(ProxyType.HTTP.value, burpAddress);
+
+        URL.openConnection.overload().implementation = function() { return this.openConnection(burpProxy); };
+        URL.openConnection.overload('java.net.Proxy').implementation = function(proxy) { return this.openConnection(burpProxy); };
+    } catch(e) {}
+
+    // ==========================================
+    // 4. JAVA & NATIVE STEALTH
+    // ==========================================
+    try {
+        const File = Java.use("java.io.File");
+        const exists = File.exists.overload();
+        exists.implementation = function() {
+            try {
+                const path = this.getAbsolutePath();
+                if (path && forbiddenPaths.some(p => path.toLowerCase().indexOf(p) !== -1)) return false; 
+            } catch (err) {}
+            return exists.call(this);
+        };
+    } catch(e) {}
+
+    const fakePathPtr = Memory.allocUtf8String("/dev/null");
+
+    try {
+        const fopen = Module.findExportByName("libc.so", "fopen");
+        if (fopen) {
+            Interceptor.attach(fopen, {
+                onEnter: function(args) {
+                    try {
+                        const path = args[0].readUtf8String();
+                        if (path && forbiddenPaths.some(p => path.toLowerCase().indexOf(p) !== -1)) args[0] = fakePathPtr; 
+                    } catch(err) {}
+                }
+            });
+        }
+        const access = Module.findExportByName("libc.so", "access");
+        if (access) {
+            Interceptor.attach(access, {
+                onEnter: function(args) {
+                    try {
+                        const path = args[0].readUtf8String();
+                        if (path && forbiddenPaths.some(p => path.toLowerCase().indexOf(p) !== -1)) args[0] = fakePathPtr; 
+                    } catch(err) {}
+                }
+            });
+        }
+    } catch(e) {}
+
+    // ==========================================
+    // 5. GHOST UI & APP STEALTH
+    // ==========================================
+    try {
+        const Dialog = Java.use("android.app.Dialog");
+        const showDialog = Dialog.show.overload();
+        showDialog.implementation = function() {
+            try {
+                showDialog.call(this); 
+                this.dismiss();  
+            } catch(e) {}      
+        };
+        const Toast = Java.use("android.widget.Toast");
+        Toast.show.implementation = function() { };
+    } catch(e) { }
+
+    const rootPkgs = [
+        "com.topjohnwu.magisk", "eu.chainfire.supersu", "com.noshufou.android.su", 
+        "me.weishu.kernelsu", "com.thirdparty.superuser"
+    ];
+    try {
+        const PM = Java.use("android.app.ApplicationPackageManager");
+        const getPkgInfo = PM.getPackageInfo.overload('java.lang.String', 'int');
+        getPkgInfo.implementation = function(pkg, flags) {
+            if (rootPkgs.indexOf(pkg) !== -1) throw Java.use("android.content.pm.PackageManager$NameNotFoundException").$new();
+            return getPkgInfo.call(this, pkg, flags);
+        };
+
+        const Runtime = Java.use("java.lang.Runtime");
+        Runtime.exec.overload('java.lang.String').implementation = function(cmd) {
+            if (cmd.indexOf("su") !== -1) return this.exec("ls /dev/null");
+            return this.exec(cmd);
+        };
+    } catch(e) {}
+
+    console.log("[+] Setup Complete. Awaiting stable traffic...");
+});
+
+```
+
+`frida-universal-bypass.js`:
+
+```js
+/*!
+ * frida-universal-bypass.js  —  single-file harness, v2.0
+ *
+ * Scope: Android root/hiding/anti-Frida/anti-debug + TLS pinning bypass.
+ * Rule: the tool masks SOURCES (files, props, pm, lists), hook points, and
+ * trust decisions — not verdicts. Any on-the-fly detection the target invents
+ * still reads through a masked surface.
+ *
+ * "Dynamic" discovery: (a) live ClassLoader.loadClass watcher instead of a
+ * fixed class list, (b) real system state read from inside the process before
+ * spoofing, (c) per-symbol/per-layout probing with fallbacks.
+ *
+ * Compat: Frida 16 + 17 (API shims below), Android API 24-35, arm64/arm.
+ * Usage: attach to the app process (-f spawn recommended). See README.md.
+ *   - frida-tools >= 12: spawn resumes by DEFAULT; pass --pause only if you
+ *     need hooks installed before the app's earliest frames.
+ *   - Raw create_script() on Frida 17 has no Java bridge bundled: this script
+ *     degrades to native-only and logs it. Use the frida CLI or frida-compile
+ *     (or frida-python >= 16.5 which registers the lazy bridge).
+ */
+
+'use strict';
+
+/* ------------------------------------------------------------------ */
+/* 0. compat shims (Frida 16 <-> 17)                                   */
+/* ------------------------------------------------------------------ */
+
+function getGlobalExport(name) {
+  try {
+    if (typeof Module.findGlobalExportByName === 'function') return Module.findGlobalExportByName(name);
+    if (typeof Module.getGlobalExportByName === 'function') return Module.getGlobalExportByName(name);
+    return Module.findExportByName(null, name);
+  } catch (e) { return null; }
+}
+
+function getModuleExport(mod, name) {
+  if (!mod) return null;
+  try { if (typeof mod.findExportByName === 'function') return mod.findExportByName(name); } catch (e) {}
+  try { if (typeof Module.findExportByName === 'function') return Module.findExportByName(mod.name, name); } catch (e) {}
+  try { if (typeof mod.findGlobalExportByName === 'function') return mod.findGlobalExportByName(name); } catch (e) {}
+  return null;
+}
+
+function tryGetModule(name) {
+  try { return Process.getModuleByName(name); } catch (e) { return null; }
+}
+
+function modFind(name) {
+  try {
+    if (typeof Process.findModuleByName === 'function') return Process.findModuleByName(name);
+  } catch (e) {}
+  return tryGetModule(name);
+}
+
+function modEnum() {
+  try {
+    if (typeof Process.enumerateModules === 'function') return Process.enumerateModules();
+  } catch (e) {}
+  return [];
+}
+
+function modFindByAddress(addr) {
+  try {
+    if (typeof Process.findModuleByAddress === 'function') return Process.findModuleByAddress(addr);
+  } catch (e) {}
+  try {
+    if (typeof Process.getModuleByAddress === 'function') return Process.getModuleByAddress(addr);
+  } catch (e) {}
+  return null;
+}
+
+const hasSymtab = (mod) => {
+  try { return mod.enumerateSymbols().length > 0; } catch (e) { return false; }
+};
+
+/* ------------------------------------------------------------------ */
+/* 1. config + logging                                                 */
+/* ------------------------------------------------------------------ */
+
+function parseEnv() {
+  try {
+    if (typeof process === 'undefined' || !process.env || !process.env.BYPASS_CFG) return {};
+    return JSON.parse(process.env.BYPASS_CFG);
+  } catch (e) { return {}; }
+}
+
+const CFG = Object.assign({
+  hide: true,
+  ssl: true,
+  root: true,
+  antiFrida: true,
+  antiDebug: true,
+  integrity: true,
+  spoofProps: true,
+  verbose: false,
+  playIntegrityToken: '',
+  safetynetJws: '',
+}, parseEnv());
+
+const STATS = {
+  hooks: 0, hidden: 0, mapsPatched: 0, classesSeen: 0, checks: 0, errors: 0,
+  installed: {}, errs: [],
+};
+const LEAKS = [];
+
+function log(m) { try { send({ t: 'log', m: '[*] ' + m }); } catch (e) {} }
+function vlog(m) { if (CFG.verbose) log(m); }
+function hit(what, detail) {
+  STATS.checks++;
+  vlog(what + (detail ? ' <' + detail + '>' : ''));
+  try { send({ t: 'hit', m: what, d: detail || '' }); } catch (e) {}
+}
+function guard(label, fn) {
+  try { const r = fn(); STATS.hooks++; return r; } catch (e) {
+    STATS.errors++;
+    if (STATS.errs.length < 80) STATS.errs.push(label + ': ' + e);
+    vlog('guard ' + label + ': ' + e);
+    return null;
+  }
+}
+const rs = (p, max) => {
+  try { return p && !p.isNull() ? p.readCString(max || 4096) : null; } catch (e) { return null; }
+};
+const strPtr = (s) => Memory.allocUtf8String(s);
+
+/* ------------------------------------------------------------------ */
+/* 2. dynamic system description (real values, read before spoofing)   */
+/* ------------------------------------------------------------------ */
+
+const SYS = { sdk: 0, abi: Process.arch, slug: 'unknown', basename: 'device', spoofFp: '' };
+
+// raw syscall, bypasses our own property hook
+function rawProp(key) {
+  try {
+    if (!W.propGet) return '';
+    const out = Memory.alloc(96);
+    const n = W.propGet(strPtr(key), out);
+    return n > 0 ? rs(out) || '' : '';
+  } catch (e) { return ''; }
+}
+
+function describe() {
+  SYS.sdk = parseInt(rawProp('ro.build.version.sdk'), 10) || 0;
+  const rel = String(rawProp('ro.build.version.release') || '0');
+  SYS.slug = rel.replace(/[^0-9.]/g, '') + '.0_sdk' + SYS.sdk;
+  SYS.basename = String(rawProp('ro.product.model') || 'device').replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 40);
+  SYS.spoofFp = 'google/husky/husky:14/' + SYS.slug + '/1:user/release-keys';
+  log('sdk=' + SYS.sdk + ' abi=' + SYS.abi + ' fp=' + SYS.spoofFp);
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. hide tables                                                      */
+/* ------------------------------------------------------------------ */
+
+const FILTER_PATHS = new Set([
+  '/system/bin/su', '/system/xbin/su', '/sbin/su', '/su/bin/su', '/vendor/bin/su',
+  '/system/sbin/su', '/system/bin/.ext', '/data/local/su', '/data/local/xbin/su',
+  '/data/local/bin/su', '/system/xbin/daemonsu', '/dev/com.koushikdutta.superuser.daemon',
+  '/system/bin/failsafe/su', '/debug_ramdisk/su', '/sbin/magisk', '/system/bin/magisk',
+  '/system/xbin/magisk', '/vendor/bin/magisk', '/data/adb/magisk', '/data/adb/magisk.db',
+  '/data/adb/magisk.img', '/data/adb/ksu', '/data/adb/ksud', '/data/adb/ap', '/data/adb/apd',
+  '/data/adb/modules', '/data/adb/post-fs-data.d', '/data/adb/service.d', '/init.magisk.rc',
+  '/system/app/Superuser.apk', '/system/app/SuperSU', '/system/app/SuperSU.apk',
+  '/system/lib/libmagisk.so', '/system/lib64/libmagisk.so', '/sbin/.magisk',
+  '/data/data/eu.chainfire.supersu', '/data/user/0/eu.chainfire.supersu',
+  '/data/data/com.topjohnwu.magisk', '/data/user/0/com.topjohnwu.magisk',
+  '/data/data/com.noshufou.android.su', '/data/data/com.koushikdutta.superuser',
+  '/data/data/com.kingroot.kinguser', '/data/data/me.weishu.kernelsu',
+  '/proc/self/mounts', '/proc/self/mountinfo',
+]);
+
+const FILTER_PROPS = new Map([
+  ['ro.debuggable', '0'],
+  ['ro.secure', '1'],
+  ['ro.build.tags', 'release-keys'],
+  ['ro.build.type', 'user'],
+  ['ro.adb.secure', '1'],
+  ['service.adb.root', '1'],
+  ['ro.boot.verifiedbootstate', 'green'],
+  ['ro.boot.veritymode', 'enforcing'],
+  ['ro.build.selinux', '1'],
+  ['ro.crypto.state', 'encrypted'],
+  ['init.svc.magiskd', ''],
+  ['ro.magisk.version', ''],
+]);
+
+const HIDE_SUB = /(\/su$|\/su\/|magisk|supersu|superuser|kinguser|kingroot|kernelsu|\/ksu|apatch|zygisk|shamiko|riru|xposed|lsposed|frida|gadget|linjector|hidemyapplist|playintegrityfix|tricky\.store|\/data\/adb|mountinfo$|mounts$)/i;
+const HIDE_BASE = /^(su|magisk\w*|supersu|superuser|daemonsu|ksu|ksud|apd|frida-server\w*|frida-agent\w*|.*gadget.*\.so|libgum\w*|linjector\w*|.*xposed.*\.jar|libzygisk.*|shamiko.*)$/i;
+
+const normalize = (s) => '/' + s.split('/').filter(Boolean).join('/');
+
+function hiddenInfo(s) {
+  if (!s || s.length < 3) return null;
+  if (s.indexOf('/proc/') === 0 && /maps$/.test(s)) return { kind: 'maps', b: 'maps' };
+  if (s.indexOf('/proc/') === 0 && /(mounts|mountinfo)$/.test(s)) return { kind: 'any', b: 'mounts' };
+  const p = normalize(s);
+  if (!HIDE_SUB.test(p)) return null;
+  const b = p.split('/').pop();
+  if (FILTER_PATHS.has(p) || HIDE_BASE.test(b)) return { kind: 'any', b };
+  return null;
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. native primitives                                                */
+/* ------------------------------------------------------------------ */
+
+const A = {};
+const W = {};
+const HOOKED = new Set();
+
+function libc() {
+  let l = modFind('libc.so') || (SYS.abi.indexOf('x86') >= 0 ? modFind('libc.so.6') : null);
+  for (let i = 0; i < 40 && !l; i++) { Thread.sleep(0.05); l = modFind('libc.so'); }
+  return l;
+}
+
+function bind(l) {
+  const nf = (pn, ret, args) => { const p = getModuleExport(l, pn); if (p) W[args.k] = new NativeFunction(p, ret, args.t); return p; };
+  A.readdir = getModuleExport(l, 'readdir') || getModuleExport(l, 'readdir64');
+  A.fmemopen = getModuleExport(l, 'fmemopen');
+  A.write = getModuleExport(l, 'write');
+  A.close = getModuleExport(l, 'close');
+  A.lseek = getModuleExport(l, 'lseek') || getModuleExport(l, 'lseek64');
+  A.memfd = getModuleExport(l, 'memfd_create');
+  A.propGet = getModuleExport(l, '__system_property_get') || getModuleExport(l, 'getprop');
+  A.errno = getModuleExport(l, '__errno');
+  if (A.write) W.write = new NativeFunction(A.write, 'int', ['int', 'pointer', 'size_t']);
+  if (A.close) W.close = new NativeFunction(A.close, 'int', ['int']);
+  if (A.lseek) W.lseek = new NativeFunction(A.lseek, 'long', ['int', 'long', 'int']);
+  if (A.memfd) W.memfd = new NativeFunction(A.memfd, 'int', ['pointer', 'unsigned int']);
+  if (A.fmemopen) W.fmemopen = new NativeFunction(A.fmemopen, 'pointer', ['pointer', 'size_t', 'pointer']);
+  if (A.propGet) W.propGet = new NativeFunction(A.propGet, 'int', ['pointer', 'pointer']);
+  if (A.errno) W.errno = new NativeFunction(A.errno, 'pointer', []);
+}
+
+// a "missing file" verdict must look like one: ENOENT, not garbage-success
+function enoent() {
+  try { if (W.errno) W.errno().writeInt(2); } catch (e) {}
+  return new NativePointer(-1);
+}
+
+function writeAll(fd, buf, len) {
+  let off = 0;
+  while (off < len) { const n = W.write(fd, buf.add(off), len - off); if (n <= 0) return false; off += n; }
+  return true;
+}
+
+// fd whose read() returns a fabricated file (memfd, no shm residue)
+function anonFd(txt) {
+  if (!W.memfd || !W.write) return -1;
+  let fd = -1;
+  try { fd = W.memfd(strPtr('fb'), 0); } catch (e) { return -1; }
+  if (fd < 0) return -1;
+  if (!writeAll(fd, strPtr(txt), txt.length)) { try { W.close(fd); } catch (e) {} return -1; }
+  try { W.lseek(fd, 0, 0); } catch (e) {}
+  return fd;
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. maps sanitiser                                                   */
+/* ------------------------------------------------------------------ */
+
+const MAPS_BAD = /(frida|gum-js|gum|linjector|gadget|magisk|supersu|superuser|kinguser|kingroot|kernelsu|ksud|apatch|zygisk|shamiko|riru|xposed|lsposed|playintegrityfix|tricky\.store|hidemyapplist|\/data\/adb|re\.frida|libgum)/i;
+
+const isMapsPath = (p) =>
+  !!p && /^\/proc\/(self|\d+)(\/task\/\d+)?\/maps(\.jsformat)?$/.test(p);
+
+function readText(path) {
+  try {
+    const f = new File(path, 'r');
+    const u = new Uint8Array(f.readAll());
+    f.close();
+    let s = '';
+    const CH = 8192;
+    for (let i = 0; i < u.length; i += CH) s += String.fromCharCode.apply(null, u.subarray(i, i + CH));
+    return s;
+  } catch (e) { return ''; }
+}
+
+function sanitizeMaps(path) {
+  const real = readText(path);
+  let txt;
+  if (!real) {
+    txt = '7f0000000000-7f0000100000 r--p 00000000 fd:00 1 /system/lib64/libc.so\n';
+  } else {
+    const self = /\/self/.test(path) ? 'self' : String(Process.id);
+    const keep = [];
+    const lines = real.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const ln = lines[i];
+      if (!ln) continue;
+      if (MAPS_BAD.test(ln)) continue;
+      if (ln.indexOf('/proc/' + self) < 0 && /\bfd:\d+\b/.test(ln) && !/\s\/\S+$/.test(ln)) continue; // deleted mappings
+      keep.push(ln);
+    }
+    txt = keep.join('\n') + '\n';
+  }
+  STATS.mapsPatched++;
+  return txt;
+}
+
+/* ------------------------------------------------------------------ */
+/* 6. fs hooks: hide + maps (single combined pass, no double hooking)  */
+/* ------------------------------------------------------------------ */
+
+function hookExport(mod, name, handlers) {
+  const key = mod.name + '!' + name;
+  if (HOOKED.has(key)) return null;
+  const addr = getModuleExport(mod, name);
+  if (!addr) return null;
+  // stat64/readdir64 etc. are __strong_alias of stat/readdir: same address.
+  // Attaching twice to one address double-runs handlers.
+  const akey = 'a!' + addr.toString();
+  HOOKED.add(key);
+  if (HOOKED.has(akey)) return addr;
+  HOOKED.add(akey);
+  const where = (modFindByAddress(addr) || mod).name;
+  STATS.installed[where + '!' + name] = 1;
+  guard(name, () => { Interceptor.attach(addr, handlers); });
+  return addr;
+}
+
+function installFsHooks(l) {
+  if (!CFG.hide && !CFG.antiFrida) return;
+  const statSize = SYS.abi === 'arm64' ? 48 : 44;
+
+  const openish = (idx) => ({
+    onEnter(args) {
+      const p = rs(args[idx]);
+      this.path = p;
+      this.sp = args[idx + 1];
+      this.maps = CFG.antiFrida && isMapsPath(p);
+      this.h = this.maps ? null : (CFG.hide ? hiddenInfo(p) : null);
+      if (this.maps) hit('maps open');
+      if (this.h) { STATS.hidden++; hit('hide open ' + this.h.b); }
+    },
+    onLeave(r) {
+      if (this.h) return enoent();
+      if (!this.maps) return r;
+      const fd = anonFd(sanitizeMaps(this.path));
+      return fd >= 0 ? new NativePointer(fd) : r;
+    },
+  });
+
+  const pather = (idx, tag) => ({
+    onEnter(args) {
+      const p = rs(args[idx]);
+      this.h = CFG.hide ? hiddenInfo(p) : null;
+      if (this.h) { STATS.hidden++; hit('hide ' + tag + ' ' + this.h.b); }
+    },
+    onLeave(r) { return this.h ? enoent() : r; },
+  });
+
+  const statish = (idx, sizeOff) => ({
+    onEnter(args) {
+      const p = rs(args[idx]);
+      this.sp = args[idx + 1];
+      this.maps = CFG.antiFrida && isMapsPath(p);
+      this.h = this.maps ? null : (CFG.hide ? hiddenInfo(p) : null);
+      if (this.maps) hit('maps stat');
+      if (this.h) { STATS.hidden++; hit('hide stat ' + this.h.b); }
+    },
+    onLeave(r) {
+      if (this.h) return enoent();
+      if (this.maps && sizeOff) { try { this.sp.add(sizeOff).writeU64(8192); } catch (e) {} }
+      return r;
+    },
+  });
+
+  openish.bind(null);
+  for (const n of ['open', 'open64', 'openat64', '__open_2']) hookExport(l, n, openish(0));
+  for (const n of ['openat', '__openat_2']) hookExport(l, n, openish(1));
+
+  for (const n of ['access', 'faccessat', 'faccessat2']) hookExport(l, n, pather(n === 'access' ? 0 : 1, n));
+  for (const n of ['stat', 'stat64', 'lstat', 'lstat64']) hookExport(l, n, statish(0, statSize));
+  hookExport(l, '__statx', statish(0, 0));
+
+  hookExport(l, 'fopen', {
+    onEnter(args) {
+      const p = rs(args[0]);
+      this.path = p;
+      this.maps = CFG.antiFrida && isMapsPath(p);
+      this.h = this.maps ? null : (CFG.hide ? hiddenInfo(p) : null);
+      if (this.maps) hit('maps fopen');
+      if (this.h) { STATS.hidden++; hit('hide fopen ' + this.h.b); }
+    },
+    onLeave(r) {
+      if (this.h) return new NativePointer(0);
+      if (!this.maps || !W.fmemopen) return r;
+      const txt = sanitizeMaps(this.path);
+      const buf = strPtr(txt);
+      LEAKS.push(buf);
+      return W.fmemopen(buf, txt.length, strPtr('r'));
+    },
+  });
+  // bionic: fopen64 is a strong alias of fopen on 64-bit — dedupe handles it
+  hookExport(l, 'fopen64', getModuleExport(l, 'fopen') ? {
+    onEnter(args) {
+      const p = rs(args[0]);
+      this.path = p;
+      this.maps = CFG.antiFrida && isMapsPath(p);
+      this.h = this.maps ? null : (CFG.hide ? hiddenInfo(p) : null);
+      if (this.maps) hit('maps fopen64');
+      if (this.h) { STATS.hidden++; hit('hide fopen64 ' + this.h.b); }
+    },
+    onLeave(r) {
+      if (this.h) return new NativePointer(0);
+      if (!this.maps || !W.fmemopen) return r;
+      const txt = sanitizeMaps(this.path);
+      const buf = strPtr(txt);
+      LEAKS.push(buf);
+      return W.fmemopen(buf, txt.length, strPtr('r'));
+    },
+  } : null);
+
+  hookExport(l, 'opendir', {
+    onEnter(args) {
+      this.h = CFG.hide ? hiddenInfo(rs(args[0])) : null;
+      if (this.h) { STATS.hidden++; hit('hide opendir ' + this.h.b); }
+    },
+    onLeave(r) {
+      if (this.h) return new NativePointer(0);
+      if (!r.isNull() && CFG.hide) keepDir(r);
+      return r;
+    },
+  });
+
+  hookExport(l, 'system', {
+    onEnter(args) { this.cmd = rs(args[0]) || ''; },
+    onLeave(r) {
+      if (this.cmd && /\bsu\b|magisk|which|mount|getprop/i.test(this.cmd)) { hit('system ' + this.cmd); return new NativePointer(0); }
+      return r;
+    },
+  });
+
+  if (CFG.hide || CFG.spoofProps) {
+    const addr = getModuleExport(l, '__system_property_get');
+    if (addr && !HOOKED.has(l.name + '!prop')) {
+      HOOKED.add(l.name + '!prop');
+      STATS.installed[(modFindByAddress(addr) || l).name + '!__system_property_get'] = 1;
+      guard('prop', () => {
+        Interceptor.attach(addr, {
+          onEnter(args) {
+            const k = rs(args[0]);
+            this.k = k;
+            this.out = args[1];
+            this.v = null;
+            if (CFG.spoofProps && FILTER_PROPS.has(k)) this.v = FILTER_PROPS.get(k);
+            if (k === 'ro.build.fingerprint') this.v = SYS.spoofFp;
+            if (this.v) hit('hide prop ' + k);
+          },
+          onLeave(r) {
+            if (this.v === null || this.v === '') return r;
+            try { this.out.writeUtf8String(this.v); return new NativePointer(this.v.length); } catch (e) { return r; }
+          },
+        });
+      });
+    }
+  }
+}
+
+/* --- readdir filtering (dirs opened while the hook was live) -------- */
+
+const DIRS = new Set();
+
+function keepDir(dirp) {
+  DIRS.add(dirp.toString());
+  if (DIRS.size > 8192) DIRS.clear();
+  if (W.readdir) return;
+
+  guard('readdir', () => {
+    const addr = getModuleExport(libc(), 'readdir') || getModuleExport(libc(), 'readdir64');
+    if (!addr) return;
+    W.readdir = new NativeFunction(addr, 'pointer', ['pointer']);
+    Interceptor.replace(addr, new NativeCallback(function (d) {
+      const k = d.toString();
+      for (let i = 0; i < 256; i++) {
+        // advance via the REAL readdir: returning NULL here would stall the
+        // caller's loop; skipping hidden entries by consuming is the safe form
+        const e = W.readdir(d);
+        if (e.isNull()) return e;
+        if (!DIRS.has(k)) return e;
+        const name = rs(e.add(19), 255); // dirent: d_name @19
+        if (!name || name === '.') continue;
+        if (hiddenInfo('/' + name)) continue;
+        return e;
+      }
+      return ptr(0);
+    }, 'pointer', ['pointer']));
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* 7. anti-Frida / anti-debug                                          */
+/* ------------------------------------------------------------------ */
+
+let UNLINKED = 0;
+
+function installAntiFrida(l) {
+  if (!CFG.antiFrida) return;
+
+  hookExport(l, 'pthread_getname_np', {
+    onEnter(args) { this.buf = args[1]; },
+    onLeave(r) {
+      if (r.toInt32() !== 0) return r;
+      const cur = rs(this.buf, 32);
+      if (!cur) return r;
+      let rep = null;
+      if (/^gmain$|^gdbus$/.test(cur)) rep = 'main';
+      else if (/gum-js-loop|gum-js|pool-frida|gum-eh/.test(cur)) rep = 'mali-render';
+      else if (/linjector/.test(cur)) rep = 'adbd';
+      if (!rep) return r;
+      try { this.buf.writeUtf8String(rep); return new NativePointer(rep.length); } catch (e) { return r; }
+    },
+  });
+
+  hookExport(l, 'ptrace', {
+    onEnter(args) { this.req = args[0].toInt32(); },
+    onLeave(r) { return this.req === 0 ? new NativePointer(0) : r; },
+  });
+
+  unhookSoinfo();
+}
+
+// drop frida's loader chains from the module list so dl_iterate_phdr /
+// map "shared object" entries stop advertising it
+function unhookSoinfo() {
+  const arm64 = SYS.abi === 'arm64';
+  const OFF = arm64 ? { next: 0x18, realpath: 0x40, soname: 0x48 }
+                    : { next: 0x10, realpath: 0x28, soname: 0x30 };
+
+  guard('soinfo', () => {
+    const mods = modEnum();
+    const all = [];
+    for (let i = 0; i < mods.length; i++) {
+      const m = mods[i];
+      if (!hasSymtab(m)) continue;
+      try {
+        if (rs(m.base.add(OFF.realpath).readPointer()) !== m.path) continue;
+      } catch (e) { continue; }
+      all.push(m.base);
+    }
+    if (!all.length) { log('soinfo layout unknown (maps hooks only)'); return; }
+    const bad = all.filter((s) => /(frida|gum|linjector|gadget|re\.frida)/i.test(rs(s.add(OFF.realpath).readPointer()) || ''));
+    for (let i = 0; i < bad.length; i++) {
+      const t = bad[i];
+      let prevFields = 0;
+      for (let j = 0; j < all.length; j++) {
+        const s = all[j];
+        if (s.equals(t)) continue;
+        try {
+          if (s.add(OFF.next).readPointer().equals(t)) { s.add(OFF.next).writePointer(t.add(OFF.next).readPointer()); prevFields++; }
+        } catch (e) {}
+      }
+      try { t.add(OFF.next).writePointer(ptr(0)); } catch (e) {}
+      try { t.add(OFF.soname).writePointer(strPtr('libandroid.so')); } catch (e) {}
+      UNLINKED += prevFields;
+    }
+    log('soinfo chains unlinked=' + UNLINKED + ' modules=' + bad.length);
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. java helpers                                                     */
+/* ------------------------------------------------------------------ */
+
+const DONE = new Set();
+const WATCH = [];
+const FACTORIES = {};
+
+function useVia(name, loader) {
+  if (loader) {
+    try {
+      const h = loader.hashCode();
+      if (!FACTORIES[h]) FACTORIES[h] = Java.ClassFactory.get(loader);
+      return FACTORIES[h].use(name);
+    } catch (e) {}
+  }
+  return Java.use(name);
+}
+
+function hookClass(name, loader, fn) {
+  if (DONE.has(name)) return;
+  let C;
+  try { C = useVia(name, loader); } catch (e) { return; }
+  DONE.add(name);
+  guard('class ' + name, () => fn(C));
+}
+
+function watch(re, fn) {
+  WATCH.push({ re, fn });
+  // one enumeration for every watch() call in this tick; enumerate is costly
+  if (watch.pending) { watch.pending.push({ re, fn }); return; }
+  watch.pending = [{ re, fn }];
+  const loaded = Java.enumerateLoadedClassesSync();
+  for (let i = 0; i < loaded.length; i++) {
+    const cn = loaded[i];
+    for (let j = 0; j < watch.pending.length; j++) {
+      if (watch.pending[j].re.test(cn)) { hookClass(cn, null, watch.pending[j].fn); break; }
+    }
+  }
+  watch.pending = null;
+}
+
+// hook every overload, keeping a handle on the original for call-through
+function each(C, method, make) {
+  try {
+    const m = C[method];
+    if (!m) return;
+    const ov = m.overloads || [];
+    for (let i = 0; i < ov.length; i++) {
+      guard(method + '#' + i, () => {
+        const impl = make(ov[i], i);
+        if (impl) ov[i].implementation = impl;
+      });
+    }
+  } catch (e) { vlog('ov ' + method + ': ' + e); }
+}
+
+function startWatcher() {
+  guard('watcher', () => {
+    if (!WATCH.length) return;
+    const CL = Java.use('java.lang.ClassLoader');
+    const oc = CL.loadClass.overload('java.lang.String');
+    oc.implementation = function (name) {
+      let v = null;
+      let err = null;
+      try { v = oc.call(this, name); } catch (e) { err = e; }
+      STATS.classesSeen++;
+      for (let i = 0; i < WATCH.length; i++) {
+        if (WATCH[i].re.test(name) && !DONE.has(name)) { hookClass(name, this, WATCH[i].fn); break; }
+      }
+      if (err) throw err;
+      return v;
+    };
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* 9. root surface                                                     */
+/* ------------------------------------------------------------------ */
+
+function hookConstantArrays() {
+  watch(/rootbeer|libsuperuser|Shell$/i, (C) => {
+    guard('consts', () => {
+      const f = C.class.getDeclaredFields();
+      for (let i = 0; i < f.length; i++) {
+        if (f[i].getType().getName() !== '[Ljava.lang.String;') continue;
+        guard('const.' + f[i].getName(), () => {
+          f[i].setAccessible(true);
+          const arr = f[i].get(null);
+          if (!arr) return;
+          for (let j = 0; j < arr.length; j++) {
+            if (arr[j] && hiddenInfo(arr[j])) arr[j] = '/system/xbin/__su';
+          }
+        });
+      }
+    });
+  });
+}
+
+function hookFileChecks() {
+  hookClass('java.io.File', null, (C) => {
+    const probe = (o, tag) => function () {
+      let p = null;
+      try { p = this.getAbsolutePath(); } catch (e) {}
+      const s = p ? String(p) : null;
+      if (s && hiddenInfo(s)) { STATS.hidden++; hit('hide File.' + tag + ' ' + s); return false; }
+      return o.call(this);
+    };
+    each(C, 'exists', (o) => probe(o, 'exists'));
+    each(C, 'canRead', (o) => probe(o, 'canRead'));
+    each(C, 'canExecute', (o) => probe(o, 'canExecute'));
+    each(C, 'isFile', (o) => probe(o, 'isFile'));
+  });
+}
+
+const REL = '/data/app/~~stub/base.apk';
+const EXTRA_PKGS = [
+  'eu.chainfire.supersu', 'com.topjohnwu.magisk', 'com.noshufou.android.su',
+  'com.koushikdutta.superuser', 'com.kingroot.kinguser', 'me.weishu.kernelsu',
+];
+const GOOGLE_PKGS = ['com.google.android.gms', 'com.android.vending'];
+
+function fakeInfo(name) {
+  const PI = Java.use('android.content.pm.PackageInfo');
+  const pi = PI.$new();
+  pi.packageName.value = name;
+  try { pi.versionName.value = '8.1.0'; } catch (e) {}
+  try { pi.versionCode.value = 810000; } catch (e) {}
+  const AI = Java.use('android.content.pm.ApplicationInfo');
+  const ai = AI.$new();
+  ai.packageName.value = name;
+  ai.sourceDir.value = REL;
+  ai.publicSourceDir.value = REL;
+  ai.className.value = 'android.app.Application';
+  try { ai.flags.value = 0x00000087; } catch (e) {}
+  pi.applicationInfo.value = ai;
+  return pi;
+}
+
+function installPmMask() {
+  const C = (() => { try { return Java.use('android.app.ApplicationPackageManager'); } catch (e) { return null; } })();
+  if (!C) { vlog('ApplicationPackageManager missing'); return; }
+  hookClass('android.app.ApplicationPackageManager', null, (K) => {
+    each(K, 'getPackageInfo', (o) => function () {
+      const name = String(arguments[0]);
+      try {
+        const r = o.call(this, ...arguments);
+        try { r.applicationInfo.sourceDir.value = REL; } catch (e) {}
+        return r;
+      } catch (e) {
+        if (!hiddenInfo(name)) throw e;
+        hit('hide pm.getPackageInfo ' + name);
+        return fakeInfo(name);
+      }
+    });
+    each(K, 'getInstalledPackages', (o) => function () {
+      const out = o.call(this, ...arguments);
+      const want = [];
+      for (let i = 0; i < GOOGLE_PKGS.length; i++) want.push(GOOGLE_PKGS[i]);
+      for (let i = 0; i < EXTRA_PKGS.length; i++) {
+        let present = false;
+        for (let j = 0; j < out.size(); j++) {
+          try { if (String(out.get(j).packageName.value) === EXTRA_PKGS[i]) { present = true; break; } } catch (e) {}
+        }
+        if (!present) want.push(EXTRA_PKGS[i]);
+      }
+      for (let i = 0; i < want.length; i++) {
+        try { out.add(fakeInfo(want[i])); } catch (e) {}
+      }
+      hit('hide pm.getInstalledPackages +' + want.length);
+      return out;
+    });
+    if (K.getInstalledApplications) {
+      each(K, 'getInstalledApplications', (o) => function () {
+        const out = o.call(this, ...arguments);
+        try { for (let i = 0; i < EXTRA_PKGS.length; i++) out.add(fakeInfo(EXTRA_PKGS[i]).applicationInfo.value); } catch (e) {}
+        return out;
+      });
+    }
+  });
+}
+
+function hookRootBeer() {
+  watch(/rootbeer/i, (C) => {
+    guard('rootbeer', () => {
+      const ms = C.class.getDeclaredMethods();
+      for (let i = 0; i < ms.length; i++) {
+        const m = ms[i];
+        if (m.getParameterTypes().length !== 0) continue;
+        if (m.getReturnType().getName() !== 'boolean') continue;
+        const n = m.getName();
+        // known positives -> true, known negatives -> false
+        if (!/Rooted|suExists|SuExists|TestKeys|DangerousProps|RWPaths|RootBinaries|RootManagementApps|Magisk|BusyBox|DevKeys|OtaRoot|RootNative/i.test(n)) continue;
+        guard('rb.' + n, () => {
+          C[n].implementation = function () {
+            const want = !/NotRooted|SELinux/i.test(n);
+            hit('RootBeer.' + n + '=' + want);
+            return want;
+          };
+        });
+      }
+    });
+  });
+}
+
+function hookShell() {
+  hookClass('java.lang.Runtime', null, (C) => each(C, 'exec', (o) => function () {
+    const c = String(arguments[0]);
+    if (/su|magisk|which|mount|getprop|ps\b/i.test(c)) hit('Runtime.exec ' + c);
+    return o.call(this, ...arguments);
+  }));
+  hookClass('java.lang.ProcessBuilder', null, (C) => each(C, 'start', (o) => function () {
+    let c = '';
+    try { c = String(this.command()); } catch (e) {}
+    if (/su|magisk|which|mount|getprop/i.test(c)) hit('ProcessBuilder ' + c);
+    return o.call(this);
+  }));
+}
+
+function hookPropsAndDebug() {
+  if (CFG.spoofProps) {
+    hookClass('android.os.Build', null, (C) => {
+      guard('tags', () => { C.TAGS.value = 'release-keys'; });
+      guard('type', () => { C.TYPE.value = 'user'; });
+      guard('fp', () => { if (SYS.spoofFp) C.FINGERPRINT.value = SYS.spoofFp; });
+    });
+  }
+  hookClass('android.os.SystemProperties', null, (C) => {
+    each(C, 'get', (o, i) => function (a, b) {
+      if (FILTER_PROPS.has(a)) { hit('hide SystemProperties.get ' + a); return FILTER_PROPS.get(a) || o.call(null, a, b); }
+      if (a === 'ro.build.fingerprint' && SYS.spoofFp) return SYS.spoofFp;
+      return i === 0 ? o.call(null, a) : o.call(null, a, b);
+    });
+  });
+  if (CFG.antiDebug) {
+    hookClass('android.os.Debug', null, (C) => {
+      guard('dbg1', () => { C.isDebuggerConnected.implementation = () => false; });
+      if (C.waitingForDebugger) guard('dbg2', () => { C.waitingForDebugger.implementation = () => false; });
+      if (C.waitForDebugger) guard('dbg3', () => { C.waitForDebugger.implementation = function () {}; });
+    });
+  }
+}
+
+// ensures Arrays.asList(...) on a static array also reflects masks
+function hookArrays() {
+  hookClass('java.util.Arrays', null, (C) => each(C, 'asList', () => function () {
+    const arr = arguments[0];
+    const out = Java.use('java.util.ArrayList').$new();
+    for (let i = 0; i < arr.length; i++) out.add(arr[i]);
+    return out;
+  }));
+}
+
+function hookGoogle() {
+  watch(/GoogleApiAvailability/i, (C) => each(C, 'isGooglePlayServicesAvailable', () => function () {
+    hit('gms available'); return 0;
+  }));
+}
+
+/* ------------------------------------------------------------------ */
+/* 10. tls                                                             */
+/* ------------------------------------------------------------------ */
+
+let BYPASS = null;
+
+// X509TrustManager declares the 2-arg trio, but Conscrypt/OkHttp also invoke
+// 3-arg forms (Socket / SSLEngine). registerClass binds ONE overload per JS
+// function — every live overload must be declared explicitly or the first
+// exotic caller gets an AbstractMethodError.
+const CERT_ARR = '[Ljava.security.cert.X509Certificate;';
+const VOID_OVERLOADS = (extra) => {
+  const list = [
+    { returnType: 'void', argumentTypes: [CERT_ARR, 'java.lang.String'], implementation() {} },
+  ];
+  for (const t of extra) {
+    list.push({ returnType: 'void', argumentTypes: [CERT_ARR, 'java.lang.String', t], implementation() {} });
+  }
+  return list;
+};
+const ISSUERS = {
+  returnType: '[Ljava.security.cert.X509Certificate;',
+  argumentTypes: [],
+  implementation() { return Java.array('java.security.cert.X509Certificate', []); },
+};
+
+function anyTrust() {
+  if (BYPASS) return BYPASS;
+  const TM = Java.use('javax.net.ssl.X509TrustManager');
+  const Cls = Java.registerClass({
+    name: 'org.fb.TrustAll',
+    implements: [TM],
+    methods: {
+      checkClientTrusted: VOID_OVERLOADS(['java.net.Socket', 'javax.net.ssl.SSLEngine']),
+      checkServerTrusted: VOID_OVERLOADS(['java.net.Socket', 'javax.net.ssl.SSLEngine', 'javax.net.ssl.SSLSession']),
+      getAcceptedIssuers: ISSUERS,
+    },
+  });
+  BYPASS = Cls.$new();
+  return BYPASS;
+}
+
+function wrapTm(orig) {
+  const TM = Java.use('javax.net.ssl.X509TrustManager');
+  wrapTm.n = (wrapTm.n || 0) + 1;
+  const Cls = Java.registerClass({
+    name: 'org.fb.WrapTm' + wrapTm.n,
+    implements: [TM],
+    fields: { inner: 'javax.net.ssl.TrustManager' },
+    methods: {
+      checkClientTrusted: VOID_OVERLOADS(['java.net.Socket', 'javax.net.ssl.SSLEngine']),
+      checkServerTrusted: VOID_OVERLOADS(['java.net.Socket', 'javax.net.ssl.SSLEngine', 'javax.net.ssl.SSLSession']),
+      getAcceptedIssuers: {
+        returnType: '[Ljava.security.cert.X509Certificate;',
+        argumentTypes: [],
+        implementation() {
+          try {
+            const inner = Java.cast(this.inner.value, TM);
+            return inner.getAcceptedIssuers();
+          } catch (e) {}
+          return Java.array('java.security.cert.X509Certificate', []);
+        },
+      },
+    },
+  });
+  const o = Cls.$new();
+  try { o.inner.value = orig; } catch (e) {}
+  return o;
+}
+
+function hookSslContext() {
+  let C;
+  try { C = Java.use('javax.net.ssl.SSLContext'); } catch (e) { return; }
+  each(C, 'init', (o) => function () {
+    try {
+      const a = Array.prototype.slice.call(arguments);
+      const tms = a[1];
+      if (tms && tms.length) {
+        const w = [];
+        for (let i = 0; i < tms.length; i++) w.push(tms[i] ? wrapTm(tms[i]) : tms[i]);
+        a[1] = Java.array('javax.net.ssl.TrustManager', w);
+        hit('SSLContext.init wrapped ' + w.length);
+        return o.call(this, ...a);
+      }
+    } catch (e) { hit('SSLContext.init fallback'); }
+    return o.call(this, ...arguments);
+  });
+}
+
+function hookTmf() {
+  hookClass('javax.net.ssl.TrustManagerFactory', null, (C) => {
+    each(C, 'init', (o) => function () {
+      try {
+        const a = Array.prototype.slice.call(arguments);
+        if (a[0] && a[0].length) {
+          const w = [];
+          for (let i = 0; i < a[0].length; i++) w.push(a[0][i] ? wrapTm(a[0][i]) : a[0][i]);
+          a[0] = Java.array('javax.net.ssl.TrustManager', w);
+          return o.call(this, ...a);
+        }
+      } catch (e) {}
+      return o.call(this, ...arguments);
+    });
+    each(C, 'getTrustManagers', (o) => function () {
+      const r = o.call(this);
+      hit('TrustManagerFactory.getTrustManagers');
+      return r;
+    });
+  });
+}
+
+function hookConscrypt() {
+  const names = ['com.android.org.conscrypt.TrustManagerImpl', 'org.conscrypt.TrustManagerImpl'];
+  for (let i = 0; i < names.length; i++) {
+    const n = names[i];
+    let C;
+    try { C = Java.use(n); } catch (e) { continue; }
+    hookClass(n, null, (K) => {
+      // mixed signatures: void (chain, type[, socket]) AND List (chain, ..., host).
+      // Void overloads ignore the return; List overloads need the chain back or
+      // hostname-verification paths NPE on API 34+.
+      const chainOf = (a) => {
+        for (let i = 0; i < a.length; i++) {
+          const v = a[i];
+          try {
+            if (v && typeof v === 'object' && typeof v.size === 'function') return v;
+            if (v && typeof v === 'object' && typeof v.length === 'number') {
+              const out = Java.use('java.util.ArrayList').$new();
+              for (let j = 0; j < v.length; j++) out.add(v[j]);
+              return out;
+            }
+          } catch (e) {}
+        }
+        return null;
+      };
+      let hookedAny = false;
+      for (const m of ['checkTrustedChain', 'checkTrusted', 'verifyChain']) {
+        if (!K[m]) continue;
+        hookedAny = true;
+        each(K, m, () => function () {
+          hit('TrustManagerImpl.' + m);
+          return chainOf(arguments) || undefined;
+        });
+      }
+      if (!hookedAny) each(K, 'checkServerTrusted', () => function () {
+        hit('TrustManagerImpl.checkServerTrusted');
+        return chainOf(arguments) || undefined;
+      });
+    });
+  }
+  // CA store also used by libcore; accept everything
+  hookClass('java.security.cert.CertificateFactory', null, () => {});
+  watch(/X509TrustManagerExtensions/i, (C) => {
+    each(C, 'checkServerTrusted', () => function () {
+      hit('X509TrustManagerExtensions');
+      for (let i = 0; i < arguments.length; i++) { try { if (arguments[i] && typeof arguments[i].size === 'function') return arguments[i]; } catch (e) {} }
+      return undefined;
+    });
+  });
+}
+
+function hookPinners() {
+  const table = [
+    ['okhttp3.CertificatePinner', ['check', 'check$okhttp']],
+    ['com.android.okhttp.CertificatePinner', ['check']],
+    ['okhttp3.internal.platform.Platform', ['isCleartextTrafficPermitted']],
+  ];
+  for (let i = 0; i < table.length; i++) {
+    const cls = table[i][0];
+    const methods = table[i][1];
+    const re = new RegExp('\\.' + cls.split('.').pop() + '$');
+    const fn = (C) => {
+      for (let m = 0; m < methods.length; m++) {
+        each(C, methods[m], () => function () {
+          hit(cls + '.' + methods[m]);
+          if (methods[m] === 'isCleartextTrafficPermitted') return true;
+          return undefined;
+        });
+      }
+    };
+    watch(re, fn);
+  }
+  // Superfish-style certificate pinning by classpath scan
+  watch(/CertificatePinner/i, (C) => each(C, 'check', () => function () { hit('CertificatePinner generic'); return undefined; }));
+}
+
+function hookHostname() {
+  const V = 'javax.net.ssl.HostnameVerifier';
+  let shared = null;
+  const make = () => {
+    const Cls = Java.registerClass({
+      name: 'org.fb.HostAny' + ((make.n = (make.n || 0) + 1)),
+      implements: [Java.use(V)],
+      methods: { verify() { return true; } },
+    });
+    return Cls.$new();
+  };
+  const sh = () => shared || (shared = make());
+
+  hookClass('javax.net.ssl.HttpsURLConnection', null, (C) => {
+    each(C, 'setDefaultHostnameVerifier', (o) => function () {
+      hit('defaultHostnameVerifier');
+      return o.call(this, sh());
+    });
+    each(C, 'setHostnameVerifier', (o) => function () {
+      hit('setHostnameVerifier');
+      return o.call(this, sh());
+    });
+  });
+  guard('hnv.install', () => {
+    Java.use('javax.net.ssl.HttpsURLConnection').setDefaultHostnameVerifier(sh());
+  });
+  watch(/(OkHostnameVerifier|HostnameVerifier)$/, (C) => each(C, 'verify', () => function () {
+    hit('HostnameVerifier.verify');
+    return true;
+  }));
+}
+
+function hookWebView() {
+  watch(/WebViewClient$/i, (C) => each(C, 'onReceivedSslError', (o) => function (v, h, e) {
+    hit('WebView ssl');
+    try { h.proceed(); } catch (err) {}
+    return o.call(this, v, h, e);
+  }));
+}
+
+function hookCertPath() {
+  hookClass('java.security.cert.CertPathValidator', null, (C) => each(C, 'validate', (o) => function () {
+    try { return o.call(null, ...arguments); } catch (e) { hit('CertPathValidator swallow'); return null; }
+  }));
+  watch(/PKIXValidator$/i, (C) => each(C, 'validate', (o) => function () {
+    try { return o.call(this, ...arguments); } catch (e) { hit('PKIXValidator swallow'); return null; }
+  }));
+  watch(/SSL.*Socket$/i, (C) => each(C, 'startHandshake', (o) => function () {
+    try { return o.call(this); } catch (e) { hit('startHandshake swallow'); }
+  }));
+  watch(/Cronet/i, (C) => each(C, 'isCleartextTrafficPermitted', () => function () { hit('cronet'); return true; }));
+}
+
+/* native tls: force every chain decision to "ok" ---------------------- */
+
+const TLS_LIBS = ['libssl.so', 'libboringssl.so', 'libssl_crypto.so', 'libconscrypt_jni.so', 'libflutter.so'];
+
+function installNativeTls() {
+  if (!CFG.ssl) return;
+  for (let i = 0; i < TLS_LIBS.length; i++) {
+    const m = modFind(TLS_LIBS[i]);
+    if (m) hookTlsLib(m);
+  }
+}
+
+function hookTlsLib(m) {
+  if (!hasSymtab(m)) { vlog('no symtab ' + m.name); return; }
+
+  // BoringSSL layouts (ssl.h):
+  //   custom_verify cb: enum ssl_verify_result_t (*)(SSL*, uint8_t* out_alert)  -> 0 = ssl_verify_ok
+  //   legacy verify cb:  int (*)(int preverify_ok, X509_STORE_CTX*)             -> 1 = ok
+  //   cert_verify cb:    int (*)(X509_STORE_CTX*, void* arg)                    -> 1 = ok
+  // NOTE: SSL_CTX_set_verify_cert_callback does not exist in any SSL lib.
+  const stdCb = new NativeCallback(function () { return 0; }, 'int', ['pointer', 'pointer']);
+  const legacyCb = new NativeCallback(function () { return 1; }, 'int', ['pointer', 'pointer']);
+  LEAKS.push(stdCb, legacyCb);
+
+  const replaceFn = (sym, ret, argTypes, mk) => {
+    const addr = getModuleExport(m, sym);
+    if (!addr) return;
+    const akey = 'a!' + addr.toString();
+    if (HOOKED.has(akey) || HOOKED.has(m.name + '!' + sym)) return;
+    HOOKED.add(akey); HOOKED.add(m.name + '!' + sym);
+    STATS.installed[m.name + '!' + sym] = 1;
+    guard(sym, () => {
+      const orig = new NativeFunction(addr, ret, argTypes);
+      Interceptor.replace(addr, new NativeCallback(function () {
+        hit('native ' + sym);
+        return orig.apply(null, mk(Array.prototype.slice.call(arguments)));
+      }, ret, argTypes));
+    });
+  };
+
+  // Replace (not attach) so every later installer gets OUR callback and the
+  // app's original cb (possibly JNI-aware) never runs -> no pending-exception
+  // poisoning of the Conscrypt native path.
+  replaceFn('SSL_CTX_set_custom_verify', 'void', ['pointer', 'int', 'pointer'],
+    (a) => [a[0], a[1], stdCb]);
+  replaceFn('SSL_set_custom_verify', 'void', ['pointer', 'int', 'pointer'],
+    (a) => [a[0], a[1], stdCb]);
+  replaceFn('SSL_CTX_set_verify', 'void', ['pointer', 'int', 'pointer'],
+    (a) => [a[0], 0 /* SSL_VERIFY_NONE */, ptr(0)]);
+  replaceFn('SSL_CTX_set_cert_verify_callback', 'void', ['pointer', 'pointer', 'pointer'],
+    (a) => [a[0], legacyCb, a[2]]);
+
+  // verdict readers only; handshake left alone so TLS state stays coherent
+  hookExport(m, 'SSL_get_verify_result', { onLeave(r) { return r.toInt32() === 0 ? r : new NativePointer(0); } });
+  hookExport(m, 'X509_verify_cert', { onLeave() { return new NativePointer(1); } });
+  hookExport(m, 'X509_STORE_CTX_get_error', { onLeave() { return new NativePointer(0); } });
+}
+
+// flutter/cronet/monochrome load late: catch dlopen and re-run the TLS pass
+function installLateModuleWatcher() {
+  if (!CFG.ssl) return;
+  const l = libc();
+  if (!l) return;
+  const wl = new RegExp('(' + TLS_LIBS.join('|').replace(/\./g, '\\.') + ')$');
+  for (const sym of ['android_dlopen_ext', 'dlopen']) {
+    hookExport(l, sym, {
+      onEnter(args) { this.name = rs(args[0]); },
+      onLeave() {
+        if (!this.name || !wl.test(this.name)) return;
+        const m = modFind(this.name.split('/').pop());
+        if (m) guard('late ' + this.name, () => hookTlsLib(m));
+      },
+    });
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* 11. integrity / attestation                                         */
+/* ------------------------------------------------------------------ */
+
+function installIntegrity() {
+  if (!CFG.integrity) return;
+  watch(/AttestationResponse$/, (C) => each(C, 'getJwsResult', (o) => function () {
+    const real = o.call(this);
+    if (CFG.safetynetJws) { hit('safetynet spoof'); return CFG.safetynetJws; }
+    try { send({ t: 'token', kind: 'safetynet', value: String(real) }); } catch (e) {}
+    return real;
+  }));
+  watch(/IntegrityTokenResponse$/, (C) => each(C, 'token', (o) => function () {
+    const real = o.call(this);
+    if (CFG.playIntegrityToken) { hit('integrity spoof'); return CFG.playIntegrityToken; }
+    try { send({ t: 'token', kind: 'integrity', value: String(real) }); } catch (e) {}
+    return real;
+  }));
+  watch(/(AppCheckToken|FirebaseAppCheckTokenImpl)$/, (C) => each(C, 'getToken', (o) => function () {
+    const real = o.call(this);
+    try { send({ t: 'token', kind: 'appcheck', value: String(real) }); } catch (e) {}
+    return real;
+  }));
+  watch(/(SafetyNetClient|IntegrityManager)$/, (C) => {
+    guard('attest', () => {
+      const ms = C.class.getDeclaredMethods();
+      for (let i = 0; i < ms.length; i++) {
+        const n = ms[i].getName();
+        if (!/attest|requestIntegrityToken|prepareIntegrityToken/i.test(n)) continue;
+        each(C, n, (o) => function () { hit('attest ' + n); return o.call(this, ...arguments); });
+      }
+    });
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* 12. bootstrap                                                       */
+/* ------------------------------------------------------------------ */
+
+function report(reason) {
+  try {
+    send({
+      t: 'status', reason, sdk: SYS.sdk, abi: SYS.abi, fp: SYS.spoofFp,
+      hooks: STATS.hooks, hidden: STATS.hidden, maps: STATS.mapsPatched,
+      unlinked: UNLINKED, checks: STATS.checks, errors: STATS.errors,
+      classes: STATS.classesSeen, installed: Object.keys(STATS.installed), errs: STATS.errs,
+    });
+  } catch (e) {}
+}
+
+function bootstrapJava() {
+  const load = (n) => { try { return Java.use(n); } catch (e) { return null; } };
+  if (!load('android.os.Build')) { log('java not ready'); return; }
+
+  hookArrays();
+  hookConstantArrays();
+  hookFileChecks();
+  installPmMask();
+  hookPropsAndDebug();
+  hookRootBeer();
+  hookShell();
+  hookGoogle();
+
+  if (CFG.ssl) {
+    hookSslContext();
+    hookTmf();
+    hookConscrypt();
+    hookPinners();
+    hookHostname();
+    hookWebView();
+    hookCertPath();
+  }
+  installIntegrity();
+  startWatcher();
+  report('booted');
+}
+
+function main() {
+  log('start pid=' + Process.id + ' ' + Process.arch);
+  const l = libc();
+  if (l) { bind(l); describe(); installFsHooks(l); installAntiFrida(l); installLateModuleWatcher(); }
+  else log('libc unresolved');
+
+  // Frida 17 unbundled the Java bridge: raw create_script() agents have no
+  // global `Java`. Native hooks above still stand; degrade gracefully.
+  if (typeof Java === 'undefined') {
+    log('no Java bridge in this runtime — native-only mode (use frida CLI or frida-compile)');
+    report('native-only');
+    return;
+  }
+
+  const go = () => { try { bootstrapJava(); } catch (e) { log('bootstrap: ' + e); } };
+  try { Java.perform(go); } catch (e) { go(); }
+
+  let t = 0;
+  const iv = setInterval(() => { t++; if (t === 3 || t === 12) report('t+' + t + 's'); if (t > 20) clearInterval(iv); }, 1000);
+}
+
+if (typeof rpc !== 'undefined' && typeof rpc.exports !== 'undefined') {
+  rpc.exports.status = () => ({ stats: STATS, sys: SYS, unlinked: UNLINKED });
+  rpc.exports.configure = (p) => { Object.assign(CFG, p || {}); return CFG; };
+  rpc.exports.report = () => { report('rpc'); return true; };
+}
+
+main();
+
+```
+
+`frida-universal-ios.js`:
+
+```js
+/*!
+ * frida-universal-ios.js  —  single-file harness, v1.0
+ *
+ * Scope: iOS jailbreak detection + SSL pinning bypass, iPhone/iPad, iOS 13-18.
+ * Rule: mask SOURCES (paths, dyld image list, sysctl records, trust verdicts),
+ * not verdicts, so a check the app invents at runtime still resolves through a
+ * masked surface.
+ *
+ * "Dynamic" discovery: (a) ApiResolver('objc') wildcard sweeps so private class
+ * clusters (__NSURLSessionLocal) are found, not just the nominal class; (b) the
+ * dyld image table is rebuilt from the live list and resynced on dlopen;
+ * (c) runtime triage logs which subsystem each check used, with a backtrace.
+ *
+ * Compat: Frida 16 + 17 (bridge ladder below), arm64/arm64e.
+ * Usage: frida -U -f com.example.app -l frida-universal-ios.js
+ *   Native layer is complete before the Java-style ObjC bootstrap, so --pause
+ *   is safe; without it early hooks may be missed. See README.md.
+ */
+
+'use strict';
+
+/* ------------------------------------------------------------------ */
+/* 0. compat shims (Frida 16 <-> 17)                                   */
+/* ------------------------------------------------------------------ */
+
+function getGlobalExport(name) {
+  try {
+    if (typeof Module.findGlobalExportByName === 'function') return Module.findGlobalExportByName(name);
+    if (typeof Module.getGlobalExportByName === 'function') return Module.getGlobalExportByName(name);
+    return Module.findExportByName(null, name);
+  } catch (e) { return null; }
+}
+
+function getModuleExport(mod, name) {
+  if (!mod) return null;
+  try { if (typeof mod.findExportByName === 'function') { const p = mod.findExportByName(name); if (p) return p; } } catch (e) {}
+  try { if (typeof Module.findExportByName === 'function') { const p = Module.findExportByName(mod.name, name); if (p) return p; } } catch (e) {}
+  // private dylibs on iOS regularly lack a usable lookup path; scan the symtab
+  try {
+    const syms = mod.enumerateSymbols();
+    for (let i = 0; i < syms.length; i++) if (syms[i].name === name) return syms[i].address;
+  } catch (e) {}
+  return null;
+}
+
+function modFind(name) {
+  try {
+    if (typeof Process.findModuleByName === 'function') return Process.findModuleByName(name);
+  } catch (e) {}
+  try { return Process.getModuleByName(name); } catch (e) { return null; }
+}
+
+function modEnum() {
+  try {
+    if (typeof Process.enumerateModules === 'function') return Process.enumerateModules();
+  } catch (e) {}
+  return [];
+}
+
+function modFindByAddress(addr) {
+  try {
+    if (typeof Process.findModuleByAddress === 'function') return Process.findModuleByAddress(addr);
+  } catch (e) {}
+  try { if (typeof Process.getModuleByAddress === 'function') return Process.getModuleByAddress(addr); } catch (e) {}
+  return null;
+}
+
+/* ObjC bridge ladder: 16 = lazy global, 17 = bundled bridge only in tooling. */
+const O = (typeof ObjC !== 'undefined') ? ObjC
+  : (typeof globalThis !== 'undefined' && globalThis.ObjC) ? globalThis.ObjC
+  : null;
+
+const HAS_OBJC = !!O;
+const objcReady = () => { try { return HAS_OBJC && O.available === true; } catch (e) { return false; } };
+
+/* ------------------------------------------------------------------ */
+/* 1. config + logging                                                 */
+/* ------------------------------------------------------------------ */
+
+function parseEnv() {
+  try {
+    if (typeof process === 'undefined' || !process.env || !process.env.BYPASS_CFG) return {};
+    return JSON.parse(process.env.BYPASS_CFG);
+  } catch (e) { return {}; }
+}
+
+const CFG = Object.assign({
+  jb: true,
+  ssl: true,
+  hide: true,
+  dyld: true,
+  antiFrida: true,
+  antiDebug: true,
+  triage: true,
+  verbose: false,
+}, parseEnv());
+
+const STATS = {
+  hooks: 0, hidden: 0, images: 0, checks: 0, errors: 0, classes: 0,
+  installed: {}, errs: [], tried: [],
+};
+const LEAKS = [];
+
+function log(m) { try { send({ t: 'log', m: '[*] ' + m }); } catch (e) {} }
+function vlog(m) { if (CFG.verbose) log(m); }
+
+// triage: which subsystem answered + who asked (ctx = the hook's `this`)
+function hit(what, detail, ctx) {
+  STATS.checks++;
+  vlog(what + (detail ? ' <' + detail + '>' : ''));
+  const rec = { t: 'hit', m: what, d: detail || '' };
+  try {
+    const bt = Thread.backtrace(ctx && ctx.context ? ctx.context : undefined, Backtracer.ACCURATE)
+      .slice(0, 6)
+      .map((a) => {
+        try { const s = DebugSymbol.fromAddress(a); return (s && s.moduleName ? s.moduleName : '?') + '!' + (s.name || '?'); }
+        catch (e) { return '?'; }
+      });
+    rec.bt = bt;
+    STATS.tried.push(what + ' <- ' + (bt[0] || '?'));
+  } catch (e) {}
+  try { send(rec); } catch (e) {}
+}
+
+function guard(label, fn) {
+  try { const r = fn(); STATS.hooks++; return r; } catch (e) {
+    STATS.errors++;
+    if (STATS.errs.length < 80) STATS.errs.push(label + ': ' + e);
+    vlog('guard ' + label + ': ' + e);
+    return null;
+  }
+}
+
+const rs = (p, max) => {
+  try { return p && !p.isNull() ? p.readCString(max || 4096) : null; } catch (e) { return null; }
+};
+const strPtr = (s) => Memory.allocUtf8String(s);
+
+function enoent() {
+  try { if (W.errno) W.errno().writeInt(2); } catch (e) {}
+  return new NativePointer(-1);
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. jailbreak surface tables                                         */
+/* ------------------------------------------------------------------ */
+
+const JB_PATHS = [
+  '/Applications/Cydia.app', '/Applications/Sileo.app', '/Applications/Zebra.app',
+  '/Applications/Filza.app', '/Applications/Icy.app', '/Applications/blackra1n.app',
+  '/Applications/RockApp.app', '/Applications/WinterBoard.app',
+  '/Library/MobileSubstrate/MobileSubstrate.dylib', '/Library/MobileSubstrate/DynamicLibraries',
+  '/usr/lib/substrate/SubstrateLoader.dylib', '/usr/lib/libsubstrate.dylib',
+  '/usr/lib/libsubstitute.dylib', '/usr/lib/libhooker.dylib', '/usr/lib/TweakInject.dylib',
+  '/usr/lib/libellekit.dylib', '/usr/libexec/cydia', '/usr/libexec/ellekit',
+  '/usr/bin/cycript', '/usr/bin/ssh', '/usr/sbin/sshd', '/usr/libexec/sftp-server',
+  '/usr/bin/dpkg', '/usr/bin/apt', '/bin/bash', '/bin/sh', '/etc/apt',
+  '/etc/ssh/sshd_config', '/private/var/stash', '/private/var/lib/apt',
+  '/private/var/tmp/cydia.log', '/var/cache/apt', '/var/lib/cydia', '/var/lib/dpkg/status',
+  '/var/log/syslog', '/var/tmp/cydia.log',
+  '/System/Library/LaunchDaemons/com.saurik.Cydia.Startup.plist',
+  '/var/jb',
+];
+
+const JB_LEAF = /^(Cydia|Sileo|Zebra|Substrate|Substitute|ellekit|libellekit|libsubstrate|libsubstitute|libhooker|TweakInject|cydia|dpkg|apt|bash|sshd|ssh|frida|FridaGadget|blob\d*\w*)\.?(dylib|app)?$/i;
+const JB_SUB = /(MobileSubstrate|libsubstrate|libsubstitute|libhooker|TweakInject|ellekit|Cydia\.app|Sileo\.app|Zebra\.app|Filza\.app|cydia|dpkg|\/var\/jb(\/|$)|substrate)/i;
+const HIDE_SUB = /(frida|gum-js|libgum|gadget|ellekit|substrate|substitute|libhooker|TweakInject|blob\d+\.dylib|re\.frida)/i;
+
+const JB_SCHEMES = /^(cydia|sileo|zebra|zbra|filza|activator|installer|undecimus|trollstore|sileo-beta):/i;
+
+function normalize(p) {
+  if (!p) return null;
+  const parts = p.split('/').filter(Boolean);
+  return '/' + parts.join('/');
+}
+
+function isJbPath(p) {
+  if (!p || p.length < 3) return null;
+  const n = normalize(p);
+  if (!n) return null;
+  if (n === '/var/jb') return { k: 'dir', b: 'var/jb' };
+  if (n.indexOf('/var/jb/') === 0) return { k: 'any', b: n.split('/').pop() };
+  for (let i = 0; i < JB_PATHS.length; i++) if (n === JB_PATHS[i] || n.indexOf(JB_PATHS[i] + '/') === 0) {
+    return { k: 'any', b: n.split('/').pop() };
+  }
+  if (JB_SUB.test(n)) return { k: 'any', b: n.split('/').pop() };
+  const leaf = n.split('/').pop();
+  if (JB_LEAF.test(leaf)) return { k: 'any', b: leaf };
+  return null;
+}
+
+const isHiddenImage = (p) => !!p && HIDE_SUB.test(p);
+
+/* ------------------------------------------------------------------ */
+/* 3. native primitives                                                */
+/* ------------------------------------------------------------------ */
+
+const A = {};
+const W = {};
+const HOOKED = new Set();
+
+function libsystem() {
+  let l = modFind('libsystem_kernel.dylib') || modFind('libSystem.B.dylib');
+  for (let i = 0; i < 40 && !l; i++) {
+    Thread.sleep(0.05);
+    l = modFind('libsystem_kernel.dylib') || modFind('libSystem.B.dylib');
+  }
+  return l;
+}
+
+function bind(l) {
+  A.readdir = getModuleExport(l, 'readdir');
+  A.fmemopen = getModuleExport(l, 'fmemopen');
+  A.write = getModuleExport(l, 'write');
+  A.close = getModuleExport(l, 'close');
+  A.lseek = getModuleExport(l, 'lseek');
+  A.ftruncate = getModuleExport(l, 'ftruncate');
+  A.shm = getModuleExport(l, 'shm_open');
+  A.errno = getGlobalExport('__error');
+  if (A.write) W.write = new NativeFunction(A.write, 'long', ['int', 'pointer', 'size_t']);
+  if (A.close) W.close = new NativeFunction(A.close, 'int', ['int']);
+  if (A.lseek) W.lseek = new NativeFunction(A.lseek, 'long', ['int', 'long', 'int']);
+  if (A.ftruncate) W.ftruncate = new NativeFunction(A.ftruncate, 'int', ['int', 'long']);
+  if (A.shm) W.shm = new NativeFunction(A.shm, 'int', ['pointer', 'int', 'unsigned short']);
+  if (A.fmemopen) W.fmemopen = new NativeFunction(A.fmemopen, 'pointer', ['pointer', 'size_t', 'pointer']);
+  if (A.errno) W.errno = new NativeFunction(A.errno, 'pointer', []);
+}
+
+function hookExport(mod, name, handlers) {
+  const addr = (mod ? getModuleExport(mod, name) : null) || getGlobalExport(name);
+  if (!addr) return null;
+  const akey = 'a!' + addr.toString();
+  if (HOOKED.has(key(mod, name)) || HOOKED.has(akey)) return addr;
+  HOOKED.add(key(mod, name));
+  HOOKED.add(akey);
+  STATS.installed[(modFindByAddress(addr) || mod || { name: 'global' }).name + '!' + name] = 1;
+  guard(name, () => { Interceptor.attach(addr, handlers); });
+  return addr;
+}
+
+function key(mod, name) { return (mod ? mod.name : '?') + '!' + name; }
+
+/* ------------------------------------------------------------------ */
+/* 4. jailbreak file hooks                                             */
+/* ------------------------------------------------------------------ */
+
+// rootful + rootless path verdicts, plus directory-entry filtering
+function installFsHooks(l) {
+  if (!CFG.jb && !CFG.hide) return;
+
+  const openish = (idx) => ({
+    onEnter(args) {
+      const p = rs(args[idx]);
+      this.h = isJbPath(p);
+      if (this.h) { STATS.hidden++; hit('jb open', p); }
+    },
+    onLeave(r) { return this.h ? enoent() : r; },
+  });
+
+  const statish = (idx) => ({
+    onEnter(args) {
+      this.h = isJbPath(rs(args[idx]));
+      if (this.h) { STATS.hidden++; hit('jb stat', this.h.b); }
+    },
+    onLeave(r) { return this.h ? enoent() : r; },
+  });
+
+  for (const n of ['open', 'openat']) hookExport(l, n, openish(n === 'open' ? 0 : 1));
+  for (const n of ['access', 'faccessat']) hookExport(l, n, openish(n === 'access' ? 0 : 1));
+  for (const n of ['stat', 'stat64', 'lstat', 'lstat64']) hookExport(l, n, statish(0));
+  for (const n of ['statfs', 'statfs64']) hookExport(l, n, statish(0));
+
+  hookExport(l, 'opendir', {
+    onEnter(args) { this.h = isJbPath(rs(args[0])); if (this.h) hit('jb opendir', this.h.b); },
+    onLeave(r) {
+      if (this.h) return enoent();
+      if (!r.isNull()) keepDir(r);
+      return r;
+    },
+  });
+
+  hookExport(l, 'fopen', {
+    onEnter(args) { this.h = isJbPath(rs(args[0])); if (this.h) hit('jb fopen', this.h.b); },
+    onLeave(r) { return this.h ? new NativePointer(0) : r; },
+  });
+
+  hookExport(l, 'fork', {
+    onEnter() { hit('fork'); },
+    onLeave() { return new NativePointer(1); },
+  });
+}
+
+const DIRS = new Set();
+
+function keepDir(dirp) {
+  DIRS.add(dirp.toString());
+  if (DIRS.size > 8192) DIRS.clear();
+  if (W.readdir) return;
+  guard('readdir', () => {
+    const addr = A.readdir || getGlobalExport('readdir');
+    if (!addr) return;
+    W.readdir = new NativeFunction(addr, 'pointer', ['pointer']);
+    Interceptor.replace(addr, new NativeCallback(function (d) {
+      const k = d.toString();
+      for (let i = 0; i < 128; i++) {
+        const e = W.readdir(d);
+        if (e.isNull()) return e;
+        if (!DIRS.has(k)) return e;
+        const name = rs(e.add(21), 255); // Darwin dirent: d_name @21
+        if (!name || name === '.') continue;
+        if (isJbPath('/' + name)) continue;
+        return e;
+      }
+      return ptr(0);
+    }, 'pointer', ['pointer']));
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. dyld image hiding.                                               */
+/*   iOS 15+ (dyld4) reads an internal vector, not infoArray, so the   */
+/*   three _dyld_* entry points must be replaced. Publishing the       */
+/*   infoArray too covers dyld3 (<=14) and task_info() walkers.        */
+/* ------------------------------------------------------------------ */
+
+const IMG = { keep: [], published: null, patched: false };
+
+function dyldInfos() {
+  try {
+    const p = getGlobalExport('_dyld_all_image_infos');
+    if (!p) return null;
+    // dyld3 exports a pointer variable, dyld4 exports the struct itself
+    const direct = p.readU32();
+    if (direct >= 1 && direct <= 4) return p;
+    const cand = p.readPointer();
+    if (!cand.isNull()) {
+      const v = cand.readU32();
+      if (v >= 1 && v <= 4) return cand;
+    }
+    return direct >= 1 && direct < 0x1000 ? p : null;
+  } catch (e) { return null; }
+}
+
+function buildImageTable() {
+  const origCount = getGlobalExport('_dyld_image_count');
+  const origName = getGlobalExport('_dyld_get_image_name');
+  const origHeader = getGlobalExport('_dyld_get_image_header');
+  if (!origCount || !origName || !origHeader) { log('dyld entry points missing'); return false; }
+
+  // captured once: after Interceptor.replace these names resolve to trampolines
+  ORIG.dyldCount = new NativeFunction(origCount, 'uint', []);
+  ORIG.dyldName = new NativeFunction(origName, 'pointer', ['uint']);
+  ORIG.dyldHeader = new NativeFunction(origHeader, 'pointer', ['uint']);
+
+  const total = ORIG.dyldCount();
+  IMG.keep = [];
+  let dropped = 0;
+
+  for (let i = 0; i < total; i++) {
+    let path = null;
+    let hdr = ptr(0);
+    try { path = rs(ORIG.dyldName(i)); } catch (e) {}
+    try { hdr = ORIG.dyldHeader(i); } catch (e) {}
+    if (path && isHiddenImage(path)) { dropped++; continue; }
+    IMG.keep.push({ i, path, cpath: path ? strPtr(path) : null, real: hdr });
+  }
+  STATS.images = dropped;
+  log('dyld images total=' + total + ' hidden=' + dropped);
+  return true;
+}
+
+function publishInfoArray() {
+  const infos = dyldInfos();
+  if (!infos) return;
+  guard('infoArray', () => {
+    const count = infos.add(4).readU32();
+    const arr = infos.add(8).readPointer();
+    if (!count || arr.isNull()) return;
+
+    const want = count - STATS.images;
+    if (want <= 0) return;
+
+    // own buffer: 3 pointers per dyld_image_info
+    const buf = Memory.alloc(24 * want);
+    LEAKS.push(buf);
+
+    let w = 0;
+    for (let i = 0; i < count && w < want; i++) {
+      const src = arr.add(24 * i);
+      const p = src.readPointer();
+      let keep = true;
+      try { const s = rs(src.add(8).readPointer()); keep = !isHiddenImage(s); } catch (e) {}
+      if (!keep) continue;
+      buf.add(24 * w).writePointer(p);
+      buf.add(24 * w + 8).writePointer(src.add(8).readPointer());
+      buf.add(24 * w + 16).writePointer(src.add(16).readPointer());
+      w++;
+    }
+
+    infos.add(8).writePointer(ptr(0));
+    infos.add(8).writePointer(buf);
+    infos.add(4).writeU32(w);
+    IMG.published = buf;
+    hit('dyld infoArray published', String(w));
+  });
+
+  // dyld4 reads an internal vector: replace the public entry points with an
+  // index mapper over the filtered table. Never returns a hidden slot.
+  guard('dyld.replace', () => {
+    const cAddr = getGlobalExport('_dyld_image_count');
+    const nAddr = getGlobalExport('_dyld_get_image_name');
+    const hAddr = getGlobalExport('_dyld_get_image_header');
+
+    if (cAddr) {
+      Interceptor.replace(cAddr, new NativeCallback(function () { return IMG.keep.length; }, 'uint', []));
+      IMG.patched = true;
+    }
+    if (nAddr) {
+      Interceptor.replace(nAddr, new NativeCallback(function (i) {
+        const e = IMG.keep[Number(i)];
+        return e ? (e.cpath || ptr(0)) : ptr(0);
+      }, 'pointer', ['uint']));
+    }
+    if (hAddr) {
+      Interceptor.replace(hAddr, new NativeCallback(function (i) {
+        const e = IMG.keep[Number(i)];
+        return e && e.real ? e.real : ptr(0);
+      }, 'pointer', ['uint']));
+    }
+    hit('dyld entry points replaced', String(IMG.keep.length));
+  });
+}
+
+/* resync from the captured originals after late dlopen; ASLR-stable, appends */
+function resyncImages() {
+  if (!CFG.dyld || !ORIG.dyldName || !IMG.patched) return;
+  guard('dyld.resync', () => {
+    const seen = new Set(IMG.keep.map((x) => x.path));
+    const total = ORIG.dyldCount();
+    for (let i = 0; i < total; i++) {
+      let p = null;
+      try { p = rs(ORIG.dyldName(i)); } catch (e) { break; }
+      if (!p || seen.has(p)) continue;
+      seen.add(p);
+      if (isHiddenImage(p)) continue;
+      let hdr = ptr(0);
+      try { hdr = ORIG.dyldHeader(i); } catch (e) {}
+      IMG.keep.push({ i, path: p, cpath: strPtr(p), real: hdr });
+    }
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* 6. anti-Frida / anti-debug traps                                    */
+/* ------------------------------------------------------------------ */
+
+const TRAPS = {};
+// impl receives the original NativeFunction: the address is patched after this,
+// so re-resolving the export inside the callback would recurse forever
+function trap(name, addr, ret, args, impl) {
+  if (!addr || TRAPS[name]) return;
+  TRAPS[name] = 1;
+  guard('trap.' + name, () => {
+    const orig = new NativeFunction(addr, ret, args);
+    Interceptor.replace(addr, new NativeCallback(function () {
+      return impl.apply(null, [orig].concat(Array.prototype.slice.call(arguments)));
+    }, ret, args));
+    STATS.installed['syscall!' + name] = 1;
+  });
+}
+
+function installTraps(l) {
+  if (CFG.antiDebug) {
+    // PT_DENY_ATTACH(31) kills attach when a debugger already holds the task
+    trap('ptrace', getGlobalExport('ptrace') || getModuleExport(l, 'ptrace'), 'int', ['int', 'int', 'pointer', 'pointer'],
+      (orig, req, a1, a2, a3) => (req === 31 ? 0 : orig(req, a1, a2, a3)));
+    trap('isatty', getGlobalExport('isatty') || getModuleExport(l, 'isatty'), 'int', ['int'], function () { return 0; });
+    // getppid: 1 under launchd, !=1 under a spawn chain
+    trap('getppid', getGlobalExport('getppid') || getModuleExport(l, 'getppid'), 'int', [], function () { return 1; });
+  }
+
+  // csops: CS_DEBUGGED lives in the status word written to arg2
+  hookExport(l, 'csops', {
+    onEnter(args) { this.buf = args[2]; this.len = args[3].toInt32(); },
+    onLeave(r) {
+      if (r.toInt32() !== 0 || !this.buf || this.len < 4) return r;
+      try { this.buf.writeU32(this.buf.readU32() & ~0x10000000); } catch (e) {}
+      return r;
+    },
+  });
+
+  // sysctl: P_TRACED (0x800) in kinfo_proc p_flag @ +0x20; procargs path scrub
+  const sysctl = getGlobalExport('sysctl') || getModuleExport(l, 'sysctl');
+  hookExport(l, 'sysctl', {
+    onEnter(args) {
+      this.name = args[0];
+      this.namelen = args[1].toInt32();
+      this.oldp = args[2];
+      this.oldlenp = args[3];
+      this.isProc = this.namelen >= 2 && this.name.readInt() === 1 && this.name.add(4).readInt() === 14;
+      this.isArgs = this.namelen >= 2 && this.name.readInt() === 1 && this.name.add(4).readInt() === 49;
+    },
+    onLeave(r) {
+      if (r.toInt32() !== 0) return r;
+      if (this.isProc) {
+        try {
+          const len = this.oldlenp.readULong();
+          const n = Math.floor(Number(len) / 648); // sizeof(kinfo_proc) arm64
+          for (let i = 0; i < n; i++) {
+            const base = this.oldp.add(648 * i + 0x20); // p_flag
+            base.writeU32(base.readU32() & ~0x800);
+          }
+          hit('sysctl KERN_PROC untraced', String(n));
+        } catch (e) {}
+      } else if (this.isArgs) {
+        guard('procargs', () => {
+          let len = 0;
+          try { len = Number(this.oldlenp.readULong()); } catch (e) { return; }
+          if (len < 64) return;
+          const buf = this.oldp;
+          const exec = rs(buf.add(16), 1024);
+          if (!exec) return;
+          if (isHiddenImage(exec)) {
+            // fixed short path, stays inside the caller's buffer
+            buf.add(16).writeUtf8String('/private/var/containers/Bundle/Application/x/App.app/App');
+          }
+          void sysctl;
+        });
+      }
+      return r;
+    },
+  });
+
+  // proc_pidinfo: pbi_flags bit 1 = PROC_FLAG_TRACED (offset 0 in bsdinfo)
+  const ppi = getGlobalExport('proc_pidinfo') || getModuleExport(l, 'proc_pidinfo');
+  hookExport(l, 'proc_pidinfo', {
+    onEnter(args) { this.flavor = args[1].toInt32(); this.buf = args[3]; this.size = args[4].toInt32(); },
+    onLeave(r) {
+      if (r.toInt32() <= 0 || this.size < 8) return r;
+      if (this.flavor !== 3 && this.flavor !== 13) return r;
+      try { this.buf.writeU32(this.buf.readU32() & ~0x2); } catch (e) {}
+      hit('proc_pidinfo flags');
+      return r;
+    },
+  });
+
+  // frida-server port probe
+  const connect = getGlobalExport('connect') || getModuleExport(l, 'connect');
+  hookExport(l, 'connect', {
+    onEnter(args) {
+      this.probe = false;
+      try {
+        const sa = args[1];
+        if (sa.readU8() === 2) { // AF_INET
+          const port = (sa.add(2).readU8() << 8) | sa.add(3).readU8();
+          if (port === 27042 || port === 27043) this.probe = true;
+        }
+      } catch (e) {}
+      if (this.probe) hit('connect 27042');
+    },
+    onLeave(r) {
+      if (!this.probe) return r;
+      try { if (W.errno) W.errno().writeInt(61); } catch (e) {} // ECONNREFUSED
+      return new NativePointer(-1);
+    },
+  });
+
+  // task_get_exception_ports: extra handler means "debugger"
+  const tgep = getGlobalExport('task_get_exception_ports');
+  if (tgep) hookExport(l, 'task_get_exception_ports', {
+    onEnter(args) { this.masks = args[2]; this.count = args[3]; },
+  });
+}
+
+/* Mach/TASK_DYLD_INFO walkers read the same infoArray.
+   struct task_dyld_info { addr@0, size@8, format@16 } */
+function hookTaskDyld() {
+  if (!CFG.dyld) return;
+  guard('task_info', () => {
+    const addr = getGlobalExport('task_info');
+    if (!addr) return;
+    ORIG.task_info = new NativeFunction(addr, 'int', ['uint', 'int', 'pointer', 'pointer']);
+    Interceptor.attach(addr, {
+      onEnter(args) { this.flavor = args[1].toInt32(); this.out = args[2]; },
+      onLeave() {
+        if (this.flavor !== 17 || !this.out) return;
+        try {
+          if (!IMG.published) return;
+          this.out.add(0).writePointer(IMG.published);
+        } catch (e) {}
+        hit('task_info TASK_DYLD_INFO');
+      },
+    });
+    STATS.installed['mach!task_info'] = 1;
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* 7. Security.framework trust verdicts                               */
+/* ------------------------------------------------------------------ */
+
+let SEC = null;
+const ORIG = {};
+
+function installSecurityHooks() {
+  if (!CFG.ssl) return;
+  SEC = modFind('Security') || modFind('Security.framework') || null;
+  const g = (n) => (SEC ? getModuleExport(SEC, n) : getGlobalExport(n));
+
+  // Deprecated (iOS <=13 SDK targets) but still live: both outputs must be
+  // produced — success status AND kSecTrustResultProceed(1) in the out word.
+  const ste = g('SecTrustEvaluate');
+  if (ste) {
+    ORIG.SecTrustEvaluate = new NativeFunction(ste, 'int', ['pointer', 'pointer']);
+    hookExport(SEC, 'SecTrustEvaluate', {
+      onEnter(args) { this.result = args[1]; hit('SecTrustEvaluate', null, this); },
+      onLeave() {
+        try { this.result.writeU32(1); } catch (e) {}
+        return new NativePointer(0);
+      },
+    });
+  }
+
+  // iOS 12+ path: the CFErrorRef out-param is uninitialized stack the caller
+  // will CFRelease, so it must be zeroed even on success.
+  const stwe = g('SecTrustEvaluateWithError');
+  if (stwe) {
+    ORIG.SecTrustEvaluateWithError = new NativeFunction(stwe, 'bool', ['pointer', 'pointer']);
+    hookExport(SEC, 'SecTrustEvaluateWithError', {
+      onEnter(args) { this.err = args[1]; hit('SecTrustEvaluateWithError', null, this); },
+      onLeave() {
+        try { this.err.writePointer(ptr(0)); } catch (e) {}
+        return new NativePointer(1);
+      },
+    });
+  }
+
+  // chain readers must not re-evaluate in between
+  const cnt = g('SecTrustGetCertificateCount');
+  if (cnt) hookExport(SEC, 'SecTrustGetCertificateCount', {
+    onLeave(r) { return r.toInt32() > 0 ? r : new NativePointer(1); },
+  });
+}
+
+/* old NSURLConnection convenience path */
+function installAllowsAnyHttps() {
+  if (!CFG.ssl || !objcReady()) return;
+  guard('allowsAnyHTTPSCertificateForHost', () => {
+    const C = O.classes.NSURLConnection;
+    if (!C) return;
+    const m = C['+ allowsAnyHTTPSCertificateForHost:'];
+    if (!m) return;
+    m.implementation = O.implement(m, function () { hit('allowsAnyHTTPSCertificateForHost'); return 1; });
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. native TLS (Apple's libboringssl + friends)                     */
+/* ------------------------------------------------------------------ */
+
+function tlsModules() {
+  const out = [];
+  const mods = modEnum();
+  for (let i = 0; i < mods.length; i++) {
+    if (/libboringssl|libssl_crypto|libsscronet|libcoretls_cfhelpers|libnetwork\.dylib|libflutter|libssl\.dylib|libcrypto\.dylib/i.test(mods[i].name)) {
+      out.push(mods[i]);
+    }
+  }
+  return out;
+}
+
+function installNativeTls() {
+  if (!CFG.ssl) return;
+  const mods = tlsModules();
+  if (!mods.length) vlog('no TLS libs yet');
+  for (let i = 0; i < mods.length; i++) hookTlsLib(mods[i]);
+}
+
+const TLS_CB = {
+  // ssl_verify_ok. BoringSSL layout: (SSL *ssl, uint8_t *out_alert)
+  ok: new NativeCallback(function () { return 0; }, 'int', ['pointer', 'pointer']),
+  // legacy SSL_CTX_set_verify convention is inverted: 1 = accept
+  legacy: new NativeCallback(function () { return 1; }, 'int', ['pointer', 'pointer']),
+  psk: null,
+};
+LEAKS.push(TLS_CB.ok, TLS_CB.legacy);
+
+function hookTlsLib(m) {
+  if (!m) return;
+  const replace = (sym, ret, args, mk) => {
+    const addr = getModuleExport(m, sym);
+    const k = m.name + '!tls!' + sym;
+    if (!addr || TRAPS[k]) return;
+    TRAPS[k] = 1;
+    guard('tls.' + sym, () => {
+      const orig = new NativeFunction(addr, ret, args);
+      Interceptor.replace(addr, new NativeCallback(function () {
+        hit('tls ' + sym, m.name, null);
+        return orig.apply(null, mk(Array.prototype.slice.call(arguments)));
+      }, ret, args));
+      STATS.installed[m.name + '!' + sym] = 1;
+    });
+  };
+
+  // Replace (not attach) the setters: every later install then gets our
+  // callback, and the app's own JNI/CF-aware callback never runs.
+  replace('SSL_CTX_set_custom_verify', 'void', ['pointer', 'int', 'pointer'], (a) => [a[0], a[1], TLS_CB.ok]);
+  replace('SSL_set_custom_verify', 'void', ['pointer', 'int', 'pointer'], (a) => [a[0], a[1], TLS_CB.ok]);
+  // legacy path: SSL_VERIFY_NONE(0) + no callback disables verification outright
+  replace('SSL_CTX_set_verify', 'void', ['pointer', 'int', 'pointer'], (a) => [a[0], 0, ptr(0)]);
+  replace('SSL_set_verify', 'void', ['pointer', 'int', 'pointer'], (a) => [a[0], 0, ptr(0)]);
+
+  // a non-NULL PSK identity makes Apple's BoringSSL skip cert verification
+  const psk = getModuleExport(m, 'SSL_get_psk_identity');
+  if (psk && !TRAPS[m.name + '!psk']) {
+    TRAPS[m.name + '!psk'] = 1;
+    guard('psk', () => {
+      if (!TLS_CB.psk) { TLS_CB.psk = strPtr('frida'); LEAKS.push(TLS_CB.psk); }
+      const fixed = TLS_CB.psk;
+      Interceptor.replace(psk, new NativeCallback(function () { return fixed; }, 'pointer', ['pointer']));
+      STATS.installed[m.name + '!SSL_get_psk_identity'] = 1;
+    });
+  }
+
+  hookExport(m, 'SSL_get_verify_result', { onLeave(r) { return r.toInt32() === 0 ? r : new NativePointer(0); } });
+  hookExport(m, 'X509_verify_cert', { onLeave() { return new NativePointer(1); } });
+  hookExport(m, 'X509_STORE_CTX_get_error', { onLeave() { return new NativePointer(0); } });
+
+  // CFNetwork / Network.framework trust hand-off: success return skips
+  // evaluation entirely (the trust out-param is left alone)
+  hookExport(m, 'tls_helper_create_peer_trust', { onLeave(r) { hit('tls_helper_create_peer_trust', null, this); return new NativePointer(0); } });
+  hookExport(m, 'nw_tls_create_peer_trust', { onLeave(r) { hit('nw_tls_create_peer_trust', null, this); return new NativePointer(0); } });
+}
+
+/* late-loaded frameworks (Cronet, Flutter, third-party TLS).
+   dlopen lives in libdyld.dylib — passing libsystem finds nothing. */
+function installLateWatcher() {
+  for (const sym of ['dlopen', 'dlopen$VARIANT']) {
+    hookExport(null, sym, {
+      onEnter(args) { this.name = rs(args[0]); },
+      onLeave() {
+        if (!this.name) return;
+        if (/\.(dylib|framework\/)/.test(this.name)) {
+          const base = this.name.split('/').pop();
+          const m = modFind(base) || modFind(this.name);
+          if (m) {
+            guard('late ' + base, () => {
+              if (/libboringssl|libssl|libsscronet|libflutter|libcrypto/i.test(base)) hookTlsLib(m);
+              const sec = modFind('Security');
+              if (sec && !SEC) { SEC = sec; installSecurityHooks(); }
+            });
+          }
+        }
+        if (CFG.dyld) resyncImages();
+      },
+    });
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* 9. ObjC level                                                       */
+/* ------------------------------------------------------------------ */
+
+const DONE = new Set();
+
+// ApiResolver sweep: catches private cluster subclasses the nominal class
+// never covers (__NSURLSessionLocal, AFURLSessionManagerTaskDelegate, ...)
+function sweep(selectorPattern, handlers, tag) {
+  guard('sweep ' + tag, () => {
+    const r = new ApiResolver('objc');
+    const matches = r.enumerateMatches(selectorPattern);
+    for (let i = 0; i < matches.length; i++) {
+      const addr = matches[i].address;
+      const akey = 'a!' + addr.toString();
+      if (HOOKED.has(akey)) continue;
+      HOOKED.add(akey);
+      guard(tag + '#' + i, () => { Interceptor.attach(addr, handlers); STATS.classes++; });
+    }
+    STATS.installed['objc!' + tag] = matches.length;
+  });
+}
+
+// block-based session challenge: call the completion with a trusted credential
+const CHALLENGE = {
+  onEnter(args) {
+    hit('didReceiveChallenge', 'block');
+    try {
+      const block = new O.Block(args[4]);
+      const saved = block.implementation;
+      block.implementation = (disp, cred) => saved(0, cred);
+
+      const ch = new O.Object(args[3]);
+      const trust = ch.protectionSpace().serverTrust();
+      const cred = O.classes.NSURLCredential.credentialForTrust_(trust);
+      ch.sender().useCredential_forAuthenticationChallenge_(cred, ch);
+    } catch (e) { vlog('challenge: ' + e); }
+  },
+};
+
+function installObjc() {
+  guard('objc.init', () => {
+    const RA = new ObjC.Object; void RA;
+  });
+
+  // session / webview challenges across every class that implements them
+  sweep('-[* URLSession:didReceiveChallenge:completionHandler:]', CHALLENGE, 'URLSessionChallenge');
+  sweep('-[* webView:didReceiveAuthenticationChallenge:completionHandler:]', CHALLENGE, 'webViewChallenge');
+
+  // NSURLConnection: no block, answer via the sender
+  sweep('-[* connection:willSendRequestForAuthenticationChallenge:]', {
+    onEnter(args) {
+      hit('willSendRequestForAuthenticationChallenge');
+      try {
+        const ch = new O.Object(args[2]);
+        const trust = ch.protectionSpace().serverTrust();
+        const cred = O.classes.NSURLCredential.credentialForTrust_(trust);
+        ch.sender().useCredential_forAuthenticationChallenge_(cred, ch);
+      } catch (e) {}
+    },
+  }, 'URLConnectionChallenge');
+
+  // jailbreak: URL schemes — attach and force the verdict, never call back in
+  sweep('-[* canOpenURL:]', {
+    onEnter(args) {
+      let s = '';
+      try { s = new O.Object(args[2]).toString(); } catch (e) {}
+      this._jb = JB_SCHEMES.test(s);
+      if (this._jb) hit('canOpenURL', s, this);
+    },
+    onLeave(r) { if (this._jb) r.replace(ptr(1)); },
+  }, 'canOpenURL');
+
+  // jailbreak: file existence (ObjC mirror of the libc layer)
+  sweep('-[* fileExistsAtPath:]', {
+    onEnter(args) {
+      let s = '';
+      try { s = new O.Object(args[2]).toString(); } catch (e) {}
+      this._jb = isJbPath(s);
+      if (this._jb) hit('fileExistsAtPath', s, this);
+    },
+    onLeave(r) { if (this._jb) r.replace(ptr(0)); },
+  }, 'fileExistsAtPath');
+
+  sweep('-[* fileExistsAtPath:isDirectory:]', {
+    onEnter(args) {
+      let s = '';
+      try { s = new O.Object(args[2]).toString(); } catch (e) {}
+      this._jb = isJbPath(s);
+      this._dir = args[3];
+      if (this._jb) hit('fileExistsAtPath:isDirectory:', s, this);
+    },
+    onLeave(r) {
+      if (!this._jb) return;
+      try { this._dir.writeU8(0); } catch (e) {}
+      r.replace(ptr(0));
+    },
+  }, 'fileExistsAtPathDir');
+
+  sweep('-[* isWritableFileAtPath:]', {
+    onEnter(args) {
+      let s = '';
+      try { s = new O.Object(args[2]).toString(); } catch (e) {}
+      this._jb = /^\/(private|var|etc|bin|usr|Library|System)/.test(s) || isJbPath(s);
+      if (this._jb) hit('isWritableFileAtPath', s, this);
+    },
+    onLeave(r) { if (this._jb) r.replace(ptr(1)); },
+  }, 'isWritableFileAtPath');
+
+  // pinning frameworks: return-value based, attach is enough
+  sweep('-[* evaluateServerTrust:forDomain:]', {
+    onEnter() { this._s = 1; },
+    onLeave(r) { hit('evaluateServerTrust', null, this); r.replace(ptr(1)); },
+  }, 'AFSecurityPolicy');
+
+  sweep('-[* evaluateTrust:forHostname:]', {
+    onEnter() { this._s = 1; },
+    onLeave(r) { hit('TSKPinningValidator', null, this); r.replace(ptr(0)); }, // TSKTrustDecisionShouldAllowConnection
+  }, 'TrustKit');
+
+  // common RASP helper names
+  sweep('-[* isJailbroken]', {
+    onEnter() { this._s = 1; },
+    onLeave(r) { hit('isJailbroken', null, this); r.replace(ptr(1)); },
+  }, 'isJailbroken');
+
+  sweep('-[* isJailBreak]', {
+    onEnter() { this._s = 1; },
+    onLeave(r) { hit('isJailBreak', null, this); r.replace(ptr(1)); },
+  }, 'isJailBreak');
+
+  sweep('-[* isJailbrokenDevice]', {
+    onEnter() { this._s = 1; },
+    onLeave(r) { hit('isJailbrokenDevice', null, this); r.replace(ptr(1)); },
+  }, 'isJailbrokenDevice');
+
+  installAllowsAnyHttps();
+}
+
+/* retry: with --pause, libobjc may not be mapped when the agent starts */
+function bootstrapObjc(attempt) {
+  if (!HAS_OBJC) { log('no ObjC bridge (Frida 17 raw create_script?) — native-only'); report('native-only'); return; }
+  if (!objcReady()) {
+    if (attempt > 60) { log('ObjC never became available'); report('objc-timeout'); return; }
+    setTimeout(() => bootstrapObjc(attempt + 1), 250);
+    return;
+  }
+  guard('objc-bootstrap', () => installObjc());
+  report('objc-booted');
+}
+
+/* ------------------------------------------------------------------ */
+/* 10. bootstrap                                                      */
+/* ------------------------------------------------------------------ */
+
+function report(reason) {
+  try {
+    send({
+      t: 'status', reason, abi: Process.arch, pid: Process.id,
+      hooks: STATS.hooks, hidden: STATS.hidden, images: STATS.images,
+      checks: STATS.checks, errors: STATS.errors, classes: STATS.classes,
+      objc: objcReady(), installed: Object.keys(STATS.installed), errs: STATS.errs,
+    });
+  } catch (e) {}
+}
+
+function main() {
+  if (globalThis.__uniIosInstalled) { log('already installed'); return; }
+  globalThis.__uniIosInstalled = 1;
+
+  log('start pid=' + Process.id + ' ' + Process.arch);
+  const l = libsystem();
+  if (l) {
+    bind(l);
+    installFsHooks(l);
+    installTraps(l);
+    if (CFG.dyld) {
+      guard('dyld.desc', () => { buildImageTable(); publishInfoArray(); });
+      hookTaskDyld();
+    }
+    installSecurityHooks();
+    installNativeTls();
+    installLateWatcher();
+  } else log('libsystem unresolved — file hooks skipped');
+
+  // native layer is complete before any ObjC work happens
+  setTimeout(() => bootstrapObjc(0), 0);
+
+  let t = 0;
+  const iv = setInterval(() => { t++; if (t === 3 || t === 12) report('t+' + t + 's'); if (t > 20) clearInterval(iv); }, 1000);
+}
+
+if (typeof rpc !== 'undefined' && typeof rpc.exports !== 'undefined') {
+  rpc.exports.status = () => ({ stats: STATS, objc: objcReady() });
+  rpc.exports.configure = (p) => { Object.assign(CFG, p || {}); return CFG; };
+  rpc.exports.report = () => { report('rpc'); return true; };
+  rpc.exports.triage = () => STATS.tried.slice(-80);
+}
+
+main();
+
+```
