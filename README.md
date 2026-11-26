@@ -4399,6 +4399,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Dezmonius/bodycam-eac-driver-fixes [Documented, reversible PowerShell workarounds when Easy Anti-Cheat blocks Bodycam over loaded AsUpIO.sys, ssgdio64.sys, or RTCore64.sys]
 - https://github.com/ManInMyVan/Minecraft-Anticheat-List [Curated catalog of public Minecraft Java/Bedrock anticheats across platforms and versions]
 - https://github.com/aethelreborn/minecraft-anticheat-docs [Structured educational docs on Minecraft server anticheat architecture, cheat categories, detection methods, and enforcement]
+- https://github.com/flowerkitties/Orchard-Obliterator [Windows scanner that fingerprints and quarantines the Orchard Minecraft Java cheat (including obfuscated Nitro builds) via JAR signatures, launcher paths, and live process checks]
 - https://github.com/gmh5225/alt-V-Anticheat-Guide [GTA5 MP servers]
 - https://github.com/gmh5225/packer-tutorial [Packer]
 - https://github.com/gmh5225/ghostbusters [Senior Design: Anit-Cheat Detection system]
