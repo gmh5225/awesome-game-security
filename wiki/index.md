@@ -1473,6 +1473,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EscapeFromTarkov-Trainer](entities/escapefromtarkov-trainer.md) — discontinued EFT internal trainer (Mono era; IL2CPP 1.0 pivot; cheat / game:eft)
 - [mf_antiesp](entities/mf-antiesp.md) — FiveM AntiESP client Lua resource; IsEntityOccluded/WouldEntityBeOccluded + NetworkConcealPlayer for occluded players; config.lua scan/reveal tuning; complements server AC (MitologicoDev; Anti Cheat / Detection:ESP)
 - [meatyeftrelease](entities/meatyeftrelease.md) — open-source DMA EFT radar and companion toolkit (C++/ImGui; LeechCore/MemProcFS; fuser overlay; cheat / game:eft [DMA])
+- [Medal Overlay Framework](entities/medal-overlay-framework.md) — Medal.tv Electron asar patch + named-pipe JSON draw bridge (Python/C++ SDKs); ESP/menus on AC-whitelisted capture overlay (NotExenis; cheat / overlay)
 - [EfiTool](entities/efitool.md) — UEFI ExitBootServices in-RAM SYSTEM hive patch (SYSTEM shell; no disk/driver)
 - [efi-monitor (ekknod)](entities/efi-monitor.md) — PatchGuard-safe MmCopyMemory hook (C/C++; driver development / graphics / networking; cheat / EFI driver area)
 - [efiSeek](entities/efiseek.md) — Ghidra UEFI firmware analyzer (Java; EFI GUID/protocol/callback automation; LOCATE_PROTOCOL·NOTIFY·INSTALL_PROTOCOL_INTERFACE flows; headless firmware RE; DSecurity)
