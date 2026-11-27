@@ -4666,6 +4666,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ZAMR](entities/zamr.md) — curated MMRL module repository for Magisk/KernelSU/APatch (Play Integrity Fix, Zygisk, root-hide, TEESimulator; hourly JSON catalog; zelect0r; cheat / Magisk)
 - [ZeroHVCI](entities/zero-hvci.md) — HVCI bypass PoC for unsigned kernel code (gmh5225; policy edge cases / vulnerable signed drivers; VBS research)
 - [ZeroImport](entities/zeroimport.md) — C++ kernel driver runtime import resolver; hashed ntoskrnl export walk, no cleartext API strings, optional cache; import-table stealth (1hAck-0; Anti Cheat / Lazy Importer)
+- [Zero Scanner](entities/zero-scanner.md) — highho; Rust/egui offline Windows x64 CE-style memory workbench (value/pointer/AOB scans, disasm, reversible patches, speedhack, Lua, `.CT` tables, explainable triage, localhost MCP HTTP; no cloud/telemetry; cheat / memory scanner)
 - [ZeroThreadKernel](entities/zero-thread-kernel.md) — threadless kernel exec via existing contexts / timers (vs AC thread enum)
 - [ZhangBing-Injector](entities/zhangbing-injector.md) — M3351AN BYOVD DLL injector (C++ usermode + bundled WHQL-signed vulnerable `.sys` drivers; driver memory ops + protected-process injection; credits kdmapper; kernel-assisted injection research)
 - [zig-gamedev](entities/zig-gamedev.md) — cross-platform Zig gamedev libs (DX12/Vulkan/OpenGL/audio; GPU-driven rendering samples; Game Engine)
