@@ -1,0 +1,1123 @@
+Project Path: arc_bgrubbs1_ida-proofmark_jz6x5dn0
+
+Source Tree:
+
+```txt
+arc_bgrubbs1_ida-proofmark_jz6x5dn0
+├── API_AUDIT.md
+├── LICENSE
+├── LIVE_TEST_PLAN.md
+├── README.md
+├── RESEARCH.md
+├── examples
+│   ├── fixtures
+│   ├── make_ida_fixtures.py
+│   ├── make_review_package.py
+│   └── synthetic_demo.py
+├── ida-plugin.json
+├── proofmark.py
+├── proofmark_core.py
+└── tests
+    ├── test_adapter_contracts.py
+    └── test_core.py
+
+```
+
+`API_AUDIT.md`:
+
+```md
+# IDA adapter API audit — source review only
+
+Checked 2026-11-06 against the current [Hex-Rays Python reference](https://python.docs.hex-rays.com/) and [Hex-Rays plugin examples](https://docs.hex-rays.com/developer/idapython/idapython-examples). Each listed symbol exists in current official documentation. This is **not** a live IDA 9.5 runtime check.
+
+| Adapter use in `proofmark.py` | Official evidence | Review note |
+| --- | --- | --- |
+| `ida_idaapi.plugin_t`, `plugmod_t`, `PLUGIN_ENTRY`, `PLUGIN_MULTI`, `PLUGIN_UNL`, `BADADDR` | [Plugin tutorial](https://docs.hex-rays.com/developer/idapython/how-to-create-a-plugin), [ida_idaapi reference](https://python.docs.hex-rays.com/ida_idaapi/index.html) | Both flags are documented; example uses multi-plugin lifecycle. |
+| `idc.get_idb_path()` | [idc reference](https://python.docs.hex-rays.com/idc/index.html) | Returns current IDB full path. Check actual saved-DB behavior live. |
+| `ida_kernwin.get_screen_ea()`, `jumpto()` | [ida_kernwin reference](https://python.docs.hex-rays.com/ida_kernwin/index.html) | Cursor address and navigation are documented. |
+| `ida_kernwin.ask_str()`, `ask_text()`, `ask_file()` | [ida_kernwin reference](https://python.docs.hex-rays.com/ida_kernwin/index.html), [official file chooser example](https://docs.hex-rays.com/developer/cpp-sdk/cpp-sdk-examples) | `ask_file` accepts the shown three arguments; the Python reference leaves its signature as `*args`, so confirm file dialog behavior live. |
+| `ida_kernwin.msg()`, `warning()` | [ida_kernwin reference](https://python.docs.hex-rays.com/ida_kernwin/index.html) | Output and warning UI are documented. |
+| `ida_kernwin.Choose`, `CH_QFLT`, `Show(True)`, `OnGetSize`, `OnGetLine`, `OnSelectLine`, `NOTHING_CHANGED` | [Choose API](https://python.docs.hex-rays.com/classida__kernwin_1_1_choose.html), [official Choose example](https://raw.githubusercontent.com/HexRaysSA/IDAPython/9.0sp1/examples/ui/tabular_views/custom/choose.py) | `OnSelectLine` now returns `(changed, selection)`; modal behavior and row navigation still need live testing. |
+| `ida_bytes.get_bytes(ea, size, 0)` | [ida_bytes reference](https://python.docs.hex-rays.com/ida_bytes/index.html) | Explicit zero flags omit `GMB_READALL`; IDA documents failure at the first uninitialized byte. Capture retries lengths 16 down to 8 to keep the longest contiguous initialized prefix. Verification uses the same strict reader. |
+| `ida_funcs.get_func_name(ea)` | [ida_funcs reference](https://python.docs.hex-rays.com/ida_funcs/index.html) | May return no name; adapter converts to empty string. |
+| `ida_segment.getseg`, `get_segm_qty`, `getnseg`, `get_segm_name`, `SEG_BSS`, `is_spec_segm`, and `segment_t.start_ea/end_ea/type` | [ida_segment reference](https://python.docs.hex-rays.com/ida_segment/index.html) | Special and BSS segments are excluded from full scans. Capture requires mapped bytes. |
+| Relative sibling import next to `ida-plugin.json` | [Packaging guide](https://docs.hex-rays.com/developer/publishing-plugins/how-tos/plugin-publishing) | Official guide allows imports relative to entry point; direct-copy fallback also exists. |
+
+## Known limits from inspection
+
+- The matcher reads current IDB bytes, not the original file on disk; IDB patching changes results.
+- A 16-byte literal anchor may be ambiguous, or miss code changed by relocations or compilation. It never proves the analytical claim. An `unchanged` original-address check does not assess global uniqueness.
+- Scanning is synchronous but reads each block once for a batch of at most 16 records. A 16 MiB shared cap, cancellation, or uninitialized/unreadable area yields `incomplete` for changed records.
+- Sidecar addresses must be plain integers within the valid 64-bit EA range (excluding `BADADDR` and anchor overflow). Boolean and giant values are rejected before IDA API calls.
+- Imported claim and note lengths are bounded before Output-window rendering. Imported ID, claim, note, and path text are quoted with JSON escaping in Output messages and chooser cells, preserving the underlying stored content.
+- Modal chooser lifecycle, plugin loader namespace, and file dialogs have not been exercised under IDA 9.5.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Bradley Grubbs
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`LIVE_TEST_PLAN.md`:
+
+```md
+# Exact live IDA 9.5 validation plan
+
+Use an **already licensed, legitimate IDA Home or Pro 9.5 installation with IDAPython enabled**. No such installation was found locally. No license purchase or installation is part of this plan.
+
+## Synthetic inputs
+
+Run `python examples/make_ida_fixtures.py` in this project. It makes only original raw bytes:
+
+| Input | Size | SHA-256 |
+| --- | ---: | --- |
+| `examples/fixtures/proofmark-v1.bin` | 28 bytes | `1809582A693386EE3376D1C44A3AD308C9981B7C1335F6D3C6EAC99958D5A1F7` |
+| `examples/fixtures/proofmark-v2.bin` | 48 bytes | `1D6096754A3237D85086942B165A91A5C4CF6B5AC1A8D295CF1483043904E38D` |
+
+Both contain the same 16-byte x86-like anchor. V1 has it at file offset `0x04`; v2 at `0x18`. All other bytes are NOPs or RETs. These are synthetic and redistributable.
+
+## Run
+
+1. In the already licensed IDA 9.5 test installation, place `proofmark.py` and `proofmark_core.py` together in the user plugins folder. Restart IDA. Confirm **Edit → Plugins → Proofmark** appears with no traceback in the Output window.
+2. Import `proofmark-v1.bin` as a binary file, choose x86-64, and use load base `0x1000`. Save to a disposable `proofmark-v1.i64`. Confirm bytes at `0x1004` begin `48 83 EC 20`.
+3. Place the cursor at `0x1004`, invoke Proofmark command `c`, enter a synthetic conclusion and note. Confirm `<v1 IDB path>.proofmark.json` exists, contains a single record at decimal address `4100`, and has `anchor_hex` equal to `4883ec20488b05112233444885c07405`. Record the generated ID.
+4. Invoke `l`: confirm the record and note appear. Invoke `v`: expect `unchanged`, one match at `0x1004`, and a populated review table. Select its row with Enter and double-click separately; confirm navigation goes to `0x1004` with no chooser callback error. The UI must explain that `unchanged` did not check uniqueness elsewhere.
+5. Import `proofmark-v2.bin` as a separate binary at base `0x1000`; save to disposable `proofmark-v2.i64`. Invoke `o`, choose the v1 sidecar. Expect `moved_candidate`, one match at `0x1018`; select the row and confirm navigation there. Inspect the bytes and context manually. This checks the cross-IDB flow without importing any private file.
+6. With v2 open, invoke `j` using the v2 sidecar (which has no record): expect a clear not-found warning and no navigation. With v1 open, use `j` and the captured record ID: expect `0x1004`.
+7. In a disposable copy of the sidecar, change `schema_version` to `99`; invoke `o` on it. Expect a Proofmark warning for unsupported schema, no crash, and no IDB mutation. Repeat with the first record's `ea` set to JSON `true` and to a decimal value greater than `2^64`; each must be rejected before any navigation or byte read.
+8. On a disposable IDB, make an uninitialized/BSS range of at least 16 bytes (for example a `.bss` segment beginning at `0x3000`, with no values patched into it). Place the cursor there and run `c`; expect a warning refusing capture. Create a disposable sidecar record whose anchor is 16 zero bytes at `0x3000`, then run `o` against that IDB. It must **not** report `unchanged`; `not_found` or `incomplete` is acceptable depending on other mapped ranges. This specifically checks the strict `get_bytes(..., 0)` behavior.
+9. With v1 loaded at `0x1000`, the last mapped address is `0x101B`. Run `c` at `0x1014` (eight bytes remain) and `0x1013` (nine remain): expect successful 8- and 9-byte anchors. Run `c` at `0x1015` (seven remain): expect a warning. Also test a disposable segment with an initialized prefix of 8–15 bytes followed by an uninitialized hole inside the segment; capture at its start should use precisely that initialized prefix and never include the hole. Confirm it works with a full 16-byte initialized prefix too.
+10. Make a synthetic sidecar with 17 valid records at `0x1004` and invoke `v`: only indices `0..15` should be reviewed, with guidance to run `v16`. Run `v16`: only the final record should appear. For a sufficiently large disposable initialized image, choose records with changed anchors and test the progress display and Cancel button; cancelled scans must show `incomplete`, never `moved_candidate`.
+11. In a disposable sidecar, put `\\n` and `\\u001b` escapes into a claim, ID, and note. Run `l` and `o`; each record must remain on its own Output-window line, with the controls visibly escaped rather than interpreted. Check the chooser cells too.
+12. Reopen both databases; confirm no IDB changes were required by Proofmark. Check whether the sidecar remains next to the saved IDB and whether the modal table closes cleanly.
+
+Record the exact IDA edition/build, Python version, operating system, results for each step, and any traceback. If the test edition cannot load IDAPython plugins, stop and report that capability failure rather than claiming compatibility.
+
+## IDA Free ambiguity
+
+The [IDA Free comparison table](https://hex-rays.com/ida-free) lists IDAPython/C++ SDK, but the FAQ on the **same page** says IDA Free does not provide either API. The [contest page](https://hex-rays.com/plugin-contest) permits Free users to enter, which does not establish that a Python plugin can run in Free. The smallest credible runtime test is an existing licensed Home or Pro 9.5 installation. Free support must be checked in-product or clarified by Hex-Rays before claiming it.
+
+```
+
+`README.md`:
+
+```md
+# Proofmark for IDA
+
+Proofmark gives an analyst's conclusion a checkable byte anchor. Capture a short claim at the cursor, add the reasoning, and revisit the record after the IDB or binary changes. A local review table shows whether the supporting bytes are still at the same address, appear once elsewhere, appear in several places, or cannot be located reliably.
+
+**Proofmark checks byte continuity, not truth.** An unchanged anchor does not validate the analysis. A moved match is a candidate location that must be inspected in context.
+
+## Why this exists
+
+IDA bookmarks and comments are useful for navigation, but a team can carry a conclusion into a new build without noticing its original evidence changed. Proofmark stores the exact bytes behind a claim and makes that drift visible. It does not sync annotations, alter the IDB, call an AI service, or require a decompiler.
+
+Example: an analyst concludes that a parser branches on a null pointer, capturing that conclusion at the relevant instruction. In a later build, Proofmark finds that the original address changed but the 16-byte anchor appears once at a new address. It marks the record `moved_candidate`; the analyst jumps there and confirms the control flow before carrying the conclusion forward.
+
+## Install and use
+
+This is an experimental source prototype. It targets the IDAPython plugin API documented for IDA 9.5, but has **not yet been run in IDA 9.5**. This experimental release has passed offline tests and packaging validation; it has not been tested inside IDA. Version metadata limits installation to the intended 9.5 target, not a verified compatibility claim.
+
+For a manual local trial, copy `proofmark.py` and `proofmark_core.py` together into IDA's user `plugins` directory, restart IDA, and open a saved IDB. Invoke **Edit → Plugins → Proofmark** and enter a command such as `c`, `v`, or `v16`:
+
+| Command | Action |
+| --- | --- |
+| `c` | Capture a conclusion and optional reasoning at the current mapped address. |
+| `l` or `lN` | List up to 16 records from index `N` in the Output window (`l` starts at 0). |
+| `v` or `vN` | Verify up to 16 records from index `N` in the current IDB's sidecar (`v` starts at 0); inspect the table. |
+| `o` or `oN` | Open a prior IDB's sidecar and verify up to 16 records from index `N` against the currently open binary. |
+| `j` | Jump to the original address of a record in the current sidecar. |
+
+The sidecar is `<IDB path>.proofmark.json`. It includes claims, notes, original addresses, and up to 16 bytes per record. Claims are limited to 512 characters and notes to 4,096. **Treat it as potentially sensitive analysis data.** The plugin makes no network requests, but a synced IDB folder may automatically transmit the sidecar under your folder-sync settings. The plugin does not write to the IDB.
+
+Capture uses the longest contiguous initialized byte prefix at the cursor, from 8 to 16 bytes; it refuses shorter prefixes. In the verification table, select a row to jump when the bytes are unchanged or there is one moved candidate. For ambiguous, missing, or incomplete results, no destination is chosen. The Output window includes the record details and caveats. Imported text is quoted and escaped there so it cannot create forged log lines; saved claim and note content is preserved.
+
+## Result meanings
+
+| Status | Meaning |
+| --- | --- |
+| `unchanged` | The anchor bytes still occur at the original address. This quick check does **not** establish that the anchor is unique elsewhere. |
+| `moved_candidate` | They differ at the original address and occur exactly once in the scanned ranges. Review the new context. |
+| `ambiguous` | They occur in multiple scanned places. No location is selected. |
+| `not_found` | A complete scan found no occurrence. The original bytes may have changed or disappeared. |
+| `incomplete` | Cancellation, uninitialized/unreadable bytes, or the 16 MiB shared scan budget prevent a definitive classification. |
+
+The matcher considers exact **initialized IDB bytes** only. Relocations, patched operands, and other legitimate changes can make a record `not_found`. Repeated byte sequences can make it `ambiguous`. The current prototype reads IDB bytes, which may differ from the file on disk after patching. Verification is synchronous but checks at most 16 records per invocation, reads each scan block once for the batch, shows progress and a Cancel button, and caps each batch at 16 MiB. If a segment contains uninitialized bytes, affected chunks are skipped and changed records are marked `incomplete` rather than treated as verified.
+
+## Synthetic demonstration and checks
+
+The `examples/synthetic_demo.py` file uses generated x86-like bytes and no private binary. Run it with `python examples/synthetic_demo.py` from this directory. It shows one moved candidate. `examples/make_ida_fixtures.py` creates two tiny raw binaries under `examples/fixtures` for the exact live test in `LIVE_TEST_PLAN.md`.
+
+Run the standard-library tests with:
+
+```powershell
+$env:PYTHONPATH=(Get-Location).Path
+python -m unittest discover -s tests -v
+```
+
+The tests cover unchanged, moved across a scan-chunk boundary, ambiguous, missing, incomplete from unreadable bytes, cancellation and a scan limit, shared batch reads, address bounds, sidecar round-trip/schema rejection, and focused API-boundary stubs. The stubs do **not** test the IDA UI or IDAPython runtime integration.
+
+## Live verification status
+
+The in-product verification steps are documented in [LIVE_TEST_PLAN.md](LIVE_TEST_PLAN.md). They have not been run. No runtime compatibility result is claimed.
+
+## Authorship and provenance
+
+Prepared for Bradley Grubbs (`@bgrubbs1`) with AI coding assistance in November 2026. Bradley is the public maintainer. The implementation and synthetic fixture are original to this project and distributed under the [MIT license](LICENSE). No proprietary firmware, IDA databases, credentials, or third-party code are included. API and packaging decisions were checked against [Hex-Rays IDAPython examples](https://docs.hex-rays.com/developer/idapython/idapython-examples), [API reference](https://python.docs.hex-rays.com/), and [plugin publishing documentation](https://docs.hex-rays.com/developer/publishing-plugins/how-tos/plugin-publishing). Contest timing and entry requirements are on the [official contest page](https://hex-rays.com/plugin-contest).
+
+```
+
+`RESEARCH.md`:
+
+```md
+# Concept decision and source notes
+
+Checked 2026-11-06. This is a focused prototype decision, not a claim that no comparable plugin exists.
+
+## Differentiator
+
+Proofmark links a human conclusion to the exact bytes seen when that conclusion was recorded, then classifies byte continuity in a later IDB. The JSON sidecar is intentionally small and readable. It makes review debt visible without auto-transferring annotations or asserting that an unchanged byte sequence proves the conclusion.
+
+Existing tools cover neighboring jobs:
+
+- [BinSync](https://hex-rays.com/plugin-contest/2025) synchronizes reverse-engineering state across tools and collaborators.
+- [REmatch](https://github.com/nirizr/rematch) identifies similar functions and migrates annotations between databases.
+- [The `oplog` example](https://docs.hex-rays.com/developer/publishing-plugins/concepts/plugin-packaging-and-format) records operations during analysis.
+- [IDA 9.5 release notes](https://docs.hex-rays.com/release-notes/9_5) describe the current platform features, including newer first-party analysis tooling.
+
+Proofmark's narrow question is: **Do the bytes that supported this particular claim still appear, and where?** That is different from syncing, migrating, or generating analysis. The design deliberately leaves semantic validation to the analyst.
+
+## API and packaging sources
+
+- [Hex-Rays plugin tutorial](https://docs.hex-rays.com/developer/idapython/how-to-create-a-plugin): `plugin_t`, `plugmod_t`, `PLUGIN_ENTRY`, `PLUGIN_MULTI`, and `PLUGIN_UNL` lifecycle.
+- [Hex-Rays IDAPython examples](https://docs.hex-rays.com/developer/idapython/idapython-examples): chooser usage and plugin UI patterns.
+- [Hex-Rays Python API reference](https://python.docs.hex-rays.com/): `ida_bytes.get_bytes`, segment enumeration, `ida_kernwin` prompts and navigation.
+- [Plugin publishing guide](https://docs.hex-rays.com/developer/publishing-plugins/how-tos/plugin-publishing) and [packaging format](https://docs.hex-rays.com/developer/publishing-plugins/concepts/plugin-packaging-and-format): manifest fields, ZIP layout, GitHub release indexing and lint workflow.
+- [Contest page](https://hex-rays.com/plugin-contest): November 30, 2026 deadline and Plugin Repo requirement.
+
+## Resource and rights check
+
+No existing IDA project or installed IDA executable was found in the task workspace, the top levels of local `D:\lab\projects` and `D:\lab\workspaces`, common Windows installation paths, or command PATH. `hcli` was also absent. No private firmware or IDB was used. The six core tests and the demonstration use synthetic bytes only. This does **not** establish runtime compatibility with IDA 9.5 or Plugin Repo acceptance.
+
+```
+
+`examples/make_ida_fixtures.py`:
+
+```py
+"""Create tiny, original raw binaries for a live IDA import/rebase check."""
+
+from pathlib import Path
+
+root = Path(__file__).resolve().parent / "fixtures"
+root.mkdir(exist_ok=True)
+anchor = bytes.fromhex("48 83 EC 20 48 8B 05 11 22 33 44 48 85 C0 74 05")
+(root / "proofmark-v1.bin").write_bytes(b"\x90" * 4 + anchor + b"\xC3" * 8)
+(root / "proofmark-v2.bin").write_bytes(b"\x90" * 24 + anchor + b"\xC3" * 8)
+print("Created synthetic fixtures:", *(f"{p.name}={p.stat().st_size} bytes" for p in sorted(root.glob("*.bin"))))
+
+```
+
+`examples/make_review_package.py`:
+
+```py
+"""Create a deterministic local review ZIP from an explicit project allowlist."""
+
+import hashlib
+from pathlib import Path
+from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
+
+root = Path(__file__).resolve().parents[1]
+destination = root.parent / "proofmark-review-unvalidated.zip"
+files = (
+    ".gitignore",
+    "API_AUDIT.md",
+    "LIVE_TEST_PLAN.md",
+    "LICENSE",
+    "PACKAGE_STATUS.md",
+    "README.md",
+    "RESEARCH.md",
+    "ida-plugin.json",
+    "proofmark.py",
+    "proofmark_core.py",
+    "examples/make_ida_fixtures.py",
+    "examples/make_review_package.py",
+    "examples/synthetic_demo.py",
+    "examples/fixtures/proofmark-v1.bin",
+    "examples/fixtures/proofmark-v2.bin",
+    "tests/test_adapter_contracts.py",
+    "tests/test_core.py",
+)
+
+with ZipFile(destination, "w", compression=ZIP_DEFLATED) as archive:
+    for name in files:
+        path = root / name
+        if path.is_symlink() or not path.is_file():
+            raise RuntimeError(f"missing or linked source file: {name}")
+        info = ZipInfo("ida-proofmark/" + name, date_time=(2026, 11, 6, 0, 0, 0))
+        info.compress_type = ZIP_DEFLATED
+        archive.writestr(info, path.read_bytes())
+
+digest = hashlib.sha256(destination.read_bytes()).hexdigest()
+print(f"{destination.name}: {destination.stat().st_size} bytes, SHA-256 {digest}")
+
+```
+
+`examples/synthetic_demo.py`:
+
+```py
+"""No IDA needed: show how a byte-backed conclusion survives a rebase."""
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from proofmark_core import new_record, report_line, verify_record
+
+anchor = bytes.fromhex("48 83 EC 20 48 8B 05 11 22 33 44 48 85 C0 74 05")
+record = new_record("Branches if the loaded pointer is null", "Synthetic x86-like bytes", 0x1004, anchor)
+new_image = b"\x90" * 24 + anchor + b"\xC3" * 8
+reader = lambda ea, size: new_image[ea - 0x2000:ea - 0x2000 + size] if 0x2000 <= ea and ea + size <= 0x2000 + len(new_image) else None
+result = verify_record(record, reader, [(0x2000, 0x2000 + len(new_image))], chunk_size=8)
+print(report_line(record, result))
+
+```
+
+`ida-plugin.json`:
+
+```json
+{
+  "IDAMetadataDescriptorVersion": 1,
+  "plugin": {
+    "name": "Proofmark",
+    "version": "0.1.0",
+    "entryPoint": "proofmark.py",
+    "description": "Capture analyst conclusions with byte anchors and review whether the supporting bytes remain unchanged, moved, ambiguous, or missing.",
+    "keywords": [
+      "evidence",
+      "reverse-engineering",
+      "review",
+      "binary-analysis"
+    ],
+    "categories": [
+      "collaboration-and-productivity"
+    ],
+    "license": "MIT",
+    "maintainers": [
+      {
+        "name": "Bradley Grubbs",
+        "email": "bgrubbs@vt.edu"
+      }
+    ],
+    "urls": {
+      "repository": "https://github.com/bgrubbs1/ida-proofmark"
+    },
+    "idaVersions": [
+      "9.5"
+    ]
+  }
+}
+
+```
+
+`proofmark.py`:
+
+```py
+"""Proofmark: analyst claims backed by local byte anchors in IDA."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import ida_bytes
+import ida_funcs
+import ida_idaapi
+import ida_kernwin
+import ida_segment
+import idc
+
+try:
+    from .proofmark_core import (ANCHOR_SIZE, DEFAULT_SCAN_LIMIT, MAX_VERIFY_BATCH,
+                                 load_records, new_record, report_line, safe_text,
+                                 save_records, verify_batch)
+except ImportError:
+    # Also support copying these two files directly into the user plugins folder.
+    from proofmark_core import (ANCHOR_SIZE, DEFAULT_SCAN_LIMIT, MAX_VERIFY_BATCH,
+                                load_records, new_record, report_line, safe_text,
+                                save_records, verify_batch)
+
+
+def _path() -> Path:
+    idb_path = idc.get_idb_path()
+    if not idb_path:
+        raise RuntimeError("Save the IDA database before using Proofmark")
+    return Path(idb_path + ".proofmark.json")
+
+
+def _reader(ea: int, size: int) -> bytes | None:
+    if size < 1:
+        return b""
+    # Zero omits GMB_READALL: IDA returns None if any byte is uninitialized.
+    return ida_bytes.get_bytes(ea, size, 0)
+
+
+def _ranges() -> list[tuple[int, int]]:
+    result = []
+    for index in range(ida_segment.get_segm_qty()):
+        segment = ida_segment.getnseg(index)
+        if (segment is not None and segment.end_ea > segment.start_ea
+                and segment.type != ida_segment.SEG_BSS
+                and not ida_segment.is_spec_segm(segment.type)):
+            result.append((segment.start_ea, segment.end_ea))
+    return result
+
+
+def _capture(path: Path) -> None:
+    ea = ida_kernwin.get_screen_ea()
+    if ea == ida_idaapi.BADADDR:
+        raise RuntimeError("Place the cursor on mapped bytes before capturing")
+    segment = ida_segment.getseg(ea)
+    if segment is None:
+        raise RuntimeError("Cursor is outside a segment")
+    limit = min(ANCHOR_SIZE, segment.end_ea - ea)
+    anchor = None
+    # Strict reads fail if even one byte is uninitialized. Retain the longest
+    # contiguous initialized prefix, down to the documented eight-byte minimum.
+    for size in range(limit, 7, -1):
+        candidate = _reader(ea, size)
+        if candidate is not None and len(candidate) == size:
+            anchor = candidate
+            break
+    if anchor is None:
+        raise RuntimeError("At least eight readable bytes are needed at the cursor")
+    claim = ida_kernwin.ask_str("", 0, "Proofmark: conclusion supported by these bytes")
+    if claim is None:
+        return
+    note = ida_kernwin.ask_text(0, "", "Proofmark: reasoning or source (optional)")
+    if note is None:
+        return
+    function = ida_funcs.get_func_name(ea) or ""
+    segment_name = ida_segment.get_segm_name(segment) or ""
+    records = load_records(path)
+    record = new_record(claim, note, ea, anchor, segment_name, function)
+    records.append(record)
+    save_records(path, records)
+    ida_kernwin.msg(f"[Proofmark] Captured {safe_text(record['id'])} at 0x{ea:X} in {safe_text(str(path))}\n")
+
+
+def _list(path: Path, start: int = 0) -> None:
+    records = load_records(path)
+    if not records:
+        ida_kernwin.msg(f"[Proofmark] No records in {safe_text(str(path))}\n")
+        return
+    if start < 0 or start >= len(records):
+        raise ValueError(f"start index must be 0 through {len(records) - 1}")
+    page = records[start:start + MAX_VERIFY_BATCH]
+    ida_kernwin.msg(f"[Proofmark] Records {start}..{start + len(page) - 1} of {len(records)} in {safe_text(str(path))}\n")
+    for record in page:
+        ida_kernwin.msg(f"  {safe_text(record['id'])}  0x{record['ea']:X}  {safe_text(record['claim'])}\n")
+        if record.get("note"):
+            ida_kernwin.msg(f"      {safe_text(record['note'])}\n")
+    if start + len(page) < len(records):
+        ida_kernwin.msg(f"[Proofmark] Run l{start + len(page)} for the next page.\n")
+
+
+class ProofmarkTable(ida_kernwin.Choose):
+    """A modal review table; stays alive while the plugin command is running."""
+
+    def __init__(self, rows):
+        super().__init__("Proofmark evidence review",
+                         [["ID", 16], ["Status", 20], ["Address", 16], ["Claim", 80]],
+                         flags=ida_kernwin.Choose.CH_QFLT)
+        self.rows = rows
+
+    def OnGetSize(self):
+        return len(self.rows)
+
+    def OnGetLine(self, n):
+        record, result = self.rows[n]
+        if result["status"] in ("unchanged", "moved_candidate") and len(result["matches"]) == 1:
+            address = f"0x{result['matches'][0]:X}"
+        else:
+            address = f"orig 0x{record['ea']:X}"
+        return [safe_text(record["id"]), result["status"], address, safe_text(record["claim"])]
+
+    def OnSelectLine(self, n):
+        record, result = self.rows[n]
+        if result["status"] in ("unchanged", "moved_candidate"):
+            ida_kernwin.jumpto(result["matches"][0])
+        else:
+            ida_kernwin.msg(f"[Proofmark] {safe_text(record['id'])}: {result['status']}; no safe destination.\n")
+        if record.get("note"):
+            ida_kernwin.msg(f"[Proofmark] Note: {safe_text(record['note'])}\n")
+        return (ida_kernwin.Choose.NOTHING_CHANGED, n)
+
+
+def _verify(path: Path, start: int = 0) -> None:
+    records = load_records(path)
+    if not records:
+        ida_kernwin.msg("[Proofmark] No records to verify.\n")
+        return
+    if start < 0 or start >= len(records):
+        raise ValueError(f"start index must be 0 through {len(records) - 1}")
+    page = records[start:start + MAX_VERIFY_BATCH]
+    ranges = _ranges()
+    ida_kernwin.msg(f"[Proofmark] Reviewing records {start}..{start + len(page) - 1} of {len(records)}; {DEFAULT_SCAN_LIMIT // (1024 * 1024)} MiB shared scan cap.\n")
+    ida_kernwin.show_wait_box("Proofmark: reviewing evidence (Cancel to stop scan)")
+    try:
+        results = verify_batch(
+            page, _reader, ranges,
+            cancel=ida_kernwin.user_cancelled,
+            progress=lambda done, limit: ida_kernwin.replace_wait_box(
+                f"Proofmark: scanned {done // (1024 * 1024)} / {limit // (1024 * 1024)} MiB (Cancel to stop)"),
+        )
+    finally:
+        ida_kernwin.hide_wait_box()
+    rows = list(zip(page, results))
+    for record, result in rows:
+        ida_kernwin.msg("  " + report_line(record, result) + "\n")
+    ida_kernwin.msg("[Proofmark] 'unchanged' checks only the original address, not uniqueness. 'moved_candidate' needs manual context review. 'incomplete' means cancellation, unreadable bytes, or scan limits prevented a definitive result.\n")
+    if start + len(page) < len(records):
+        ida_kernwin.msg(f"[Proofmark] Run v{start + len(page)} (or o{start + len(page)}) for the next page.\n")
+    ProofmarkTable(rows).Show(True)
+
+
+def _jump(path: Path) -> None:
+    record_id = ida_kernwin.ask_str("", 0, "Proofmark: record ID to jump to")
+    if not record_id:
+        return
+    for record in load_records(path):
+        if record["id"] == record_id.strip():
+            ida_kernwin.jumpto(record["ea"])
+            return
+    ida_kernwin.warning(f"Proofmark record {record_id!r} not found")
+
+
+class ProofmarkMod(ida_idaapi.plugmod_t):
+    def run(self, arg):
+        try:
+            path = _path()
+            choice = ida_kernwin.ask_str("c", 0, "Proofmark: c=capture, lN=list page, vN=verify page, oN=open prior sidecar, j=jump")
+            if not choice:
+                return
+            command = choice.strip().lower()
+            if command == "c":
+                _capture(path)
+            elif command.startswith("l"):
+                _list(path, int(command[1:] or "0"))
+            elif command.startswith("v"):
+                _verify(path, int(command[1:] or "0"))
+            elif command.startswith("o"):
+                selected = ida_kernwin.ask_file(False, "*.json", "Open a Proofmark sidecar from another IDB")
+                if selected:
+                    _verify(Path(selected), int(command[1:] or "0"))
+            elif command == "j":
+                _jump(path)
+            else:
+                ida_kernwin.warning("Choose c, l, v, o, or j")
+        except (OSError, ValueError, RuntimeError) as exc:
+            ida_kernwin.warning(f"Proofmark: {safe_text(str(exc))}")
+
+
+class ProofmarkPlugin(ida_idaapi.plugin_t):
+    flags = ida_idaapi.PLUGIN_MULTI | ida_idaapi.PLUGIN_UNL
+    comment = "Capture and review byte-backed analyst conclusions"
+    help = "Local evidence records in an IDB sidecar; no network access"
+    wanted_name = "Proofmark"
+    wanted_hotkey = ""
+
+    def init(self):
+        return ProofmarkMod()
+
+
+def PLUGIN_ENTRY():
+    return ProofmarkPlugin()
+
+```
+
+`proofmark_core.py`:
+
+```py
+"""Offline evidence records and byte-anchor verification for Proofmark.
+
+This module intentionally has no IDA dependency so the matching logic can be
+tested with synthetic byte streams. A matching anchor is evidence of byte
+continuity, never proof that an analyst's claim is true.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import tempfile
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Callable, Iterable
+from uuid import uuid4
+
+SCHEMA_VERSION = 1
+ANCHOR_SIZE = 16
+MAX_RECORDS = 10_000
+MAX_SIDECAR_BYTES = 8 * 1024 * 1024
+MAX_EA = (1 << 64) - 2  # Exclude IDA's 64-bit BADADDR sentinel.
+MAX_VERIFY_BATCH = 16
+DEFAULT_SCAN_LIMIT = 16 * 1024 * 1024  # Shared by one verification batch.
+MAX_CLAIM_LENGTH = 512
+MAX_NOTE_LENGTH = 4096
+
+
+def new_record(claim: str, note: str, ea: int, anchor: bytes,
+               segment: str = "", function: str = "") -> dict:
+    claim = claim.strip()
+    if not claim or len(claim) > MAX_CLAIM_LENGTH:
+        raise ValueError("claim must contain 1 to 512 characters")
+    if not isinstance(note, str) or len(note) > MAX_NOTE_LENGTH:
+        raise ValueError("note must contain at most 4096 characters")
+    if not isinstance(anchor, bytes) or not 8 <= len(anchor) <= ANCHOR_SIZE:
+        raise ValueError("invalid anchor length")
+    if type(ea) is not int or not 0 <= ea <= MAX_EA - len(anchor) + 1:
+        raise ValueError("invalid address or anchor length")
+    return {
+        "id": uuid4().hex[:12],
+        "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "claim": claim,
+        "note": note.strip(),
+        "ea": ea,
+        "anchor_hex": anchor.hex(),
+        "segment": segment,
+        "function": function,
+    }
+
+
+def _validate_record(record: dict) -> None:
+    if not isinstance(record, dict):
+        raise ValueError("record must be an object")
+    if not isinstance(record.get("id"), str) or not 1 <= len(record["id"]) <= 64:
+        raise ValueError("record id missing")
+    if (not isinstance(record.get("claim"), str) or not record["claim"].strip()
+            or len(record["claim"]) > MAX_CLAIM_LENGTH):
+        raise ValueError("claim missing")
+    if not isinstance(record.get("note", ""), str) or len(record.get("note", "")) > MAX_NOTE_LENGTH:
+        raise ValueError("invalid note")
+    if type(record.get("ea")) is not int or record["ea"] < 0:
+        raise ValueError("invalid address")
+    try:
+        anchor = bytes.fromhex(record["anchor_hex"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError("invalid anchor hex") from exc
+    if not 8 <= len(anchor) <= ANCHOR_SIZE:
+        raise ValueError("invalid anchor length")
+    if record["ea"] > MAX_EA - len(anchor) + 1:
+        raise ValueError("address exceeds IDA's 64-bit address range")
+
+
+def load_records(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    if path.stat().st_size > MAX_SIDECAR_BYTES:
+        raise ValueError("sidecar exceeds size limit")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if (not isinstance(data, dict) or type(data.get("schema_version")) is not int
+            or data["schema_version"] != SCHEMA_VERSION):
+        raise ValueError("unsupported Proofmark schema")
+    records = data.get("records")
+    if not isinstance(records, list) or len(records) > MAX_RECORDS:
+        raise ValueError("invalid record list")
+    for record in records:
+        _validate_record(record)
+    if len({record["id"] for record in records}) != len(records):
+        raise ValueError("duplicate record ids")
+    return records
+
+
+def save_records(path: Path, records: list[dict]) -> None:
+    if len(records) > MAX_RECORDS:
+        raise ValueError("too many records")
+    for record in records:
+        _validate_record(record)
+    payload = json.dumps({"schema_version": SCHEMA_VERSION, "records": records},
+                         indent=2, ensure_ascii=False) + "\n"
+    if len(payload.encode("utf-8")) > MAX_SIDECAR_BYTES:
+        raise ValueError("sidecar exceeds size limit")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(prefix=".proofmark-", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(payload)
+            handle.flush()
+        os.replace(temp_name, path)
+    finally:
+        if os.path.exists(temp_name):
+            os.unlink(temp_name)
+
+
+def verify_batch(records: list[dict], reader: Callable[[int, int], bytes | None],
+                 ranges: Iterable[tuple[int, int]],
+                 max_bytes: int = DEFAULT_SCAN_LIMIT,
+                 chunk_size: int = 64 * 1024,
+                 cancel: Callable[[], bool] | None = None,
+                 progress: Callable[[int, int], None] | None = None) -> list[dict]:
+    """Check up to 16 anchors in one bounded, shared pass over initialized bytes.
+
+    The reader must return None if any requested byte is uninitialized.
+    Unchanged means bytes match at the original EA; global uniqueness is not checked.
+    """
+    if not 0 < len(records) <= MAX_VERIFY_BATCH:
+        raise ValueError("verification batch must contain 1 to 16 records")
+    if (type(max_bytes) is not int or max_bytes < 1
+            or type(chunk_size) is not int or chunk_size < 1):
+        raise ValueError("scan sizes must be positive integers")
+    scan_ranges = list(ranges)
+    for start, end in scan_ranges:
+        if (type(start) is not int or type(end) is not int
+                or start < 0 or end < start or end > MAX_EA + 1):
+            raise ValueError("invalid scan range")
+    results: list[dict | None] = [None] * len(records)
+    pending: dict[bytes, set[int]] = {}
+    for index, record in enumerate(records):
+        _validate_record(record)
+        anchor = bytes.fromhex(record["anchor_hex"])
+        if reader(record["ea"], len(anchor)) == anchor:
+            results[index] = {"id": record["id"], "status": "unchanged",
+                              "matches": [record["ea"]], "scan_complete": False,
+                              "uniqueness_checked": False, "cancelled": False,
+                              "bytes_scanned": 0}
+        else:
+            pending.setdefault(anchor, set())
+    if not pending:
+        return results  # type: ignore[return-value]
+
+    scanned = 0
+    complete = bool(scan_ranges)
+    cancelled = False
+    for start, end in scan_ranges:
+        pos = start
+        overlap = b""
+        while pos < end:
+            if cancel is not None and cancel():
+                complete = False
+                cancelled = True
+                break
+            remaining = max_bytes - scanned
+            if remaining <= 0:
+                complete = False
+                break
+            size = min(chunk_size, end - pos, remaining)
+            block = reader(pos, size)
+            scanned += size
+            if block is None or len(block) != size:
+                complete = False
+                overlap = b""
+            else:
+                haystack = overlap + block
+                base = pos - len(overlap)
+                for anchor, matches in pending.items():
+                    if len(matches) >= 6:
+                        continue
+                    found = haystack.find(anchor)
+                    while found >= 0 and len(matches) < 6:
+                        matches.add(base + found)
+                        found = haystack.find(anchor, found + 1)
+                overlap = haystack[-(ANCHOR_SIZE - 1):]
+            pos += size
+            if progress is not None:
+                progress(scanned, max_bytes)
+        if cancelled or (pos < end and scanned >= max_bytes):
+            break
+
+    for index, record in enumerate(records):
+        if results[index] is not None:
+            continue
+        matches = sorted(pending[bytes.fromhex(record["anchor_hex"])])
+        if not complete:
+            status = "incomplete"
+        elif len(matches) == 1:
+            status = "moved_candidate"
+        elif len(matches) > 1:
+            status = "ambiguous"
+        else:
+            status = "not_found"
+        results[index] = {"id": record["id"], "status": status,
+                          "matches": matches, "scan_complete": complete,
+                          "uniqueness_checked": complete, "cancelled": cancelled,
+                          "bytes_scanned": scanned}
+    return results  # type: ignore[return-value]
+
+
+def verify_record(record: dict, reader: Callable[[int, int], bytes | None],
+                  ranges: Iterable[tuple[int, int]],
+                  max_bytes: int = DEFAULT_SCAN_LIMIT,
+                  chunk_size: int = 64 * 1024) -> dict:
+    """One-record convenience wrapper around the bounded shared scanner."""
+    return verify_batch([record], reader, ranges, max_bytes, chunk_size)[0]
+
+
+def safe_text(value: str) -> str:
+    """Quote untrusted text so one record cannot forge Output-window lines."""
+    return json.dumps(value, ensure_ascii=True)
+
+
+def report_line(record: dict, result: dict) -> str:
+    locations = ", ".join(f"0x{ea:X}" for ea in result["matches"][:5])
+    if len(result["matches"]) > 5:
+        locations += " (+more)"
+    return (f"{safe_text(record['id'])}  {result['status']:<15}  "
+            f"{locations or '-':<24}  {safe_text(record['claim'])}")
+
+```
+
+`tests/test_adapter_contracts.py`:
+
+```py
+"""Focused API-boundary regressions with stubs; not an IDA runtime test."""
+
+import importlib.util
+import sys
+import unittest
+from pathlib import Path
+from types import ModuleType, SimpleNamespace
+from unittest.mock import patch
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+
+def load_adapter():
+    calls = []
+    jumps = []
+
+    class Choose:
+        CH_QFLT = 1
+        NOTHING_CHANGED = 0
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+    kernwin = ModuleType("ida_kernwin")
+    kernwin.Choose = Choose
+    kernwin.get_screen_ea = lambda: 0x2000
+    kernwin.ask_str = lambda *args: (_ for _ in ()).throw(AssertionError("prompted before byte check"))
+    kernwin.jumpto = lambda ea: jumps.append(ea)
+    kernwin.msg = lambda text: None
+
+    ida_bytes = ModuleType("ida_bytes")
+
+    def get_bytes(ea, size, flags):
+        calls.append((ea, size, flags))
+        # Simulate IDA's permissive default: undefined bytes appear only when
+        # GMB_READALL is set. Strict flags=0 must fail.
+        return b"A" * size if flags else None
+
+    ida_bytes.get_bytes = get_bytes
+    segment = SimpleNamespace(start_ea=0x2000, end_ea=0x3000, type=0)
+    ida_segment = ModuleType("ida_segment")
+    ida_segment.getseg = lambda ea: segment
+    ida_segment.SEG_BSS = 1
+    ida_segment.is_spec_segm = lambda typ: False
+
+    ida_idaapi = ModuleType("ida_idaapi")
+    ida_idaapi.BADADDR = (1 << 64) - 1
+    ida_idaapi.plugin_t = type("plugin_t", (), {})
+    ida_idaapi.plugmod_t = type("plugmod_t", (), {})
+    ida_idaapi.PLUGIN_MULTI = 256
+    ida_idaapi.PLUGIN_UNL = 8
+
+    stubs = {"ida_bytes": ida_bytes, "ida_funcs": ModuleType("ida_funcs"),
+             "ida_idaapi": ida_idaapi, "ida_kernwin": kernwin,
+             "ida_segment": ida_segment, "idc": ModuleType("idc")}
+    spec = importlib.util.spec_from_file_location("proofmark_adapter_under_test", ROOT / "proofmark.py")
+    module = importlib.util.module_from_spec(spec)
+    with patch.dict(sys.modules, stubs):
+        spec.loader.exec_module(module)
+    return module, calls, jumps
+
+
+class AdapterContractTests(unittest.TestCase):
+    def test_strict_byte_read_rejects_uninitialized_capture(self):
+        adapter, calls, _ = load_adapter()
+        self.assertIsNone(adapter._reader(0x2000, 16))
+        with self.assertRaisesRegex(RuntimeError, "readable bytes"):
+            adapter._capture(ROOT / "unused.proofmark.json")
+        self.assertTrue(calls)
+        self.assertTrue(all(flags == 0 for _, _, flags in calls))
+
+    def test_uninitialized_bytes_cannot_verify_unchanged(self):
+        adapter, calls, _ = load_adapter()
+        from proofmark_core import new_record, verify_record
+        record = new_record("synthetic", "", 0x2000, b"A" * 16)
+        result = verify_record(record, adapter._reader, [(0x2000, 0x2020)], chunk_size=8)
+        self.assertEqual(result["status"], "incomplete")
+        self.assertTrue(all(flags == 0 for _, _, flags in calls))
+
+    def test_chooser_returns_changed_and_selection(self):
+        adapter, _, jumps = load_adapter()
+        table = adapter.ProofmarkTable([({"id": "test", "note": ""},
+                                         {"status": "unchanged", "matches": [0x1004]})])
+        self.assertEqual(table.OnSelectLine(0), (0, 0))
+        self.assertEqual(jumps, [0x1004])
+
+    def test_capture_uses_longest_initialized_prefix_and_segment_boundary(self):
+        cases = ((7, 0x3000, None), (8, 0x3000, 8),
+                 (9, 0x3000, 9), (15, 0x3000, 15),
+                 (16, 0x3000, 16), (16, 0x2009, 9))
+        for prefix, segment_end, expected in cases:
+            with self.subTest(prefix=prefix, segment_end=segment_end):
+                adapter, _, _ = load_adapter()
+                calls, saved = [], []
+                adapter.ida_segment.getseg = lambda ea: SimpleNamespace(
+                    start_ea=0x2000, end_ea=segment_end, type=0)
+
+                def strict_read(ea, size, flags):
+                    calls.append((ea, size, flags))
+                    return b"A" * size if flags == 0 and size <= prefix else None
+
+                adapter.ida_bytes.get_bytes = strict_read
+                adapter.ida_kernwin.ask_str = lambda *args: "claim"
+                adapter.ida_kernwin.ask_text = lambda *args: "note"
+                adapter.ida_kernwin.msg = lambda text: None
+                adapter.ida_funcs.get_func_name = lambda ea: ""
+                adapter.ida_segment.get_segm_name = lambda seg: "synthetic"
+                adapter.load_records = lambda path: []
+                adapter.save_records = lambda path, records: saved.extend(records)
+                if expected is None:
+                    with self.assertRaisesRegex(RuntimeError, "eight readable bytes"):
+                        adapter._capture(ROOT / "unused.proofmark.json")
+                    self.assertFalse(saved)
+                else:
+                    adapter._capture(ROOT / "unused.proofmark.json")
+                    self.assertEqual(len(bytes.fromhex(saved[0]["anchor_hex"])), expected)
+                self.assertTrue(all(flags == 0 for _, _, flags in calls))
+                self.assertTrue(all(size <= segment_end - 0x2000 for _, size, _ in calls))
+
+    def test_hole_after_prefix_never_enters_anchor(self):
+        adapter, _, _ = load_adapter()
+        saved = []
+        # Byte 9 is uninitialized, while later bytes are initialized. A strict
+        # read of any prefix including the hole must fail.
+        adapter.ida_bytes.get_bytes = lambda ea, size, flags: b"A" * size if flags == 0 and size <= 8 else None
+        adapter.ida_kernwin.ask_str = lambda *args: "claim"
+        adapter.ida_kernwin.ask_text = lambda *args: "note"
+        adapter.ida_kernwin.msg = lambda text: None
+        adapter.ida_funcs.get_func_name = lambda ea: ""
+        adapter.ida_segment.get_segm_name = lambda seg: "synthetic"
+        adapter.load_records = lambda path: []
+        adapter.save_records = lambda path, records: saved.extend(records)
+        adapter._capture(ROOT / "unused.proofmark.json")
+        self.assertEqual(saved[0]["anchor_hex"], b"A".hex() * 8)
+
+    def test_imported_control_characters_are_quoted_in_output(self):
+        adapter, _, _ = load_adapter()
+        from proofmark_core import new_record, report_line
+        record = new_record("claim\n[Proofmark] forged", "note\r\n\x1b[31m", 0x2000, b"A" * 16)
+        record["id"] = "id\nforged"
+        logs = []
+        adapter.load_records = lambda path: [record]
+        adapter.ida_kernwin.msg = logs.append
+        adapter._list(ROOT / "unused.proofmark.json")
+        self.assertTrue(all(line.count("\n") == 1 for line in logs))
+        self.assertIn("\\n", "".join(logs))
+        self.assertIn("\\u001b", "".join(logs))
+        self.assertNotIn("\x1b", "".join(logs))
+        result = {"status": "incomplete", "matches": []}
+        self.assertNotIn("\n", report_line(record, result))
+        row = adapter.ProofmarkTable([(record, result)]).OnGetLine(0)
+        self.assertTrue(all("\n" not in cell and "\x1b" not in cell for cell in row))
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_core.py`:
+
+```py
+import json
+import random
+import tempfile
+import unittest
+from pathlib import Path
+
+from proofmark_core import (MAX_EA, load_records, new_record, save_records,
+                            verify_batch, verify_record)
+
+
+class MemoryReader:
+    def __init__(self, base, data, holes=()):
+        self.base = base
+        self.data = data
+        self.holes = holes
+        self.calls = []
+
+    def __call__(self, ea, size):
+        self.calls.append((ea, size))
+        if any(ea < stop and ea + size > start for start, stop in self.holes):
+            return None
+        offset = ea - self.base
+        if offset < 0 or offset + size > len(self.data):
+            return None
+        return self.data[offset:offset + size]
+
+
+class CoreTests(unittest.TestCase):
+    def setUp(self):
+        self.anchor = b"PROOFMARK-ABCDEF"
+        self.record = new_record("dispatches opcode 7", "synthetic fixture", 0x1004, self.anchor)
+
+    def test_unchanged_anchor_needs_no_scan(self):
+        reader = MemoryReader(0x1000, b"1234" + self.anchor + b"tail")
+        result = verify_record(self.record, reader, [(0x1000, 0x1000 + len(reader.data))])
+        self.assertEqual(result["status"], "unchanged")
+        self.assertEqual(result["bytes_scanned"], 0)
+
+    def test_unique_moved_anchor_across_chunk_boundary(self):
+        data = b"0" * 29 + self.anchor + b"z" * 17
+        result = verify_record(self.record, MemoryReader(0x2000, data),
+                               [(0x2000, 0x2000 + len(data))], chunk_size=11)
+        self.assertEqual(result["status"], "moved_candidate")
+        self.assertEqual(result["matches"], [0x201D])
+
+    def test_ambiguous_anchor_is_not_assigned_a_location(self):
+        data = self.anchor + b"-----" + self.anchor
+        result = verify_record(self.record, MemoryReader(0x3000, data),
+                               [(0x3000, 0x3000 + len(data))], chunk_size=9)
+        self.assertEqual(result["status"], "ambiguous")
+        self.assertEqual(len(result["matches"]), 2)
+
+    def test_missing_anchor(self):
+        data = b"z" * 80
+        result = verify_record(self.record, MemoryReader(0x4000, data),
+                               [(0x4000, 0x4050)])
+        self.assertEqual(result["status"], "not_found")
+        self.assertTrue(result["scan_complete"])
+
+    def test_holes_and_scan_budget_are_incomplete(self):
+        data = b"x" * 40
+        reader = MemoryReader(0x5000, data, [(0x5010, 0x5018)])
+        result = verify_record(self.record, reader, [(0x5000, 0x5028)], chunk_size=8)
+        self.assertEqual(result["status"], "incomplete")
+        limited = verify_record(self.record, MemoryReader(0x5000, data),
+                                [(0x5000, 0x5028)], max_bytes=16, chunk_size=8)
+        self.assertEqual(limited["status"], "incomplete")
+        self.assertEqual(limited["bytes_scanned"], 16)
+
+    def test_sidecar_roundtrip_and_schema_rejection(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[1]) as temp:
+            path = Path(temp) / "sample.proofmark.json"
+            save_records(path, [self.record])
+            self.assertEqual(load_records(path), [self.record])
+            path.write_text(json.dumps({"schema_version": 99, "records": []}), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                load_records(path)
+
+    def test_rejects_boolean_and_out_of_range_addresses(self):
+        for bad in (True, -1, MAX_EA, 10**100):
+            with self.subTest(ea=bad), self.assertRaises(ValueError):
+                new_record("claim", "", bad, self.anchor)
+            malformed = dict(self.record, ea=bad)
+            with self.subTest(loaded_ea=bad), self.assertRaises(ValueError):
+                verify_record(malformed, lambda ea, size: None, [])
+
+    def test_rejects_oversized_imported_claim_and_note(self):
+        for field, value in (("claim", "x" * 513), ("note", "x" * 4097)):
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                verify_record(dict(self.record, **{field: value}), lambda ea, size: None, [])
+
+    def test_shared_scan_reads_once_for_two_changed_anchors(self):
+        second_anchor = b"SECONDARY-ANCHOR"
+        second = new_record("second conclusion", "", 0x1100, second_anchor)
+        data = b"x" * 9 + self.anchor + b"y" * 7 + second_anchor + b"z" * 4
+        reader = MemoryReader(0x2000, data)
+        results = verify_batch([self.record, second], reader,
+                               [(0x2000, 0x2000 + len(data))], chunk_size=8)
+        self.assertEqual([r["status"] for r in results], ["moved_candidate"] * 2)
+        scan_calls = [call for call in reader.calls if call[0] >= 0x2000]
+        self.assertEqual(len(scan_calls), (len(data) + 7) // 8)
+        self.assertEqual(results[0]["bytes_scanned"], len(data))
+        self.assertEqual(results[1]["bytes_scanned"], len(data))
+
+    def test_cancel_and_global_budget_are_conservative(self):
+        second = new_record("second conclusion", "", 0x1100, b"SECONDARY-ANCHOR")
+        data = b"x" * 64
+        reader = MemoryReader(0x2000, data)
+        progress = []
+        results = verify_batch([self.record, second], reader,
+                               [(0x2000, 0x2040)], chunk_size=8,
+                               cancel=lambda: bool(progress),
+                               progress=lambda done, limit: progress.append(done))
+        self.assertEqual([r["status"] for r in results], ["incomplete"] * 2)
+        self.assertTrue(all(r["cancelled"] for r in results))
+        self.assertEqual(progress, [8])
+        limited = verify_batch([self.record, second], MemoryReader(0x2000, data),
+                               [(0x2000, 0x2040)], max_bytes=16, chunk_size=8)
+        self.assertEqual([r["status"] for r in limited], ["incomplete"] * 2)
+        self.assertEqual([r["bytes_scanned"] for r in limited], [16, 16])
+
+    def test_unchanged_does_not_imply_unique(self):
+        data = b"1234" + self.anchor + b"----" + self.anchor
+        reader = MemoryReader(0x1000, data)
+        result = verify_record(self.record, reader, [(0x1000, 0x1000 + len(data))])
+        self.assertEqual(result["status"], "unchanged")
+        self.assertFalse(result["uniqueness_checked"])
+
+    def test_shared_scan_matches_independent_naive_search(self):
+        rng = random.Random(20261106)
+        for _ in range(100):
+            data = bytes(rng.choice(b"ABCD") for _ in range(96))
+            offsets = [rng.randrange(0, 81), rng.randrange(0, 81)]
+            anchors = [data[offset:offset + 16] for offset in offsets]
+            records = [new_record(f"claim-{i}", "", 0x1000 + i * 32, anchor)
+                       for i, anchor in enumerate(anchors)]
+            results = verify_batch(records, MemoryReader(0x2000, data),
+                                   [(0x2000, 0x2000 + len(data))],
+                                   chunk_size=rng.randrange(1, 18))
+            for anchor, result in zip(anchors, results):
+                expected = [0x2000 + at for at in range(len(data) - len(anchor) + 1)
+                            if data[at:at + len(anchor)] == anchor]
+                self.assertEqual(result["matches"], expected[:6])
+                self.assertEqual(result["status"], "moved_candidate" if len(expected) == 1 else "ambiguous")
+
+    def test_partial_duplicate_exact_budget_and_empty_ranges(self):
+        anchor = b"ABCDEFGH"
+        record = new_record("claim", "", 0x3000, anchor)
+        image = anchor + b"12345678" + anchor
+        reader = MemoryReader(0x1000, image)
+        full = verify_record(record, reader, [(0x1000, 0x1000 + len(image))], chunk_size=3)
+        partial = verify_record(record, reader, [(0x1000, 0x1000 + len(image))],
+                                max_bytes=12, chunk_size=3)
+        self.assertEqual((full["status"], len(full["matches"])), ("ambiguous", 2))
+        self.assertEqual((partial["status"], partial["matches"]), ("incomplete", [0x1000]))
+        exact = verify_record(record, MemoryReader(0x1000, anchor),
+                              [(0x1000, 0x1008)], max_bytes=8, chunk_size=3)
+        self.assertEqual(exact["status"], "moved_candidate")
+        self.assertTrue(exact["scan_complete"])
+        empty = verify_record(record, lambda ea, size: None, [])
+        self.assertEqual(empty["status"], "incomplete")
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
