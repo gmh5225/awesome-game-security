@@ -20,10 +20,12 @@ Android reverse-engineering research workspace for Honor of Kings (sgame): clien
 
 Audience: mobile game-security and anti-cheat researchers studying Tencent’s protection stack and client attack surface.
 
+Deeper Honor of Kings ACE native/cloud telemetry map: [[sgame-ace-analysis]] (`libtersafe`/`libtprt`, anticheatexpert reporting, cloud detection blobs).
+
 ## Links
 
 - Repo: https://github.com/wwweeeqqu/honor-of-kings-RE-research
 
 ## Related
 
-[[frida]] · [[il2cpp]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[frida]] · [[il2cpp]] · [[sgame-ace-analysis]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
