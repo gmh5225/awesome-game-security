@@ -1,3 +1,5 @@
+- **2026-11-27** — ingest `description:Chizuui/Carbon-Android`: entity [[carbon-android]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[ngbrecomp]], [[sf33rdsxbrecompo]], [[sc2-android-recomp]], [[xemu]], and [[static-runtime-evidence]].
+
 - **2026-11-27** — ingest `description:kelvynzucco/majistic-recomp`: entity [[majistic-recomp]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[futari-recomp]], [[wwe-svr2009-recomp]], [[dead-rising-2-case-zero-xenon-recomp]], [[xenia]], and [[recompiler]].
 
 - **2026-11-27** — ingest `description:thecommenter297/ObjectFlow`: entity [[objectflow]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[xrefxpert]], [[xrefgen]], [[find-xrefs]], and [[ida-better-reverse]].
