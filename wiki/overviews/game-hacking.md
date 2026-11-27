@@ -2076,6 +2076,7 @@ sources:
   - wiki/sources/descriptions/FOCUSGAMERCH__STP-Vanguard.md
   - wiki/sources/descriptions/miaoyu2233__Foxo.md
   - wiki/sources/descriptions/GprzSS__GprzSS.md
+  - wiki/sources/descriptions/opacity001__revenant.md
 updated: 2026-11-27
 confidence: high
 ---
@@ -2445,6 +2446,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Agent-native integrated RE lab via [[open-reverselab]] (LING71671; Python; 180+ technique articles + 100+ MCP automation tools; knowledge router maps signals to attack chains; Ghidra/Frida/x64dbg/jadx; web CTF, Android APK/DEX, Windows PE, crypto, game cheating/AC boards; authorized binary/malware/game-protection investigation; Cheat agent-RE lane) (source: wiki/sources/descriptions/LING71671__open-reverselab.md)
 - UnknownCheats forum knowledge retrieval via [[uc-mcp]] (0111-0222; Python read-only MCP; session-cookie keyword search, thread read, subforum browse, page fetch, and health check; UTC staleness labels; curl_cffi Cloudflare bypass + vBulletin parse; rate limits + URL guards + SQLite cache; Claude Code/Cursor; Cheat agent-RE / community-knowledge lane) (source: wiki/sources/descriptions/0111-0222__uc-mcp.md)
 - AI-assisted RE with deterministic byte-level verification via [[reverify]] (2akouwu; MCP server + CLI; pairs LLM analysis with auditable byte-level checks; Cheat RE Tools) (source: wiki/sources/README-categories.md)
+- Unified RE orchestration via [[revenant]] (opacity001; TypeScript/Node lift + devirt + static/dynamic workflow; revng/NoVmp/unthemidator bindings; stealth QEMU VMs; CLI, MCP server, VS Code extension; PE/ELF/Mach-O CFG/xrefs; authorized protected-binary RE; Cheat / RE Tools) (source: wiki/sources/descriptions/opacity001__revenant.md)
 - Offline locked-container static PE/APK/JS RE via [[reverseai]] (dagoSte; Ghidra, JADX, LIEF, YARA-X; byte-anchored verification + MCP for agents; untrusted-binary sandbox lane; Cheat RE Tools) (source: wiki/sources/descriptions/dagoSte__reverseai.md) (source: wiki/sources/README-categories.md)
 - Pre-release shipped-build exposure scanner via [[reshield]] (swimchicken777; Python CLI + Claude Code/Codex agent skill; Unity/Unreal/Godot/web/mobile/.NET/native adapters; source maps, symbols, keys; L0–L5 score; SARIF + OWASP MASWE for CI; developer hardening vs AI-assisted RE; Cheat RE Tools) (source: wiki/sources/descriptions/swimchicken777__reshield.md)
 - Offline-first RE triage via [[rea-mytechnotalent]] (mytechnotalent; Python; one-shot PE/ELF/Mach-O + JS/Electron inventory, local RAG, multi-agent propose-review-gate, CLI + MCP; default no API key; Cheat / RE Tools) (source: wiki/sources/descriptions/mytechnotalent__rea.md)
