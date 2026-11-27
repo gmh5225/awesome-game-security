@@ -1030,6 +1030,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/zheedevVn/Rea-Unlock [MCP server unifying static and dynamic reverse engineering (Frida, Ghidra, decompilers) for binary and application analysis]
 - https://github.com/joasasantos/rea-prompts [Curated REA (Reverse Engineer Anything) prompt templates for agent-assisted RE — games, anti-cheat, DMA, kernels, APKs, and protection research with evidence-first instructions]
 - https://github.com/emrewyt/apex-re [Installable agent skill and Python scripts for game-oriented RE: Unreal/Unity IL2CPP/Godot/.NET, VMProtect/OLLVM workflows, memory diffing, and round-trip verification for Claude Code, Cursor, and Codex]
+- https://github.com/opacity001/revenant [Unified RE platform orchestrating revng lifting, NoVmp/unthemidator devirt, stealth QEMU VMs, CLI, MCP server, and VS Code extension]
 - https://github.com/jammyfu/rea-atlas [Curated map of reverse-engineering projects (game decomp/recomp, asset tools, firmware) tagged for morluto/rea usage, with multilingual README indexes]
 - https://github.com/erkamyaman/rea-games [Open GAME.md workflow to reverse-engineer games, rebuild in other engines, and prove frame-by-frame behavioral parity with recorded inputs]
 - https://github.com/LargoScript/n0xis [Cross-platform Rust RE pipeline with static PE/ELF analysis, SSA decompilation, live memory scanning, hardware watchpoints, and MCP/JSON automation for game reversing]
