@@ -831,6 +831,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://secret.club
 - https://back.engineering
 - https://github.com/batteryshark/batteryshark.github.io [BatteryShark reverse-engineering and game-hacking writeups archive (compatibility patching, classic PC game RE, low-level Windows)]
+- https://github.com/t-el/deephack-brief [Hugo site auto-publishing daily deep-dive reports on reverse engineering, anti-cheat internals, game modding, and exploits (GitHub Pages, curated report style guide)]
 - https://vollragm.github.io
 - https://www.triplefault.io
 - https://advancedvectorextensions.github.io
@@ -1144,6 +1145,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/TalhaMudo/NFSU2Recomp [Static recompilation pipeline and runtime lifting Need for Speed: Underground 2 (Win32/x86, D3D9) to native ARM64 macOS with documented RE tooling]
 - https://github.com/Mag1cByt3s/mha2-remastered [Clean-room x86-32 to Linux x86_64 static recompiler plus OpenGL 3.3 remaster runtime for Moorhuhn Adventure 2 (BYO legal game copy)]
 - https://github.com/ranggacasper/mostwanted-android [Unofficial Android arm64 port of NFS Most Wanted (Xbox BE) via XboxXBE-Recomp static lifting, Vulkan/SDL3 runtime, and Black-Android host; BYO assets]
+- https://github.com/Chizuui/Carbon-Android [Unofficial Android arm64 port of Need for Speed: Carbon (Xbox) via XboxXBE-Recomp static lift, Vulkan renderer, SDL3 input, and extended graphics options; BYO game assets]
+- https://github.com/kelvynzucco/majistic-recomp [Majin and the Forsaken Kingdom (Xbox 360) static recompilation to native Windows via ReXGlue, with documented PPC lifting, D3D12/Vulkan runtimes, and BYO-asset preservation tooling]
 - https://github.com/CiPH3R-88/NFSMW_WideScreenFix [C++ ASI plugin for NFS Most Wanted (2005) v1.3: widescreen HUD/FOV, display modes, and engine hooks built via IDA Pro reverse engineering]
 - https://github.com/CiPH3R-88/NFSMW_ControllerSupport [C++ ASI plugin for NFS Most Wanted (2005) v1.3 adding Xbox/PlayStation glyphs and full gamepad UI, engineered with IDA Pro reverse engineering of the FEng UI pipeline]
 - https://github.com/elkir0/sc2-android-recomp [StarCraft II static recompilation toolkit (x86-32 to ARM64): per-function difftest oracle, D3D9 shader translation, MPQ tools, pcrecomp closure extensions, and Android porting helpers—method and tooling only, no game assets]
@@ -1996,6 +1999,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/nologic/idaref [IDA Pro plugin showing full x86-64/ARM/MIPS instruction reference at the cursor]
 - https://github.com/awaxiaoyu/teach-me-assembly [Local IDAPython plugin that adds Chinese semantic comments to disassembly via JSON rules (x86/ARM/MIPS/RISC-V), no network or AI]
 - https://github.com/danigargu/deREferencing [IDA Pro plugin adding dereferenced register and stack views with colors for x86, ARM, and MIPS debugging]
+- https://github.com/thecommenter297/ObjectFlow [IDA Pro / Hex-Rays IDAPython plugin for semantic data tracing: local/cross xrefs, reaching definitions, pointer relationships, and trace evidence in decompiler views]
 - https://github.com/gmh5225/ida-function-string-associate [IDA 9.X: auto-generate function comments from string literals]
 - https://github.com/gmh5225/qsynthesis [Greybox Synthesizer geared for deobfuscation of assembly instructions]
 - https://github.com/gmh5225/ida_medigate [RTTI]
