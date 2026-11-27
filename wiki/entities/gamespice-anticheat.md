@@ -4,7 +4,8 @@ kind: entity
 topics: [game-engine, anti-cheat, game-server-security]
 sources:
   - wiki/sources/descriptions/gamespice-platform__anticheat.md
-updated: 2026-11-21
+  - wiki/sources/descriptions/gamespice-platform__server-security.md
+updated: 2026-11-27
 confidence: medium
 ---
 
@@ -25,7 +26,7 @@ confidence: medium
 ## Design notes
 
 - **Server-authoritative scoring layer** — not a full client anti-tamper suite
-- **Composable with GameSpice Server Security** — ingests speed/teleport/aim-snap detector output
+- **Composable with [[server-security]]** — ingests speed/teleport/aim-snap detector output from the GameSpice rule-engine addon
 - **No kernel or client driver footprint** — GDScript on the dedicated server
 
 ## Links
@@ -34,4 +35,4 @@ confidence: medium
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[dot-server-security]] · [[void-engine]] · [[rearguard]] · [[guard-game]] · [[input-provenance]] · [[godot]]
+[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[server-security]] · [[dot-server-security]] · [[void-engine]] · [[rearguard]] · [[guard-game]] · [[input-provenance]] · [[godot]]
