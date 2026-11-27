@@ -1,0 +1,5726 @@
+Project Path: arc_GprzSS_GprzSS_ojwbo1_m
+
+Source Tree:
+
+```txt
+arc_GprzSS_GprzSS_ojwbo1_m
+├── AGENTS.md
+├── LICENSE
+├── README.md
+├── build.ps1
+├── core
+│   ├── __init__.py
+│   ├── config.py
+│   ├── elevate.py
+│   ├── finding.py
+│   ├── java.py
+│   ├── scan.py
+│   ├── server.py
+│   ├── signatures.py
+│   └── winapi.py
+├── data
+│   └── signatures.json
+├── docs
+├── gprzss.py
+├── modules
+│   ├── __init__.py
+│   ├── accounts.py
+│   ├── amcache.py
+│   ├── bam.py
+│   ├── browsers.py
+│   ├── files.py
+│   ├── memory.py
+│   ├── mods.py
+│   ├── prefetch.py
+│   ├── processes.py
+│   ├── services.py
+│   ├── system.py
+│   └── usn.py
+├── requirements.txt
+├── tests
+│   ├── test_java.py
+│   ├── test_parsers.py
+│   ├── test_report.py
+│   └── test_signatures.py
+├── tools
+│   └── strip_comments.py
+└── ui
+    ├── app.js
+    ├── index.html
+    └── style.css
+
+```
+
+`AGENTS.md`:
+
+```md
+# GprzSS
+
+Windows screenshare scanner for Minecraft: Python 3.10+ stdlib only, JSON API served on 127.0.0.1, single-page web UI.
+
+## Status (Updated 2026-11-27)
+
+Live at https://github.com/GprzSS/GprzSS (public, MIT). Pushes to `main` run the test job; a `v*` tag runs build.ps1 and attaches `dist/GprzSS.exe` to the release. v1.0.0 shipped 2026-11-27, v1.1.0 adds the JDK finder and self-elevation, v1.1.1 strips every comment from the tree.
+Works: 12 modules (system, processes, memory, prefetch, amcache, bam, usn, browsers, files, services, accounts, mods), GUI, markdown and JSON export, 60 tests pass, `dist\GprzSS.exe` builds via PyInstaller.
+`core/java.py` finds the game under any JDK (Zulu, Temurin, Oracle, Corretto, Liberica, Semeru, GraalVM) by command-line markers, window title, or a heap over 300 MB, and names the runtime the way Task Manager does; a dedicated server jar is labelled a server, not the client.
+GprzSS self-elevates on every launch through `core/elevate.py`; `--no-elevate` skips it, which is what tests and CI use.
+`tools/strip_comments.py` removed the comments: tokenize for Python (keeps shebangs, `noqa`, `type:`, `pragma`, `pylint:`), a block scanner for CSS/JS/HTML. Docstrings stayed, and the suite still passes.
+Open: a protected process reports "unreadable" rather than clean. Nothing is code-signed, so SmartScreen warns on first run. Pushing a workflow file from here needs the `workflow` token scope: `gh auth refresh -h github.com -s workflow`.
+
+## Run
+
+`python gprzss.py` opens the UI at http://127.0.0.1:8765. `--scan` prints a markdown report to stdout, `--scan --json` the raw session. Run elevated for prefetch, amcache, BAM and USN; without admin those modules report skipped, not clean.
+
+Tests: `python -m pytest -q`. Build: `powershell -ExecutionPolicy Bypass -File build.ps1`.
+
+## Map
+
+- `gprzss.py` — CLI entry and argument parsing
+- `core/scan.py` — ScanSession, worker thread, report rendering
+- `core/server.py` — HTTP server, `/api/` routes, static UI
+- `core/winapi.py` — ctypes bindings: process snapshot, modules, window titles, exe product names, ReadProcessMemory, UAC relaunch
+- `core/java.py` — which JVM is the game, which JDK hosts it
+- `core/elevate.py` — the UAC handoff and its `--elevated` loop guard
+- `core/finding.py`, `core/signatures.py`, `core/config.py`
+- `modules/__init__.py` — MODULES list; a module is a dict with key, label, section, run
+- `data/signatures.json` — cheat-client and injector signatures
+- `ui/` — index.html, style.css, app.js
+
+## Decisions
+
+- Stdlib only. No pip deps at runtime, so the exe is one file and no environment can break it.
+- Signatures live in JSON so new entries need no code change.
+- A module returns findings, never raises: an unreadable artifact is an "info" finding with the reason, so a clean verdict is never a false clean.
+- PyInstaller onefile with `--add-data ui;ui` and `--add-data data;data`; `dist/` and `build/` are gitignored, the exe ships as a release asset.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 GprzSS
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# GprzSS
+
+A screenshare scanner for Minecraft servers. One click walks the machine, then
+gives you a report you can read out loud on a call and paste into Discord.
+
+![GprzSS overview](docs/screenshot-overview.png)
+
+## What it checks
+
+| Module | What it reads | Why it matters |
+| --- | --- | --- |
+| Running processes | Process list, image paths, command lines | A client left open under its own name |
+| Java runtime finder | Every `java.exe` / `javaw.exe`, its JDK and its window title | Finds the game under Zulu, Temurin, Oracle, Corretto, anything, and names that runtime |
+| JVM memory scan | The heap of the running game | Catches a client after its file is renamed or deleted |
+| Prefetch history | `C:\Windows\Prefetch\*.pf` | Proves what ran, including files that no longer exist |
+| Amcache | `Amcache.hve` | Executables that ran, with first-seen timestamps |
+| Execution history | BAM registry keys | Kernel-recorded last run time per binary |
+| Deleted executables | The NTFS change journal | A file deleted seconds after it ran |
+| Browser artefacts | Chrome, Edge, Brave, Opera, Firefox history and downloads | How the client got onto the machine |
+| Filesystem traces | Recycle bin, Temp, Downloads, `latest.log` | Where a dropped client is left sitting |
+| Services and drivers | Service list, driver list | Telemetry services turned off to hide a cleanup |
+| Accounts | Local users, Minecraft launcher profiles | Alt accounts and injected launch arguments |
+| Minecraft install | `mods`, `versions` | A client jar sitting in the class path |
+
+Each check returns findings with a severity: **detected**, **warning**, **clean**
+or **info**. The report verdict is the worst one present.
+
+## Requirements
+
+- Windows 10 or 11
+- Python 3.10 or newer (3.12 recommended)
+- No third-party packages. Standard library only.
+
+## Administrator, automatically
+
+GprzSS asks Windows for elevation every time it starts, so there is no
+right-click step to forget. If the UAC prompt is declined it still runs, and the
+report says which checks were skipped instead of pretending they passed.
+`--no-elevate` turns the prompt off, which is what CI and the tests use.
+
+## Run it
+
+```powershell
+python gprzss.py
+```
+
+Then open http://127.0.0.1:8765 (it opens on its own). Press **Run Scan**.
+
+It elevates itself, so the memory scan, Prefetch, Amcache and the change
+journal are readable without you doing anything. If UAC is declined, those
+modules report the reason rather than a clean result.
+
+### Headless
+
+```powershell
+python gprzss.py --scan                 # markdown report to stdout
+python gprzss.py --scan --json          # the same scan as JSON
+```
+
+### Build a single exe
+
+```powershell
+powershell -ExecutionPolicy Bypass -File build.ps1
+```
+
+That produces `dist\GprzSS.exe`. Right click, **Run as administrator**.
+
+## Adding your own signatures
+
+`data/signatures.json` is read at scan time, so a new entry is live on the next
+scan with no code change.
+
+```json
+{
+  "processes": [
+    { "match": "yourclient", "name": "YourClient", "severity": "detected", "kind": "client", "note": "seen on your server" }
+  ],
+  "memory_strings": [
+    { "match": "com.yourclient", "name": "YourClient", "severity": "detected" }
+  ]
+}
+```
+
+- `processes` is matched against process names, file names, prefetch names and
+  Amcache paths. A substring match, case insensitive.
+- `memory_strings` is matched against JVM memory as ASCII and UTF-16, and
+  against browser history as whole tokens.
+- Set `"loose": true` on a short needle that should match inside a longer word.
+
+Keep needles specific. `flare` is safe because matching requires the needle to
+start a token, so `cloudflare.com` does not trip it, but `client` would match
+half the internet.
+
+## Layout
+
+```
+gprzss.py            entry point, CLI and server
+core/
+  winapi.py          ctypes wrappers: process list, modules, window titles, ReadProcessMemory
+  java.py            finds the game under any installed JDK
+  elevate.py         the UAC handoff
+  signatures.py      signature loading and matching
+  scan.py            the scan session, its thread, its report
+  server.py          local HTTP server and JSON API
+modules/             one file per check, each exports run(ctx) -> list[Finding]
+ui/                  the interface: index.html, style.css, app.js
+data/signatures.json the signature database
+tests/               unittest suite, no external dependencies
+```
+
+## Tests
+
+```powershell
+python -m unittest discover -s tests
+```
+
+## Limits worth knowing
+
+- The memory scan reads up to 512 MB of the JVM heap by default, with a 90
+  second deadline, whichever comes first. Both are options in the scan request.
+- The game is found by its command line, its window title, or a heap over
+  300 MB. A dedicated server jar is reported as a server, never as the client.
+- A client that unpacks itself only while the game is closed leaves nothing in
+  memory. That is what the disk checks are for.
+- Prefetch can be disabled at the OS level, and the change journal can be
+  deleted. Both are reported as `warning`, never as `clean`.
+
+## Credit
+
+The approach follows the tools the Minecraft screen-share community already
+uses. In particular the JVM string scanning idea comes from
+[@p1aegg/javaw](https://github.com/p1aegg/javaw), and the launcher-plus-scripts
+shape from [@p1aegg/SSTool](https://github.com/p1aegg/SSTool) and
+[@p1aegg/powershell](https://github.com/p1aegg/powershell). The checks and the
+reports here are written from scratch.
+
+Layout and colour language take cues from detect.ac and echo.ac, without
+copying either.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+```
+
+`build.ps1`:
+
+```ps1
+# Build a single GprzSS.exe with PyInstaller.
+# Usage: powershell -ExecutionPolicy Bypass -File build.ps1
+$ErrorActionPreference = "Stop"
+
+Write-Host "GprzSS build" -ForegroundColor Green
+
+if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
+    throw "Python is not on PATH. Install Python 3.10 or newer first."
+}
+
+python -m pip install --upgrade pyinstaller
+
+python -m PyInstaller `
+    --noconfirm `
+    --clean `
+    --onefile `
+    --name GprzSS `
+    --add-data "ui;ui" `
+    --add-data "data;data" `
+    --hidden-import modules `
+    --hidden-import modules.memory `
+    --hidden-import modules.prefetch `
+    --hidden-import modules.amcache `
+    --hidden-import modules.bam `
+    --hidden-import modules.usn `
+    --hidden-import modules.browsers `
+    --hidden-import modules.files `
+    --hidden-import modules.services `
+    --hidden-import modules.accounts `
+    --hidden-import modules.mods `
+    --hidden-import modules.processes `
+    --hidden-import modules.system `
+    gprzss.py
+
+Write-Host ""
+Write-Host "Built dist\GprzSS.exe" -ForegroundColor Green
+Write-Host "Run it: it asks Windows for Administrator itself. --no-elevate turns that off."
+
+```
+
+`core/config.py`:
+
+```py
+"""Paths, constants and runtime options for a scan."""
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+
+APP_NAME = "GprzSS"
+VERSION = "1.1.1"
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / "data"
+UI_DIR = ROOT / "ui"
+
+DEFAULT_MEMORY_BUDGET = 512 * 1024 * 1024
+MEMORY_CHUNK = 4 * 1024 * 1024
+MEMORY_OVERLAP = 4096
+
+@dataclass
+class ScanContext:
+    """Everything a module needs, plus the knobs the UI can turn."""
+
+    signatures: dict
+    options: dict = field(default_factory=dict)
+    progress: object = None
+    cancel: object = None
+    findings: list = field(default_factory=list)
+
+    def emit(self, module_key: str, message: str, pct: float = -1.0) -> None:
+        if callable(self.progress):
+            self.progress(module_key, message, pct)
+
+    def stopped(self) -> bool:
+        return bool(callable(self.cancel) and self.cancel())
+
+    def get(self, key, default=None):
+        return self.options.get(key, default)
+
+def user_dirs() -> dict:
+    """Folders the file modules look at, resolved for the current user."""
+    home = Path(os.environ.get("USERPROFILE", str(Path.home())))
+    appdata = Path(os.environ.get("APPDATA", home / "AppData" / "Roaming"))
+    local = Path(os.environ.get("LOCALAPPDATA", home / "AppData" / "Local"))
+    temp = Path(os.environ.get("TEMP", local / "Temp"))
+    return {
+        "home": home,
+        "appdata": appdata,
+        "local": local,
+        "temp": temp,
+        "downloads": home / "Downloads",
+        "desktop": home / "Desktop",
+        "documents": home / "Documents",
+        "minecraft": appdata / ".minecraft",
+        "windir": Path(os.environ.get("SystemRoot", r"C:\Windows")),
+    }
+
+```
+
+`core/elevate.py`:
+
+```py
+"""UAC elevation.
+
+GprzSS is half a scanner without Administrator, so it asks Windows for elevation
+on every launch instead of printing a reminder to the user. The relaunched copy
+carries ELEVATED_FLAG, which stops a prompt loop if Windows hands back a token
+that still does not read as admin.
+"""
+from __future__ import annotations
+
+import os
+import sys
+
+ELEVATED_FLAG = "--elevated"
+SKIP_FLAG = "--no-elevate"
+
+ALREADY = "already"
+RELAUNCHED = "relaunched"
+DECLINED = "declined"
+SKIPPED = "skipped"
+
+def is_frozen() -> bool:
+    """True when this is the PyInstaller exe rather than a python call."""
+    return bool(getattr(sys, "frozen", False))
+
+def relaunch_command(argv) -> list:
+    """The exact command line that reruns this build elevated."""
+    args = [part for part in argv if part not in (SKIP_FLAG, ELEVATED_FLAG)]
+    if is_frozen():
+        return [sys.executable] + args + [ELEVATED_FLAG]
+    script = os.path.abspath(sys.argv[0])
+    return [sys.executable, script] + args + [ELEVATED_FLAG]
+
+def needs_elevation(admin: bool, argv) -> bool:
+    """Whether this run should hand itself to a UAC prompt."""
+    if admin:
+        return False
+    if SKIP_FLAG in argv or ELEVATED_FLAG in argv:
+        return False
+    return True
+
+def ensure_admin(argv=None, admin=None, relaunch=None) -> str:
+    """Ask for elevation when the process is not already elevated.
+
+    Returns ALREADY, RELAUNCHED (the caller should exit, the elevated copy owns
+    the run), DECLINED (UAC was refused, carry on and let the report say which
+    checks were skipped) or SKIPPED (elevation was turned off on the command
+    line, which is what CI and the tests do).
+    """
+    from core import winapi
+
+    argv = list(sys.argv[1:] if argv is None else argv)
+    elevated = winapi.is_admin() if admin is None else bool(admin)
+    if elevated:
+        return ALREADY
+    if SKIP_FLAG in argv or ELEVATED_FLAG in argv:
+        return SKIPPED
+    start = winapi.relaunch_as_admin if relaunch is None else relaunch
+    if start(relaunch_command(argv)):
+        return RELAUNCHED
+    return DECLINED
+
+```
+
+`core/finding.py`:
+
+```py
+"""The single record type every module emits."""
+from __future__ import annotations
+
+import time
+from dataclasses import dataclass, field, asdict
+
+CLEAN = "clean"
+INFO = "info"
+WARNING = "warning"
+DETECTED = "detected"
+
+SEVERITY_ORDER = {CLEAN: 0, INFO: 1, WARNING: 2, DETECTED: 3}
+
+@dataclass
+class Finding:
+    """One thing the scanner saw.
+
+    title is the headline a staff member reads in the list, detail is the path,
+    command line or address that proves it, and severity drives the colour it
+    renders in.
+    """
+
+    module: str
+    title: str
+    detail: str = ""
+    severity: str = INFO
+    category: str = "general"
+    signature: str = ""
+    evidence: dict = field(default_factory=dict)
+    tags: list = field(default_factory=list)
+    timestamp: float = field(default_factory=time.time)
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @property
+    def rank(self) -> int:
+        return SEVERITY_ORDER.get(self.severity, 1)
+
+def sort_findings(findings: list) -> list:
+    return sorted(findings, key=lambda f: (-f.rank, f.module, f.title.lower()))
+
+```
+
+`core/java.py`:
+
+```py
+r"""Which running process is Minecraft, and which Java runtime hosts it.
+
+Task Manager groups the game under the runtime that runs it ("Zulu Platform x64
+Architecture" with Minecraft underneath), and a scan has to work the same way:
+find the game whatever JDK the player installed, name that JDK in the report,
+and hand its pid to the memory module.
+
+Signals, in order of trust:
+
+1. the command line mentions the client, a mod loader or a known launcher
+2. the process owns a window titled "Minecraft* 1.21.11 - Multiplayer"
+3. a java process with a heap this big is the game even if the launcher hid both
+
+A server jar is none of those. A path is not a command line, so "D:\minecraft
+\servers\server.jar" must not read as the client.
+"""
+from __future__ import annotations
+
+import json
+import subprocess
+
+from core import winapi
+
+JAVA_NAMES = {"javaw.exe", "java.exe"}
+GAME_EXE_NAMES = {"minecraft.windows.exe"}
+LAUNCHER_NAMES = {"minecraftlauncher.exe", "minecraftlauncher2.exe"}
+
+GAME_TOKENS = (
+    "net.minecraft.client",
+    "minecraft.client.main",
+    "mojangtricks",
+    "fabric-loader",
+    "quilt-loader",
+    "net.fabricmc",
+    "net.minecraftforge",
+    "cpw.mods",
+    "optifine",
+    "--gamedir",
+    "lunarclient",
+    "badlion",
+    "labymod",
+    "feather",
+)
+
+SERVER_TOKENS = ("--nogui", "server.jar", "-jar server")
+
+TITLE_PREFIXES = ("minecraft", "lunar client", "badlion client", "feather", "labymod")
+
+PROBABLE_GAME_BYTES = 300 * 1024 * 1024
+
+RUNTIME_VENDORS = (
+    ("zulu", "Zulu Platform"),
+    ("azul", "Azul Zulu"),
+    ("temurin", "Eclipse Temurin"),
+    ("adoptium", "Eclipse Temurin"),
+    ("adoptopenjdk", "AdoptOpenJDK"),
+    ("corretto", "Amazon Corretto"),
+    ("liberica", "BellSoft Liberica"),
+    ("semeru", "IBM Semeru"),
+    ("graalvm", "GraalVM"),
+    ("microsoft", "Microsoft OpenJDK"),
+    ("oracle", "Oracle Java"),
+    ("openjdk", "OpenJDK"),
+)
+
+GENERIC_PRODUCTS = {
+    "java(tm) platform se binary",
+    "openjdk platform binary",
+    "java",
+    "javaw",
+    "javaw.exe",
+    "microsoft windows operating system",
+}
+
+CREATE_NO_WINDOW = 0x08000000
+
+def is_java_process(name: str) -> bool:
+    """True for the process names a Minecraft JVM can appear under."""
+    low = (name or "").strip().lower()
+    return low in JAVA_NAMES or low in GAME_EXE_NAMES
+
+def is_launcher(name: str) -> bool:
+    return (name or "").strip().lower() in LAUNCHER_NAMES
+
+def looks_like_command(command: str) -> bool:
+    low = (command or "").lower()
+    return any(token in low for token in GAME_TOKENS)
+
+def looks_like_title(title: str) -> bool:
+    low = (title or "").strip().lower()
+    return any(low.startswith(prefix) for prefix in TITLE_PREFIXES)
+
+def looks_like_game(command: str = "", title: str = "") -> bool:
+    """True when the command line or the window title says this is the client."""
+    return looks_like_command(command) or looks_like_title(title)
+
+def is_server(command: str) -> bool:
+    """A dedicated server, which runs the game's jar but is not the game."""
+    low = (command or "").lower()
+    return any(token in low for token in SERVER_TOKENS)
+
+def runtime_label(path: str = "", product: str = "") -> str:
+    """Task-Manager-style name for the Java runtime running a process."""
+    prod = (product or "").strip()
+    if prod and prod.lower() not in GENERIC_PRODUCTS:
+        return prod
+    low = (path or "").lower()
+    for needle, label in RUNTIME_VENDORS:
+        if needle in low:
+            return label
+    return prod or "Java"
+
+def classify(name: str, command: str = "", title: str = "", size: int = 0) -> tuple:
+    """(is_game, why) for one process. why is empty when it is not the client."""
+    low = (name or "").strip().lower()
+    if low in GAME_EXE_NAMES:
+        return True, "game executable"
+    if low not in JAVA_NAMES:
+        return False, ""
+    if is_server(command):
+        return False, ""
+    if looks_like_command(command):
+        return True, "command line"
+    if looks_like_title(title):
+        return True, "window title"
+    if size >= PROBABLE_GAME_BYTES:
+        return True, "heap size"
+    return False, ""
+
+def command_lines() -> dict:
+    """pid -> command line for every java process, in one CIM query.
+
+    One query for the whole list, because a screenshare has a clock on it and
+    powershell takes a third of a second per spawn.
+    """
+    script = (
+        "Get-CimInstance Win32_Process "
+        "-Filter \"Name='java.exe' OR Name='javaw.exe'\" "
+        "| Select-Object ProcessId,CommandLine | ConvertTo-Json -Compress"
+    )
+    try:
+        filled = subprocess.run(
+            ["powershell", "-NoProfile", "-NonInteractive", "-Command", script],
+            capture_output=True,
+            text=True,
+            timeout=20,
+            creationflags=CREATE_NO_WINDOW,
+        ).stdout.strip()
+    except Exception:
+        return {}
+    if not filled:
+        return {}
+    try:
+        rows = json.loads(filled)
+    except ValueError:
+        return {}
+    if isinstance(rows, dict):
+        rows = [rows]
+    out = {}
+    for row in rows or []:
+        try:
+            out[int(row.get("ProcessId"))] = str(row.get("CommandLine") or "")
+        except (TypeError, ValueError, AttributeError):
+            continue
+    return out
+
+def command_line(pid: int) -> str:
+    """Command line of one pid, for a module that already knows the pid."""
+    return command_lines().get(int(pid), "")
+
+def summarise(path: str = "", product: str = "") -> str:
+    """Short label for a JVM in one line, safe to put in a report."""
+    return runtime_label(path, product)
+
+def discover(procs=None, titles=None, details=None) -> list:
+    """Every java process on the machine, with its JDK and whether it is the client.
+
+    procs, titles and details can be passed in, which is how the tests drive
+    this on a machine with no Minecraft running.
+    """
+    procs = winapi.list_processes() if procs is None else procs
+    titles = winapi.window_titles() if titles is None else titles
+    candidates = [
+        proc for proc in procs if is_java_process(proc.get("name")) or is_launcher(proc.get("name"))
+    ]
+    if not candidates:
+        return []
+
+    if details is None:
+        commands = command_lines()
+        details = {}
+        for proc in candidates:
+            pid = int(proc["pid"])
+            handle = winapi.open_process(pid)
+            path = winapi.process_path(handle) if handle else ""
+            size = winapi.working_set_size(handle) if handle else 0
+            if handle:
+                winapi.close_handle(handle)
+            details[pid] = {"path": path, "size": size, "command": commands.get(pid, "")}
+
+    out = []
+    for proc in candidates:
+        pid = int(proc["pid"])
+        info = details.get(pid) or {}
+        name = proc.get("name") or ""
+        path = info.get("path", "") or ""
+        command = info.get("command", "") or ""
+        size = int(info.get("size", 0) or 0)
+        title = titles.get(pid, "") or ""
+        is_game, why = classify(name, command, title, size)
+        out.append(
+            {
+                "pid": pid,
+                "ppid": int(proc.get("ppid", 0) or 0),
+                "name": name,
+                "path": path,
+                "command": command,
+                "title": title,
+                "size": size,
+                "runtime": runtime_label(path, winapi.product_name(path) if path else ""),
+                "is_game": is_game,
+                "why": why,
+                "launcher": is_launcher(name),
+                "server": is_server(command),
+            }
+        )
+    return out
+
+def games(procs=None, titles=None, details=None) -> list:
+    """Only the processes that are the client, launchers excluded, biggest first.
+
+    Biggest first because the memory module reads them in this order, and the
+    real game is the one with the heap.
+    """
+    found = [
+        proc
+        for proc in discover(procs=procs, titles=titles, details=details)
+        if proc["is_game"] and not proc["launcher"]
+    ]
+    return sorted(found, key=lambda proc: -proc["size"])
+
+```
+
+`core/scan.py`:
+
+```py
+"""One scan run: its thread, its progress, its findings and its report."""
+from __future__ import annotations
+
+import json
+import platform
+import threading
+import time
+import traceback
+import uuid
+from dataclasses import dataclass, field
+
+import modules
+from core import signatures as signature_store
+from core.config import APP_NAME, VERSION, ScanContext
+from core.finding import DETECTED, WARNING, CLEAN, sort_findings
+
+STATE_IDLE = "idle"
+STATE_RUNNING = "running"
+STATE_DONE = "done"
+STATE_FAILED = "failed"
+
+@dataclass
+class ScanSession:
+    id: str
+    started_at: float = field(default_factory=time.time)
+    finished_at: float = 0.0
+    state: str = STATE_IDLE
+    current_module: str = ""
+    current_label: str = ""
+    message: str = ""
+    progress: float = 0.0
+    findings: list = field(default_factory=list)
+    error: str = ""
+    options: dict = field(default_factory=dict)
+    _cancelled: bool = False
+    _lock: object = field(default_factory=threading.Lock, repr=False)
+
+    def cancel(self) -> None:
+        self._cancelled = True
+
+    def stopped(self) -> bool:
+        return self._cancelled
+
+    def on_progress(self, module_key: str, message: str, pct: float = -1.0) -> None:
+        with self._lock:
+            self.message = message
+            if module_key != self.current_module:
+                self.current_module = module_key
+                keys = [m[0] for m in modules.MODULES]
+                index = keys.index(module_key) if module_key in keys else 0
+                total = len(keys) or 1
+                self.current_label = next(
+                    (m[1] for m in modules.MODULES if m[0] == module_key), module_key
+                )
+                base = (index / float(total)) * 100.0
+                self.progress = min(99.0, base + (pct / 100.0) * (100.0 / total)) if pct >= 0 else base
+            elif pct >= 0:
+                keys = [m[0] for m in modules.MODULES]
+                index = keys.index(module_key) if module_key in keys else 0
+                total = len(keys) or 1
+                base = (index / float(total)) * 100.0
+                self.progress = min(99.0, base + (pct / 100.0) * (100.0 / total))
+
+    def counts(self) -> dict:
+        counts = {CLEAN: 0, "info": 0, WARNING: 0, DETECTED: 0}
+        for finding in self.findings:
+            counts[finding.severity] = counts.get(finding.severity, 0) + 1
+        return counts
+
+    def verdict(self) -> str:
+        counts = self.counts()
+        if counts.get(DETECTED, 0) > 0:
+            return DETECTED
+        if counts.get(WARNING, 0) > 0:
+            return WARNING
+        return CLEAN
+
+    def to_dict(self, include_findings: bool = True) -> dict:
+        counts = self.counts()
+        payload = {
+            "id": self.id,
+            "state": self.state,
+            "started_at": self.started_at,
+            "finished_at": self.finished_at,
+            "elapsed": round((self.finished_at or time.time()) - self.started_at, 1),
+            "module": self.current_module,
+            "moduleLabel": self.current_label,
+            "message": self.message,
+            "progress": round(self.progress, 1),
+            "counts": counts,
+            "verdict": self.verdict(),
+            "error": self.error,
+            "modules": [
+                {"key": k, "label": label, "section": section}
+                for k, label, section, _w in modules.MODULES
+            ],
+        }
+        if include_findings:
+            payload["findings"] = [f.to_dict() for f in self.findings]
+        return payload
+
+    def markdown(self) -> str:
+        counts = self.counts()
+        verdict = self.verdict().upper()
+        lines = [
+            "# " + APP_NAME + " scan report",
+            "",
+            "- Verdict: **" + verdict + "**",
+            "- Machine: " + platform.node() + " (" + platform.platform() + ")",
+            "- Started: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.started_at)),
+            "- Finished: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.finished_at or time.time())),
+            "- Detected: " + str(counts.get(DETECTED, 0))
+            + "  Warnings: " + str(counts.get(WARNING, 0))
+            + "  Clean: " + str(counts.get(CLEAN, 0)),
+            "",
+        ]
+        sections = {}
+        for finding in sort_findings(self.findings):
+            sections.setdefault(finding.category, []).append(finding)
+        order = ["suspicious", "file_activity", "system", "accounts", "tools", "overview", "general"]
+        titles = {
+            "suspicious": "Suspicious Entries",
+            "file_activity": "File Activity",
+            "system": "System",
+            "accounts": "Accounts",
+            "tools": "Minecraft",
+            "overview": "Overview",
+            "general": "Other",
+        }
+        for key in order:
+            group = sections.get(key)
+            if not group:
+                continue
+            lines.append("## " + titles.get(key, key.title()))
+            lines.append("")
+            for finding in group:
+                badge = finding.severity.upper()
+                lines.append("- **[" + badge + "]** " + finding.title)
+                if finding.detail:
+                    lines.append("  - " + finding.detail.replace("\n", " ")[:400])
+                if finding.signature:
+                    lines.append("  - signature: " + finding.signature)
+            lines.append("")
+        lines.append("---")
+        lines.append("Generated by " + APP_NAME + " " + VERSION)
+        return "\n".join(lines)
+
+class ScanManager:
+    """Keeps every scan session, one at a time."""
+
+    def __init__(self) -> None:
+        self.sessions: dict = {}
+        self.current: ScanSession | None = None
+        self._lock = threading.Lock()
+
+    def start(self, options: dict | None = None) -> ScanSession:
+        session = ScanSession(id="scan_" + uuid.uuid4().hex[:10], options=options or {})
+        self.sessions[session.id] = session
+        with self._lock:
+            self.current = session
+        thread = threading.Thread(target=self._run, args=(session,), daemon=True)
+        thread.start()
+        return session
+
+    def _run(self, session: ScanSession) -> None:
+        session.state = STATE_RUNNING
+        try:
+            sigs = signature_store.load()
+            ctx = ScanContext(
+                signatures=sigs,
+                options=session.options,
+                progress=session.on_progress,
+                cancel=session.stopped,
+            )
+            session.findings = ctx.findings
+            modules.run_all(ctx)
+            session.state = STATE_DONE
+            session.progress = 100.0
+            session.message = "Scan complete"
+        except Exception as exc:
+            session.state = STATE_FAILED
+            session.error = str(exc)
+            session.message = "Scan failed"
+            traceback.print_exc()
+        finally:
+            session.finished_at = time.time()
+
+    def get(self, scan_id: str) -> ScanSession | None:
+        return self.sessions.get(scan_id)
+
+    def latest(self) -> ScanSession | None:
+        return self.current
+
+```
+
+`core/server.py`:
+
+```py
+"""A local HTTP server that serves the UI and the scan API."""
+from __future__ import annotations
+
+import json
+import mimetypes
+import webbrowser
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from urllib.parse import urlparse
+
+from core import signatures as signature_store
+from core.config import APP_NAME, UI_DIR, VERSION
+from core.scan import ScanManager
+
+def make_handler(manager: ScanManager):
+    class Handler(BaseHTTPRequestHandler):
+        server_version = APP_NAME + "/" + VERSION
+
+        def log_message(self, fmt, *args):
+            pass
+
+        def _send(self, code: int, body: bytes, content_type: str, extra: dict | None = None):
+            self.send_response(code)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            for key, value in (extra or {}).items():
+                self.send_header(key, value)
+            self.end_headers()
+            if self.command != "HEAD":
+                self.wfile.write(body)
+
+        def _json(self, payload, code: int = 200):
+            self._send(code, json.dumps(payload).encode("utf-8"), "application/json; charset=utf-8")
+
+        def _error(self, code: int, message: str):
+            self._json({"error": message}, code)
+
+        def do_GET(self):
+            parsed = urlparse(self.path)
+            path = parsed.path
+
+            if path in ("/", "/index.html"):
+                return self._serve_static(UI_DIR / "index.html")
+            if path.startswith("/ui/"):
+                return self._serve_static(UI_DIR / path[4:].replace("/", "\\"))
+            if path == "/api/version":
+                return self._json({"name": APP_NAME, "version": VERSION})
+            if path == "/api/signatures":
+                return self._json(signature_store.load())
+            if path == "/api/latest":
+                session = manager.latest()
+                return self._json(session.to_dict() if session else {"state": "idle"})
+            if path.startswith("/api/scan/"):
+                scan_id = path[len("/api/scan/"):]
+                session = manager.get(scan_id)
+                if not session:
+                    return self._error(404, "unknown scan")
+                return self._json(session.to_dict())
+            if path.startswith("/api/report/"):
+                rest = path[len("/api/report/"):]
+                scan_id, _, fmt = rest.partition(".")
+                session = manager.get(scan_id)
+                if not session:
+                    return self._error(404, "unknown scan")
+                if fmt == "md":
+                    body = session.markdown().encode("utf-8")
+                    return self._send(
+                        200,
+                        body,
+                        "text/markdown; charset=utf-8",
+                        {"Content-Disposition": 'attachment; filename="' + scan_id + '.md"'},
+                    )
+                return self._json(session.to_dict())
+            return self._error(404, "not found")
+
+        def do_POST(self):
+            parsed = urlparse(self.path)
+            length = int(self.headers.get("Content-Length") or 0)
+            body = self.rfile.read(length) if length else b"{}"
+            try:
+                payload = json.loads(body or b"{}")
+            except ValueError:
+                payload = {}
+
+            if parsed.path == "/api/scan":
+                options = payload if isinstance(payload, dict) else {}
+                session = manager.start(options)
+                return self._json({"id": session.id, "state": session.state})
+            if parsed.path == "/api/cancel":
+                scan_id = payload.get("id", "")
+                session = manager.get(scan_id)
+                if not session:
+                    return self._error(404, "unknown scan")
+                session.cancel()
+                return self._json({"cancelled": True})
+            return self._error(404, "not found")
+
+        def _serve_static(self, file_path: Path):
+            try:
+                resolved = Path(file_path).resolve()
+                if UI_DIR.resolve() not in resolved.parents and resolved != (UI_DIR / "index.html").resolve():
+                    return self._error(403, "forbidden")
+                data = resolved.read_bytes()
+            except (OSError, ValueError):
+                return self._error(404, "not found")
+            mime, _ = mimetypes.guess_type(str(resolved))
+            return self._send(200, data, mime or "application/octet-stream")
+
+    return Handler
+
+def serve(port: int = 8765, open_browser: bool = True, host: str = "127.0.0.1"):
+    manager = ScanManager()
+    handler = make_handler(manager)
+    server = ThreadingHTTPServer((host, port), handler)
+    url = "http://" + host + ":" + str(port) + "/"
+    print(APP_NAME + " " + VERSION + " listening on " + url)
+    if open_browser:
+        webbrowser.open(url)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nshutting down")
+    finally:
+        server.server_close()
+    return manager
+
+```
+
+`core/signatures.py`:
+
+```py
+"""Load and match the signature database."""
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+from .config import DATA_DIR, ScanContext
+
+_CACHE: dict | None = None
+
+def _empty() -> dict:
+    return {
+        "version": "0.0.0",
+        "processes": [],
+        "memory_strings": [],
+        "mods": [],
+        "services": [],
+        "paths": [],
+    }
+
+def load(path: Path | None = None) -> dict:
+    global _CACHE
+    if _CACHE is not None and path is None:
+        return _CACHE
+    target = path or (DATA_DIR / "signatures.json")
+    data = _empty()
+    try:
+        with open(target, "r", encoding="utf-8") as fh:
+            loaded = json.load(fh)
+        for key, value in loaded.items():
+            if isinstance(value, (list, str)):
+                data[key] = value
+            else:
+                data[key] = value
+    except (OSError, ValueError):
+        data["loadError"] = str(target)
+    if path is None:
+        _CACHE = data
+    return data
+
+def reload(path: Path | None = None) -> dict:
+    global _CACHE
+    _CACHE = None
+    return load(path)
+
+def _entries(sigs: dict, key: str) -> list:
+    value = sigs.get(key)
+    return value if isinstance(value, list) else []
+
+def match_name(name: str, sigs: dict, key: str = "processes") -> dict | None:
+    """First signature whose match string appears in the name, lowercased."""
+    haystack = (name or "").lower()
+    if not haystack:
+        return None
+    for entry in _entries(sigs, key):
+        needle = str(entry.get("match", "")).lower()
+        if needle and needle in haystack:
+            return entry
+    return None
+
+def match_exact(name: str, sigs: dict, key: str) -> dict | None:
+    wanted = (name or "").lower()
+    for entry in _entries(sigs, key):
+        if str(entry.get("match", "")).lower() == wanted:
+            return entry
+    return None
+
+def match_web(text: str, sigs: dict, key: str = "processes") -> dict | None:
+    """Match inside a URL, a log line or a page title.
+
+    Free text has far more accidental collisions than a file name, so the
+    needle has to stand as its own token: "flare" must not fire on
+    "cloudflare". A signature can opt out with "loose": true.
+    """
+    haystack = (text or "").lower()
+    if not haystack:
+        return None
+    for entry in _entries(sigs, key):
+        needle = str(entry.get("match", "")).lower()
+        if not needle:
+            continue
+        if entry.get("loose"):
+            if needle in haystack:
+                return entry
+            continue
+        pattern = r"(?<![a-z0-9])" + re.escape(needle)
+        if re.search(pattern, haystack):
+            return entry
+    return None
+
+def all_matches(name: str, sigs: dict, key: str = "processes") -> list:
+    haystack = (name or "").lower()
+    out = []
+    for entry in _entries(sigs, key):
+        needle = str(entry.get("match", "")).lower()
+        if needle and needle in haystack:
+            out.append(entry)
+    return out
+
+def memory_patterns(sigs: dict) -> list:
+    """(bytes_pattern, signature entry) pairs for the memory scanner."""
+    out = []
+    for entry in _entries(sigs, "memory_strings"):
+        needle = str(entry.get("match", ""))
+        if not needle:
+            continue
+        out.append((needle.encode("utf-8", "ignore"), entry))
+        out.append((needle.encode("utf-16-le", "ignore"), entry))
+    return out
+
+def service_signature(name: str, sigs: dict) -> dict | None:
+    return match_exact(name, sigs, "services")
+
+def path_signature(path: str, sigs: dict) -> dict | None:
+    return match_name(path, sigs, "paths")
+
+```
+
+`core/winapi.py`:
+
+```py
+"""Thin ctypes wrapper over the Win32 calls GprzSS needs.
+
+Everything here degrades to a safe empty result instead of raising, because a
+screenshare tool has to keep running when one API is denied.
+"""
+from __future__ import annotations
+
+import ctypes
+from ctypes import wintypes
+
+kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+advapi32 = ctypes.WinDLL("advapi32", use_last_error=True)
+psapi = ctypes.WinDLL("psapi", use_last_error=True)
+
+PROCESS_QUERY_INFORMATION = 0x0400
+PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+PROCESS_VM_READ = 0x0010
+TH32CS_SNAPPROCESS = 0x00000002
+TH32CS_SNAPMODULE = 0x00000008
+TH32CS_SNAPMODULE32 = 0x00000010
+MEM_COMMIT = 0x1000
+PAGE_GUARD = 0x100
+PAGE_READABLE = {0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80}
+MAX_PATH = 260
+TOKEN_ADJUST_PRIVILEGES = 0x0020
+TOKEN_QUERY = 0x0008
+SE_PRIVILEGE_ENABLED = 0x00000002
+
+class PROCESSENTRY32W(ctypes.Structure):
+    _fields_ = [
+        ("dwSize", wintypes.DWORD),
+        ("cntUsage", wintypes.DWORD),
+        ("th32ProcessID", wintypes.DWORD),
+        ("th32DefaultHeapID", ctypes.POINTER(ctypes.c_ulong)),
+        ("th32ModuleID", wintypes.DWORD),
+        ("cntThreads", wintypes.DWORD),
+        ("th32ParentProcessID", wintypes.DWORD),
+        ("pcPriClassBase", ctypes.c_long),
+        ("dwFlags", wintypes.DWORD),
+        ("szExeFile", wintypes.WCHAR * MAX_PATH),
+    ]
+
+class MODULEENTRY32W(ctypes.Structure):
+    _fields_ = [
+        ("dwSize", wintypes.DWORD),
+        ("th32ModuleID", wintypes.DWORD),
+        ("th32ProcessID", wintypes.DWORD),
+        ("GlblcntUsage", wintypes.DWORD),
+        ("ProccntUsage", wintypes.DWORD),
+        ("modBaseAddr", ctypes.POINTER(ctypes.c_byte)),
+        ("modBaseSize", wintypes.DWORD),
+        ("hModule", wintypes.HMODULE),
+        ("szModule", wintypes.WCHAR * 256),
+        ("szExePath", wintypes.WCHAR * MAX_PATH),
+    ]
+
+class MEMORY_BASIC_INFORMATION(ctypes.Structure):
+    _fields_ = [
+        ("BaseAddress", ctypes.c_void_p),
+        ("AllocationBase", ctypes.c_void_p),
+        ("AllocationProtect", wintypes.DWORD),
+        ("RegionSize", ctypes.c_size_t),
+        ("State", wintypes.DWORD),
+        ("Protect", wintypes.DWORD),
+        ("Type", wintypes.DWORD),
+    ]
+
+def is_admin() -> bool:
+    try:
+        return bool(ctypes.windll.shell32.IsUserAnAdmin())
+    except Exception:
+        return False
+
+def enable_debug_privilege() -> bool:
+    """Grant SeDebugPrivilege to this process. Required to read javaw.exe."""
+    try:
+        h_token = wintypes.HANDLE()
+        if not advapi32.OpenProcessToken(
+            kernel32.GetCurrentProcess(),
+            TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+            ctypes.byref(h_token),
+        ):
+            return False
+
+        class LUID(ctypes.Structure):
+            _fields_ = [("LowPart", wintypes.DWORD), ("HighPart", wintypes.LONG)]
+
+        class LUID_AND_ATTRIBUTES(ctypes.Structure):
+            _fields_ = [("Luid", LUID), ("Attributes", wintypes.DWORD)]
+
+        class TOKEN_PRIVILEGES(ctypes.Structure):
+            _fields_ = [
+                ("PrivilegeCount", wintypes.DWORD),
+                ("Privileges", LUID_AND_ATTRIBUTES * 1),
+            ]
+
+        luid = LUID()
+        if not advapi32.LookupPrivilegeValueW(None, "SeDebugPrivilege", ctypes.byref(luid)):
+            return False
+        tp = TOKEN_PRIVILEGES()
+        tp.PrivilegeCount = 1
+        tp.Privileges[0].Luid = luid
+        tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED
+        ctypes.set_last_error(0)
+        advapi32.AdjustTokenPrivileges(h_token, False, ctypes.byref(tp), 0, None, None)
+        err = ctypes.get_last_error()
+        kernel32.CloseHandle(h_token)
+        return err == 0
+    except Exception:
+        return False
+
+def list_processes() -> list:
+    """Snapshot of every process: pid, ppid, name, thread count."""
+    out = []
+    snap = kernel32.CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
+    if not snap or snap == -1:
+        return out
+    try:
+        entry = PROCESSENTRY32W()
+        entry.dwSize = ctypes.sizeof(PROCESSENTRY32W)
+        if not kernel32.Process32FirstW(snap, ctypes.byref(entry)):
+            return out
+        while True:
+            out.append(
+                {
+                    "pid": int(entry.th32ProcessID),
+                    "ppid": int(entry.th32ParentProcessID),
+                    "name": entry.szExeFile,
+                    "threads": int(entry.cntThreads),
+                }
+            )
+            if not kernel32.Process32NextW(snap, ctypes.byref(entry)):
+                break
+    finally:
+        kernel32.CloseHandle(snap)
+    return out
+
+def open_process(pid: int):
+    handle = kernel32.OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, False, pid)
+    if not handle:
+        handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+    return int(handle) if handle else None
+
+def close_handle(handle: int) -> None:
+    try:
+        kernel32.CloseHandle(handle)
+    except Exception:
+        pass
+
+def process_path(handle: int) -> str:
+    buf = ctypes.create_unicode_buffer(32768)
+    size = wintypes.DWORD(len(buf))
+    if kernel32.QueryFullProcessImageNameW(handle, 0, buf, ctypes.byref(size)):
+        return buf.value
+    return ""
+
+def list_modules(pid: int) -> list:
+    """Loaded modules of a process, with base address and image size."""
+    out = []
+    snap = kernel32.CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid)
+    if not snap or snap == -1:
+        return out
+    try:
+        entry = MODULEENTRY32W()
+        entry.dwSize = ctypes.sizeof(MODULEENTRY32W)
+        if not kernel32.Module32FirstW(snap, ctypes.byref(entry)):
+            return out
+        while True:
+            out.append(
+                {
+                    "name": entry.szModule,
+                    "path": entry.szExePath,
+                    "base": ctypes.cast(entry.modBaseAddr, ctypes.c_void_p).value or 0,
+                    "size": int(entry.modBaseSize),
+                }
+            )
+            if not kernel32.Module32NextW(snap, ctypes.byref(entry)):
+                break
+    finally:
+        kernel32.CloseHandle(snap)
+    return out
+
+def iter_readable_regions(handle: int):
+    """Yield (base, size) for committed, readable, non-guard regions."""
+    mbi = MEMORY_BASIC_INFORMATION()
+    address = 0
+    limit = 0x7FFFFFFFFFFF
+    while address < limit:
+        written = kernel32.VirtualQueryEx(
+            handle, ctypes.c_void_p(address), ctypes.byref(mbi), ctypes.sizeof(mbi)
+        )
+        if not written:
+            break
+        base = mbi.BaseAddress or 0
+        size = int(mbi.RegionSize)
+        if size <= 0:
+            break
+        if (
+            mbi.State == MEM_COMMIT
+            and (mbi.Protect & 0xFF) in PAGE_READABLE
+            and not (mbi.Protect & PAGE_GUARD)
+        ):
+            yield base, size
+        address = base + size
+
+def read_memory(handle: int, address: int, size: int):
+    buf = ctypes.create_string_buffer(size)
+    read = ctypes.c_size_t(0)
+    ok = kernel32.ReadProcessMemory(
+        handle, ctypes.c_void_p(address), buf, size, ctypes.byref(read)
+    )
+    if not ok or read.value == 0:
+        return None
+    return buf.raw[: read.value]
+
+def working_set_size(handle: int) -> int:
+    class PROCESS_MEMORY_COUNTERS(ctypes.Structure):
+        _fields_ = [
+            ("cb", wintypes.DWORD),
+            ("PageFaultCount", wintypes.DWORD),
+            ("PeakWorkingSetSize", ctypes.c_size_t),
+            ("WorkingSetSize", ctypes.c_size_t),
+            ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+            ("PagefileUsage", ctypes.c_size_t),
+            ("PeakPagefileUsage", ctypes.c_size_t),
+        ]
+
+    counters = PROCESS_MEMORY_COUNTERS()
+    counters.cb = ctypes.sizeof(counters)
+    psapi.GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb)
+    return int(counters.WorkingSetSize)
+
+def module_for_address(modules: list, address: int) -> str:
+    for mod in modules:
+        base = mod["base"]
+        if base and base <= address < base + mod["size"]:
+            return mod["name"]
+    return ""
+
+user32 = ctypes.WinDLL("user32", use_last_error=True)
+version = ctypes.WinDLL("version", use_last_error=True)
+
+ENUMPROC = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+
+user32.EnumWindows.argtypes = [ENUMPROC, wintypes.LPARAM]
+user32.EnumWindows.restype = wintypes.BOOL
+user32.IsWindowVisible.argtypes = [wintypes.HWND]
+user32.IsWindowVisible.restype = wintypes.BOOL
+user32.GetWindowTextLengthW.argtypes = [wintypes.HWND]
+user32.GetWindowTextLengthW.restype = ctypes.c_int
+user32.GetWindowTextW.argtypes = [wintypes.HWND, wintypes.LPWSTR, ctypes.c_int]
+user32.GetWindowTextW.restype = ctypes.c_int
+user32.GetWindowThreadProcessId.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.DWORD)]
+user32.GetWindowThreadProcessId.restype = wintypes.DWORD
+
+version.GetFileVersionInfoSizeW.argtypes = [wintypes.LPCWSTR, ctypes.POINTER(wintypes.DWORD)]
+version.GetFileVersionInfoSizeW.restype = wintypes.DWORD
+version.GetFileVersionInfoW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID]
+version.GetFileVersionInfoW.restype = wintypes.BOOL
+version.VerQueryValueW.argtypes = [
+    wintypes.LPCVOID,
+    wintypes.LPCWSTR,
+    ctypes.POINTER(ctypes.c_void_p),
+    ctypes.POINTER(wintypes.UINT),
+]
+version.VerQueryValueW.restype = wintypes.BOOL
+
+def window_titles() -> dict:
+    """pid -> title of its first visible top-level window."""
+    out = {}
+    try:
+
+        def collect(hwnd, _param):
+            try:
+                if not user32.IsWindowVisible(hwnd):
+                    return True
+                length = user32.GetWindowTextLengthW(hwnd)
+                if length <= 0:
+                    return True
+                buf = ctypes.create_unicode_buffer(length + 1)
+                user32.GetWindowTextW(hwnd, buf, length + 1)
+                title = buf.value.strip()
+                if not title:
+                    return True
+                pid = wintypes.DWORD(0)
+                user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+                if pid.value:
+                    out.setdefault(int(pid.value), title)
+            except Exception:
+                pass
+            return True
+
+        user32.EnumWindows(ENUMPROC(collect), 0)
+    except Exception:
+        return out
+    return out
+
+def product_name(path: str) -> str:
+    """The name an exe gives itself in its version resource.
+
+    This is what Task Manager prints for a process group, so a Zulu runtime
+    reads back as "Zulu Platform x64 Architecture" rather than "javaw.exe".
+    """
+    if not path:
+        return ""
+    try:
+        size = version.GetFileVersionInfoSizeW(str(path), None)
+        if not size:
+            return ""
+        buf = ctypes.create_string_buffer(size)
+        if not version.GetFileVersionInfoW(str(path), 0, size, buf):
+            return ""
+        ptr = ctypes.c_void_p()
+        length = wintypes.UINT()
+        if not version.VerQueryValueW(
+            buf, "\\VarFileInfo\\Translation", ctypes.byref(ptr), ctypes.byref(length)
+        ):
+            return ""
+        pairs = []
+        if ptr.value and length.value >= 4:
+            words = ctypes.cast(ptr, ctypes.POINTER(wintypes.WORD))
+            pairs = [(words[i * 2], words[i * 2 + 1]) for i in range(length.value // 4)]
+        for lang, codepage in pairs or [(0x0409, 0x04B0)]:
+            for field in ("ProductName", "FileDescription"):
+                key = "\\StringFileInfo\\%04x%04x\\%s" % (lang, codepage, field)
+                if not version.VerQueryValueW(buf, key, ctypes.byref(ptr), ctypes.byref(length)):
+                    continue
+                if not length.value or not ptr.value:
+                    continue
+                value = ctypes.wstring_at(ptr.value).strip()
+                if value:
+                    return value
+    except Exception:
+        return ""
+    return ""
+
+def quote_arg(value: str) -> str:
+    """Quote one argument for a ShellExecute parameter list."""
+    if not value or any(ch in value for ch in ' \t"'):
+        return '"' + value.replace('"', '\\"') + '"'
+    return value
+
+def relaunch_as_admin(command: list) -> bool:
+    """Run command through the UAC prompt. False when UAC was declined."""
+    try:
+        shell32 = ctypes.WinDLL("shell32", use_last_error=True)
+        params = " ".join(quote_arg(part) for part in command[1:])
+        result = shell32.ShellExecuteW(None, "runas", command[0], params, None, 1)
+        return int(result) > 32
+    except Exception:
+        return False
+
+```
+
+`data/signatures.json`:
+
+```json
+{
+  "version": "1.0.0",
+  "updated": "2026-11-27",
+  "note": "Add your own entries here. Every module reads this file at scan time, so a new signature is live without touching code.",
+  "processes": [
+    {
+      "match": "vape",
+      "name": "Vape",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Vape V4 / Lite injection client"
+    },
+    {
+      "match": "liquidbounce",
+      "name": "LiquidBounce",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Open source Forge/Fabric cheat client"
+    },
+    {
+      "match": "wurst",
+      "name": "Wurst",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Wurst client, ships as a jar or injected exe"
+    },
+    {
+      "match": "impact",
+      "name": "Impact",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Impact client"
+    },
+    {
+      "match": "astolfo",
+      "name": "Astolfo",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Astolfo client"
+    },
+    {
+      "match": "novoline",
+      "name": "Novoline",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Novoline client"
+    },
+    {
+      "match": "dortware",
+      "name": "Dortware",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Dortware client"
+    },
+    {
+      "match": "futureclient",
+      "name": "Future",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Future client"
+    },
+    {
+      "match": "moonclient",
+      "name": "Moon",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Moon client"
+    },
+    {
+      "match": "tenacity",
+      "name": "Tenacity",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Tenacity client"
+    },
+    {
+      "match": "sigma",
+      "name": "Sigma",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Sigma client"
+    },
+    {
+      "match": "flare",
+      "name": "Flare",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Flare client"
+    },
+    {
+      "match": "krypton",
+      "name": "Krypton",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Krypton client"
+    },
+    {
+      "match": "zeroday",
+      "name": "ZeroDay",
+      "severity": "detected",
+      "kind": "client",
+      "note": "ZeroDay client"
+    },
+    {
+      "match": "entropy",
+      "name": "Entropy",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Entropy client"
+    },
+    {
+      "match": "pandora",
+      "name": "Pandora",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Pandora client"
+    },
+    {
+      "match": "raven",
+      "name": "Raven",
+      "severity": "warning",
+      "kind": "client",
+      "note": "Raven client, also a common app name"
+    },
+    {
+      "match": "ropesuite",
+      "name": "RopeSuite",
+      "severity": "detected",
+      "kind": "client",
+      "note": "RopeSuite client"
+    },
+    {
+      "match": "autoclicker",
+      "name": "Auto Clicker",
+      "severity": "warning",
+      "kind": "tool",
+      "note": "Auto clicker, bannable on most servers"
+    },
+    {
+      "match": "opauto",
+      "name": "OP Auto Clicker",
+      "severity": "warning",
+      "kind": "tool",
+      "note": "OP Auto Clicker"
+    },
+    {
+      "match": "klicker",
+      "name": "Klicker",
+      "severity": "warning",
+      "kind": "tool",
+      "note": "Klicker autoclicker"
+    },
+    {
+      "match": "xray",
+      "name": "X-Ray Tool",
+      "severity": "warning",
+      "kind": "tool",
+      "note": "X-Ray helper or resource pack"
+    },
+    {
+      "match": "jartex",
+      "name": "Jartex Injector",
+      "severity": "detected",
+      "kind": "injector",
+      "note": "Jar injector used to load clients"
+    },
+    {
+      "match": "injector",
+      "name": "Injector",
+      "severity": "warning",
+      "kind": "injector",
+      "note": "Generic dll/agent injector"
+    }
+  ],
+  "memory_strings": [
+    {
+      "match": "net.minecraft.client.main.Main",
+      "name": "Minecraft main class",
+      "severity": "clean",
+      "kind": "baseline",
+      "note": "Confirms this really is a Minecraft process"
+    },
+    {
+      "match": "com.vape",
+      "name": "Vape",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Vape package loaded in the JVM"
+    },
+    {
+      "match": "vape.gg",
+      "name": "Vape",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Vape loader artefact"
+    },
+    {
+      "match": "vapeunstable",
+      "name": "Vape",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Vape dev build artefact"
+    },
+    {
+      "match": "net.ccbluex.liquidbounce",
+      "name": "LiquidBounce",
+      "severity": "detected",
+      "kind": "client",
+      "note": "LiquidBounce package loaded in the JVM"
+    },
+    {
+      "match": "liquidbounce.gui",
+      "name": "LiquidBounce",
+      "severity": "detected",
+      "kind": "client",
+      "note": "LiquidBounce click GUI"
+    },
+    {
+      "match": "net.wurstclient",
+      "name": "Wurst",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Wurst package loaded in the JVM"
+    },
+    {
+      "match": "impactclient",
+      "name": "Impact",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Impact client classes"
+    },
+    {
+      "match": "astolfo.gui",
+      "name": "Astolfo",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Astolfo click GUI"
+    },
+    {
+      "match": "dev.novoline",
+      "name": "Novoline",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Novoline classes"
+    },
+    {
+      "match": "dortware.gui",
+      "name": "Dortware",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Dortware click GUI"
+    },
+    {
+      "match": "futureclient.gui",
+      "name": "Future",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Future click GUI"
+    },
+    {
+      "match": "tenacityclient",
+      "name": "Tenacity",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Tenacity client classes"
+    },
+    {
+      "match": "moonclient",
+      "name": "Moon",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Moon client classes"
+    },
+    {
+      "match": "sigma.gui",
+      "name": "Sigma",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Sigma click GUI"
+    },
+    {
+      "match": "client.gui.clickgui",
+      "name": "Click GUI",
+      "severity": "warning",
+      "kind": "client",
+      "note": "A click GUI class, the shape every client ships"
+    },
+    {
+      "match": "ANTI_CHEAT_SCREENSHARE",
+      "name": "Screenshot guard",
+      "severity": "warning",
+      "kind": "bypass",
+      "note": "A bypass that hides traces from screenshare tools"
+    },
+    {
+      "match": "rave.cheat",
+      "name": "Rave",
+      "severity": "detected",
+      "kind": "client",
+      "note": "Rave client"
+    },
+    {
+      "match": "optifine.gui",
+      "name": "OptiFine",
+      "severity": "clean",
+      "kind": "baseline",
+      "note": "Normal mod, listed so a clean hit is visible"
+    }
+  ],
+  "mods": [
+    {
+      "match": "liquidbounce",
+      "name": "LiquidBounce",
+      "severity": "detected",
+      "note": "Cheat client jar in the mods folder"
+    },
+    {
+      "match": "wurst",
+      "name": "Wurst",
+      "severity": "detected",
+      "note": "Cheat client jar in the mods folder"
+    },
+    {
+      "match": "impact4",
+      "name": "Impact",
+      "severity": "detected",
+      "note": "Impact client jar in the mods folder"
+    },
+    {
+      "match": "astolfo",
+      "name": "Astolfo",
+      "severity": "detected",
+      "note": "Astolfo client jar in the mods folder"
+    },
+    {
+      "match": "xray",
+      "name": "X-Ray",
+      "severity": "warning",
+      "note": "X-Ray mod"
+    },
+    {
+      "match": "xray-",
+      "name": "X-Ray",
+      "severity": "warning",
+      "note": "X-Ray mod"
+    }
+  ],
+  "services": [
+    {
+      "name": "DiagTrack",
+      "severity": "warning",
+      "note": "Connected User Experiences and Telemetry, commonly disabled to hide activity"
+    },
+    {
+      "name": "PcaSvc",
+      "severity": "warning",
+      "note": "Program Compatibility Assistant, commonly disabled to hide activity"
+    },
+    {
+      "name": "SysMain",
+      "severity": "warning",
+      "note": "Superfetch, commonly disabled to hide prefetch traces"
+    },
+    {
+      "name": "WinDefend",
+      "severity": "detected",
+      "note": "Windows Defender disabled"
+    },
+    {
+      "name": "EventLog",
+      "severity": "detected",
+      "note": "Windows event logging disabled"
+    },
+    {
+      "name": "Schedule",
+      "severity": "detected",
+      "note": "Task Scheduler disabled"
+    },
+    {
+      "name": "wuauserv",
+      "severity": "warning",
+      "note": "Windows Update disabled"
+    },
+    {
+      "name": "BAM",
+      "severity": "warning",
+      "note": "Background Activity Moderator disabled to hide execution history"
+    }
+  ],
+  "paths": [
+    {
+      "match": "\\temp\\",
+      "severity": "warning",
+      "note": "Ran from the Temp folder, a common way to hide an exe"
+    },
+    {
+      "match": "\\downloads\\",
+      "severity": "info",
+      "note": "Ran straight out of Downloads"
+    },
+    {
+      "match": "\\appdata\\roaming\\.minecraft\\versions\\",
+      "severity": "info",
+      "note": "A Minecraft version jar folder"
+    },
+    {
+      "match": "\\appdata\\roaming\\.minecraft\\libraries\\",
+      "severity": "clean",
+      "note": "A normal launcher library"
+    }
+  ]
+}
+
+```
+
+`gprzss.py`:
+
+```py
+#!/usr/bin/env python3
+"""GprzSS: a screenshare scanner for Minecraft servers.
+
+GprzSS asks Windows for Administrator on launch, because the memory scan and
+half the registry checks need it:
+
+    python gprzss.py
+
+Then open the printed address. Use --no-open to keep the browser shut, --scan to
+print a markdown report to stdout and exit, --no-elevate to skip the UAC prompt.
+"""
+from __future__ import annotations
+
+import argparse
+import sys
+import time
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description="GprzSS screenshare scanner")
+    parser.add_argument("--port", type=int, default=8765, help="port for the local UI (default 8765)")
+    parser.add_argument("--no-open", action="store_true", help="do not open a browser window")
+    parser.add_argument("--host", default="127.0.0.1", help="bind address (default 127.0.0.1)")
+    parser.add_argument("--scan", action="store_true", help="run one scan, print the report, exit")
+    parser.add_argument("--json", action="store_true", help="with --scan, print JSON instead of markdown")
+    parser.add_argument("--no-elevate", action="store_true", help="never ask Windows for elevation")
+    parser.add_argument("--elevated", action="store_true", help="internal: this copy is the elevated relaunch")
+    args = parser.parse_args(argv)
+
+    from core import elevate
+
+    outcome = elevate.ensure_admin(argv)
+    if outcome == elevate.RELAUNCHED:
+        return 0
+    if outcome == elevate.DECLINED:
+        print(
+            "Administrator was declined, so the memory scan and the registry checks will report as skipped.",
+            file=sys.stderr,
+        )
+
+    if args.scan:
+        from core.scan import ScanSession
+        import modules
+        from core import signatures
+        from core.config import ScanContext
+
+        session = ScanSession(id="cli")
+        sigs = signatures.load()
+        ctx = ScanContext(
+            signatures=sigs,
+            progress=lambda key, msg, pct=-1.0: print("[" + key + "] " + msg, file=sys.stderr),
+            cancel=session.stopped,
+        )
+        started = time.time()
+        modules.run_all(ctx)
+        session.findings = ctx.findings
+        session.finished_at = time.time()
+        session.state = "done"
+        if args.json:
+            import json
+
+            print(json.dumps(session.to_dict(), indent=2))
+        else:
+            print(session.markdown())
+        print("\nscan took %.1fs" % (time.time() - started), file=sys.stderr)
+        return 0
+
+    from core.server import serve
+
+    serve(port=args.port, open_browser=not args.no_open, host=args.host)
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+```
+
+`modules/__init__.py`:
+
+```py
+"""Scan modules, in the order the report reads them."""
+from __future__ import annotations
+
+from . import (
+    accounts,
+    amcache,
+    bam,
+    browsers,
+    files,
+    memory,
+    mods,
+    prefetch,
+    processes,
+    services,
+    system,
+    usn,
+)
+
+MODULES = [
+    ("system", "System Baseline", "overview", 3),
+    ("processes", "Running Processes", "suspicious", 8),
+    ("memory", "JVM Memory Scan", "suspicious", 30),
+    ("prefetch", "Prefetch History", "file_activity", 8),
+    ("amcache", "Amcache Register", "file_activity", 10),
+    ("bam", "Execution History", "file_activity", 5),
+    ("usn", "Deleted Executables", "file_activity", 12),
+    ("browsers", "Browser Artifacts", "file_activity", 6),
+    ("files", "Filesystem Traces", "file_activity", 6),
+    ("services", "Services and Drivers", "system", 5),
+    ("accounts", "Accounts", "accounts", 4),
+    ("mods", "Minecraft Mods", "tools", 7),
+]
+
+BY_KEY = {
+    "system": system,
+    "processes": processes,
+    "memory": memory,
+    "prefetch": prefetch,
+    "amcache": amcache,
+    "bam": bam,
+    "usn": usn,
+    "browsers": browsers,
+    "files": files,
+    "services": services,
+    "accounts": accounts,
+    "mods": mods,
+}
+
+def run_all(ctx) -> None:
+    """Run every module in order, appending findings to ctx.findings."""
+    for key, label, section, _weight in MODULES:
+        if ctx.stopped():
+            break
+        ctx.emit(key, "starting " + label, -1)
+        module = BY_KEY[key]
+        try:
+            produced = module.run(ctx) or []
+        except Exception as exc:
+            from core.finding import Finding, WARNING
+
+            produced = [
+                Finding(
+                    module=key,
+                    title=label + " could not complete",
+                    detail=str(exc)[:300],
+                    severity=WARNING,
+                    category=section,
+                )
+            ]
+        for finding in produced:
+            finding.module = key
+            if not finding.category or finding.category == "general":
+                finding.category = section
+        ctx.findings.extend(produced)
+
+```
+
+`modules/accounts.py`:
+
+```py
+"""Windows accounts and Minecraft launcher profiles on this machine."""
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+
+from core.config import user_dirs
+from core.finding import Finding, INFO, WARNING
+
+def _local_users() -> list:
+    try:
+        out = subprocess.run(
+            ["powershell", "-NoProfile", "-NonInteractive", "-Command",
+             "Get-LocalUser | Select-Object Name,Enabled,LastLogon | ConvertTo-Json -Compress"],
+            capture_output=True,
+            text=True,
+            timeout=25,
+            creationflags=0x08000000,
+        ).stdout.strip()
+        data = json.loads(out) if out else []
+        return data if isinstance(data, list) else [data]
+    except Exception:
+        return []
+
+def _launcher_profiles() -> list:
+    dirs = user_dirs()
+    path = dirs["minecraft"] / "launcher_profiles.json"
+    out = []
+    if not path.is_file():
+        return out
+    try:
+        data = json.loads(path.read_text(encoding="utf-8", errors="ignore"))
+    except (OSError, ValueError):
+        return out
+    for key, profile in (data.get("profiles") or {}).items():
+        if not isinstance(profile, dict):
+            continue
+        out.append(
+            {
+                "id": key,
+                "name": profile.get("name") or key,
+                "type": profile.get("type") or "",
+                "last_used": profile.get("lastUsed") or "",
+                "game_dir": profile.get("gameDir") or "",
+                "java_args": profile.get("javaArgs") or "",
+                "last_version": profile.get("lastVersionId") or "",
+            }
+        )
+    return out
+
+def run(ctx) -> list:
+    out: list = []
+    users = _local_users()
+    for user in users:
+        out.append(
+            Finding(
+                module="accounts",
+                title=str(user.get("Name", "unknown")) + (" (enabled)" if user.get("Enabled") else " (disabled)"),
+                detail="Last logon: " + str(user.get("LastLogon") or "never"),
+                severity=INFO,
+                category="accounts",
+                evidence=user,
+                tags=["windows-account"],
+            )
+        )
+
+    profiles = _launcher_profiles()
+    for profile in profiles:
+        args = str(profile.get("java_args") or "")
+        suspicious = any(token in args.lower() for token in ("javaagent", "-noverify", "tweakclass"))
+        out.append(
+            Finding(
+                module="accounts",
+                title="Launcher profile: " + str(profile.get("name")),
+                detail=(profile.get("last_version") or "") + "  " + (profile.get("game_dir") or ""),
+                severity=WARNING if suspicious else INFO,
+                category="accounts",
+                evidence=profile,
+                tags=["minecraft-profile"] + (["injection-args"] if suspicious else []),
+            )
+        )
+
+    if not profiles:
+        out.append(
+            Finding(
+                module="accounts",
+                title="No Minecraft launcher profiles",
+                detail="launcher_profiles.json was not found, so no launcher account data is available",
+                severity=INFO,
+                category="accounts",
+            )
+        )
+    return out
+
+```
+
+`modules/amcache.py`:
+
+```py
+"""Amcache: executables that ran on this machine, with their first-seen time."""
+from __future__ import annotations
+
+import os
+import shutil
+import subprocess
+import tempfile
+import winreg
+from datetime import datetime, timedelta, timezone
+
+from core import signatures
+from core.config import user_dirs
+from core.finding import Finding, INFO, WARNING
+
+HIVE_KEY = r"HKLM\GprzSSAmcache"
+MAX_ROWS = 600
+
+def _load_hive(hive_path: str, temp_dir: str) -> str | None:
+    """Copy the hive (it is locked) and load it under our own key."""
+    copy = os.path.join(temp_dir, "amcache.hve")
+    try:
+        shutil.copy2(hive_path, copy)
+    except OSError:
+        return None
+    result = subprocess.run(
+        ["reg", "load", HIVE_KEY, copy],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        creationflags=0x08000000,
+    )
+    if result.returncode != 0:
+        return None
+    return copy
+
+def _unload() -> None:
+    subprocess.run(
+        ["reg", "unload", HIVE_KEY],
+        capture_output=True,
+        timeout=20,
+        creationflags=0x08000000,
+    )
+
+def _filetime(value: int):
+    if not value:
+        return ""
+    try:
+        return (datetime(1601, 1, 1, tzinfo=timezone.utc) + timedelta(microseconds=value / 10)).isoformat()
+    except Exception:
+        return ""
+
+def run(ctx) -> list:
+    out: list = []
+    dirs = user_dirs()
+    hive_path = str(dirs["windir"] / "AppCompat" / "Programs" / "Amcache.hve")
+    if not os.path.exists(hive_path):
+        out.append(
+            Finding(
+                module="amcache",
+                title="Amcache hive not present",
+                detail=hive_path,
+                severity=INFO,
+                category="file_activity",
+                tags=["precondition"],
+            )
+        )
+        return out
+
+    temp_dir = tempfile.mkdtemp(prefix="gprzss-")
+    loaded = _load_hive(hive_path, temp_dir)
+    if not loaded:
+        out.append(
+            Finding(
+                module="amcache",
+                title="Amcache could not be loaded",
+                detail="Run as Administrator to read the AppCompat hive",
+                severity=WARNING,
+                category="file_activity",
+                tags=["precondition"],
+            )
+        )
+        return out
+
+    rows = []
+    try:
+        base = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"GprzSSAmcache\Root\InventoryApplicationFile")
+        index = 0
+        while index < MAX_ROWS:
+            try:
+                sub_name = winreg.EnumKey(base, index)
+            except OSError:
+                break
+            index += 1
+            if ctx.stopped():
+                break
+            try:
+                with winreg.OpenKey(base, sub_name) as sub:
+                    def get(name):
+                        try:
+                            return winreg.QueryValueEx(sub, name)[0]
+                        except OSError:
+                            return None
+
+                    rows.append(
+                        {
+                            "key": sub_name,
+                            "path": get("LowerCaseLongPath") or get("Name") or "",
+                            "name": get("Name") or "",
+                            "link_date": _filetime(get("LinkDate") or 0),
+                            "size": get("Size") or 0,
+                        }
+                    )
+            except OSError:
+                continue
+            if index % 50 == 0:
+                ctx.emit("amcache", "read %d amcache records" % index, -1)
+        winreg.CloseKey(base)
+    except OSError as exc:
+        out.append(
+            Finding(
+                module="amcache",
+                title="Amcache key unreadable",
+                detail=str(exc),
+                severity=WARNING,
+                category="file_activity",
+            )
+        )
+    finally:
+        _unload()
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+    flagged = 0
+    for row in rows:
+        basis = os.path.basename(row["path"] or row["name"] or "")
+        hits = signatures.all_matches(basis, ctx.signatures, "processes")
+        if not hits:
+            continue
+        flagged += 1
+        entry = hits[0]
+        out.append(
+            Finding(
+                module="amcache",
+                title=str(entry.get("name", basis)) + " is in the Amcache",
+                detail=row["path"] or row["name"],
+                severity=str(entry.get("severity", WARNING)),
+                category="file_activity",
+                signature=str(entry.get("match", "")),
+                evidence={
+                    "name": basis,
+                    "path": row["path"],
+                    "link_date": row["link_date"],
+                    "size": row["size"],
+                    "note": entry.get("note", ""),
+                },
+                tags=["amcache", str(entry.get("kind", ""))],
+            )
+        )
+
+    out.append(
+        Finding(
+            module="amcache",
+            title="%d Amcache records, %d matched a signature" % (len(rows), flagged),
+            detail="Amcache keeps executables after the file itself is deleted",
+            severity=INFO if flagged == 0 else WARNING,
+            category="file_activity",
+            evidence={"count": len(rows), "flagged": flagged},
+        )
+    )
+    return out
+
+```
+
+`modules/bam.py`:
+
+```py
+"""BAM: the last execution time of every binary, kept by the kernel."""
+from __future__ import annotations
+
+import os
+import subprocess
+import winreg
+from datetime import datetime, timedelta, timezone
+
+from core import signatures
+from core.finding import Finding, INFO, WARNING
+
+def _current_sids() -> list:
+    """SIDs that have a BAM entry."""
+    out = []
+    try:
+        base = winreg.OpenKey(
+            winreg.HKEY_LOCAL_MACHINE,
+            r"SYSTEM\CurrentControlSet\Services\bam\State\UserSettings",
+        )
+    except OSError:
+        try:
+            base = winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE,
+                r"SYSTEM\CurrentControlSet\Services\bam\UserSettings",
+            )
+        except OSError:
+            return out
+    try:
+        index = 0
+        while True:
+            try:
+                out.append(winreg.EnumKey(base, index))
+            except OSError:
+                break
+            index += 1
+    finally:
+        winreg.CloseKey(base)
+    return out
+
+def _filetime_to_dt(raw: bytes):
+    if not raw or len(raw) < 8:
+        return ""
+    value = int.from_bytes(raw[:8], "little")
+    if value == 0:
+        return ""
+    try:
+        return (datetime(1601, 1, 1, tzinfo=timezone.utc) + timedelta(microseconds=value / 10)).isoformat()
+    except Exception:
+        return ""
+
+def run(ctx) -> list:
+    out: list = []
+    sids = _current_sids()
+    if not sids:
+        out.append(
+            Finding(
+                module="bam",
+                title="No BAM execution history",
+                detail="Either the key is protected, or execution history was cleared",
+                severity=INFO,
+                category="file_activity",
+                tags=["precondition"],
+            )
+        )
+        return out
+
+    total = 0
+    flagged = 0
+    for sid in sids:
+        for root in (
+            r"SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\\" + sid,
+            r"SYSTEM\CurrentControlSet\Services\bam\UserSettings\\" + sid,
+        ):
+            if ctx.stopped():
+                break
+            try:
+                key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, root)
+            except OSError:
+                continue
+            try:
+                index = 0
+                while True:
+                    try:
+                        name, value, _kind = winreg.EnumValue(key, index)
+                    except OSError:
+                        break
+                    index += 1
+                    total += 1
+                    exe = name.split("\\")[-1]
+                    hits = signatures.all_matches(exe, ctx.signatures, "processes")
+                    if not hits:
+                        continue
+                    flagged += 1
+                    entry = hits[0]
+                    out.append(
+                        Finding(
+                            module="bam",
+                            title=str(entry.get("name", exe)) + " was executed",
+                            detail=name,
+                            severity=str(entry.get("severity", WARNING)),
+                            category="file_activity",
+                            signature=str(entry.get("match", "")),
+                            evidence={
+                                "path": name,
+                                "serid": sid,
+                                "last_executed": _filetime_to_dt(value if isinstance(value, bytes) else b""),
+                            },
+                            tags=["bam", str(entry.get("kind", ""))],
+                        )
+                    )
+            finally:
+                winreg.CloseKey(key)
+
+    out.append(
+        Finding(
+            module="bam",
+            title="%d BAM entries, %d matched a signature" % (total, flagged),
+            detail="BAM records every executable the kernel started, even one deleted afterwards",
+            severity=INFO if flagged == 0 else WARNING,
+            category="file_activity",
+            evidence={"count": total, "flagged": flagged},
+        )
+    )
+    return out
+
+```
+
+`modules/browsers.py`:
+
+```py
+"""Browser history and downloads, matched against the signature database."""
+from __future__ import annotations
+
+import os
+import shutil
+import sqlite3
+import tempfile
+import time
+from pathlib import Path
+
+from core import signatures
+from core.config import user_dirs
+from core.finding import Finding, INFO, WARNING
+
+BROWSERS = {
+    "Chrome": ("Google", "Chrome", "User Data", "History"),
+    "Edge": ("Microsoft", "Edge", "User Data", "History"),
+    "Brave": ("BraveSoftware", "Brave-Browser", "User Data", "History"),
+    "Opera": ("Opera Software", "Opera Stable", "History", ""),
+}
+
+MAX_ROWS = 4000
+
+def _candidate_profiles(dirs: dict) -> list:
+    out = []
+    for label, parts in BROWSERS.items():
+        if parts[3]:
+            base = dirs["local"].joinpath(parts[0], parts[1], parts[2])
+        else:
+            base = dirs["appdata"].joinpath(parts[0], parts[1])
+        if not base.is_dir():
+            continue
+        for profile in sorted(base.glob("Default")) + sorted(base.glob("Profile *")):
+            history = profile / parts[3] if parts[3] else profile / "History"
+            if history.is_file():
+                out.append((label, profile.name, history))
+    firefox = dirs["appdata"] / "Mozilla" / "Firefox" / "Profiles"
+    if firefox.is_dir():
+        for profile in firefox.glob("*"):
+            history = profile / "places.sqlite"
+            if history.is_file():
+                out.append(("Firefox", profile.name, history))
+    return out
+
+def _query(history_path: Path) -> list:
+    """Copy the (locked) database, then read urls and downloads."""
+    rows = []
+    temp_dir = tempfile.mkdtemp(prefix="gprzss-browser-")
+    copy = os.path.join(temp_dir, "history.sqlite")
+    try:
+        shutil.copy2(history_path, copy)
+        for suffix in ("-wal", "-shm"):
+            src = Path(str(history_path) + suffix)
+            if src.exists():
+                shutil.copy2(src, copy + suffix)
+        conn = sqlite3.connect(copy, timeout=5)
+        try:
+            cur = conn.cursor()
+            is_firefox = "places" in str(history_path).lower()
+            if is_firefox:
+                cur.execute(
+                    "SELECT url, title, last_visit_date FROM moz_places "
+                    "WHERE url IS NOT NULL ORDER BY last_visit_date DESC LIMIT ?",
+                    (MAX_ROWS,),
+                )
+                for url, title, ts in cur.fetchall():
+                    rows.append(
+                        {
+                            "url": url or "",
+                            "title": title or "",
+                            "when": (ts or 0) / 1e6,
+                            "kind": "visit",
+                        }
+                    )
+            else:
+                cur.execute(
+                    "SELECT url, title, last_visit_time FROM urls "
+                    "ORDER BY last_visit_time DESC LIMIT ?",
+                    (MAX_ROWS,),
+                )
+                for url, title, ts in cur.fetchall():
+                    rows.append(
+                        {
+                            "url": url or "",
+                            "title": title or "",
+                            "when": ((ts or 0) / 1e6) - 11644473600,
+                            "kind": "visit",
+                        }
+                    )
+                try:
+                    cur.execute(
+                        "SELECT target_path, tab_url, start_time FROM downloads "
+                        "ORDER BY start_time DESC LIMIT 500"
+                    )
+                    for target, tab_url, ts in cur.fetchall():
+                        rows.append(
+                            {
+                                "url": tab_url or "",
+                                "title": target or "",
+                                "when": ((ts or 0) / 1e6) - 11644473600,
+                                "kind": "download",
+                            }
+                        )
+                except sqlite3.Error:
+                    pass
+        finally:
+            conn.close()
+    except (sqlite3.Error, OSError):
+        pass
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+    return rows
+
+def run(ctx) -> list:
+    out: list = []
+    dirs = user_dirs()
+    profiles = _candidate_profiles(dirs)
+    if not profiles:
+        out.append(
+            Finding(
+                module="browsers",
+                title="No browser history found",
+                detail="Chrome, Edge, Brave, Opera and Firefox profiles were all checked",
+                severity=INFO,
+                category="file_activity",
+                tags=["precondition"],
+            )
+        )
+        return out
+
+    total = 0
+    flagged = 0
+    for label, profile, path in profiles:
+        if ctx.stopped():
+            break
+        ctx.emit("browsers", "reading " + label + " (" + profile + ")", -1)
+        rows = _query(path)
+        total += len(rows)
+        for row in rows:
+            haystack = (row["url"] + " " + row["title"]).lower()
+            hit = signatures.match_web(haystack, ctx.signatures, "processes")
+            hits = [hit] if hit else []
+            if not hits:
+                continue
+            flagged += 1
+            entry = hits[0]
+            out.append(
+                Finding(
+                    module="browsers",
+                    title=str(entry.get("name", "")) + " in " + label + " " + row["kind"] + " history",
+                    detail=row["url"][:220] or row["title"][:220],
+                    severity=WARNING if entry.get("kind") != "client" else "detected",
+                    category="file_activity",
+                    signature=str(entry.get("match", "")),
+                    evidence={
+                        "browser": label,
+                        "profile": profile,
+                        "url": row["url"][:500],
+                        "title": row["title"][:300],
+                        "when": row["when"],
+                        "kind": row["kind"],
+                    },
+                    tags=["browser", label.lower()],
+                )
+            )
+
+    out.append(
+        Finding(
+            module="browsers",
+            title="%d history rows across %d profiles, %d matched" % (total, len(profiles), flagged),
+            detail="Downloads straight to a client site are worth a second look",
+            severity=INFO if flagged == 0 else WARNING,
+            category="file_activity",
+            evidence={"rows": total, "profiles": len(profiles), "flagged": flagged},
+        )
+    )
+    return out
+
+```
+
+`modules/files.py`:
+
+```py
+"""Loose files: the recycle bin, Temp, Downloads and the Minecraft logs."""
+from __future__ import annotations
+
+import os
+from datetime import datetime, timezone
+from pathlib import Path
+
+from core import signatures
+from core.config import user_dirs
+from core.finding import Finding, INFO, WARNING, DETECTED
+
+INTERESTING = (".exe", ".jar", ".dll", ".bat", ".ps1", ".msi", ".zip")
+RECENT_SECONDS = 14 * 24 * 3600
+
+def _recent(path: Path, seconds: int = RECENT_SECONDS) -> bool:
+    try:
+        return (datetime.now().timestamp() - path.stat().st_mtime) < seconds
+    except OSError:
+        return False
+
+def _walk_capped(root: Path, max_files: int = 3000) -> list:
+    out = []
+    if not root.is_dir():
+        return out
+    try:
+        for entry in os.scandir(root):
+            if len(out) >= max_files:
+                break
+            try:
+                if entry.is_file() and entry.name.lower().endswith(INTERESTING):
+                    out.append(Path(entry.path))
+            except OSError:
+                continue
+    except OSError:
+        pass
+    return out
+
+def run(ctx) -> list:
+    out: list = []
+    dirs = user_dirs()
+
+    recycle_roots = []
+    for drive in ("C:", "D:", "E:"):
+        candidate = Path(drive + "\\$Recycle.Bin")
+        if candidate.is_dir():
+            recycle_roots.append(candidate)
+
+    recycle_hits = 0
+    for root in recycle_roots:
+        if ctx.stopped():
+            break
+        for entry in _walk_capped(root):
+            hits = signatures.all_matches(entry.name, ctx.signatures, "processes")
+            if not hits:
+                continue
+            entry_sig = hits[0]
+            recycle_hits += 1
+            out.append(
+                Finding(
+                    module="files",
+                    title=str(entry_sig.get("name", entry.name)) + " in the recycle bin",
+                    detail=str(entry),
+                    severity=str(entry_sig.get("severity", WARNING)),
+                    category="file_activity",
+                    signature=str(entry_sig.get("match", "")),
+                    evidence={"path": str(entry), "source": "recycle-bin"},
+                    tags=["recycle-bin", "deleted"],
+                )
+            )
+
+    for label, folder in (("Temp", dirs["temp"]), ("Downloads", dirs["downloads"])):
+        flagged_here = 0
+        for entry in _walk_capped(folder):
+            hits = signatures.all_matches(entry.name, ctx.signatures, "processes")
+            if not hits:
+                continue
+            flagged_here += 1
+            entry_sig = hits[0]
+            out.append(
+                Finding(
+                    module="files",
+                    title=str(entry_sig.get("name", entry.name)) + " sitting in " + label,
+                    detail=str(entry),
+                    severity=str(entry_sig.get("severity", WARNING)),
+                    category="file_activity",
+                    signature=str(entry_sig.get("match", "")),
+                    evidence={"path": str(entry), "source": label.lower()},
+                    tags=[label.lower()],
+                )
+            )
+        if flagged_here == 0:
+            out.append(
+                Finding(
+                    module="files",
+                    title="Nothing flagged in " + label,
+                    detail=str(folder),
+                    severity=INFO,
+                    category="file_activity",
+                    evidence={"folder": str(folder), "flagged": 0},
+                )
+            )
+
+    mc = dirs["minecraft"]
+    logs = mc / "logs" / "latest.log"
+    if logs.is_file():
+        try:
+            text = logs.read_text(encoding="utf-8", errors="ignore")[-400_000:].lower()
+        except OSError:
+            text = ""
+        if text:
+            for entry in ctx.signatures.get("memory_strings", []):
+                needle = str(entry.get("match", "")).lower()
+                if not needle or entry.get("severity") == "clean":
+                    continue
+                if signatures.match_web(text, {"memory_strings": [entry]}, "memory_strings"):
+                    out.append(
+                        Finding(
+                            module="files",
+                            title=str(entry.get("name", needle)) + " named in latest.log",
+                            detail=str(logs),
+                            severity=WARNING,
+                            category="file_activity",
+                            signature=needle,
+                            evidence={"log": str(logs), "signature": needle},
+                            tags=["log"],
+                        )
+                    )
+
+    if recycle_hits == 0:
+        out.append(
+            Finding(
+                module="files",
+                title="No flagged executables in the recycle bin",
+                detail="",
+                severity=INFO,
+                category="file_activity",
+            )
+        )
+
+    return out
+
+```
+
+`modules/memory.py`:
+
+```py
+"""Read the Minecraft JVM heap and look for client artefacts.
+
+This is the part that catches a client whose files were renamed or deleted:
+the loaded classes and their strings are still in memory until the game closes.
+"""
+from __future__ import annotations
+
+import time
+
+from core import java, signatures, winapi
+from core.config import DEFAULT_MEMORY_BUDGET, MEMORY_CHUNK, MEMORY_OVERLAP
+from core.finding import Finding, INFO, WARNING, DETECTED, CLEAN
+
+MAX_HITS_PER_SIGNATURE = 4
+
+def _targets(ctx) -> list:
+    """Java processes that are actually running Minecraft.
+
+    core.java answers this for any installed JDK, so a game under Zulu or
+    Temurin is read as readily as one under Oracle. A java process carrying no
+    marker at all is only read when the caller pins its pid.
+    """
+    forced = int(ctx.get("force_pid", -1))
+    out = []
+    for proc in java.discover():
+        if proc["launcher"]:
+            continue
+        if proc["is_game"] or proc["pid"] == forced:
+            out.append(proc)
+    return out
+
+def _scan_process(ctx, proc, patterns, budget, modules) -> tuple[list, int]:
+    """Return (hits, bytes_read). A hit is (signature_entry, address, encoding)."""
+    hits: list = []
+    hits_by_sig: dict = {}
+    bytes_read = 0
+    handle = winapi.open_process(proc["pid"])
+    if not handle:
+        return hits, 0
+
+    try:
+        deadline = time.time() + float(ctx.get("memory_seconds", 90))
+        for base, size in winapi.iter_readable_regions(handle):
+            if ctx.stopped() or bytes_read >= budget or time.time() > deadline:
+                break
+            if size > 1024 * 1024 * 1024:
+                continue
+            offset = 0
+            while offset < size:
+                if ctx.stopped() or bytes_read >= budget or time.time() > deadline:
+                    break
+                chunk_size = min(MEMORY_CHUNK, size - offset)
+                data = winapi.read_memory(handle, base + offset, chunk_size)
+                if data:
+                    bytes_read += len(data)
+                    lowered = data.lower()
+                    for needle_lower, entry in patterns:
+                        if hits_by_sig.get(id(entry), 0) >= MAX_HITS_PER_SIGNATURE:
+                            continue
+                        idx = lowered.find(needle_lower)
+                        while idx != -1:
+                            if hits_by_sig.get(id(entry), 0) >= MAX_HITS_PER_SIGNATURE:
+                                break
+                            address = base + offset + idx
+                            hits_by_sig[id(entry)] = hits_by_sig.get(id(entry), 0) + 1
+                            hits.append(
+                                (
+                                    entry,
+                                    address,
+                                    winapi.module_for_address(modules, address),
+                                )
+                            )
+                            idx = lowered.find(needle_lower, idx + len(needle_lower))
+                    pct = min(99.0, (bytes_read / float(budget)) * 100.0) if budget else 0.0
+                    ctx.emit("memory", "scanned %.0f MB of %s" % (bytes_read / 1e6, proc["name"]), pct)
+                offset += max(1, len(data) - MEMORY_OVERLAP) if data and len(data) > MEMORY_OVERLAP else chunk_size
+    finally:
+        winapi.close_handle(handle)
+
+    return hits, bytes_read
+
+NATIVE_BUNDLES = (
+    "jna", "jinput", "lwjgl", "libopus", "librnnoise", "libspeex", "liblame",
+    "discord", "glfw", "openal", "sodium", "netty", "tcnative", "jline",
+)
+
+def _suspicious_modules(modules: list) -> list:
+    """Modules that are not where a legitimate native belongs.
+
+    A DLL read out of Temp is normal for Minecraft. What is not normal is one
+    loaded from Temp that no longer exists on disk, because that image only
+    lives in the process now, which is what an injected payload looks like.
+    """
+    import os
+
+    out = []
+    for mod in modules:
+        path = mod.get("path") or ""
+        lowered = path.lower()
+        if not lowered:
+            continue
+        in_temp = "\\temp\\" in lowered or "\\downloads\\" in lowered
+        if not in_temp:
+            continue
+        name = (mod.get("name") or "").lower()
+        if any(name.startswith(prefix) or prefix in name for prefix in NATIVE_BUNDLES):
+            continue
+        out.append({**mod, "missing": not os.path.exists(path)})
+    return out
+
+def run(ctx) -> list:
+    out: list = []
+    sigs = ctx.signatures
+    targets = _targets(ctx)
+    if not targets:
+        out.append(
+            Finding(
+                module="memory",
+                title="Memory scan skipped, no java process running",
+                detail="Start Minecraft on any Java runtime, stay on the server, then run a new scan",
+                severity=WARNING,
+                category="suspicious",
+                tags=["precondition"],
+            )
+        )
+        return out
+
+    patterns = []
+    for raw, entry in signatures.memory_patterns(sigs):
+        patterns.append((raw.lower(), entry))
+
+    budget = int(ctx.get("memory_budget", DEFAULT_MEMORY_BUDGET))
+    total_hits = 0
+    total_bytes = 0
+    clean_hits = []
+
+    for proc in targets:
+        ctx.emit(
+            "memory",
+            "attaching to " + proc["name"] + " on " + proc["runtime"] + " (pid " + str(proc["pid"]) + ")",
+            0,
+        )
+        modules = winapi.list_modules(proc["pid"])
+        hits, read = _scan_process(ctx, proc, patterns, budget, modules)
+        total_bytes += read
+
+        grouped: dict = {}
+        for entry, address, mod_name in hits:
+            key = str(entry.get("name", ""))
+            grouped.setdefault(key, {"entry": entry, "addresses": [], "modules": set()})
+            grouped[key]["addresses"].append(address)
+            if mod_name:
+                grouped[key]["modules"].add(mod_name)
+
+        for key, group in grouped.items():
+            entry = group["entry"]
+            sev = str(entry.get("severity", WARNING))
+            if sev == CLEAN:
+                clean_hits.append(key)
+                continue
+            total_hits += 1
+            addr_list = ", ".join("0x%X" % a for a in group["addresses"][:MAX_HITS_PER_SIGNATURE])
+            out.append(
+                Finding(
+                    module="memory",
+                    title=key + " found in " + proc["name"] + " memory (" + proc["runtime"] + ")",
+                    detail=addr_list,
+                    severity=sev,
+                    category="suspicious",
+                    signature=str(entry.get("match", "")),
+                    evidence={
+                        "pid": proc["pid"],
+                        "name": key,
+                        "signature": entry.get("match", ""),
+                        "addresses": ["0x%X" % a for a in group["addresses"][:MAX_HITS_PER_SIGNATURE]],
+                        "modules": sorted(group["modules"]),
+                        "kind": entry.get("kind", ""),
+                        "note": entry.get("note", ""),
+                        "hits": len(group["addresses"]),
+                    },
+                    tags=["memory", str(entry.get("kind", ""))],
+                )
+            )
+
+        for mod in _suspicious_modules(modules):
+            missing = bool(mod.get("missing"))
+            out.append(
+                Finding(
+                    module="memory",
+                    title=(
+                        "Module loaded from Temp, file no longer exists"
+                        if missing
+                        else "Unrecognised module loaded from Temp"
+                    ),
+                    detail=mod.get("path", ""),
+                    severity=DETECTED if missing else WARNING,
+                    category="suspicious",
+                    signature="module-path",
+                    evidence={
+                        "module": mod.get("name"),
+                        "path": mod.get("path"),
+                        "pid": proc["pid"],
+                        "onDisk": not missing,
+                    },
+                    tags=["injection"],
+                )
+            )
+
+    if total_hits == 0:
+        detail = "Read %.0f MB across %d process(es)" % (total_bytes / 1e6, len(targets))
+        if clean_hits:
+            detail += ". Known-good markers present: " + ", ".join(sorted(set(clean_hits))[:4])
+        out.append(
+            Finding(
+                module="memory",
+                title="No client signatures in JVM memory",
+                detail=detail,
+                severity=CLEAN,
+                category="suspicious",
+                tags=["memory"],
+            )
+        )
+
+    return out
+
+```
+
+`modules/mods.py`:
+
+```py
+"""The mods folder: what is actually in the game's class path."""
+from __future__ import annotations
+
+import hashlib
+import os
+from pathlib import Path
+
+from core import signatures
+from core.config import user_dirs
+from core.finding import Finding, INFO, WARNING, DETECTED, CLEAN
+
+MAX_HASH_BYTES = 64 * 1024 * 1024
+
+def _sha1(path: Path) -> str:
+    digest = hashlib.sha1()
+    try:
+        with open(path, "rb") as fh:
+            for chunk in iter(lambda: fh.read(1 << 20), b""):
+                digest.update(chunk)
+    except OSError:
+        return ""
+    return digest.hexdigest()
+
+def run(ctx) -> list:
+    out: list = []
+    dirs = user_dirs()
+    mc = dirs["minecraft"]
+    mods_dir = mc / "mods"
+
+    if not mc.is_dir():
+        out.append(
+            Finding(
+                module="mods",
+                title="No .minecraft folder for this user",
+                detail=str(mc),
+                severity=INFO,
+                category="tools",
+                tags=["precondition"],
+            )
+        )
+        return out
+
+    if not mods_dir.is_dir():
+        out.append(
+            Finding(
+                module="mods",
+                title="No mods folder installed",
+                detail=str(mods_dir),
+                severity=INFO,
+                category="tools",
+            )
+        )
+        return out
+
+    jars = sorted(p for p in mods_dir.glob("*.jar"))
+    flagged = 0
+    for jar in jars:
+        hits = signatures.all_matches(jar.name, ctx.signatures, "mods")
+        try:
+            stat = jar.stat()
+        except OSError:
+            continue
+        entry = hits[0] if hits else None
+        if entry:
+            flagged += 1
+        out.append(
+            Finding(
+                module="mods",
+                title=(str(entry.get("name", jar.name)) if entry else jar.name),
+                detail=str(jar),
+                severity=str(entry.get("severity", WARNING)) if entry else CLEAN,
+                category="tools",
+                signature=str(entry.get("match", "")) if entry else "mod",
+                evidence={
+                    "file": str(jar),
+                    "size": stat.st_size,
+                    "modified": stat.st_mtime,
+                    "sha1": _sha1(jar) if stat.st_size <= MAX_HASH_BYTES else "",
+                    "note": entry.get("note", "") if entry else "No signature match",
+                },
+                tags=["mod"] + (["flagged"] if entry else []),
+            )
+        )
+
+    versions = mc / "versions"
+    custom = []
+    if versions.is_dir():
+        for child in versions.iterdir():
+            if child.is_dir() and child.name.lower() not in ("1.8.9", "1.21", "latest-release", "latest-snapshot"):
+                jar = child / (child.name + ".jar")
+                if jar.is_file():
+                    custom.append(child.name)
+    if custom:
+        out.append(
+            Finding(
+                module="mods",
+                title="%d non-standard version folders" % len(custom),
+                detail=", ".join(custom[:12]),
+                severity=WARNING,
+                category="tools",
+                evidence={"versions": custom[:50]},
+                tags=["version"],
+            )
+        )
+
+    out.append(
+        Finding(
+            module="mods",
+            title="%d mod jars, %d flagged" % (len(jars), flagged),
+            detail=str(mods_dir),
+            severity=CLEAN if flagged == 0 else DETECTED,
+            category="tools",
+            evidence={"jars": len(jars), "flagged": flagged},
+        )
+    )
+    return out
+
+```
+
+`modules/prefetch.py`:
+
+```py
+"""Parse Prefetch files for what ran recently, including deleted binaries."""
+from __future__ import annotations
+
+import os
+import struct
+from datetime import datetime, timedelta, timezone
+
+from core import signatures
+from core.config import user_dirs
+from core.finding import Finding, INFO, WARNING, DETECTED
+
+MAX_FILES = 400
+MIN_RUNS = 1
+
+def _filetime_to_dt(value: int):
+    if not value:
+        return None
+    try:
+        return datetime(1601, 1, 1, tzinfo=timezone.utc) + timedelta(microseconds=value / 10)
+    except Exception:
+        return None
+
+def _read_prefetch(path: str) -> dict | None:
+    """Extract the executable name, run count and last run time.
+
+    The format is undocumented and versioned, so this reads the fields whose
+    offsets have been stable since Windows 7 and falls back to a name derived
+    from the file name when the header does not parse.
+    """
+    try:
+        with open(path, "rb") as fh:
+            data = fh.read(4096)
+    except OSError:
+        return None
+    if len(data) < 84 or data[4:8] != b"SCCA":
+        return None
+
+    version = struct.unpack_from("<I", data, 0)[0]
+    name = ""
+    run_count = 0
+    last_run = None
+
+    try:
+        if version == 17:
+            name = data[16:76].split(b"\x00", 1)[0].decode("utf-16-le", "ignore")
+            run_count = struct.unpack_from("<I", data, 0x98)[0]
+            last_run = _filetime_to_dt(struct.unpack_from("<Q", data, 0x80)[0])
+        elif version == 23:
+            name = data[16:76].split(b"\x00", 1)[0].decode("utf-16-le", "ignore")
+            run_count = struct.unpack_from("<I", data, 0xD0)[0]
+            last_run = _filetime_to_dt(struct.unpack_from("<Q", data, 0xB0)[0])
+        elif version in (26, 30, 31, 33):
+            name_offset = struct.unpack_from("<I", data, 0x84)[0]
+            name_chars = 60
+            raw_name = data[name_offset : name_offset + name_chars * 2]
+            name = raw_name.decode("utf-16-le", "ignore").split("\x00", 1)[0]
+            last_run = _filetime_to_dt(struct.unpack_from("<Q", data, 0x80)[0])
+            run_count = struct.unpack_from("<I", data, 0x98)[0] if len(data) > 0x9C else 0
+    except (struct.error, UnicodeDecodeError):
+        pass
+
+    if not name:
+        stem = os.path.basename(path)
+        name = stem.split("-")[0] + ".EXE"
+
+    return {
+        "name": name,
+        "path": path,
+        "run_count": int(run_count),
+        "last_run": last_run.isoformat() if last_run else "",
+        "version": version,
+    }
+
+def run(ctx) -> list:
+    out: list = []
+    dirs = user_dirs()
+    pf_dir = dirs["windir"] / "Prefetch"
+    if not pf_dir.is_dir():
+        out.append(
+            Finding(
+                module="prefetch",
+                title="Prefetch folder is not readable",
+                detail=str(pf_dir) + " (needs Administrator, or prefetch is disabled)",
+                severity=WARNING,
+                category="file_activity",
+                tags=["precondition"],
+            )
+        )
+        return out
+
+    entries = []
+    try:
+        names = [p for p in os.listdir(pf_dir) if p.lower().endswith(".pf")]
+    except OSError as exc:
+        names = []
+        out.append(
+            Finding(
+                module="prefetch",
+                title="Prefetch folder denied",
+                detail=str(exc),
+                severity=WARNING,
+                category="file_activity",
+            )
+        )
+
+    for index, filename in enumerate(names[:MAX_FILES]):
+        if ctx.stopped():
+            break
+        record = _read_prefetch(str(pf_dir / filename))
+        if record:
+            entries.append(record)
+        if index % 25 == 0:
+            ctx.emit("prefetch", "parsed %d of %d prefetch entries" % (index, min(len(names), MAX_FILES)), index)
+
+    entries.sort(key=lambda e: e["last_run"], reverse=True)
+
+    flagged = 0
+    for record in entries:
+        hits = signatures.all_matches(record["name"], ctx.signatures, "processes")
+        if not hits:
+            continue
+        flagged += 1
+        entry = hits[0]
+        out.append(
+            Finding(
+                module="prefetch",
+                title=str(entry.get("name", record["name"])) + " was executed",
+                detail=record["name"] + "  last run " + (record["last_run"] or "unknown"),
+                severity=str(entry.get("severity", WARNING)),
+                category="file_activity",
+                signature=str(entry.get("match", "")),
+                evidence={
+                    "prefetch": record["path"],
+                    "name": record["name"],
+                    "run_count": record["run_count"],
+                    "last_run": record["last_run"],
+                    "note": entry.get("note", ""),
+                },
+                tags=["prefetch", str(entry.get("kind", ""))],
+            )
+        )
+
+    out.append(
+        Finding(
+            module="prefetch",
+            title="%d prefetch entries, %d matched a signature" % (len(entries), flagged),
+            detail="Prefetch only exists when the Windows feature is enabled",
+            severity=INFO if flagged == 0 else WARNING,
+            category="file_activity",
+            evidence={"count": len(entries), "flagged": flagged},
+        )
+    )
+    return out
+
+```
+
+`modules/processes.py`:
+
+```py
+"""Every running process, matched against the signature database.
+
+The game is found through core.java, which means it is found under whichever
+JDK the player installed: Zulu, Temurin, Oracle, Corretto, anything. The report
+names that runtime the way Task Manager does, and flags any java process that
+carries no sign of being the game.
+"""
+from __future__ import annotations
+
+from core import java, signatures, winapi
+from core.finding import Finding, INFO, WARNING, DETECTED, CLEAN
+
+command_line = java.command_line
+
+def run(ctx) -> list:
+    out: list = []
+    sigs = ctx.signatures
+    procs = winapi.list_processes()
+    runtimes = java.discover(procs=procs)
+    by_pid = {proc["pid"]: proc for proc in runtimes}
+    games = [proc for proc in runtimes if proc["is_game"] and not proc["launcher"]]
+    flagged: set = set()
+
+    for proc in procs:
+        name = proc["name"] or ""
+        if not name or name.lower() in ("system idle process", "system"):
+            continue
+        hit = signatures.match_name(name, sigs, "processes")
+        if not hit:
+            continue
+
+        handle = winapi.open_process(proc["pid"])
+        path = winapi.process_path(handle) if handle else ""
+        if handle:
+            winapi.close_handle(handle)
+
+        flagged.add(proc["pid"])
+        runtime = by_pid.get(proc["pid"], {}).get("runtime", "")
+        out.append(
+            Finding(
+                module="processes",
+                title=str(hit.get("name", name)) + " is running",
+                detail=path or name,
+                severity=str(hit.get("severity", WARNING)),
+                category="suspicious",
+                signature=str(hit.get("match", "")),
+                evidence={
+                    "pid": proc["pid"],
+                    "ppid": proc["ppid"],
+                    "process": name,
+                    "path": path,
+                    "runtime": runtime,
+                    "kind": hit.get("kind", ""),
+                    "note": hit.get("note", ""),
+                },
+                tags=[str(hit.get("kind", "process"))],
+            )
+        )
+
+    for proc in runtimes:
+        if proc["pid"] in flagged:
+            continue
+        evidence = {
+            "pid": proc["pid"],
+            "process": proc["name"],
+            "runtime": proc["runtime"],
+            "path": proc["path"],
+            "window": proc["title"],
+            "command": proc["command"][:1200],
+            "detectedBy": proc["why"],
+            "workingSetMB": round(proc["size"] / 1e6, 1),
+        }
+        if proc["launcher"]:
+            out.append(
+                Finding(
+                    module="processes",
+                    title="Minecraft Launcher is open",
+                    detail=proc["path"] or proc["name"],
+                    severity=INFO,
+                    category="suspicious",
+                    signature="launcher",
+                    evidence=evidence,
+                    tags=["launcher"],
+                )
+            )
+        elif proc["server"]:
+            out.append(
+                Finding(
+                    module="processes",
+                    title="Minecraft server running on " + proc["runtime"],
+                    detail=proc["path"] or proc["name"],
+                    severity=INFO,
+                    category="suspicious",
+                    signature="server",
+                    evidence=evidence,
+                    tags=["minecraft", "server"],
+                )
+            )
+        elif proc["is_game"]:
+            out.append(
+                Finding(
+                    module="processes",
+                    title="Minecraft running on " + proc["runtime"],
+                    detail=proc["path"] or proc["name"],
+                    severity=INFO,
+                    category="suspicious",
+                    signature="jvm",
+                    evidence=evidence,
+                    tags=["minecraft", "jvm"],
+                )
+            )
+        else:
+            out.append(
+                Finding(
+                    module="processes",
+                    title="Java process with no Minecraft markers: " + proc["runtime"],
+                    detail=proc["path"] or proc["name"],
+                    severity=INFO,
+                    category="suspicious",
+                    signature="jvm",
+                    evidence=evidence,
+                    tags=["jvm"],
+                )
+            )
+
+    if not games:
+        out.append(
+            Finding(
+                module="processes",
+                title="No Minecraft process is running",
+                detail=(
+                    "Start the game on whichever Java it uses (Zulu, Temurin, Oracl"
+                    "e, anything), then rescan so the memory scan has a heap to read"
+                ),
+                severity=WARNING,
+                category="suspicious",
+                tags=["precondition"],
+            )
+        )
+    elif not any(f.severity == DETECTED for f in out):
+        out.append(
+            Finding(
+                module="processes",
+                title="No flagged process names in the process list",
+                detail="Names alone prove little, the memory scan is the part that matters",
+                severity=CLEAN,
+                category="suspicious",
+            )
+        )
+
+    return out
+
+```
+
+`modules/services.py`:
+
+```py
+"""Services and drivers, with the ones a cheat turns off called out."""
+from __future__ import annotations
+
+import json
+import subprocess
+
+from core import signatures
+from core.finding import Finding, INFO, WARNING, DETECTED
+
+def _services() -> list:
+    try:
+        out = subprocess.run(
+            [
+                "powershell",
+                "-NoProfile",
+                "-NonInteractive",
+                "-Command",
+                "Get-CimInstance Win32_Service | "
+                "Select-Object Name,DisplayName,State,StartMode,PathName | "
+                "ConvertTo-Json -Compress",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=40,
+            creationflags=0x08000000,
+        ).stdout.strip()
+        if not out:
+            return []
+        data = json.loads(out)
+        return data if isinstance(data, list) else [data]
+    except Exception:
+        return []
+
+def _drivers() -> list:
+    try:
+        out = subprocess.run(
+            ["driverquery", "/fo", "csv", "/nh"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            creationflags=0x08000000,
+        ).stdout
+    except Exception:
+        return []
+    rows = []
+    for line in out.splitlines():
+        parts = [p.strip().strip('"') for p in line.split('","')]
+        if len(parts) >= 2:
+            rows.append({"module": parts[0].strip('"'), "name": parts[1]})
+    return rows
+
+def run(ctx) -> list:
+    out: list = []
+    services = _services()
+    if not services:
+        out.append(
+            Finding(
+                module="services",
+                title="Service list unavailable",
+                detail="Get-CimInstance returned nothing, likely blocked by policy",
+                severity=INFO,
+                category="system",
+                tags=["precondition"],
+            )
+        )
+    flagged = 0
+    for svc in services:
+        if ctx.stopped():
+            break
+        name = str(svc.get("Name") or "")
+        state = str(svc.get("State") or "")
+        start_mode = str(svc.get("StartMode") or "")
+        sig = signatures.service_signature(name, ctx.signatures)
+        if not sig:
+            continue
+        disabled = start_mode.lower() == "disabled" or state.lower() == "stopped"
+        if not disabled:
+            continue
+        flagged += 1
+        out.append(
+            Finding(
+                module="services",
+                title=name + " is " + ("disabled" if start_mode.lower() == "disabled" else "stopped"),
+                detail=str(sig.get("note", "")),
+                severity=str(sig.get("severity", WARNING)),
+                category="system",
+                signature=name,
+                evidence={
+                    "service": name,
+                    "display": svc.get("DisplayName"),
+                    "state": state,
+                    "start_mode": start_mode,
+                    "path": svc.get("PathName"),
+                },
+                tags=["service", "antiforensic"],
+            )
+        )
+
+    drivers = _drivers()
+    for drv in drivers[:400]:
+        sig = signatures.service_signature(drv.get("module", ""), ctx.signatures)
+        if sig:
+            out.append(
+                Finding(
+                    module="services",
+                    title=drv.get("module", "") + " driver is loaded",
+                    detail=str(sig.get("note", "")),
+                    severity=str(sig.get("severity", WARNING)),
+                    category="system",
+                    signature=drv.get("module", ""),
+                    evidence={"module": drv.get("module"), "name": drv.get("name")},
+                    tags=["driver"],
+                )
+            )
+
+    out.append(
+        Finding(
+            module="services",
+            title="%d services checked, %d turned off" % (len(services), flagged),
+            detail="Turned-off telemetry services are the usual cover for a cleanup",
+            severity="clean" if flagged == 0 else WARNING,
+            category="system",
+            evidence={"services": len(services), "flagged": flagged, "drivers": len(drivers)},
+        )
+    )
+    return out
+
+```
+
+`modules/system.py`:
+
+```py
+"""Machine baseline: who ran this scan, on what, with what protection."""
+from __future__ import annotations
+
+import getpass
+import os
+import platform
+import shutil
+import socket
+from datetime import datetime, timezone
+
+from core import winapi
+from core.config import user_dirs
+from core.finding import Finding, CLEAN, INFO, WARNING, DETECTED
+
+def _uptime_hours() -> float:
+    try:
+        import ctypes
+
+        ticks = ctypes.windll.kernel32.GetTickCount64()
+        return ticks / 1000.0 / 3600.0
+    except Exception:
+        return 0.0
+
+def _defender_off() -> bool | None:
+    """Real-time protection state, or None when we cannot tell."""
+    try:
+        import subprocess
+
+        out = subprocess.run(
+            [
+                "powershell",
+                "-NoProfile",
+                "-NonInteractive",
+                "-Command",
+                "(Get-MpComputerStatus).RealTimeProtectionEnabled",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=12,
+            creationflags=0x08000000,
+        ).stdout.strip().lower()
+        if out in ("true", "false"):
+            return out == "false"
+    except Exception:
+        pass
+    return None
+
+def run(ctx) -> list:
+    out: list = []
+    dirs = user_dirs()
+
+    host = socket.gethostname()
+    out.append(
+        Finding(
+            module="system",
+            title="Scanned " + host + " as " + getpass.getuser(),
+            detail="Privilege level: " + ("Administrator" if winapi.is_admin() else "Standard user"),
+            severity=INFO,
+            category="overview",
+            evidence={
+                "host": host,
+                "user": getpass.getuser(),
+                "admin": winapi.is_admin(),
+            },
+        )
+    )
+
+    build = platform.version()
+    release = platform.release()
+    arch = platform.machine()
+    out.append(
+        Finding(
+            module="system",
+            title="Windows " + release + " build " + build,
+            detail=arch + " architecture, uptime " + ("%.1f" % _uptime_hours()) + " hours",
+            severity=INFO,
+            category="overview",
+            evidence={"release": release, "build": build, "arch": arch},
+        )
+    )
+
+    total, used, free = shutil.disk_usage(os.environ.get("SystemDrive", "C:") + "\\")
+    out.append(
+        Finding(
+            module="system",
+            title="System drive %.0f GB free of %.0f GB" % (free / 1e9, total / 1e9),
+            detail="A nearly full drive is a common reason artefacts go missing",
+            severity=INFO,
+            category="overview",
+        )
+    )
+
+    if not winapi.is_admin():
+        out.append(
+            Finding(
+                module="system",
+                title="Not running as Administrator",
+                detail=(
+                    "GprzSS asks Windows for elevation on every launch, so this run either had the UAC prompt declined "
+                    "or was started with --no-elevate. The memory scan of javaw.exe and several registry hives are skipped."
+                ),
+                severity=WARNING,
+                category="overview",
+                tags=["elevation"],
+            )
+        )
+    else:
+        got_debug = winapi.enable_debug_privilege()
+        out.append(
+            Finding(
+                module="system",
+                title="Administrator access, SeDebugPrivilege " + ("granted" if got_debug else "denied"),
+                detail="" if got_debug else "Memory scanning will skip processes it cannot open.",
+                severity=CLEAN if got_debug else WARNING,
+                category="overview",
+            )
+        )
+
+    defender_off = _defender_off()
+    if defender_off is True:
+        out.append(
+            Finding(
+                module="system",
+                title="Windows Defender real-time protection is off",
+                detail="Frequently disabled before running a cheat client so the injector is not quarantined",
+                severity=WARNING,
+                category="system",
+                tags=["defender"],
+            )
+        )
+    elif defender_off is False:
+        out.append(
+            Finding(
+                module="system",
+                title="Windows Defender real-time protection is on",
+                detail="",
+                severity=CLEAN,
+                category="system",
+                tags=["defender"],
+            )
+        )
+
+    return out
+
+```
+
+`modules/usn.py`:
+
+```py
+"""The USN change journal: files that were deleted off the volume."""
+from __future__ import annotations
+
+import os
+import re
+import subprocess
+
+from core import signatures
+from core.finding import Finding, INFO, WARNING, DETECTED
+
+MAX_BYTES = 48 * 1024 * 1024
+INTERESTING = (".exe", ".jar", ".dll", ".bat", ".ps1", ".zip")
+DELETE_REASON = "0x80000200"
+
+def _read_journal(drive: str) -> str:
+    """Stream the journal as CSV, capped so a busy volume cannot hang the scan."""
+    cmd = ["fsutil", "usn", "readjournal", drive, "csv"]
+    collected = []
+    size = 0
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            creationflags=0x08000000,
+        )
+    except OSError:
+        return ""
+    try:
+        for raw in proc.stdout:
+            line = raw.decode("utf-8", "ignore")
+            if any(token in line.lower() for token in INTERESTING):
+                collected.append(line)
+                size += len(line)
+                if size > MAX_BYTES:
+                    break
+    finally:
+        try:
+            proc.kill()
+        except Exception:
+            pass
+    return "".join(collected)
+
+def _parse(line: str) -> dict | None:
+    parts = [p.strip().strip('"') for p in line.split(",")]
+    if len(parts) < 6:
+        return None
+    return {
+        "usn": parts[0],
+        "file": parts[1],
+        "reason": parts[2] if parts[2].startswith("0x") else "",
+        "timestamp": parts[3] if re.match(r"\d", parts[3]) else "",
+        "raw": line.strip(),
+    }
+
+def run(ctx) -> list:
+    out: list = []
+    drive = (os.environ.get("SystemDrive") or "C:") + "\\"
+    ctx.emit("usn", "reading the change journal on " + drive, 0)
+    text = _read_journal(drive)
+    if not text:
+        out.append(
+            Finding(
+                module="usn",
+                title="Change journal is empty or unreadable",
+                detail="fsutil needs Administrator, and the journal can be deleted with fsutil usn deletejournal",
+                severity=WARNING,
+                category="file_activity",
+                tags=["precondition"],
+            )
+        )
+        return out
+
+    deleted = []
+    for line in text.splitlines():
+        record = _parse(line)
+        if not record:
+            continue
+        name = record["file"].split("\\")[-1]
+        if not name or "." not in name:
+            continue
+        if not name.lower().endswith(INTERESTING):
+            continue
+        if DELETE_REASON in record["reason"] or "delete" in record["raw"].lower():
+            deleted.append(record)
+
+    flagged = 0
+    for record in deleted[:400]:
+        name = record["file"].split("\\")[-1]
+        hits = signatures.all_matches(name, ctx.signatures, "processes")
+        if not hits:
+            flagged += 0
+            continue
+        entry = hits[0]
+        flagged += 1
+        out.append(
+            Finding(
+                module="usn",
+                title=str(entry.get("name", name)) + " was created and deleted",
+                detail=record["file"],
+                severity=DETECTED if entry.get("severity") == DETECTED else WARNING,
+                category="file_activity",
+                signature=str(entry.get("match", "")),
+                evidence={
+                    "file": record["file"],
+                    "usn": record["usn"],
+                    "reason": record["reason"],
+                    "timestamp": record["timestamp"],
+                },
+                tags=["usn", "deleted"],
+            )
+        )
+
+    out.append(
+        Finding(
+            module="usn",
+            title="%d deleted executables in the journal, %d matched" % (len(deleted), flagged),
+            detail="A file deleted seconds after it ran is the classic cleanup move",
+            severity=INFO if flagged == 0 else WARNING,
+            category="file_activity",
+            evidence={"deleted": len(deleted), "flagged": flagged},
+        )
+    )
+    return out
+
+```
+
+`requirements.txt`:
+
+```txt
+# GprzSS runs on the Python standard library alone.
+# Nothing to install. Kept for tooling that expects the file.
+
+```
+
+`tests/test_java.py`:
+
+```py
+"""Finding the game whatever JDK hosts it, and the elevation decision."""
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from core import elevate, java
+
+class JavaProcessTests(unittest.TestCase):
+    def test_javaw_and_java_are_java_processes(self):
+        self.assertTrue(java.is_java_process("javaw.exe"))
+        self.assertTrue(java.is_java_process("JAVA.EXE"))
+
+    def test_bedrock_and_launcher_names(self):
+        self.assertTrue(java.is_java_process("minecraft.windows.exe"))
+        self.assertTrue(java.is_launcher("MinecraftLauncher.exe"))
+
+    def test_other_binaries_are_not(self):
+        self.assertFalse(java.is_java_process("explorer.exe"))
+        self.assertFalse(java.is_java_process(""))
+
+class GameMarkerTests(unittest.TestCase):
+    """The screenshot case: game under a third-party JDK, no launcher in sight."""
+
+    def test_window_title_alone_identifies_the_game(self):
+        title = "Minecraft* 1.21.11 - Multiplayer (3rd-party Server)"
+        self.assertTrue(java.looks_like_game("", title))
+
+    def test_zulu_hosted_game_is_found_by_title(self):
+        is_game, why = java.classify(
+            "javaw.exe",
+            command="",
+            title="Minecraft 1.21.11",
+            size=0,
+        )
+        self.assertTrue(is_game)
+        self.assertEqual(why, "window title")
+
+    def test_command_line_identifies_the_game(self):
+        cmd = r'"C:\Program Files\Zulu\zulu-21\bin\javaw.exe" -cp ... net.minecraft.client.main.Main'
+        self.assertTrue(java.looks_like_game(cmd, ""))
+
+    def test_a_plain_server_jar_is_not_the_game(self):
+        cmd = r'"C:\Program Files\Java\jdk-21\bin\java.exe" -Xmx2G -jar paper.jar nogui'
+        self.assertFalse(java.looks_like_game(cmd, ""))
+
+    def test_a_server_under_a_minecraft_path_is_not_the_client(self):
+        cmd = (
+            r"C:\Users\someone\.superbot\minecraft\runtime\java-runtime-epsilon\bin\java.exe "
+            r"-Djava.awt.headless=true -jar C:\Users\someone\minecraft\servers\default\server.jar "
+            r"--nogui --pidFile server.pid"
+        )
+        self.assertFalse(java.looks_like_game(cmd, ""))
+        self.assertTrue(java.is_server(cmd))
+
+    def test_a_modrinth_launch_of_the_client_is_the_game(self):
+        cmd = (
+            r'"C:\Users\someone\AppData\Roaming\ModrinthApp\meta\java_versions'
+            r'\zulu21.54.201-ca-jre21.0.13.1-win_x64\bin\javaw.exe" '
+            r"-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump "
+            r"-Djava.library.path=C:\Users\someone\AppData\Roaming\ModrinthApp\meta\natives\1.21.11"
+        )
+        self.assertTrue(java.looks_like_game(cmd, ""))
+
+    def test_a_large_heap_with_no_markers_is_flagged_as_a_guess(self):
+        is_game, why = java.classify("javaw.exe", "", "", 400 * 1024 * 1024)
+        self.assertTrue(is_game)
+        self.assertEqual(why, "heap size")
+
+    def test_a_small_unmarked_process_is_not_flagged(self):
+        is_game, _why = java.classify("java.exe", "", "", 60 * 1024 * 1024)
+        self.assertFalse(is_game)
+
+    def test_a_launcher_is_not_the_game_itself(self):
+        is_game, why = java.classify("MinecraftLauncher.exe", "", "Minecraft Launcher 3.0", 0)
+        self.assertFalse(is_game)
+        self.assertEqual(why, "")
+
+class RuntimeLabelTests(unittest.TestCase):
+    def test_product_name_wins_and_reads_like_task_manager(self):
+        self.assertEqual(
+            java.runtime_label(r"C:\Program Files\Zulu\zulu-21\bin\javaw.exe", "Zulu Platform x64 Architecture"),
+            "Zulu Platform x64 Architecture",
+        )
+
+    def test_generic_product_falls_back_to_the_install_path(self):
+        self.assertEqual(
+            java.runtime_label(r"C:\Program Files\Eclipse Adoptium\jdk-21\bin\javaw.exe", "Java(TM) Platform SE binary"),
+            "Eclipse Temurin",
+        )
+
+    def test_zulu_path_is_named_without_a_version_resource(self):
+        self.assertEqual(
+            java.runtime_label(r"C:\Program Files\Zulu\zulu-21\bin\javaw.exe", ""),
+            "Zulu Platform",
+        )
+
+    def test_unknown_runtime_still_gets_a_label(self):
+        self.assertEqual(java.runtime_label("", ""), "Java")
+
+class DiscoverTests(unittest.TestCase):
+    """Both the game and an unrelated java app on one machine."""
+
+    PROCS = [
+        {"pid": 100, "ppid": 4, "name": "javaw.exe"},
+        {"pid": 200, "ppid": 4, "name": "java.exe"},
+        {"pid": 300, "ppid": 4, "name": "explorer.exe"},
+        {"pid": 400, "ppid": 4, "name": "MinecraftLauncher.exe"},
+        {"pid": 500, "ppid": 4, "name": "java.exe"},
+    ]
+    TITLES = {
+        100: "Minecraft* 1.21.11 - Multiplayer (3rd-party Server)",
+        200: "IntelliJ IDEA",
+        300: "Program Manager",
+    }
+    DETAILS = {
+        100: {"path": r"C:\Program Files\Zulu\zulu-21\bin\javaw.exe", "size": 900 * 1024 * 1024, "command": ""},
+        200: {"path": r"C:\Program Files\Eclipse Adoptium\jdk-21\bin\java.exe", "size": 90 * 1024 * 1024, "command": ""},
+        400: {"path": r"C:\Program Files\Minecraft\launcher.exe", "size": 40 * 1024 * 1024, "command": ""},
+        500: {
+            "path": r"C:\Users\someone\minecraft\runtime\bin\java.exe",
+            "size": 317 * 1024 * 1024,
+            "command": r"java.exe -jar C:\Users\someone\minecraft\servers\default\server.jar --nogui",
+        },
+    }
+
+    def find(self):
+        return java.discover(procs=self.PROCS, titles=self.TITLES, details=self.DETAILS)
+
+    def test_the_zulu_game_is_the_only_game(self):
+        games = java.games(procs=self.PROCS, titles=self.TITLES, details=self.DETAILS)
+        self.assertEqual([g["pid"] for g in games], [100])
+
+    def test_the_runtime_is_named(self):
+        found = {p["pid"]: p for p in self.find()}
+        self.assertIn("Zulu", found[100]["runtime"])
+        self.assertIn("Temurin", found[200]["runtime"])
+
+    def test_non_java_processes_are_left_out(self):
+        self.assertNotIn(300, [p["pid"] for p in self.find()])
+
+    def test_the_launcher_is_marked_as_a_launcher(self):
+        found = {p["pid"]: p for p in self.find()}
+        self.assertTrue(found[400]["launcher"])
+        self.assertFalse(found[400]["is_game"])
+
+    def test_the_other_java_app_is_listed_but_not_a_game(self):
+        found = {p["pid"]: p for p in self.find()}
+        self.assertFalse(found[200]["is_game"])
+
+    def test_a_server_is_marked_as_a_server_not_the_game(self):
+        found = {p["pid"]: p for p in self.find()}
+        self.assertTrue(found[500]["server"])
+        self.assertFalse(found[500]["is_game"])
+
+    def test_only_the_client_is_a_game_when_a_server_is_also_up(self):
+        games = java.games(procs=self.PROCS, titles=self.TITLES, details=self.DETAILS)
+        self.assertEqual([g["pid"] for g in games], [100])
+
+class ElevationTests(unittest.TestCase):
+    def test_an_elevated_run_never_prompts(self):
+        self.assertFalse(elevate.needs_elevation(True, ["--scan"]))
+
+    def test_a_plain_run_prompts(self):
+        self.assertTrue(elevate.needs_elevation(False, ["--scan"]))
+
+    def test_no_elevate_is_respected(self):
+        self.assertFalse(elevate.needs_elevation(False, ["--scan", elevate.SKIP_FLAG]))
+
+    def test_the_elevated_marker_stops_a_prompt_loop(self):
+        self.assertFalse(elevate.needs_elevation(False, [elevate.ELEVATED_FLAG]))
+
+    def test_the_relaunch_carries_the_marker_and_drops_the_skip_flag(self):
+        command = elevate.relaunch_command(["--scan", elevate.SKIP_FLAG])
+        self.assertIn(elevate.ELEVATED_FLAG, command)
+        self.assertNotIn(elevate.SKIP_FLAG, command)
+        self.assertIn("--scan", command)
+
+    def test_arguments_with_spaces_survive_the_relaunch(self):
+        from core.winapi import quote_arg
+
+        self.assertEqual(quote_arg("--path"), "--path")
+        self.assertEqual(quote_arg(r"C:\Program Files\Zulu\javaw.exe"), r'"C:\Program Files\Zulu\javaw.exe"')
+
+    def test_a_declined_prompt_is_reported_not_raised(self):
+        outcome = elevate.ensure_admin(["x"], admin=False, relaunch=lambda command: False)
+        self.assertEqual(outcome, elevate.DECLINED)
+
+    def test_an_accepted_prompt_hands_the_run_over(self):
+        seen = []
+
+        def relaunch(command):
+            seen.append(command)
+            return True
+
+        outcome = elevate.ensure_admin(["--scan"], admin=False, relaunch=relaunch)
+        self.assertEqual(outcome, elevate.RELAUNCHED)
+        self.assertIn("--scan", seen[0])
+
+    def test_an_admin_run_does_not_relaunch_at_all(self):
+        outcome = elevate.ensure_admin(["--scan"], admin=True, relaunch=lambda command: True)
+        self.assertEqual(outcome, elevate.ALREADY)
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_parsers.py`:
+
+```py
+"""Parsers that read undocumented Windows formats."""
+import struct
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from modules import prefetch, usn
+
+class PrefetchTests(unittest.TestCase):
+    def _write(self, tmp_path, version=30, name="VAPE.EXE"):
+        """Build a minimal header that passes the magic and version checks."""
+        data = bytearray(1024)
+        struct.pack_into("<I", data, 0, version)
+        data[4:8] = b"SCCA"
+        struct.pack_into("<I", data, 0x84, 0x200)
+        encoded = name.encode("utf-16-le")
+        data[0x200 : 0x200 + len(encoded)] = encoded
+        path = tmp_path / (name.lower() + "-12345678.pf")
+        path.write_bytes(bytes(data))
+        return str(path)
+
+    def test_executable_name_is_read_from_the_name_block(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = self._write(Path(directory))
+            record = prefetch._read_prefetch(path)
+        self.assertIsNotNone(record)
+        self.assertEqual(record["name"], "VAPE.EXE")
+
+    def test_a_file_that_is_not_prefetch_returns_none(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "junk.pf"
+            path.write_bytes(b"not a prefetch file at all")
+            self.assertIsNone(prefetch._read_prefetch(str(path)))
+
+    def test_missing_file_is_safe(self):
+        self.assertIsNone(prefetch._read_prefetch("C:\\does\\not\\exist.pf"))
+
+    def test_name_falls_back_to_the_file_name_when_the_header_is_short(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            data = bytearray(84)
+            struct.pack_into("<I", data, 0, 30)
+            data[4:8] = b"SCCA"
+            path = Path(directory) / "fallback-9abcdef0.pf"
+            path.write_bytes(bytes(data))
+            record = prefetch._read_prefetch(str(path))
+        self.assertEqual(record["name"], "fallback.EXE")
+
+class UsnTests(unittest.TestCase):
+    def test_a_csv_row_is_split_into_fields(self):
+        line = '"12345", "vape.exe", "0x80000200", "2026-11-27 10:00", "", "x"'
+        record = usn._parse(line)
+        self.assertEqual(record["file"], "vape.exe")
+        self.assertEqual(record["reason"], "0x80000200")
+
+    def test_a_short_row_returns_none(self):
+        self.assertIsNone(usn._parse("too,short"))
+
+    def test_a_row_without_a_reason_keeps_an_empty_reason(self):
+        record = usn._parse('"1", "a.exe", "nonsense", "2026-01-01", "", "x"')
+        self.assertEqual(record["reason"], "")
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_report.py`:
+
+```py
+"""The markdown report and the verdict ladder."""
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from core.finding import Finding, CLEAN, WARNING, DETECTED, INFO, sort_findings
+from core.scan import ScanSession
+
+def build(findings):
+    session = ScanSession(id="test")
+    session.findings = findings
+    session.state = "done"
+    return session
+
+class VerdictTests(unittest.TestCase):
+    def test_clean_when_nothing_is_flagged(self):
+        session = build([Finding(module="m", title="ok", severity=CLEAN)])
+        self.assertEqual(session.verdict(), CLEAN)
+
+    def test_one_detection_wins_over_warnings(self):
+        session = build(
+            [
+                Finding(module="m", title="w", severity=WARNING),
+                Finding(module="m", title="d", severity=DETECTED),
+            ]
+        )
+        self.assertEqual(session.verdict(), DETECTED)
+
+    def test_info_does_not_raise_the_verdict(self):
+        session = build([Finding(module="m", title="i", severity=INFO)])
+        self.assertEqual(session.verdict(), CLEAN)
+
+    def test_empty_scan_is_clean(self):
+        self.assertEqual(build([]).verdict(), CLEAN)
+
+class SortTests(unittest.TestCase):
+    def test_detected_findings_come_first(self):
+        ordered = sort_findings(
+            [
+                Finding(module="a", title="clean", severity=CLEAN),
+                Finding(module="b", title="detected", severity=DETECTED),
+                Finding(module="c", title="warn", severity=WARNING),
+            ]
+        )
+        self.assertEqual([f.severity for f in ordered], [DETECTED, WARNING, CLEAN])
+
+class MarkdownTests(unittest.TestCase):
+    def test_report_names_the_verdict_and_the_finding(self):
+        session = build(
+            [
+                Finding(
+                    module="memory",
+                    title="Vape found in javaw.exe memory",
+                    detail="0x7FF6A000",
+                    severity=DETECTED,
+                    category="suspicious",
+                    signature="com.vape",
+                )
+            ]
+        )
+        report = session.markdown()
+        self.assertIn("DETECTED", report)
+        self.assertIn("Vape found in javaw.exe memory", report)
+        self.assertIn("Suspicious Entries", report)
+
+    def test_report_omits_sections_that_have_nothing_in_them(self):
+        session = build([Finding(module="system", title="ok", severity=INFO, category="overview")])
+        report = session.markdown()
+        self.assertIn("Overview", report)
+        self.assertNotIn("Suspicious Entries", report)
+
+    def test_long_detail_is_truncated(self):
+        session = build(
+            [
+                Finding(
+                    module="x",
+                    title="long",
+                    detail="a" * 900,
+                    severity=WARNING,
+                    category="suspicious",
+                )
+            ]
+        )
+        self.assertLess(len(session.markdown()), 1400)
+
+class CountTests(unittest.TestCase):
+    def test_counts_group_by_severity(self):
+        session = build(
+            [
+                Finding(module="m", title="a", severity=DETECTED),
+                Finding(module="m", title="b", severity=WARNING),
+                Finding(module="m", title="c", severity=WARNING),
+            ]
+        )
+        counts = session.counts()
+        self.assertEqual(counts[DETECTED], 1)
+        self.assertEqual(counts[WARNING], 2)
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_signatures.py`:
+
+```py
+"""Signature matching, including the false positive that bit the browser scan."""
+import unittest
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from core import signatures
+
+SAMPLE = {
+    "processes": [
+        {"match": "vape", "name": "Vape", "severity": "detected"},
+        {"match": "flare", "name": "Flare", "severity": "detected"},
+        {"match": "loosey", "name": "Loose", "severity": "warning", "loose": True},
+    ],
+    "memory_strings": [
+        {"match": "net.ccbluex.liquidbounce", "name": "LiquidBounce", "severity": "detected"},
+    ],
+}
+
+class MatchNameTests(unittest.TestCase):
+    def test_substring_matches_a_process_name(self):
+        self.assertEqual(signatures.match_name("vape.lite.exe", SAMPLE)["name"], "Vape")
+
+    def test_case_is_ignored(self):
+        self.assertEqual(signatures.match_name("VAPE.EXE", SAMPLE)["name"], "Vape")
+
+    def test_no_match_returns_none(self):
+        self.assertIsNone(signatures.match_name("explorer.exe", SAMPLE))
+
+    def test_empty_name_is_safe(self):
+        self.assertIsNone(signatures.match_name("", SAMPLE))
+
+class MatchWebTests(unittest.TestCase):
+    """A URL is not a file name, so a needle has to stand as its own token."""
+
+    def test_cloudflare_does_not_match_flare(self):
+        self.assertIsNone(
+            signatures.match_web("https://cloudflare.com/cdn-cgi/challenge", SAMPLE)
+        )
+
+    def test_flare_on_its_own_does_match(self):
+        hit = signatures.match_web("https://flareclient.example/download", SAMPLE)
+        self.assertIsNotNone(hit)
+        self.assertEqual(hit["name"], "Flare")
+
+    def test_dotted_signature_matches_inside_a_url(self):
+        hit = signatures.match_web(
+            "https://example.com/path?x=net.ccbluex.liquidbounce",
+            SAMPLE,
+            "memory_strings",
+        )
+        self.assertIsNotNone(hit)
+        self.assertEqual(hit["name"], "LiquidBounce")
+
+    def test_loose_signature_matches_inside_a_longer_word(self):
+        hit = signatures.match_web("xxlooseyxx", SAMPLE)
+        self.assertIsNotNone(hit)
+
+    def test_empty_text_is_safe(self):
+        self.assertIsNone(signatures.match_web("", SAMPLE))
+
+class AllMatchesTests(unittest.TestCase):
+    def test_every_matching_signature_is_returned(self):
+        sigs = {
+            "processes": [
+                {"match": "vape", "name": "Vape"},
+                {"match": "lite", "name": "Lite"},
+            ]
+        }
+        names = [h["name"] for h in signatures.all_matches("vape.lite.exe", sigs)]
+        self.assertEqual(names, ["Vape", "Lite"])
+
+class MemoryPatternTests(unittest.TestCase):
+    def test_each_needle_is_produced_in_ascii_and_utf16(self):
+        patterns = signatures.memory_patterns(SAMPLE)
+        raw = [p[0] for p in patterns]
+        self.assertIn(b"net.ccbluex.liquidbounce", raw)
+        self.assertIn("net.ccbluex.liquidbounce".encode("utf-16-le"), raw)
+
+    def test_blank_needles_are_skipped(self):
+        patterns = signatures.memory_patterns({"memory_strings": [{"match": ""}]})
+        self.assertEqual(patterns, [])
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tools/strip_comments.py`:
+
+```py
+"""One-off: strip comments from the source tree.
+
+Python files go through tokenize so string literals that contain a hash are left
+alone. CSS, JS, HTML and PowerShell get a plain scanner. Directive comments that
+change behaviour (noqa, type:, pragma, pylint:) are kept.
+"""
+from __future__ import annotations
+
+import io
+import re
+import sys
+import tokenize
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+KEEP = ("noqa", "type:", "pragma", "pylint:", "mypy:", "fmt: skip", "isort:", "!/")
+
+def strip_python(src: str) -> str:
+    lines = src.splitlines()
+    drop: set[int] = set()
+    inline: list[tuple[int, int, int]] = []
+    try:
+        for tok in tokenize.generate_tokens(io.StringIO(src).readline):
+            if tok.type != tokenize.COMMENT:
+                continue
+            text = tok.string
+            if any(k in text for k in KEEP):
+                continue
+            row = tok.start[0]
+            whole = lines[row - 1].strip() == text.strip()
+            if whole:
+                drop.add(row)
+            else:
+                inline.append((row, tok.start[1], tok.end[1]))
+    except tokenize.TokenError:
+        pass
+
+    out = []
+    for i, line in enumerate(lines, start=1):
+        if i in drop:
+            continue
+        for r, a, b in inline:
+            if r == i:
+                line = (line[:a] + line[b:]).rstrip()
+        out.append(line)
+    text = "\n".join(out) + "\n"
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text
+
+def strip_block(src: str, opener: str, closer: str) -> str:
+    out = []
+    depth = 0
+    i = 0
+    while i < len(src):
+        if src.startswith(opener, i):
+            depth += 1
+            i += len(opener)
+            continue
+        if depth and src.startswith(closer, i):
+            depth -= 1
+            i += len(closer)
+            continue
+        if not depth:
+            out.append(src[i])
+        i += 1
+    text = "".join(out)
+    text = re.sub(r"[ \t]+\n", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text
+
+def strip_line_comments(src: str) -> str:
+    kept = [ln for ln in src.splitlines() if not ln.lstrip().startswith("//")]
+    text = "\n".join(kept) + "\n"
+    return re.sub(r"\n{3,}", "\n\n", text)
+
+def main() -> int:
+    targets = sorted(
+        p for p in ROOT.rglob("*")
+        if p.is_file()
+        and ".git" not in p.parts
+        and "__pycache__" not in p.parts
+        and p.suffix in {".py", ".css", ".js", ".html", ".ps1"}
+    )
+    changed = 0
+    for path in targets:
+        src = path.read_text(encoding="utf-8")
+        if path.suffix == ".py":
+            new = strip_python(src)
+        elif path.suffix == ".css":
+            new = strip_block(src, "/*", "*/")
+        elif path.suffix == ".js":
+            new = strip_line_comments(strip_block(src, "/*", "*/"))
+        elif path.suffix == ".html":
+            new = strip_block(src, "<!--", "-->")
+        else:
+            new = strip_line_comments(src)
+        if new != src:
+            path.write_text(new, encoding="utf-8", newline="\n")
+            changed += 1
+            print(f"stripped {path.relative_to(ROOT)}")
+    print(f"{changed} file(s) changed")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`ui/app.js`:
+
+```js
+
+
+const SECTIONS = {
+  overview: { title: "Overview" },
+  suspicious: { title: "Suspicious Entries" },
+  fileactivity: { title: "File Activity" },
+  system: { title: "System" },
+  accounts: { title: "All Accounts" },
+  minecraft: { title: "Minecraft" },
+  log: { title: "Full Log" }
+};
+
+const CATEGORY_TO_VIEW = {
+  suspicious: "suspicious",
+  file_activity: "fileactivity",
+  system: "system",
+  accounts: "accounts",
+  tools: "minecraft",
+  overview: "overview",
+  general: "log"
+};
+
+const state = {
+  scan: null,
+  findings: [],
+  view: "overview",
+  polling: null,
+  filters: { suspicious: "", files: "", log: "" }
+};
+
+const $ = (id) => document.getElementById(id);
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined && text !== null) node.textContent = text;
+  return node;
+}
+
+function toast(message) {
+  const node = $("toast");
+  node.textContent = message;
+  node.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => node.classList.remove("show"), 2200);
+}
+
+function setView(name) {
+  state.view = name;
+  document.querySelectorAll(".nav-item").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.view === name);
+  });
+  document.querySelectorAll(".view").forEach((view) => {
+    view.classList.toggle("active", view.id === "view-" + name);
+  });
+  $("pageTitle").textContent = SECTIONS[name] ? SECTIONS[name].title : name;
+  render();
+}
+
+document.querySelectorAll(".nav-item").forEach((btn) => {
+  btn.addEventListener("click", () => setView(btn.dataset.view));
+});
+
+function severityLabel(sev) {
+  return { detected: "DETECTED", warning: "WARNING", clean: "CLEAN", info: "INFO" }[sev] || "INFO";
+}
+
+function makeRow(finding) {
+  const row = el("div", "row sev-" + (finding.severity || "info"));
+
+  const bar = el("span", "row-sev");
+  row.appendChild(bar);
+
+  const body = el("div", "row-body");
+  body.appendChild(el("div", "row-title", finding.title));
+  if (finding.detail) body.appendChild(el("div", "row-detail", finding.detail));
+  row.appendChild(body);
+
+  const tools = el("div", "row-tools");
+  const tag = el("span", "tag " + (finding.severity || "info"), severityLabel(finding.severity));
+  tools.appendChild(tag);
+  const btn = el("button", "detail-btn", "View Detail");
+  btn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openDrawer(finding);
+  });
+  tools.appendChild(btn);
+  row.appendChild(tools);
+
+  row.addEventListener("click", () => openDrawer(finding));
+  return row;
+}
+
+function fillRows(container, findings, emptyMessage) {
+  container.innerHTML = "";
+  if (!findings.length) {
+    const empty = el("div", "empty");
+    const glyph = el("div", "glyph", "i");
+    empty.appendChild(glyph);
+    empty.appendChild(el("div", "", emptyMessage));
+    container.appendChild(empty);
+    return;
+  }
+  const fragment = document.createDocumentFragment();
+  findings.forEach((finding) => fragment.appendChild(makeRow(finding)));
+  container.appendChild(fragment);
+}
+
+function matchesFilter(finding, needle) {
+  if (!needle) return true;
+  const haystack = [
+    finding.title, finding.detail, finding.module, finding.signature,
+    (finding.tags || []).join(" "), JSON.stringify(finding.evidence || {})
+  ].join(" ").toLowerCase();
+  return haystack.includes(needle.toLowerCase());
+}
+
+function openDrawer(finding) {
+  $("drawerTitle").textContent = finding.title;
+  const body = $("drawerBody");
+  body.innerHTML = "";
+
+  const kv = el("dl", "kv");
+  const rows = [
+    ["severity", (finding.severity || "info").toUpperCase()],
+    ["module", finding.module],
+    ["category", finding.category],
+    ["signature", finding.signature || "none"],
+    ["tags", (finding.tags || []).join(", ") || "none"],
+    ["when", new Date((finding.timestamp || 0) * 1000).toLocaleString()]
+  ];
+  rows.forEach(([key, value]) => {
+    kv.appendChild(el("dt", "", key));
+    kv.appendChild(el("dd", "", String(value)));
+  });
+  body.appendChild(kv);
+
+  if (finding.detail) {
+    body.appendChild(el("p", "section-label", "Evidence"));
+    const pre = el("pre", "raw", finding.detail);
+    body.appendChild(pre);
+  }
+
+  body.appendChild(el("p", "section-label", "Raw record"));
+  body.appendChild(el("pre", "raw", JSON.stringify(finding.evidence || {}, null, 2)));
+
+  $("drawer").classList.add("open");
+  $("scrim").classList.add("open");
+}
+
+function closeDrawer() {
+  $("drawer").classList.remove("open");
+  $("scrim").classList.remove("open");
+}
+
+$("drawerClose").addEventListener("click", closeDrawer);
+$("scrim").addEventListener("click", closeDrawer);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeDrawer();
+});
+
+function render() {
+  const findings = state.findings;
+  const counts = { detected: 0, warning: 0, clean: 0, info: 0 };
+  findings.forEach((f) => { counts[f.severity] = (counts[f.severity] || 0) + 1; });
+
+  $("chipDetN").textContent = counts.detected;
+  $("chipWarnN").textContent = counts.warning;
+  $("chipDet").className = "chip" + (counts.detected ? " bad" : counts.detected === 0 && findings.length ? " good" : "");
+  $("chipWarn").className = "chip" + (counts.warning ? " warn" : "");
+
+  $("statDetected").textContent = counts.detected;
+  $("statWarnings").textContent = counts.warning;
+  $("statClean").textContent = counts.clean;
+  $("statElapsed").textContent = (state.scan && state.scan.elapsed ? state.scan.elapsed : 0).toFixed(1) + "s";
+
+  const byCategory = (category) => findings.filter((f) => f.category === category);
+
+  const suspicious = findings.filter((f) => ["detected", "warning"].includes(f.severity) && f.category !== "overview");
+  $("navSuspicious").textContent = suspicious.length;
+  $("navSuspicious").className = "nav-count" + (counts.detected ? " hot" : suspicious.length ? " warm" : "");
+  const fileFindings = byCategory("file_activity");
+  $("navFiles").textContent = fileFindings.length;
+  $("navFiles").className = "nav-count" + (fileFindings.some((f) => f.severity === "detected") ? " hot" : "");
+
+  const machine = byCategory("overview");
+  fillRows($("overviewMachine"), machine, "No machine data yet");
+  const top = findings
+    .filter((f) => ["detected", "warning"].includes(f.severity))
+    .slice(0, 12);
+  $("topCount").textContent = top.length;
+  fillRows($("overviewTop"), top, "Nothing flagged yet");
+
+  const suspiciousFiltered = suspicious.filter((f) => matchesFilter(f, state.filters.suspicious));
+  $("suspiciousCount").textContent = suspiciousFiltered.length;
+  fillRows($("rowsSuspicious"), suspiciousFiltered, suspicious.length ? "No entries match this filter" : "Run a scan to populate suspicious entries");
+
+  const filesFiltered = fileFindings.filter((f) => matchesFilter(f, state.filters.files));
+  $("fileCount").textContent = filesFiltered.length;
+  fillRows($("rowsFiles"), filesFiltered, "No file artefacts yet");
+
+  fillRows($("rowsSystem"), byCategory("system"), "No system findings");
+  fillRows($("rowsAccounts"), byCategory("accounts"), "No account data");
+  fillRows($("rowsMinecraft"), byCategory("tools"), "No Minecraft data");
+
+  const logFiltered = findings.filter((f) => matchesFilter(f, state.filters.log));
+  $("logCount").textContent = logFiltered.length;
+  fillRows($("rowsLog"), logFiltered, "The log is empty");
+}
+
+function renderVerdict() {
+  const container = $("verdict");
+  const badge = $("verdictBadge");
+  const title = $("verdictTitle");
+  const sub = $("verdictSub");
+  const scan = state.scan;
+
+  container.className = "verdict";
+  if (!scan || scan.state === "idle" || !scan.id) {
+    badge.textContent = "NO DATA";
+    title.textContent = "No scan yet";
+    sub.textContent = "Press Run Scan to check this machine";
+    return;
+  }
+  if (scan.state === "running") {
+    badge.textContent = "SCANNING";
+    title.textContent = "Scan in progress";
+    sub.textContent = scan.moduleLabel ? scan.moduleLabel + ": " + scan.message : "starting";
+    return;
+  }
+  const counts = scan.counts || {};
+  if (counts.detected) {
+    container.classList.add("detected");
+    badge.textContent = "DETECTED";
+    title.textContent = counts.detected + " detection" + (counts.detected === 1 ? "" : "s") + " found";
+    sub.textContent = "Review the entries below before clearing this player";
+  } else if (counts.warning) {
+    container.classList.add("warning");
+    badge.textContent = "REVIEW";
+    title.textContent = counts.warning + " warning" + (counts.warning === 1 ? "" : "s") + ", nothing conclusive";
+    sub.textContent = "Open each entry and read the evidence before deciding";
+  } else {
+    container.classList.add("clean");
+    badge.textContent = "CLEAN";
+    title.textContent = "No detections and no warnings";
+    sub.textContent = "Nothing in the signature set matched on this machine";
+  }
+}
+
+async function startScan() {
+  if (state.polling) return;
+  $("btnScan").disabled = true;
+  $("btnScanLabel").textContent = "Scanning";
+  $("scanModule").innerHTML = "<b>STARTING</b> preparing modules";
+  try {
+    const response = await fetch("/api/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}"
+    });
+    const data = await response.json();
+    if (!data.id) throw new Error(data.error || "scan did not start");
+    state.scan = { id: data.id, state: "running" };
+    poll(data.id);
+  } catch (error) {
+    toast("Could not start the scan: " + error.message);
+    $("btnScan").disabled = false;
+    $("btnScanLabel").textContent = "Run Scan";
+  }
+}
+
+function poll(scanId) {
+  state.polling = setInterval(async () => {
+    try {
+      const response = await fetch("/api/scan/" + scanId);
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+      state.scan = data;
+      state.findings = data.findings || [];
+      updateScanBar(data);
+      renderVerdict();
+      render();
+
+      if (data.state === "done" || data.state === "failed") {
+        clearInterval(state.polling);
+        state.polling = null;
+        $("btnScan").disabled = false;
+        $("btnScanLabel").textContent = "Rescan";
+        $("pageSub").textContent = "scanned " + new Date(data.started_at * 1000).toLocaleTimeString();
+        toast(data.state === "done" ? "Scan complete" : "Scan failed: " + data.error);
+      }
+    } catch (error) {
+      clearInterval(state.polling);
+      state.polling = null;
+      $("btnScan").disabled = false;
+      $("btnScanLabel").textContent = "Run Scan";
+      toast("Scan polling stopped: " + error.message);
+    }
+  }, 400);
+}
+
+function updateScanBar(scan) {
+  const module = $("scanModule");
+  const label = scan.state === "running" ? "SCANNING" : (scan.state === "done" ? "COMPLETE" : scan.state.toUpperCase());
+  module.innerHTML = "<b>" + label + "</b> " + (scan.message || "");
+  const pct = Math.round(scan.progress || 0);
+  $("progressBar").style.width = pct + "%";
+  $("progressPct").textContent = pct + "%";
+  $("footSession").textContent = scan.state === "running" ? "live" : (scan.id || "idle");
+}
+
+async function exportReport() {
+  if (!state.scan || !state.scan.id) {
+    toast("Run a scan first");
+    return;
+  }
+  window.location.href = "/api/report/" + state.scan.id + ".md";
+}
+
+$("btnScan").addEventListener("click", startScan);
+$("btnExport").addEventListener("click", exportReport);
+
+$("filterSuspicious").addEventListener("input", (event) => {
+  state.filters.suspicious = event.target.value;
+  render();
+});
+$("filterFiles").addEventListener("input", (event) => {
+  state.filters.files = event.target.value;
+  render();
+});
+
+async function boot() {
+  try {
+    const version = await (await fetch("/api/version")).json();
+    $("verLabel").textContent = "v" + version.version;
+  } catch (error) {  }
+  try {
+    const sigs = await (await fetch("/api/signatures")).json();
+    const total = (sigs.processes || []).length + (sigs.memory_strings || []).length +
+      (sigs.mods || []).length + (sigs.services || []).length;
+    $("footSigs").textContent = total;
+  } catch (error) {  }
+  try {
+    const latest = await (await fetch("/api/latest")).json();
+    if (latest && latest.id) {
+      state.scan = latest;
+      state.findings = latest.findings || [];
+      updateScanBar(latest);
+      if (latest.state === "running") poll(latest.id);
+    }
+  } catch (error) {  }
+  render();
+  renderVerdict();
+}
+
+boot();
+
+```
+
+`ui/index.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GprzSS</title>
+<link rel="stylesheet" href="/ui/style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#3ddc97" stroke-width="2.2" stroke-linecap="round">
+        <path d="M3 12h4l2.5-6 3.5 13 2.5-7h5"/>
+      </svg>
+    </span>
+    <span class="brand-name">GPRZSS</span>
+    <span class="brand-ver" id="verLabel">v1.0</span>
+  </div>
+
+  <nav>
+    <div class="nav-group">
+      <button class="nav-item active" data-view="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Overview
+      </button>
+      <button class="nav-item" data-view="suspicious">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M12 9v4"/><circle cx="12" cy="16" r=".6" fill="currentColor"/></svg>
+        Suspicious Entries
+        <span class="nav-count" id="navSuspicious">0</span>
+      </button>
+      <button class="nav-item" data-view="fileactivity">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/></svg>
+        File Activity
+        <span class="nav-count" id="navFiles">0</span>
+      </button>
+      <button class="nav-item" data-view="system">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M8 21h8M12 17v4"/></svg>
+        System
+      </button>
+      <button class="nav-item" data-view="accounts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c.8-3.4 3.6-5.4 7-5.4s6.2 2 7 5.4"/></svg>
+        All Accounts
+      </button>
+      <button class="nav-item" data-view="minecraft">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>
+        Minecraft
+      </button>
+      <button class="nav-item" data-view="log">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16M4 10h16M4 15h11M4 20h7"/></svg>
+        Full Log
+      </button>
+    </div>
+  </nav>
+
+  <div class="sidebar-foot">
+    <div class="side-stat"><span>session</span><b id="footSession">idle</b></div>
+    <div class="side-stat"><span>modules</span><b id="footModules">12</b></div>
+    <div class="side-stat"><span>signatures</span><b id="footSigs">0</b></div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div>
+      <div class="page-title" id="pageTitle">Overview</div>
+    </div>
+    <span class="page-sub" id="pageSub">not scanned</span>
+    <div class="topbar-actions">
+      <span class="chip" id="chipWarn"><span class="dot"></span>warnings <b id="chipWarnN">0</b></span>
+      <span class="chip" id="chipDet"><span class="dot"></span>detections <b id="chipDetN">0</b></span>
+      <button class="btn btn-ghost" id="btnExport" title="Download the report">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg>
+        Export
+      </button>
+      <button class="btn btn-primary" id="btnScan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>
+        <span id="btnScanLabel">Run Scan</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="scanbar" id="scanbar">
+      <span class="module" id="scanModule"><b>IDLE</b> waiting for a scan</span>
+      <span class="progress" id="progressWrap"><i id="progressBar"></i></span>
+      <span class="page-sub" id="progressPct">0%</span>
+    </div>
+
+    <div class="view active" id="view-overview">
+      <div class="verdict" id="verdict">
+        <span class="verdict-badge" id="verdictBadge">NO DATA</span>
+        <div class="verdict-text">
+          <h2 id="verdictTitle">No scan yet</h2>
+          <p id="verdictSub">Press Run Scan to check this machine</p>
+        </div>
+        <div class="verdict-spacer"></div>
+      </div>
+
+      <div class="stat-strip">
+        <div class="stat"><div class="stat-label">Detected</div><div class="stat-value danger" id="statDetected">0</div></div>
+        <div class="stat"><div class="stat-label">Warnings</div><div class="stat-value warn" id="statWarnings">0</div></div>
+        <div class="stat"><div class="stat-label">Clean signals</div><div class="stat-value good" id="statClean">0</div></div>
+        <div class="stat"><div class="stat-label">Elapsed</div><div class="stat-value dim" id="statElapsed">0.0s</div></div>
+      </div>
+
+      <div class="panel-grid">
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Machine</h3>
+            <span class="spacer"></span>
+          </div>
+          <div class="rows" id="overviewMachine"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Top findings</h3>
+            <span class="count" id="topCount">0</span>
+            <span class="spacer"></span>
+          </div>
+          <div class="rows" id="overviewTop"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="view" id="view-suspicious">
+      <div class="panel-grid single">
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Detected and suspicious</h3>
+            <span class="count" id="suspiciousCount">0</span>
+            <span class="spacer"></span>
+          </div>
+          <input class="filter" id="filterSuspicious" placeholder="Filter by name, path, signature or module">
+          <div class="rows" id="rowsSuspicious"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="view" id="view-fileactivity">
+      <div class="panel-grid single">
+        <section class="panel">
+          <div class="panel-head">
+            <h3>File and execution artefacts</h3>
+            <span class="count" id="fileCount">0</span>
+            <span class="spacer"></span>
+          </div>
+          <input class="filter" id="filterFiles" placeholder="Filter artefacts">
+          <div class="rows" id="rowsFiles"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="view" id="view-system">
+      <div class="panel-grid single">
+        <section class="panel">
+          <div class="panel-head"><h3>System and services</h3><span class="spacer"></span></div>
+          <div class="rows" id="rowsSystem"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="view" id="view-accounts">
+      <div class="panel-grid single">
+        <section class="panel">
+          <div class="panel-head"><h3>Accounts on this machine</h3><span class="spacer"></span></div>
+          <div class="rows" id="rowsAccounts"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="view" id="view-minecraft">
+      <div class="panel-grid single">
+        <section class="panel">
+          <div class="panel-head"><h3>Minecraft install</h3><span class="spacer"></span></div>
+          <div class="rows" id="rowsMinecraft"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="view" id="view-log">
+      <div class="panel-grid single">
+        <section class="panel">
+          <div class="panel-head"><h3>Every finding, unsorted</h3><span class="count" id="logCount">0</span><span class="spacer"></span></div>
+          <div class="rows" id="rowsLog"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="drawer-scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <h3 id="drawerTitle">Detail</h3>
+    <button class="drawer-close" id="drawerClose" aria-label="Close">&times;</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script src="/ui/app.js"></script>
+</body>
+</html>
+
+```
+
+`ui/style.css`:
+
+```css
+
+
+:root {
+  --bg: #08090a;
+  --surface: #0e1112;
+  --surface-2: #131718;
+  --surface-3: #191e20;
+  --line: #1e2426;
+  --line-soft: #171c1e;
+  --text: #dbe2e5;
+  --text-dim: #9aa6ab;
+  --muted: #66737a;
+  --accent: #3ddc97;
+  --accent-dim: #1f5f47;
+  --warn: #edb63c;
+  --danger: #f2585f;
+  --info: #7b93ff;
+  --radius: 4px;
+  --mono: "JetBrains Mono", "Cascadia Mono", "Consolas", ui-monospace, monospace;
+  --sans: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --sidebar: 208px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: grid;
+  grid-template-columns: var(--sidebar) 1fr;
+  overflow: hidden;
+}
+
+button, input, select { font-family: inherit; font-size: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: none; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #20282a; border-radius: 6px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: #2b3639; }
+
+.sidebar {
+  background: #0a0c0d;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0 12px;
+  overflow-y: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 16px 18px;
+}
+
+.brand-mark {
+  width: 24px; height: 24px;
+  display: grid; place-items: center;
+  border: 1px solid var(--accent-dim);
+  border-radius: 3px;
+  background: linear-gradient(150deg, #10301f, #0a0c0d);
+  flex: none;
+}
+.brand-mark svg { width: 13px; height: 13px; }
+
+.brand-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+}
+.brand-ver {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  margin-left: auto;
+}
+
+.nav-group { padding: 0 8px; margin-bottom: 4px; }
+
+.nav-label {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #4d585d;
+  padding: 12px 10px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 3px;
+  color: var(--text-dim);
+  text-align: left;
+  font-size: 12.5px;
+  position: relative;
+  transition: background .12s, color .12s;
+}
+
+.nav-item:hover { background: var(--surface-2); color: var(--text); }
+
+.nav-item.active {
+  background: linear-gradient(90deg, rgba(61, 220, 151, .12), rgba(61, 220, 151, .02));
+  color: var(--accent);
+}
+.nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 6px; bottom: 6px;
+  width: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.nav-item svg { width: 14px; height: 14px; opacity: .8; flex: none; }
+
+.nav-count {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  color: var(--text-dim);
+}
+.nav-count.hot { background: rgba(242, 88, 95, .16); color: #ff8b90; }
+.nav-count.warm { background: rgba(237, 182, 60, .14); color: var(--warn); }
+
+.sidebar-foot {
+  margin-top: auto;
+  padding: 12px 16px 0;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.side-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+.side-stat b { color: var(--text-dim); font-weight: 500; }
+
+.main { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+
+.topbar {
+  height: 56px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+  background: rgba(10, 12, 13, .8);
+  backdrop-filter: blur(6px);
+  flex: none;
+}
+
+.page-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.page-sub {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--mono);
+  margin-left: 2px;
+}
+
+.topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text-dim);
+}
+.chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+.chip.warn { border-color: rgba(237, 182, 60, .3); color: var(--warn); background: rgba(237, 182, 60, .06); }
+.chip.warn .dot { background: var(--warn); }
+.chip.bad { border-color: rgba(242, 88, 95, .3); color: #ff8b90; background: rgba(242, 88, 95, .07); }
+.chip.bad .dot { background: var(--danger); }
+.chip.good { border-color: rgba(61, 220, 151, .28); color: var(--accent); background: rgba(61, 220, 151, .06); }
+.chip.good .dot { background: var(--accent); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  transition: border-color .12s, background .12s, transform .06s;
+}
+.btn:hover { border-color: #2c3639; background: var(--surface-3); }
+.btn:active { transform: translateY(1px); }
+.btn svg { width: 13px; height: 13px; }
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #04150e;
+  font-weight: 600;
+}
+.btn-primary:hover { background: #4ce8a4; border-color: #4ce8a4; }
+.btn-primary:disabled { opacity: .55; cursor: default; transform: none; }
+.btn-ghost { background: transparent; }
+
+.content { flex: 1; overflow-y: auto; padding: 18px 20px 40px; }
+.view { display: none; }
+.view.active { display: block; }
+
+.scanbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  margin-bottom: 16px;
+}
+.scanbar .module {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text-dim);
+  min-width: 180px;
+}
+.scanbar .module b { color: var(--accent); font-weight: 500; }
+
+.progress {
+  flex: 1;
+  height: 3px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  transition: width .25s ease;
+  box-shadow: 0 0 8px rgba(61, 220, 151, .5);
+}
+.progress.done i { background: var(--accent); }
+
+.verdict {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--muted);
+  border-radius: var(--radius);
+  background: var(--surface);
+  margin-bottom: 16px;
+}
+.verdict.detected { border-left-color: var(--danger); background: linear-gradient(90deg, rgba(242, 88, 95, .07), var(--surface) 40%); }
+.verdict.warning { border-left-color: var(--warn); background: linear-gradient(90deg, rgba(237, 182, 60, .06), var(--surface) 40%); }
+.verdict.clean { border-left-color: var(--accent); background: linear-gradient(90deg, rgba(61, 220, 151, .06), var(--surface) 40%); }
+
+.verdict-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .14em;
+  padding: 4px 8px;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+}
+.verdict.detected .verdict-badge { color: #ff8b90; }
+.verdict.warning .verdict-badge { color: var(--warn); }
+.verdict.clean .verdict-badge { color: var(--accent); }
+
+.verdict-text h2 { margin: 0 0 3px; font-size: 14px; font-weight: 600; }
+.verdict-text p { margin: 0; font-size: 11.5px; color: var(--muted); font-family: var(--mono); }
+.verdict-spacer { flex: 1; }
+
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stat {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 12px 14px;
+}
+.stat-label {
+  font-size: 9.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.stat-value { font-size: 20px; font-weight: 600; font-family: var(--mono); letter-spacing: -0.02em; }
+.stat-value.danger { color: var(--danger); }
+.stat-value.warn { color: var(--warn); }
+.stat-value.good { color: var(--accent); }
+.stat-value.dim { color: var(--text-dim); }
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+.panel-grid.single { grid-template-columns: 1fr; }
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.panel-head h3 {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+.panel-head .count {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+.panel-head .spacer { flex: 1; }
+
+.filter {
+  width: 100%;
+  padding: 6px 10px;
+  margin: 10px 14px 0;
+  width: calc(100% - 28px);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-size: 11.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .12s;
+}
+.filter::placeholder { color: #4d585d; }
+.filter:focus { border-color: var(--accent-dim); }
+
+.rows { padding: 8px; overflow-y: auto; max-height: 62vh; }
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  transition: background .1s, border-color .1s;
+  width: 100%;
+  text-align: left;
+  position: relative;
+}
+.row:hover { background: var(--surface-2); border-color: var(--line); }
+
+.row-sev {
+  width: 2px;
+  align-self: stretch;
+  border-radius: 2px;
+  background: var(--line);
+  flex: none;
+}
+.row.sev-detected .row-sev { background: var(--danger); }
+.row.sev-warning .row-sev { background: var(--warn); }
+.row.sev-clean .row-sev { background: var(--accent); }
+.row.sev-info .row-sev { background: #35424a; }
+
+.row-body { flex: 1; min-width: 0; }
+.row-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 3px;
+  overflow-wrap: anywhere;
+}
+.row-detail {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: #5d6b72;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.row.sev-detected .row-title { color: #ffdada; }
+
+.row-tools { display: flex; align-items: center; gap: 6px; flex: none; }
+
+.tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .09em;
+  padding: 2px 6px;
+  border-radius: 2px;
+  border: 1px solid;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tag.detected { color: #ff8b90; border-color: rgba(242, 88, 95, .35); background: rgba(242, 88, 95, .09); }
+.tag.warning { color: var(--warn); border-color: rgba(237, 182, 60, .3); background: rgba(237, 182, 60, .08); }
+.tag.clean { color: var(--accent); border-color: rgba(61, 220, 151, .28); background: rgba(61, 220, 151, .07); }
+.tag.info { color: #8fa3b0; border-color: var(--line); background: var(--surface-2); }
+
+.detail-btn {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  border: 1px solid #2b3b52;
+  background: rgba(123, 147, 255, .1);
+  color: #9db0ff;
+  white-space: nowrap;
+  transition: background .1s;
+}
+.detail-btn:hover { background: rgba(123, 147, 255, .2); }
+
+.empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+.empty .glyph {
+  width: 26px; height: 26px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  display: grid; place-items: center;
+  color: #3c474d;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+table.data th {
+  text-align: left;
+  font-size: 9.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+  position: sticky;
+  top: 0;
+}
+table.data td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: top;
+}
+table.data td.mono { font-family: var(--mono); font-size: 10.5px; color: var(--text-dim); overflow-wrap: anywhere; }
+table.data tr:hover td { background: var(--surface-2); }
+
+.drawer-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .16s;
+  z-index: 40;
+}
+.drawer-scrim.open { opacity: 1; pointer-events: auto; }
+
+.drawer {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 480px;
+  max-width: 92vw;
+  background: #0b0e0f;
+  border-left: 1px solid var(--line);
+  transform: translateX(100%);
+  transition: transform .2s cubic-bezier(.3, .8, .3, 1);
+  z-index: 41;
+  display: flex;
+  flex-direction: column;
+}
+.drawer.open { transform: translateX(0); }
+
+.drawer-head {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.drawer-head h3 { margin: 0; font-size: 14px; line-height: 1.4; }
+.drawer-close {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.drawer-close:hover { background: var(--surface-3); color: var(--text); }
+
+.drawer-body { padding: 16px 18px; overflow-y: auto; flex: 1; }
+
+.kv { display: grid; grid-template-columns: 110px 1fr; gap: 8px 12px; margin-bottom: 18px; }
+.kv dt { font-size: 10.5px; color: var(--muted); letter-spacing: .04em; }
+.kv dd { margin: 0; font-family: var(--mono); font-size: 11px; color: var(--text-dim); overflow-wrap: anywhere; }
+
+.section-label {
+  font-size: 9.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+pre.raw {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 12px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: #9fb0b8;
+  overflow-x: auto;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translate(-50%, 20px);
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 9px 16px;
+  border-radius: 3px;
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s, transform .18s;
+  z-index: 60;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 1080px) {
+  .panel-grid { grid-template-columns: 1fr; }
+  .stat-strip { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 760px) {
+  body { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+}
+
+```
