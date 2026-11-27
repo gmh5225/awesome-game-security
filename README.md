@@ -5397,6 +5397,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/klasscripts/ffs-explorer [Cross-platform PySide6 viewer for iOS/Android GrayKey and Cellebrite UFED Full File System ZIP extractions — stream-browse without unpacking, vendor metadata reconstruction, SQLite/WAL preview, and artefact shortcuts]
 - https://github.com/NotSkrib/error-pc-check [Open-source consensual Minecraft Java screenshare workflow: signed C# client agent, staff web panel, and Supabase backend for live forensic scans and severity-ranked cheat evidence reports]
 - https://github.com/abdulhamitakdag/hapiscanner [Open-source, consent-based Windows PC verification and Minecraft cheat-evidence scanner for server screenshares (MFT/USN, process modules, rule-based reports)]
+- https://github.com/GprzSS/GprzSS [Python Windows Minecraft screenshare scanner: processes, JVM heap, prefetch, Amcache, BAM, NTFS journal, browsers, and mods with severity-graded reports]
 - https://github.com/Architectography/Architectography [Windows PC forensic checker UI that launches NirSoft/System Informer utilities, live process search, and system summary for third-party cheat software triage]
 - https://github.com/Catusse2k/ScreenShare-Signatures [Signature database and docs for FiveM/Minecraft screenshare forensics covering DMA, kernel loaders, firmware hints, and cheat evasion artifacts]
 
