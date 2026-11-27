@@ -1894,6 +1894,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GOverlay](entities/goverlay.md) — DirectX 9–12 hook overlay framework (Electron/Qt/CEF/WPF composite; IPC + shared memory; companion/stats UI)
 - [GOWTool](entities/gow-tool.md) — God of War (2018) Windows asset extractor/converter (HitmanHimself; C++ Visual Studio; DirectXTex + glTF; proprietary format RE / modding; God of War 2018)
 - [GamePlug](entities/gameplug.md) — Multi-API (D3D9–12/Vulkan) proxy-DLL framework for ImGui overlays and game plugins on Windows (C++23; plugin API; x86/x64)
+- [Game Release Guard](entities/game-release-guard.md) — huangzhuzhu75-bit; multi-engine AI security skills + Python CLI/Tkinter GUI; Unity/Unreal C# editor adapters; backup/audit/staging/rollback; IL2CPP/native, Pak/IoStore, obfuscation, integrity/DRM, optional Steam wrap; authorized Windows/Steam pre-ship hardening (Game Develop / Game Engine Protection)
 - [GoodEye](entities/goodeye.md) — BEDaisy APC instrumentation kernel driver (BE per-thread APC callback RE; cheat / explore anticheat system:be)
 - [unturned-godot](entities/unturned-godot.md) — Godot 4.7 port: reverse-engineers Unturned Unity formats from Steam install (Game Engine / asset extraction)
 

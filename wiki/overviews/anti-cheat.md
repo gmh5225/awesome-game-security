@@ -680,6 +680,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__kli-ex.md
   - wiki/sources/descriptions/huntandhackett__process-cloning.md
   - wiki/sources/descriptions/huoji120__Etw-Syscall.md
+  - wiki/sources/descriptions/huangzhuzhu75-bit__game-release-guard.md
   - wiki/sources/descriptions/hotline1337__page_no_access.md
   - wiki/sources/descriptions/hotline1337__umium.md
   - wiki/sources/descriptions/haram__splendid_implanter.md
@@ -1625,6 +1626,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Educational AC curriculum:** [[anticheat-lab]] (Ogonx; six-month self-study track on deliberately vulnerable own-game builds—x64 ASM/C++ memory layout, RE tooling, server authority, statistical/client checks; Compiler Explorer + VS stack tracing; devlog; VM-only scope; Anti Cheat) complements guide-style labs such as [[minecraft-anticheat-docs]] and telemetry research stacks such as [[apex-anticheat-lab]]. (source: wiki/sources/descriptions/Ogonx__anticheat-lab.md) (source: wiki/sources/README-categories.md) Multi-track interactive lab corpus [[free-to-learn]] (itsHabib; JS/Python course modules + automated check harnesses; anti-cheat engineering I/II on server authority, replay, and integrity for an original toy game; plus time-travel debugging, firmware forensics, and adjacent systems tracks; Anti Cheat) extends that hands-on curriculum lane beside [[oficina-cheat-e-anticheat]]. (source: wiki/sources/descriptions/itsHabib__free-to-learn.md)
 
 **Pre-ship client memory audit:** [[anticheat-lab-senolbasyigit]] (senolbasyigit; Claude Code skill + Python; CE-style scan/filter/RW on SHA-256–guarded own dev builds via `devbuild.json`; documents exposed health/ammo/currency with server-side fix recommendations and regression tests; optional pywinauto RPA without memory reads; Open Source Anti Cheat System) for teams validating client value exposure before release beside QA clients such as [[anticheat-qa]] and curriculum labs such as [[anticheat-lab]] (Ogonx). (source: wiki/sources/descriptions/senolbasyigit__anticheat-lab.md)
+
+**Multi-engine Windows release hardening:** [[game-release-guard]] (huangzhuzhu75-bit; Python stdlib CLI/Tkinter GUI + AI skills; Unity/Unreal C# editor adapters; Godot/Cocos/GameMaker guides; off-project backup/audit/staging/rollback; IL2CPP/native inspection, UE Pak/IoStore crypto, obfuscation hooks, integrity/DRM checks, optional Steam wrap—authorized client hardening, not live AC) for indie PC/Steam pre-ship workflows beside build-time kits such as [[anti-reverse-engineer-anything]]. (source: wiki/sources/descriptions/huangzhuzhu75-bit__game-release-guard.md)
 
 **Authorized cheat-impact VM lab:** [[snare]] (MeuxyVex; Python 3.11; agentless KVM/QEMU Windows guest—baseline vs cheat differential host observations (memory, processes, kernel drivers, network); hook/injection/cross-process/driver detectors; YAML game profiles → JSON/HTML reports; planned LibVMI/DRAKVUF + Volatility 3/MemProcFS; early design; Open Source Anti Cheat System) for developers and small AC teams studying cheat behavior beside curriculum labs such as [[anticheat-lab]] and pre-ship audits such as [[anticheat-lab-senolbasyigit]]. (source: wiki/sources/descriptions/MeuxyVex__Snare.md)
 
