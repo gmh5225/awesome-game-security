@@ -4575,6 +4575,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VX-It](entities/vx-it.md) — Unreal decrypt for Veiled Experts (C/C++; cheat / game:veiled experts `[Decrypt]`)
 - [VxLang](entities/vxlang-page.md) — Windows x86-64/.NET binary protector (virtualization / flatten / anti-tamper; PE/DLL/SYS)
 
+- [X-Hair](entities/x-hair.md) — ybreakless Pure Rust cross-platform click-through FPS crosshair overlay (Windows/X11/Wayland; Raw Input/evdev; egui reticle studio; per-game weapon profiles, share codes, community catalog; no injection/hooks/game memory/graphics hooks; Cheat / overlay)
 - [x14.08-coverstory-blizzard](entities/x14-08-coverstory-blizzard.md) — WoW cheat / Warden bypass (loader hooks / RunScript; C++)
 - [x260-lenovo-opencore](entities/x260-lenovo-opencore.md) — ThinkPad X260 Hackintosh OpenCore EFI (macOS research host)
 - [x64-EXE-Packer](entities/x64-exe-packer.md) — PE X64 binary packer (Anti Cheat → Binary Packer)

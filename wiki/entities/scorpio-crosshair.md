@@ -18,7 +18,7 @@ CS2 share codes, per-game profiles, launcher-based game detection, raw-input aim
 
 ## Security posture
 
-Deliberately avoids **process handles**, **injection**, **hooks**, **memory reads**, and **synthetic input** so anti-cheat systems are less likely to flag the tool—an external visual aid that stays outside the game and AC **trust boundary**. Suits players who want a consistent crosshair and developers researching overlay design without touching the protected process. Compare [[crosshair-z]], [[iris-overlay]], and [[perfoverlay-supreme]]; apply [[frame-observation-boundary]] when triaging transparent HWND overlays. (source: wiki/sources/descriptions/Deikus-LXXVII__Scorpio-Crosshair.md)
+Deliberately avoids **process handles**, **injection**, **hooks**, **memory reads**, and **synthetic input** so anti-cheat systems are less likely to flag the tool—an external visual aid that stays outside the game and AC **trust boundary**. Suits players who want a consistent crosshair and developers researching overlay design without touching the protected process. Compare [[crosshair-z]], [[x-hair]], [[iris-overlay]], and [[perfoverlay-supreme]]; apply [[frame-observation-boundary]] when triaging transparent HWND overlays. (source: wiki/sources/descriptions/Deikus-LXXVII__Scorpio-Crosshair.md)
 
 ## Links
 
@@ -26,4 +26,4 @@ Deliberately avoids **process handles**, **injection**, **hooks**, **memory read
 
 ## Related
 
-[[crosshair-z]] · [[iris-overlay]] · [[perfoverlay-supreme]] · [[frame-observation-boundary]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[crosshair-z]] · [[x-hair]] · [[iris-overlay]] · [[perfoverlay-supreme]] · [[frame-observation-boundary]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
