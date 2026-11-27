@@ -1,0 +1,3540 @@
+Project Path: arc_thecommenter297_ObjectFlow_s5qf_nu6
+
+Source Tree:
+
+```txt
+arc_thecommenter297_ObjectFlow_s5qf_nu6
+└── ObjectFlow.py
+
+```
+
+`ObjectFlow.py`:
+
+```py
+# -*- coding: utf-8 -*-
+"""
+ObjectFlow 0.4.0-alpha.3
+Smart Semantic Xrefs for IDA Pro / Hex-Rays.
+
+Standalone IDAPython plugin.
+
+Features:
+    Local Xrefs
+    Cross Xrefs
+    Stable variable selection
+    Reaching definitions
+    Pointer and memory relationships
+    Trace evidence
+    Hot reload
+
+All inferred references are static MAY relationships.
+"""
+
+import runpy
+import traceback
+
+from pathlib import Path
+from types import SimpleNamespace
+from collections import defaultdict, deque
+
+import ida_idaapi as api
+import ida_hexrays as hr
+import ida_kernwin as kw
+import ida_funcs
+import ida_name
+import ida_lines
+import ida_ida
+import ida_bytes
+import idautils
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+
+VERSION = "0.4.0-alpha.3"
+
+SOURCE = Path(globals().get(
+    "__file__",
+    r"E:\IDA v9.1.250226\plugins\ObjectFlow.py"
+)).resolve()
+
+MAX_FUNCTIONS = 40
+MAX_OPS = 8000
+
+LOCAL = "Local Xrefs"
+CROSS = "Cross Xrefs"
+
+
+# ============================================================
+# UTILITIES
+# ============================================================
+
+def log(s):
+    print("[ObjectFlow] " + str(s))
+
+
+def flag(obj, name):
+    try:
+        v = getattr(obj, name, False)
+        return bool(v() if callable(v) else v)
+    except Exception:
+        return False
+
+
+def valid(ea):
+    return ea is not None and 0 <= ea < api.BADADDR
+
+
+def fname(ea):
+    return ida_funcs.get_func_name(ea) or "sub_%X" % ea
+
+
+def text(e, cf):
+    try:
+        return ida_lines.tag_remove(str(e.print1(cf)))
+    except Exception:
+        return "?"
+
+
+def width(e):
+    try:
+        n = int(e.type.get_size())
+        return n if 0 < n < 0x10000000 else None
+    except Exception:
+        return None
+
+
+def ptr(e):
+    return flag(e.type, "is_ptr")
+
+
+def array(e):
+    return flag(e.type, "is_array")
+
+
+def number(e):
+    try:
+        if e.op == hr.cot_cast:
+            n = number(e.x)
+        elif e.op == hr.cot_num:
+            n = int(e.numval())
+        else:
+            return None
+
+        w = width(e)
+
+        if n is None or not w or w > 8:
+            return None
+
+        n &= (1 << (8 * w)) - 1
+
+        if flag(e.type, "is_signed"):
+            if n >= 1 << (8 * w - 1):
+                n -= 1 << (8 * w)
+
+        return n
+
+    except Exception:
+        return None
+
+
+def length(e):
+    n = number(e)
+    return n if n is not None and n >= 0 else None
+
+
+def opcode(names):
+    return {
+        getattr(hr, "cot_" + n)
+        for n in names.split()
+        if hasattr(hr, "cot_" + n)
+    }
+
+
+MEMORY = opcode("ptr idx memptr memref")
+
+BINARY = opcode("""
+    add sub mul sdiv udiv smod umod
+    bor xor band shl sshr ushr
+    land lor eq ne
+    sge uge sle ule sgt ugt slt ult
+    fadd fsub fmul fdiv
+""")
+
+UNARY = opcode("neg fneg lnot bnot")
+
+COMPOUND = opcode("""
+    asgadd asgsub asgmul asgsdiv asgudiv
+    asgsmod asgumod asgbor asgband
+    asgxor asgshl asgsshr asgushr
+""")
+
+INCREMENT = opcode("""
+    preinc predec postinc postdec
+""")
+
+
+def calltarget(e):
+    x = e.x
+
+    while x.op == hr.cot_cast:
+        x = x.x
+
+    if x.op != hr.cot_obj:
+        return None
+
+    ea = int(x.obj_ea)
+    f = ida_funcs.get_func(ea)
+
+    if f and int(f.start_ea) == ea:
+        return ea
+
+    name = ida_name.get_name(ea) or ""
+
+    if flag(x.type, "is_func") or name.startswith("__imp_"):
+        return ea
+
+    return None
+
+
+def callname(ea):
+    if ea is None:
+        return "indirect call"
+
+    name = ida_name.get_name(ea) or fname(ea)
+    name = name.lstrip(".").split("@")[0]
+
+    for _ in range(4):
+        for pre in ("j_", "__imp_", "__libc_"):
+            if name.startswith(pre):
+                name = name[len(pre):]
+
+    name = name.lstrip("_")
+
+    for pre in ("isoc99_", "isoc23_"):
+        if name.startswith(pre):
+            name = name[len(pre):]
+
+    return name
+
+
+def internal(ea):
+    if ea is None:
+        return False
+
+    f = ida_funcs.get_func(ea)
+
+    return bool(
+        f and not (
+            f.flags & (
+                ida_funcs.FUNC_LIB |
+                ida_funcs.FUNC_THUNK
+            )
+        )
+    )
+
+
+# ============================================================
+# STABLE VARIABLE / EXPRESSION IDENTITY
+# ============================================================
+
+def exprkey(e, cf, depth=0):
+
+    f = int(cf.entry_ea)
+
+    if e.op == hr.cot_var:
+        return ("L", f, int(e.v.idx))
+
+    if e.op == hr.cot_obj:
+        return ("G", int(e.obj_ea))
+
+    if depth < 16:
+
+        if e.op == hr.cot_num:
+            return ("CONST", f, number(e))
+
+        if e.op == hr.cot_ptr:
+            return (
+                "DEREF", f,
+                exprkey(e.x, cf, depth + 1),
+                width(e)
+            )
+
+        if e.op in (hr.cot_memptr, hr.cot_memref):
+            return (
+                "FIELD", f, int(e.op),
+                exprkey(e.x, cf, depth + 1),
+                int(e.m), width(e)
+            )
+
+        if e.op == hr.cot_idx:
+            return (
+                "INDEX", f,
+                exprkey(e.x, cf, depth + 1),
+                exprkey(e.y, cf, depth + 1),
+                width(e)
+            )
+
+        if e.op == hr.cot_ref:
+            return (
+                "ADDRESS", f,
+                exprkey(e.x, cf, depth + 1)
+            )
+
+        if e.op == hr.cot_cast:
+            return (
+                "CAST", f, str(e.type),
+                exprkey(e.x, cf, depth + 1)
+            )
+
+        if e.op in BINARY:
+            return (
+                "EXPRESSION", f, int(e.op),
+                exprkey(e.x, cf, depth + 1),
+                exprkey(e.y, cf, depth + 1)
+            )
+
+    # Calls and unsupported expressions retain
+    # their individual CTree occurrence identities.
+
+    i = int(e.index)
+
+    if 0 <= i < 0x10000000:
+        return ("SITE", f, i, int(e.op))
+
+    return (
+        "SITE_FALLBACK", f,
+        int(e.ea), int(e.op), text(e, cf)
+    )
+
+
+# ============================================================
+# DATA-FLOW CORE
+# ============================================================
+
+IDENTITY = {
+    "assign",
+    "reaches",
+    "argument",
+    "return",
+    "cast",
+    "possible value",
+    "return destination",
+    "address value",
+    "pointer offset",
+    "may keep address"
+}
+
+WRITES = {
+    "DEF", "STORE", "WRITE", "COPY", "PARAM"
+}
+
+
+def overlap(x, n, y, m):
+    if n == 0 or m == 0:
+        return False
+
+    if x is None or y is None:
+        return True
+
+    return (
+        (n is None or y < x + n)
+        and (m is None or x < y + m)
+    )
+
+
+def addoff(x, y):
+    if x is None or y is None:
+        return None
+
+    z = x + y
+    return z if abs(z) <= 0x100000 else None
+
+
+class Engine:
+
+    def __init__(self, pw=8):
+
+        self.pw = pw
+        self.ops = {}
+        self.blocks = {}
+        self.pred = defaultdict(set)
+
+        self.entry = {}
+        self.roots = defaultdict(set)
+        self.points = defaultdict(set)
+
+        self.edges = defaultdict(set)
+        self.links = set()
+        self.calls = []
+
+        self.formals = {}
+        self.returns = defaultdict(list)
+        self.issues = []
+
+        self.reachable = set()
+        self.at = {}
+        self.capped = False
+
+        self.scanned = set()
+        self.needs = set()
+
+    def block(self, f):
+
+        b = len(self.blocks)
+        self.blocks[b] = (f, [])
+        return b
+
+    def jump(self, a, b):
+
+        if a is not None and b is not None:
+            self.pred[b].add(a)
+
+    def emit(self, b, kind, label, site, **kwargs):
+
+        n = len(self.ops)
+
+        data = dict(
+            kind=kind,
+            label=label,
+            site=site,
+            f=self.blocks[b][0],
+            direct=None,
+            base=None,
+            off=0,
+            size=None,
+            src=None,
+            copybase=None,
+            weak=False,
+            ptr=False,
+            seed=set()
+        )
+
+        data.update(kwargs)
+
+        self.ops[n] = SimpleNamespace(**data)
+        self.blocks[b][1].append(n)
+
+        if kind == "ALLOC":
+            self.ops[n].seed.add((("H", n), 0))
+
+        return n
+
+    def link(self, a, b, role, prop=False, off=0):
+
+        if a is not None and b is not None and a != b:
+            self.links.add((a, b, role, prop, off))
+
+    def edge(self, a, b, role):
+
+        if a != b:
+            self.edges[a, b].add(role)
+
+    def add(self, n, refs):
+
+        extra = set(refs) - self.points[n]
+        room = 48 - len(self.points[n])
+
+        if len(extra) > room:
+            self.capped = True
+            extra = set(
+                sorted(extra, key=repr)[:max(0, room)]
+            )
+
+        self.points[n].update(extra)
+        return bool(extra)
+
+    def loc(self, o):
+
+        if o.direct is not None:
+            return {(o.direct, o.off)}
+
+        return {
+            (obj, addoff(k, o.off))
+            for obj, k in self.points[o.base]
+        }
+
+    def kill(self, a, b):
+
+        return (
+            not b.weak
+            and a.direct is not None
+            and a.direct == b.direct
+            and a.off is not None
+            and b.off is not None
+            and a.size is not None
+            and b.size is not None
+            and b.off <= a.off
+            and a.off + a.size <= b.off + b.size
+        )
+
+    def reaching(self):
+
+        outs = {}
+        self.at = {}
+        self.reachable = set()
+
+        for _ in range(128):
+
+            changed = False
+
+            for b, (f, nodes) in self.blocks.items():
+
+                ps = [
+                    outs[p]
+                    for p in self.pred[b]
+                    if p in outs
+                ]
+
+                if not ps and b != self.entry.get(f):
+                    continue
+
+                state = set().union(*ps)
+
+                for n in nodes:
+
+                    self.at[n] = set(state)
+                    self.reachable.add(n)
+
+                    o = self.ops[n]
+
+                    if o.kind in WRITES:
+
+                        state = {
+                            d for d in state
+                            if not self.kill(self.ops[d], o)
+                        }
+
+                        state.add(n)
+
+                if b not in outs or outs[b] != state:
+                    outs[b] = state
+                    changed = True
+
+            if not changed:
+                return
+
+        self.capped = True
+
+    def defs(self, n, locations, size):
+
+        return {
+            d for d in (
+                self.at.get(n, set())
+                | self.external.get(self.ops[n].f, set())
+            )
+
+            if any(
+                a == c
+                and overlap(b, size, e, self.ops[d].size)
+
+                for a, b in locations
+                for c, e in self.loc(self.ops[d])
+            )
+        }
+
+    def ptrdefs(
+        self, n, locations, size,
+        seen=frozenset()
+    ):
+
+        if (
+            n in seen
+            or len(seen) >= 8
+            or size != self.pw
+        ):
+            return set()
+
+        result = set()
+
+        for d in self.defs(n, locations, size):
+
+            o = self.ops[d]
+
+            for a, b in locations:
+
+                for c, e in self.loc(o):
+
+                    if a != c:
+                        continue
+
+                    if o.kind == "COPY":
+
+                        rel = (
+                            b - e
+                            if b is not None and e is not None
+                            else None
+                        )
+
+                        if rel is not None:
+
+                            if rel < 0:
+                                continue
+
+                            if (
+                                o.size is not None
+                                and rel + size > o.size
+                            ):
+                                continue
+
+                        src = {
+                            (obj, addoff(k, rel))
+                            for obj, k in self.points[o.copybase]
+                        }
+
+                        result.update(
+                            self.ptrdefs(
+                                d, src, size, seen | {n}
+                            )
+                        )
+
+                    elif o.size == size and (
+                        b == e or b is None or e is None
+                    ):
+
+                        result.update(self.points[d])
+
+        return result
+
+    def solve(self):
+
+        # Interprocedural argument and return binding.
+
+        for f, result, args, site in self.calls:
+
+            if f in self.formals:
+
+                for a, p in zip(args, self.formals[f]):
+                    self.link(a, p, "argument", True)
+
+                for r in self.returns[f]:
+                    self.link(r, result, "return", True)
+
+            else:
+
+                for a in args:
+                    self.link(a, site, "use")
+
+        self.reaching()
+
+        writes = {
+            n for n in self.reachable
+            if self.ops[n].kind in WRITES
+        }
+
+        self.external = {
+            f: {
+                n for n in writes
+                if self.ops[n].f != f
+            }
+            for f in self.entry
+        }
+
+        for n, o in self.ops.items():
+            self.add(n, o.seed)
+
+        # Points-to fixed point.
+
+        for phase in range(5):
+
+            for _ in range(64):
+
+                changed = False
+
+                for a, b, _, prop, off in self.links:
+
+                    if (
+                        prop
+                        and a in self.reachable
+                        and b in self.reachable
+                    ):
+
+                        changed |= self.add(
+                            b,
+                            [
+                                (obj, addoff(k, off))
+                                for obj, k in self.points[a]
+                            ]
+                        )
+
+                for n in self.reachable:
+
+                    o = self.ops[n]
+
+                    if o.kind == "ADDR":
+
+                        changed |= self.add(
+                            n, self.loc(o)
+                        )
+
+                    elif o.kind == "LOAD":
+
+                        changed |= self.add(
+                            n,
+                            self.ptrdefs(
+                                n, self.loc(o), o.size
+                            )
+                        )
+
+                if not changed:
+                    break
+
+            else:
+                self.capped = True
+
+            if phase == 4:
+                break
+
+            # Symbolic origins for unresolved pointers.
+
+            changed = False
+
+            for n in self.reachable:
+
+                o = self.ops[n]
+
+                if self.points[n]:
+                    continue
+
+                if not (o.ptr or n in self.needs):
+                    continue
+
+                if o.kind == "LOAD":
+
+                    loc = self.loc(o)
+
+                    if loc and not self.defs(n, loc, o.size):
+
+                        changed |= self.add(
+                            n,
+                            [
+                                (("U", obj, k), 0)
+                                for obj, k in loc
+                            ]
+                        )
+
+                elif o.kind in (
+                    "PARAM", "CALL", "UNKNOWN"
+                ):
+
+                    changed |= self.add(
+                        n, {(("U", n), 0)}
+                    )
+
+            if not changed:
+                break
+
+        # Materialize relationships.
+
+        for a, b, role, _, _ in self.links:
+
+            if (
+                a in self.reachable
+                and b in self.reachable
+            ):
+
+                self.edge(a, b, role)
+
+        for n in self.reachable:
+
+            o = self.ops[n]
+
+            if o.kind in ("LOAD", "CONTENT"):
+
+                for d in self.defs(
+                    n, self.loc(o), o.size
+                ):
+
+                    self.edge(
+                        d, n,
+                        "content" if o.kind == "CONTENT"
+                        else "reaches"
+                    )
+
+            elif o.kind == "COPY":
+
+                for d in self.defs(
+                    n, self.points[o.copybase], o.size
+                ):
+
+                    self.edge(d, n, "copied content")
+
+        # Multiple address expressions referring to
+        # the same definite storage location.
+
+        groups = defaultdict(list)
+
+        for n in self.reachable:
+
+            o = self.ops[n]
+
+            if (
+                o.kind == "ADDR"
+                and o.direct is not None
+                and o.off is not None
+            ):
+
+                groups[o.direct, o.off].append(n)
+
+        for ns in groups.values():
+
+            ns.sort()
+
+            for n in ns[1:]:
+                self.edge(ns[0], n, "address value")
+
+        return self
+
+    def trace(self, key, rootf, cross):
+
+        # All occurrences of the selected variable
+        # are roots, rather than the clicked occurrence.
+
+        seeds = sorted(
+            n for n in self.roots.get(key, ())
+            if cross or self.ops[n].f == rootf
+        )
+
+        inc = defaultdict(dict)
+        out = defaultdict(dict)
+
+        for (a, b), roles in self.edges.items():
+
+            inc[b][a] = roles
+            out[a][b] = roles
+
+        paths = {
+            n: [(n, "selected variable/expression")]
+            for n in seeds
+        }
+
+        todo = deque(
+            (n, d, paths[n])
+            for n in seeds
+            if n in self.reachable
+            for d in ("in", "out")
+        )
+
+        visited = set()
+
+        while todo:
+
+            n, d, path = todo.popleft()
+
+            if (n, d) in visited:
+                continue
+
+            visited.add((n, d))
+
+            if len(visited) > 30000:
+                self.capped = True
+                break
+
+            graph = inc if d == "in" else out
+
+            for b, roles in sorted(graph[n].items()):
+
+                if not cross and self.ops[b].f != rootf:
+                    continue
+
+                if self.ops[b].kind == "CONST":
+                    continue
+
+                role = " / ".join(sorted(roles))
+
+                p = path + [
+                    (
+                        b,
+                        ("origin: " if d == "in" else "")
+                        + role
+                    )
+                ]
+
+                if b not in paths or len(p) < len(paths[b]):
+                    paths[b] = p
+
+                todo.append((b, d, p))
+
+                # Follow sibling aliases through
+                # value-preserving origins only.
+
+                if d == "in" and roles & IDENTITY:
+
+                    if (
+                        (
+                            not self.points[n]
+                            and not self.points[b]
+                        )
+                        or self.points[n] & self.points[b]
+                    ):
+
+                        todo.append((b, "out", p))
+
+        return paths, set(seeds)
+
+
+# ============================================================
+# CTREE EXTRACTION
+# ============================================================
+
+class Extractor:
+
+    def __init__(self, m, cf):
+
+        self.m = m
+        self.cf = cf
+        self.f = int(cf.entry_ea)
+
+        self.lv = cf.get_lvars()
+
+        self.b = m.block(self.f)
+        m.entry[self.f] = self.b
+
+        self.site = (self.f, fname(self.f) + "()")
+
+        self.globals = set()
+        self.callees = set()
+
+        self.breaks = []
+        self.continues = []
+        self.labels = {}
+        self.gotos = []
+
+        m.formals[self.f] = []
+
+        for i in cf.argidx:
+
+            i = int(i)
+            v = self.lv[i]
+
+            try:
+                t = v.type()
+                w = int(t.get_size())
+
+                if not 0 < w < 0x10000000:
+                    w = None
+
+                is_pointer = flag(t, "is_ptr")
+
+            except Exception:
+                w = None
+                is_pointer = False
+
+            k = ("L", self.f, i)
+
+            n = m.emit(
+                self.b,
+                "PARAM",
+                str(v.name),
+
+                (self.f, "parameter " + str(v.name)),
+
+                direct=k,
+                size=w,
+                ptr=is_pointer
+            )
+
+            m.formals[self.f].append(n)
+            m.roots[k].add(n)
+
+    def new(self):
+        return self.m.block(self.f)
+
+    def issue(self, s):
+        self.m.issues.append(fname(self.f) + ": " + s)
+
+    def remember(self, e, n):
+
+        if n is not None:
+            self.m.roots[exprkey(e, self.cf)].add(n)
+
+        return n
+
+    def emit(
+        self, e, kind,
+        label=None,
+        remember=True,
+        **kwargs
+    ):
+
+        n = self.m.emit(
+            self.b,
+            kind,
+            text(e, self.cf) if label is None else label,
+            self.site,
+            **kwargs
+        )
+
+        if remember:
+            self.remember(e, n)
+
+        return n
+
+    def expression(self, e, prefix="", ea=None):
+
+        if e is None or e.op == hr.cot_empty:
+            return None
+
+        address = int(e.ea)
+
+        if not valid(address):
+            address = ea if valid(ea) else self.f
+
+        old = self.site
+
+        self.site = (
+            address,
+            prefix + text(e, self.cf)
+        )
+
+        try:
+            return self.value(e)
+        finally:
+            self.site = old
+
+    def direct(self, e):
+
+        if e.op == hr.cot_var:
+            return ("L", self.f, int(e.v.idx))
+
+        if e.op == hr.cot_obj:
+
+            ea = int(e.obj_ea)
+
+            try:
+                string = ida_bytes.is_strlit(
+                    ida_bytes.get_full_flags(ea)
+                )
+            except Exception:
+                string = False
+
+            if not string:
+                self.globals.add(ea)
+
+            return ("G", ea)
+
+        return None
+
+    def location(self, e):
+
+        op = e.op
+
+        if op in (hr.cot_var, hr.cot_obj):
+            return self.direct(e), None, 0, None
+
+        if op == hr.cot_memref:
+
+            obj, base, off, index = self.location(e.x)
+
+            return (
+                obj, base,
+                addoff(off, int(e.m)),
+                index
+            )
+
+        if op == hr.cot_memptr:
+            return None, self.value(e.x), int(e.m), None
+
+        if op == hr.cot_ptr:
+            return None, self.value(e.x), 0, None
+
+        if op == hr.cot_idx:
+
+            base = self.value(e.x)
+            index = self.value(e.y)
+
+            i = number(e.y)
+            w = width(e)
+
+            off = i * w if i is not None and w else None
+
+            return None, base, off, index
+
+        return None, None, None, None
+
+    def memory(
+        self, e, kind,
+        src=None,
+        preserve=True
+    ):
+
+        obj, base, off, index = self.location(e)
+
+        if obj is None and base is None:
+            self.issue(
+                "Unresolved memory: " + text(e, self.cf)
+            )
+
+        n = self.emit(
+            e, kind,
+
+            direct=obj,
+            base=base,
+            off=off,
+            size=width(e),
+            ptr=ptr(e),
+
+            weak=(obj is None),
+            src=src
+        )
+
+        if obj is not None:
+            self.m.roots[obj].add(n)
+
+        if base is not None:
+
+            self.m.needs.add(base)
+
+            self.m.link(
+                base, n,
+                "write target"
+                if kind in ("DEF", "STORE")
+                else "address"
+            )
+
+        if index is not None:
+            self.m.link(index, n, "index")
+
+        if src is not None:
+
+            self.m.link(
+                src, n,
+
+                "assign" if preserve else "depends",
+
+                preserve
+            )
+
+        return n
+
+    def store(self, lhs, src, preserve=True):
+
+        kind = (
+            "DEF"
+            if lhs.op in (
+                hr.cot_var,
+                hr.cot_obj,
+                hr.cot_memref
+            )
+            else "STORE"
+        )
+
+        return self.memory(
+            lhs, kind, src, preserve
+        )
+
+    def value(self, e):
+
+        if e is None or e.op == hr.cot_empty:
+            return None
+
+        op = e.op
+
+        # Assignments.
+
+        if op == hr.cot_asg:
+
+            src = self.value(e.y)
+
+            n = self.store(
+                e.x,
+                src,
+                width(e.x) is not None
+                and width(e.x) == width(e.y)
+            )
+
+            return self.remember(e, n)
+
+        # Direct or indirect memory reads.
+
+        if op in (hr.cot_var, hr.cot_obj) or op in MEMORY:
+
+            return self.memory(
+                e, "ADDR" if array(e) else "LOAD"
+            )
+
+        # Address-of.
+
+        if op == hr.cot_ref:
+
+            n = self.memory(e.x, "ADDR")
+            return self.remember(e, n)
+
+        # Function calls.
+
+        if op == hr.cot_call:
+            return self.call(e)
+
+        # Constants.
+
+        if op in (hr.cot_num, hr.cot_str):
+            return self.emit(e, "CONST")
+
+        # Cast.
+
+        if op == hr.cot_cast:
+
+            src = self.value(e.x)
+
+            preserve = (
+                width(e) is not None
+                and width(e) == width(e.x)
+
+                and (
+                    ptr(e)
+                    or flag(e.type, "is_integral")
+                )
+
+                and (
+                    ptr(e.x)
+                    or flag(e.x.type, "is_integral")
+                )
+            )
+
+            if preserve and src is not None:
+
+                if ptr(e):
+                    self.m.needs.add(src)
+
+                return self.remember(e, src)
+
+            n = self.emit(e, "EXPR", ptr=ptr(e))
+            self.m.link(src, n, "depends")
+            return n
+
+        # Conditional expression.
+
+        if op == hr.cot_tern:
+
+            condition = self.value(e.x)
+
+            start = self.b
+
+            yes = self.new()
+            no = self.new()
+            join = self.new()
+
+            self.m.jump(start, yes)
+            self.m.jump(start, no)
+
+            self.b = yes
+            a = self.value(e.y)
+            self.m.jump(self.b, join)
+
+            self.b = no
+            b = self.value(e.z)
+            self.m.jump(self.b, join)
+
+            self.b = join
+
+            n = self.emit(e, "EXPR", ptr=ptr(e))
+
+            self.m.link(condition, n, "condition")
+
+            self.m.link(
+                a, n, "possible value",
+                width(e) is not None
+                and width(e) == width(e.y)
+            )
+
+            self.m.link(
+                b, n, "possible value",
+                width(e) is not None
+                and width(e) == width(e.z)
+            )
+
+            return n
+
+        # Short-circuit expressions.
+
+        if op in (hr.cot_land, hr.cot_lor):
+
+            a = self.value(e.x)
+
+            start = self.b
+            rhs = self.new()
+            join = self.new()
+
+            self.m.jump(start, rhs)
+            self.m.jump(start, join)
+
+            self.b = rhs
+            b = self.value(e.y)
+            self.m.jump(self.b, join)
+
+            self.b = join
+
+            n = self.emit(e, "EXPR")
+
+            self.m.link(a, n, "depends")
+            self.m.link(b, n, "depends")
+
+            return n
+
+        if op == hr.cot_comma:
+
+            self.value(e.x)
+            return self.remember(e, self.value(e.y))
+
+        # Compound assignment and increment.
+
+        if op in COMPOUND or op in INCREMENT:
+
+            old = self.value(e.x)
+
+            rhs = (
+                self.value(e.y)
+                if op in COMPOUND
+                else None
+            )
+
+            n = self.emit(e, "EXPR", ptr=ptr(e))
+
+            self.m.link(old, n, "depends")
+            self.m.link(rhs, n, "depends")
+
+            preserve = (
+                ptr(e.x)
+                and (
+                    op in INCREMENT
+                    or op in (
+                        hr.cot_asgadd,
+                        hr.cot_asgsub
+                    )
+                )
+            )
+
+            if preserve:
+
+                try:
+                    w = int(
+                        e.x.type.get_pointed_object().get_size()
+                    )
+                except Exception:
+                    w = 0
+
+                v = 1 if op in INCREMENT else number(e.y)
+
+                off = (
+                    w * v
+                    if v is not None and 0 < w < 0x10000000
+                    else None
+                )
+
+                if off is not None and op in (
+                    hr.cot_predec,
+                    hr.cot_postdec,
+                    hr.cot_asgsub
+                ):
+                    off = -off
+
+                self.m.link(
+                    old, n, "pointer offset", True, off
+                )
+
+            definition = self.store(e.x, n, preserve)
+
+            result = (
+                old
+                if op in (hr.cot_postinc, hr.cot_postdec)
+                else definition
+            )
+
+            return self.remember(e, result)
+
+        # Binary expressions.
+
+        if op in BINARY:
+
+            a = self.value(e.x)
+            b = self.value(e.y)
+
+            n = self.emit(e, "EXPR", ptr=ptr(e))
+
+            self.m.link(a, n, "depends")
+            self.m.link(b, n, "depends")
+
+            if op in (hr.cot_add, hr.cot_sub):
+
+                x, y = e.x, e.y
+                src = a
+
+                if (
+                    op == hr.cot_add
+                    and ptr(y)
+                    and not ptr(x)
+                ):
+                    x, y = y, x
+                    src = b
+
+                if not ptr(y) and (
+                    ptr(x) or width(x) == self.m.pw
+                ):
+
+                    w = 1
+
+                    if ptr(x):
+
+                        try:
+                            w = int(
+                                x.type.get_pointed_object()
+                                .get_size()
+                            )
+                        except Exception:
+                            w = 0
+
+                    v = number(y)
+
+                    off = (
+                        v * w
+                        if v is not None
+                        and 0 < w < 0x10000000
+                        else None
+                    )
+
+                    if op == hr.cot_sub and off is not None:
+                        off = -off
+
+                    self.m.link(
+                        src, n, "pointer offset", True, off
+                    )
+
+            return n
+
+        if op in UNARY:
+
+            a = self.value(e.x)
+            n = self.emit(e, "EXPR")
+
+            self.m.link(a, n, "depends")
+            return n
+
+        # Unsupported expressions remain visible,
+        # without inventing their semantics.
+
+        n = self.emit(e, "UNKNOWN", ptr=ptr(e))
+
+        self.issue(
+            "Unsupported expression: " + text(e, self.cf)
+        )
+
+        return n
+
+    # ========================================================
+    # LIBRARY SIDE EFFECTS
+    # ========================================================
+
+    def content(self, e, base, size=None, label=None):
+
+        n = self.emit(
+            e, "CONTENT",
+            label=label,
+            remember=False,
+            base=base,
+            size=size
+        )
+
+        if base is not None:
+            self.m.needs.add(base)
+            self.m.link(base, n, "read address")
+
+        return n
+
+    def write_effect(self, e, base, size=None, src=None):
+
+        n = self.emit(
+            e, "WRITE",
+            remember=False,
+            base=base,
+            size=size,
+            weak=True
+        )
+
+        if base is not None:
+            self.m.needs.add(base)
+            self.m.link(base, n, "write target")
+
+        if src is not None:
+            self.m.link(src, n, "content")
+
+        return n
+
+    def call(self, e):
+
+        target = calltarget(e)
+        name = callname(target)
+
+        args = list(e.a)
+        vals = [self.value(a) for a in args]
+
+        # Allocation.
+
+        if name in ("malloc", "calloc", "realloc"):
+
+            n = self.emit(e, "ALLOC", ptr=True)
+
+            for a in vals:
+                self.m.link(a, n, "allocation size")
+
+            if name == "realloc" and vals:
+
+                self.m.link(
+                    vals[0], n,
+                    "may keep address", True
+                )
+
+            return n
+
+        # Deallocation.
+
+        if name == "free":
+
+            n = self.emit(e, "FREE")
+
+            for a in vals:
+                self.m.link(a, n, "free")
+
+            return n
+
+        # strlen / strnlen.
+
+        if name in ("strlen", "strnlen") and vals:
+
+            size = (
+                length(args[1])
+                if name == "strnlen" and len(args) > 1
+                else None
+            )
+
+            n = self.content(e, vals[0], size)
+            return self.remember(e, n)
+
+        # String and memory comparisons.
+
+        if name in (
+            "strcmp", "strncmp", "memcmp"
+        ) and len(vals) >= 2:
+
+            size = length(args[2]) if len(args) > 2 else None
+
+            a = self.content(
+                e, vals[0], size,
+                "content(" + text(args[0], self.cf) + ")"
+            )
+
+            b = self.content(
+                e, vals[1], size,
+                "content(" + text(args[1], self.cf) + ")"
+            )
+
+            n = self.emit(e, "CALL")
+
+            self.m.link(a, n, "depends")
+            self.m.link(b, n, "depends")
+
+            return n
+
+        # scanf-family.
+        # Conservative potential writes.
+
+        if name in ("scanf", "sscanf", "fscanf"):
+
+            start = 1 if name == "scanf" else 2
+
+            source = None
+            effects = []
+
+            if name == "sscanf" and vals:
+                source = self.content(e, vals[0])
+
+            for i in range(start, len(vals)):
+
+                if ptr(args[i]) or array(args[i]):
+
+                    w = self.write_effect(
+                        e, vals[i], None, source
+                    )
+
+                    effects.append(w)
+                    self.remember(e, w)
+
+            n = self.emit(e, "CALL")
+
+            for w in effects:
+                self.m.link(w, n, "result")
+
+            return n
+
+        # read / recv.
+
+        if name in ("read", "recv") and len(vals) >= 3:
+
+            w = self.write_effect(
+                e, vals[1], length(args[2])
+            )
+
+            self.remember(e, w)
+
+            n = self.emit(e, "CALL")
+
+            self.m.link(w, n, "result")
+            return n
+
+        # fgets.
+
+        if name == "fgets" and len(vals) >= 2:
+
+            w = self.write_effect(
+                e, vals[0], length(args[1])
+            )
+
+            self.remember(e, w)
+
+            n = self.emit(e, "CALL", ptr=True)
+
+            self.m.link(
+                vals[0], n, "possible value", True
+            )
+
+            return n
+
+        # fread.
+
+        if name == "fread" and len(vals) >= 3:
+
+            a = length(args[1])
+            b = length(args[2])
+
+            size = (
+                a * b
+                if a is not None and b is not None
+                else None
+            )
+
+            w = self.write_effect(e, vals[0], size)
+
+            self.remember(e, w)
+
+            n = self.emit(e, "CALL")
+            self.m.link(w, n, "result")
+
+            return n
+
+        # memcpy / memmove.
+
+        if name in (
+            "memcpy", "memmove"
+        ) and len(vals) >= 3:
+
+            n = self.emit(
+                e, "COPY",
+
+                base=vals[0],
+                copybase=vals[1],
+
+                size=length(args[2]),
+                weak=True
+            )
+
+            for a in vals[:2]:
+                if a is not None:
+                    self.m.needs.add(a)
+
+            self.m.link(vals[0], n, "write target")
+            self.m.link(vals[1], n, "read address")
+
+            result = self.emit(e, "CALL", ptr=True)
+
+            self.m.link(
+                vals[0], result, "return destination", True
+            )
+
+            return result
+
+        # String copy.
+
+        if name in (
+            "strcpy", "strncpy"
+        ) and len(vals) >= 2:
+
+            size = length(args[2]) if len(args) > 2 else None
+
+            src = self.content(
+                e, vals[1], size,
+                "content(" + text(args[1], self.cf) + ")"
+            )
+
+            w = self.write_effect(
+                e, vals[0], size, src
+            )
+
+            self.remember(e, w)
+
+            result = self.emit(e, "CALL", ptr=True)
+
+            self.m.link(
+                vals[0], result,
+                "return destination", True
+            )
+
+            return result
+
+        # memset.
+
+        if name == "memset" and len(vals) >= 3:
+
+            w = self.write_effect(
+                e, vals[0], length(args[2]), vals[1]
+            )
+
+            self.remember(e, w)
+
+            result = self.emit(e, "CALL", ptr=True)
+
+            self.m.link(
+                vals[0], result,
+                "return destination", True
+            )
+
+            return result
+
+        # Functions consuming buffer contents.
+
+        if name in ("write", "send") and len(vals) >= 3:
+
+            r = self.content(
+                e, vals[1], length(args[2])
+            )
+
+            self.remember(e, r)
+
+            n = self.emit(e, "CALL")
+            self.m.link(r, n, "result")
+
+            return n
+
+        if name == "puts" and vals:
+
+            r = self.content(e, vals[0])
+            self.remember(e, r)
+
+            n = self.emit(e, "CALL")
+            self.m.link(r, n, "result")
+
+            return n
+
+        # Internal or opaque calls.
+
+        use = self.emit(e, "USE")
+        result = self.emit(e, "CALL", ptr=ptr(e))
+
+        if internal(target):
+
+            self.callees.add(target)
+
+            self.m.calls.append(
+                (target, result, tuple(vals), use)
+            )
+
+        else:
+
+            for a in vals:
+                self.m.link(a, use, "use")
+
+            if target is None:
+                self.m.link(
+                    self.value(e.x),
+                    use,
+                    "indirect target"
+                )
+
+        return result
+
+    # ========================================================
+    # STRUCTURED CONTROL FLOW
+    # ========================================================
+
+    def stmt(self, i):
+
+        if i is None:
+            return
+
+        try:
+
+            label = int(i.label_num)
+
+            if label >= 0:
+
+                b = self.new()
+                self.m.jump(self.b, b)
+
+                self.labels[label] = b
+                self.b = b
+
+        except Exception:
+            pass
+
+        op = i.op
+
+        if op == hr.cit_block:
+
+            for child in i.cblock:
+                self.stmt(child)
+
+            return
+
+        if op == hr.cit_expr:
+
+            self.expression(i.cexpr, ea=int(i.ea))
+            return
+
+        # If / else.
+
+        if op == hr.cit_if:
+
+            o = i.cif
+
+            self.expression(o.expr, "if ", int(i.ea))
+
+            start = self.b
+            yes = self.new()
+            no = self.new()
+            join = self.new()
+
+            self.m.jump(start, yes)
+            self.m.jump(start, no)
+
+            self.b = yes
+            self.stmt(o.ithen)
+            self.m.jump(self.b, join)
+
+            self.b = no
+
+            if o.ielse:
+                self.stmt(o.ielse)
+
+            self.m.jump(self.b, join)
+
+            self.b = join
+            return
+
+        # While / for / do-while.
+
+        if op in (hr.cit_while, hr.cit_for, hr.cit_do):
+
+            if op == hr.cit_for:
+
+                o = i.cfor
+                self.expression(o.init, "for init ")
+
+            elif op == hr.cit_while:
+                o = i.cwhile
+
+            else:
+                o = i.cdo
+
+            head = self.new()
+            body = self.new()
+            end = self.new()
+
+            step = self.new() if op == hr.cit_for else head
+
+            self.m.jump(
+                self.b,
+                body if op == hr.cit_do else head
+            )
+
+            self.b = head
+            self.expression(o.expr, "loop condition ")
+
+            self.m.jump(self.b, body)
+            self.m.jump(self.b, end)
+
+            self.breaks.append(end)
+            self.continues.append(step)
+
+            self.b = body
+            self.stmt(o.body)
+            self.m.jump(self.b, step)
+
+            if op == hr.cit_for:
+
+                self.b = step
+                self.expression(o.step, "for step ")
+                self.m.jump(self.b, head)
+
+            self.breaks.pop()
+            self.continues.pop()
+
+            self.b = end
+            return
+
+        # Switch.
+
+        if op == hr.cit_switch:
+
+            o = i.cswitch
+
+            self.expression(o.expr, "switch ", int(i.ea))
+
+            dispatch = self.b
+            end = self.new()
+
+            self.breaks.append(end)
+
+            previous = None
+
+            for case in o.cases:
+
+                b = self.new()
+
+                self.m.jump(dispatch, b)
+
+                if previous is not None:
+                    self.m.jump(previous, b)
+
+                self.b = b
+                self.stmt(case)
+
+                previous = self.b
+
+            self.m.jump(previous, end)
+            self.m.jump(dispatch, end)
+
+            self.breaks.pop()
+
+            self.b = end
+            return
+
+        # Return.
+
+        if op == hr.cit_return:
+
+            e = i.creturn.expr
+
+            src = self.expression(
+                e, "return ", int(i.ea)
+            )
+
+            n = self.m.emit(
+                self.b,
+
+                "RETURN",
+
+                "return " + text(e, self.cf),
+
+                (
+                    int(i.ea),
+                    "return " + text(e, self.cf)
+                )
+            )
+
+            self.m.link(src, n, "return", True)
+            self.m.returns[self.f].append(n)
+
+            self.b = self.new()
+            return
+
+        if op == hr.cit_break:
+
+            if self.breaks:
+                self.m.jump(self.b, self.breaks[-1])
+
+            self.b = self.new()
+            return
+
+        if op == hr.cit_continue:
+
+            if self.continues:
+                self.m.jump(self.b, self.continues[-1])
+
+            self.b = self.new()
+            return
+
+        if op == hr.cit_goto:
+
+            try:
+
+                self.gotos.append(
+                    (self.b, int(i.cgoto.label_num))
+                )
+
+            except Exception:
+                self.issue("Unresolved goto")
+
+            self.b = self.new()
+            return
+
+        if op != hr.cit_empty:
+            self.issue("Unsupported statement: %s" % op)
+
+    def run(self):
+
+        self.stmt(self.cf.body)
+
+        for b, label in self.gotos:
+
+            target = self.labels.get(label)
+
+            if target is None:
+                self.issue("Missing label %s" % label)
+            else:
+                self.m.jump(b, target)
+
+
+# ============================================================
+# INTERPROCEDURAL ANALYZER
+# ============================================================
+
+class Analyzer:
+
+    def run(self, root, cross=False):
+
+        m = Engine(
+            8 if ida_ida.inf_is_64bit() else 4
+        )
+
+        queue = deque([root])
+
+        while (
+            queue
+            and len(m.scanned) < MAX_FUNCTIONS
+            and len(m.ops) < MAX_OPS
+        ):
+
+            ea = queue.popleft()
+
+            if ea in m.scanned:
+                continue
+
+            m.scanned.add(ea)
+
+            try:
+
+                cf = hr.decompile(ea)
+
+                if not cf:
+                    raise RuntimeError("No CTree")
+
+                cf.get_pseudocode()
+
+                ex = Extractor(m, cf)
+                ex.run()
+
+                if not cross:
+                    continue
+
+                related = set(ex.callees)
+
+                # Shared global references.
+
+                for g in ex.globals:
+
+                    for xr in idautils.XrefsTo(g):
+
+                        f = ida_funcs.get_func(xr.frm)
+
+                        if f and internal(f.start_ea):
+                            related.add(int(f.start_ea))
+
+                # Callers.
+
+                for xr in idautils.CodeRefsTo(ea, 0):
+
+                    f = ida_funcs.get_func(xr)
+
+                    if f and internal(f.start_ea):
+                        related.add(int(f.start_ea))
+
+                queue.extend(
+                    sorted(related - m.scanned)
+                )
+
+            except Exception as exc:
+
+                m.issues.append(
+                    "%s: %s" % (fname(ea), exc)
+                )
+
+                traceback.print_exc()
+
+        if any(f not in m.scanned for f in queue):
+            m.capped = True
+
+        return m.solve()
+
+
+# ============================================================
+# SMART XREF RESULT COLLECTION
+# ============================================================
+
+KIND_PRIORITY = {
+    "FREE": 0,
+    "ALLOC": 1,
+    "COPY": 2,
+    "WRITE": 3,
+    "STORE": 4,
+    "CONTENT": 5,
+    "RETURN": 6,
+    "DEF": 7,
+    "PARAM": 8,
+    "USE": 9,
+    "LOAD": 10,
+    "ADDR": 11,
+    "CALL": 12,
+    "EXPR": 13,
+    "UNKNOWN": 14
+}
+
+KIND_LABELS = {
+    "FREE": "Free",
+    "ALLOC": "Alloc",
+    "COPY": "Copy",
+    "WRITE": "Write",
+    "STORE": "Store",
+    "CONTENT": "Read",
+    "RETURN": "Return",
+    "DEF": "Assign",
+    "PARAM": "Arg",
+    "USE": "Use",
+    "LOAD": "Read",
+    "ADDR": "Address",
+    "CALL": "Call",
+    "EXPR": "Expr",
+    "UNKNOWN": "Unknown"
+}
+
+
+def collect_rows(model, key, rootf, cross):
+
+    paths, direct = model.trace(key, rootf, cross)
+
+    groups = defaultdict(list)
+
+    for n in paths:
+
+        o = model.ops[n]
+
+        if o.kind == "CONST":
+            continue
+
+        if not cross and o.f != rootf:
+            continue
+
+        groups[
+            (o.f, o.site[0], o.site[1])
+        ].append(n)
+
+    rows = []
+
+    for (f, ea, code), ns in groups.items():
+
+        direct_nodes = [
+            n for n in ns if n in direct
+        ]
+
+        kinds = {
+            model.ops[n].kind for n in ns
+        }
+
+        flags = set()
+
+        for n in direct_nodes:
+
+            kind = model.ops[n].kind
+
+            if kind in WRITES:
+                flags.add("w")
+            elif kind == "ADDR":
+                flags.add("a")
+            else:
+                flags.add("r")
+
+        mode = "/".join(
+            c for c in ("r", "w", "a")
+            if c in flags
+        )
+
+        semantic = min(
+            kinds,
+            key=lambda k: KIND_PRIORITY.get(k, 99)
+        )
+
+        if direct_nodes:
+            ref = "D"
+        else:
+            ref = "I?"
+
+        kind = KIND_LABELS.get(semantic, semantic)
+
+        if mode:
+            kind = mode + " / " + kind
+
+        # Prefer an actual indirect witness when
+        # the selected statement has one.
+
+        witnesses = [
+            n for n in ns
+            if len(paths[n]) > 1
+        ]
+
+        witness = min(
+            witnesses or direct_nodes or ns,
+            key=lambda n: (
+                len(paths[n]),
+                KIND_PRIORITY.get(model.ops[n].kind, 99),
+                n
+            )
+        )
+
+        rows.append({
+            "f": f,
+            "ea": ea,
+            "code": code,
+            "direct": bool(direct_nodes),
+            "ref": ref,
+            "kind": kind,
+            "semantic": semantic,
+            "path": paths[witness],
+            "nodes": ns
+        })
+
+    return sorted(
+        rows,
+        key=lambda r: (
+            r["f"] != rootf,
+            r["f"],
+            r["ea"],
+            r["code"]
+        )
+    )
+
+
+# ============================================================
+# PSEUDOCODE SELECTION
+# ============================================================
+
+def active_vu():
+
+    try:
+
+        w = kw.get_current_widget()
+
+        if w:
+            return hr.get_widget_vdui(w)
+
+    except Exception:
+        pass
+
+    return None
+
+
+def capture(vu):
+
+    if not vu or not vu.cfunc:
+        return None
+
+    if not vu.get_current_item(hr.USE_KEYBOARD):
+        return None
+
+    cf = vu.cfunc
+    f = int(cf.entry_ea)
+
+    item = vu.item
+
+    # Declaration and every use share the same
+    # local-variable identity.
+
+    if item.citype == hr.VDI_LVAR:
+
+        for i, v in enumerate(cf.get_lvars()):
+
+            if v.name == item.l.name:
+
+                return (
+                    f,
+                    ("L", f, i),
+                    str(v.name)
+                )
+
+    if (
+        item.citype == hr.VDI_EXPR
+        and item.it
+        and flag(item.it, "is_expr")
+    ):
+
+        e = item.e
+
+        # Selecting a function token selects
+        # the surrounding call expression.
+
+        if e.op == hr.cot_obj and (
+            flag(e.type, "is_func")
+            or ida_funcs.get_func(e.obj_ea)
+        ):
+
+            try:
+
+                p = cf.body.find_parent_of(item.it)
+
+                if (
+                    p
+                    and flag(p, "is_expr")
+                    and p.op == hr.cot_call
+                ):
+
+                    e = p.cexpr
+
+            except Exception:
+                pass
+
+        return (
+            f,
+            exprkey(e, cf),
+            text(e, cf)
+        )
+
+    return None
+
+
+# ============================================================
+# XREF TABLE UI
+# ============================================================
+
+class XrefTable(QtWidgets.QTableWidget):
+
+    def __init__(self, owner):
+
+        super().__init__(0, 5, owner.parent)
+
+        self.owner = owner
+
+        self.setHorizontalHeaderLabels([
+            "Ref", "Type", "Address", "Function", "Text"
+        ])
+
+        self.setSelectionBehavior(
+            QtWidgets.QAbstractItemView.SelectRows
+        )
+
+        self.setSelectionMode(
+            QtWidgets.QAbstractItemView.SingleSelection
+        )
+
+        self.setEditTriggers(
+            QtWidgets.QAbstractItemView.NoEditTriggers
+        )
+
+        self.setShowGrid(False)
+        self.setWordWrap(False)
+        self.setAlternatingRowColors(False)
+        self.setSortingEnabled(False)
+
+        self.verticalHeader().hide()
+
+        # Inherit native IDA font.
+
+        f = QtGui.QFont(owner.parent.font())
+        hf = QtGui.QFont(f)
+
+        native_height = 0
+
+        try:
+
+            w = kw.find_widget("Functions")
+
+            if w:
+
+                q = kw.PluginForm.TWidgetToPyQtWidget(w)
+
+                views = (
+                    [q]
+                    if isinstance(
+                        q, QtWidgets.QAbstractItemView
+                    )
+                    else []
+                )
+
+                views += q.findChildren(
+                    QtWidgets.QAbstractItemView
+                )
+
+                if views:
+
+                    v = next(
+                        (x for x in views if x.isVisible()),
+                        views[0]
+                    )
+
+                    f = QtGui.QFont(v.font())
+                    hf = QtGui.QFont(f)
+
+                    h = (
+                        v.header()
+                        if isinstance(v, QtWidgets.QTreeView)
+                        else (
+                            v.horizontalHeader()
+                            if isinstance(v, QtWidgets.QTableView)
+                            else None
+                        )
+                    )
+
+                    if h:
+                        hf = QtGui.QFont(h.font())
+
+                    native_height = v.sizeHintForRow(0)
+
+        except Exception:
+            pass
+
+        self.setFont(f)
+
+        fm = QtGui.QFontMetrics(f)
+
+        vh = self.verticalHeader()
+
+        vh.setSectionResizeMode(
+            QtWidgets.QHeaderView.Fixed
+        )
+
+        vh.setMinimumSectionSize(1)
+
+        vh.setDefaultSectionSize(
+            max(fm.height() + 3, native_height)
+        )
+
+        # Native-like column headers.
+
+        h = self.horizontalHeader()
+
+        h.setFont(hf)
+
+        h.setDefaultAlignment(
+            QtCore.Qt.AlignLeft |
+            QtCore.Qt.AlignVCenter
+        )
+
+        h.setSectionsClickable(False)
+        h.setSectionsMovable(False)
+        h.setSortIndicatorShown(False)
+
+        h.setSectionResizeMode(
+            QtWidgets.QHeaderView.Interactive
+        )
+
+        h.setStretchLastSection(False)
+
+        self.setHorizontalScrollMode(
+            QtWidgets.QAbstractItemView.ScrollPerPixel
+        )
+
+        self.setColumnWidth(
+            0, max(34, fm.horizontalAdvance("Ref") + 15)
+        )
+
+        self.setColumnWidth(
+            1, max(65, fm.horizontalAdvance("r/w / Store") + 15)
+        )
+
+        self.setColumnWidth(
+            2, max(80, fm.horizontalAdvance("00000000") + 18)
+        )
+
+        self.setColumnWidth(
+            3, max(85, fm.horizontalAdvance("Function") + 18)
+        )
+
+        self.setColumnWidth(4, 260)
+
+        self.cellDoubleClicked.connect(
+            self.jump_to_row
+        )
+
+        self.itemSelectionChanged.connect(
+            self.selection_changed
+        )
+
+        self.setContextMenuPolicy(
+            QtCore.Qt.CustomContextMenu
+        )
+
+        self.customContextMenuRequested.connect(
+            self.context_menu
+        )
+
+    def populate(self, rows):
+
+        root = (
+            self.owner.selection[0]
+            if self.owner.selection
+            else self.owner.root
+        )
+
+        # Preserve deterministic address ordering.
+        # Never sort by Direct / Indirect.
+
+        ordered = sorted(
+            enumerate(rows),
+
+            key=lambda pair: (
+                pair[1]["f"] != root,
+                pair[1]["f"],
+
+                not valid(pair[1]["ea"]),
+
+                pair[1]["ea"]
+                if valid(pair[1]["ea"])
+                else 0,
+
+                pair[1]["code"],
+                pair[0]
+            )
+        )
+
+        self.setSortingEnabled(False)
+
+        old_block = self.blockSignals(True)
+
+        self.setUpdatesEnabled(False)
+
+        try:
+
+            self.clearContents()
+            self.setRowCount(len(ordered))
+
+            # Hide redundant function names
+            # in Local Xrefs mode.
+
+            self.setColumnHidden(
+                3,
+                self.owner.scope.currentText() == LOCAL
+            )
+
+            for visual_row, (original_index, row) in enumerate(ordered):
+
+                ea = row["ea"]
+
+                values = [
+                    row["ref"],
+                    row["kind"],
+
+                    "%08X" % ea
+                    if valid(ea)
+                    else "?",
+
+                    fname(row["f"]),
+                    row["code"]
+                ]
+
+                for col, value in enumerate(values):
+
+                    item = QtWidgets.QTableWidgetItem(value)
+
+                    # Keep the original record identity.
+                    # Navigation remains correct after ordering.
+
+                    item.setData(
+                        QtCore.Qt.UserRole,
+                        original_index
+                    )
+
+                    item.setToolTip(
+                        value + (
+                            "\nDirect occurrence"
+                            if row["direct"]
+                            else "\nPossible indirect relationship"
+                        )
+                    )
+
+                    self.setItem(
+                        visual_row,
+                        col,
+                        item
+                    )
+
+            self.resizeColumnToContents(2)
+
+            if not self.isColumnHidden(3):
+                self.resizeColumnToContents(3)
+
+            self.resizeColumnToContents(4)
+
+            self.setColumnWidth(
+                4,
+                max(180, min(1600, self.columnWidth(4)))
+            )
+
+        finally:
+
+            self.blockSignals(old_block)
+            self.setUpdatesEnabled(True)
+
+    def record(self, row):
+
+        if row < 0:
+            return None
+
+        item = self.item(row, 0)
+
+        if item is None:
+            return None
+
+        i = item.data(QtCore.Qt.UserRole)
+
+        if i is None:
+            return None
+
+        return self.owner.visible_rows[i]
+
+    def jump_to_row(self, row, col=0):
+
+        record = self.record(row)
+
+        if record:
+            self.owner.navigate(record)
+
+    def selection_changed(self):
+
+        row = self.record(self.currentRow())
+
+        if row:
+            self.owner.show_path(row)
+
+    def keyPressEvent(self, event):
+
+        if event.key() in (
+            QtCore.Qt.Key_Return,
+            QtCore.Qt.Key_Enter
+        ):
+
+            self.jump_to_row(self.currentRow())
+            return
+
+        super().keyPressEvent(event)
+
+    def context_menu(self, pos):
+
+        row = self.record(self.rowAt(pos.y()))
+
+        if not row:
+            return
+
+        menu = QtWidgets.QMenu(self)
+
+        jump = menu.addAction("Jump to reference")
+        copy = menu.addAction("Copy reference")
+        path = menu.addAction("Show trace path")
+
+        action = menu.exec_(
+            self.viewport().mapToGlobal(pos)
+        )
+
+        if action == jump:
+
+            self.owner.navigate(row)
+
+        elif action == copy:
+
+            QtWidgets.QApplication.clipboard().setText(
+                "%X  %s  %s" % (
+                    row["ea"],
+                    fname(row["f"]),
+                    row["code"]
+                )
+            )
+
+        elif action == path:
+
+            self.owner.path_toggle.setChecked(True)
+            self.owner.show_path(row)
+
+
+# ============================================================
+# HEX-RAYS CALLBACKS
+# ============================================================
+
+class Hooks(hr.Hexrays_Hooks):
+
+    def __init__(self, form):
+
+        super().__init__()
+        self.form = form
+
+    def curpos(self, vu):
+
+        if self.form.ready and not self.form.busy:
+            self.form.observe(vu)
+
+        return 0
+
+    def refresh_pseudocode(self, vu):
+
+        if not self.form.busy:
+            self.form.cache.clear()
+
+        return 0
+
+    def lvar_name_changed(self, *args):
+
+        self.form.cache.clear()
+        return 0
+
+    def lvar_type_changed(self, *args):
+
+        self.form.cache.clear()
+        return 0
+
+
+# ============================================================
+# MAIN PLUGIN PANEL
+# ============================================================
+
+class Form(kw.PluginForm):
+
+    def __init__(self, owner, root, settings=None):
+
+        super().__init__()
+
+        self.owner = owner
+        self.root = root
+        self.last_root = root
+
+        self.settings = settings or {}
+
+        # Older graph versions stored incompatible
+        # occurrence-based selection keys.
+
+        self.selection = (
+            self.settings.get("selection")
+            if self.settings.get("format") == 4
+            else None
+        )
+
+        self.ready = False
+        self.busy = False
+        self.capturing = False
+
+        self.cache = {}
+
+        self.model = None
+
+        self.rows = []
+        self.visible_rows = []
+
+        self.timer = None
+        self.hooks = None
+
+    def OnCreate(self, form):
+
+        self.parent = self.FormToPyQtWidget(form)
+
+        layout = QtWidgets.QVBoxLayout(self.parent)
+
+        layout.setContentsMargins(3, 3, 3, 3)
+        layout.setSpacing(3)
+
+        # Scope controls.
+
+        bar = QtWidgets.QHBoxLayout()
+        bar.setSpacing(3)
+
+        self.scope = QtWidgets.QComboBox()
+
+        self.scope.addItems([LOCAL, CROSS])
+
+        self.scope.setCurrentText(
+            self.settings.get("scope", LOCAL)
+        )
+
+        self.filter = QtWidgets.QComboBox()
+
+        self.filter.addItems([
+            "All",
+            "Direct",
+            "Indirect"
+        ])
+
+        bar.addWidget(self.scope, 1)
+        bar.addWidget(self.filter)
+
+        layout.addLayout(bar)
+
+        # Action controls.
+
+        actions = QtWidgets.QHBoxLayout()
+        actions.setSpacing(3)
+
+        refresh = QtWidgets.QToolButton()
+        refresh.setText("Refresh")
+
+        reload = QtWidgets.QToolButton()
+        reload.setText("Reload")
+
+        self.follow = QtWidgets.QCheckBox("Follow")
+
+        self.follow.setChecked(
+            self.settings.get("follow", True)
+        )
+
+        self.path_toggle = QtWidgets.QCheckBox("Path")
+
+        actions.addWidget(refresh)
+        actions.addWidget(reload)
+        actions.addWidget(self.follow)
+        actions.addWidget(self.path_toggle)
+        actions.addStretch()
+
+        layout.addLayout(actions)
+
+        # Current target.
+
+        self.title = QtWidgets.QLabel(
+            "Xrefs to: select a variable"
+        )
+
+        self.title.setWordWrap(True)
+
+        layout.addWidget(self.title)
+
+        # Xref table and optional evidence.
+
+        self.splitter = QtWidgets.QSplitter(
+            QtCore.Qt.Vertical
+        )
+
+        self.table = XrefTable(self)
+
+        self.splitter.addWidget(self.table)
+
+        self.path = QtWidgets.QPlainTextEdit()
+
+        self.path.setReadOnly(True)
+
+        self.path.setFont(
+            QtGui.QFontDatabase.systemFont(
+                QtGui.QFontDatabase.FixedFont
+            )
+        )
+
+        self.path.setMaximumBlockCount(300)
+
+        self.splitter.addWidget(self.path)
+
+        self.splitter.setStretchFactor(0, 4)
+        self.splitter.setStretchFactor(1, 1)
+
+        self.path.hide()
+
+        layout.addWidget(self.splitter, 1)
+
+        self.status = QtWidgets.QLabel(VERSION)
+        self.status.setWordWrap(True)
+
+        layout.addWidget(self.status)
+
+        self.legend = QtWidgets.QLabel(
+            "D: direct   I?: possible indirect"
+        )
+
+        layout.addWidget(self.legend)
+
+        # Signals.
+
+        refresh.clicked.connect(self.refresh)
+        reload.clicked.connect(self.reload)
+
+        self.scope.currentTextChanged.connect(
+            self.scope_changed
+        )
+
+        self.filter.currentTextChanged.connect(
+            self.apply_filter
+        )
+
+        self.follow.toggled.connect(
+            self.follow_changed
+        )
+
+        self.path_toggle.toggled.connect(
+            self.path.setVisible
+        )
+
+        # Local automatic updates are debounced.
+        # Cross analysis is always manual.
+
+        self.timer = QtCore.QTimer(self.parent)
+
+        self.timer.setSingleShot(True)
+        self.timer.setInterval(250)
+
+        self.timer.timeout.connect(self.auto_refresh)
+
+        self.hooks = Hooks(self)
+        self.hooks.hook()
+
+        self.ready = True
+
+        self.find_selection()
+
+        log("Panel created: " + VERSION)
+
+    # --------------------------------------------------------
+    # Selection management
+    # --------------------------------------------------------
+
+    def observe(self, vu, force=False):
+
+        if (
+            not self.ready
+            or self.busy
+            or self.capturing
+            or not vu
+            or not vu.cfunc
+        ):
+            return
+
+        if not force and not self.follow.isChecked():
+            return
+
+        self.capturing = True
+
+        try:
+            s = capture(vu)
+
+            if not s:
+                return
+
+            changed = (
+                self.selection is None
+                or self.selection[:2] != s[:2]
+            )
+
+            self.selection = s
+
+            self.root = s[0]
+            self.last_root = s[0]
+
+            self.title.setText(
+                "Xrefs to: %s()::%s" % (
+                    fname(s[0]),
+                    s[2]
+                )
+            )
+
+            # Same variable identity:
+            # preserve the existing results.
+
+            if not changed:
+                return
+
+            # Both scopes now support automatic refresh.
+
+            cross = (
+                self.scope.currentText() == CROSS
+            )
+
+            if cross:
+                self.clear_results()
+                self.status.setText(
+                    "Cross Xrefs: updating..."
+                )
+
+            self.timer.start(
+                450 if cross else 250
+            )
+
+        except Exception as exc:
+            log("Selection: " + str(exc))
+
+        finally:
+            self.capturing = False
+
+    def find_selection(self):
+
+        vu = active_vu()
+
+        if vu:
+
+            self.observe(vu, force=True)
+            return
+
+        if self.selection:
+
+            self.title.setText(
+                "Xrefs to: %s()::%s" % (
+                    fname(self.selection[0]),
+                    self.selection[2]
+                )
+            )
+
+            return
+
+        for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+
+            w = kw.find_widget("Pseudocode-" + c)
+
+            if not w:
+                continue
+
+            vu = hr.get_widget_vdui(w)
+
+            if (
+                vu and vu.cfunc
+                and int(vu.cfunc.entry_ea) == self.root
+            ):
+
+                self.observe(vu, force=True)
+                return
+
+    def follow_changed(self, checked):
+
+        if not self.ready:
+            return
+
+        if not checked:
+            self.timer.stop()
+            return
+
+        self.find_selection()
+
+        if self.selection:
+
+            cross = (
+                self.scope.currentText() == CROSS
+            )
+
+            self.timer.start(
+                450 if cross else 250
+            )
+
+    def scope_changed(self, scope):
+
+        if not self.ready:
+            return
+
+        self.timer.stop()
+        self.clear_results()
+
+        if not self.selection:
+            self.status.setText(
+                "Select a variable in pseudocode."
+            )
+            return
+
+        if self.follow.isChecked():
+
+            self.status.setText(
+                scope + ": updating..."
+            )
+
+            self.timer.start(
+                450 if scope == CROSS else 250
+            )
+
+        else:
+
+            # Explicit scope changes still work
+            # when automatic following is disabled.
+
+            self.build(False)
+
+    # --------------------------------------------------------
+    # Analysis
+    # --------------------------------------------------------
+
+    def auto_refresh(self):
+
+        if (
+            not self.ready
+            or self.busy
+            or not self.follow.isChecked()
+            or not self.selection
+        ):
+            return
+
+        # Reuse the cached model where available.
+        # Works for both Local and Cross Xrefs.
+
+        self.build(False)
+
+    def refresh(self, *_):
+
+        if not self.ready:
+            return
+
+        self.find_selection()
+        self.build(True)
+
+    def build(self, force=False):
+
+        if not self.ready or self.busy:
+            return
+
+        self.timer.stop()
+
+        if not self.selection:
+
+            self.status.setText(
+                "Select a variable in pseudocode."
+            )
+
+            return
+
+        f, key, label = self.selection
+
+        cross = self.scope.currentText() == CROSS
+
+        self.busy = True
+
+        try:
+
+            cachekey = (f, cross)
+
+            if force or cachekey not in self.cache:
+
+                self.status.setText("Analyzing...")
+
+                model = Analyzer().run(f, cross)
+
+                if len(self.cache) >= 4:
+                    self.cache.clear()
+
+                self.cache[cachekey] = model
+
+            else:
+
+                model = self.cache[cachekey]
+
+            self.model = model
+
+            self.rows = collect_rows(
+                model, key, f, cross
+            )
+
+            self.apply_filter()
+
+            if force:
+
+                log(
+                    "%s | %d refs | %d functions | %d issues"
+                    % (
+                        label,
+                        len(self.rows),
+                        len(model.scanned),
+                        len(model.issues)
+                    )
+                )
+
+                for issue in model.issues[:10]:
+                    log(issue)
+
+        except Exception:
+
+            traceback.print_exc()
+
+            self.clear_results()
+
+            self.status.setText(
+                "Analysis failed. See Output."
+            )
+
+        finally:
+
+            self.busy = False
+
+    # --------------------------------------------------------
+    # Xref table
+    # --------------------------------------------------------
+
+    def clear_results(self):
+
+        self.model = None
+
+        self.rows = []
+        self.visible_rows = []
+
+        self.table.populate([])
+        self.path.clear()
+
+    def apply_filter(self, *_):
+
+        mode = self.filter.currentText()
+
+        self.visible_rows = [
+            r for r in self.rows
+
+            if mode == "All"
+            or (mode == "Direct" and r["direct"])
+            or (mode == "Indirect" and not r["direct"])
+        ]
+
+        self.table.populate(self.visible_rows)
+        self.path.clear()
+
+        direct = sum(r["direct"] for r in self.rows)
+        indirect = len(self.rows) - direct
+
+        status = (
+            "%d refs: %d direct, %d indirect"
+            % (len(self.rows), direct, indirect)
+        )
+
+        if len(self.visible_rows) != len(self.rows):
+
+            status += " | %d shown" % len(
+                self.visible_rows
+            )
+
+        if self.model:
+
+            status += " | %d funcs" % len(
+                self.model.scanned
+            )
+
+            if self.model.capped:
+                status += " | analysis capped"
+
+            if self.model.issues:
+                status += " | %d issues" % len(
+                    self.model.issues
+                )
+
+            self.status.setToolTip(
+                VERSION
+                + "\n"
+                + "\n".join(self.model.issues[:20])
+            )
+
+        self.status.setText(status)
+
+    # --------------------------------------------------------
+    # Trace evidence
+    # --------------------------------------------------------
+
+    def show_path(self, row):
+
+        if self.model is None:
+            return
+
+        lines = [
+            "DIRECT REFERENCE"
+            if row["direct"]
+            else "POSSIBLE INDIRECT REFERENCE",
+
+            ""
+        ]
+
+        for n, role in row["path"]:
+
+            o = self.model.ops[n]
+            ea, statement = o.site
+
+            address = "%X" % ea if valid(ea) else "?"
+
+            lines.extend([
+                "%s | %s" % (address, fname(o.f)),
+                "    " + statement,
+                "    [" + o.label + "]",
+                "    " + role,
+                ""
+            ])
+
+        lines.append(
+            "Path follows static data-flow evidence."
+        )
+
+        lines.append(
+            "It does not establish a runtime execution order."
+        )
+
+        self.path.setPlainText("\n".join(lines))
+
+    def navigate(self, row):
+
+        # Preserve the current Xref target while
+        # navigating to one of its references.
+
+        previous = self.busy
+        self.busy = True
+
+        try:
+
+            self.timer.stop()
+
+            hr.open_pseudocode(row["f"], 0)
+
+            if valid(row["ea"]):
+                kw.jumpto(row["ea"])
+
+        except Exception:
+
+            traceback.print_exc()
+
+        finally:
+
+            self.busy = previous
+
+    # --------------------------------------------------------
+    # Hot reload
+    # --------------------------------------------------------
+
+    def snapshot(self):
+
+        return {
+            "format": 4,
+            "scope": self.scope.currentText(),
+            "follow": self.follow.isChecked(),
+            "selection": self.selection
+        }
+
+    def reload(self, *_):
+
+        self.owner.request_reload(
+            self.root,
+            self.snapshot()
+        )
+
+    def OnClose(self, form):
+
+        self.ready = False
+
+        if self.timer:
+            self.timer.stop()
+            self.timer = None
+
+        if self.hooks:
+            self.hooks.unhook()
+            self.hooks = None
+
+        self.cache.clear()
+
+        self.owner.form_closed(self)
+
+
+# ============================================================
+# STABLE PLUGIN OWNER
+# ============================================================
+
+class ObjectFlowPlugin(api.plugin_t):
+
+    flags = 0
+
+    comment = "Smart semantic cross references"
+
+    help = (
+        "Local Xrefs / Cross Xrefs / Trace evidence"
+    )
+
+    wanted_name = "ObjectFlow"
+    wanted_hotkey = "Ctrl-Alt-O"
+
+    def init(self):
+
+        if not hr.init_hexrays_plugin():
+            return api.PLUGIN_SKIP
+
+        self.form = None
+        self.form_class = Form
+
+        self.last_root = None
+
+        self.pending = None
+        self.reloading = False
+        self.terminating = False
+
+        log("Loaded " + VERSION)
+
+        return api.PLUGIN_KEEP
+
+    def open_form(self, root, settings=None):
+
+        self.last_root = root
+
+        self.form = self.form_class(
+            self, root, settings
+        )
+
+        self.form.Show(
+            "ObjectFlow",
+            options=kw.PluginForm.WOPN_TAB
+        )
+
+        self.form.refresh()
+
+    def run(self, arg):
+
+        if self.reloading or self.terminating:
+            return
+
+        vu = active_vu()
+        selection = None
+
+        if vu and vu.cfunc:
+
+            root = int(vu.cfunc.entry_ea)
+
+            try:
+                selection = capture(vu)
+            except Exception:
+                pass
+
+        else:
+
+            f = ida_funcs.get_func(kw.get_screen_ea())
+
+            root = (
+                int(f.start_ea)
+                if f else self.last_root
+            )
+
+        if root is None and self.form:
+            root = self.form.root
+
+        if root is None:
+
+            kw.warning(
+                "ObjectFlow: open pseudocode first."
+            )
+
+            return
+
+        if self.form is None:
+
+            self.open_form(
+                root,
+                {
+                    "format": 4,
+                    "selection": selection
+                }
+            )
+
+        else:
+
+            if self.form.root != root:
+                self.form.selection = None
+
+            self.form.root = root
+            self.form.last_root = root
+
+            if selection:
+                self.form.selection = selection
+
+            self.form.Show(
+                "ObjectFlow",
+                options=kw.PluginForm.WOPN_TAB
+            )
+
+            self.form.refresh()
+
+    def request_reload(self, root, settings):
+
+        if self.reloading or self.terminating:
+            return
+
+        self.reloading = True
+
+        QtCore.QTimer.singleShot(
+            0,
+            lambda: self.reload_source(root, settings)
+        )
+
+    def reload_source(self, root, settings):
+
+        if self.terminating:
+            return
+
+        try:
+
+            ns = runpy.run_path(str(SOURCE))
+            cls = ns["Form"]
+
+            if not issubclass(cls, kw.PluginForm):
+                raise TypeError("Invalid ObjectFlow Form")
+
+            self.pending = (
+                cls,
+                root,
+                settings,
+                ns.get("VERSION", "?")
+            )
+
+            if self.form:
+                self.form.Close(0)
+            else:
+                self.finish_reload()
+
+        except Exception:
+
+            self.pending = None
+            self.reloading = False
+
+            traceback.print_exc()
+
+            kw.warning(
+                "ObjectFlow reload failed. See Output."
+            )
+
+    def form_closed(self, form):
+
+        if self.form is form:
+            self.form = None
+
+        if self.pending and not self.terminating:
+
+            QtCore.QTimer.singleShot(
+                0, self.finish_reload
+            )
+
+    def finish_reload(self):
+
+        if not self.pending or self.terminating:
+
+            self.reloading = False
+            return
+
+        cls, root, settings, version = self.pending
+
+        self.pending = None
+
+        old_class = self.form_class
+
+        try:
+
+            self.form_class = cls
+            self.open_form(root, settings)
+
+            log("Reloaded " + version)
+
+        except Exception:
+
+            traceback.print_exc()
+
+            if self.form:
+
+                try:
+                    self.form.Close(0)
+                except Exception:
+                    pass
+
+            self.form = None
+            self.form_class = old_class
+
+        finally:
+
+            self.reloading = False
+
+    def term(self):
+
+        self.terminating = True
+        self.pending = None
+
+        if self.form:
+            self.form.Close(0)
+
+        self.form = None
+
+
+def PLUGIN_ENTRY():
+
+    return ObjectFlowPlugin()
+
+```
