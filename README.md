@@ -3484,6 +3484,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/rogxo/ReadPhys
 - https://github.com/libtersafe/dfm_android_unicorn [Coordinate Decryption (Android ARM64)]
 - https://github.com/wwweeeqqu/honor-of-kings-RE-research [Honor of Kings mobile RE: KernelPatch KPM reads, Tencent ACE analysis, IL2CPP/native notes]
+- https://github.com/SuKERY918/sgame-ace-analysis [Honor of Kings ACE (libtersafe/libtprt) RE: cloud rules, naked-TCP reporting, OBJ_VM cloud modules, and arm64 Frida validation notes]
 - https://github.com/not1cyyy/Anti-Cheat-Amateur [Stealth kdmapper kernel driver and virtualized UE memory scanner for Tencent ACE evasion research]
 - https://github.com/Lixense/ff-ace-anticheat-analysis [Byte-level RE post-mortem on Tencent ACE (libanogs/libanort) in Free Fire, with IDA tooling and detection catalog]
 - https://github.com/arx-oioi/-AntiCheat-Anogs-Tencent- [Reverse-engineering notes on Tencent mobile protection (libanogs): detection loops, anti-debug/inject/dump, and reaction paths]
@@ -4808,6 +4809,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/kingsjoys/kingsSafe [Open Unity game-hardening research: asset protection, memory protection, and logic obfuscation with documented threat model and unity-build-probe experiments]
 - https://github.com/talsec/Free-RASP-Unity-POC [Unity freeRASP plugin for mobile root/jailbreak, Frida, tamper, and integrity detection]
 - https://github.com/phajmvawnsix/com.sipvlib.anticheat [Unity UPM anti-cheat: server-verified GameTime plus root/jailbreak/emulator/debugger checks]
+- https://github.com/huangzhuzhu75-bit/game-release-guard [Multi-engine AI security Skills plus local Unity/Unreal release CLI and GUI for backup, audit, staging, and pre-ship hardening workflows]
 
 > Game Engine Protection:Source
 - [Source Engine serverside anti-cheat plugin. (CS:S, CS:GO, CS:P, TF2)](https://github.com/kanekikun420/NoCheatZ-3)
@@ -4831,6 +4833,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/GloriousBrendon/rearguard [Open-source zero-access anti-cheat SDK (Rust server + Godot 4 plugin) that plants per-match input signals to detect macros and aimbots without a kernel driver]
 - https://github.com/modcommunity/dot-server-security [Godot 4 dedicated-server security addon with movement/shot validation, configurable rule-engine escalation, ban feeds, and dry-run auditing]
 - https://github.com/gamespice-platform/anticheat [Godot 4.7+ server-side anti-cheat addon with suspicion scoring, command sanity checks, and escalation hooks for GameSpice Server Security detectors]
+- https://github.com/gamespice-platform/server-security [Godot 4 dedicated-server security addon: operator-defined rules, external ban lists, dry-run escalation, and integrated server-side anti-cheat detectors]
 - https://github.com/B6sse/modManager [Star Wars Battlefront (2015) mod manager: SHA-256-verified approved mods only, in-memory apply via Auric, no unauthorized imports]
 - https://github.com/Parko-Developer/guard-game [Node.js server-side cheat detection: clients report movement/actions, server validates against world limits; TCP/HTTP protocol, admin API, and engine SDKs (C#, GDScript, JS, Luau)]
 - https://github.com/Ajitha-2001/aimguard [Python server-side anti-cheat prototype: telemetry ingestion, lag-compensated validation, PVS replication, behavioral detectors, moderator review workflow, and HTTP API on synthetic gameplay data]
@@ -5013,6 +5016,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/sorrelhub/shprotect-ac [Server-first Roblox Luau anti-cheat with movement, remote spam, fly/noclip, and client watchdog detectors]
 - https://github.com/theo926/VolcanoAC [Open-source Roblox Luau server anti-cheat with speed, fly, noclip, and seated-state movement validation plus lag-back enforcement]
 - https://github.com/Dalbonden/Anti-cheat [ACF: modular server-authoritative Roblox anti-cheat framework (Luau) with detection modules, evidence store, enforcement ladder, and offline/Studio tests]
+- https://github.com/Headxdevv/headcraft-roblox-connection [Server-authoritative Roblox admin, moderation, and anti-cheat framework with Cmdr-style console, movement/remote detectors, and optional signed Headcraft backend sync]
 - https://github.com/Buck3ttcode/bloxdesk [Roblox Luau telemetry SDK for passive speed, noclip, and remote-spam detection with webhook incident reporting]
 - https://github.com/no1qq/RustBlox [Rust Roblox desktop launcher with TheWatcher client-side watchdog that scans cheat processes, suspicious memory, and injection while Roblox runs]
 - https://github.com/severrir/AntiCheat-Dashboard [Roblox server-side anti-cheat with trust scoring, honeypots, Supabase ingest, Discord alerts, and React staff dashboard]
