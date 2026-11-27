@@ -2875,6 +2875,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Model Anti-Cheat](entities/model-anti-cheat.md) — DayZ server-side ML AC (mission telemetry logging, feature extraction, RandomForest aimbot/movement anomaly detection)
 - [mixed-boolean-transform](entities/mixed-boolean-transform.md) — source-to-source C++ MBA obfuscation (Z3-verified; Eigen3 + GMP; Cheat Mixed boolean-arithmetic)
 - [mha2-remastered](entities/mha2-remastered.md) — Mag1cByt3s; *Moorhuhn Adventure 2* Win32 x86-32→Linux x86_64 static recomp (Capstone Python lifter; clean-room Win32/DirectDraw–DirectShow HLE; OpenGL 3.3/SDL2/FFmpeg; x87 + flat guest memory; neural 4K upscale; BYO legal copy; Cheat)
+- [majistic-recomp](entities/majistic-recomp.md) — kelvynzucco; *Majin and the Forsaken Kingdom* Xbox 360→native Windows via ReXGlue/ReIGlue PPC lift (D3D12/Vulkan; XMA; Tauri/Rust launcher + shader prebuild export; SDL3/ImGui/FFmpeg/Tracy; BYO disc; Xbox)
 - [mhynot2](entities/mhynot2.md) — Genshin Impact AC bypass research (experimental `mhyprot2` circumvention; khang06)
 - [mhydeath](entities/mhydeath.md) — BYOVD via miHoYo `mhyprot2.sys` (Genshin Impact; arbitrary kernel R/W + process kill; gmh5225)
 - [mhyprot2](entities/mhyprot2.md) — BYOVD via miHoYo `mhyprot2.sys` (Genshin Impact; IOCTL kernel R/W + process kill; gmh5225)

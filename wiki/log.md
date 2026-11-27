@@ -1,3 +1,5 @@
+- **2026-11-27** — ingest `description:kelvynzucco/majistic-recomp`: entity [[majistic-recomp]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[futari-recomp]], [[wwe-svr2009-recomp]], [[dead-rising-2-case-zero-xenon-recomp]], [[xenia]], and [[recompiler]].
+
 - **2026-11-27** — ingest `description:thecommenter297/ObjectFlow`: entity [[objectflow]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[xrefxpert]], [[xrefgen]], [[find-xrefs]], and [[ida-better-reverse]].
 
 - **2026-11-27** — ingest `description:t-el/deephack-brief` (projection `wiki/sources/descriptions/t-el__deephack-brief.md`): entity [[deephack-brief]] (t-el; Hugo daily automated deep-dive reports on RE, anti-cheat internals, game modding, exploits; PaperMod; shell publish + GitHub Actions → GitHub Pages; cheat / guide); cited [[overviews/reverse-engineering]] Guides/indexes lane + [[overviews/game-hacking]] curated learning lane; `index.md` entity catalog.
