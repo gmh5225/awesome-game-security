@@ -3122,6 +3122,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [obengine](entities/obengine.md) — open-source 2D Lua+C++ game engine (SFML; scene/game-object/map/animation/input/networking/plugins; scriptable APIs; Game Engine / [2D+Lua])
 - [Obelisk](entities/obelisk.md) — Zagrios Apple silicon macOS unified Steam/Epic/GOG launcher (SwiftUI + Rust storefront core; SteamKit/Legendary patterns; Voile Wine + voile-lkd + D3DMetal/DXMT; no AC bypass; compatibility research; Cheat / Proton)
 - [obj2shellcode](entities/obj2shellcode.md) — C++ object-to-shellcode generation framework (AC shellcode engine & tricks)
+- [ObjectFlow](entities/objectflow.md) — IDAPython Hex-Rays semantic data tracing (microcode xrefs, reaching defs, pointer/memory MAY-links, trace evidence; PyQt5; game client/AC native RE; cheat / IDA Plugins)
 - [oblivion-6](entities/oblivion-6.md) — Oblivion Hack Shield MMO client-server AC (VS C++ client DLL integrity/anti-debug/injection/HWID checks; server heartbeat, ban lists, Win/Linux)
 - [obpo-plugin](entities/obpo-plugin.md) — IDA client + Go OBPO backend (closed core; open plugin; Fix OLLVM)
 - [Oboro](entities/oboro.md) — Android NDK LLVM 21 / OLLVM prebuilt toolchain (FLA, BCF, indirection, string/constant encryption; Clang+BOLT monorepo; native `.so` hardening; luluovo1; Obfuscation Engine)
