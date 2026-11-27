@@ -895,6 +895,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/HeathHowren/Pointer-Lab [Windows x64 user-mode memory scanner and debugger with pointer chains, disassembly, patching, and ImGui UI]
 - https://github.com/digital-dev/Apprentice [Open-source Windows game trainer and memory editor (Electron + C++ N-API) with value freezes, code patches, Mono/IL2CPP support, and .CT import/export]
 - https://github.com/JeanExtreme002/PyMemoryEditor [Pure-Python (ctypes) memory scanner/editor for Windows, Linux and macOS with value scans, pointer chains, a Qt UI and an MCP server]
+- https://github.com/highho/zero-scanner [Rust + egui offline Windows memory workbench with value/pointer/AOB scans, disasm, reversible patches, speedhack, Lua, Cheat Engine .CT tables, and a local MCP server for agents]
 - https://github.com/enes59255X/EnesMem [Windows x64 PyQt6 memory scanner and editor (ctypes + Rust-accelerated core) with AOB/UIV scans, pointer chains, watchlist, HWBP, and speedhack; packaged win64 releases]
 - https://github.com/winterhafen/hermes-hook [Cross-platform Python game memory scanner and hooking workbench with Unity/IL2CPP and Unreal class browsing, Frida-based Wine/Proton support, pointer scans, and scriptable hooks]
 - https://github.com/grembyte/grembyte [Alpha desktop memory scanner and hooking workbench for single-player games on Linux and Windows, with Unity Mono/IL2CPP and Unreal class browsing, Frida hooks, and Wine/Proton support]
