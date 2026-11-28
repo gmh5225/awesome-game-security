@@ -744,6 +744,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/jenissimo/bottleship [Browser HLE that boots x86 Win32 PEs and reimplements Win32/COM plus DirectDraw/Direct3D 3–9 on WebGPU/WebAudio/OPFS for classic Windows games]
 - https://github.com/Lomchat/orthros [Browser runtime that runs unmodified Win32 x86 games via PE loading, Win32/DirectX HLE on web APIs, and optional GoldSrc/re3 WASM ports]
 - https://github.com/duruer/s3-mobile [Mobile port of The Settlers III using user-supplied game files: x86 CPU emulation, Win32/DirectX high-level emulation, and touch UI for Android and iOS]
+- https://github.com/mweinbach/apple-silicon-port-factory [Experimental Win32/x86-64 PE loader and AArch64 interpreter with Metal 4/MetalFX paths for porting owned Windows games to Apple Silicon without Wine]
 
 > Compatibility
 - https://github.com/CnCNet/cnc-ddraw [Old Game]
@@ -1575,6 +1576,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/noobpk/frida-android-hook [Trace classes/functions/and modify the return values]
 - https://github.com/unrandoms/frida-mobile-kit [Organized Frida script toolkit for Android dynamic analysis: cert pinning bypass (OkHttp, Flutter, React Native), traffic/crypto logging, root-detection bypass, and runtime memory inspection with a small CLI]
 - https://github.com/mrmtwoj/android-frida-bypass-suite [Frida script and Python forward proxy for Android pentesting: Java/native root bypass, SSL pinning bypass (OkHttp, TrustKit, Conscrypt, WebView), AES key hooks, Burp/adb reverse setup]
+- https://github.com/marcosfx1323/root-bypass-frida-detection [Frida script combining native libc and Java/ART hooks to hide root, Magisk/KernelSU paths, and Frida presence from Android integrity and RASP checks]
 - https://github.com/vraj002/Frida-Scripts [Curated Frida scripts for Android/iOS client testing: universal root and anti-Frida hiding, SSL pinning bypass (OkHttp/Conscrypt/Flutter), and iOS-oriented bypass helpers]
 - https://github.com/marwaboualam/mobile_penetration_testing [Frida scripts for Android SSL pinning bypass, root detection bypass, and native/JNI hooking on lab APKs (AndroGoat, OWASP UnCrackable)]
 - https://github.com/apkunpacker/AntiFrida_Bypass [Bypass Some AntiFrida Checks]
@@ -4860,6 +4862,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/kyzoeth/bitgeist [Browser retro speedrun platform with WASM libretro cores, RAM telemetry, and 60Hz input-log verification plus deterministic replay for cheat-resistant leaderboards]
 - https://github.com/quarterhood/engine [Open deterministic arcade game engine and CLI verifier that replays recorded inputs from a seed to validate server scores (public run API)]
 - https://github.com/eric-rolph/serverless-time-trial-racing-game [Serverless sim racing with shared Box3D WASM physics: Ed25519-signed input replay on Cloudflare Workers for bit-exact lap validation and cheat-resistant leaderboards]
+- https://github.com/ksroido/wardogs-anti-cheat [Server-side Wardogs anti-cheat on Cloudflare Workers and D1: karma-based kill-event rules, kick enforcement, and multi-worker cron/hook architecture]
 - https://github.com/KoJesko/PlasmaTrack-Dev [ETS2/ATS VTC job tracker: in-game telemetry plugin, Rust uploader client, and Cloudflare Workers backend that replays jobs via shared pt-core with server-side anti-cheat scoring]
 - https://github.com/web-coder-lab/chessking [Rust server-side anti-cheat for multiplayer chess: risk scoring, device fingerprinting, match integrity, captcha, and ban escalation]
 - https://github.com/AbdulAmi09/SentinelAntiCheat [Chess integrity platform with seven-layer statistical engine-assistance detection, explainable risk tiers, arbiter case management, and hash-chained audit logging]
