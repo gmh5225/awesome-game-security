@@ -3485,6 +3485,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/luavmload/vanguard-update-notifier [Discord bot that polls Riot clientconfig, hashes Vanguard setup files, and alerts on anti-cheat updates]
 - https://github.com/Karwmam/Vanguard-Service-Manager-vGK-Control [Windows tools to check Riot Vanguard/vgk status and toggle auto-start]
 - https://github.com/shinishiz/VanguardSwitch [Windows utility to stop Riot Vanguard (vgc/vgk) when idle and re-enable it without reboot on PCs without official Vanguard On-Demand]
+- https://github.com/LoanPleurmeauBonnin/tuxgate [Rust CLI for Riot titles on Linux: Vanguard compatibility facts, local diagnostics, and dual-boot help without anti-cheat bypass]
 
 > Explore AntiCheat System:XignCode
 - https://github.com/gmh5225/XignCode-Dump
