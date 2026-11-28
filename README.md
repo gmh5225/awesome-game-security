@@ -1178,6 +1178,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/sergen213/kabus22-linux [Reverse-engineered native Linux Kabus 22 engine with GTK installer/launcher, OpenGL/Vulkan rendering, and RE notes; requires user-supplied original game assets]
 - https://github.com/LyeDevGit/WonTree-RBLX-Dumper [Universal Roblox game analysis dumper: Luau decompile stack, remote call graph, live remote logger, framework and anti-cheat pattern detection, markdown/CSV reports]
 - https://github.com/aauuzy/XenoDLLRE [Static RE of Xeno Roblox executor v1.3.65: bytecode hijack attach, XOR+zstd resources, localhost protocol, YARA/score detector, and defensive IOC notes]
+- https://github.com/Leeksov/roblox-ios-research [Static IDA RE of Roblox iOS RobloxLib anti-tamper, bytecode integrity checks, and server-side validation (no native client anti-cheat on iOS)]
 - https://github.com/jlucaso1/unturned-godot [Godot 4 port that reverse-engineers Unturned Unity serialized formats from a Steam install and renders maps with terrain, objects, lighting, and multiplayer]
 - https://github.com/omochikaeri15/battle-cats-complete [Rust desktop toolkit for The Battle Cats: import .pack/.apk data, view cats/enemies/stages, render animations, and export assets]
 - https://github.com/gmh5225/compiler-binary-richprint [Print compiler information stored in Rich Header of PE executable]
@@ -3502,6 +3503,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/stuffed-cat/hide-ace-kernel [KernelSU module that bind-mounts empty files over Tencent ACE kernel `/proc/inte_*` integrity nodes to hide KO/syscall-table reports from user space]
 - https://github.com/Siselea/deltaforce-cleaner [Python GUI/CLI uninstaller that removes Delta Force and leftover Tencent ACE kernel services, drivers, registry, files, and WeGame traces on Windows]
 - https://github.com/mioolio/AntiCheatExpert [Reverse-engineering and byte-faithful rebuild documentation for Tencent AntiCheatExpert (18 PE/kernel components: drivers, SGuard, plugins, UEFI)]
+- https://github.com/Leeksov/ace-security-research [Authorized assessment of Tencent ACE intl.anticheatexpert.com console: mapped microservices and game IDs, IDOR/OAuth findings, and recon scripts]
 
 > Explore AntiCheat System:G-Presto
 - https://github.com/ARandomPerson7/G-Presto-Anti-Cheat-Reverse-Engineered/blob/main/Main.cpp
