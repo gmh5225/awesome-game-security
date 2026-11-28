@@ -24,4 +24,4 @@ Researchers and analysts who need structured Wardogs mechanics data for RE, bala
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[unreal-object-model]] · [[zircon-ue-dumper]] · [[uedumper]] · [[corner-culling]]
+[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[unreal-object-model]] · [[zircon-ue-dumper]] · [[uedumper]] · [[corner-culling]] · [[wardogs-anti-cheat]]
