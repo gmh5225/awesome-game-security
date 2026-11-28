@@ -16,7 +16,7 @@ Ships structured assembly sources, pack metadata, per-component reports, and Chi
 
 Listed in the README as reverse-engineering and byte-faithful rebuild documentation for Tencent AntiCheatExpert (drivers, SGuard, plugins, UEFI).
 
-Complements mobile-focused Tencent ACE RE such as [[ff-ace-anticheat-analysis]] and [[anticheat-anogs-tencent]], host cleanup tooling such as [[deltaforce-cleaner]], and other full-stack commercial AC dossiers such as [[all-about-eac]] and [[fortnite-ac-reversal]].
+Complements mobile-focused Tencent ACE RE such as [[ff-ace-anticheat-analysis]] and [[anticheat-anogs-tencent]], authorized ACE **console/CDN/backend** assessment [[ace-security-research]], host cleanup tooling such as [[deltaforce-cleaner]], and other full-stack commercial AC dossiers such as [[all-about-eac]] and [[fortnite-ac-reversal]].
 
 ## Links
 

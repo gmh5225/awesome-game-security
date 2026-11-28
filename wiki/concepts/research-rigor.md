@@ -19,7 +19,8 @@ sources:
   - wiki/sources/descriptions/ANTI-CHEAT-OBSERVATORY__ANTI-CHEAT-OBSERVATORY.github.io.md
   - wiki/sources/descriptions/smoothjazzchazz__game-integrity-code.md
   - wiki/sources/descriptions/bgrubbs1__ida-proofmark.md
-updated: 2026-11-27
+  - wiki/sources/descriptions/Leeksov__ace-security-research.md
+updated: 2026-11-28
 confidence: high
 ---
 
@@ -56,6 +57,8 @@ Architecture feasibility studies such as [[ac-compat-research]] (IZxMD; vendor-a
 Early formal game-semantics work such as [[game-integrity-code]] (smoothjazzchazz; Lean 4 manuscript mirror) models how an authoritative implementation might accept only histories matching an abstract legal state-transition spec under adversarial conditions—pair with [[research-rigor]] before treating exploratory definitions as deployment or security theorems. (source: wiki/sources/descriptions/smoothjazzchazz__game-integrity-code.md)
 
 Curated AC catalogs such as [[anti-cheat-observatory]] keep **version-scoped claims**, evidence origins, and dispute state explicit in Git-backed JSON rather than treating RSS or GitHub discovery hits as verified findings—use as a reference map, not as standalone proof of live product behavior. (source: wiki/sources/descriptions/ANTI-CHEAT-OBSERVATORY__ANTI-CHEAT-OBSERVATORY.github.io.md)
+
+Authorized vendor **control-plane** assessments such as [[ace-security-research]] (Leeksov; Tencent ACE developer console/CDN/backend) separate **confirmed** vs **blocked** findings, attach stepwise reproduction and impact analysis, and ship automation only as evidence helpers—pair with [[research-rigor]] before generalizing IDOR/OAuth/CDN conclusions across environments or disclosure timelines. (source: wiki/sources/descriptions/Leeksov__ace-security-research.md)
 
 Engine globals, object layouts, metadata formats, and helper APIs vary by engine branch, build configuration, platform, and game modifications—verify the exact version and binary artifacts before generalizing signatures or offsets. (source: wiki/sources/skills/game-engine.md)
 
