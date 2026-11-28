@@ -60,12 +60,13 @@ sources:
   - wiki/sources/descriptions/AadityaPokhriyal__Ban-Hammer.md
   - wiki/sources/descriptions/ThatKidGlitchy__chess-hacks.md
   - wiki/sources/descriptions/Coding-With-SouRav__Chess-Cheater.md
+  - wiki/sources/descriptions/gobgolaxi__OculusAI.md
   - wiki/sources/descriptions/essensha__cs2-anti-cheat-ml-research.md
   - wiki/sources/descriptions/elijoewashacked-pixel__VyxAntiCheat.md
   - wiki/sources/descriptions/phugiadang12__aegis-ac.md
   - wiki/sources/descriptions/ScaxeTeam__Scaxe-AntiCheat-OSS.md
   - wiki/sources/descriptions/bvishwesh__AntiCheat-Engine.md
-updated: 2026-11-18
+updated: 2026-11-28
 confidence: medium
 ---
 
@@ -155,6 +156,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[vyx-anticheat]] — elijoewashacked-pixel Paper **1.20+** Spigot/Paper/Purpur plugin; Bukkit-event combat/movement/inventory/world checks plus lightweight statistical “mini AI” scoring of click rhythm, aim, and reaction against a server clean-player baseline with a strict CPU time budget—on-server heuristics, not remote ML (source: wiki/sources/descriptions/elijoewashacked-pixel__VyxAntiCheat.md)
 - [[wepac]] — wepposs Paper/Spigot **1.21+** Java plugin; hybrid rule-based movement/combat/block/inventory checks plus embedded **MLP** cheat scoring with per-player adaptive thresholds; inline Netty packet inspection and movement physics simulation; online learning from punishments, staff labels, and filtered legit PvP; persisted weights across restarts (source: wiki/sources/descriptions/wepposs__WepAC.md)
 - [[mkac]] — korpys667 Paper/Folia Kotlin/Java 21 open-source combat AC; packet checks plus **hosted MKAC API** ML scoring for killaura and aim-assist from input patterns; violation logging, YAML punishments, optional SQLite/MySQL/Redis cross-server alerts; in-game monitoring, suspicion review, and data-collection commands (source: wiki/sources/descriptions/korpys667__MKAC.md)
+- [[oculus-ai]] — gobgolaxi Paper/Folia Java plugin; ProtocolLib + hosted OculusAI API; neural **PvP aim** and **end-crystal** combat models plus wall/hitbox rule checks; per-player suspicion buffers with separate alert/punishment thresholds; staff live monitoring, in-game config, punishment replay URLs, and dataset/NPC test tooling (source: wiki/sources/descriptions/gobgolaxi__OculusAI.md)
 - [[minecraft-anticheat-docs]] — aethelreborn structured Markdown primer on Minecraft server-side combat/reach analysis, heuristic and ML detection models, and latency compensation for Java Edition plugins (GrimAC/Vulcan/Matrix context; documentation-only Guide lane) (source: wiki/sources/descriptions/aethelreborn__minecraft-anticheat-docs.md)
 - [[mlanticheat]] — Minecraft Paper 1.21.4+ combat AC; per-server ensemble neural + logistic models + anomaly detection over combat rotations; operator labeling, Shadow Mode review, optional PacketEvents rotation tracking, automatic retraining (gravemaulr)
 - [[model-anti-cheat]] — DayZ server-side ML pipeline; mission-script per-second telemetry (position, view, weapon, raycast line-of-sight) + Python feature extraction + RandomForest aimbot/movement anomaly classifier (sample cheater sessions)
