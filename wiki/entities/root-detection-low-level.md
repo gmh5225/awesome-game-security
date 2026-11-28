@@ -26,4 +26,4 @@ Android security testing, malware analysis, reverse engineering, and investigati
 
 ## Related
 
-[[frida]] · [[mobile-anti-cheat]] · [[0xdea-frida-scripts]] · [[ssl-bypass]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
+[[frida]] · [[root-bypass-frida-detection]] · [[mobile-anti-cheat]] · [[0xdea-frida-scripts]] · [[ssl-bypass]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
