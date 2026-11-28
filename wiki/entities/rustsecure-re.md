@@ -20,4 +20,4 @@ Complements offensive Rust cheat samples such as [[lord-abbot-rust-external-chea
 
 ## Related
 
-[[easy-anti-cheat]] · [[kdmapper]] · [[bepinex-il2cppbase]] · [[il2cpp]] · [[al-khaser]] · [[lord-abbot-rust-external-cheat]] · [[rust-rustinternal]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[easy-anti-cheat]] · [[kdmapper]] · [[bepinex-il2cppbase]] · [[il2cpp]] · [[al-khaser]] · [[lord-abbot-rust-external-cheat]] · [[rust-rustinternal]] · [[roblox-ios-research]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
