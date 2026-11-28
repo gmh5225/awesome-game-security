@@ -1,0 +1,1484 @@
+Project Path: arc_AlexPfaltz_wine-impact-build_g41genpf
+
+Source Tree:
+
+```txt
+arc_AlexPfaltz_wine-impact-build_g41genpf
+├── LICENSE
+├── README.md
+├── patches
+│   ├── ntoskrnl-impactdrv.patch
+│   └── wine-ntoskrnl-impact-anticheat.patch
+└── scripts
+    └── deploy.sh
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 AlexPfaltz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Wine ntoskrnl.exe Patch: Impact/MRAC Anti-Cheat Support
+
+Сборка патченного ntoskrnl.exe для запуска античита Impact/MRAC (Allods Online).
+
+## Как это работает
+
+Патч реализует полную эмуляцию Windows-ядра в Wine:
+- MDL/memory функции: MmProbeAndLockPages, MmUnlockPages, MmMapLockedPagesSpecifyCache
+- Process notifications: PsSetCreateProcessNotifyRoutine, PsSetCreateProcessNotifyRoutineEx
+- Process info: PsGetProcessImageFileName, PsGetProcessCreateTimeQuadPart
+- Memory copy: MmCopyVirtualMemory
+- Security tokens: SeCreateClientSecurity, SeImpersonateClientEx
+- Thread context: gs:[0x188] (KPCR.Prcb.CurrentThread)
+
+## Использование
+
+### Шаг 1: Запуск сборки
+
+1. Перейдите в Actions → Build Wine ntoskrnl.exe
+2. Выберите параметры:
+   - Wine version: 11.19 (рекомендуется)
+   - Patch type: full (рекомендуется) или stub
+3. Нажмите Run workflow
+
+### Шаг 2: Скачивание артефакта
+
+1. После завершения сборки скачайте артефакт ntoskrnl.exe
+
+### Шаг 3: Деплой
+
+```bash
+# Бэкап оригинала
+cp /home/user/PortProton/data/dist/PROTON_LG_10-28/lib/wine/x86_64-windows/ntoskrnl.exe{,.bak}
+
+# Замена
+cp /path/to/ntoskrnl.exe /home/user/PortProton/data/dist/PROTON_LG_10-28/lib/wine/x86_64-windows/ntoskrnl.exe
+```
+
+## Структура
+
+```
+.
+├── .github/workflows/build.yml
+├── patches/
+│   ├── ntoskrnl-impactdrv.patch (полный патч)
+│   └── wine-ntoskrnl-impact-anticheat.patch (stub-патч)
+├── scripts/deploy.sh
+└── README.md
+```
+
+## Лицензия
+
+- Патч: LGPL-2.1-or-later
+- Скрипты и документация: MIT
+
+```
+
+`patches/ntoskrnl-impactdrv.patch`:
+
+```patch
+diff --git a/dlls/ntoskrnl.exe/ntoskrnl.c b/dlls/ntoskrnl.exe/ntoskrnl.c
+index b3f4575..e4acfcc 100644
+--- a/dlls/ntoskrnl.exe/ntoskrnl.c
++++ b/dlls/ntoskrnl.exe/ntoskrnl.c
+@@ -271,8 +271,29 @@ static const POBJECT_TYPE *known_types[] =
+ 
+ DECLARE_CRITICAL_SECTION(handle_map_cs);
+ 
++/* Drivers handle user-mode handles which belong to the process that issued the
++ * IRP, while wine runs the dispatch code in the device manager process. */
++static HANDLE duplicate_client_handle( HANDLE handle )
++{
++    THREAD_BASIC_INFORMATION info;
++    HANDLE thread, process, ret = NULL;
++
++    if (!(thread = OpenThread( THREAD_QUERY_INFORMATION, FALSE, client_tid )))
++        return NULL;
++
++    if (!NtQueryInformationThread( thread, ThreadBasicInformation, &info, sizeof(info), NULL ) &&
++        (process = OpenProcess( PROCESS_DUP_HANDLE, FALSE, HandleToUlong( info.ClientId.UniqueProcess ) )))
++    {
++        DuplicateHandle( process, handle, GetCurrentProcess(), &ret, 0, FALSE, DUPLICATE_SAME_ACCESS );
++        NtClose( process );
++    }
++    NtClose( thread );
++    return ret;
++}
++
+ NTSTATUS kernel_object_from_handle( HANDLE handle, POBJECT_TYPE type, void **ret )
+ {
++    HANDLE client_handle = NULL;
+     void *obj;
+     NTSTATUS status;
+ 
+@@ -286,12 +307,25 @@ NTSTATUS kernel_object_from_handle( HANDLE handle, POBJECT_TYPE type, void **ret
+         obj = wine_server_get_ptr( reply->user_ptr );
+     }
+     SERVER_END_REQ;
+-    if (status)
++
++    if (status && GetCurrentThreadId() == request_thread && client_tid &&
++        (client_handle = duplicate_client_handle( handle )))
+     {
+-        LeaveCriticalSection( &handle_map_cs );
+-        return status;
++        TRACE( "resolving handle %p in client process tid %lu\n", handle, client_tid );
++        handle = client_handle;
++
++        SERVER_START_REQ( get_kernel_object_ptr )
++        {
++            req->manager = wine_server_obj_handle( get_device_manager() );
++            req->handle  = wine_server_obj_handle( handle );
++            status = wine_server_call( req );
++            obj = wine_server_get_ptr( reply->user_ptr );
++        }
++        SERVER_END_REQ;
+     }
+ 
++    if (status) goto done;
++
+     if (!obj)
+     {
+         char buf[256];
+@@ -299,11 +333,8 @@ NTSTATUS kernel_object_from_handle( HANDLE handle, POBJECT_TYPE type, void **ret
+         ULONG size;
+ 
+         status = NtQueryObject( handle, ObjectTypeInformation, buf, sizeof(buf), &size );
+-        if (status)
+-        {
+-            LeaveCriticalSection( &handle_map_cs );
+-            return status;
+-        }
++        if (status) goto done;
++
+         if (!type)
+         {
+             size_t i;
+@@ -317,15 +348,15 @@ NTSTATUS kernel_object_from_handle( HANDLE handle, POBJECT_TYPE type, void **ret
+             if (i == ARRAY_SIZE(known_types))
+             {
+                 FIXME("Unsupported type %s\n", debugstr_us(&type_info->TypeName));
+-                LeaveCriticalSection( &handle_map_cs );
+-                return STATUS_INVALID_HANDLE;
++                status = STATUS_INVALID_HANDLE;
++                goto done;
+             }
+         }
+         else if (RtlCompareUnicodeStrings( type->name, lstrlenW(type->name), type_info->TypeName.Buffer,
+                                            type_info->TypeName.Length / sizeof(WCHAR), FALSE) )
+         {
+-            LeaveCriticalSection( &handle_map_cs );
+-            return STATUS_OBJECT_TYPE_MISMATCH;
++            status = STATUS_OBJECT_TYPE_MISMATCH;
++            goto done;
+         }
+ 
+         if (type->constructor)
+@@ -339,7 +370,9 @@ NTSTATUS kernel_object_from_handle( HANDLE handle, POBJECT_TYPE type, void **ret
+     }
+     else if (type && ObGetObjectType( obj ) != type) status = STATUS_OBJECT_TYPE_MISMATCH;
+ 
++done:
+     LeaveCriticalSection( &handle_map_cs );
++    if (client_handle) NtClose( client_handle );
+     if (!status) *ret = obj;
+     return status;
+ }
+@@ -403,14 +436,19 @@ NTSTATUS WINAPI ObOpenObjectByPointer( void *obj, ULONG attr, ACCESS_STATE *acce
+ 
+ 
+ static void *create_file_object( HANDLE handle );
++static void release_file_object( void *obj );
+ 
+ static const WCHAR file_type_name[] = {'F','i','l','e',0};
+ 
+ static struct _OBJECT_TYPE file_type = {
+     file_type_name,
+-    create_file_object
++    create_file_object,
++    release_file_object
+ };
+ 
++/* marks file objects created for process images, which have no server object */
++static const char image_file_marker;
++
+ POBJECT_TYPE IoFileObjectType = &file_type;
+ 
+ static void *create_file_object( HANDLE handle )
+@@ -422,6 +460,25 @@ static void *create_file_object( HANDLE handle )
+     return file;
+ }
+ 
++static void release_file_object( void *obj )
++{
++    FILE_OBJECT *file = obj;
++
++    if (file->FsContext2 == &image_file_marker)
++    {
++        free_kernel_object( file );
++        return;
++    }
++
++    SERVER_START_REQ( release_kernel_object )
++    {
++        req->manager  = wine_server_obj_handle( get_device_manager() );
++        req->user_ptr = wine_server_client_ptr( obj );
++        if (wine_server_call( req )) FIXME( "failed to release %p\n", obj );
++    }
++    SERVER_END_REQ;
++}
++
+ DECLARE_CRITICAL_SECTION(irp_completion_cs);
+ 
+ static void free_dispatch_irp( struct irp_data *irp_data )
+@@ -919,6 +976,15 @@ static void unload_driver( struct wine_rb_entry *entry, void *context )
+ 
+ PEPROCESS PsInitialSystemProcess = NULL;
+ 
++/* x86_64 drivers read the current thread inline from KPCR.Prcb.CurrentThread
++ * (gs:[0x188]); in user mode that offset is this TEB field */
++static void update_current_kthread(void)
++{
++#ifdef __x86_64__
++    NtCurrentTeb()->ReservedForDebuggerInstrumentation[15] = KeGetCurrentThread();
++#endif
++}
++
+ /***********************************************************************
+  *           wine_ntoskrnl_main_loop   (Not a Windows API)
+  */
+@@ -934,6 +1000,7 @@ NTSTATUS CDECL wine_ntoskrnl_main_loop( HANDLE stop_event )
+     PsInitialSystemProcess = IoGetCurrentProcess();
+     request_thread = GetCurrentThreadId();
+ 
++    update_current_kthread();
+     pnp_manager_start();
+ 
+     handles[0] = stop_event;
+@@ -1025,6 +1092,7 @@ NTSTATUS CDECL wine_ntoskrnl_main_loop( HANDLE stop_event )
+         {
+         case STATUS_SUCCESS:
+             assert( context.params.type != IRP_CALL_NONE && context.params.type < ARRAY_SIZE(dispatch_funcs) );
++            update_current_kthread();
+             status = dispatch_funcs[context.params.type]( &context );
+             if (!context.in_buff) context.in_size = 4096;
+             break;
+@@ -2521,6 +2589,487 @@ HANDLE WINAPI PsGetProcessInheritedFromUniqueProcessId( PEPROCESS process )
+     return id;
+ }
+ 
++static HANDLE open_process_handle( PEPROCESS process, ACCESS_MASK access )
++{
++    DWORD pid = HandleToUlong( (HANDLE)process->info.UniqueProcessId );
++
++    if (pid == GetCurrentProcessId()) return GetCurrentProcess();
++    return OpenProcess( access, FALSE, pid );
++}
++
++static void close_process_handle( HANDLE handle )
++{
++    if (handle && handle != GetCurrentProcess()) NtClose( handle );
++}
++
++/* returns the Win32 image path of a process, allocated from the process heap */
++static WCHAR *get_process_image_path( PEPROCESS process )
++{
++    UNICODE_STRING *name;
++    ULONG size = sizeof(*name) + MAX_PATH * sizeof(WCHAR);
++    WCHAR *ret = NULL;
++    HANDLE handle;
++
++    NTSTATUS status = STATUS_NO_MEMORY;
++
++    if (!(handle = open_process_handle( process, PROCESS_QUERY_LIMITED_INFORMATION )))
++    {
++        WARN( "failed to open process %p, error %lu\n", (HANDLE)process->info.UniqueProcessId, GetLastError() );
++        return NULL;
++    }
++    if ((name = HeapAlloc( GetProcessHeap(), 0, size )) &&
++        !(status = NtQueryInformationProcess( handle, ProcessImageFileNameWin32, name, size, NULL )) &&
++        name->Length && (ret = HeapAlloc( GetProcessHeap(), 0, name->Length + sizeof(WCHAR) )))
++    {
++        memcpy( ret, name->Buffer, name->Length );
++        ret[name->Length / sizeof(WCHAR)] = 0;
++    }
++    if (!ret) TRACE( "no image name for process %p yet, status %#lx\n", (HANDLE)process->info.UniqueProcessId, status );
++    HeapFree( GetProcessHeap(), 0, name );
++    close_process_handle( handle );
++    return ret;
++}
++
++/*********************************************************************
++ *           PsGetProcessImageFileName  (NTOSKRNL.@)
++ */
++UCHAR * WINAPI PsGetProcessImageFileName( PEPROCESS process )
++{
++    TRACE( "%p\n", process );
++
++    if (!process->image_name[0])
++    {
++        WCHAR *path, *name;
++
++        if (!(path = get_process_image_path( process ))) return (UCHAR *)process->image_name;
++        name = wcsrchr( path, '\\' ) ? wcsrchr( path, '\\' ) + 1 : path;
++        /* the kernel keeps only the first 15 characters */
++        WideCharToMultiByte( CP_ACP, 0, name, -1, process->image_name, sizeof(process->image_name), NULL, NULL );
++        process->image_name[sizeof(process->image_name) - 1] = 0;
++        HeapFree( GetProcessHeap(), 0, path );
++    }
++    return (UCHAR *)process->image_name;
++}
++
++/*********************************************************************
++ *           PsGetProcessCreateTimeQuadPart  (NTOSKRNL.@)
++ */
++LONGLONG WINAPI PsGetProcessCreateTimeQuadPart( PEPROCESS process )
++{
++    KERNEL_USER_TIMES times = {{{0}}};
++    HANDLE handle;
++
++    TRACE( "%p\n", process );
++
++    if ((handle = open_process_handle( process, PROCESS_QUERY_LIMITED_INFORMATION )))
++    {
++        NtQueryInformationProcess( handle, ProcessTimes, &times, sizeof(times), NULL );
++        close_process_handle( handle );
++    }
++    return times.CreateTime.QuadPart;
++}
++
++/*********************************************************************
++ *           PsGetProcessSectionBaseAddress  (NTOSKRNL.@)
++ */
++void * WINAPI PsGetProcessSectionBaseAddress( PEPROCESS process )
++{
++    PEB *peb = process->info.PebBaseAddress;
++    void *base = NULL;
++    HANDLE handle;
++
++    TRACE( "%p\n", process );
++
++    if ((handle = open_process_handle( process, PROCESS_VM_READ )))
++    {
++        NtReadVirtualMemory( handle, &peb->ImageBaseAddress, &base, sizeof(base), NULL );
++        close_process_handle( handle );
++    }
++    return base;
++}
++
++/* file objects of process images are not backed by the server, so they carry the
++ * volume relative path only */
++static FILE_OBJECT *create_image_file_object( const WCHAR *path )
++{
++    FILE_OBJECT *file;
++    const WCHAR *name = path;
++    SIZE_T len;
++
++    if (name[0] && name[1] == ':') name += 2;
++    len = wcslen( name ) * sizeof(WCHAR);
++
++    if (!(file = alloc_kernel_object( IoFileObjectType, NULL, sizeof(*file) + len + sizeof(WCHAR), 1 )))
++        return NULL;
++    file->Type = 5;
++    file->Size = sizeof(*file);
++    file->FsContext2 = (void *)&image_file_marker;
++    file->FileName.Buffer = (WCHAR *)(file + 1);
++    file->FileName.Length = len;
++    file->FileName.MaximumLength = len + sizeof(WCHAR);
++    memcpy( file->FileName.Buffer, name, len + sizeof(WCHAR) );
++    return file;
++}
++
++/***********************************************************************
++ *           PsReferenceProcessFilePointer  (NTOSKRNL.EXE.@)
++ */
++NTSTATUS WINAPI PsReferenceProcessFilePointer( PEPROCESS process, FILE_OBJECT **file )
++{
++    WCHAR *path;
++
++    TRACE( "%p %p\n", process, file );
++
++    if (!(path = get_process_image_path( process ))) return STATUS_UNSUCCESSFUL;
++    *file = create_image_file_object( path );
++    HeapFree( GetProcessHeap(), 0, path );
++    return *file ? STATUS_SUCCESS : STATUS_NO_MEMORY;
++}
++
++/*********************************************************************
++ *           MmCopyVirtualMemory    (NTOSKRNL.@)
++ */
++NTSTATUS WINAPI MmCopyVirtualMemory( PEPROCESS fromprocess, void *fromaddress, PEPROCESS toprocess,
++                                     void *toaddress, SIZE_T bufsize, KPROCESSOR_MODE mode,
++                                     SIZE_T *copied )
++{
++    HANDLE from, to = NULL;
++    NTSTATUS status = STATUS_SUCCESS;
++    SIZE_T done = 0, chunk, size;
++    char *buffer = NULL;
++
++    TRACE( "fromprocess %p, fromaddress %p, toprocess %p, toaddress %p, bufsize %Iu, mode %d, copied %p\n",
++           fromprocess, fromaddress, toprocess, toaddress, bufsize, mode, copied );
++
++    *copied = 0;
++    if (!(from = open_process_handle( fromprocess, PROCESS_VM_READ )) ||
++        !(to = open_process_handle( toprocess, PROCESS_VM_WRITE | PROCESS_VM_OPERATION )))
++    {
++        status = STATUS_ACCESS_DENIED;
++        goto done;
++    }
++    if (!(buffer = HeapAlloc( GetProcessHeap(), 0, min( bufsize, 0x10000 ) )))
++    {
++        status = STATUS_NO_MEMORY;
++        goto done;
++    }
++
++    while (done < bufsize)
++    {
++        chunk = min( bufsize - done, 0x10000 );
++        size = 0;
++        NtReadVirtualMemory( from, (char *)fromaddress + done, buffer, chunk, &size );
++        if (size) NtWriteVirtualMemory( to, (char *)toaddress + done, buffer, size, &size );
++        done += size;
++        if (size < chunk)
++        {
++            status = STATUS_PARTIAL_COPY;
++            break;
++        }
++    }
++    *copied = done;
++
++done:
++    HeapFree( GetProcessHeap(), 0, buffer );
++    close_process_handle( from );
++    close_process_handle( to );
++    return status;
++}
++
++
++/* Wine has no kernel hook for process creation; the device manager watches the
++ * process list instead and reports changes shortly after they happen. */
++
++struct process_notify
++{
++    void   *routine;
++    BOOLEAN ex;
++};
++
++struct known_process
++{
++    HANDLE    pid;
++    LONGLONG  create_time;
++    PEPROCESS process;
++    BOOL      pending;  /* creation not reported yet */
++    unsigned int retries;
++};
++
++/* a new process gets its image name only after its loader starts */
++#define MAX_PROCESS_NOTIFY_RETRIES 40
++
++static struct process_notify process_notify[64];
++static unsigned int process_notify_count;
++static struct known_process *known_processes;
++static unsigned int known_process_count;
++static HANDLE process_monitor;
++DECLARE_CRITICAL_SECTION(process_notify_cs);
++
++static SYSTEM_PROCESS_INFORMATION *get_process_list(void)
++{
++    ULONG size = 0x10000;
++    void *buffer = NULL;
++    NTSTATUS status;
++
++    for (;;)
++    {
++        HeapFree( GetProcessHeap(), 0, buffer );
++        if (!(buffer = HeapAlloc( GetProcessHeap(), 0, size ))) return NULL;
++        status = NtQuerySystemInformation( SystemProcessInformation, buffer, size, &size );
++        if (status != STATUS_INFO_LENGTH_MISMATCH) break;
++        size *= 2;
++    }
++    if (status)
++    {
++        HeapFree( GetProcessHeap(), 0, buffer );
++        return NULL;
++    }
++    return buffer;
++}
++
++static SYSTEM_PROCESS_INFORMATION *next_process( SYSTEM_PROCESS_INFORMATION *spi )
++{
++    return spi->NextEntryOffset ? (SYSTEM_PROCESS_INFORMATION *)((char *)spi + spi->NextEntryOffset) : NULL;
++}
++
++static BOOL get_process_command_line( PEPROCESS process, UNICODE_STRING *str )
++{
++    PEB *peb = process->info.PebBaseAddress;
++    RTL_USER_PROCESS_PARAMETERS *params;
++    UNICODE_STRING cmdline;
++    HANDLE handle;
++    BOOL ret = FALSE;
++
++    if (!(handle = open_process_handle( process, PROCESS_VM_READ ))) return FALSE;
++    if (!NtReadVirtualMemory( handle, &peb->ProcessParameters, &params, sizeof(params), NULL ) &&
++        !NtReadVirtualMemory( handle, &params->CommandLine, &cmdline, sizeof(cmdline), NULL ) &&
++        (str->Buffer = HeapAlloc( GetProcessHeap(), 0, cmdline.Length + sizeof(WCHAR) )) &&
++        !NtReadVirtualMemory( handle, cmdline.Buffer, str->Buffer, cmdline.Length, NULL ))
++    {
++        str->Length = cmdline.Length;
++        str->MaximumLength = cmdline.Length + sizeof(WCHAR);
++        str->Buffer[cmdline.Length / sizeof(WCHAR)] = 0;
++        ret = TRUE;
++    }
++    close_process_handle( handle );
++    return ret;
++}
++
++static void notify_process_created( SYSTEM_PROCESS_INFORMATION *spi, PEPROCESS process, const WCHAR *path,
++                                    const struct process_notify *notify, unsigned int count )
++{
++    UNICODE_STRING image = {0}, cmdline = {0};
++    PS_CREATE_NOTIFY_INFO info;
++    WCHAR *name = NULL;
++    unsigned int i;
++
++    memset( &info, 0, sizeof(info) );
++    info.Size = sizeof(info);
++    info.ParentProcessId = spi->ParentProcessId;
++    info.CreatingThreadId.UniqueProcess = spi->ParentProcessId;
++    if (path)
++        RtlDosPathNameToNtPathName_U( path, &image, NULL, NULL );
++    else if ((name = HeapAlloc( GetProcessHeap(), 0, spi->ProcessName.Length + sizeof(WCHAR) )))
++    {
++        memcpy( name, spi->ProcessName.Buffer, spi->ProcessName.Length );
++        name[spi->ProcessName.Length / sizeof(WCHAR)] = 0;
++        RtlCreateUnicodeString( &image, name );
++        path = name;
++    }
++    if (path && (info.FileObject = create_image_file_object( path ))) info.FileOpenNameAvailable = 1;
++    get_process_command_line( process, &cmdline );
++    info.ImageFileName = image.Buffer ? &image : NULL;
++    info.CommandLine = cmdline.Buffer ? &cmdline : NULL;
++
++    TRACE( "process %p, pid %p, parent %p, image %s\n", process, spi->UniqueProcessId,
++           spi->ParentProcessId, debugstr_us(&image) );
++
++    for (i = 0; i < count; i++)
++    {
++        if (notify[i].ex)
++            ((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)notify[i].routine)( process, spi->UniqueProcessId, &info );
++        else
++            ((PCREATE_PROCESS_NOTIFY_ROUTINE)notify[i].routine)( spi->ParentProcessId, spi->UniqueProcessId, TRUE );
++    }
++
++    if (info.FileObject) ObDereferenceObject( info.FileObject );
++    RtlFreeUnicodeString( &image );
++    HeapFree( GetProcessHeap(), 0, cmdline.Buffer );
++    HeapFree( GetProcessHeap(), 0, name );
++}
++
++static void notify_process_exited( struct known_process *known, const struct process_notify *notify,
++                                   unsigned int count )
++{
++    unsigned int i;
++
++    TRACE( "process %p, pid %p\n", known->process, known->pid );
++
++    for (i = 0; i < count; i++)
++    {
++        if (notify[i].ex)
++        {
++            if (known->process)
++                ((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)notify[i].routine)( known->process, known->pid, NULL );
++        }
++        else
++        {
++            HANDLE parent = known->process ? (HANDLE)known->process->info.InheritedFromUniqueProcessId : 0;
++            ((PCREATE_PROCESS_NOTIFY_ROUTINE)notify[i].routine)( parent, known->pid, FALSE );
++        }
++    }
++}
++
++static struct known_process *find_known_process( struct known_process *list, unsigned int count,
++                                                 HANDLE pid, LONGLONG create_time )
++{
++    unsigned int i;
++
++    for (i = 0; i < count; i++)
++        if (list[i].pid == pid && list[i].create_time == create_time) return &list[i];
++    return NULL;
++}
++
++/* compares the process list with the previous one and sends notifications,
++ * process_notify_cs is not held while drivers are called */
++static void update_process_list( BOOL notify )
++{
++    struct process_notify routines[ARRAY_SIZE(process_notify)];
++    SYSTEM_PROCESS_INFORMATION *list, *spi;
++    struct known_process *known, *old;
++    unsigned int count = 0, i, routine_count, old_count;
++
++    if (!(list = get_process_list())) return;
++    for (spi = list; spi; spi = next_process( spi )) count++;
++    if (!(known = HeapAlloc( GetProcessHeap(), HEAP_ZERO_MEMORY, count * sizeof(*known) )))
++    {
++        HeapFree( GetProcessHeap(), 0, list );
++        return;
++    }
++
++    EnterCriticalSection( &process_notify_cs );
++    routine_count = process_notify_count;
++    memcpy( routines, process_notify, routine_count * sizeof(*routines) );
++    old = known_processes;
++    old_count = known_process_count;
++    LeaveCriticalSection( &process_notify_cs );
++
++    for (spi = list, i = 0; spi; spi = next_process( spi ), i++)
++    {
++        struct known_process *prev;
++        WCHAR *path;
++
++        known[i].pid = spi->UniqueProcessId;
++        known[i].create_time = spi->CreationTime.QuadPart;
++        if ((prev = find_known_process( old, old_count, known[i].pid, known[i].create_time )))
++        {
++            known[i].process = prev->process;
++            known[i].pending = prev->pending;
++            known[i].retries = prev->retries + 1;
++            prev->process = NULL;
++            if (!known[i].pending) continue;
++        }
++        else if (!spi->UniqueProcessId || PsLookupProcessByProcessId( spi->UniqueProcessId, &known[i].process ))
++            known[i].process = NULL;
++
++        if (!notify || !known[i].process) continue;
++
++        path = get_process_image_path( known[i].process );
++        if (!path && known[i].retries < MAX_PROCESS_NOTIFY_RETRIES)
++        {
++            known[i].pending = TRUE;
++            continue;
++        }
++        known[i].pending = FALSE;
++        notify_process_created( spi, known[i].process, path, routines, routine_count );
++        HeapFree( GetProcessHeap(), 0, path );
++    }
++
++    for (i = 0; i < old_count; i++)
++    {
++        if (!old[i].process) continue;
++        if (notify && !old[i].pending) notify_process_exited( &old[i], routines, routine_count );
++        ObDereferenceObject( old[i].process );
++    }
++
++    EnterCriticalSection( &process_notify_cs );
++    known_processes = known;
++    known_process_count = count;
++    LeaveCriticalSection( &process_notify_cs );
++
++    HeapFree( GetProcessHeap(), 0, old );
++    HeapFree( GetProcessHeap(), 0, list );
++}
++
++static DWORD CALLBACK process_monitor_proc( void *arg )
++{
++    SetThreadDescription( GetCurrentThread(), L"wine_process_monitor" );
++
++    for (;;)
++    {
++        Sleep( 50 );
++        update_process_list( TRUE );
++    }
++    return 0;
++}
++
++static NTSTATUS set_process_notify( void *routine, BOOLEAN ex, BOOLEAN remove )
++{
++    NTSTATUS status = STATUS_SUCCESS;
++    BOOL start = FALSE;
++    unsigned int i;
++
++    EnterCriticalSection( &process_notify_cs );
++    if (remove)
++    {
++        for (i = 0; i < process_notify_count; i++)
++            if (process_notify[i].routine == routine && process_notify[i].ex == ex) break;
++        if (i < process_notify_count)
++            memmove( &process_notify[i], &process_notify[i + 1],
++                     (--process_notify_count - i) * sizeof(*process_notify) );
++        else
++            status = STATUS_PROCEDURE_NOT_FOUND;
++    }
++    else if (process_notify_count == ARRAY_SIZE(process_notify))
++        status = STATUS_INVALID_PARAMETER;
++    else
++    {
++        process_notify[process_notify_count].routine = routine;
++        process_notify[process_notify_count].ex = ex;
++        process_notify_count++;
++        start = !process_monitor;
++    }
++    LeaveCriticalSection( &process_notify_cs );
++
++    if (start)
++    {
++        /* existing processes are not reported */
++        update_process_list( FALSE );
++        EnterCriticalSection( &process_notify_cs );
++        if (!process_monitor) process_monitor = CreateThread( NULL, 0, process_monitor_proc, NULL, 0, NULL );
++        LeaveCriticalSection( &process_notify_cs );
++    }
++    return status;
++}
++
++/***********************************************************************
++ *           PsSetCreateProcessNotifyRoutine   (NTOSKRNL.EXE.@)
++ */
++NTSTATUS WINAPI PsSetCreateProcessNotifyRoutine( PCREATE_PROCESS_NOTIFY_ROUTINE callback, BOOLEAN remove )
++{
++    TRACE( "%p %d\n", callback, remove );
++    return set_process_notify( callback, FALSE, remove );
++}
++
++/***********************************************************************
++ *           PsSetCreateProcessNotifyRoutineEx   (NTOSKRNL.EXE.@)
++ */
++NTSTATUS WINAPI PsSetCreateProcessNotifyRoutineEx( PCREATE_PROCESS_NOTIFY_ROUTINE_EX callback, BOOLEAN remove )
++{
++    TRACE( "%p %d\n", callback, remove );
++    return set_process_notify( callback, TRUE, remove );
++}
++
+ static void *create_thread_object( HANDLE handle )
+ {
+     THREAD_BASIC_INFORMATION info;
+@@ -2565,16 +3114,31 @@ PRKTHREAD WINAPI KeGetCurrentThread(void)
+ {
+     struct _KTHREAD *thread = NtCurrentTeb()->Instrumentation[1];
+ 
++    TRACE( "tid %lx, request thread %lx, client tid %lx\n",
++           GetCurrentThreadId(), request_thread, client_tid );
++
+     if (!thread)
+     {
+         HANDLE handle = GetCurrentThread();
++        NTSTATUS status;
+ 
+         /* FIXME: we shouldn't need it, GetCurrentThread() should be client thread already */
+-        if (GetCurrentThreadId() == request_thread)
+-            handle = OpenThread( MAXIMUM_ALLOWED, FALSE, client_tid );
++        if (GetCurrentThreadId() == request_thread && client_tid)
++        {
++            if (!(handle = OpenThread( THREAD_QUERY_INFORMATION, FALSE, client_tid )))
++            {
++                WARN( "failed to open client thread %lu, error %lu\n", client_tid, GetLastError() );
++                return NULL;
++            }
++        }
+ 
+-        kernel_object_from_handle( handle, PsThreadType, (void**)&thread );
++        status = kernel_object_from_handle( handle, PsThreadType, (void **)&thread );
+         if (handle != GetCurrentThread()) NtClose( handle );
++        if (status)
++        {
++            WARN( "failed to resolve current thread, status %#lx\n", status );
++            return NULL;
++        }
+ 
+         NtCurrentTeb()->Instrumentation[1] = thread;
+     }
+@@ -2867,6 +3431,17 @@ PVOID WINAPI MmAllocateContiguousMemorySpecifyCache( SIZE_T size,
+ /***********************************************************************
+  *           MmAllocatePagesForMdl   (NTOSKRNL.EXE.@)
+  */
++/* there is no physical memory to describe; use the virtual page numbers so
++ * that the PFN array is consistent with MmGetPhysicalAddress */
++static void fill_mdl_pfns( MDL *mdl )
++{
++    PFN_NUMBER *pfns = (PFN_NUMBER *)(mdl + 1);
++    ULONG_PTR page = (ULONG_PTR)mdl->StartVa >> PAGE_SHIFT;
++    SIZE_T i, count = ADDRESS_AND_SIZE_TO_SPAN_PAGES( (char *)mdl->StartVa + mdl->ByteOffset, mdl->ByteCount );
++
++    for (i = 0; i < count; i++) pfns[i] = page + i;
++}
++
+ PMDL WINAPI MmAllocatePagesForMdl(PHYSICAL_ADDRESS lowaddress, PHYSICAL_ADDRESS highaddress,
+                                   PHYSICAL_ADDRESS skipbytes, SIZE_T size)
+ {
+@@ -2880,7 +3455,11 @@ PMDL WINAPI MmAllocatePagesForMdl(PHYSICAL_ADDRESS lowaddress, PHYSICAL_ADDRESS
+  */
+ void WINAPI MmBuildMdlForNonPagedPool(MDL *mdl)
+ {
+-    FIXME("stub: %p\n", mdl);
++    TRACE("%p\n", mdl);
++
++    fill_mdl_pfns( mdl );
++    mdl->MdlFlags |= MDL_SOURCE_IS_NONPAGED_POOL;
++    mdl->MappedSystemVa = (char *)mdl->StartVa + mdl->ByteOffset;
+ }
+ 
+ /***********************************************************************
+@@ -2904,6 +3483,21 @@ void WINAPI MmFreeNonCachedMemory( void *addr, SIZE_T size )
+     VirtualFree( addr, 0, MEM_RELEASE );
+ }
+ 
++/***********************************************************************
++ *           KeStallExecutionProcessor   (NTOSKRNL.EXE.@)
++ */
++void WINAPI KeStallExecutionProcessor( ULONG us )
++{
++    LARGE_INTEGER freq, start, now;
++
++    TRACE( "%lu\n", us );
++
++    QueryPerformanceFrequency( &freq );
++    QueryPerformanceCounter( &start );
++    do QueryPerformanceCounter( &now );
++    while ((now.QuadPart - start.QuadPart) * 1000000 / freq.QuadPart < us);
++}
++
+ /***********************************************************************
+  *           MmIsAddressValid   (NTOSKRNL.EXE.@)
+  *
+@@ -2970,9 +3564,12 @@ PVOID WINAPI MmMapLockedPages( MDL *mdl, KPROCESSOR_MODE mode )
+ PVOID WINAPI  MmMapLockedPagesSpecifyCache(PMDLX MemoryDescriptorList, KPROCESSOR_MODE AccessMode, MEMORY_CACHING_TYPE CacheType,
+                                            PVOID BaseAddress, ULONG BugCheckOnFailure, MM_PAGE_PRIORITY Priority)
+ {
+-    FIXME("(%p, %u, %u, %p, %lu, %u): stub\n", MemoryDescriptorList, AccessMode, CacheType, BaseAddress, BugCheckOnFailure, Priority);
++    TRACE("(%p, %u, %u, %p, %lu, %u)\n", MemoryDescriptorList, AccessMode, CacheType, BaseAddress, BugCheckOnFailure, Priority);
+ 
+-    return NULL;
++    /* drivers and their clients share one address space here, so the
++     * locked pages are already visible at their original address */
++    if (BaseAddress) FIXME("requested base address %p ignored\n", BaseAddress);
++    return MmMapLockedPages( MemoryDescriptorList, AccessMode );
+ }
+ 
+ /***********************************************************************
+@@ -2980,7 +3577,13 @@ PVOID WINAPI  MmMapLockedPagesSpecifyCache(PMDLX MemoryDescriptorList, KPROCESSO
+  */
+ void WINAPI MmUnmapLockedPages( void *base, MDL *mdl )
+ {
+-    FIXME( "(%p %p_\n", base, mdl );
++    TRACE( "(%p %p)\n", base, mdl );
++
++    if (base == mdl->MappedSystemVa)
++    {
++        mdl->MdlFlags &= ~MDL_MAPPED_TO_SYSTEM_VA;
++        mdl->MappedSystemVa = NULL;
++    }
+ }
+ 
+ /***********************************************************************
+@@ -3006,7 +3609,21 @@ PVOID WINAPI MmPageEntireDriver(PVOID AddrInSection)
+  */
+ void WINAPI MmProbeAndLockPages(PMDLX MemoryDescriptorList, KPROCESSOR_MODE AccessMode, LOCK_OPERATION Operation)
+ {
+-    FIXME("(%p, %u, %u): stub\n", MemoryDescriptorList, AccessMode, Operation);
++    MDL *mdl = MemoryDescriptorList;
++    char *va = (char *)mdl->StartVa + mdl->ByteOffset;
++
++    TRACE("(%p, %u, %u)\n", mdl, AccessMode, Operation);
++
++    if (mdl->ByteCount)
++    {
++        if (Operation == IoReadAccess ? IsBadReadPtr( va, mdl->ByteCount )
++                                      : IsBadWritePtr( va, mdl->ByteCount ))
++            RtlRaiseStatus( STATUS_ACCESS_VIOLATION );
++    }
++
++    fill_mdl_pfns( mdl );
++    mdl->MdlFlags |= MDL_PAGES_LOCKED;
++    if (Operation != IoReadAccess) mdl->MdlFlags |= MDL_WRITE_OPERATION;
+ }
+ 
+ 
+@@ -3024,7 +3641,9 @@ void WINAPI MmResetDriverPaging(PVOID AddrInSection)
+  */
+ void WINAPI  MmUnlockPages(PMDLX MemoryDescriptorList)
+ {
+-    FIXME("(%p): stub\n", MemoryDescriptorList);
++    TRACE("(%p)\n", MemoryDescriptorList);
++
++    MemoryDescriptorList->MdlFlags &= ~(MDL_PAGES_LOCKED | MDL_WRITE_OPERATION);
+ }
+ 
+ 
+@@ -3262,44 +3881,173 @@ BOOLEAN WINAPI PsGetVersion(ULONG *major, ULONG *minor, ULONG *build, UNICODE_ST
+ }
+ 
+ 
++struct _SECURITY_CLIENT_CONTEXT
++{
++    SECURITY_QUALITY_OF_SERVICE SecurityQos;
++    PACCESS_TOKEN ClientToken;
++    BOOLEAN DirectlyAccessClientToken;
++    BOOLEAN DirectAccessEffectiveOnly;
++    BOOLEAN ServerIsRemote;
++    TOKEN_CONTROL ClientTokenControl;
++};
++
++/* the server can't map tokens to kernel objects, so keep our own handle */
++struct client_token
++{
++    HANDLE handle;
++};
++
++/* duplicate the effective token of a client thread as an impersonation token */
++static NTSTATUS open_client_token( PETHREAD client_thread, const SECURITY_QUALITY_OF_SERVICE *qos, HANDLE *ret )
++{
++    SECURITY_QUALITY_OF_SERVICE token_qos = *qos;
++    OBJECT_ATTRIBUTES attr;
++    HANDLE thread, process, token;
++    NTSTATUS status;
++
++    if (!(thread = OpenThread( THREAD_QUERY_INFORMATION, FALSE, HandleToUlong( client_thread->kthread.id.UniqueThread ) )))
++        return STATUS_INVALID_PARAMETER;
++    status = NtOpenThreadToken( thread, TOKEN_DUPLICATE | TOKEN_QUERY, TRUE, &token );
++    NtClose( thread );
++
++    if (status == STATUS_NO_TOKEN)
++    {
++        if (!(process = OpenProcess( PROCESS_QUERY_INFORMATION, FALSE,
++                                     HandleToUlong( client_thread->kthread.id.UniqueProcess ) )))
++            return STATUS_INVALID_PARAMETER;
++        status = NtOpenProcessToken( process, TOKEN_DUPLICATE | TOKEN_QUERY, &token );
++        NtClose( process );
++    }
++    if (status) return status;
++
++    token_qos.Length = sizeof(token_qos);
++    InitializeObjectAttributes( &attr, NULL, 0, NULL, NULL );
++    attr.SecurityQualityOfService = &token_qos;
++    status = NtDuplicateToken( token, TOKEN_ALL_ACCESS, &attr, qos->EffectiveOnly, TokenImpersonation, ret );
++    NtClose( token );
++    return status;
++}
++
+ /***********************************************************************
+- *           PsImpersonateClient   (NTOSKRNL.EXE.@)
++ *           SeCreateClientSecurity   (NTOSKRNL.EXE.@)
+  */
+-NTSTATUS WINAPI PsImpersonateClient(PETHREAD Thread, PACCESS_TOKEN Token, BOOLEAN CopyOnOpen,
+-                                    BOOLEAN EffectiveOnly, SECURITY_IMPERSONATION_LEVEL ImpersonationLevel)
++NTSTATUS WINAPI SeCreateClientSecurity( PETHREAD client_thread, SECURITY_QUALITY_OF_SERVICE *qos,
++                                        BOOLEAN remote_session, struct _SECURITY_CLIENT_CONTEXT *context )
+ {
+-    FIXME("(%p, %p, %u, %u, %u): stub\n", Thread, Token, CopyOnOpen, EffectiveOnly, ImpersonationLevel);
++    struct client_token *client_token;
++    HANDLE token;
++    NTSTATUS status;
+ 
+-    return STATUS_NOT_IMPLEMENTED;
++    TRACE( "thread %p, qos %p, remote %u, context %p\n", client_thread, qos, remote_session, context );
++
++    if (!client_thread || !qos || !context) return STATUS_INVALID_PARAMETER;
++
++    if ((status = open_client_token( client_thread, qos, &token ))) return status;
++    if (!(client_token = alloc_kernel_object( SeTokenObjectType, NULL, sizeof(*client_token), 1 )))
++    {
++        NtClose( token );
++        return STATUS_NO_MEMORY;
++    }
++    client_token->handle = token;
++    context->ClientToken = client_token;
++
++    context->SecurityQos = *qos;
++    context->DirectlyAccessClientToken = FALSE;
++    context->DirectAccessEffectiveOnly = qos->EffectiveOnly;
++    context->ServerIsRemote = remote_session;
++    memset( &context->ClientTokenControl, 0, sizeof(context->ClientTokenControl) );
++
++    return STATUS_SUCCESS;
+ }
+ 
++/***********************************************************************
++ *           SeImpersonateClientEx   (NTOSKRNL.EXE.@)
++ */
++NTSTATUS WINAPI SeImpersonateClientEx( struct _SECURITY_CLIENT_CONTEXT *context, PETHREAD server_thread )
++{
++    struct client_token *client_token = context->ClientToken;
++    HANDLE thread = GetCurrentThread();
++    NTSTATUS status;
++
++    TRACE( "context %p, thread %p\n", context, server_thread );
++
++    if (!client_token || ObGetObjectType( client_token ) != SeTokenObjectType) return STATUS_INVALID_PARAMETER;
++
++    if (server_thread && !(thread = OpenThread( THREAD_SET_THREAD_TOKEN, FALSE,
++                                                HandleToUlong( server_thread->kthread.id.UniqueThread ) )))
++        status = STATUS_INVALID_PARAMETER;
++    else
++        status = NtSetInformationThread( thread, ThreadImpersonationToken,
++                                         &client_token->handle, sizeof(client_token->handle) );
++
++    if (thread && thread != GetCurrentThread()) NtClose( thread );
++    return status;
++}
+ 
+ /***********************************************************************
+- *           PsRevertToSelf   (NTOSKRNL.EXE.@)
++ *           SeImpersonateClient   (NTOSKRNL.EXE.@)
+  */
+-void WINAPI PsRevertToSelf(void)
++void WINAPI SeImpersonateClient( struct _SECURITY_CLIENT_CONTEXT *context, PETHREAD server_thread )
+ {
+-    FIXME("\n");
++    SeImpersonateClientEx( context, server_thread );
+ }
+ 
++/***********************************************************************
++ *           SeTokenType   (NTOSKRNL.EXE.@)
++ */
++TOKEN_TYPE WINAPI SeTokenType( PACCESS_TOKEN token )
++{
++    struct client_token *client_token = token;
++    TOKEN_TYPE type = TokenPrimary;
++    ULONG size;
++
++    TRACE( "%p\n", token );
++
++    if (client_token && ObGetObjectType( client_token ) == SeTokenObjectType)
++        NtQueryInformationToken( client_token->handle, TokenType, &type, sizeof(type), &size );
++    return type;
++}
+ 
+ /***********************************************************************
+- *           PsSetCreateProcessNotifyRoutine   (NTOSKRNL.EXE.@)
++ *           PsDereferencePrimaryToken   (NTOSKRNL.EXE.@)
+  */
+-NTSTATUS WINAPI PsSetCreateProcessNotifyRoutine( PCREATE_PROCESS_NOTIFY_ROUTINE callback, BOOLEAN remove )
++void WINAPI PsDereferencePrimaryToken( PACCESS_TOKEN token )
+ {
+-    FIXME( "stub: %p %d\n", callback, remove );
+-    return STATUS_SUCCESS;
++    TRACE( "%p\n", token );
++    if (token) ObDereferenceObject( token );
+ }
+ 
++/***********************************************************************
++ *           PsDereferenceImpersonationToken   (NTOSKRNL.EXE.@)
++ */
++void WINAPI PsDereferenceImpersonationToken( PACCESS_TOKEN token )
++{
++    TRACE( "%p\n", token );
++    if (token) ObDereferenceObject( token );
++}
+ 
+ /***********************************************************************
+- *           PsSetCreateProcessNotifyRoutineEx   (NTOSKRNL.EXE.@)
++ *           PsImpersonateClient   (NTOSKRNL.EXE.@)
+  */
+-NTSTATUS WINAPI PsSetCreateProcessNotifyRoutineEx( PCREATE_PROCESS_NOTIFY_ROUTINE_EX callback, BOOLEAN remove )
++NTSTATUS WINAPI PsImpersonateClient(PETHREAD Thread, PACCESS_TOKEN Token, BOOLEAN CopyOnOpen,
++                                    BOOLEAN EffectiveOnly, SECURITY_IMPERSONATION_LEVEL ImpersonationLevel)
+ {
+-    FIXME( "stub: %p %d\n", callback, remove );
+-    return STATUS_SUCCESS;
++    FIXME("(%p, %p, %u, %u, %u): stub\n", Thread, Token, CopyOnOpen, EffectiveOnly, ImpersonationLevel);
++
++    return STATUS_NOT_IMPLEMENTED;
++}
++
++
++/***********************************************************************
++ *           PsRevertToSelf   (NTOSKRNL.EXE.@)
++ */
++void WINAPI PsRevertToSelf(void)
++{
++    HANDLE token = NULL;
++
++    TRACE( "\n" );
++
++    NtSetInformationThread( GetCurrentThread(), ThreadImpersonationToken, &token, sizeof(token) );
+ }
+ 
+ 
+@@ -3344,16 +4092,6 @@ NTSTATUS WINAPI PsRemoveLoadImageNotifyRoutine(PLOAD_IMAGE_NOTIFY_ROUTINE routin
+  }
+ 
+ 
+-/***********************************************************************
+- *           PsReferenceProcessFilePointer  (NTOSKRNL.EXE.@)
+- */
+-NTSTATUS WINAPI PsReferenceProcessFilePointer(PEPROCESS process, FILE_OBJECT **file)
+-{
+-    FIXME("%p %p\n", process, file);
+-    return STATUS_NOT_IMPLEMENTED;
+-}
+-
+-
+ /***********************************************************************
+  *           PsTerminateSystemThread   (NTOSKRNL.EXE.@)
+  */
+@@ -3500,6 +4238,34 @@ ULONG WINAPI KeGetCurrentProcessorNumberEx(PPROCESSOR_NUMBER process_number)
+     return cur_number;
+ }
+ 
++/***********************************************************************
++ *          KeGetProcessorNumberFromIndex   (NTOSKRNL.EXE.@)
++ */
++NTSTATUS WINAPI KeGetProcessorNumberFromIndex( ULONG index, PPROCESSOR_NUMBER number )
++{
++    USHORT group, group_count = GetActiveProcessorGroupCount();
++
++    TRACE( "%lu, %p\n", index, number );
++
++    if (!number) return STATUS_INVALID_PARAMETER;
++
++    for (group = 0; group < group_count; group++)
++    {
++        ULONG count = GetActiveProcessorCount( group );
++
++        if (index < count)
++        {
++            number->Group = group;
++            number->Number = index;
++            number->Reserved = 0;
++            return STATUS_SUCCESS;
++        }
++        index -= count;
++    }
++
++    return STATUS_INVALID_PARAMETER;
++}
++
+ /***********************************************************************
+  *          KeQueryGroupAffinity   (NTOSKRNL.EXE.@)
+  */
+@@ -4326,20 +5092,6 @@ PVOID WINAPI PsGetProcessWow64Process(PEPROCESS process)
+     return NULL;
+ }
+ 
+-/*********************************************************************
+- *           MmCopyVirtualMemory    (NTOSKRNL.@)
+- */
+-NTSTATUS WINAPI MmCopyVirtualMemory(PEPROCESS fromprocess, void *fromaddress, PEPROCESS toprocess,
+-                                    void *toaddress, SIZE_T bufsize, KPROCESSOR_MODE mode,
+-                                    SIZE_T *copied)
+-{
+-    FIXME("fromprocess %p, fromaddress %p, toprocess %p, toaddress %p, bufsize %Iu, mode %d, copied %p stub.\n",
+-            fromprocess, fromaddress, toprocess, toaddress, bufsize, mode, copied);
+-
+-    *copied = 0;
+-    return STATUS_NOT_IMPLEMENTED;
+-}
+-
+ /*********************************************************************
+  *           KeEnterGuardedRegion    (NTOSKRNL.@)
+  */
+@@ -4358,9 +5110,19 @@ void WINAPI KeLeaveGuardedRegion(void)
+ 
+ static const WCHAR token_type_name[] = {'T','o','k','e','n',0};
+ 
++static void release_token( void *obj )
++{
++    struct client_token *token = obj;
++
++    NtClose( token->handle );
++    free_kernel_object( token );
++}
++
+ static struct _OBJECT_TYPE token_type =
+ {
+-    token_type_name
++    token_type_name,
++    NULL,
++    release_token
+ };
+ 
+ POBJECT_TYPE SeTokenObjectType = &token_type;
+@@ -4587,36 +5349,6 @@ void WINAPI KeSignalCallDpcDone(void *barrier)
+     InterlockedDecrement((LONG *)barrier);
+ }
+ 
+-void * WINAPI PsGetProcessSectionBaseAddress(PEPROCESS process)
+-{
+-    void *image_base;
+-    NTSTATUS status;
+-    SIZE_T size;
+-    HANDLE h;
+-
+-    TRACE("process %p.\n", process);
+-
+-    if ((status = ObOpenObjectByPointer(process, 0, NULL, PROCESS_ALL_ACCESS, NULL, KernelMode, &h)))
+-    {
+-        WARN("Error opening process object, status %#lx.\n", status);
+-        return NULL;
+-    }
+-
+-    status = NtReadVirtualMemory(h, &process->info.PebBaseAddress->ImageBaseAddress,
+-            &image_base, sizeof(image_base), &size);
+-
+-    NtClose(h);
+-
+-    if (status || size != sizeof(image_base))
+-    {
+-        WARN("Error reading process memory, status %#lx, size %Iu.\n", status, size);
+-        return NULL;
+-    }
+-
+-    TRACE("returning %p.\n", image_base);
+-    return image_base;
+-}
+-
+ void WINAPI KeStackAttachProcess(KPROCESS *process, KAPC_STATE *apc_state)
+ {
+     FIXME("process %p, apc_state %p stub.\n", process, apc_state);
+@@ -4689,7 +5421,6 @@ BOOL WINAPI DllMain( HINSTANCE inst, DWORD reason, LPVOID reserved )
+     switch(reason)
+     {
+     case DLL_PROCESS_ATTACH:
+-        DisableThreadLibraryCalls( inst );
+ #if defined(__i386__) || defined(__x86_64__)
+         handler = RtlAddVectoredExceptionHandler( TRUE, vectored_handler );
+ #endif
+@@ -4699,6 +5430,9 @@ BOOL WINAPI DllMain( HINSTANCE inst, DWORD reason, LPVOID reserved )
+         dpc_call_tls_index = TlsAlloc();
+         LdrRegisterDllNotification( 0, ldr_notify_callback, NULL, &ldr_notify_cookie );
+         break;
++    case DLL_THREAD_ATTACH:
++        update_current_kthread();
++        break;
+     case DLL_PROCESS_DETACH:
+         LdrUnregisterDllNotification( ldr_notify_cookie );
+ 
+diff --git a/dlls/ntoskrnl.exe/ntoskrnl.exe.spec b/dlls/ntoskrnl.exe/ntoskrnl.exe.spec
+index 4426e50..49094b1 100644
+--- a/dlls/ntoskrnl.exe/ntoskrnl.exe.spec
++++ b/dlls/ntoskrnl.exe/ntoskrnl.exe.spec
+@@ -562,6 +562,7 @@
+ @ stdcall KeFlushQueuedDpcs()
+ @ stdcall KeGetCurrentProcessorNumber() NtGetCurrentProcessorNumber
+ @ stdcall KeGetCurrentProcessorNumberEx(ptr)
++@ stdcall KeGetProcessorNumberFromIndex(long ptr)
+ @ stdcall KeGetCurrentThread()
+ @ stub KeGetPreviousMode
+ @ stub KeGetRecommendedSharedDataAlignment
+@@ -664,6 +665,7 @@
+ @ stdcall KeSetTargetProcessorDpcEx(ptr ptr)
+ @ stub KeSetTimeIncrement
+ @ stdcall KeSetTimer(ptr int64 ptr)
++@ stdcall KeStallExecutionProcessor(long)
+ @ stdcall KeSetTimerEx(ptr int64 long ptr)
+ @ stdcall KeStackAttachProcess(ptr ptr)
+ @ stub KeSynchronizeExecution
+@@ -901,8 +903,8 @@
+ @ stub PsChargeProcessPoolQuota
+ @ stub PsCreateSystemProcess
+ @ stdcall PsCreateSystemThread(ptr long ptr long ptr ptr ptr)
+-@ stub PsDereferenceImpersonationToken
+-@ stub PsDereferencePrimaryToken
++@ stdcall PsDereferenceImpersonationToken(ptr)
++@ stdcall PsDereferencePrimaryToken(ptr)
+ @ stub PsDisableImpersonation
+ @ stub PsEstablishWin32Callouts
+ @ stub PsGetContextThread
+@@ -917,13 +919,13 @@
+ @ stub PsGetJobLock
+ @ stub PsGetJobSessionId
+ @ stub PsGetJobUIRestrictionsClass
+-@ stub PsGetProcessCreateTimeQuadPart
++@ stdcall PsGetProcessCreateTimeQuadPart(ptr)
+ @ stub PsGetProcessDebugPort
+ @ stub PsGetProcessExitProcessCalled
+ @ stub PsGetProcessExitStatus
+ @ stub PsGetProcessExitTime
+ @ stdcall PsGetProcessId(ptr)
+-@ stub PsGetProcessImageFileName
++@ stdcall PsGetProcessImageFileName(ptr)
+ @ stdcall PsGetProcessInheritedFromUniqueProcessId(ptr)
+ @ stub PsGetProcessJob
+ @ stub PsGetProcessPeb
+@@ -1343,7 +1345,7 @@
+ @ stub SeCaptureSubjectContext
+ @ stub SeCloseObjectAuditAlarm
+ @ stub SeCreateAccessState
+-@ stub SeCreateClientSecurity
++@ stdcall SeCreateClientSecurity(ptr ptr long ptr)
+ @ stub SeCreateClientSecurityFromSubjectContext
+ @ stub SeDeassignSecurity
+ @ stub SeDeleteAccessState
+@@ -1351,8 +1353,8 @@
+ @ stub SeExports
+ @ stub SeFilterToken
+ @ stub SeFreePrivileges
+-@ stub SeImpersonateClient
+-@ stub SeImpersonateClientEx
++@ stdcall SeImpersonateClient(ptr ptr)
++@ stdcall SeImpersonateClientEx(ptr ptr)
+ @ stdcall SeLocateProcessImageName(ptr ptr)
+ @ stub SeLockSubjectContext
+ @ stub SeMarkLogonSessionForTerminationNotification
+@@ -1378,7 +1380,7 @@
+ @ stub SeTokenIsRestricted
+ @ stub SeTokenIsWriteRestricted
+ @ extern SeTokenObjectType
+-@ stub SeTokenType
++@ stdcall SeTokenType(ptr)
+ @ stub SeUnlockSubjectContext
+ @ stub SeUnregisterLogonSessionTerminatedRoutine
+ @ stub SeValidSecurityDescriptor
+diff --git a/dlls/ntoskrnl.exe/ntoskrnl_private.h b/dlls/ntoskrnl.exe/ntoskrnl_private.h
+index d9db6f6..5f87749 100644
+--- a/dlls/ntoskrnl.exe/ntoskrnl_private.h
++++ b/dlls/ntoskrnl.exe/ntoskrnl_private.h
+@@ -56,6 +56,7 @@ struct _EPROCESS
+     DISPATCHER_HEADER header;
+     PROCESS_BASIC_INFORMATION info;
+     BOOL wow64;
++    char image_name[16];
+ };
+ 
+ struct _KTHREAD
+
+```
+
+`patches/wine-ntoskrnl-impact-anticheat.patch`:
+
+```patch
+--- a/dlls/ntoskrnl.exe/ntoskrnl.c
++++ b/dlls/ntoskrnl.exe/ntoskrnl.c
+@@ -4317,6 +4317,46 @@
+     return ret;
+ }
+ 
++/* Names of kernel drivers that should use stub loading on Wine.
++ * These are anti-cheat drivers that cannot be loaded as DLLs. */
++static const char * const stub_driver_names[] =
++{
++    "impactdrv",
++    "impactdrv1",
++    "mracdrv",
++    "mracdrv1",
++    NULL
++};
++
++/* Check if a driver name matches a known stub driver */
++static BOOL is_stub_driver_name( const WCHAR *name )
++{
++    char buf[MAX_PATH];
++    unsigned int i;
++
++    if (WideCharToMultiByte( CP_ACP, 0, name, -1, buf, sizeof(buf), NULL, NULL ) <= 0)
++        return FALSE;
++
++    for (i = 0; stub_driver_names[i]; i++)
++        if (!lstrcmpiA( buf, stub_driver_names[i] ))
++            return TRUE;
++    return FALSE;
++}
++
++/* Check if a path points to a .sys file */
++static BOOL is_sys_file( const WCHAR *path )
++{
++    const WCHAR *ext;
++    if (!path) return FALSE;
++    ext = wcsrchr( path, '\\' );
++    if (!ext) ext = path;
++    else ext++;
++    return (ext[0] == 's' || ext[0] == 'S') &&
++           (ext[1] == 'y' || ext[1] == 'Y') &&
++           (ext[2] == 's' || ext[2] == 'S') &&
++           ext[3] == '\0';
++}
++
+ /* load the .sys module for a device driver */
+ static HMODULE load_driver( const WCHAR *driver_name, const UNICODE_STRING *keyname )
+ {
+@@ -4382,6 +4422,25 @@
+ 
+     module = LoadLibraryExW( str, 0, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS );
+ 
++    /* Handle stub loading for known anti-cheat kernel drivers */
++    if (!module && is_stub_driver_name( driver_name ) && is_sys_file( str ))
++    {
++        /* LoadLibraryExW failed to load .sys as DLL - this is expected.
++         * Create a stub HMODULE so the driver registration succeeds. */
++        static HMODULE stub_base;
++        static ULONG stub_counter;
++
++        WARN( "kernel driver %s cannot be loaded as DLL, using stub module\n",
++              wine_dbgstr_w( driver_name ) );
++        TRACE( "  path: %s\n", wine_dbgstr_w( str ) );
++        HeapFree( GetProcessHeap(), 0, path );
++
++        module = (HMODULE)(ULONG_PTR)(0x10000000 + (stub_counter++ * 0x1000));
++        TRACE( "created stub HMODULE %p for driver %s\n", module, wine_dbgstr_w( driver_name ) );
++        return module;
++    }
++
+     if (module && load_image_notify_routine_count)
+     {
+         UNICODE_STRING module_name;
+
+```
+
+`scripts/deploy.sh`:
+
+```sh
+#!/bin/bash
+set -euo pipefail
+PROTON_DIR="${PROTON_DIR:-/home/alex/PortProton/data/dist/PROTON_LG_10-28}"
+NTOSKRNL_SRC="${1:-}"
+GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
+log_info()  { echo -e "${GREEN}[INFO]${NC} $1"; }
+log_warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+if [ -z "${NTOSKRNL_SRC}" ]; then
+    log_error "Не указан путь к ntoskrnl.exe"
+    log_info "Использование: $0 /path/to/ntoskrnl.exe"
+    exit 1
+fi
+if [ ! -f "${NTOSKRNL_SRC}" ]; then
+    log_error "Файл не найден: ${NTOSKRNL_SRC}"
+    exit 1
+fi
+log_info "Деплой ntoskrnl.exe в PROTON_LG_10-28..."
+if [ ! -d "${PROTON_DIR}" ]; then
+    log_error "Целевая директория не найдена: ${PROTON_DIR}"
+    exit 1
+fi
+TARGET="${PROTON_DIR}/lib/wine/x86_64-windows/ntoskrnl.exe"
+BACKUP="${TARGET}.bak.$(date +%Y%m%d_%H%M%S)"
+if [ -f "${TARGET}" ]; then
+    cp "${TARGET}" "${BACKUP}"
+    log_info "Бэкап создан: ${BACKUP}"
+fi
+cp -v "${NTOSKRNL_SRC}" "${TARGET}"
+if strings "${TARGET}" | grep -q "stub module\|stub_driver_names\|impactdrv\|MmProbeAndLockPages\|PsSetCreateProcessNotifyRoutine" 2>/dev/null; then
+    log_info "OK Патч обнаружен в бинарном ntoskrnl.exe"
+else
+    log_warn "WARN Патч НЕ обнаружен в бинарном ntoskrnl.exe"
+fi
+SIZE=$(stat -c%s "${TARGET}" 2>/dev/null || stat -f%z "${TARGET}" 2>/dev/null)
+log_info "ntoskrnl.exe развёрнут (размер: ${SIZE} байт)"
+log_info "Готово! Запустите PortProton с PROTON_LG_10-28 и проверьте запуск игры."
+
+```
