@@ -1503,6 +1503,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/lico-n/ZygiskFrida [Injects frida gadget using zygisk]
 - https://github.com/hex91/zygisk-gadget-stealth [Zygisk module for per-app Frida Gadget injection with configurable stealth and WebUI status]
 - https://github.com/xjoker/frida-magisk [Magisk/KernelSU module bundling official Frida server and Gadget plus a Zygisk injector, with scripted builds and on-device WebUI]
+- https://github.com/ViRb3/magisk-frida [Magisk/KernelSU/APatch module that auto-starts up-to-date frida-server on boot, with multi-arch builds and configurable listen port]
 - https://github.com/Admirepowered/Zygisk_mod [Standalone implementation of Zygisk]
 - https://github.com/anasfanani/Magisk-Tailscaled [Magisk module for running Tailscale]
 - https://github.com/ayoubvvch/sshserver-magisk [Magisk/KernelSU/APatch module with statically linked Dropbear SSH and SFTP for headless root shell access from boot]
@@ -2702,6 +2703,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/hiitiger/goverlay [DirectX hook game overlay for Electron/Qt/CEF apps injected into games]
 - https://github.com/gameplug-labs/gameplug [Multi-API (D3D9–12/Vulkan) proxy-DLL framework for ImGui overlays and game plugins on Windows]
 - https://github.com/storycraft/asdf-overlay [Rust overlay library with DirectX, OpenGL, and Vulkan hooking for in-game overlays]
+- https://github.com/joeplenty/menyoo-dx12 [Pure-Rust DirectX 12 in-game mod menu overlay for GTA with software-rasterized UI, Object Spooner, and external RVA schema]
 - https://github.com/nemirtingas/ingame_overlay [Cross-platform C++ library for injected in-game overlays by hooking OpenGL, Vulkan, DirectX 9–12, and Metal render paths]
 
 > Render/Draw
@@ -4907,6 +4909,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Vagdedes/Spartan-AntiCheat-In-Rewrite [Java/Maven rewrite of the long-running Spartan Minecraft server anti-cheat (Spigot/Paper ecosystem)]
 - https://github.com/redsignalofficial/RedSignalAntiCheat [Open-source AGPL Spigot/Paper/Folia Minecraft anti-cheat (RSAC) with movement, combat, interaction, and packet checks plus RSInjector hooks]
 - https://github.com/ElbsxS1/AntiCheat-Asthen [Open Paper/Folia 26.3 server anti-cheat (AsthenGuard) with movement, combat, mining checks, Bedrock-aware tuning, and bundled Paper anti-xray assets]
+- https://github.com/raphvallee/AntiCheat [Modular Paper 26.3 (Java 25) Minecraft server anti-cheat plugin with SpeedA, FlyA, and ReachA reference checks, Gradle build, and unit tests]
 - https://github.com/mrKozy/KozyAntiCheat [Server-side anti-cheat for Paper, Purpur, Folia, and Fabric Minecraft Java networks]
 - https://github.com/Fi3w0/Fiw-Anticheat [Shared-engine Minecraft server modpack verification, anti-cheat support, and admin enforcement across Fabric, Forge, and NeoForge]
 - https://github.com/Ender3D/minecraft-mod-creative-scroll [Fabric server mod granting timed admin-issued Creative sessions with inventory sandboxing, packet-level spawn blocklist, and container/drop isolation]
