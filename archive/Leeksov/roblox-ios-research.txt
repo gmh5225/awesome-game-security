@@ -1,0 +1,1800 @@
+Project Path: arc_Leeksov_roblox-ios-research_afak9ctr
+
+Source Tree:
+
+```txt
+arc_Leeksov_roblox-ios-research_afak9ctr
+├── LICENSE
+├── README.md
+└── docs
+    ├── BYTECODE_VERIFICATION.md
+    ├── DETECTION_MAP.md
+    ├── DETECTION_SYSTEMS.md
+    ├── FFLAGS.md
+    ├── FUNCTION_INDEX.md
+    ├── REAPER_ANALYSIS.md
+    ├── REPORTING_PATHS.md
+    └── SYSTEM_IMPORTS.md
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 leeksov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Roblox iOS — Anti-Tamper & Integrity Verification Research
+
+Reverse-engineering of the **anti-tamper**, integrity verification, and server-side validation
+systems in the iOS Roblox client (`RobloxLib`, arm64).
+
+> **Important distinction:** This is **not** a classic anti-cheat (no environment scanning, no
+> jailbreak/root detection, no process inspection, no debugger detection). Roblox on iOS has
+> **no native anti-cheat** in the binary. What it has is **anti-tamper** (bytecode signature
+> verification, patch integrity) and **server-side validation** (challenge-response, physics
+> hash checks, device attestation). The Lua VM itself is not an anti-cheat — Lua scripts are
+> game logic written by place developers, not by Roblox's security team.
+
+All addresses refer to the current RobloxLib build. Every function was identified via static
+analysis in IDA Pro, cross-referenced through string anchors, xrefs, and call-graph traversal.
+
+---
+
+## Key findings
+
+- **No anti-cheat in RobloxLib.** No jailbreak detection, no anti-debug, no injection scanning,
+  no environment fingerprinting. The binary imports `sysctl`/`sysctlbyname`/`task_info` but they
+  are used exclusively by **Crashpad** (crash reporter). No `ptrace`, `csops`, `sandbox_check`,
+  or file-existence checks (`/Applications/Cydia.app`, etc.) exist.
+- **No `DYLD_INSERT_LIBRARIES` detection.** No `getenv` caller checks for injection-related
+  env vars. All `getenv` usage is SQLite, WebRTC, and OpenSSL configuration.
+- **Reaper.framework is NOT anti-cheat.** It is [Emerge Tools](https://www.emergetools.com/)
+  dead-code detection SDK (`com.emergetools.reaper`). Scans only app-bundle binaries for
+  ObjC/Swift type usage analytics. Does not scan for injected dylibs.
+- **The "external anti-cheat module"** referenced by the IOSSupport ObjC bridge
+  (`clientSendExtAntiCheat:`, `setExtAntiCheatJoinData:`) is **not present in the IPA**.
+  The bridge is either a no-op on iOS or the module is downloaded at runtime.
+- **macOS analysis in separate repo:** [roblox-macos-research](https://github.com/Leeksov/roblox-macos-research) —
+  native AC telemetry module, NativeCodeGen, struct ABI differences, all decrypted strings.
+- **All protection is anti-tamper or server-side:**
+  - Bytecode signature verification (GF(2^128) Galois hash)
+  - DataModel patch signing (Blake2b / Blake3)
+  - US14116 server challenge-response (disconnect code 268)
+  - Device integrity (Apple App Attest, disconnect codes 296–300)
+  - RakNet encryption failure thresholds
+  - FFlag-controlled telemetry pipelines
+  - Physics/animation hash checks (server-side divergence detection)
+
+---
+
+## Structure
+
+| Document | Contents |
+|---|---|
+| [`docs/DETECTION_MAP.md`](docs/DETECTION_MAP.md) | High-level architecture: all protection layers, flag setters, reporting paths |
+| [`docs/BYTECODE_VERIFICATION.md`](docs/BYTECODE_VERIFICATION.md) | Bytecode signature verification: GF(2^128) Galois hash, trailer parsing, obfuscation tables |
+| [`docs/REPORTING_PATHS.md`](docs/REPORTING_PATHS.md) | Network reporting: 20+ disconnect codes, exit codes, crash classification, telemetry fields |
+| [`docs/DETECTION_SYSTEMS.md`](docs/DETECTION_SYSTEMS.md) | Independent systems: US14116 memcheck, external AC bridge, security channel, QoS heartbeat, device integrity, physics FPS detection |
+| [`docs/FFLAGS.md`](docs/FFLAGS.md) | 40+ security-relevant FFlags with string addresses and global variables |
+| [`docs/FUNCTION_INDEX.md`](docs/FUNCTION_INDEX.md) | Complete address table of 60+ identified integrity/validation functions |
+| [`docs/REAPER_ANALYSIS.md`](docs/REAPER_ANALYSIS.md) | Full reverse of Reaper.framework — proves it is dead-code analytics, not anti-cheat |
+| [`docs/SYSTEM_IMPORTS.md`](docs/SYSTEM_IMPORTS.md) | Audit of all security-sensitive system imports (sysctl, ptrace, mprotect, etc.) |
+| **macOS research** | See separate repo: [roblox-macos-research](https://github.com/Leeksov/roblox-macos-research) |
+
+## What's NOT here (and why)
+
+- **Lua-side anti-cheat scripts** — individual Roblox *places* (games) can include their own
+  Lua anti-cheat scripts, but those are written by **place developers**, not Roblox. They run
+  inside the Lua VM like any game script and are not part of the native binary. They can be
+  dumped and analyzed per-place, but they are not covered here.
+- **Windows/macOS anti-cheat** — Roblox on desktop uses Hyperion (Byfron), a native anti-cheat
+  with kernel-level protections. This research covers **iOS only**, where no equivalent exists.
+
+## Methodology
+
+1. **String anchoring** — search for known integrity strings (`"HashMismatches"`, `"US14116"`,
+   `"bytecode version mismatch"`, `"disconnect"`, etc.) and trace to referencing functions
+2. **Import audit** — enumerate all security-sensitive system imports (`sysctl`, `ptrace`,
+   `task_info`, `access`, `mprotect`, `getenv`, `dlopen`) and trace every caller
+3. **Xref traversal** — follow call graphs from identified entry points to map complete pipelines
+4. **FFlag enumeration** — search all `FFlag`/`DFFlag`/`FInt` strings and correlate with init functions
+5. **Framework analysis** — reverse every non-system framework in the IPA (Reaper, Backtrace, Persona2)
+
+## Credits
+
+Research by [@leeksov](https://github.com/leeksov).
+
+## Disclaimer
+
+For educational and security-research purposes only. This documents publicly observable
+behavior of a shipping binary for the purpose of understanding runtime protection techniques.
+
+## License
+
+MIT — see [`LICENSE`](LICENSE).
+
+```
+
+`docs/BYTECODE_VERIFICATION.md`:
+
+```md
+# Bytecode Signature Verification Pipeline
+
+The bytecode authentication system verifies the cryptographic integrity of Luau bytecode
+before execution. It uses a GF(2^128) polynomial hash with pre-computed multiplication
+tables embedded in the binary.
+
+---
+
+## Call Chain
+
+```
+luau_load (sub_43E2CE8, 5712B)
+  └─ bytecode_authenticate (sub_172CC78, 520B)         @ call site 0x43E2E58
+       ├─ ensure_global_init (sub_172CEA0)
+       ├─ parse_signature_trailer (sub_172CED0, 640B)
+       │    ├─ detect_sig_v1 (sub_172DEC0, 128B)       — XOR magic 0xC432/0x6A
+       │    ├─ detect_sig_v2 (sub_172DF40, 92B)        — XOR magic 0x94A9D232
+       │    ├─ version_telemetry (sub_172D888, 728B)    — codes 900-903
+       │    └─ verify_hash_galois (sub_172DC9C, 524B)   — GF(2^128) core
+       ├─ telemetry_report (sub_172D184, 1280B)         — cr_* crash fields
+       └─ stats_increment (sub_172D714, 96B)            — atomic counters
+```
+
+---
+
+## 1. bytecode_authenticate — `sub_172CC78` (520 bytes)
+
+The top-level orchestrator. Called from `luau_load` with the bytecode buffer.
+Returns `true` (nonzero) on verification **failure**, `false` on success.
+
+### Decompiled logic
+
+```c
+// 1. One-time init of global state
+sub_172CEA0(a1);  // initializes xmmword_673ED18
+
+// 2. Parse cryptographic trailer from bytecode end
+int version = sub_172CED0(&xmmword_673ED18, bytecode, size, &trailer_info);
+
+// 3. Obfuscated version check via multi-stage lookup
+//    T1 @ 0x4EBE7C4 (10 bytes, index permutation)
+//    T2 @ 0x4EBE7CE (10 bytes, second permutation)
+//    T3 @ 0x4EBE7D8 (10 DWORDs, value table)
+v8 = T3[ T2[ T1[(int)version] ] % 10 ] / 7 - 157;
+
+// 4. Conditionally clear capability bit on the lua_State
+//    *(*(L+48) + 1232) &= ~0x40000000
+//    L+48 = global_State; offset 1232 (0x4D0) = capability flags
+if (-991146299 * (v8 / 0xA9) >= 0x13B13B14)
+    *(DWORD*)(*(QWORD*)(a1 + 48) + 0x4D0) &= ~0x40000000u;
+
+// 5. Build 8-bit flags bitmask from divisor table
+//    Divisors @ 0x4EBE7A0: {0xD, 0xA9, 0x895, 0x6F91, 0x5AA5D, ...}
+uint8_t flags = 0;
+for (int i = 0; i < 8; i++)
+    flags |= ((-991146299 * (v8 / divisors[i]) > 0x13B13B13) << i);
+
+// 6. Send telemetry with computed flags
+sub_172D184(context, bytecode, &trailer_info, version, flags);
+
+// 7. Final pass/fail via another obfuscated comparison
+bool failed = (v8 / 0x895 - 13 * v14) != 0;
+sub_172D714(&xmmword_673ED18, version, failed);  // stats
+return failed;
+```
+
+### Key constants
+
+| Address | Data | Purpose |
+|---------|------|---------|
+| `0x4EBE7C4` | `09 09 01 00 02 05 02 00 05 02` | Index permutation T1 |
+| `0x4EBE7CE` | `08 03 04 09 01 05 02 07 00 06` | Index permutation T2 |
+| `0x4EBE7D8` | 10 DWORDs: `0x44FD, 0x405E, 0x0945, ...` | Value table T3 |
+| `0x4EBE7A0` | 8 DWORDs: `0xD, 0xA9, 0x895, 0x6F91, ...` | Exponential divisors |
+| `0x4EBE800` | 10 QWORDs: `4, 8, 8, 16, 20, 24, 28, 32, 36, 40` | Stats struct offsets |
+
+The magic constant `-991146299` (`0xC4EC4EC5` unsigned) is a compiler-generated
+multiplication constant for division-by-constant optimization.
+
+### Capability bit clear
+
+At `0x172CD78`, the function clears bit 30 (`0x40000000`) from:
+```
+*(DWORD*)(*(QWORD*)(lua_State + 48) + 1232)
+```
+- `lua_State + 48` → `global_State*` (in Roblox's layout, offset 0x30)
+- `global_State + 1232` (`0x4D0`) → execution permission/capability flags
+
+This **removes a specific VM capability** when the bytecode's signature status
+meets certain conditions — part of the anti-tamper system that adjusts runtime
+permissions based on bytecode authenticity.
+
+---
+
+## 2. parse_signature_trailer — `sub_172CED0` (640 bytes)
+
+Extracts the cryptographic signature from the END of the bytecode buffer.
+
+### Trailer formats
+
+| Version | Trailer size | Key offset | Magic check |
+|---------|-------------|------------|-------------|
+| 0 | 40 bytes | +4 | `0x94A9D232` (XOR of two DWORDs) |
+| 1 | 24 bytes | +16 | `0xC432` / `0x6A` (XOR of individual bytes) |
+| 2 | — | — | Unsupported (returns 5) |
+
+### Logic
+
+```c
+if (bytecode_size < 0x118)  return error;  // need ≥280 bytes
+
+int version = detect_version(bytecode, size);  // tries v1 then v2
+if (version < 0)    return 3;   // negative = invalid
+if (version > max)  return 4;   // exceeds dword_6CDA9E8
+if (version > 1)    return 5;   // unsupported future version
+
+// XOR-decode 4 bytes of the signing key
+trailer_start = size - (version == 0 ? 40 : 24);
+key_offset    = version == 0 ? 4 : 16;
+decoded_key   = XOR(bytecode[trailer_start + key_offset], bytecode[trailer_start]);
+
+// Minimum bytecode size check (256–1024 range, config at dword_6CDA9B8)
+if (trailer_start < clamp(dword_6CDA9B8, 256, 1024))  return error;
+
+// Extract 24 bytes of signing info
+memcpy(output + 8, bytecode + trailer_start, 24);
+
+// Version 1: check magic signature ID 0x74110D70
+if (version >= 1 && output->sig_id != 0x74110D70)  return 9;
+
+// Compute hash of bytecode body (everything before trailer)
+hash = compute_hash(bytecode, trailer_start, 32);
+
+// Dispatch verification
+if (version == 1 && byte_6CDAA00 == 1)
+    return verify_hash_galois(hash, decoded_key, sig_data);
+else
+    return 0;  // verification disabled by config
+```
+
+### Configuration globals
+
+| Address | Type | Purpose |
+|---------|------|---------|
+| `byte_6CDAA00` | bool | Signature verification enforcement toggle (1 = enforce) |
+| `dword_6CDA9D0` | int | Minimum signature version required |
+| `dword_6CDA9B8` | int | Minimum bytecode size (clamped 256–1024) |
+| `dword_6CDA9E8` | int | Maximum supported signature version |
+
+---
+
+## 3. verify_hash_galois — `sub_172DC9C` (524 bytes)
+
+The core cryptographic verification using **Galois Field GF(2^128)** polynomial hashing.
+
+### Pre-computed tables
+
+On first call, loads 99,084 bytes of GF lookup tables from embedded data at `0x4EA6494`
+into globals at `0x673EC90`–`0x673ECF0` (three table pointers). Tables hold 8,257 entries
+of 12-byte data for the field multiplication.
+
+Total table storage: 132,112 bytes (`0x20410`) required for verification.
+
+### Algorithm
+
+```c
+// Initialize: load pre-computed GF tables (one-time)
+if (!initialized)
+    init_gf_tables(&tables_673EC90, &data_4EA6494, 99084);
+
+// Need 0x20410 bytes of table data
+if (table_end - table_start < 0x20410)  return 7;  // tables not ready
+
+// Start with initial state from table
+int8x16_t hash = *(int8x16_t*)table_start;
+
+// Phase 1: Simple XOR with two sub-tables per key byte
+for each byte b in 16-byte key:
+    if (b != 0)
+        hash ^= table1[offset + b] ^ table2[offset + b];
+
+// Phase 2: Extended Galois multiplication with cross-byte interactions
+for (i = 0..15):
+    if (key[i] != 0):
+        for (j = 0..7):
+            if (bit j of key[i] is set) && (i != 0):
+                for (k = 0..i-1):
+                    if (key[k] != 0):
+                        hash ^= table3[complex_index(j, i, k, key[k])];
+
+// Final comparison: 12 bytes (8 + 4), big-endian
+computed_hi = bswap64(hash.u64[0]);
+expected_hi = bswap64(*(uint64*)(decoded_sig + 4));
+computed_lo = bswap32(hash.u32[2]);
+expected_lo = bswap32(*(uint32*)(decoded_sig + 12));
+
+return (computed_hi == expected_hi && computed_lo == expected_lo) ? 0 : 7;
+```
+
+Return 0 = hash matches (pass). Return 7 = hash mismatch (fail).
+
+---
+
+## 4. Version detection functions
+
+### detect_sig_v1 — `sub_172DEC0` (128 bytes)
+
+```c
+if (size < 24 || *data == 0)  return -1;
+// XOR last 24 bytes with last 4 bytes, check for magic
+if (((data[size-24] ^ data[size-4]) | ...) ^ 0xC432 | ... ^ 0x6A) != 0)
+    return -1;
+return data[size-21] ^ data[size-1];  // extracted version
+```
+
+### detect_sig_v2 — `sub_172DF40` (92 bytes)
+
+```c
+if (size < 40 || *data == 0)  return -1;
+decoded = XOR(*(DWORD*)(data + size - 40), *(DWORD*)(data + size - 32));
+return (decoded == 0x94A9D232) ? 0 : -1;
+```
+
+---
+
+## 5. Telemetry reporter — `sub_172D184` (1280 bytes)
+
+Fires when signature verification completes. Crash-report fields:
+
+| Field | Description |
+|-------|-------------|
+| `cr_sessionid` | Session identifier |
+| `cr_placeid` | Place ID |
+| `cr_universeid` | Universe ID |
+| `cr_userid` | User ID |
+| `cr_source` | Bytecode source identifier |
+| `cr_size` | Bytecode size |
+| `cr_env` | Environment |
+| `cr_err` | Error code from verification |
+| `cr_sigver` | Signature version detected |
+| `cr_sigid` | Signature ID from trailer |
+
+---
+
+## 6. Stats counters — `sub_172D714` (96 bytes)
+
+Atomic increments on global structure at `xmmword_673ED18`:
+
+- Always: increment `result[0]` (total attempts)
+- If failed: increment `result[3]` (failure count)
+- Per-version: increment at `T_offsets[version]` if `(0x3FB >> version) & 1`
+  - Bitmask `0x3FB = 0b1111111011` → counters for versions 0,1,3,4,5,6,7,8,9 (not 2)
+
+---
+
+## 7. Related FFlags
+
+| FFlag | Global | Init func | Purpose |
+|-------|--------|-----------|---------|
+| `RbxmBytecodeDisablePrehash` | `byte_6CDA8B0` | `0x172CA24` | Disable pre-hashing in RBXM |
+| `LoadBytecodeWithSignatureAsHashKey` | `byte_6CDA8C8` | `0x172CA58` | Use signature as hash key |
+| `RemoveBytecodeCopyOnLoad` | `byte_6CDA8E0` | — | Skip bytecode copy |
+| `DebugSkipLoadAssetWithBytecodeVerification` | `byte_6CED8F0` | `0x22D9F08` | **Skip ALL verification** |
+| `DebugSkipPostTtiSignatureVerification` | — | `0x300EA48` | Skip post-TTI verify |
+| `DebugBypassTeamTestSignatureVerification` | — | `0x4C65D0` | Skip team-test verify |
+
+---
+
+## 8. Patch-level verification (DataModel)
+
+Separate from bytecode auth, the DataModel patch system verifies game
+updates using Blake2b or Blake3:
+
+| Function | Size | Purpose |
+|----------|------|---------|
+| `sub_2FFFDB0` | 1584B | `deserializeAndVerifyPatch` — main entry |
+| `sub_2FFC4DC` | 736B | `deferSignatureCheck` — 15s deferred verify |
+| `sub_300EA48` | 3800B | Post-TTI signature verification |
+
+Player hydration uses a hardcoded key:
+`8Nu7Er7LsbQpihVC+ijfEbbRFzj+Kikw9McFEZdFSt4=` (stored at `qword_6CE9D38`).
+
+```
+
+`docs/DETECTION_MAP.md`:
+
+```md
+# Roblox AC Detection Map
+
+High-level architecture of the anti-cheat / integrity verification systems in the current
+RobloxLib build. Organized by detection layer.
+
+---
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        FLAG SETTERS (Detection Triggers)                │
+│                                                                         │
+│  Hash Compare        Bytecode Auth       Physics Telemetry              │
+│  sub_9B8D60          sub_172CC78          sub_203C7A4                   │
+│  HashMismatches      GF(2^128) verify    TotalHashChecks               │
+│                                                                         │
+│  Physics FPS         Animation Hash      NetAsset Hash                  │
+│  sub_26B7D6C         sub_2042F30          sub_3C3FB8                   │
+│  ElevatedPhysicsFPS  HashCheckCount       MD5 validation               │
+├─────────────────────────────────────────────────────────────────────────┤
+│                      REPORTING PATHS (To Server)                        │
+│                                                                         │
+│  Telemetry Events    Disconnect Codes     Crash Classification          │
+│  cr_* fields         257 BadHash          Crash-Anticheat               │
+│  sub_172D184         258 SecurityKey      AnticheatCrash                │
+│                      268 HashTimeout      RBX_EXIT_ANTICHEAT            │
+│                      304 AndroidAC        sub_48E2258                   │
+├─────────────────────────────────────────────────────────────────────────┤
+│                   INDEPENDENT DETECTION SYSTEMS                         │
+│                                                                         │
+│  US14116 Memcheck    Bytecode Verify      External Anti-Cheat           │
+│  sub_28F43C0         sub_172CC78          IOSSupport ObjC               │
+│  Server challenge    GF(2^128) hash       clientSendExtAntiCheat:       │
+│  DC code 268         Galois tables         connectClientExtAntiCheatSignal:│
+│                                           setExtAntiCheatJoinData:      │
+│                                                                         │
+│  Security Channel    Secure Heartbeat     Device Integrity              │
+│  SecurityChannelJob  ClientQoSImpl        getDeviceIntegrityToken       │
+│  sub_80134C          secureHeartbeat      Apple App Attest              │
+│                      QOS01-QOS14          DC codes 296-300              │
+├─────────────────────────────────────────────────────────────────────────┤
+│                        FFLAG ENFORCEMENT                                │
+│                                                                         │
+│  Bytecode Hash          Integrity Processor      US14116                │
+│  DisablePrehash         DisableAllAdditions       DisableDisconnect     │
+│  DeferSigCheck          AnalyticsThrottle         MismatchGuard         │
+│  LoadRawWithHashKey                                                     │
+│                                                                         │
+│  Signature Verification    External AC Telemetry                        │
+│  DebugSkipPostTti...       MigrateToV2                                 │
+│  DebugBypassTeamTest...    DisableLegacyMetrics                        │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Layer 1: Flag Setters (Detection Triggers)
+
+These functions detect anomalies and set flags or send telemetry.
+
+### Hash Mismatch Detection — `sub_9B8D60` (688 bytes)
+
+Sends `RBX::Telemetry::RobloxTelemetryEvent` containing integrity fields:
+- `HashMismatches` — count of hash verification failures
+- `CacheReadFailures` — cache integrity failures
+- `DeserializationFailures` / `SerializationFailures`
+
+Mismatch count stored at input struct offset +392.
+
+### Bytecode Authentication — `sub_172CC78` (520 bytes)
+
+The core bytecode signature verifier. Called from `luau_load` (`sub_43E2CE8`) at
+`0x43E2E58`. Returns `true` on failure, `false` on success.
+
+**Logic:**
+1. Initialize global state at `xmmword_673ED18`
+2. Parse cryptographic trailer from bytecode end via `sub_172CED0`
+3. Run obfuscated version check through lookup tables at `0x4EBE7C4`
+4. Conditionally clear capability bit `0x40000000` at `*(*(L+48)+1232)`
+5. If version > 1 or check passes, compute 8-bit flags bitmask and send telemetry
+6. Final validation — returns nonzero if signature mismatches
+
+On failure: clears VM capability bit, sends crash report via `sub_172D184`.
+
+### Elevated Physics FPS Detection — `sub_26B7D6C` (244 bytes)
+
+Speed hack detector. Reports at thresholds: 65, 70, 80, 90, 100 FPS.
+Each threshold fires a separate counter: `ElevatedPhysicsFPSDetected_65/70/80/90/100`.
+
+### Physics Simulation Integrity — `sub_203C7A4` (1148 bytes)
+
+Periodic telemetry sender tracking server-client physics divergence:
+- `TotalHashChecks` — physics state hash comparisons
+- `TotalMispredictions` — client-server prediction mismatches
+- `ResimulationCount` — forced re-simulations
+- `ServerAuthorityMode` — authority model in use
+
+Timer interval at global `dword_6CE5EE0`.
+
+### Animation Replication Hash — `sub_2042F30` (1672 bytes)
+
+Animation state verification. Logs `[FLog::AnimationReplication] hashCheck: ...`.
+Tracks `HashCheckCount` and `HashCheckRate` counters.
+
+### NetAsset Hash Validation — `sub_3C3FB8` (1704 bytes)
+
+MD5 hash verification of shared network assets during deserialization.
+Detects `"Duplicate hash %s in shared NetAsset dictionary"` and
+`"Invalid NetAsset version"`.
+
+---
+
+## Layer 2: Reporting Paths
+
+### Telemetry Event Reporter — `sub_172D184` (1280 bytes)
+
+Bytecode signature crash/event reporter. Fields:
+- `cr_sessionid`, `cr_placeid`, `cr_universeid`, `cr_userid`
+- `cr_source`, `cr_size`, `cr_env`
+- `cr_err`, `cr_sigver`, `cr_sigid`
+
+### Disconnect Code Table — `sub_4663E8C` (1756 bytes)
+
+Maps integer codes to disconnect reason strings. Security-relevant codes:
+
+| Code | Reason | Trigger |
+|------|--------|---------|
+| 257 | `DisconnectBadhash` | Hash verification failure |
+| 258 | `DisconnectSecurityKeyMismatch` | Key exchange failure |
+| 263 | `DisconnectIllegalTeleport` | Teleport exploit |
+| 268 | `DisconnectHashTimeout` | US14116 hash timeout |
+| 273 | `DisconnectNewSecurityKeyMismatch` | Updated key failure |
+| 279 | `DisconnectBySecurityPolicy` | Policy violation |
+| 296 | `DisconnectRemoteAttestationUnsupported` | Device attestation |
+| 297 | `DisconnectRemoteAttestationGeneralFailure` | Attestation error |
+| 298 | `DisconnectRemoteAttestationTimeout` | Attestation timeout |
+| 299 | `DisconnectRemoteAttestationOSOutOfDate` | OS too old |
+| 300 | `DisconnectRemoteAttestationBootValidationFailure` | Boot validation |
+| 304 | `DisconnectAndroidAnticheatKick` | Android AC (also applies to iOS) |
+
+### Crash Classification — `sub_4880184` (2588 bytes)
+
+Classifies previous-session crashes. Categories include:
+- `Crash-Anticheat` — AC-triggered crash
+- `AnticheatCrash` — registered in `InitFunc_24433` (30880 bytes)
+- `Inferred-OOM`, `Inferred-Uncategorized`
+
+### Exit Reason Mapper — `sub_48E2258` (3132 bytes)
+
+Maps exit codes to identifiers including:
+- `RBX_EXIT_ANTICHEAT`
+- `RBX_EXIT_QOS01` through `RBX_EXIT_QOS14` (security heartbeat failures)
+- `RBX_ERROR_BADHASH`, `RBX_ERROR_SECURITY_KEY_MISMATCH`
+- `RBX_ERROR_NETWORK_SECURITY_FAILURE`
+
+---
+
+## Layer 3: Independent Detection Systems
+
+### US14116 Remote SysStats — `sub_28F43C0` (692 bytes)
+
+Server challenge-response system. The server sends system stats challenges;
+the client must respond correctly.
+
+**Logic:**
+1. Receives stats via `onRemoteSysStats` callback
+2. Checks FFlags at `byte_6CF9FC8` and `byte_6D01768`
+3. If stats entry not found in client list, or check flags pass:
+   calls `sub_28F3C44(replicator, playerId, 268)` → disconnect code 268
+
+Log: `"Players::onRemoteSysStats disconnect"`, `"[FLog::US14116] onRemoteSysStats: %s"`
+
+### External Anti-Cheat Module (iOS)
+
+ObjC-bridged external AC system. Three entry points on the `IOSSupport` class:
+- `clientSendExtAntiCheat:` — sends AC data payload
+- `connectClientExtAntiCheatSignal:` — connects the signal handler
+- `setExtAntiCheatJoinData:` — sets join-time AC data
+
+Data type: `RBX::Security::ExternalAntiCheatData` via
+`rbx::signal<void(vector<uint8_t>, shared_ptr<ExternalAntiCheatData>, int64_t, ...)>`
+
+Post-join gate at `sub_28F42A0` (236 bytes): fires `"AntiCheat-AfterJoin"` counter,
+checks flag at replicator+2237.
+
+### Security Channel — `sub_80134C` (96 bytes)
+
+Dedicated network channel for anti-tamper communication:
+- `SecurityChannelMutex` at `0x55CEE79`
+- `SecurityChannelSequenceNumberMutex` at `0x55CEE8E`
+- `RBX::Network::SecurityChannelJob` — background job
+- `RBX::Network::ServerSecurityCheckJob` — server-side validation
+
+### Secure Heartbeat — `ClientQoSImpl`
+
+Periodic security heartbeat under `RBX::Security` namespace:
+- `RBX::Security::ClientQoSImpl::secureHeartbeat`
+- `RBX::Security::ClientQoSImplIos` — iOS-specific
+- `RBX::Security::ClientQoSContext` — context data
+- Failure triggers exit codes `RBX_EXIT_QOS01` through `RBX_EXIT_QOS14`
+
+### Device Integrity (Apple App Attest)
+
+Apple device attestation integration:
+- `RBX::AccountProtocolCore::getDeviceIntegrityToken`
+- `RBX::AccountProtocolCore::deviceIntegrityAvailable`
+- Reflection: `GetDeviceIntegrityToken`, `GetDeviceIntegrityTokenYield`
+- FFlag: `EnableAsyncDeviceIntegrityTokenRetreival`
+- Failure → disconnect codes 296–300
+
+### Cheat/Exploit Kick Handler — `sub_28F2C78` (3500 bytes)
+
+Server-initiated kick processor. Formats `"AbuserID:{};{}"` strings,
+processes script edits. Contains the `"Cheating/Exploiting;"` disconnect message.
+
+### Security Key Exchange — `sub_82229C` (1148 bytes)
+
+Validates security keys during connection. References:
+- `SecurityKeyRejected` at `0x55D14F1`
+- `ConnectSecuritykeyMismatch` counter
+- Failure → disconnect codes 258 or 273
+
+### Encryption Layer
+
+RakNet packet encryption with automatic disconnect on repeated failures:
+- `DecryptionFailDisconnectThreshold` — FFlag controlling max failures before DC
+- `EncryptionFailThreshold` — encryption error threshold
+- `LibcatDecryptionFailed`, `RakNetDecryptionFailure` counters
+
+---
+
+## Layer 4: Signature Verification (DataModel Patches)
+
+### Patch Verification — `sub_2FFFDB0` (1584 bytes)
+
+`DataModelPatchConfigurer` deserialization + verification. Supports both
+**Blake2b** and **Blake3** hash algorithms.
+
+Events: `deserialize_patch_begin/end`, `verify_patch_begin/end`.
+
+### Deferred Signature Check — `sub_2FFC4DC` (736 bytes)
+
+Postponed verification with **15-second timeout**. Skipped during homepage
+interaction (`isHomePageInteractive` check at offset 152).
+
+### Post-TTI Verification — `sub_300EA48` (3800 bytes)
+
+Post-Time-To-Interactive signature check. Controlled by
+`DebugSkipPostTtiSignatureVerification` FFlag.
+
+### Player Hydration Signing — `InitFunc_15727` at `0x221AA8C` (1844 bytes)
+
+Hardcoded signing key: `"8Nu7Er7LsbQpihVC+ijfEbbRFzj+Kikw9McFEZdFSt4="`
+Counters: `PlayerHydrationSignatureVerifySuccessCounter/FailureCounter`.
+Key stored at `qword_6CE9D38`.
+
+---
+
+## Layer 5: Telemetry & Counters
+
+### PreHash Telemetry — `sub_8CAC60` (440 bytes)
+
+Reports bytecode connection hash statistics with sampling:
+- `postEnLength`, `postHash`, `preEnLength`, `preHash`
+- `cap`, `verMin`, `verMax`, `numSff`
+- Counter: `debugLuaConnIssue`
+- Sampling: `hash(result) % 10000 < threshold` (global `dword_6CB86C8`)
+
+### Bouncing Script Detection — `sub_172B53C` (1600 bytes)
+
+Tracks script hash integrity: `BouncingScriptHashes`, `BouncingScriptPermyriad`,
+`ScriptHash` counters.
+
+### Client-Side User Hashing — `InitFunc_12250` at `0x195C09C`
+
+FFlag: `ClientSideUserHashing` at `0x56A9792`.
+Throttle: `ClientSideUserHashingTelemetryThrottleHundredthsPercent`.
+
+### LR Hash Miss Telemetry
+
+Lightweight replication hash verification:
+- `LrHashCheck` / `LrHashFail` counters
+- FFlag: `ReportLrHashMissTelemetryForRbxTransport`
+- Functions: `sub_840FF4` (3824 bytes), `sub_9AD848` (2440 bytes),
+  `sub_2B1D2DC` (26336 bytes — very large)
+
+### RCC Hash Exchange — `sub_DD29F8` (1504 bytes)
+
+Roblox Cloud Compute hash verification:
+- `RCCHashReceived`, `RCCHashTimeout`, `ExitWithoutRCCHash` counters
+- Hash source tracking: `"None"`, `"Fallback"`, `"RCC"`
+
+---
+
+## Layer 6: Challenge / Moderation
+
+### Generic Challenge Service — `RBX::GenericChallengeService`
+
+HTTP challenge headers: `rblx-challenge-id`, `rblx-challenge-metadata`, `rblx-challenge-type`.
+Events: `ChallengeRequiredEvent`, `ChallengeCompletedEvent`, `ChallengeAbandonedEvent`,
+`ChallengeInvalidatedEvent`, `ChallengeLoadedEvent`.
+FFlag: `EnableGenericChallengeResponseHandling`.
+
+### Moderation Result — `sub_19963F0`
+
+Enum values: `ViolationDetected` (0), `Borderline` (1), `NoViolationDetected` (2).
+
+### RUPP Token System
+
+`RBX::Rupp::ClientRuppGenerator`, `ServerRuppGenerator`, `RuppTokenProcessor`.
+Token validation during connection; failure causes disconnect.
+Counter: `ClientRuppDeserializationError`.
+
+```
+
+`docs/DETECTION_SYSTEMS.md`:
+
+```md
+# Independent Detection Systems
+
+Detailed analysis of each detection system: US14116, external anti-cheat,
+security channel, device integrity, physics integrity, and hash verification.
+
+---
+
+## 1. US14116 — Remote SysStats / Memory Check
+
+### Core handler — `sub_28F43C0` (692 bytes)
+
+Server sends system stats challenges; client must respond correctly.
+
+**Logic:**
+```c
+// Log the incoming stats
+NSLog("[FLog::US14116] onRemoteSysStats: %s", stats_string);
+
+// Check FFlags
+if (byte_6CF9FC8 || byte_6D01768) {
+    // If stats entry not found in client list → mismatch
+    if (!find_in_client_list(stats))
+        sub_28F3C44(replicator, playerId, 268);  // disconnect code 268
+    // Log: "Players::onRemoteSysStats disconnect"
+}
+
+// Display stats telemetry
+NSLog("[FLog::US14116] Sending display stats: %lld | %s | %s",
+      value, key1, key2);
+```
+
+**Disconnect code 268** = `DisconnectHashTimeout`. The server expects
+specific values from client memory; mismatches indicate tampering.
+
+### AfterJoin gate — `sub_28F42A0` (236 bytes)
+
+Post-join dispatcher:
+1. Fires `"AntiCheat-AfterJoin"` telemetry event via `sub_43F2BB4`
+2. Checks `*(byte*)(replicator + 2237)` — server flag for AC enabled
+3. If AC enabled and callback at `*(qword*)(replicator + 2168)` exists:
+   invokes external AC path
+4. Otherwise: falls through to US14116 handler `sub_28F43C0`
+
+---
+
+## 2. External Anti-Cheat Module (iOS)
+
+### Architecture
+
+ObjC-bridged system on the `IOSSupport` class with three entry points:
+
+| Selector | Purpose |
+|----------|---------|
+| `clientSendExtAntiCheat:` | Sends AC data payload to server |
+| `connectClientExtAntiCheatSignal:` | Connects the C++ signal to ObjC bridge |
+| `setExtAntiCheatJoinData:` | Sets join-time AC initialization data |
+
+### Signal type
+
+```cpp
+rbx::signal<void(
+    vector<uint8_t>,                         // payload
+    shared_ptr<RBX::Security::ExternalAntiCheatData>,  // metadata
+    int64_t,                                 // timestamp or ID
+    const char*,                             // context string 1
+    const char*,                             // context string 2
+    size_t                                   // data size
+)>
+```
+
+### Telemetry FFlags
+
+| FFlag | Global | Purpose |
+|-------|--------|---------|
+| `MigrateExternalAntiCheatModuleTelemetryToV2` | `byte_6CB3198` | Migrate to v2 telemetry |
+| `DisableExternalAntiCheatModuleLegacyTelemetryMetrics` | `byte_6CB31B0` | Kill legacy metrics |
+
+### Exit codes
+
+- `RBX_EXIT_ANTICHEAT` at `0x58E824C` — exit handler in `sub_48E2258`
+- `Crash-Anticheat` at `0x5888B03` — crash classifier in `sub_4880184`
+- `AnticheatCrash` at `0x58BC506` — init in `InitFunc_24433`
+- `DisconnectAndroidAnticheatKick` (code 304) — also used on iOS
+
+---
+
+## 3. Security Key Exchange — `sub_82229C` (1148 bytes)
+
+Validates cryptographic keys during connection establishment.
+
+**References:**
+- `SecurityKeyRejected` at `0x55D14F1`
+- `ConnectSecuritykeyMismatch` counter at `0x58A1AD0`
+- `DisconnectSecurityKeyMismatch` (code 258)
+- `DisconnectNewSecurityKeyMismatch` (code 273)
+- `RBX_ERROR_SECURITY_KEY_MISMATCH`
+- `RBX_ERROR_NEW_SECURITY_KEY_MISMATCH`
+
+---
+
+## 4. Security Channel
+
+Dedicated network channel for anti-tamper communication.
+
+### Components
+
+| Component | Address | Description |
+|-----------|---------|-------------|
+| `SecurityChannelMutex` | `0x55CEE79` | Channel mutex |
+| `SecurityChannelSequenceNumberMutex` | `0x55CEE8E` | Sequence number mutex |
+| `RBX::Network::SecurityChannelJob` | RTTI `0x4DB0C8D` | Background job |
+| `RBX::Network::ServerSecurityCheckJob` | RTTI `0x4DB0EDC` | Server validation |
+
+Init function: `sub_80134C` (96 bytes).
+
+---
+
+## 5. Secure Heartbeat (ClientQoS)
+
+Periodic security heartbeat under `RBX::Security` namespace.
+
+### Classes
+
+| Class | RTTI | Description |
+|-------|------|-------------|
+| `RBX::Security::ClientQoSImpl` | `0x4D8F5F0` | Base implementation |
+| `RBX::Security::ClientQoSImplIos` | `0x4D8F938` | iOS-specific |
+| `RBX::Security::ClientQoSContext` | `0x4D8F813` | Context data |
+| `RBX::Network::DeserializedClientQoSItem` | `0x4DB0D41` | Deserialized payload |
+
+### secureHeartbeat method — RTTI `0x4D8F836`
+
+Runs periodically. Failure triggers exit codes:
+- `RBX_EXIT_QOS01` through `RBX_EXIT_QOS14` (14 distinct failure categories)
+
+FFlag: `EnablePlatformQoSEmergency` at `0x55ADFBD` — emergency shutdown on QoS failure.
+
+---
+
+## 6. Device Integrity (Apple App Attest)
+
+Apple device attestation for hardware-level trust verification.
+
+### API surface
+
+| Method | RTTI | Purpose |
+|--------|------|---------|
+| `getDeviceIntegrityToken` | `0x4DEF5DD` | Request attestation token |
+| `getDeviceIntegrityTokenYield` | `0x4DEF71D` | Yielding variant |
+| `deviceIntegrityAvailable` | `0x4DEF8D9` | Check availability |
+
+Reflection names: `GetDeviceIntegrityToken`, `GetDeviceIntegrityTokenYield`,
+`DeviceIntegrityAvailable`.
+
+FFlag: `EnableAsyncDeviceIntegrityTokenRetreival` at `0x562DEEA`.
+
+### Disconnect codes on failure
+
+| Code | Reason |
+|------|--------|
+| 296 | `DisconnectRemoteAttestationUnsupported` |
+| 297 | `DisconnectRemoteAttestationGeneralFailure` |
+| 298 | `DisconnectRemoteAttestationTimeout` |
+| 299 | `DisconnectRemoteAttestationOSOutOfDate` |
+| 300 | `DisconnectRemoteAttestationBootValidationFailure` |
+
+---
+
+## 7. Physics Integrity Detection
+
+### Elevated FPS Detection — `sub_26B7D6C` (244 bytes)
+
+Speed hack detector. Reports at multiple thresholds:
+
+| Threshold | Counter string |
+|-----------|---------------|
+| 65 | `ElevatedPhysicsFPSDetected_65` |
+| 70 | `ElevatedPhysicsFPSDetected_70` |
+| 80 | `ElevatedPhysicsFPSDetected_80` |
+| 90 | `ElevatedPhysicsFPSDetected_90` |
+| 100 | `ElevatedPhysicsFPSDetected_100` |
+| — | `ElevatedPhysicsFPSDetected_SetMinimum` |
+
+Reports to `"Game"` category via `sub_18EACBC`.
+
+### Physics Simulation Telemetry — `sub_203C7A4` (1148 bytes)
+
+Periodic integrity check tracking server-client divergence:
+
+| Field | Description |
+|-------|-------------|
+| `TotalHashChecks` | Physics state hash comparisons |
+| `TotalMispredictions` | Client-server prediction mismatches |
+| `WorldStepsSimulatedThisEvent` | Steps in this reporting interval |
+| `ResimulationCount` | Forced re-simulations |
+| `ServerAuthorityMode` | Physics authority model |
+
+Timer interval: `dword_6CE5EE0`.
+
+### Animation Hash — `sub_2042F30` (1672 bytes)
+
+Animation replication hash verification:
+- Log: `[FLog::AnimationReplication] hashCheck: ...`
+- Counters: `HashCheckCount`, `HashCheckRate`
+- Physics counters: `MispredictCount`, `MispredictRate`, `FixedStepCount`
+  from `sub_204CF54` (564 bytes)
+
+---
+
+## 8. Hash Verification Systems
+
+### NetAsset Hash — `sub_3C3FB8` (1704 bytes)
+
+MD5 hash validation of shared network assets:
+- `"NetAsset Hash mismatch"` at `0x558DB51`
+- `"Duplicate hash %s in shared NetAsset dictionary"` — duplicate detection
+- `"Invalid NetAsset version"` — version validation
+
+### Cache Hash Telemetry — `sub_9B8D60` (688 bytes)
+
+Reports cache integrity metrics:
+- `HashMismatches` — hash failures (offset +392)
+- `CacheReadFailures` — cache read errors
+- `DeserializationFailures` / `SerializationFailures`
+
+### LR Hash Verification
+
+Lightweight replication hash checks:
+- `LrHashCheck` / `LrHashFail` counters
+- Functions: `sub_840FF4` (3824B), `sub_9AD848` (2440B), `sub_2B1D2DC` (26336B)
+- FFlag: `ReportLrHashMissTelemetryForRbxTransport`
+
+### RCC Hash Exchange — `sub_DD29F8` (1504 bytes)
+
+Roblox Cloud Compute hash verification:
+- `RCCHashReceived` / `RCCHashTimeout` / `ExitWithoutRCCHash`
+- Hash source tracking: `"None"`, `"Fallback"`, `"RCC"`
+- Exit handler: `sub_DD3B2C` (316 bytes)
+
+### Bouncing Script Detection — `sub_172B53C` (1600 bytes)
+
+Script hash integrity: `BouncingScriptHashes`, `BouncingScriptPermyriad`, `ScriptHash`.
+
+---
+
+## 9. Cheat/Exploit Kick Handler — `sub_28F2C78` (3500 bytes)
+
+Server-initiated kick for detected cheating. Cyclomatic complexity 110.
+
+**Logic:**
+- Processes script edits
+- Formats `"AbuserID:{};{}"` strings
+- Disconnect message: `"Cheating/Exploiting;"`
+- Referenced from vtable at `0x6215288`
+
+---
+
+## 10. Encryption Layer
+
+RakNet packet encryption monitoring:
+
+| Component | Address | Purpose |
+|-----------|---------|---------|
+| `DecryptionFailDisconnectThreshold` | `0x57821DC` | FFlag: max failures before DC |
+| `EncryptionFailThreshold` | `0x57821FE` | FFlag: encryption error threshold |
+| `RakNetDecryptionFailure` | `0x5782014` | Counter |
+| `LibcatDecryptionFailed` | `0x578359B` | Counter |
+| `BitStreamReadBitsOverflowCheck` | `0x577E3EF` | FFlag: bounds check |
+
+---
+
+## 11. Additional Detection FFlags
+
+| FFlag | Address | Purpose |
+|-------|---------|---------|
+| `ImprovedProximityPromptCheatDetection` | `0x57043D4` | Proximity prompt exploit detection |
+| `PatchTeleportExploit` | `0x5725EF4` | Teleport exploit mitigation |
+| `ClientSideUserHashing` | `0x56A9792` | Client-side user identity hashing |
+| `StreamingIntegrityMode` | `0x55F3122` | Streaming data integrity enforcement |
+| `VoiceChatEnableApiSecurityCheck` | `0x55B95BD` | Voice chat security validation |
+| `RCCShouldUseObfuscatedByteCodeInTeamTestSignal` | `0x55EE924` | Obfuscated bytecode in team test |
+
+```
+
+`docs/FFLAGS.md`:
+
+```md
+# Security-Relevant FFlags
+
+All FFlags identified that control anti-cheat, integrity verification,
+telemetry, and security behavior. Grouped by subsystem.
+
+---
+
+## Bytecode Verification
+
+| FFlag | String address | Global | Init func | Purpose |
+|-------|---------------|--------|-----------|---------|
+| `RbxmBytecodeDisablePrehash` | `0x568BCFD` | `byte_6CDA8B0` | `0x172CA24` | Disable pre-hashing in RBXM files |
+| `LoadBytecodeWithSignatureAsHashKey` | `0x568BD18` | `byte_6CDA8C8` | `0x172CA58` | Use signature as hash key |
+| `RemoveBytecodeCopyOnLoad` | `0x568BD38` | `byte_6CDA8E0` | — | Skip bytecode buffer copy on load |
+| `DebugSkipLoadAssetWithBytecodeVerification` | `0x56F850C` | `byte_6CED8F0` | `0x22D9F08` | **Skip ALL bytecode verification** |
+| `LoadAssetWithBytecodeAsyncEnabled` | — | `byte_6CED8D8` | — | Async bytecode loading |
+
+## Signature Verification (DataModel)
+
+| FFlag | String address | Init func | Purpose |
+|-------|---------------|-----------|---------|
+| `DebugSkipPostTtiSignatureVerification` | `0x579DA5B` | `0x300EA48` | Skip post-TTI patch verification |
+| `DebugBypassTeamTestSignatureVerification` | `0x559AD8C` | `0x4C65D0` | Skip team-test signature check |
+| `RCCShouldUseObfuscatedByteCodeInTeamTestSignal` | `0x55EE924` | — | Obfuscate bytecode in team test |
+
+## External Anti-Cheat
+
+| FFlag | String address | Global | Purpose |
+|-------|---------------|--------|---------|
+| `MigrateExternalAntiCheatModuleTelemetryToV2` | `0x55B48B9` | `byte_6CB3198` | Migrate AC telemetry to v2 |
+| `DisableExternalAntiCheatModuleLegacyTelemetryMetrics` | `0x55B48E5` | `byte_6CB31B0` | Kill legacy AC metrics |
+
+## Security Alerting Telemetry
+
+| FFlag | String address | Global | Purpose |
+|-------|---------------|--------|---------|
+| `MigrateGameEngineSecurityAlertingTelemetryToV2` | — | `byte_6CB3078` | Migrate security alerts |
+| `DisableGameEngineSecurityAlertingLegacyTelemetryMetrics` | — | `byte_6CB3090` | Kill legacy security metrics |
+| `MigrateGameEngineRccAlertingTelemetryToV2` | — | `byte_6CB3108` | Migrate RCC alerts |
+| `DisableGameEngineRccAlertingLegacyTelemetryMetrics` | — | `byte_6CB3120` | Kill legacy RCC metrics |
+
+## Integrity Checked Processor
+
+| FFlag | String address | Init func | Purpose |
+|-------|---------------|-----------|---------|
+| `IntegrityCheckedProcessorDisableAllAdditions` | `0x56CE16E` | `0x1F9089C` | Disable integrity-checked telemetry pipeline |
+
+## Encryption / Network
+
+| FFlag | String address | Purpose |
+|-------|---------------|---------|
+| `DecryptionFailDisconnectThreshold` | `0x57821DC` | Max decryption failures before disconnect |
+| `EncryptionFailThreshold` | `0x57821FE` | Encryption error threshold |
+| `RakNetEncryptionFailureReportHundredthsPercent` | `0x578202C` | Sampling rate for failure reports |
+| `BitStreamReadBitsOverflowCheck` | `0x577E3EF` | BitStream bounds checking |
+
+## Disconnect / Reporting
+
+| FFlag | String address | Purpose |
+|-------|---------------|---------|
+| `DisconnectOnISRSendThrowReportSecs` | `0x55D7570` | Timeout before DC on ISR send throw |
+| `DisconnectOnISRSendThrowThrottle` | `0x55D7593` | Throttle for ISR send throw |
+| `DebugEnableSendItemLimitDisconnect` | `0x55E2651` | Debug: send item limit DC |
+| `EnableSendItemLimitDisconnect` | `0x55E268B` | Production: send item limit DC |
+| `DisconnectReasonDiagThrottlePercent` | `0x55E611B` | DC reason telemetry sampling |
+| `StopReportingDisconnectReasonToOldCounters` | `0x55E64C8` | Counter migration |
+| `ReportDisconnectTelemetryForRbxTransport` | `0x55E673B` | RbxTransport DC telemetry |
+| `ReportLrHashMissTelemetryForRbxTransport` | `0x55E6712` | LR hash miss telemetry |
+
+## Device Integrity
+
+| FFlag | String address | Purpose |
+|-------|---------------|---------|
+| `EnableAsyncDeviceIntegrityTokenRetreival` | `0x562DEEA` | Async device attestation |
+
+## QoS / Heartbeat
+
+| FFlag | String address | Purpose |
+|-------|---------------|---------|
+| `EnablePlatformQoSEmergency` | `0x55ADFBD` | QoS emergency shutdown |
+
+## Exploit Detection
+
+| FFlag | String address | Init func | Purpose |
+|-------|---------------|-----------|---------|
+| `ImprovedProximityPromptCheatDetection` | `0x57043D4` | `0x23D35E0` | Proximity prompt exploit detection |
+| `PatchTeleportExploit` | `0x5725EF4` | `0x25BB164` | Teleport exploit mitigation |
+| `ClientSideUserHashing` | `0x56A9792` | `0x195C09C` | Client-side user identity hash |
+| `ClientSideUserHashingTelemetryThrottleHundredthsPercent` | `0x56A975A` | — | Throttle for hash telemetry |
+
+## Challenge / Moderation
+
+| FFlag | String address | Purpose |
+|-------|---------------|---------|
+| `EnableGenericChallengeResponseHandling` | `0x55972FD` | Challenge/captcha system |
+| `VoiceChatEnableApiSecurityCheck` | `0x55B95BD` | Voice chat security check |
+
+## Streaming
+
+| FFlag | String address | Purpose |
+|-------|---------------|---------|
+| `StreamingIntegrityMode` | `0x55F3122` | Streaming data integrity mode |
+| `ServerStreamingIntegrityMode` | `0x55ECBDE` | Server-side integrity mode |
+
+```
+
+`docs/FUNCTION_INDEX.md`:
+
+```md
+# Function Index
+
+Complete address table of every identified anti-cheat / integrity function.
+
+---
+
+## Bytecode Verification Pipeline
+
+| Address | Size | Name | Description |
+|---------|------|------|-------------|
+| `0x43E2CE8` | 5712 | `luau_load` | Top-level bytecode deserializer |
+| `0x172CC78` | 520 | `bytecode_authenticate` | Signature verification orchestrator |
+| `0x172CED0` | 640 | `parse_signature_trailer` | Extract signature from bytecode end |
+| `0x172DC9C` | 524 | `verify_hash_galois` | GF(2^128) polynomial hash verification |
+| `0x172DEC0` | 128 | `detect_sig_v1` | XOR magic detection for v1 signatures |
+| `0x172DF40` | 92 | `detect_sig_v2` | XOR magic detection for v2 (40B trailer) |
+| `0x172D888` | 728 | `version_telemetry` | Version extraction + telemetry codes 900-903 |
+| `0x172D184` | 1280 | `crash_report` | Bytecode AC crash/telemetry reporter |
+| `0x172D714` | 96 | `stats_increment` | Atomic counter updates |
+| `0x172E080` | 148 | `init_gf_tables` | Load 99KB Galois field lookup tables |
+| `0x172E27C` | 160 | `copy_gf_table_data` | Copy 8257 GF table entries |
+| `0x172C7D4` | 1052 | `InitFunc_10942` | FFlag registration (prehash, sig-as-hash) |
+| `0x172B53C` | 1600 | `bouncing_script_hash` | Script hash integrity tracking |
+
+## DataModel Patch Verification
+
+| Address | Size | Name | Description |
+|---------|------|------|-------------|
+| `0x2FFFDB0` | 1584 | `deserializeAndVerifyPatch` | Blake2b/Blake3 patch verification |
+| `0x2FFC4DC` | 736 | `deferSignatureCheck` | Deferred 15s signature check |
+| `0x300EA48` | 3800 | `postTtiSignatureVerify` | Post-TTI signature verification |
+| `0x221AA8C` | 1844 | `InitFunc_15727` | Player hydration signing init |
+
+## US14116 / Remote SysStats
+
+| Address | Size | Name | Description |
+|---------|------|------|-------------|
+| `0x28F43C0` | 692 | `onRemoteSysStats` | US14116 handler, DC code 268 |
+| `0x28F42A0` | 236 | `antiCheatAfterJoin` | Post-join AC dispatcher |
+| `0x28F2C78` | 3500 | `cheatExploitKick` | Server-initiated cheat kick |
+| `0x28F3C44` | — | `disconnectPlayer` | Sends disconnect with code |
+
+## Hash Verification
+
+| Address | Size | Name | Description |
+|---------|------|------|-------------|
+| `0x9B8D60` | 688 | `hashMismatchTelemetry` | Cache hash mismatch reporter |
+| `0x3C3FB8` | 1704 | `netAssetHashVerify` | NetAsset MD5 validation |
+| `0x8CAC60` | 440 | `preHashTelemetry` | Pre/post hash telemetry reporter |
+| `0xDD29F8` | 1504 | `rccHashExchange` | RCC hash verification |
+| `0xDD3B2C` | 316 | `exitWithoutRCCHash` | RCC hash timeout handler |
+| `0x840FF4` | 3824 | `lrHashCheck_1` | LR hash check function 1 |
+| `0x9AD848` | 2440 | `lrHashCheck_2` | LR hash check function 2 |
+| `0x2B1D2DC` | 26336 | `lrHashCheck_3` | LR hash check (very large) |
+
+## Physics / Animation Integrity
+
+| Address | Size | Name | Description |
+|---------|------|------|-------------|
+| `0x26B7D6C` | 244 | `elevatedPhysicsFPS` | Speed hack FPS detection |
+| `0x203C7A4` | 1148 | `physicsSimTelemetry` | Physics hash/misprediction telemetry |
+| `0x2042F30` | 1672 | `animationHashCheck` | Animation replication hash |
+| `0x204CF54` | 564 | `hashCheckProfile` | Hash check count/rate profiler |
+
+## Security Infrastructure
+
+| Address | Size | Name | Description |
+|---------|------|------|-------------|
+| `0x82229C` | 1148 | `securityKeyValidation` | Security key exchange validation |
+| `0x80134C` | 96 | `securityChannelInit` | Security channel mutex init |
+| `0x8EBC60` | 1196 | `gameJoinSuccess` | Join success telemetry |
+
+## Disconnect / Exit Mappers
+
+| Address | Size | Name | Description |
+|---------|------|------|-------------|
+| `0x4663E8C` | 1756 | `disconnectCodeToString` | DC code → string mapper |
+| `0x48E2258` | 3132 | `exitReasonMapper` | Exit code → identifier mapper |
+| `0x4880184` | 2588 | `crashClassifier` | Previous-session crash classifier |
+| `0x195CE4C` | 3940 | `disconnectEnumInit` | Disconnect enum registration |
+| `0x19963F0` | — | `moderationResult` | Moderation verdict enum |
+
+## FFlag Initialization
+
+| Address | Size | Name | Description |
+|---------|------|------|-------------|
+| `0x65395C` | 2048 | `InitFunc_2337` | Security alerting telemetry FFlags |
+| `0x195C09C` | 728 | `InitFunc_12250` | Client-side user hashing FFlags |
+| `0x4845270` | 30880 | `InitFunc_24433` | AnticheatCrash registration |
+| `0x22D9F08` | — | `InitFunc_15996` | Debug bytecode verification skip |
+
+## Global Data
+
+| Address | Type | Purpose |
+|---------|------|---------|
+| `0x673ED18` | xmmword | Bytecode auth state / stats counters |
+| `0x673EC90`–`0x673ECF0` | ptrs | Galois field multiplication tables |
+| `0x4EA6494` | 99084 bytes | Pre-computed GF table data |
+| `0x4EBE7A0`–`0x4EBE800` | tables | Obfuscation lookup tables |
+| `byte_6CDAA00` | bool | Signature verification enforcement |
+| `dword_6CDA9D0` | int | Min signature version |
+| `dword_6CDA9B8` | int | Min bytecode size |
+| `dword_6CE5EE0` | int | Physics telemetry timer interval |
+| `qword_6CE9D38` | ptr | Player hydration signing key |
+| `dword_6CB86C8` | int | PreHash telemetry sampling threshold |
+| `byte_6CF9FC8` | bool | US14116 guard flag 1 |
+| `byte_6D01768` | bool | US14116 guard flag 2 |
+
+```
+
+`docs/REAPER_ANALYSIS.md`:
+
+```md
+# Reaper.framework — Full Reverse
+
+**Verdict: NOT anti-cheat.** Reaper is the [Emerge Tools](https://www.emergetools.com/) dead-code
+detection SDK (`com.emergetools.reaper`). It collects which ObjC/Swift types are actually
+instantiated at runtime and reports them via a callback — used for tree-shaking analytics,
+not security.
+
+---
+
+## Binary info
+
+| Field | Value |
+|-------|-------|
+| Path | `Frameworks/Reaper.framework/Reaper` |
+| Size | 107,856 bytes |
+| Arch | arm64 |
+| Bundle ID | `reaper-ios.Reaper` |
+| Min iOS | 13.0 |
+| SDK | iPhoneOS 26.2 (Xcode 26.3) |
+
+## Classes
+
+| Class | Purpose |
+|-------|---------|
+| `EMGReaper` | Main ObjC singleton — lifecycle, scan, report |
+| `NameFinder` | Swift helper — resolves type metadata pointers to demangled names |
+
+---
+
+## Function-by-function analysis
+
+### `+[EMGReaper sharedInstance]`
+
+Standard `dispatch_once` singleton. Stores instance at static `sSharedInstance`.
+
+### `-[EMGReaper startWithHandler:]`
+
+Entry point. Called once via `dispatch_once`.
+
+**Logic:**
+1. Check iOS version via `NSProcessInfo.operatingSystemVersion`
+2. Only proceeds if iOS **15–18** (version check: `sub x8, version, #15; cmp x8, #4` + `cmp version, #26`)
+3. If outside range → early return (no scanning on older/newer iOS)
+4. Store the handler callback block
+5. Create serial dispatch queue `"com.emergetools.reaper"` with QoS `.background`
+6. Create `NSMutableSet` for deduplication (`_usedTypesReported`)
+7. Register for `UIApplicationDidEnterBackgroundNotification` → `-didEnterBackground`
+8. Register for `UIApplicationWillTerminateNotification` → `-willTerminate`
+
+### `-[EMGReaper didEnterBackground]`
+
+Triggers `-enqueueUploadReport`.
+
+### `-[EMGReaper enqueueUploadReport]`
+
+Dispatches `-uploadReport` asynchronously on the background queue.
+
+### `-[EMGReaper uploadReport]` (main scan function)
+
+**Logic:**
+```
+1. count = _dyld_image_count()
+2. appPath = NSBundle.mainBundle.executableURL
+                     .URLByDeletingLastPathComponent.path
+3. allTypes = NSMutableArray()
+4. for i in 0..<count:
+     name = _dyld_get_image_name(i)          // e.g. "/path/to/Roblox.app/Roblox"
+     nameStr = [NSString stringWithUTF8String:name]
+     if [nameStr hasPrefix:appPath]:          // ← ONLY scans app-bundle binaries
+       header = _dyld_get_image_header(i)
+       types = [self usedTypesInBinary:header]
+       [allTypes addObjectsFromArray:types]
+5. newTypes = filter(allTypes, not in _usedTypesReported)
+6. if newTypes.count > 0:
+     [_usedTypesReported addObjectsFromArray:newTypes]
+     handler(newTypes)                        // callback to Roblox
+```
+
+**Key detail:** The `hasPrefix:appPath` filter means Reaper **only scans binaries inside
+the .app bundle** (Roblox, RobloxLib, Reaper itself, Backtrace, Persona2). It does **not**
+scan system frameworks, injected dylibs, or tweaks. This confirms it is not an injection
+detector.
+
+### `-[EMGReaper usedTypesInBinary:]` (type collector)
+
+Combines ObjC and Swift type scanning for a single mach_header.
+
+**Logic:**
+```
+1. result = [self usedSwiftTypesInBinary:header]  // Swift types first
+2. section = get_objc_section(header, "__objc_classlist", &size)
+3. for each class pointer in section:
+     metaclass = object_getClass(cls)
+     // Skip Swift-bridged classes (bit 5 of metaclass RO flags)
+     if metaclass.ro_data.flags & 0x20: continue
+     // Check class is "realized" (actually loaded, not just declared)
+     if !(cls.data & 0x3): continue
+     // Check type descriptor: kind mask 0x10030080, must be 0x10000
+     descriptor = cls + 0x40
+     if (descriptor.kind & 0x10030080) != 0x10000: continue
+     // Check singleton has been used
+     kind = descriptor.kind & 0x1F
+     if kind - 0x10 <= 2:  // class/struct/enum
+       offset = lookup_table[kind - 0x10]
+       if !(descriptor + offset).value: continue
+     // Get class name
+     name = class_getName(cls)
+     [result addObject:[NSString stringWithUTF8String:name]]
+4. return result
+```
+
+### `-[EMGReaper usedSwiftTypesInBinary:]` (Swift type scanner)
+
+**Logic:**
+```
+1. section = getsectiondata(header, "__TEXT", "__swift5_types", &size)
+2. for each 4-byte relative pointer in section:
+     descriptor = resolve_relative_pointer(ptr)
+     kind = descriptor.flags & 0x1F
+     // Only struct (0x11) and class (0x12)
+     if kind - 0x11 > 1: continue
+     // Check context descriptor flags
+     if (descriptor.flags & 0x10030080) != 0x10000: continue
+     // Check singleton has been instantiated
+     accessor = descriptor.accessFunction
+     if !accessor.pointee: continue
+     // Resolve name
+     metadata = call accessor()
+     name = [NameFinder getNameWithPtr:metadata qualified:true]
+     name = removeUnknownContext(name)  // strip "(unknown context at $...)"
+     [result addObject:name]
+3. return result
+```
+
+### `NameFinder.getName(ptr:qualified:)` (Swift)
+
+Swift static method. Takes a metadata pointer and returns the demangled Swift type name.
+Uses `swift_getTypeContextDescriptor` and `swift_getObjCClassMetadata` internally.
+
+### `removeUnknownContext()` (C++)
+
+Strips `(unknown context at $XXXX)` patterns from demangled names using
+`NSRegularExpression` with pattern `\.\(unknown context at \$[0-9a-fA-F]+\)\.`.
+
+### `get_objc_section()` (C++)
+
+Wrapper around `getsectiondata()` that reads Mach-O section data from a `mach_header_64`.
+
+### `is_swift_singleton_used()` / `is_swift_singleton_attributable()` (C++)
+
+Check whether a Swift type descriptor's singleton metadata has been instantiated.
+
+---
+
+## System imports used
+
+| Import | Purpose |
+|--------|---------|
+| `_dyld_image_count` | Count loaded images |
+| `_dyld_get_image_name` | Get image path (for `hasPrefix` filter) |
+| `_dyld_get_image_header` | Get mach_header for section reading |
+| `_dyld_register_func_for_add_image` | NOT called by Reaper — present in Swift runtime only |
+| `_getsectiondata` | Read `__swift5_types` and `__objc_classlist` sections |
+| `_dlsym` | Swift runtime internal use only |
+| `_class_getName` | Get ObjC class name string |
+| `_object_getClass` | Get metaclass for flag checking |
+| `_memcmp` | String comparison |
+
+**Not imported:** `ptrace`, `sysctl`, `task_info`, `access`, `stat`, `getenv`, `fork`,
+`sandbox_check`, `csops`. No security-sensitive syscalls whatsoever.
+
+---
+
+## Instance variables
+
+| Ivar | Type | Purpose |
+|------|------|---------|
+| `_queue` | `NSObject<OS_dispatch_queue>` | Background serial queue |
+| `_usedTypesReported` | `NSMutableSet` | Deduplication set |
+| `_handleTypes` | block | Callback for reporting new types |
+
+---
+
+## Conclusion
+
+Reaper scans only app-bundle binaries, collects instantiated ObjC/Swift type names,
+deduplicates across background-entry events, and reports deltas via a callback. It is
+a performance/size optimization tool, not a security module. The `hasPrefix:appPath`
+filter explicitly excludes injected dylibs from scanning.
+
+```
+
+`docs/REPORTING_PATHS.md`:
+
+```md
+# Reporting Paths & Disconnect Codes
+
+How detection results are communicated to Roblox servers and how the client
+is terminated when violations are detected.
+
+---
+
+## 1. Disconnect Code Table — `sub_4663E8C` (1756 bytes)
+
+Master disconnect-reason-to-string mapper. Takes integer code, returns string.
+
+### Security-relevant disconnect codes
+
+| Code | String | Trigger |
+|------|--------|---------|
+| 257 | `DisconnectBadhash` | Hash verification failure |
+| 258 | `DisconnectSecurityKeyMismatch` | Security key exchange failure |
+| 259 | `DisconnectProtocolMismatch` | Protocol version mismatch |
+| 263 | `DisconnectIllegalTeleport` | Teleport exploit detected |
+| 264 | `DisconnectDuplicatePlayer` | Duplicate player connection |
+| 265 | `DisconnectDuplicateTicket` | Duplicate auth ticket |
+| 266 | `DisconnectTimeout` | Connection timeout |
+| 268 | `DisconnectHashTimeout` | US14116 hash check timeout |
+| 269 | `DisconnectLuaKick` | Script-level kick |
+| 270 | `DisconnectOnRemoteSysStats` | Remote SysStats check failure |
+| 273 | `DisconnectNewSecurityKeyMismatch` | Updated security key failure |
+| 274 | `DisconnectEvicted` | Player evicted |
+| 279 | `DisconnectBySecurityPolicy` | Security policy violation |
+| 296 | `DisconnectRemoteAttestationUnsupported` | Device attestation unsupported |
+| 297 | `DisconnectRemoteAttestationGeneralFailure` | Attestation error |
+| 298 | `DisconnectRemoteAttestationTimeout` | Attestation timeout |
+| 299 | `DisconnectRemoteAttestationOSOutOfDate` | OS too old for attestation |
+| 300 | `DisconnectRemoteAttestationBootValidationFailure` | Boot validation failure |
+| 304 | `DisconnectAndroidAnticheatKick` | Anti-cheat module kick |
+
+---
+
+## 2. Exit/Error Code Mapper — `sub_48E2258` (3132 bytes)
+
+Maps exit codes to telemetry identifiers. Security-relevant:
+
+| Identifier | String address | Description |
+|------------|---------------|-------------|
+| `RBX_ERROR_BADHASH` | `0x58E7932` | Hash verification failure |
+| `RBX_ERROR_SECURITY_KEY_MISMATCH` | `0x58E7944` | Key exchange failure |
+| `RBX_ERROR_NEW_SECURITY_KEY_MISMATCH` | `0x58E7ABB` | Updated key failure |
+| `RBX_ERROR_HASH_TIMEOUT` | `0x58E7A75` | Hash check timeout |
+| `RBX_ERROR_BY_SECURITY_POLICY` | `0x58E7B92` | Policy violation |
+| `RBX_ERROR_NETWORK_SECURITY_FAILURE` | `0x58E7DB4` | Network security error |
+| `RBX_ERROR_NETWORK_MISBEHAVIOR` | `0x58E7D96` | Network behavior anomaly |
+| `RBX_ERROR_NETWORK_INTERNAL_FAILURE` | `0x58E7D5D` | Network internal error |
+| `RBX_EXIT_ANTICHEAT` | `0x58E824C` | Anti-cheat triggered exit |
+| `RBX_EXIT_QOS01`–`RBX_EXIT_QOS14` | `0x58E82A9`–`0x58E82F4` | Security heartbeat failures |
+
+---
+
+## 3. Crash Classification — `sub_4880184` (2588 bytes)
+
+Previous-session crash classifier. Security categories:
+
+- `Crash-Anticheat` at `0x5888B03` — anti-cheat triggered crash
+- `AnticheatCrash` at `0x58BC506` — registered in `InitFunc_24433` (30880 bytes)
+- `Inferred-OOM`, `Inferred-Uncategorized` — non-security fallbacks
+
+---
+
+## 4. Bytecode Signature Telemetry — `sub_172D184` (1280 bytes)
+
+Fires on every bytecode signature verification. Reports:
+
+| Field | Description |
+|-------|-------------|
+| `cr_sessionid` | Session ID |
+| `cr_placeid` | Place ID |
+| `cr_universeid` | Universe ID |
+| `cr_userid` | User ID |
+| `cr_source` | Bytecode source |
+| `cr_size` | Bytecode size |
+| `cr_env` | Environment |
+| `cr_err` | Verification error code |
+| `cr_sigver` | Signature version |
+| `cr_sigid` | Signature ID |
+
+---
+
+## 5. Version/Signature Telemetry — `sub_172D888` (728 bytes)
+
+Sends counters during signature version detection:
+
+| Telemetry code | Meaning |
+|---------------|---------|
+| 900 | No signature found |
+| 901 | Negative version (invalid) |
+| 902 | Version 0 detected |
+| 903 | Version > 0 detected |
+
+Fields: `"placeid"`, `"version"`, `"code"`, `"decrcc"`, `"declocal"`.
+
+---
+
+## 6. PreHash Telemetry — `sub_8CAC60` (440 bytes)
+
+Bytecode connection hash statistics. Sampled: `hash(result) % 10000 < threshold`.
+
+| Field | Description |
+|-------|-------------|
+| `gameid` | Game identifier |
+| `postEnLength` | Post-encryption bytecode length |
+| `postHash` | Post-encryption hash |
+| `preEnLength` | Pre-encryption bytecode length |
+| `preHash` | Pre-encryption hash |
+| `cap` | Capability flags |
+| `verMin` / `verMax` | Version range (byte) |
+| `numSff` | Number of SFF entries (u16) |
+
+Counter: `debugLuaConnIssue`. Sampling threshold at `dword_6CB86C8`.
+
+---
+
+## 7. Encryption Failure Reporting
+
+RakNet packet-level encryption monitoring:
+
+| FFlag/Counter | Address | Purpose |
+|---------------|---------|---------|
+| `DecryptionFailDisconnectThreshold` | `0x57821DC` | Max failures before DC |
+| `EncryptionFailThreshold` | `0x57821FE` | Encryption error threshold |
+| `RakNetDecryptionFailure` | `0x5782014` | Decryption failure counter |
+| `RakNetEncryptionFailureReportHundredthsPercent` | `0x578202C` | Sampling rate |
+| `LibcatDecryptionFailed` | `0x578359B` | Libcat-specific failure |
+| `DecryptionFailed` | `0x57835B2` | Generic decryption failure |
+
+---
+
+## 8. Security Alerting Telemetry Migration
+
+FFlags controlling telemetry pipeline migration (from `InitFunc_2337` at `0x65395C`):
+
+| FFlag | Global | Purpose |
+|-------|--------|---------|
+| `MigrateGameEngineSecurityAlertingTelemetryToV2` | `byte_6CB3078` | Migrate security alerts to v2 |
+| `DisableGameEngineSecurityAlertingLegacyTelemetryMetrics` | `byte_6CB3090` | Kill legacy metrics |
+| `MigrateGameEngineRccAlertingTelemetryToV2` | `byte_6CB3108` | Migrate RCC alerts |
+| `DisableGameEngineRccAlertingLegacyTelemetryMetrics` | `byte_6CB3120` | Kill legacy RCC metrics |
+| `MigrateExternalAntiCheatModuleTelemetryToV2` | `byte_6CB3198` | Migrate external AC |
+| `DisableExternalAntiCheatModuleLegacyTelemetryMetrics` | `byte_6CB31B0` | Kill legacy AC metrics |
+
+---
+
+## 9. Generic Challenge Service
+
+HTTP-based challenge/captcha system:
+
+- Class: `RBX::GenericChallengeService`
+- Headers: `rblx-challenge-id`, `rblx-challenge-metadata`, `rblx-challenge-type`
+- Events: `ChallengeRequiredEvent`, `ChallengeCompletedEvent`, `ChallengeAbandonedEvent`,
+  `ChallengeInvalidatedEvent`, `ChallengeLoadedEvent`
+- FFlag: `EnableGenericChallengeResponseHandling` at `0x55972FD`
+
+---
+
+## 10. RUPP Token System
+
+Connection-time token exchange:
+
+- `RBX::Rupp::ClientRuppGenerator` — client token generator
+- `RBX::Rupp::ServerRuppGenerator` — server token generator
+- `RBX::Rupp::RuppTokenProcessor` — validation
+- `RBX::Rupp::TokenTlv` — TLV wire format
+- Counter: `ClientRuppDeserializationError` at `0x577F277`
+
+---
+
+## 11. Moderation Result Categories — `sub_19963F0`
+
+Server-side moderation verdict enum:
+
+| Value | Category |
+|-------|----------|
+| 0 | `ViolationDetected` |
+| 1 | `Borderline` |
+| 2 | `NoViolationDetected` |
+
+```
+
+`docs/SYSTEM_IMPORTS.md`:
+
+```md
+# System Import Audit
+
+Every security-sensitive system import in RobloxLib was traced to its callers
+to determine whether it serves an anti-cheat / RASP purpose.
+
+**Result: None of them do.** All are used by Crashpad, SQLite, OpenSSL, WebRTC,
+or standard infrastructure.
+
+---
+
+## Audited imports
+
+### `sysctl` — imported at `0x7007090`
+
+| Caller | Size | Purpose |
+|--------|------|---------|
+| `sub_6B0698` | 1056 | **Crashpad** `CrashHandler::Initialize` — reads `kern_proc_info` for crash dump |
+| `sub_6B6B0C` | 1436 | **Crashpad** intermediate dump handler — reads process info, PID, parent PID |
+| `sub_6C7128` | 1316 | **Crashpad** `CrashpadShared` — reads `kern.maxfiles` and fd count |
+| `sub_3524FB8` | 280 | **Crashpad** — kern info for crash context |
+| `sub_486C028` | 156 | Unknown (small, likely Crashpad auxiliary) |
+| `sub_49437D0` | 168 | Unknown (small, likely system info query) |
+
+**Verdict:** All Crashpad crash-reporter infrastructure. No `CTL_KERN`/`KERN_PROC`
+P_TRACED debugger detection.
+
+### `sysctlbyname` — imported at `0x7007098`
+
+| Caller | Size | Purpose |
+|--------|------|---------|
+| `sub_6C7128` | 1316 | **Crashpad** — reads `kern.num_files` |
+| `sub_6F2DB8` | 552 | **Crashpad** — reads system info |
+| `sub_6F9BB0` | 788 | **Crashpad** — additional system queries |
+| `sub_306D448` | 140 | Memory page size query |
+| `sub_306D52C` | 160 | Memory page size query |
+| `sub_36CD394` | 80 | Small system query |
+| `InitFunc_23366` | 320 | **6 calls** — reads hw.ncpu, hw.memsize etc. (hardware info for telemetry) |
+| `sub_42512B0` | 5948 | Large function — 4 calls to sysctlbyname (hw queries) |
+| `sub_486DB14` | 128 | Small system query |
+| `sub_4927158` | 196 | boost::thread::hardware_concurrency (2 calls) |
+| `sub_492721C` | 96 | boost::thread::physical_concurrency |
+| `_OPENSSL_cpuid_setup` | 808 | **OpenSSL** CPU feature detection (3 calls) |
+
+**Verdict:** Hardware info, Crashpad, OpenSSL, boost. No security checks.
+
+### `task_info` — imported at `0x70070B0`
+
+| Caller | Size | Purpose |
+|--------|------|---------|
+| `sub_6B6B0C` | 1436 | **Crashpad** — `task_basic_info` for crash dump (flavor 0x5) |
+| `sub_6B83F0` | 884 | **Crashpad** — task info + dyld image enumeration for crash context (flavor 0x11) |
+| `sub_486BEFC` | 80 | Small task query |
+| `sub_486BF4C` | 196 | Task query |
+| `sub_486DFFC` | 376 | Task query |
+
+**Verdict:** All Crashpad. No `TASK_DYLD_INFO` for debugger/injection detection.
+
+### `access` — imported at `0x70063F0`
+
+| Caller | Size | Purpose |
+|--------|------|---------|
+| `sub_469651C` | 1672 | **SQLite** `os_unix.c` — file access checks for VFS (`SQLITE_FORCE_PROXY_LOCKING`) |
+| `sub_4696CD4` | 132 | **SQLite** — file existence check |
+| `sub_46A2DC4` | 392 | **SQLite** — temp directory probing (`etilqs_` temp files) |
+| `sub_46A56A0` | 80 | **SQLite** — simple file check |
+
+**Verdict:** All SQLite file I/O. No jailbreak file existence checks
+(`/Applications/Cydia.app`, `/usr/sbin/sshd`, etc.).
+
+### `getenv` — imported at `0x7006A18`
+
+| Caller | Size | Purpose |
+|--------|------|---------|
+| `sub_7E33D4` | 128 | Unknown small function |
+| `sub_9E1A3C` | 7724 | Large function — unclear |
+| `_isEnvVarEnabled` | 224 | **WebRTC** — reads env vars for debug config |
+| `_setRemoteDescription` | 2184 | **WebRTC** — SDP configuration |
+| `_createOffer`/`_createAnswer` | — | **WebRTC** — session setup |
+| `sub_36810C8` | 104 | Reads env vars (2 calls) |
+| `sub_393F064` | 80 | Small env check |
+| `sub_44DCADC` | 192 | Unknown |
+| `sub_45EBF30` | 56 | Very small |
+| `sub_4696480` | 156 | **SQLite** — reads env for config |
+| `sub_469651C` | 1672 | **SQLite** — reads `SQLITE_FORCE_PROXY_LOCKING` |
+| `sub_48715E4` | 564 | Filesystem error handler — reads `TMP`/`TEMP`/`USERPROFILE` |
+| `sub_49044AC` | 92 | Small env read |
+| `sub_496FA2C` | 252 | 4 calls — reads multiple env vars |
+| `_OPENSSL_cpuid_setup` | 808 | **OpenSSL** — CPU detection config |
+| `_ossl_safe_getenv` | 56 | **OpenSSL** — safe env read wrapper |
+| `sub_4ACE6D8` | 204 | **OpenSSL** — env config |
+| `sub_4CDE85C` | 376 | Unknown env read |
+
+**Verdict:** SQLite, WebRTC, OpenSSL, filesystem utils. **No `DYLD_INSERT_LIBRARIES`
+detection** — none of the callers check for injection-related env vars.
+
+### `mprotect` — imported at `0x7006C10`
+
+| Caller | Size | Purpose |
+|--------|------|---------|
+| `sub_55C4` | 228 | JIT memory allocator — `mmap(NONE)` → `mprotect(RW)` for executable memory |
+| `sub_B48C` | 664 | Memory allocator |
+| `sub_EB58` | 512 | Memory allocator |
+| `sub_112CC` | 640 | Memory allocator |
+| `sub_12268` | 368 | Memory allocator |
+| `sub_306CDBC` | 696 | Memory page management |
+| `sub_306D134` | 60 | Small mprotect wrapper |
+| `_CRYPTO_secure_malloc_init` | 840 | **OpenSSL** — secure heap initialization (2 calls) |
+
+**Verdict:** Memory allocators and OpenSSL secure malloc. No code-integrity
+self-checks (no `mprotect(TEXT, NONE)` → checksum → `mprotect(TEXT, RX)` pattern).
+
+---
+
+## Imports NOT present
+
+These security-sensitive APIs are **not imported** by RobloxLib:
+
+| API | Typical AC use | Status |
+|-----|---------------|--------|
+| `ptrace` | `PT_DENY_ATTACH` anti-debug | **NOT IMPORTED** |
+| `csops` | Code signing self-validation | **NOT IMPORTED** |
+| `sandbox_check` | Sandbox escape detection | **NOT IMPORTED** |
+| `fork` | Fork-based jailbreak detection | **NOT IMPORTED** (only `pthread_atfork`) |
+| `vm_protect` / `mach_vm_protect` | Memory protection manipulation | **NOT IMPORTED** |
+| `mach_vm_read` / `mach_vm_write` | Memory introspection | **NOT IMPORTED** |
+| `_dyld_get_image_name` (in RobloxLib) | Loaded dylib scanning | **NOT IMPORTED** by RobloxLib (only by Reaper.framework) |
+| `SecTrustEvaluate` | Certificate pinning | **NOT IMPORTED** |
+
+---
+
+## Reaper.framework imports
+
+Reaper imports dyld APIs but uses them for dead-code analytics, not security:
+
+| Import | Reaper's usage |
+|--------|---------------|
+| `_dyld_image_count` | Count loaded images |
+| `_dyld_get_image_name` | Filter to app-bundle only (`hasPrefix:`) |
+| `_dyld_get_image_header` | Read Mach-O sections for type metadata |
+| `_getsectiondata` | Read `__swift5_types` / `__objc_classlist` |
+| `_class_getName` | Get ObjC class name for reporting |
+| `_object_getClass` | Read metaclass flags |
+| `_dlsym` | Swift runtime internal |
+
+**Not imported by Reaper:** `ptrace`, `sysctl`, `task_info`, `access`, `stat`,
+`getenv`, `fork`, `sandbox_check`. No security syscalls.
+
+---
+
+## Conclusion
+
+RobloxLib relies entirely on **server-side validation** (bytecode signing, hash
+challenges, device attestation) rather than client-side environment detection. There
+is no jailbreak detection, no anti-debug, no dylib injection scanning, and no code
+integrity self-checks in the main binary or any bundled framework.
+
+```

