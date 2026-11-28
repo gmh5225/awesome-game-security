@@ -1119,6 +1119,7 @@ sources:
   - wiki/sources/descriptions/FOCUSGAMERCH__STP-Vanguard.md
   - wiki/sources/descriptions/jeffreyesdavid__aegis-log-sentinel.md
   - wiki/sources/descriptions/GprzSS__GprzSS.md
+  - wiki/sources/descriptions/raphvallee__AntiCheat.md
 updated: 2026-11-28
 confidence: high
 ---
@@ -1606,6 +1607,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Paper fly-focused AC:** [[nofly]] (getawife; Java Paper **1.21.x** plugin; synchronous movement analysis + PacketEvents packet sanity checks; gravity simulation with configurable buffers/leniency for hover/sustained ascent/glide; exemptions for creative/vehicles/elytra/potions; staff alerts, disk logging, setback rubber-banding; lightweight fly-only scope rather than general exploit prevention; Anti Cheat / game:minecraft) for Paper operators wanting narrow fly detection beside modular plugins such as [[h-ac]] and heuristic Paper plugins such as [[bs-anticheat]]. (source: wiki/sources/descriptions/getawife__nofly.md)
 
 **Paper starter server-side AC:** [[nova-anticheat]] (Jdgshsvejevhevejeve; Java 21 Gradle Paper **1.21** plugin; Bukkit event handlers for movement/combat/block checks—speed, flight, reach, auto-clicker, no-fall, fast break/place, suspicious rotation; buffered thresholds + decaying violation levels; configurable warn/setback/kick actions; admin alerts, per-player violation info, and config reload; lightweight starter framework for server administrators; no client install required; Anti Cheat / Open Source Anti Cheat System / game:minecraft) beside modular plugins such as [[h-ac]] and fly-focused plugins such as [[nofly]]. (source: wiki/sources/descriptions/Jdgshsvejevhevejeve__NOVA-AntiCheat.md)
+
+**Paper modular AC framework:** [[raphvallee-anticheat]] (raphvallee; Java **25** Gradle Paper **26.3** plugin/framework; Bukkit listeners feed movement/combat trackers into single-class handler checks; centralized exemptions; violation logging and configurable punishments; conservative **SpeedA**/**FlyA**/**ReachA** reference modules; Brigadier `/ac` staff commands with per-player debug, violation levels, and config hot reload; JUnit tests and documented extension rules—plugin-author framework beside starter stacks such as [[nova-anticheat]]; Anti Cheat / Open Source Anti Cheat System / game:minecraft). (source: wiki/sources/descriptions/raphvallee__AntiCheat.md)
 
 **Paper/Spigot modular MC AC (wide version span):** [[argus-ac]] (hahasc26-lang; Java 17 Bukkit/Spigot/Paper **1.12.2–1.21.x**; movement/combat/world/packet checks; HARD/SOFT setbacks; SHA-256 hash-chain audit logs + movement replay; optional ProtocolLib; Open Source Anti Cheat System / game:minecraft) for operators needing cross-version enforcement with investigatable violation history beside alert-first Paper **1.21.11** stacks such as [[aegis-ac]]. (source: wiki/sources/descriptions/hahasc26-lang__ArgusAC.md)
 
